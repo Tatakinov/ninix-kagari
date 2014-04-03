@@ -92,7 +92,7 @@ module NConfig
   end
 
   def self.null_config()
-    return Config()
+    return NConfig::Config.new()
   end
 
   class TEST
