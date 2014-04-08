@@ -124,6 +124,7 @@ module Alias
   end
 
   class TEST
+
     def initialize(path)
       conf = Alias::create_from_file(path)
       print("ALIAS:   ", conf, "\n")
