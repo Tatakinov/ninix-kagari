@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  metamagic.py - unknown unknowns
+#  metamagic.rb - unknown unknowns
 #  Copyright (C) 2011-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
