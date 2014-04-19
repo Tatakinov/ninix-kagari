@@ -15,9 +15,7 @@
 module DLL
 
   def self.get_path() # XXX
-    #import ninix
     return File.expand_path(File.dirname(__FILE__), 'dll')
-    #return os.path.join(os.fsencode(ninix.__path__[0]), b'dll')
   end
 
 
@@ -91,7 +89,6 @@ module DLL
       end
     end
 
-    #@abc.abstractmethod
     def execute(args)
       return nil
     end
