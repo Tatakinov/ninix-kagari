@@ -98,7 +98,7 @@ module DLL
       argument = []
       @charset = 'CP932' # default
       for line in req.split("\n")
-        line = line.encode(@charset).strip
+        line = line.force_encoding(@charset).strip.encode("UTF-8", :invalid => :replace)
         if not line
           continue
         end

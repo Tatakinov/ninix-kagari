@@ -29,7 +29,7 @@ module NConfig
       end
     end
 
-    def get(name, default=None)
+    def get(name, default=nil)
       if name.class == Array
         keylist = name
       else
@@ -52,8 +52,10 @@ module NConfig
   def self.create_from_file(path)
     charset = 'CP932' # default
     f = File.open(path, 'rb')
-    if f.read(3) == "\xEF\xBB\xBF"
-      charset = 'BOM|UTF-8'
+    if f.read(3).bytes == [239, 187, 191] # "\xEF\xBB\xBF"
+      f.close
+      f = File.open(path, 'rb:BOM|UTF-8')
+      charset = 'UTF-8'
     else
       f.seek(0) # rewind
     end
@@ -69,10 +71,10 @@ module NConfig
   def self.create_from_buffer(buf, charset='CP932')
     dic = Config.new
     for line in buf
-      begin
-        key, value = line.split(",", 2)
-      rescue
-        continue
+      line = line.force_encoding(charset).encode("UTF-8", :invalid => :replace)
+      key, value = line.split(",", 2)
+      if key == nil or value == nil
+        next
       end
       key = key.strip
       if key == 'charset'
@@ -81,11 +83,12 @@ module NConfig
           charset = value
         else
           #logging.error('Unsupported charset {0}'.format(value))
+          print('Unsupported charset ', value, "\n")
         end
       elsif ['refreshundeletemask', 'icon', 'cursor', 'shiori', 'makoto'].include?(key)
-        dic[key] = value.strip().encode(charset)
+        dic[key] = value
       else
-        dic[key] = value.encode(charset, :invalid => :replace).strip
+        dic[key] = value.strip
       end
     end
     return dic
