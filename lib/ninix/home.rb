@@ -19,8 +19,7 @@ require "ninix/dll"
 
 module Home
 
-#  PLUGIN_STANDARD = [3.0, 3.1]
-  PLUGIN_STANDARD = [0.0, 10.0] # FIXME: TEST
+  PLUGIN_STANDARD = [3.0, 3.1]
 
   def self.get_ninix_home()
     return File.join(File.expand_path('~'), '.ninix')
