@@ -83,9 +83,12 @@ module Pix
 #        ##self.input_shape_combine_region(region)
 #        _gtkhack.gtkwindow_set_input_shape(self, cr.get_target())
 
-#    def update_size(self, w, h):
+    def update_size(w, h)
 #        self.get_child().set_size_request(w, h) # XXX
 #        self.queue_resize()
+      @darea.set_size_request(w, h) # XXX
+      queue_resize()
+    end
 
 #    def size_allocate(self, widget, event):
 #        new_x, new_y = self.__position

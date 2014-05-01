@@ -22,13 +22,14 @@ module Seriko
 
     def initialize(seriko)
       @seriko = seriko
-      self.request_parent = lambda {|a| return nil} # dummy
+#      self.request_parent = lambda {|a| return nil} # dummy
+      @parent = nil
       @exclusive_actor = nil
       @base_id = nil
       @timeout_id = nil
       reset_overlays()
       @queue = []
-      @fps = Controler.DEFAULT_FPS
+      @fps = DEFAULT_FPS
       @next_tick = 0
       @prev_tick = 0 # XXX
       @active = []
@@ -36,20 +37,25 @@ module Seriko
       @dirty = true
     end
 
-    def set_responsible(request_method)
-      self.request_parent = request_method
+    def set_responsible(parent) #(request_method)
+      ##self.request_parent = request_method
+      @parent = parent
     end
     
     def set_base_id(window, surface_id)
       if surface_id == '-2'
         terminate(window)
-        @base_id = window.surface_id
+        @base_id = window.get_surface_id
       elsif surface_id == '-1'
-        @base_id = window.surface_id
+        @base_id = window.get_surface_id
       else
         @base_id = surface_id
       end
       @dirty = true
+    end
+
+    def get_base_id()
+      return @base_id
     end
 
     def move_surface(xoffset, yoffset)
@@ -68,7 +74,7 @@ module Seriko
         last_actor = actor
         frame, actor = get_actor_next(window)
       end
-      if last_actor != nil and last_actor.exclusive and \
+      if last_actor != nil and last_actor.exclusive? and \
         last_actor.terminate_flag and @exclusive_actor == nil # XXX
         invoke_restart(window)
       end
@@ -76,18 +82,20 @@ module Seriko
 
     def get_actor_next(window)
       if not @active.empty?
-        @active.sort(key=lambda {|x| return x[0]})
+        @active.sort {|x| x[0]} # (key=lambda {|x| return x[0]})
         if @active[0][0] <= @next_tick
-          return @active.pop(0)
+          return @active.shift
         end
       end
       return nil, nil
     end
 
     def update(window)
-      current_tick = GLib.get_monotonic_time() # [microsec]
-      quality = self.request_parent('GET', 'get_preference', 'animation_quality')
-      @fps = Controler.DEFAULT_FPS * quality
+      ##current_tick = GLib.get_monotonic_time() # [microsec]
+      ## FIXME: GLib.get_monotonic_time
+      current_tick = (Time.now.to_f * 1000000).to_i # [microsec]
+      quality = @parent.handle_request('GET', 'get_preference', 'animation_quality')
+      @fps = DEFAULT_FPS * quality
       if @prev_tick == 0 ## First time
         delta_tick = 1000.0 / @fps # [msec]
       else
@@ -104,8 +112,7 @@ module Seriko
         window.move_surface(*@move)
         @move = nil
       end
-      @timeout_id = GLib.timeout_add((1000.0 / @fps).to_i, # [msec]
-                                     @update, window)
+      @timeout_id = GLib::Timeout.add((1000.0 / @fps).to_i) { update(window) } # [msec]
       return false
     end
 
@@ -131,7 +138,6 @@ module Seriko
       begin
         del @overlays[actor]
       rescue # except KeyError:
-        pass
       end
       @dirty = true
     end
@@ -157,7 +163,7 @@ module Seriko
         @queue << actor
         return
       end
-      if actor.exclusive
+      if actor.exclusive?
         lock_exclusive(window, actor)
       end
       actor.invoke(window, @next_tick)
@@ -261,11 +267,11 @@ module Seriko
       terminate(window)
       @next_tick = 0
       @prev_tick = 0 # XXX
-      set_base_id(window, window.surface_id)
+      set_base_id(window, window.get_surface_id)
       if @seriko.include?(surface_id)
         @base_id = surface_id
       else
-        @base_id = window.surface_id
+        @base_id = window.get_surface_id
       end
       @dirty = true # XXX
     end
@@ -276,8 +282,7 @@ module Seriko
       if @timeout_id != nil
         GLib.source_remove(@timeout_id)
       end
-      @timeout_id = GLib.timeout_add((1000.0 / @fps).to_i, # [msec]
-                                     @update, window)
+      @timeout_id = GLib::Timeout.add((1000.0 / @fps).to_i) { update(window) } # [msec]
     end
 
     def terminate(window)
@@ -311,7 +316,7 @@ module Seriko
     end
 
     def iter_overlays()
-      actors = list(@overlays.keys())
+      actors = @overlays.keys()
       temp = []
       for actor in actors
         temp << [actor.get_id(), actor]
@@ -323,13 +328,16 @@ module Seriko
         temp << actor
       end
       actors = temp
+      result = []
       for actor in actors
         surface_id, x, y, method = @overlays[actor]
         ##logging.debug(
         ##    'actor={0:d}, id={1}, x={2:d}, y={3:d}'.format(
         ##        actor.get_id(), surface_id, x, y))
-        yield surface_id, x, y, method
+        #yield surface_id, x, y, method
+        result << [surface_id, x, y, method]
       end
+      return result
     end
   end
 
@@ -343,7 +351,15 @@ module Seriko
       @last_method = nil
       @exclusive = 0
       @post_proc = nil
-      @terminate_flag = 1
+      @terminate_flag = true
+    end
+
+    def exclusive?
+      if @exclusive != 0
+        return true
+      else
+        return false
+      end
     end
 
     def set_post_proc(proc, args)
@@ -372,18 +388,17 @@ module Seriko
     end
 
     def invoke(window, base_frame)
-      @terminate_flag = 0
+      @terminate_flag = false
     end
 
     def update(window, base_frame)
       if @terminate_flag
-        return False
+        return false
       end
-      pass
     end
 
     def terminate()
-      @terminate_flag = 1
+      @terminate_flag = true
       if @post_proc != nil
         proc, args = @post_proc
         @post_proc = nil
@@ -405,23 +420,23 @@ module Seriko
                    'interpolate', 'reduce', 'replace', 'asis']
 
     def show_pattern(window, surface, method, args)
-      if Actor.OVERLAY_SET.include?(@last_method)
+      if OVERLAY_SET.include?(@last_method)
         window.remove_overlay(self)
       end
       if method == 'move'
-        window.seriko.move_surface(args[0], args[1]) ## FIXME
-      elsif Actor.OVERLAY_SET.include?(method)
+        window.get_seriko.move_surface(args[0], args[1]) ## FIXME
+      elsif OVERLAY_SET.include?(method)
         window.add_overlay(self, surface, args[0], args[1], method)
       elsif method == 'base'
-        window.seriko.set_base_id(window, surface) ## FIXME
+        window.get_seriko.set_base_id(window, surface) ## FIXME
       elsif method == 'start'
         window.invoke(args[0], update=1)
       elsif method == 'alternativestart'
         window.invoke(args.sample, update=1)
       elsif method == 'stop'
-        window.seriko.stop_actor(args[0]) ## FIXME
+        window.get_seriko.stop_actor(args[0]) ## FIXME
       elsif method == 'alternativestop'
-        window.seriko.stop_actor(args.sample) ## FIXME
+        window.get_seriko.stop_actor(args.sample) ## FIXME
       else
         raise RuntimeError('should not reach here')
       end
@@ -440,14 +455,14 @@ module Seriko
 
     def invoke(window, base_frame)
       terminate()
-      @terminate_flag = 0
+      @terminate_flag = false
       @pattern = 0
       update(window, base_frame)
     end
 
     def update(window, base_frame)
       if @terminate_flag
-        return False
+        return false
       end
       if @pattern == 0
         @surface_id = window.get_surface()
@@ -459,7 +474,7 @@ module Seriko
       end
       show_pattern(window, surface, method, args)
       window.append_actor(base_frame + interval, self)
-      return False
+      return false
     end
   end
 
@@ -479,14 +494,14 @@ module Seriko
 
     def invoke(window, base_frame)
       terminate()
-      @terminate_flag = 0
+      @terminate_flag = false
       reset()
       window.append_actor(base_frame + @wait, self)
     end
 
     def update(window, base_frame)
       if @terminate_flag
-        return False
+        return false
       end
       if @pattern == 0
         @surface_id = window.get_surface()
@@ -500,7 +515,7 @@ module Seriko
       end
       show_pattern(window, surface, method, args)
       window.append_actor(base_frame + @wait, self)
-      return False
+      return false
     end
   end
 
@@ -515,7 +530,7 @@ module Seriko
 
     def invoke(window, base_frame)
       terminate()
-      @terminate_flag = 0
+      @terminate_flag = false
       @wait = 0
       @pattern = 0
       update(window, base_frame)
@@ -523,7 +538,7 @@ module Seriko
 
     def update(window, base_frame)
       if @terminate_flag
-        return False
+        return false
       end
       if @pattern == 0
         @surface_id = window.get_surface()
@@ -540,7 +555,7 @@ module Seriko
       if @wait >= 0
         window.append_actor(base_frame + @wait, self)
       end
-      return False
+      return false
     end
   end
 
@@ -553,7 +568,7 @@ module Seriko
 
     def invoke(window, base_frame)
       terminate()
-      @terminate_flag = 0
+      @terminate_flag = false
       @wait = 0
       @pattern = 0
       update(window, base_frame)
@@ -561,7 +576,7 @@ module Seriko
 
     def update(window, base_frame)
       if @terminate_flag
-        return False
+        return false
       end
       if @pattern == 0
         @surface_id = window.get_surface()
@@ -578,7 +593,7 @@ module Seriko
       if @wait >= 0
         window.append_actor(base_frame + @wait, self)
       end
-      return False
+      return false
     end
   end
 
@@ -586,11 +601,9 @@ module Seriko
   class Mayuna < Actor
 
     def set_exclusive()
-        pass
     end
 
     def show_pattern(window, surface, method, args)
-        pass
     end
   end
 
