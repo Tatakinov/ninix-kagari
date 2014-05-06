@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  communicate.py - ghost-to-ghost communication mechanism
+#  communicate.rb - ghost-to-ghost communication mechanism
 #  Copyright (C) 2002-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
 #
