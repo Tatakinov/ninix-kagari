@@ -94,7 +94,7 @@ module Pix
 #        new_x, new_y = self.__position
 #        Gtk.Window.move(self, new_x, new_y)
 
-    def move(x, y)
+#    def move(x, y)
 #        left, top, scrn_w, scrn_h = get_workarea()
 #        w, h = self.get_child().get_size_request() # XXX
 #        new_x = min(max(left, x), scrn_w - w)
@@ -103,19 +103,20 @@ module Pix
 #        self.__position = (new_x, new_y)
 #        self.__surface_position = (x, y)
 #        self.darea.queue_draw()
-    end
+#    end
 
 #    def get_draw_offset(self):
 #        window_x, window_y = self.__position
 #        surface_x, surface_y = self.__surface_position
 #        return surface_x - window_x, surface_y - window_y
 
-#    def winpos_to_surfacepos(self, x, y, scale):
-#        window_x, window_y = self.__position
-#        surface_x, surface_y = self.__surface_position
-#        new_x = int((x - (surface_x - window_x)) * 100 / scale)
-#        new_y = int((y - (surface_y - window_y)) * 100 / scale)
-#        return new_x, new_y
+    def winpos_to_surfacepos(x, y, scale)
+      window_x, window_y = @__position
+      surface_x, surface_y = @__surface_position
+      new_x = ((x - (surface_x - window_x)) * 100 / scale).to_i
+      new_y = ((y - (surface_y - window_y)) * 100 / scale).to_i
+      return new_x, new_y
+    end
 
   end
 
