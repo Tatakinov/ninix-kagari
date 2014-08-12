@@ -103,13 +103,13 @@ module Install
         zf = Zip::File.new(filename)
         for entry in zf
           name = entry.name
+          if entry.directory?
+            next
+          end
           path = File.join(tmpdir, name)
           dname, fname = File.split(path)
           if not Dir.exists?(dname)
             FileUtils.mkdir_p(dname)
-          end
-          if not fname # directory
-            continue
           end
           buf = zf.read(name)
           of = open(path, 'wb')

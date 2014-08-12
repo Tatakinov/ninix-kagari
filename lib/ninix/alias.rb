@@ -53,7 +53,7 @@ module Alias
             else
               raise ValueError('unexpedted end of file')
             end
-            line = line.sub('\x81\x40', '').strip()
+            line = line.gsub('\x81\x40', '').strip()
             if line.length == 0
               next
             elsif line == '{'
@@ -68,7 +68,7 @@ module Alias
             else
               raise ValueError('unexpected end of file')
             end
-            line = line.sub('\x81\x40', '').strip()
+            line = line.gsub('\x81\x40', '').strip()
             if line.length == 0
               next
             elsif line == '}'

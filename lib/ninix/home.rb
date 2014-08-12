@@ -38,7 +38,7 @@ module Home
   end
 
   def self.get_normalized_path(path)
-    path = path.sub('\\', '/')
+    path = path.gsub('\\', '/')
     if File.absolute_path(path) != path
       path = path.downcase
     end
@@ -658,7 +658,7 @@ module Home
         end
         if charset == 'CP932'
           # '\x81\x40': full-width space in CP932(Shift_JIS)
-          temp = line.sub('\x81\x40', '').strip()
+          temp = line.gsub('\x81\x40', '').strip()
         else
           temp = line.strip()
         end

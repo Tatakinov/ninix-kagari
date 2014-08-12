@@ -148,7 +148,7 @@ module DLL
           name = dll_name
         end
       end
-      name = name.sub('\\', '/')
+      name = name.gsub('\\', '/')
       head, tail = File.split(name)
       name = tail
       if not name
