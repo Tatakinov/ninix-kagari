@@ -1296,13 +1296,13 @@ module Surface
         end
         cr = Cairo::Context.new(surface)
         op = {
-          'base' =>        cairo.OPERATOR_SOURCE, # XXX
-          'overlay' =>     cairo.OPERATOR_OVER,
-          'overlayfast' => cairo.OPERATOR_ATOP,
-          'interpolate' => cairo.OPERATOR_SATURATE,
-          'reduce' =>      cairo.OPERATOR_DEST_IN,
-          'replace' =>     cairo.OPERATOR_SOURCE,
-          'asis' =>        cairo.OPERATOR_OVER,
+          'base' =>        Cairo::OPERATOR_SOURCE, # XXX
+          'overlay' =>     Cairo::OPERATOR_OVER,
+          'overlayfast' => Cairo::OPERATOR_ATOP,
+          'interpolate' => Cairo::OPERATOR_SATURATE,
+          'reduce' =>      Cairo::OPERATOR_DEST_IN,
+          'replace' =>     Cairo::OPERATOR_SOURCE,
+          'asis' =>        Cairo::OPERATOR_OVER,
         }[method]
         cr.set_operator(op)
         cr.set_source_surface(overlay, x, y)
