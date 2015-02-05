@@ -26,7 +26,7 @@ module EntryDB
     def add(key, script)
       if @__db.has_key?(key)
         entries = @__db[key]
-      elsif
+      else
         entries = []
       end
       entries << script

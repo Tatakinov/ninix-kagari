@@ -54,7 +54,8 @@ module SSTPLib
         512 => 'Invisible',
         }
 
-    def initialize(fp)
+    def initialize(server, fp)
+      @server = server
       @fp = fp
     end
 
@@ -75,21 +76,24 @@ module SSTPLib
         end       
         headers << line
       end
-      message = {}
+      message = []
       for h in headers
         if h.include?(":")
           key, value = h.split(":", 2)
-          message[key] = value.strip
+          message << [key, value.strip]
         end
       end
-      if message.keys.include?("Charset")
-        charset = message["Charset"]
+      if message.assoc("Charset") != nil
+        charset = message.reverse.assoc("Charset")[1] # XXX
       else
         charset = "Shift_JIS"
       end
-      for key in message.keys
-        message[key] = message[key].force_encoding(charset).encode("UTF-8", :invalid => :replace)
+      new_list = []
+      for item in message
+        key, value = item
+        new_list << [key, value.force_encoding(charset).encode("UTF-8", :invalid => :replace)] ## FIXME
       end
+      message = new_list
       return message
     end
 
@@ -157,16 +161,11 @@ module SSTPLib
 
     def client_hostname
       begin
-        host, port = self.client_address
+        sock_domain, remote_port, remote_hostname, remote_ip = @fp.peeraddr
+        return remote_hostname
       rescue #except:
         return 'localhost'
       end
-      begin
-        hostname, aliaslist, ipaddrlist = socket.gethostbyaddr(host)
-      rescue #except socket.error:
-        hostname = host
-      end
-      return hostname
     end
 
     def timestamp
@@ -190,11 +189,16 @@ module SSTPLib
       print('Allow reuse address: ' + opt.int.to_s + "\n")
       while true
         s = sstpd.accept
-        handler = BaseSSTPRequestHandler.new(s)
+        handler = BaseSSTPRequestHandler.new(self, s)
         buffer = s.gets
         handler.handle(buffer)
         s.close
       end
+    end
+
+    def request_parent(args)
+      print("ARGS: ", args, "\n")
+      return 1
     end
   end
 end
