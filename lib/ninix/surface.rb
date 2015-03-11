@@ -87,7 +87,7 @@ module Surface
 
     def identify_window(win)
       for surface_window in @window
-        if win == surface_window.window.window
+        if win == surface_window.get_window.window
           return true
         end
       end
@@ -96,14 +96,14 @@ module Surface
 
     def window_stayontop(flag)
       for surface_window in @window
-        gtk_window = surface_window.window
+        gtk_window = surface_window.get_window
         gtk_window.set_keep_above(flag)
       end
     end
          
     def window_iconify(flag)
       gtk_window = @window[0].window
-      iconified = gtk_window.window.state & \
+      iconified = gtk_window.get_window.state & \
       Gdk::EventWindowState::ICONIFIED
       if flag and not iconified
         gtk_window.iconify()
@@ -126,16 +126,16 @@ module Surface
         for surface_window in @window
           gtk_window = surface_window.get_window
           if gtk_window != window and \
-            not gtk_window.window.state & \
+            not gtk_window.get_window.state & \
             Gdk::EventWindowState::ICONIFIED
             gtk_window.iconify()
           end
         end
       else
         for surface_window in @window
-          gtk_window = surface_window.window
+          gtk_window = surface_window.get_window
           if gtk_window != window and \
-            gtk_window.window.state & \
+            gtk_window.get_window.state & \
             Gdk::EventWindowState::ICONIFIED
             gtk_window.deiconify()
           end
@@ -186,9 +186,9 @@ module Surface
     def window_stick(stick)
       for window in @window
         if stick
-          window.window.stick()
+          window.get_window.stick()
         else
-          window.window.unstick()
+          window.get_window.unstick()
         end
       end
     end
@@ -820,7 +820,7 @@ module Surface
         return
       end
       for window in @window
-        window.window.set_icon_from_file(path) # XXX
+        window.get_window.set_icon(path) # XXX
       end
     end
 
@@ -1172,7 +1172,7 @@ module Surface
     def set_surface(surface_id)
       prev_id = @surface_id
       if @alias != nil and @alias.include?(surface_id)
-        aliases = @alias.get(surface_id)
+        aliases = @alias[surface_id]
         if aliases
           surface_id = random.choice(aliases)
         end
