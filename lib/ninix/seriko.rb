@@ -280,7 +280,7 @@ module Seriko
       invoke_runonce(window)
       invoke_always(window)
       if @timeout_id != nil
-        GLib.source_remove(@timeout_id)
+        GLib::Source.remove(@timeout_id)
       end
       @timeout_id = GLib::Timeout.add((1000.0 / @fps).to_i) { update(window) } # [msec]
     end
@@ -310,7 +310,7 @@ module Seriko
 
     def destroy()
       if @timeout_id != nil
-        GLib.source_remove(!timeout_id)
+        GLib::Source.remove(!timeout_id)
         @timeout_id = nil
       end
     end
