@@ -1014,6 +1014,10 @@ module Surface
 #      @darea.drag_dest_add_uri_targets()
     end
 
+    def get_seriko
+      return @seriko
+    end
+
     def get_window
       return @window
     end
@@ -1174,7 +1178,7 @@ module Surface
       if @alias != nil and @alias.include?(surface_id)
         aliases = @alias[surface_id]
         if aliases
-          surface_id = random.choice(aliases)
+          surface_id = aliases.sample
         end
       end
       if surface_id == '-2'
