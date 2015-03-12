@@ -103,7 +103,7 @@ module Surface
          
     def window_iconify(flag)
       gtk_window = @window[0].window
-      iconified = gtk_window.get_window.state & \
+      iconified = gtk_window.window.state & \
       Gdk::EventWindowState::ICONIFIED
       if flag and not iconified
         gtk_window.iconify()
@@ -126,7 +126,7 @@ module Surface
         for surface_window in @window
           gtk_window = surface_window.get_window
           if gtk_window != window and \
-            not gtk_window.get_window.state & \
+            not gtk_window.window.state & \
             Gdk::EventWindowState::ICONIFIED
             gtk_window.iconify()
           end
@@ -135,7 +135,7 @@ module Surface
         for surface_window in @window
           gtk_window = surface_window.get_window
           if gtk_window != window and \
-            gtk_window.get_window.state & \
+            gtk_window.window.state & \
             Gdk::EventWindowState::ICONIFIED
             gtk_window.deiconify()
           end
@@ -1233,7 +1233,7 @@ module Surface
     end
 
     def iter_mayuna(surface_width, surface_height, mayuna, done)
-      for surface_id, interval, method, args in mayuna.patterns
+      for surface_id, interval, method, args in mayuna.get_patterns
         if ['bind', 'add'].include?(method)
           if @surfaces.include?(surface_id)
             dest_x, dest_y = args
@@ -1339,23 +1339,23 @@ module Surface
       for part, x1, y1, x2, y2 in @collisions
         if @parent.handle_request('GET', 'get_preference',
                                   'check_collision_name')
-          cr.set_operator(cairo.OPERATOR_SOURCE)
+          cr.set_operator(Cairo::OPERATOR_SOURCE)
           cr.set_source_rgba(0.4, 0.0, 0.0, 1.0) # XXX
           cr.move_to(x1 + 2, y1)
-          font_desc = Pango.FontDescription()
-          font_desc.set_size(8 * Pango.SCALE)
-          layout = Pango.Layout(@darea.get_pango_context())
+          font_desc = Pango::FontDescription.new
+          font_desc.set_size(8 * Pango::SCALE)
+          layout = Pango::Layout.new(@darea.pango_context)
           layout.set_font_description(font_desc)
-          layout.set_wrap(Pango.WrapMode.CHAR) # XXX
+          layout.set_wrap(Pango::WRAP_WORD_CHAR) # XXX
           layout.set_text(part, -1)
           PangoCairo.update_layout(cr, layout)
           PangoCairo.show_layout(cr, layout)
         end
-        cr.set_operator(cairo.OPERATOR_ATOP)
+        cr.set_operator(Cairo::OPERATOR_ATOP)
         cr.set_source_rgba(0.2, 0.0, 0.0, 0.4) # XXX
         cr.rectangle(x1, y1, x2 - x1, y2 - y1)
         cr.fill_preserve()
-        cr.set_operator(cairo.OPERATOR_SOURCE)
+        cr.set_operator(Cairo::OPERATOR_SOURCE)
         cr.set_source_rgba(0.4, 0.0, 0.0, 0.8) # XXX
         cr.stroke()
       end
@@ -1378,12 +1378,12 @@ module Surface
             done << actor_id
             for method, mayuna_id, dest_x, dest_y in iter_mayuna(surface_width, surface_height, actor, done)
               mayuna_surface = get_image_surface(mayuna_id)
-              cr = cairo.Context(surface)
+              cr = Cairo::Context.new(surface)
               if ['bind', 'add'].include?(method)
                 cr.set_source_surface(mayuna_surface, dest_x, dest_y)
                 cr.mask_surface(mayuna_surface, dest_x, dest_y)
               elsif method == 'reduce'
-                cr.set_operator(cairo.OPERATOR_DEST_IN)
+                cr.set_operator(Cairo::OPERATOR_DEST_IN)
                 cr.set_source_surface(mayuna_surface, dest_x, dest_y)
                 cr.paint()
               else
@@ -1416,15 +1416,15 @@ module Surface
           next
         end
         # overlay surface
-        cr = cairo.Context(new_surface)
+        cr = Cairo::Context.new(new_surface)
         op = {
-          'base' =>        cairo.OPERATOR_SOURCE, # XXX
-          'overlay' =>     cairo.OPERATOR_OVER,
-          'overlayfast' => cairo.OPERATOR_ATOP,
-          'interpolate' => cairo.OPERATOR_SATURATE,
-          'reduce' =>      cairo.OPERATOR_DEST_IN,
-          'replace' =>     cairo.OPERATOR_SOURCE,
-          'asis' =>        cairo.OPERATOR_OVER,
+          'base' =>        Cairo::OPERATOR_SOURCE, # XXX
+          'overlay' =>     Cairo::OPERATOR_OVER,
+          'overlayfast' => Cairo::OPERATOR_ATOP,
+          'interpolate' => Cairo::OPERATOR_SATURATE,
+          'reduce' =>      Cairo::OPERATOR_DEST_IN,
+          'replace' =>     Cairo::OPERATOR_SOURCE,
+          'asis' =>        Cairo::OPERATOR_OVER,
         }[method]
         cr.set_operator(op)
         cr.set_source_surface(overlay_surface, x, y)
