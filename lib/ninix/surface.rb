@@ -652,8 +652,8 @@ module Surface
         x, y = get_position(side)
         direction = @window[side].direction
         ox, oy = get_balloon_offset(side)
-        parent.handle_request(
-                              'NOTIFY', 'set_balloon_direction', side, direction)
+        @parent.handle_request(
+          'NOTIFY', 'set_balloon_direction', side, direction)
         if direction == 0 # left
           base_x = x + ox
         else
@@ -662,7 +662,7 @@ module Surface
         end
         base_y = y + oy
         @parent.handle_request(
-                               'NOTIFY', 'set_balloon_position', side, base_x, base_y)
+          'NOTIFY', 'set_balloon_position', side, base_x, base_y)
       end
     end
 
@@ -1344,12 +1344,14 @@ module Surface
           cr.move_to(x1 + 2, y1)
           font_desc = Pango::FontDescription.new
           font_desc.set_size(8 * Pango::SCALE)
-          layout = Pango::Layout.new(@darea.pango_context)
+          layout = cr.create_pango_layout
+#          layout = Pango::Layout.new(@darea.pango_context)
           layout.set_font_description(font_desc)
           layout.set_wrap(Pango::WRAP_WORD_CHAR) # XXX
-          layout.set_text(part, -1)
-          PangoCairo.update_layout(cr, layout)
-          PangoCairo.show_layout(cr, layout)
+          layout.set_text(part)
+          cr.show_pango_layout(layout)
+#          PangoCairo.update_layout(cr, layout)
+#          PangoCairo.show_layout(cr, layout)
         end
         cr.set_operator(Cairo::OPERATOR_ATOP)
         cr.set_source_rgba(0.2, 0.0, 0.0, 0.4) # XXX
@@ -1368,8 +1370,8 @@ module Surface
       end
       if @mayuna.include?(surface_id) and @mayuna[surface_id]
         surface = get_image_surface(surface_id)
-        surface_width = surface.get_width()
-        surface_height = surface.get_height()
+        surface_width = surface.width
+        surface_height = surface.height
         done = []
         for actor in @mayuna[surface_id]
           actor_id = actor.get_id()
@@ -1411,7 +1413,7 @@ module Surface
       for surface_id, x, y, method in @seriko.iter_overlays()
         begin
           overlay_surface = get_image_surface(
-                                              surface_id, is_asis=bool(method == 'asis'))
+                                              surface_id, is_asis=(method == 'asis'))
         rescue # except:
           next
         end
@@ -1427,13 +1429,13 @@ module Surface
           'asis' =>        Cairo::OPERATOR_OVER,
         }[method]
         cr.set_operator(op)
-        cr.set_source_surface(overlay_surface, x, y)
+        cr.set_source(overlay_surface, x, y)
         if ['overlay', 'overlayfast'].include?(method)
-          cr.mask_surface(overlay_surface, x, y)
+          cr.mask(overlay_surface, x, y)
         else
           cr.paint()
         end
-        del cr
+#        del cr
       end
       @image_surface = new_surface
       @darea.queue_draw()
