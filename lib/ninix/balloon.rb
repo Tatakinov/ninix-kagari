@@ -77,7 +77,7 @@ module Balloon
 
     def get_window(side)
       if @window.length > side
-        return @window[side].window ## FIXME
+        return @window[side].get_window ## FIXME
       else
         return nil
       end
@@ -109,7 +109,7 @@ module Balloon
 
     def identify_window(win)
       for balloon_window in @window
-        if win == balloon_window.window.window
+        if win == balloon_window.get_window.window
           return true
         end
       end
@@ -237,7 +237,7 @@ module Balloon
       rescue # except:
         default_id = 0
       end
-      for side in range(@window.length)
+      for side in 0..@window.length-1
         @window[side].set_balloon(default_id)
       end
     end
@@ -263,7 +263,7 @@ module Balloon
     end
 
     def set_autoscroll(flag)
-      for side in range(@window.length)
+      for side in 0..@window.length-1
         @window[side].set_autoscroll(flag)
       end
     end
@@ -283,7 +283,7 @@ module Balloon
     end
 
     def hide_all
-      for side in range(@window.length)
+      for side in 0..@window.length-1
         @window[side].hide()
       end
     end
@@ -295,7 +295,7 @@ module Balloon
     end
 
     def raise_all
-      for side in range(@window.length)
+      for side in 0..@window.length-1
         @window[side].raise_()
       end
     end
@@ -307,7 +307,7 @@ module Balloon
     end
 
     def lower_all
-      for side in range(@window.length)
+      for side in 0..@window.length-1
         @window[side].lower()
       end
     end
@@ -323,7 +323,7 @@ module Balloon
     end
 
     def clear_text_all
-      for side in range(@window.length)
+      for side in 0..@window.length-1
         clear_text(side)
       end
     end
@@ -559,6 +559,10 @@ module Balloon
       @position = [0, 0]
       reset_fonts()
       clear_text()
+    end
+
+    def get_window
+      return @window
     end
 
     def set_responsible(parent)
@@ -1171,7 +1175,7 @@ module Balloon
       if @lineno <= sl <= @lineno + @lines
         sn = @link_buffer[index][1]
         en = @link_buffer[index][3]
-        for n in range(sl, el + 1)
+        for n in sl..el
           if n - @lineno >= @line_regions.length
             break
             x, y, w, h = @line_regions[n - @lineno]
@@ -1235,7 +1239,7 @@ module Balloon
         if @lineno <= sl <= @lineno + @lines
           sn = @link_buffer[i][1]
           en = @link_buffer[i][3]
-          for n in range(sl,el + 1)
+          for n in sl..el
             if n - @lineno >= @line_regions.length
               break
             end
@@ -1539,7 +1543,7 @@ module Balloon
         el = @text_buffer.length - 1
         en = @text_buffer[-1].length
       end
-      for i in range(@link_buffer.length)
+      for i in 0..@link_buffer.length-1
         if @link_buffer[i][4] == link_id
           sl = @link_buffer[i][0]
           sn = @link_buffer[i][1]
