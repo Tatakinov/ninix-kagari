@@ -35,7 +35,7 @@ module Version
       '\_q' +
       'Copyright (c) 2001, 2002 Tamito KAJIYAMA\n' +
       'Copyright (c) 2002-2006 MATSUMURA Namihiko\n' +
-      'Copyright (c) 2002-2014 Shyouzou Sugitani\n' +
+      'Copyright (c) 2002-2015 Shyouzou Sugitani\n' +
       'Copyright (c) 2002, 2003 ABE Hideaki\n' +
       'Copyright (c) 2003-2005 Shun-ichi TAHARA\e'
   end

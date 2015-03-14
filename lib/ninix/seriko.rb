@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2002-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -920,39 +920,4 @@ ed)', "\n")
     mayuna = temp
     return mayuna
   end
-
-
-  class TEST
-
-    # find ~/.ninix -name 'surface*a.txt' | xargs ruby seriko.rb
-    def initialize(list_path)
-      require "ninix/config"
-#      if len(sys.argv) == 1
-#        print('Usage:', sys.argv[0], '[surface??a.txt ...]')
-#      end
-      for filename in list_path
-        print('Reading', filename, '...', "\n")
-        for actor in Seriko.get_actors(NConfig.create_from_file(filename))
-          print('#', actor.get_id().to_i.to_s, "\n")
-          #print(actor.__class__.__name__,)
-          print('(', actor.get_interval(), ')', "\n")
-          print('number of patterns = ', actor.get_patterns().length, "\n")
-          for pattern in actor.get_patterns()
-            print('surface=', pattern[0], ', interval=', pattern[1].to_i.to_s, ', method=', pattern[2], ', args=', pattern[3], "\n")
-          end
-        end
-        for actor in Seriko.get_mayuna(NConfig.create_from_file(filename))
-          print('#', actor.get_id().to_i.to_s, "\n")
-          #print(actor.__class__.__name__,)
-          print('(', actor.get_interval(), ')', "\n")
-          print('number of patterns =', actor.get_patterns().length, "\n")
-          for pattern in actor.get_patterns()
-            print('surface=', pattern[0], ', interval=', pattern[1].to_i.to_s, ', method=', pattern[2], ', args=', pattern[3], "\n")
-          end
-        end
-      end
-    end
-  end
 end
-
-Seriko::TEST.new(ARGV)

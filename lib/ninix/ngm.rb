@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  Copyright (C) 2001-2004 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2004-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2004-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -932,20 +932,4 @@ module NGM
       @parent.handle_request('NOTIFY', 'update_sakura', self.get('Name'), 'NGM')
     end
   end
-
-  class TEST
-
-    def initialize
-      ngm = NGM.new()
-      ngm.set_responsible(self)
-      ngm.show_dialog()
-      Gtk.main
-    end
-
-    def handle_request(event_type, event, *arglist, **argdict)
-      return ''
-    end
-  end
 end
-
-NGM::TEST.new

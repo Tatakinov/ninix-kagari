@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2003-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2003-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -351,42 +351,4 @@ module Pix
     left, top, width, height = root.geometry
     return left, top, width, height
   end
-
-  class TEST
-
-    def initialize(path)
-      @win = Pix::TransparentWindow.new
-      @win.signal_connect('destroy') do
-        Gtk.main_quit
-      end
-      @win.darea.signal_connect('draw') do |w, cr|
-        expose_cb(w, cr)
-      end
-      @surface = Pix.create_surface_from_file(path, true, true)
-      @win.set_default_size(@surface.width, @surface.height)
-      @win.show_all
-      Gtk.main
-    end
-
-    def expose_cb(widget, cr)
-      cr.set_source(@surface, 0, 0)
-      cr.set_operator(Cairo::OPERATOR_SOURCE)
-      cr.paint
-      region = Cairo::Region.new()
-      data = @surface.data
-      for i in 0..(data.size / 4 - 1)
-        if (data[i * 4 + 3].ord) != 0
-          x = i % @surface.width
-          y = i / @surface.width
-          region.union!(x, y, 1, 1)
-        end
-      end
-      @win.input_shape_combine_region(region)
-    end
-  end
 end
-
-
-$:.unshift(File.dirname(__FILE__))
-
-Pix::TEST.new(ARGV.shift)
