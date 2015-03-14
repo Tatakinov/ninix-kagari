@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2004-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2004-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -307,7 +307,7 @@ module Kinoko
         end
       end
       print("ACTORS: ", actors, "\n")
-      @seriko = Seriko::Controler.new(actors)
+      @seriko = Seriko::Controller.new(actors)
       @seriko.set_responsible(self) ## FIXME
       path = File.join(@data['dir'], @data['base'])
       print("PATH: ", path, "\n")
@@ -536,62 +536,4 @@ module Kinoko
     def leave_notify(widget, event) ## FIXME
     end
   end
-
-  class TEST
-
-    def initialize(path)
-      @win = Pix::TransparentWindow.new
-      @win.signal_connect('destroy') do
-        Gtk.main_quit
-      end
-      @win.darea.signal_connect('draw') do |w, cr|
-        expose_cb(w, cr)
-      end
-      @surface = Pix.create_surface_from_file(path, true, true)
-      @win.set_default_size(@surface.width, @surface.height)
-      @win.show_all
-      require "ninix/home"
-      kinoko_list = Home.search_kinoko()
-      kinoko = Kinoko.new(kinoko_list)
-      print("K: ", kinoko, "\n")
-      kinoko.load(kinoko_list.sample, self)
-      Gtk.main
-    end
-
-    def notify_event(event, *args) # dummy
-    end
-
-    def handle_request(type, event, *a) # dummy
-      if event == 'get_kinoko_position'
-        return 0, 0
-      end
-    end
-
-    def attach_observer(arg) # dummy
-    end
-
-    def get_surface_scale() # dummy
-      return 100
-    end
-
-    def expose_cb(widget, cr)
-      cr.set_source(@surface, 0, 0)
-      cr.set_operator(Cairo::OPERATOR_SOURCE)
-      cr.paint
-      region = Cairo::Region.new()
-      data = @surface.data
-      for i in 0..(data.size / 4 - 1)
-        if (data[i * 4 + 3].ord) != 0
-          x = i % @surface.width
-          y = i / @surface.width
-          region.union!(x, y, 1, 1)
-        end
-      end
-      @win.input_shape_combine_region(region)
-    end
-  end
 end
-
-$:.unshift(File.dirname(__FILE__))
-
-Kinoko::TEST.new(ARGV.shift)

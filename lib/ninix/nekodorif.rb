@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2004-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2004-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -908,50 +908,4 @@ module Nekodorif
       return true
     end
   end
-
-  class TEST
-
-    def initialize
-      nekoninni = Home.search_nekoninni()
-      katochan = Home.search_katochan()
-      neko = Nekoninni.new
-      ninni = nekoninni.sample
-      neko.load(ninni[1], katochan, self)
-      Gtk.main
-    end
-
-    def attach_observer(nekoninni) # dummy
-    end
-
-    def detach_observer(nekoninni) # dummy
-    end
-
-    def get_surface_scale
-      return 100
-    end
-
-    def get_selfname
-      return "Sakura"
-    end
-
-    def get_keroname
-      return "Kero"
-    end
-
-    def notify_event(*a)
-    end
-
-    def get_surface_position(side)
-      return 0, 0
-    end
-
-    def get_surface_size(side)
-      return 100, 100
-    end
-
-    def handle_request(type, event, *a) # dummy
-    end
-  end
 end
-
-Nekodorif::TEST.new

@@ -16,7 +16,7 @@ require "gtk3"
 
 module Seriko
 
-  class Controler
+  class Controller
 
     DEFAULT_FPS = 30.0 # current default
 

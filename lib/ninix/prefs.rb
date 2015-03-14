@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2004-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2004-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #  Copyright (C) 2003-2005 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -491,22 +491,4 @@ module Prefs
       end
     end
   end
-
-  class TEST
-
-    def initialize
-      @dialog = PreferenceDialog.new()
-      @dialog.set_responsible(self)
-      @dialog.load()
-      @dialog.show()
-#      @dialog.save()
-      Gtk.main
-    end
-
-    def handle_request(type, event, *a) # dummy
-      return []
-    end
-  end
 end
-
-Prefs::TEST.new

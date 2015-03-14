@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2002-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -19,7 +19,7 @@ require "digest/md5"
 
 require "ninix/home"
 
-module UPDATE
+module Update
 
   class NetworkUpdate
 
@@ -506,49 +506,4 @@ module UPDATE
       return filelist
     end
   end
-
-  class TEST
-
-    def initialize
-      update = NetworkUpdate.new
-      update.set_responsible(self)
-      homeurl = "http://www.aquadrop.sakura.ne.jp/shizuku/"
-      ghostdir = "/home/shy/TEST/ghost/shizuku"
-      update.start(homeurl, ghostdir, timeout=60)
-      while true
-        state = update.state
-        s = Time.now.to_i
-        code = update.run()
-        e = Time.now.to_i
-        delta = e - s
-        if delta > 0.1
-          print('Warning: state = ', state.to_i, ' (', delta.to_f, ' sec)', "\n")
-        end
-        while true
-          event = update.get_event()
-          if event == nil
-            break
-          end
-          print(event, "\n")
-        end
-        if code == 0
-          break
-        end
-        if update.state == 5 and not update.get_schedule.empty?
-          print('File(s) to be update:', "\n")
-          for filename, checksum in update.get_schedule
-            print('   ', filename, "\n")
-          end
-        end
-      end
-      update.stop()
-      update.clean_up()
-    end
-
-    def handle_request(*a)
-      return nil
-    end
-  end
 end
-
-#UPDATE::TEST.new
