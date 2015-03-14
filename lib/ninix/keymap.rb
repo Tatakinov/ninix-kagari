@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  Copyright (C) 2002 by Tamito KAJIYAMA
-#  Copyright (C) 2003-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2003-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -239,32 +239,4 @@ module Keymap
     Gdk::Keyval::GDK_KEY_Control_R => '163',
     }
 
-  class Test
-
-    def key_press(widget, event)
-      begin
-        print(Keymap_old[event.keyval], " ",
-              Keymap_new[event.keyval], " ",
-              event.keyval, "\n")
-      rescue # except KeyError:
-        print('unknown keyval: ', event.keyval,
-              "(", Gdk::Keyval.to_name(event.keyval), ")\n")
-      end
-    end
-
-    def initialize
-      @win = Gtk::Window.new
-      @win.set_events(Gdk::Event::KEY_PRESS_MASK)
-      @win.signal_connect('destroy') do
-        Gtk.main_quit
-      end
-      @win.signal_connect('key_press_event') do |w, e|
-        key_press(w, e)
-      end
-      @win.show
-      Gtk.main
-    end
-  end
 end
-
-Keymap::Test.new

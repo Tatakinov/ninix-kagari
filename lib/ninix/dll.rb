@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  dll.rb - a pseudo DLL (SHIORI/SAORI API support) module for ninix
-#  Copyright (C) 2002-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2002-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -15,7 +15,7 @@
 module DLL
 
   def self.get_path() # XXX
-    return File.expand_path(File.dirname(__FILE__), 'dll')
+    return File.expand_path(File.join(File.dirname(__FILE__), 'dll'))
   end
 
 
@@ -212,28 +212,4 @@ module DLL
       end
     end
   end
-
-  class TEST
-
-    def initialize()
-      shiori_lib = DLL::Library.new('shiori')
-      instance = shiori_lib.request(['AYA', 'aya.dll'])
-      print(instance, "\n")
-      instance = shiori_lib.request(['Kawari', 'kawari.dll'])
-      print(instance, "\n")
-      saori_lib = DLL::Library.new('saori')
-      instance = saori_lib.request('Hanayu')
-      print(instance, "\n")
-      instance = saori_lib.request('bln')
-      print(instance, "\n")
-      if instance
-        result = instance.request("GET Version\nCharset : UTF-8\nArgument: arg1\nArgument : arg2")
-        print(result, "\n")
-        result = instance.request("EXECUTE\nCharset : CP932\nArgument: arg1\nArgument : arg2")
-        print(result, "\n")
-      end
-    end
-  end
 end
-
-DLL::TEST.new()
