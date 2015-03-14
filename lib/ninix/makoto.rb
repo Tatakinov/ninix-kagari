@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
-#  Copyright (C) 2004-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2004-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -125,9 +125,3 @@ module Makoto
     end
   end
 end
-
-print("testing...\n")
-for i in 0...1000
-  Makoto.test()
-end
-Makoto.test(1)

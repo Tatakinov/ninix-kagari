@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2011-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2011-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -19,25 +19,4 @@ module Lock
   def self.unlockfile(fileobj)
     fileobj.flock(File::LOCK_UN)
   end
-
-
-  class TEST
-
-    def initialize(path)
-      f = open(path, "w")
-      if Lock.lockfile(f)
-        print("LOCK\n")
-        sleep(5)
-        Lock.unlockfile(f)
-        print("UNLOCK\n")
-      else
-        print("LOCK: failed.\n")
-      end
-      f.close
-    end
-  end
 end
-
-$:.unshift(File.dirname(__FILE__))
-
-Lock::TEST.new(ARGV.shift)

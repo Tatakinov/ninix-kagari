@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
-#  Copyright (C) 2003-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2003-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -97,19 +97,4 @@ module NConfig
   def self.null_config()
     return NConfig::Config.new()
   end
-
-  class TEST
-
-    def initialize(path)
-      conf = NConfig::create_from_file(path)
-      for key in conf.keys 
-        print("Key:   ", key, "\n")
-        print("VALUE: ", conf[key], "\n")
-      end
-    end
-  end
 end
-
-$:.unshift(File.dirname(__FILE__))
-
-NConfig::TEST.new(ARGV.shift)

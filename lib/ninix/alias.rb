@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
-#  Copyright (C) 2004-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2004-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -11,6 +11,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
+require "logger"
 require "ninix/config"
 
 module Alias
@@ -122,16 +123,4 @@ module Alias
     end
     return dic
   end
-
-  class TEST
-
-    def initialize(path)
-      conf = Alias::create_from_file(path)
-      print("ALIAS:   ", conf, "\n")
-    end
-  end
 end
-
-$:.unshift(File.dirname(__FILE__))
-
-Alias::TEST.new(ARGV.shift)

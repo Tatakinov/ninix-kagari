@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2005-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2005-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -39,13 +39,4 @@ module Version
       'Copyright (c) 2002, 2003 ABE Hideaki\n' +
       'Copyright (c) 2003-2005 Shun-ichi TAHARA\e'
   end
-
-  class TEST
-
-    def initialize()
-      print(Version.VERSION_INFO + "\n")
-    end
-  end
 end
-
-Version::TEST.new()
