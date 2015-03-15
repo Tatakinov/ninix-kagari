@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2003-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2003-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #  Copyright (C) 2003 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -75,81 +75,81 @@ module Menu
         @__menu_list = {
             'Portal' => {
                 'entry' => ['Portal', nil, _('Portal sites(_P)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Recommend' => {
                 'entry' => ['Recommend', nil, _('Recommend sites(_R)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Options' => {
                 'entry' => ['Options', nil, _('Options(_F)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Options/Update' => {
                 'entry' => ['Update', nil, _('Network Update(_U)'), nil,
                           '', lambda {|a, b| @parent.handle_request('NOTIFY', 'network_update')}],
-                'visible' => 1},
+                'visible' => true},
             'Options/Vanish' => {
                 'entry' => ['Vanish', nil, _('Vanish(_F)'), nil,
                           '', lambda {|a, b| @parent.handle_request('NOTIFY', 'vanish')}],
-                'visible' => 1},
+                'visible' => true},
             'Options/Preferences' => {
                 'entry' => ['Preferences', nil, _('Preferences...(_O)'), nil,
                            '', lambda {|a, b| @parent.handle_request('NOTIFY', 'edit_preferences')}],
-                'visible' => 1},
+                'visible' => true},
             'Options/Console' => {
                 'entry' => ['Console', nil, _('Console(_C)'), nil,
                           '', lambda {|a, b| @parent.handle_request('NOTIFY', 'open_console')}],
-                'visible' => 1},
+                'visible' => true},
             'Options/Manager' => {
                 'entry' => ['Manager', nil, _('Ghost Manager(_M)'), nil,
                           '', lambda {|a, b| @parent.handle_request('NOTIFY', 'open_ghost_manager')}],
-                'visible' => 1},
+                'visible' => true},
             'Information' => {
                 'entry' => ['Information', nil, _('Information(_I)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Information/Usage' => {
                 'entry' => ['Usage', nil, _('Usage graph(_A)'), nil,
                           '', lambda {|a, b| @parent.handle_request('NOTIFY', 'show_usage')}],
-                'visible' => 1},
+                'visible' => true},
             'Information/Version' => {
                 'entry' => ['Version', nil, _('Version(_V)'), nil,
                           '', lambda {|a, b| @parent.handle_request('NOTIFY', 'about')}],
-                'visible' => 1},
+                'visible' => true},
             'Close' => {
                 'entry' => ['Close', nil, _('Close(_W)'), nil,
                           '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close_sakura')}],
-                'visible' => 1},
+                'visible' => true},
             'Quit' => {
                 'entry' => ['Quit', nil, _('Quit(_Q)'), nil,
                           '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close_all')}],
-                'visible' => 1},
+                'visible' => true},
             'Change' => {
                 'entry' => ['Change', nil, _('Change(_G)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Summon' => {
                 'entry' => ['Summon', nil, _('Summon(_X)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Shell' => {
                 'entry' => ['Shell', nil, _('Shell(_S)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Balloon' => {
                 'entry' => ['Balloon', nil, _('Balloon(_B)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Costume' => {
                 'entry' => ['Costume', nil, _('Costume(_C)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Stick' => {
                 'entry' => ['Stick', nil, _('Stick(_Y)'), nil,
                           '', lambda {|a, b| @parent.handle_request('NOTIFY', 'stick_window')},
                           false],
-                'visible' => 1},
+                'visible' => true},
             'Nekodorif' => {
                 'entry' => ['Nekodorif', nil, _('Nekodorif(_N)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Kinoko' => {
                 'entry' => ['Kinoko', nil, _('Kinoko(_K)'), nil],
-                'visible' => 1},
+                'visible' => true},
             'Plugin' => {
                 'entry' => ['Plugin', nil, _('Plugin(_P)'), nil],
-                'visible' => 1},
+                'visible' => true},
             }
       @__fontcolor = {
         'normal' => [0, 0, 0],
@@ -275,9 +275,9 @@ module Menu
       if @__mayuna_menu.length > side and @__mayuna_menu[side] != nil
         menuitem = @ui_manager.get_widget(['/popup/', 'Costume'].join(''))
         menuitem.set_submenu(@__mayuna_menu[side])
-        __set_visible('Costume', 1)
+        __set_visible('Costume', true)
       else
-        __set_visible('Costume', 0)
+        __set_visible('Costume', false)
       end
     end
 
@@ -367,7 +367,7 @@ module Menu
           elsif key == 'Portal'
             name_list = [] # same as 'kero'
           elsif key == 'Recommend'
-            name_list = ['char{0:d}.recommendbuttoncaption'.format(side)]
+            name_list = ['char' + side.to_s + '.recommendbuttoncaption']
           else
             name_list = @__ui[key][0][side]
           end
@@ -392,20 +392,20 @@ module Menu
         else
           name_list = @__ui[key][2][side]
         end
-        if name_list # visible
+        if name_list and !name_list.empty? # visible
           for name in name_list
             visible = @parent.handle_request('GET', 'getstring', name)
             if visible != nil
               break
             end
-            if visible == '0'
-              __set_visible(key, 0)
-            else
-              __set_visible(key, 1)
-            end
           end
-        elsif name_list == nil
-          __set_visible(key, 0)
+          if visible == '0'
+            __set_visible(key, false)
+          else
+            __set_visible(key, true)
+          end
+        else
+          __set_visible(key, false)
         end
       end
     end
@@ -420,7 +420,7 @@ module Menu
         end
       end
       if side > 1
-        string = 'char{0:d}'.format(side)
+        string = 'char' + side.to_s
       else
         #assert [0, 1].include?(side) ## FIXME
         string = ['sakura', 'kero'][side]
@@ -438,7 +438,7 @@ module Menu
       end
       __set_portal_menu(side, portal)
       if side > 1
-        string = 'char{0:d}'.format(side)
+        string = 'char' + side.to_s
       else
         #assert [0, 1].include?(side) ## FIXME
         string = ['sakura', 'kero'][side]
@@ -486,7 +486,7 @@ module Menu
 
     def __set_portal_menu(side, portal)
       if side >= 1
-        __set_visible('Portal', 0)
+        __set_visible('Portal', false)
       else
             if portal
               menu = Gtk::Menu.new()
@@ -558,9 +558,9 @@ module Menu
             set_stylecontext(i, *a)
           end
               menu.show()
-              __set_visible('Portal', 1)
+              __set_visible('Portal', true)
             else
-              __set_visible('Portal', 0)
+              __set_visible('Portal', false)
             end
       end
     end
@@ -634,9 +634,9 @@ module Menu
           set_stylecontext(i, *a)
         end
         menu.show()
-        __set_visible('Recommend', 1)
+        __set_visible('Recommend', true)
       else
-        __set_visible('Recommend', 0)
+        __set_visible('Recommend', false)
       end
     end
 
@@ -706,6 +706,7 @@ module Menu
                            "}"
                           ].join(""))
       style_context.add_provider(provider, 800) # STYLE_PROVIDER_PRIORITY_USER
+      return false
     end
 
     def set_stylecontext_with_sidebar(item, *args)
@@ -713,7 +714,7 @@ module Menu
         @__imagepath['foreground_with_sidebar'] == nil or \
         @sidebar_width <= 0
         set_stylecontext(item, *args)
-        return
+        return false
       end
       _, offset_y = item.translate_coordinates(item.parent, 0, 0)
       style_context = item.style_context
@@ -755,6 +756,7 @@ module Menu
                            "}"
                           ].join(''))
       style_context.add_provider(provider, 800) # STYLE_PROVIDER_PRIORITY_USER
+      return false
     end
 
     def on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
@@ -942,75 +944,4 @@ module Menu
       end
     end
   end
-
-  class TEST
-    
-    def initialize
-      @test_menu = Menu.new()
-      @test_menu.set_responsible(self)
-      @test_menu.create_mayuna_menu([]) # XXX
-      @test_menu.set_pixmap(nil, nil, nil, "left", "left", "left") # XXX
-      @window = Pix::TransparentWindow.new()
-      @image_surface = Pix.create_surface_from_file('test1.png')
-      @window.signal_connect('delete_event') do |w, e|
-        # delete(w, e)
-        Gtk.main_quit
-      end
-      @darea = @window.darea # @window.get_child()
-      @darea.set_events(Gdk::Event::EXPOSURE_MASK|
-                        Gdk::Event::BUTTON_PRESS_MASK|
-                        Gdk::Event::BUTTON_RELEASE_MASK|
-                        Gdk::Event::POINTER_MOTION_MASK|
-                        Gdk::Event::POINTER_MOTION_HINT_MASK|
-                        Gdk::Event::LEAVE_NOTIFY_MASK)
-      @darea.signal_connect('button_press_event') do |w, e|
-        button_press(w, e)
-      end
-      @darea.signal_connect('draw') do |w, cr|
-        redraw(w, cr)
-      end
-      @window.set_default_size(@image_surface.width, @image_surface.height)
-      @window.show_all()
-      Gtk.main
-    end
-
-    def redraw(widget, cr)
-      #scale = @__scale
-      scale = 100.0
-      cr.scale(scale / 100.0, scale / 100.0)
-      cr.set_source(@image_surface, 0, 0)
-      cr.set_operator(Cairo::OPERATOR_SOURCE)
-      cr.paint()
-    end
-
-    def button_press(widget, event)
-      if event.button == 1
-        if event.event_type == Gdk::Event::BUTTON_PRESS
-          @test_menu.popup(event.button, 0)
-        end
-      elsif event.button == 3
-        if event.event_type == Gdk::Event::BUTTON_PRESS
-          @test_menu.popup(event.button, 1)
-        end
-      end
-      return true
-    end
-
-    def handle_request(type, event, *a) # dummy
-      if event == 'get_ghost_menus'
-        return []
-      end
-      if event == 'get_plugin_list'
-        return []
-      end
-      if event == 'get_nekodorif_list'
-        return []
-      end
-      if event == 'get_kinoko_list'
-        return []
-      end
-    end
-  end
 end
-
-Menu::TEST.new
