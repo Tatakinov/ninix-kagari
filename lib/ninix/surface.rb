@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2014 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2002-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #  Copyright (C) 2003 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -954,7 +954,7 @@ module Surface
       @surface_id = default_id
       @surfaces = surfaces
       @image_surface = nil # XXX
-      @seriko = Seriko::Controler.new(seriko)
+      @seriko = Seriko::Controller.new(seriko)
       @seriko.set_responsible(self)#.handle_request)
       @region = region
       @mayuna = mayuna
@@ -1528,7 +1528,7 @@ module Surface
         return ''
       end
       for part, x1, y1, x2, y2 in @collisions
-        if x1 <= x <= x2 and y1 <= y <= y2
+        if x1 <= x and x <= x2 and y1 <= y and y <= y2
           ##logging.debug('{0} touched'.format(part))
           return part
         end
@@ -1851,45 +1851,4 @@ module Surface
       return true
     end
   end
-
-  class TEST
-
-    def initialize
-      require "ninix/home"
-      ghosts = Home.search_ghosts()
-      surface_sets = {}
-      key = ghosts.keys.sample
-      surface_set = ghosts[key][3]
-      prefix = ghosts[key][4]
-      default_sakura = 0
-      default_kero = 10
-      key = surface_set.keys.sample
-      name, surface_dir, desc, alias_, surface_info, tooltips, seriko_descript = surface_set[key]
-      surface = Surface.new
-      surface.set_responsible(self)
-      surface.new_(desc, alias_, surface_info, name, prefix, tooltips, seriko_descript, default_sakura, default_kero)
-      surface.set_surface_default(0)
-      surface.set_surface_default(1)
-      surface.reset_position
-      surface.show(0)
-      surface.show(1)
-      Gtk.main
-    end
-
-    def handle_request(event_type, event, *arglist, **argdict)
-      if event == 'get_surface_id'
-        return 0
-      elsif event == 'get_selfname'
-        return 'SAKURA'
-      elsif event == 'get_keroname'
-        return 'KERO'
-      elsif event == 'lock_repaint'
-        return false
-      else
-        return 100 # XXX
-      end
-    end
-  end
 end
-
-Surface::TEST.new

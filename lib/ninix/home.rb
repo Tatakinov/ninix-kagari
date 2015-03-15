@@ -87,7 +87,7 @@ module Home
     return table
   end
 
-  def self.search_ghosts(target=nil)
+  def self.search_ghosts(target=nil, check_shiori=true)
     home_dir = get_ninix_home()
     ghosts = {}
     if target
@@ -129,7 +129,7 @@ module Home
         end
       end
       shell_name, surface_set = find_surface_set(prefix)
-      if candidate['score'] == 0
+      if check_shiori and candidate['score'] == 0
         next
       end
       shiori_name = candidate['name']
