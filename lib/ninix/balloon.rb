@@ -1081,6 +1081,7 @@ module Balloon
       if not @__shown
         return true
       end
+      cr.translate(*@window.get_draw_offset) # XXX
 #      assert @balloon_surface != nil
 #      scale = @scale
       cr.scale(scale / 100.0, scale / 100.0)

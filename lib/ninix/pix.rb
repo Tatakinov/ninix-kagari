@@ -15,11 +15,12 @@ require "gtk3"
 module Pix
 
   class BaseTransparentWindow < Gtk::Window
+    alias :base_move :move
 
     def initialize(type=Gtk::Window::Type::TOPLEVEL)
       super(type)
       set_decorated(false)
-#      set_resizable(false)
+      #set_resizable(false) # XXX
       screen_changed()
     end
 
@@ -48,67 +49,43 @@ module Pix
       @__position = [0, 0]
       @__surface_position = [0, 0]
       @__redraw = nil
-#      connect_after('size_allocate', size_allocate)
+      signal_connect_after('size_allocate') do |a|
+        size_allocate(a)
+      end
       # create drawing area
       @darea = Gtk::DrawingArea.new
       @darea.show()
-#      @darea.connect = wrap_connect
       add(@darea)
       override_background_color(Gtk::StateFlags::NORMAL,
                                 Gdk::RGBA.new(0, 0, 0, 0))
     end
 
-#    def wrap_connect(self, signal, user_function, user_data=None):
-#        if signal == 'draw':
-#            self.__redraw = (user_function, user_data)
-#            Gtk.DrawingArea.connect(self.darea, signal, self.wrap_draw)
-#        else:
-#            if user_data is not None:
-#                Gtk.DrawingArea.connect(
-#                    self.darea, signal, user_function, user_data)
-#            else:
-#                Gtk.DrawingArea.connect(
-#                    self.darea, signal, user_function)
-
-#    def wrap_draw(self, darea, cr):
-#        if self.__redraw is None:
-#            return
-#        cr.translate(*self.get_draw_offset())
-#        user_function, user_data = self.__redraw
-#        if user_data is not None:
-#            user_function(darea, cr, user_data)
-#        else:
-#            user_function(darea, cr)
-#        ##region = Gdk.cairo_region_create_from_surface(cr.get_target())
-#        ##self.input_shape_combine_region(region)
-#        _gtkhack.gtkwindow_set_input_shape(self, cr.get_target())
-
     def update_size(w, h)
-#        self.get_child().set_size_request(w, h) # XXX
-#        self.queue_resize()
       @darea.set_size_request(w, h) # XXX
       queue_resize()
     end
 
-#    def size_allocate(self, widget, event):
-#        new_x, new_y = self.__position
-#        Gtk.Window.move(self, new_x, new_y)
+    def size_allocate(allocation)
+      new_x, new_y = @__position
+      base_move(new_x, new_y)
+    end
 
-#    def move(x, y)
-#        left, top, scrn_w, scrn_h = get_workarea()
-#        w, h = self.get_child().get_size_request() # XXX
-#        new_x = min(max(left, x), scrn_w - w)
-#        new_y = min(max(top, y), scrn_h - h)
-#        Gtk.Window.move(self, new_x, new_y)
-#        self.__position = (new_x, new_y)
-#        self.__surface_position = (x, y)
-#        self.darea.queue_draw()
-#    end
+    def move(x, y)
+      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      w, h = @darea.get_size_request() # XXX
+      new_x = [[left, x].max, scrn_w - w].min
+      new_y = [[top, y].max, scrn_h - h].min
+      base_move(new_x, new_y)
+      @__position = [new_x, new_y]
+      @__surface_position = [x, y]
+      @darea.queue_draw()
+    end
 
-#    def get_draw_offset(self):
-#        window_x, window_y = self.__position
-#        surface_x, surface_y = self.__surface_position
-#        return surface_x - window_x, surface_y - window_y
+    def get_draw_offset
+      window_x, window_y = @__position
+      surface_x, surface_y = @__surface_position
+      return surface_x - window_x, surface_y - window_y
+    end
 
     def winpos_to_surfacepos(x, y, scale)
       window_x, window_y = @__position
@@ -117,7 +94,6 @@ module Pix
       new_y = ((y - (surface_y - window_y)) * 100 / scale).to_i
       return new_x, new_y
     end
-
   end
 
 

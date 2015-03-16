@@ -1445,6 +1445,7 @@ module Surface
       if @image_surface == nil # XXX
         return
       end
+      cr.translate(*@window.get_draw_offset) # XXX
       cr.save()
       scale = get_scale
       cr.scale(scale / 100.0, scale / 100.0)

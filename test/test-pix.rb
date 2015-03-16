@@ -19,6 +19,7 @@ module NinixTest
     end
 
     def expose_cb(widget, cr)
+      cr.translate(*@win.get_draw_offset)
       cr.set_source(@surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.paint
