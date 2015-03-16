@@ -958,10 +958,9 @@ module Sakura
       def proc(arg=self)
         @vanished_count += 1
         @ghost_time = 0
-### FIXME
-#        GLib.idle_add(
-#          lambda a: @parent.handle_request('NOTIFY', 'vanish_sakura', *a),
-#                 [arg, nil])
+        GLib::Idle.add([arg, nil]){|a, args| 
+            @parent.handle_request('NOTIFY', 'vanish_sakura', a, args)
+        }
       end
       enqueue_event('OnVanishSelected', proc=proc)
       @vanished = 1 ## FIXME
@@ -983,7 +982,7 @@ module Sakura
     end
 
     def notify_deiconified()
-      if not @cantalk
+      if @cantalk == 0
         @cantalk = 1
         @parent.handle_request('NOTIFY', 'select_current_sakura')
         if not @passivemode
@@ -1805,7 +1804,7 @@ module Sakura
         host, show_sstp_marker, use_translator, \
         @sstp_entry_db, @sstp_request_handler = \
                             script_queue.pop(0)
-        if @cantalk
+        if @cantalk != 0
           if show_sstp_marker
             @balloon.show_sstp_message(sender, host)
           else
