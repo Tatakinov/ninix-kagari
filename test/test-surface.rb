@@ -14,8 +14,8 @@ module NinixTest
       key = ghosts.keys.sample
       surface_set = ghosts[key][3]
       prefix = ghosts[key][4]
-      default_sakura = 0
-      default_kero = 10
+      default_sakura = "0"
+      default_kero = "10"
       key = surface_set.keys.sample
       name, surface_dir, desc, alias_, surface_info, tooltips, seriko_descript = surface_set[key]
       @surface = Surface::Surface.new
@@ -26,8 +26,7 @@ module NinixTest
     end
 
     def update
-      @surface.set_surface_default(0)
-      @surface.set_surface_default(1)
+      @surface.set_surface_default(nil)
       @surface.reset_position
       @surface.show(0)
       @surface.show(1)
