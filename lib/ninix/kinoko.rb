@@ -416,6 +416,7 @@ module Kinoko
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.paint()
       print("REDRAW: ", cr, "\n")
+      @window.set_shape(cr)
     end
 
     def get_image_surface(surface_id)

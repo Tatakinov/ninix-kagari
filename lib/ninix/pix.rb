@@ -94,6 +94,21 @@ module Pix
       new_y = ((y - (surface_y - window_y)) * 100 / scale).to_i
       return new_x, new_y
     end
+
+    def set_shape(cr)
+      w, h = size
+      image_surface = cr.target.map_to_image
+      region = Cairo::Region.new()
+      data = image_surface.data
+      for i in 0..(data.size / 4 - 1)
+        if (data[i * 4 + 3].ord) != 0
+          x = i % image_surface.width
+          y = i / image_surface.width
+          region.union!(x, y, 1, 1)
+        end
+      end
+      input_shape_combine_region(region)
+    end
   end
 
 

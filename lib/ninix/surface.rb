@@ -1321,12 +1321,12 @@ module Surface
     end
 
     def get_image_surface(surface_id, is_asis=false)
-      if not @surfaces.include?(surface_id.to_s)
+      if not @surfaces.include?(surface_id)
 #        logging.debug('cannot load surface #{0}'.format(surface_id))
         print('cannot load surface #' + surface_id.to_s, "\n")
         return Pix.create_blank_surface(100, 100)
       end
-      return create_surface_from_file(surface_id.to_s, is_asis=is_asis)
+      return create_surface_from_file(surface_id, is_asis=is_asis)
     end
 
     def draw_region(cr)
@@ -1456,6 +1456,7 @@ module Surface
       if @parent.handle_request('GET', 'get_preference', 'check_collision')
         draw_region(cr)
       end
+      @window.set_shape(cr)
     end
 
     def remove_overlay(actor)

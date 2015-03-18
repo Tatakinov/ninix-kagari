@@ -1166,6 +1166,7 @@ module Balloon
       end
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
+      @window.set_shape(cr)
       return false
     end
 

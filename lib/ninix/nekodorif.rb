@@ -379,6 +379,7 @@ module Nekodorif
       cr.set_source(@image_surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.paint()
+      @window.set_shape(cr)
     end
 
     def delete()#widget, event)
