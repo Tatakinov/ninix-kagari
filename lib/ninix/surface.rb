@@ -1334,6 +1334,8 @@ module Surface
         return
       end
       cr.save()
+      # translate the user-space origin
+      cr.translate(*@window.get_draw_offset) # XXX
       scale = get_scale
       cr.scale(scale / 100.0, scale / 100.0)
       for part, x1, y1, x2, y2 in @collisions
@@ -1445,21 +1447,7 @@ module Surface
       if @image_surface == nil # XXX
         return
       end
-      # clear
-      cr.set_operator(Cairo::OPERATOR_SOURCE)
-      cr.set_source_rgba(0, 0, 0, 0)
-      cr.paint
-      # translate the user-space origin
-      cr.translate(*@window.get_draw_offset) # XXX
-      cr.save()
-      scale = get_scale
-      cr.scale(scale / 100.0, scale / 100.0)
-      cr.set_source(@image_surface, 0, 0)
-      cr.set_operator(Cairo::OPERATOR_SOURCE)
-      # copy rectangle on the destination
-      cr.rectangle(0, 0, @image_surface.width, @image_surface.height)
-      cr.fill()
-      cr.restore()
+      @window.set_surface(cr, @image_surface, get_scale)
       if @parent.handle_request('GET', 'get_preference', 'check_collision')
         draw_region(cr)
       end

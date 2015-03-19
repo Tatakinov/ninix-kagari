@@ -373,12 +373,7 @@ module Nekodorif
     end
 
     def redraw(widget, cr)
-      cr.translate(*@window.get_draw_offset) # XXX
-      scale = @__scale
-      cr.scale(scale / 100.0, scale / 100.0)
-      cr.set_source(@image_surface, 0, 0)
-      cr.set_operator(Cairo::OPERATOR_SOURCE)
-      cr.paint()
+      @window.set_surface(cr, @image_surface, @__scale)
       @window.set_shape(cr)
     end
 

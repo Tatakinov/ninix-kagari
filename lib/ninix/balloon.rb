@@ -1081,14 +1081,10 @@ module Balloon
       if not @__shown
         return true
       end
-      cr.translate(*@window.get_draw_offset) # XXX
-#      assert @balloon_surface != nil
-#      scale = @scale
-      cr.scale(scale / 100.0, scale / 100.0)
-      cr.set_source(@balloon_surface, 0, 0)
-      cr.set_operator(Cairo::OPERATOR_SOURCE)
-      cr.paint()
+      #assert @balloon_surface != nil
+      @window.set_surface(cr, @balloon_surface, scale)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
+      cr.translate(*@window.get_draw_offset) # XXX
       # draw images
       for i in 0..(@images.length - 1)
         image_surface, (x, y) = @images[i]

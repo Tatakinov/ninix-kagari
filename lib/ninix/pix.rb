@@ -56,8 +56,6 @@ module Pix
       @darea = Gtk::DrawingArea.new
       @darea.show()
       add(@darea)
-      override_background_color(Gtk::StateFlags::NORMAL,
-                                Gdk::RGBA.new(0, 0, 0, 0))
     end
 
     def update_size(w, h)
@@ -93,6 +91,23 @@ module Pix
       new_x = ((x - (surface_x - window_x)) * 100 / scale).to_i
       new_y = ((y - (surface_y - window_y)) * 100 / scale).to_i
       return new_x, new_y
+    end
+
+    def set_surface(cr, surface, scale)
+      cr.save()
+      # clear
+      cr.set_operator(Cairo::OPERATOR_SOURCE)
+      cr.set_source_rgba(0, 0, 0, 0)
+      cr.paint
+      # translate the user-space origin
+      cr.translate(*get_draw_offset) # XXX
+      cr.scale(scale / 100.0, scale / 100.0)
+      cr.set_source(surface, 0, 0)
+      cr.set_operator(Cairo::OPERATOR_SOURCE)
+      # copy rectangle on the destination
+      cr.rectangle(0, 0, surface.width, surface.height)
+      cr.fill()
+      cr.restore()
     end
 
     def set_shape(cr)
