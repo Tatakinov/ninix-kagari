@@ -197,16 +197,16 @@ module Pix
   end
 
   def self.get_DDP_IHDR(path)
-#    size = os.path.getsize(path)
-#    key = size << 2    
-#    buf = b''
-#    with open(path, 'rb') as f:
-#        for i in range(24):
-#            c = f.read(1)
-#            key = (key * 0x08088405 + 1) & 0xffffffff
-#            buf = b''.join(
-#                (buf, int.to_bytes((c[0] ^ key >> 24) & 0xff, 1, 'little')))
-#    return buf
+    size = File.size(path)
+    key = size << 2    
+    buf = ""
+    f = File.open(path, 'rb')
+    for i in 0..23
+      c = f.read(1)
+      key = (key * 0x08088405 + 1) & 0xffffffff
+      buf << ((c[0].ord ^ key >> 24) & 0xff).chr
+    end
+    return buf
   end
 
   def self.get_png_IHDR(path)
@@ -278,16 +278,17 @@ module Pix
   end
 
   def self.create_pixbuf_from_DDP_file(path)
-#    with open(path, 'rb') as f:
-#        buf = f.read()
-#    key = len(buf) << 2
-#    loader = GdkPixbuf.PixbufLoader.new_with_type('png')
-#    for i in range(len(buf)):
-#        key = (key * 0x08088405 + 1) & 0xffffffff
-#        loader.write(int.to_bytes((buf[i] ^ key >> 24) & 0xff, 1, 'little'))
-#    pixbuf = loader.get_pixbuf()
-#    loader.close()
-#    return pixbuf
+    f = File.open(path, 'rb')
+    buf = f.read()
+    key = buf.length << 2
+    loader = Gdk::PixbufLoader.new('png')
+    for i in 0..buf.length-1
+      key = (key * 0x08088405 + 1) & 0xffffffff
+      loader.write(((buf[i].ord ^ key >> 24) & 0xff).chr)
+    end
+    pixbuf = loader.pixbuf
+    loader.close()
+    return pixbuf
   end
 
   def self.create_surface_from_file(path, is_pnr=true, use_pna=false)
