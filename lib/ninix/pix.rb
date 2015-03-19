@@ -10,6 +10,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
+require "digest/md5"
 require "gtk3"
 
 module Pix
@@ -163,37 +164,42 @@ module Pix
   end
 
   def self.get_DGP_IHDR(path)
-#    head, tail = os.path.split(os.fsdecode(path)) # XXX
-#    filename = tail
-#    m_half = hashlib.md5(filename[:len(filename) // 2]).hexdigest()
-#    m_full = hashlib.md5(filename).hexdigest()
-#    tmp = ''.join((m_full, filename))
-#    key = ''
-#    j = 0
-#    for i in range(len(tmp)):
-#        value = ord(tmp[i]) ^ ord(m_half[j])
-#        if not value:
-#            break
-#        key = ''.join((key, chr(value)))
-#        j += 1
-#        if j >= len(m_half):
-#            j = 0
-#    key_length = len(key)
-#    if key_length == 0: # not encrypted
-#        logging.warning(''.join((filename, ' generates a null key.')))
-#        return get_png_IHDR(path)
-#    key = ''.join((key[1:], key[0]))
-#    key_pos = 0
-#    buf = b''
-#    with open(path, 'rb') as f:
-#        for i in range(24):
-#            c = f.read(1)
-#            buf = b''.join(
-#                (buf, int.to_bytes(c[0] ^ ord(key[key_pos]), 1, 'little')))
-#            key_pos += 1
-#            if key_pos >= key_length:
-#                key_pos = 0
-#    return buf
+    head, tail = File.split(path) # XXX
+    filename = tail
+    m_half = Digest::MD5.hexdigest(filename[0..filename.length/2-1])
+    m_full = Digest::MD5.hexdigest(filename)
+    tmp = [m_full, filename].join('')
+    key = ''
+    j = 0
+    for i in 0..tmp.length-1
+      value = tmp[i].ord ^ m_half[j].ord
+      if value == 0
+        break
+      end
+      key << value.chr
+      j += 1
+      if j >= m_half.length
+        j = 0
+      end
+    end
+    key_length = key.length
+    if key_length == 0 # not encrypted
+      ##logging.warning(''.join((filename, ' generates a null key.')))
+      return get_png_IHDR(path)
+    end
+    key = [key[1..-1], key[0]].join('')
+    key_pos = 0
+    buf = ''
+    f = File.open(path, 'rb')
+    for i in 0..23
+      c = f.read(1)
+      buf << (c[0].ord ^ key[key_pos].ord).chr
+      key_pos += 1
+      if key_pos >= key_length
+        key_pos = 0
+      end
+    end
+    return buf
   end
 
   def self.get_DDP_IHDR(path)
@@ -239,42 +245,48 @@ module Pix
   end
 
   def self.create_pixbuf_from_DGP_file(path)
-    head = File.dirname(path)
-#    head, tail = os.path.split(os.fsdeocde(path)) # XXX
-#    filename = tail
-#    m_half = hashlib.md5(filename[:len(filename) // 2]).hexdigest()
-#    m_full = hashlib.md5(filename).hexdigest()
-#    tmp = ''.join((m_full, filename))
-#    key = ''
-#    j = 0
-#    for i in range(len(tmp)):
-#        value = ord(tmp[i]) ^ ord(m_half[j])
-#        if not value:
-#            break
-#        key = ''.join((key, chr(value)))
-#        j += 1
-#        if j >= len(m_half):
-#            j = 0
-#    key_length = len(key)
-#    if key_length == 0: # not encrypted
-#        logging.warning(''.join((filename, ' generates a null key.')))
-#        pixbuf = __pixbuf_new_from_file(filename)
-#        return pixbuf
-#    key = ''.join((key[1:], key[0]))
-#    key_pos = 0
-#    loader = GdkPixbuf.PixbufLoader.new_with_type('png')
-#    with open(path, 'rb') as f:
-#        while 1:
-#            c = f.read(1)
-#            if c == b'':
-#                break
-#            loader.write(int.to_bytes(c[0] ^ ord(key[key_pos]), 1, 'little'))
-#            key_pos += 1
-#            if key_pos >= key_length:
-#                key_pos = 0
-#    pixbuf = loader.get_pixbuf()
-#    loader.close()
-#    return pixbuf
+    head, tail = File.split(path) # XXX
+    filename = tail
+    m_half = Digest::MD5.hexdigest(filename[0..filename.length/2-1])
+    m_full = Digest::MD5.hexdigest(filename)
+    tmp = [m_full, filename].join('')
+    key = ''
+    j = 0
+    for i in 0..tmp.length-1
+      value = tmp[i].ord ^ m_half[j].ord
+      if value == 0
+        break
+      end
+      key << value.chr
+      j += 1
+      if j >= m_half.length
+        j = 0
+      end
+    end
+    key_length = key.length
+    if key_length == 0 # not encrypted
+      ##logging.warning(''.join((filename, ' generates a null key.')))
+      pixbuf = pixbuf_new_from_file(filename)
+      return pixbuf
+    end
+    key = [key[1..-1], key[0]].join('')
+    key_pos = 0
+    loader = Gdk::PixbufLoader.new('png')
+    f = File.open(path, 'rb')
+    while true
+      c = f.read(1)
+      if c == ''
+        break
+      end
+      loader.write((c[0].ord ^ key[key_pos].ord).chr)
+      key_pos += 1
+      if key_pos >= key_length
+        key_pos = 0
+      end
+    end
+    pixbuf = loader.pixbuf
+    loader.close()
+    return pixbuf
   end
 
   def self.create_pixbuf_from_DDP_file(path)

@@ -30,8 +30,15 @@ module NinixTest
         cr.set_source_pixbuf(pixbuf, 0, 0)
         cr.set_operator(Cairo::OPERATOR_SOURCE)
         cr.paint()
-      elsif ext == ".dgp"
-        # Not Yet
+      elsif ext == ".dgp" # not-tested
+        print("DGP size:", Pix.get_png_size(path), "\n")
+        pixbuf = Pix.create_pixbuf_from_DGP_file(path)
+        @surface = Cairo::ImageSurface.new(Cairo::FORMAT_ARGB32,
+                                           pixbuf.width, pixbuf.height)
+        cr = Cairo::Context.new(@surface)
+        cr.set_source_pixbuf(pixbuf, 0, 0)
+        cr.set_operator(Cairo::OPERATOR_SOURCE)
+        cr.paint()
       else
         @surface = Pix.create_surface_from_file(path, true, true)
       end
