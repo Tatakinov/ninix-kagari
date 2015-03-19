@@ -48,7 +48,6 @@ module Pix
       set_focus_on_map(false)
       @__position = [0, 0]
       @__surface_position = [0, 0]
-      @__redraw = nil
       signal_connect_after('size_allocate') do |a|
         size_allocate(a)
       end
@@ -225,14 +224,13 @@ module Pix
  end
 
   def self.create_icon_pixbuf(path)
-#    path = os.fsdecode(path) # XXX
-#    try:
-#        pixbuf = __pixbuf_new_from_file(path)
-#    except: # compressed icons are not supported. :-(
-#        pixbuf = None
-#    else:
-#        pixbuf = pixbuf.scale_simple(16, 16, GdkPixbuf.InterpType.BILINEAR)
-#    return pixbuf
+    begin
+      pixbuf = pixbuf_new_from_file(path)
+    rescue # compressed icons are not supported. :-(
+      return nil
+    end
+    pixbuf = pixbuf.scale(16, 16, Gdk::Pixbuf::InterpType::BILINEAR)
+    return pixbuf
   end
 
   def self.create_blank_surface(width, height)
