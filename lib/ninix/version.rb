@@ -18,11 +18,11 @@ module Version
   bindtextdomain("ninix-aya")
 
   def self.NUMBER
-    return '4.99.18'
+    return '4.500.0'
   end
 
   def self.CODENAME
-    return 'bulletproof'
+    return 'recompile the world'
   end
 
   def self.VERSION

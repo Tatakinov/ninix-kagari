@@ -22,7 +22,6 @@ module Seriko
 
     def initialize(seriko)
       @seriko = seriko
-#      self.request_parent = lambda {|a| return nil} # dummy
       @parent = nil
       @exclusive_actor = nil
       @base_id = nil
@@ -37,8 +36,7 @@ module Seriko
       @dirty = true
     end
 
-    def set_responsible(parent) #(request_method)
-      ##self.request_parent = request_method
+    def set_responsible(parent)
       @parent = parent
     end
     
@@ -75,7 +73,7 @@ module Seriko
         frame, actor = get_actor_next(window)
       end
       if last_actor != nil and last_actor.exclusive? and \
-        last_actor.terminate_flag and @exclusive_actor == nil # XXX
+        last_actor.terminate? and @exclusive_actor == nil # XXX
         invoke_restart(window)
       end
     end
@@ -105,12 +103,12 @@ module Seriko
       @prev_tick = current_tick
       update_frame(window)
       if @dirty
-        window.update_frame_buffer()
         @dirty = false
+        window.update_frame_buffer()
       end
       if @move != nil
-        window.move_surface(*@move)
         @move = nil
+        window.move_surface(*@move)
       end
       @timeout_id = GLib::Timeout.add((1000.0 / @fps).to_i) { update(window) } # [msec]
       return false
@@ -120,7 +118,9 @@ module Seriko
       #assert @exclusive_actor is nil
       terminate(window)
       @exclusive_actor = actor
-      actor.set_post_proc(unlock_exclusive, [window, actor])
+      actor.set_post_proc(
+        ->(w, a) { unlock_exclusive(w, a) },
+        [window, actor])
       @dirty = true # XXX
     end
 
@@ -135,11 +135,9 @@ module Seriko
     end
 
     def remove_overlay(actor)
-      begin
-        del @overlays[actor]
-      rescue # except KeyError:
+      if @overlays.delete(actor)
+        @dirty = true
       end
-      @dirty = true
     end
 
     def add_overlay(window, actor, surface_id, x, y, method)
@@ -195,7 +193,7 @@ module Seriko
 
     def invoke_talk(window, surface_id, count)
       if not @seriko.include?(surface_id)
-        return 0
+        return false
       end
       interval_count = nil
       for actor in @seriko[surface_id]
@@ -207,9 +205,9 @@ module Seriko
       end
       if interval_count != nil and count >= interval_count
         invoke_actor(window, actor)
-        return 1
+        return true
       else
-        return 0
+        return false
       end
     end
 
@@ -310,7 +308,7 @@ module Seriko
 
     def destroy()
       if @timeout_id != nil
-        GLib::Source.remove(!timeout_id)
+        GLib::Source.remove(@timeout_id)
         @timeout_id = nil
       end
     end
@@ -354,6 +352,10 @@ module Seriko
       @terminate_flag = true
     end
 
+    def terminate?
+      return @terminate_flag
+    end
+
     def exclusive?
       if @exclusive != 0
         return true
@@ -362,9 +364,9 @@ module Seriko
       end
     end
 
-    def set_post_proc(proc, args)
-      #assert @post_proc is None
-      @post_proc = [proc, args]
+    def set_post_proc(post_proc, args)
+      #assert @post_proc == nil
+      @post_proc = [post_proc, args]
     end
 
     def set_exclusive()
@@ -400,9 +402,9 @@ module Seriko
     def terminate()
       @terminate_flag = true
       if @post_proc != nil
-        proc, args = @post_proc
+        post_proc, args = @post_proc
         @post_proc = nil
-        proc(*args)
+        post_proc.call(*args)
       end
     end
 
@@ -667,7 +669,7 @@ module Seriko
       if config.include?(key) and config[key] == 'exclusive'
         actor.set_exclusive()
       end
-      if 1#begin
+      begin
         for n in 0..127 # up to 128 patterns (0 - 127)
           if version == 1
             key = actor_id.to_s + 'pattern' + n.to_s
@@ -770,11 +772,11 @@ module Seriko
           end
           actor.add_pattern(surface, interval, method, args)
         end
-      else #rescue # except ValueError as error:
+      rescue # except ValueError as error:
         #logging.error('seriko.py: ' + error.to_s)
         next
       end
-      if not actor.get_patterns()
+      if actor.get_patterns().empty?
 #        logging.error(
 #                      'seriko.py: animation group #{0:d} has no pattern (ignored)'.format(actor_id))
         print('seriko.py: animation group #', actor_id, ' has no pattern (ignor
@@ -900,7 +902,7 @@ ed)', "\n")
         logging.error('seriko.py: ' + error.to_s)
         next
       end
-      if not actor.get_patterns()
+      if actor.get_patterns().empty?
         ## FIXME
         #logging.error('seriko.py: animation group #{0:d} has no pattern (ignored)'.format(mayuna_id))
         next

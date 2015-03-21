@@ -105,13 +105,13 @@ module Communicate
             flags = flags + 'break'
           end
           if sstp != nil ## FIXME: owned, remote
-            if flags
+            if !flags.empty?
               flags = flags + ','
             end
             flags = flags + 'sstp-send'
           end
           if notranslate
-            if flags
+            if !flags.empty?
               flags = flags + ','
           end
             flags = flags + 'notranslate'

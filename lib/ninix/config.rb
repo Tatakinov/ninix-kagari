@@ -18,7 +18,7 @@ module NConfig
 
     def get_with_type(name, conv, default=nil)
       value = self.get(name)
-      if value is nil
+      if value == nil
         return default
       end
       ##assert conv is not None
@@ -61,7 +61,7 @@ module NConfig
     end
     buf = []
     while line = f.gets
-      if line.strip
+      if !line.strip.empty?
         buf << line.strip
       end
     end

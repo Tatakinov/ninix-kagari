@@ -76,7 +76,7 @@ module Home
         if ['.rb'].include?(ext)
           name = basename
         end
-        if name and not table.include?(name)
+        if !name.empty? and not table.include?(name)
           shiori = shiori_lib.request(['', name])
           if shiori
             table[name] = shiori
@@ -177,7 +177,7 @@ module Home
         next
       end
       balloon_info = read_balloon_info(path) # REQUIRED
-      if not balloon_info
+      if balloon_info.empty?
         next
       end
       if balloon_info.include?('balloon_dir') # XXX
@@ -346,7 +346,7 @@ module Home
         end
       end
     end
-    if kinoko['title']
+    if not kinoko['title'].empty?
       return kinoko
     else
       return nil
@@ -363,7 +363,7 @@ module Home
         name = line.strip.encode("UTF-8", :invalid => :replace)
       end
     end
-    if name
+    if not name.empty?
       return [name, top_dir] ## FIXME
     else
       return nil
@@ -432,7 +432,7 @@ module Home
         return nil
       end
     end
-    if katochan['name']
+    if not katochan['name'].empty?
       return katochan
     else
       return nil
@@ -465,9 +465,9 @@ module Home
 
   def self.find_makoto_dll(top_dir)
     if File.readable_real?(File.join(top_dir, 'makoto.dll'))
-      return 1
+      return true
     else
-      return 0
+      return false
     end
   end
 
@@ -480,7 +480,7 @@ module Home
     else
       shell_name = nil
     end
-    if not shell_name
+    if not shell_name or shell_name.empty?
       inst = read_install_txt(top_dir)
       if inst
         shell_name = inst.get('name')
@@ -746,7 +746,7 @@ module Home
     rescue #except IOError:
       return config_list
     end
-    if alias_buffer
+    if not alias_buffer.empty?
       config_list << ['__alias__', Alias.create_from_buffer(alias_buffer)]
     end
     config_list << ['__tooltips__', tooltips]

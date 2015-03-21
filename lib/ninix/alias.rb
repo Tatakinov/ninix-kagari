@@ -25,7 +25,7 @@ module Alias
     f = File.open(path, 'rb')
     buf = []
     while line = f.gets
-      if line.strip
+      if line and !line.strip.empty?
         buf << line.strip
       end
     end
@@ -82,7 +82,7 @@ module Alias
             else
               #raise ValueError('malformed line found')
             end
-            if values and \
+            if !values.empty? and \
               values.start_with?('[') and values.end_with?(']')
               table[key] = []
               for value in values[1, values.length - 2].split(',')
@@ -111,7 +111,7 @@ module Alias
           #return fatal('malformed line found')
         end
         if key == 'makoto'
-          if value and \
+          if !value.empty? and \
             value.start_with('[') and value.end_with(']')
             value = value[1, value.length - 2].split(',')
           else

@@ -11,6 +11,7 @@ module NinixTest
         raise SystemExit('Home directory not found.\n')
       end
       ghosts, balloons, plugins, nekoninni, katochan, kinoko = config
+      ghosts = Home.search_ghosts(target=nil, check_shiori=false) # over write
       # ghosts
       for key in ghosts.keys
         desc, shiori_dir, use_makoto, surface_set, prefix, shiori_dll, shiori_name = ghosts[key]

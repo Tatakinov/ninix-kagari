@@ -41,12 +41,12 @@ module DLL
       end
       @dir = dir
       result = 0
-      if not check_import
+      if check_import != 0
         #pass
-      elsif @loaded
+      elsif @loaded != 0
         result = 2
       else
-        if setup()
+        if setup() != 0
           @loaded = 1
           result = 1
         end
@@ -99,7 +99,7 @@ module DLL
       @charset = 'CP932' # default
       for line in req.split("\n")
         line = line.force_encoding(@charset).strip.encode("UTF-8", :invalid => :replace)
-        if not line
+        if line.empty?
           continue
         end
         if req_type == nil
@@ -144,14 +144,14 @@ module DLL
     def request(name)
       if @type == 'shiori'
         dll_name, name = name
-        if not name and dll_name
+        if name.empty? and not dll_name.empty?
           name = dll_name
         end
       end
       name = name.gsub('\\', '/')
       head, tail = File.split(name)
       name = tail
-      if not name
+      if not name or name.empty?
         return nil
       end
       if name.downcase.end_with?('.dll') # XXX
