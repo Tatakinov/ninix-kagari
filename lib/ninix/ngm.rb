@@ -798,21 +798,20 @@ module NGM
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       #assert event_type in ['GET', 'NOTIFY']
       handlers = {
-        'get_home_dir' => lambda { return  @home_dir },
-        'network_update' => lambda { return network_update },
-        'get' => lambda { return get(arglist[0]) }
+        'get_home_dir' => lambda {|*a| return  @home_dir },
+        'network_update' => lambda {|*a| return network_update },
+        'get' => lambda {|*a| return get(a[0]) }
       }
       if handlers.include?(event)
-        result = handlers[event].call #( *arglist, **argdict)
+        result = handlers[event].call(*arglist)
       else
         begin
           result = public_send(event, *arglist)
         rescue
-          result = @parent.handle_request(
-            event_type, event, *arglist, **argdict)
+          result = @parent.handle_request(event_type, event, *arglist)
         end
       end
       if event_type == 'GET'

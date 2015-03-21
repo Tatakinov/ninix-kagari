@@ -184,25 +184,20 @@ module Nekodorif
       return 1
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       ##assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'get_katochan_list' =>  lambda { return @katochan_list },
         'get_mode' =>  lambda { return @mode },
       }
-#      handler = handlers.get(event,
-#                             getattr(self, event,
-#                                     lambda {|a| return nil})) ## FIXME
-#      result = handler(*arglist, **argdict)
-#      if not handlers.include?(event)
-#        result = @parent.handle_request(event_type, event, *arglist, **argdict)
-#      else
       if handlers.include?(event)
-        result = handlers[event].call #( *arglist, **argdict)
+        result = handlers[event].call # no argument
       else
-        ## FIXME
-        print("REQ: ", Nekoninni.method_defined?(event), " , ", *arglist, "\n")
-        result = method(event).call(*arglist)#, **argdict)
+        if Nekoninni.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = nil # XXX
+        end
       end
       if event_type == 'GET'
         return result
@@ -217,7 +212,7 @@ module Nekodorif
       if @katochan != nil
         @katochan.update()
       end
-      #self.process_script()
+      #process_script()
       return true
     end
 
@@ -350,16 +345,18 @@ module Nekodorif
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       ##assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
       }
-#      handler = handlers.get(event, getattr(self, event, nil))
-#      if handler == nil
       if not handlers.include?(event)
-        result = @parent.handle_request(event_type, event, *arglist, **argdict)
+        result = @parent.handle_request(event_type, event, *arglist)
       else
-        result = method(event).call(*arglist)#, **argdict)
+        if Skin.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = nil
+        end
       end
       if event_type == 'GET'
         return result
@@ -442,11 +439,11 @@ module Nekodorif
 
     def set_position(reset=0)
       left, top, scrn_w, scrn_h = Pix.get_workarea()
-      if reset
+      if reset != 0
         @x = left
         @y = top + scrn_h - @h
       else
-        if not @omni
+        if @omni != 0
           @y = top + scrn_h - @h
         end
       end
@@ -455,7 +452,7 @@ module Nekodorif
 
     def move(x_delta, y_delta)
       @x = @x + x_delta
-      if @omni
+      if @omni != 0
         @y = @y + y_delta
       end
       set_position()
@@ -499,7 +496,6 @@ module Nekodorif
       else
         x, y, state = event.x, event.y, event.state
       end
-      #x, y = self.window.winpos_to_surfacepos(x, y, self.__scale)
       if state & Gdk::Window::ModifierType::BUTTON1_MASK
         if @x_root != nil and \
           @y_root != nil
@@ -601,11 +597,8 @@ module Nekodorif
     end
 
     def redraw(widget, cr)
-      scale = @__scale
-      cr.scale(scale / 100.0, scale / 100.0)
-      cr.set_source(@image_surface, 0, 0)
-      cr.set_operator(Cairo::OPERATOR_SOURCE)
-      cr.paint()
+      @window.set_surface(cr, @image_surface, @__scale)
+      @window.set_shape(cr)
     end
 
     def set_movement(timing)
@@ -690,7 +683,6 @@ module Nekodorif
       end
       @w, @h = w, h
       @window.update_size(@w, @h)
-      #self.darea.queue_draw_area(0, 0, self.w, self.h)
       @image_surface = new_surface
       @darea.queue_draw()
     end
@@ -701,9 +693,9 @@ module Nekodorif
       set_state('before')
       if @data.include?('category')
         category = @data['category'].split(',')
-        if category
+        if not category.empty?
           if not CATEGORY_LIST.include?(category[0])
-            logging.warning('WARNING: unknown major category - {0}'.format(category[0]))
+            #logging.warning('WARNING: unknown major category - {0}'.format(category[0]))
             ##self.data['category'] = self.CATEGORY_LIST[-1]
           end
         else
@@ -847,7 +839,7 @@ module Nekodorif
       if @settings['state'] == 'fall'
         update_surface()
         update_position()
-        if check_collision()
+        if check_collision() != 0
           set_state('hit')
           @hit = 1
           if @parent.handle_request('GET', 'get_mode') == 1
@@ -858,11 +850,16 @@ module Nekodorif
             #pass ## FIXME
           end
         end
-        if check_mikire()
+        if check_mikire() != 0
           set_state('dodge')
         end
       elsif @settings['state'] == 'hit'
-        if @hit_stop >= @data.get('hit.waittime', 0)
+        if @data.include?('hit.waittime')
+          wait_time = @data['hit.waittime']
+        else
+          wait_time = 0
+        end
+        if @hit_stop >= wait_time
           set_state('after')
           set_movement('after')
           if @parent.handle_request('GET', 'get_mode') == 1
@@ -879,7 +876,7 @@ module Nekodorif
       elsif @settings['state'] == 'after'
         update_surface()
         update_position()
-        if check_mikire()
+        if check_mikire() != 0
           set_state('end')
         end
       elsif @settings['state'] == 'end'

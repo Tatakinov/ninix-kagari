@@ -100,7 +100,7 @@ module DLL
       for line in req.split("\n")
         line = line.force_encoding(@charset).strip.encode("UTF-8", :invalid => :replace)
         if line.empty?
-          continue
+          next
         end
         if req_type == nil
           for request in ['EXECUTE', 'GET Version'] ## FIXME
@@ -111,7 +111,7 @@ module DLL
           next
         end
         if line.index(':') == nil
-          continue
+          next
         end
         key, value = line.split(':', 2)
         key = key.strip()

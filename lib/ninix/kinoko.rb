@@ -52,7 +52,6 @@ module Kinoko
                     '', lambda {|a, b| return @parent.handle_request('NOTIFY', 'close')}],
                    '/ui/popup/Exit'],
       }
-      @__skin_list = nil
       actions = Gtk::ActionGroup.new('Actions')
       entry = []
       for value in @__menu_list.values()
@@ -81,14 +80,13 @@ module Kinoko
 
     def set_skin_menu(list) ## FIXME
       key = 'skin'
-      if list
-        menu = Gtk.Menu()
+      if not list.empty?
+        menu = Gtk::Menu.new
         for skin in list
-          item = Gtk.MenuItem(skin['title'])
-          item.signal_connect(
-                       'activate',
-                       lambda {|a, k| return @parent.handle_request('NOTIFY', 'select_skin', k)},
-                       [skin])
+          item = Gtk::MenuItem.new(skin['title'])
+          item.signal_connect('activate', skin) do |a, k|
+            @parent.handle_request('NOTIFY', 'select_skin', k)
+          end
           menu.add(item)
           item.show()
         end
@@ -119,42 +117,42 @@ module Kinoko
 
     def finalize()
       @__running = false
-      self.target.detach_observer(self)
-      if self.skin != nil
-        self.skin.destroy()
+      @target.detach_observer(self)
+      if @skin != nil
+        @skin.destroy()
       end
     end
 
     def observer_update(event, args)
-      if self.skin == nil
+      if @skin == nil
         return
       end
       if ['set position', 'set surface'].include?(event)
-        self.skin.set_position()
-        self.skin.show()
+        @skin.set_position()
+        @skin.show()
       elsif event == 'set scale'
-        scale = self.target.get_surface_scale()
-        self.skin.set_scale(scale)
+        scale = @target.get_surface_scale()
+        @skin.set_scale(scale)
       elsif event == 'hide'
         side = args
         if side == 0 # sakura side
-          self.skin.hide()
+          @skin.hide()
         end
       elsif event == 'iconified'
-        self.skin.hide()
+        @skin.hide()
       elsif event == 'deiconified'
-        self.skin.show()
+        @skin.show()
       elsif event == 'finalize'
-        self.finalize()
+        finalize()
       elsif event == 'move surface'
         side, xoffset, yoffset = args
         if side == 0 # sakura side
-          self.skin.set_position(xoffset, yoffset)
+          @skin.set_position(xoffset, yoffset)
         end
       elsif event == 'raise'
         side = args
         if side == 0 # sakura side
-          self.skin.set_position() ## FIXME
+          @skin.set_position() ## FIXME
         end
       else
         ##logging.debug('OBSERVER(kinoko): ignore - {0}'.format(event))
@@ -164,21 +162,25 @@ module Kinoko
     def load_skin()
       scale = @target.get_surface_scale()
       @skin = Skin.new(@accelgroup)
-      @skin.set_responsible(@target)
+      @skin.set_responsible(self)
       @skin.load(@data, scale)
-      print("SKIN: ", @skin, "\n")
     end
 
     def handle_request(event_type, event, *arglist, **argdict)
       #assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
-        'get_target_window' =>  lambda {|a| return self.target.surface.window[0].window}, # XXX
-        'get_kinoko_position' => self.target.get_kinoko_position,
+        'get_target_window' =>  lambda { return @target.get_window }, # XXX
+        'get_kinoko_position' => lambda { return @target.get_kinoko_position }
       }
-      handler = handlers.get(event,
-                             getattr(self, event,
-                                     lambda {|a| return nil})) ## FIXME
-      result = handler(*arglist, **argdict)
+      if handlers.include?(event)
+        result = handlers[event].call # no argument
+      else
+        if Kinoko.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = nil
+        end
+      end
       if event_type == 'GET'
         return result
       end
@@ -193,7 +195,7 @@ module Kinoko
       if @skin == nil
         return 0
       else
-        self.send_event('OnKinokoObjectCreate')
+        send_event('OnKinokoObjectCreate')
       end
       @__running = true
       GLib::Timeout.add(10) { do_idle_tasks } # 10[ms]
@@ -209,8 +211,8 @@ module Kinoko
     end
 
     def close()
-      self.finalize()
-      self.send_event('OnKinokoObjectDestroy')
+      finalize()
+      send_event('OnKinokoObjectDestroy')
     end
 
     def send_event(event)
@@ -232,14 +234,14 @@ module Kinoko
     end
 
     def select_skin(args)
-      self.send_event('OnKinokoObjectChanging')
-      self.skin.destroy()
-      self.data = args
-      self.load_skin()
-      if self.skin == nil
+      send_event('OnKinokoObjectChanging')
+      @skin.destroy()
+      @data = args
+      load_skin()
+      if @skin == nil
         return 0
       else
-        self.send_event('OnKinokoObjectChanged')
+        send_event('OnKinokoObjectChanged')
       end
       return 1
     end
@@ -263,18 +265,18 @@ module Kinoko
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       #assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
       }
-#      handler = handlers.get(event, getattr(self, event, nil))
-#      if handler == nil
-      if not handlers.include?(event)
-        result = @parent.handle_request(event_type, event, *arglist, **argdict)
+      if handlers.include?(event)
+        result = handlers[event].call # no argument
       else
-#        result = handler(*arglist, **argdict)
-        ## FIXME
-        result = class_eval(event) #( *arglist, **argdict)
+        if Skin.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = @parent.handle_request(event_type, event, *arglist)
+        end
       end
       if event_type == 'GET'
         return result
@@ -306,11 +308,9 @@ module Kinoko
           actors = {'' =>  []}
         end
       end
-      print("ACTORS: ", actors, "\n")
       @seriko = Seriko::Controller.new(actors)
       @seriko.set_responsible(self) ## FIXME
       path = File.join(@data['dir'], @data['base'])
-      print("PATH: ", path, "\n")
       begin
         @image_surface = Pix.create_surface_from_file(path)
         w = [8, (@image_surface.width * @__scale / 100).to_i].max
@@ -319,7 +319,6 @@ module Kinoko
         @parent.handle_request('NOTIFY', 'close')
         return
       end
-      print("SURFACE: ", w, " , ", h, "\n")
       @path = path
       @w, @h = w, h
       @darea = @window.darea # @window.get_child()
@@ -434,16 +433,14 @@ module Kinoko
     end
 
     def update_frame_buffer()
-      print("UPDATE FRAME: ", @seriko.get_base_id, "\n")
       new_surface = create_image_surface(@seriko.get_base_id)
       #assert new_surface != nil
       # draw overlays
       for surface_id, x, y, method in @seriko.iter_overlays()
-        print("OVERLAY: ", surface_id, x, y, method, "\n")
-        if 1#begin
+        begin
           overlay_surface = get_image_surface(surface_id)
-        else#rescue #except:
-          continue
+        rescue #except:
+          next
         end
         # overlay surface
         cr = Cairo::Context.new(new_surface)
@@ -451,7 +448,7 @@ module Kinoko
         cr.mask(overlay_surface, x, y)
         #del cr
       end
-      #self.darea.queue_draw_area(0, 0, w, h)
+      #@darea.queue_draw_area(0, 0, w, h)
       @image_surface = new_surface
       @darea.queue_draw()
     end
@@ -499,7 +496,7 @@ module Kinoko
       @seriko.invoke(self, actor_id, update)
     end
 
-    def delete() #widget, event)
+    def delete()
       @parent.handle_request('NOTIFY', 'close')
     end
 

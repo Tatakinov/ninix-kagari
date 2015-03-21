@@ -17,8 +17,9 @@ module NinixTest
       @win.set_default_size(@surface.width, @surface.height)
       @win.show_all
       kinoko_list = Home.search_kinoko()
+      print("K: ", kinoko_list, "\n")
       kinoko = Kinoko::Kinoko.new(kinoko_list)
-      print("K: ", kinoko, "\n")
+      #print("K: ", kinoko, "\n")
       kinoko.load(kinoko_list.sample, self)
       Gtk.main
     end
@@ -26,10 +27,16 @@ module NinixTest
     def notify_event(event, *args) # dummy
     end
 
+    def get_window # dummy
+      return @win
+    end
+
+    def get_kinoko_position # dummy
+      return 100, 200
+    end
+
     def handle_request(type, event, *a) # dummy
-      if event == 'get_kinoko_position'
-        return 0, 0
-      elsif event == 'get_preference' and a[0] == 'animation_quality'
+      if event == 'get_preference' and a[0] == 'animation_quality'
         return 1
       end
     end

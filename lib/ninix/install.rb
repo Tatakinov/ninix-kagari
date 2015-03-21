@@ -26,13 +26,13 @@ require "ninix/version"
 
 module Install
 
-#  class InstallError(Exception)
-#    # pass
-#  end
+  class InstallError < Exception
+    #pass
+  end
 
   def self.fatal(error)
-    logging.error(error) # XXX
-    raise InstallError(error)
+    #logging.error(error) # XXX
+    raise InstallError.new(error)
   end
 
   class Installer
@@ -75,7 +75,7 @@ module Install
       if ['.nar', '.zip'].include?(ext)
         # pass
       else
-        fatal('unknown archive format')
+        Install.fatal('unknown archive format')
       end
     end
 
@@ -86,7 +86,7 @@ module Install
       begin
         FileUtils.mkdir_p(tmpdir)
       rescue # except:
-        fatal('cannot make temporary directory')
+        Install.fatal('cannot make temporary directory')
       end
       url = nil
       if filename.start_with?('http:') or filename.start_with?('ftp:')
@@ -94,7 +94,7 @@ module Install
         filename = download(filename, tmpdir)
         if filename == nil
           FileUtils.remove_entry_secure(tmpdir)
-          fatal('cannot download the archive file')
+          Install.fatal('cannot download the archive file')
         end
       else
         check_archive(filename)
@@ -119,7 +119,7 @@ module Install
         zf.close()
       rescue # except:
         FileUtils.remove_entry_secure(tmpdir)
-        fatal('cannot extract files from the archive')
+        Install.fatal('cannot extract files from the archive')
       end
       Dir.glob(tmpdir) { |path|
         if File.directory?(path)
@@ -131,7 +131,6 @@ module Install
           File.chmod(st_mode | 128 | 256, path)
         end
       }
-#      print("EXTRACT: ", tmpdir, "\n")
       rename_files(tmpdir)
       return tmpdir
     end
@@ -146,7 +145,7 @@ module Install
         elsif File.exists?(File.join(tmpdir, 'plugin.txt'))
           filetype = 'plugin'
         else
-          fatal('cannot read install.txt from the archive')
+          Install.fatal('cannot read install.txt from the archive')
         end
       else
         filetype = inst.get('type')
@@ -275,15 +274,13 @@ module Install
     end
 
     def rename_files(basedir)
-#      print("RENAME: ", basedir, "\n")
-#      if os.name == 'nt' # XXX
-#        return
-#      end
+      if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|cygwin|bccwin/ # XXX
+        return
+      end
       Dir.foreach(basedir) { |filename|
         next if /^\.+$/ =~ filename
         filename2 = filename.downcase
         path = File.join(basedir, filename2)
-#        print("PATH: ", path, "\n")
         if filename != filename2
           File.rename(File.join(basedir, filename), path)
         end
@@ -338,9 +335,9 @@ module Install
     end
 
     def lower_files(top_dir)
-#      if os.name == 'nt' # XXX
-#        return    
-#      end
+      if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|cygwin|bccwin/ # XXX
+        return    
+      end
       n = 0
       Dir.foreach(top_dir) { |filename|
         next if /^\.+$/ =~ filename
@@ -348,8 +345,8 @@ module Install
         path = File.join(top_dir, filename2)
         if filename != filename2
           File.rename(File.join(top_dir, filename), path)
-#          logging.info(
-#                       'renamed {0}'.format(File.join(top_dir, filename)))
+          #logging.info(
+          #  'renamed {0}'.format(File.join(top_dir, filename)))
           n += 1
         end
         if File.directory?(path)
@@ -380,13 +377,13 @@ module Install
 
     def select(candidates)
       #assert len(candidates) >= 1
-      if len(candidates) == 1
+      if candidates.length == 1
         return candidates[0]
       end
       ls = @treeview.get_model()
       ls.clear()
       for i, item in enumerate(candidates)
-        ls.append([i, item])
+        ls << [i, item]
       end
       ts = @treeview.get_selection()
       ts.select_iter(ls.get_iter_first())
@@ -402,13 +399,12 @@ module Install
     def install_ghost(archive, tmpdir, homedir)
       # find install.txt
       inst = Home.read_install_txt(tmpdir)
-#      print("INST: ", inst, "\n")
       if inst == nil
-        fatal('install.txt not found')
+        Install.fatal('install.txt not found')
       end
       target_dir = inst.get('directory')
       if target_dir == nil
-        fatal('"directory" not found in install.txt')
+        Install.fatal('"directory" not found in install.txt')
       end
       prefix = File.join(homedir, 'ghost', target_dir)
       ghost_src = File.join(tmpdir, 'ghost', 'master')
@@ -448,7 +444,6 @@ module Install
       end
       balloon_name = nil
       if balloon_dir
-#        print("BALLOON DIR: ", balloon_dir, "\n")
         balloon_dir = Home.get_normalized_path(balloon_dir)
         balloon_dst = File.join(homedir, 'balloon', balloon_dir)
         if inst
@@ -459,7 +454,6 @@ module Install
         else
           balloon_src = balloon_dir
         end
-#        print("INSTALL.TXT(B): ", File.join(tmpdir, balloon_src), "\n") 
         inst_balloon = Home.read_install_txt(
                                              File.join(tmpdir, balloon_src))
         if Dir.exists?(balloon_dst) and \
@@ -483,7 +477,7 @@ module Install
       end
       if Dir.exists?(prefix)
         inst_dst = Home.read_install_txt(prefix)
-        if inst.get('refresh', 0).to_i
+        if inst.get('refresh', 0).to_i != 0
           # uninstall older versions of the ghost
           if confirm_refresh(prefix, 'ghost')
             mask = []
@@ -502,7 +496,7 @@ module Install
         end
       end
       # install files
-#      logging.info('installing {0} (ghost)'.format(archive))
+      #logging.info('installing {0} (ghost)'.format(archive))
       install_files(filelist)
       # create SETTINGS
       path = File.join(prefix, 'SETTINGS')
@@ -514,7 +508,7 @@ module Install
           end
         rescue # except IOError as e:
           code, message = e.args
-#          logging.error('cannot write {0}'.format(path))
+          #logging.error('cannot write {0}'.format(path))
         ensure
           f.close()
         end
@@ -528,7 +522,7 @@ module Install
     def install_supplement(archive, tmpdir, homedir)
       inst = Home.read_install_txt(tmpdir)
       if inst and inst.include?('accept')
-        logging.info('searching supplement target ...')
+        #logging.info('searching supplement target ...')
         candidates = []
         begin
           dirlist = Dir.entries(File.join(homedir, 'ghost'))
@@ -538,7 +532,7 @@ module Install
         for dirname in dirlist
           path = File.join(homedir, 'ghost', dirname)
           if File.exists?(File.join(path, 'shell', 'surface.txt'))
-            continue # ghost.inverse(obsolete)
+            next # ghost.inverse(obsolete)
           end
           desc = Home.read_descript_txt(
                                         File.join(path, 'ghost', 'master'))
@@ -546,8 +540,8 @@ module Install
             candidates << dirname
           end
         end
-        if not candidates
-          logging.info('not found')
+        if candidates.empty?
+          #logging.info('not found')
           return nil, nil, 4
         else
           target = self.select(candidates)
@@ -560,7 +554,7 @@ module Install
               path = File.join(path, 'shell', inst['directory'])
             else
               if not inst.include?('type')
-#                logging.error('supplement type not specified')
+                #logging.error('supplement type not specified')
               else
 #                logging.error('unsupported supplement type: {0}'.format(inst['type']))
               end
@@ -582,11 +576,11 @@ module Install
       # find install.txt
       inst = Home.read_install_txt(srcdir)
       if inst == nil
-        fatal('install.txt not found')
+        Install.fatal('install.txt not found')
       end
       target_dir = inst.get('directory')
       if target_dir == nil
-        fatal('"directory" not found in install.txt')
+        Install.fatal('"directory" not found in install.txt')
       end
       dstdir = File.join(homedir, 'balloon', target_dir)
       filelist = []
@@ -616,7 +610,7 @@ module Install
         end
       end
       # install files
-#      logging.info('installing {0} (balloon)'.format(archive))
+      #logging.info('installing {0} (balloon)'.format(archive))
       install_files(filelist)
       return target_dir, inst.get('name'), 0
     end
@@ -631,7 +625,7 @@ module Install
         path = File.join(homedir, 'plugin', subdir)
         plugin = Home.read_plugin_txt(path)
         if plugin == nil
-          continue
+          next
         end
         plugin_name, plugin_dir, startup, menu_items = plugin
         if plugin_name == name
@@ -648,7 +642,7 @@ module Install
       # find plugin.txt
       plugin = Home.read_plugin_txt(srcdir)
       if plugin == nil
-        fatal('failed to read plugin.txt')
+        Install.fatal('failed to read plugin.txt')
       end
       plugin_name, plugin_dir, startup, menu_items = plugin
       # find files
@@ -662,7 +656,7 @@ module Install
       # uninstall older versions of the plugin
       uninstall_plugin(homedir, plugin_name)
       # install files
-#      print('installing {0} (plugin)'.format(archive))
+      #logging.info('installing {0} (plugin)'.format(archive))
       install_files(filelist)
       return plugin_dir, plugin_name, 0
     end
@@ -677,7 +671,7 @@ module Install
         path = File.join(homedir, 'kinoko', subdir)
         kinoko = Home.read_kinoko_ini(path)
         if kinoko == nil
-          continue
+          next
         end
         kinoko_name = kinoko['title']
         if kinoko_name == name
@@ -693,7 +687,7 @@ module Install
       # find kinoko.ini
       kinoko = Home.read_kinoko_ini(srcdir)
       if kinoko == nil
-        fatal('failed to read kinoko.ini')
+        Install.fatal('failed to read kinoko.ini')
       end
       kinoko_name = kinoko['title']
       if kinoko['extractpath'] != nil
@@ -713,7 +707,7 @@ module Install
       # uninstall older versions of the kinoko
       uninstall_kinoko(homedir, kinoko_name)
       # install files
-#      logging.info('installing {0} (kinoko)'.format(archive))
+      #logging.info('installing {0} (kinoko)'.format(archive))
       install_files(filelist)
       return dstdir, [kinoko_name, kinoko['ghost'], kinoko['category']], 0
     end
@@ -732,11 +726,11 @@ module Install
       # find install.txt
       inst = Home.read_install_txt(srcdir)
       if inst == nil
-        fatal('install.txt not found')
+        Install.fatal('install.txt not found')
       end
       target_dir = inst.get('directory')
       if target_dir == nil
-        fatal('"directory" not found in install.txt')
+        Install.fatal('"directory" not found in install.txt')
       end
       dstdir = File.join(homedir, 'nekodorif', 'skin', target_dir)
       # find files
@@ -751,7 +745,7 @@ module Install
       # uninstall older versions of the skin
       uninstall_nekoninni(homedir, target_dir)
       # install files
-#      logging.info('installing {0} (nekodorif skin)'.format(archive))
+      #logging.info('installing {0} (nekodorif skin)'.format(archive))
       install_files(filelist)
       return target_dir, inst.get('name'), 0
     end
@@ -770,11 +764,11 @@ module Install
       # find install.txt
       inst = Home.read_install_txt(srcdir)
       if inst == nil
-        fatal('install.txt not found')
+        Install.fatal('install.txt not found')
       end
       target_dir = inst.get('directory')
       if target_dir == nil
-        fatal('"directory" not found in install.txt')
+        Install.fatal('"directory" not found in install.txt')
       end
       dstdir = File.join(homedir, 'nekodorif', 'katochan', target_dir)
       # find files
@@ -789,7 +783,7 @@ module Install
       # uninstall older versions of the skin
       uninstall_katochan(homedir, target_dir)
       # install files
-#      logging.info('installing {0} (nekodorif katochan)'.format(archive))
+      #logging.info('installing {0} (nekodorif katochan)'.format(archive))
       install_files(filelist)
       return target_dir, inst.get('name'), 0
     end
@@ -814,7 +808,6 @@ module Install
         if not Dir.exists?(dirname)
           FileUtils.mkdir_p(dirname)
         end
-#        print("INSTALL FILES: ", from_path, " to ", to_path, "\n")
         FileUtils.copy(from_path, to_path)
       end
     end
