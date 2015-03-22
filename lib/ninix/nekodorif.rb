@@ -158,7 +158,7 @@ module Nekodorif
       elsif event == 'finalize'
         finalize()
       else
-        ##logging.debug('OBSERVER(nekodorif): ignore - {0}'.format(event))
+        #logging.debug('OBSERVER(nekodorif): ignore - {0}'.format(event))
       end
     end
 

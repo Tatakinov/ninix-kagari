@@ -44,6 +44,9 @@ module NinixTest
     def attach_observer(arg) # dummy
     end
 
+    def detach_observer(arg) # dummy
+    end
+
     def get_surface_scale() # dummy
       return 100
     end

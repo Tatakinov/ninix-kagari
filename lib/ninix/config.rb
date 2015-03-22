@@ -16,19 +16,6 @@ module NConfig
 
   class Config < Hash
 
-    def get_with_type(name, conv, default=nil)
-      value = self.get(name)
-      if value == nil
-        return default
-      end
-      ##assert conv is not None
-      begin
-        return conv(value)
-      rescue
-        return default # XXX
-      end
-    end
-
     def get(name, default=nil)
       if name.class == Array
         keylist = name
@@ -42,11 +29,6 @@ module NConfig
       end
       return default
     end
-
-#    def __str__
-#       return ''.join(
-#           ['{0},{1}\n'.format(key, value) for key, value in self.items()])
-#    end
   end
 
   def self.create_from_file(path)

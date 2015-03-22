@@ -44,12 +44,12 @@ module Kinoko
       EOS
       @__menu_list = {
         'settings' => [['Settings', nil, _('Settings...(_O)'), nil,
-                        '', lambda {|a, b| return @parent.handle_request('NOTIFY', 'edit_preferences')}],
+                        '', lambda {|a, b| @parent.handle_request('NOTIFY', 'edit_preferences')}],
                        '/ui/popup/Settings'],
         'skin' => [['Skin', nil, _('Skin(_K)'), nil],
                    nil, '/ui/popup/Skin'],
         'exit' => [['Exit', nil, _('Exit(_Q)'), nil,
-                    '', lambda {|a, b| return @parent.handle_request('NOTIFY', 'close')}],
+                    '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close')}],
                    '/ui/popup/Exit'],
       }
       actions = Gtk::ActionGroup.new('Actions')
@@ -155,7 +155,7 @@ module Kinoko
           @skin.set_position() ## FIXME
         end
       else
-        ##logging.debug('OBSERVER(kinoko): ignore - {0}'.format(event))
+        #logging.debug('OBSERVER(kinoko): ignore - {0}'.format(event))
       end
     end
 

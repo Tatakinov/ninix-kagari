@@ -103,12 +103,12 @@ module Seriko
       @prev_tick = current_tick
       update_frame(window)
       if @dirty
-        @dirty = false
         window.update_frame_buffer()
+        @dirty = false
       end
       if @move != nil
-        @move = nil
         window.move_surface(*@move)
+        @move = nil
       end
       @timeout_id = GLib::Timeout.add((1000.0 / @fps).to_i) { update(window) } # [msec]
       return false

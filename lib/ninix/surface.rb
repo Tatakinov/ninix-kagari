@@ -15,6 +15,7 @@
 
 require "gtk3"
 
+require "ninix/keymap"
 require "ninix/pix"
 require "ninix/seriko"
 
@@ -34,20 +35,19 @@ module Surface
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       ##assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'stick_window' => 'window_stick',
       }
       if handlers.include?(event)
-        result = handlers[event].call #( *arglist, **argdict)
+        result = handlers[event].call # no argument
       else
-#      handler = handlers.get(event, getattr(self, event, None))
-#      if handler == nil
-        result = @parent.handle_request(
-                                        event_type, event, *arglist, **argdict)
-#      else
-#        result = handler(*arglist, **argdict)
+        if Surface.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = @parent.handle_request(event_type, event, *arglist)
+        end
       end
       if event_type == 'GET'
         return result
@@ -103,8 +103,8 @@ module Surface
          
     def window_iconify(flag)
       gtk_window = @window[0].window
-      iconified = gtk_window.window.state & \
-      Gdk::EventWindowState::ICONIFIED
+      iconified = (gtk_window.window.state & \
+                   Gdk::EventWindowState::ICONIFIED).nonzero?
       if flag and not iconified
         gtk_window.iconify()
       elsif not flag and iconified
@@ -116,18 +116,18 @@ module Surface
       if not @parent.handle_request('GET', 'is_running')
         return
       end
-      if not (event.changed_mask & Gdk::EventWindowState::ICONIFIED)
+      if (event.changed_mask & Gdk::EventWindowState::ICONIFIED).zero?
         return
       end
-      if event.new_window_state & Gdk::EventWindowState::ICONIFIED
+      if (event.new_window_state & Gdk::EventWindowState::ICONIFIED).nonzero?
         if window == @window[0].get_window
           @parent.handle_request('NOTIFY', 'notify_iconified')
         end
         for surface_window in @window
           gtk_window = surface_window.get_window
           if gtk_window != window and \
-            not gtk_window.window.state & \
-            Gdk::EventWindowState::ICONIFIED
+            (gtk_window.window.state & \
+             Gdk::EventWindowState::ICONIFIED).nonzero?
             gtk_window.iconify()
           end
         end
@@ -135,8 +135,8 @@ module Surface
         for surface_window in @window
           gtk_window = surface_window.get_window
           if gtk_window != window and \
-            gtk_window.window.state & \
-            Gdk::EventWindowState::ICONIFIED
+            (gtk_window.window.state & \
+             Gdk::EventWindowState::ICONIFIED).nonzero?
             gtk_window.deiconify()
           end
         end
@@ -152,24 +152,25 @@ module Surface
     end
 
     def key_press(window, event)
-      name = @keymap_old.get(event.keyval, event.string)
-      keycode = @keymap_new.get(event.keyval, event.string)
-      if event.type == Gdk.EventType.KEY_RELEASE
+      name = Keymap::Keymap_old[event.keyval]
+      keycode = Keymap::Keymap_new[event.keyval]
+      if event.event_type == Gdk::Event::KEY_RELEASE
         @key_press_count = 0
         return true
       end
-      if not (event.type == Gdk.EventType.KEY_PRESS)
+      if not (event.event_type == Gdk::Event::KEY_PRESS)
         return false
       end
       @key_press_count += 1
-      if event.state & \
-        (Gdk::Window::ModifierType::CONTROL_MASK | Gdk::Window::ModifierType::SHIFT_MASK)
+      if (event.state & \
+          (Gdk::Window::ModifierType::CONTROL_MASK | \
+           Gdk::Window::ModifierType::SHIFT_MASK)).nonzero?
         if name == 'f12'
-          logging.info('reset surface position')
+          #logging.info('reset surface position')
           reset_position()
         end
         if name == 'f10'
-          logging.info('reset balloon offset')
+          #logging.info('reset balloon offset')
           for side in 0..@window.length-1
             set_balloon_offset(side, nil)
           end
@@ -177,8 +178,8 @@ module Surface
       end
       if name or keycode
         @parent.handle_request(
-                               'NOTIFY', 'notify_event', 'OnKeyPress', name, keycode,
-                               @key_press_count)
+          'NOTIFY', 'notify_event', 'OnKeyPress', name, keycode,
+          @key_press_count)
       end
       return true
     end
@@ -193,16 +194,12 @@ module Surface
       end
     end
 
-    #re_surface_id = re.compile('^surface([0-9]+)$')
-    #RE_SURFACE_ID = re.compile('^surface([0-9]+)$')
     RE_SURFACE_ID = Regexp.new('^surface([0-9]+)$')
 
     def get_seriko(surface)
       seriko = {}
       for basename in surface.keys
         path, config = surface[basename]
-#      for basename, (path, config) in surface.items()
-        #match = re_surface_id.match(basename)
         match = RE_SURFACE_ID.match(basename)
         if not match
           next
@@ -236,7 +233,6 @@ module Surface
       maxheight = 0
       for basename in surface.keys
         path, config = surface[basename]
-#      for basename, (path, config) in surface.items()
         if path == nil
           next
         end
@@ -247,9 +243,8 @@ module Surface
           if not File.exists?(dgp_path)
             ddp_path = [name, '.ddp'].join('')
             if not File.exists?(ddp_path)
-#              logging.error(
-#                            '{0}: file not found (ignored)'.format(path))
-              print(path + ': file not found (ignored)' + "\n")
+              #logging.error(
+              #  '{0}: file not found (ignored)'.format(path))
               next
             else
               path = ddp_path
@@ -262,7 +257,6 @@ module Surface
         w, h = Pix.get_png_size(path)
         maxwidth = [maxwidth, w].max
         maxheight = [maxheight, h].max
-        #match = re_surface_id.match(basename)
         match = RE_SURFACE_ID.match(basename)
         if not match
           next
@@ -274,16 +268,13 @@ module Surface
       composite_surface = {}
       for basename in surface.keys
         path, config = surface[basename]
-#      for basename, (path, config) in surface.items()
-        #match = re_surface_id.match(basename)
         match = RE_SURFACE_ID.match(basename)
         if not match
           next
         end
         key = match[1]
         if config.include?('element0')
-#          logging.debug('surface {0}'.format(key))
-          print('surface ' + key.to_s, "\n")
+          #logging.debug('surface {0}'.format(key))
           composite_surface[key] = compose_elements(elements, config)
         end
       end
@@ -292,7 +283,7 @@ module Surface
       for key in [default_sakura, default_kero]
         if not surfaces.include?(key.to_s)
           raise SystemExit(
-                           'cannot load default surface #' + key.to_s + ' (abort)\n')
+                  'cannot load default surface #' + key.to_s + ' (abort)\n')
         end
       end
       @__surfaces = surfaces
@@ -300,8 +291,6 @@ module Surface
       region = {}
       for basename in surface.keys
         path, config = surface[basename]
-#      for basename, (path, config) in surface.items()
-        #match = re_surface_id.match(basename)
         match = RE_SURFACE_ID.match(basename)
         if not match
           next
@@ -320,12 +309,10 @@ module Surface
             next
           end
           begin
-            for value in values[0, 4]
-              x1 = value[0].to_i
-              y1 = value[1].to_i
-              x2 = value[2].to_i
-              y2 = value[3].to_i
-            end
+            x1 = values[0].to_i
+            y1 = values[1].to_i
+            x2 = values[2].to_i
+            y2 = values[3].to_i
           rescue # except ValueError:
             next
           end
@@ -338,14 +325,13 @@ module Surface
             next
           end
           begin
-            for value in rect.split(',')
-              x1 = value[0].to_i
-              y1 = value[1].to_i
-              x2 = value[2].to_i
-              y2 = value[3].to_i
-            end
+            values = rect.split(',')
+            x1 = values[0].to_i
+            y1 = values[1].to_i
+            x2 = values[2].to_i
+            y2 = values[3].to_i
           rescue # except ValueError:
-            pass
+            #pass
           end
           buf << [part.capitalize(), x1, y1, x2, y2].join('')
         end
@@ -356,8 +342,6 @@ module Surface
       mayuna = {}
       for basename in surface.keys
         path, config = surface[basename]
-#      for basename, (path, config) in surface.items()
-        #match = re_surface_id.match(basename)
         match = RE_SURFACE_ID.match(basename)
         if not match
           next
@@ -409,22 +393,16 @@ module Surface
     end
 
     def get_menu_fontcolor
-      fontcolor_r = @desc.get_with_type(
-                                        'menu.background.font.color.r', int, 0)
-      fontcolor_g = @desc.get_with_type(
-                                        'menu.background.font.color.g', int, 0)
-      fontcolor_b = @desc.get_with_type(
-                                        'menu.background.font.color.b', int, 0)
+      fontcolor_r = @desc.get('menu.background.font.color.r', 0).to_i
+      fontcolor_g = @desc.get('menu.background.font.color.g', 0).to_i
+      fontcolor_b = @desc.get('menu.background.font.color.b', 0).to_i
       fontcolor_r = [0, [255, fontcolor_r].min].max
       fontcolor_g = [0, [255, fontcolor_g].min].max
       fontcolor_b = [0, [255, fontcolor_b].min].max
       background = [fontcolor_r, fontcolor_g, fontcolor_b]
-      fontcolor_r = @desc.get_with_type(
-                                        'menu.foreground.font.color.r', int, 0)
-      fontcolor_g = @desc.get_with_type(
-                                        'menu.foreground.font.color.g', int, 0)
-      fontcolor_b = @desc.get_with_type(
-                                        'menu.foreground.font.color.b', int, 0)
+      fontcolor_r = @desc.get('menu.foreground.font.color.r', 0).to_i
+      fontcolor_g = @desc.get('menu.foreground.font.color.g', 0).to_i
+      fontcolor_b = @desc.get('menu.foreground.font.color.b', 0).to_i
       fontcolor_r = [0, [255, fontcolor_r].min].max
       fontcolor_g = [0, [255, fontcolor_g].min].max
       fontcolor_b = [0, [255, fontcolor_b].min].max
@@ -455,9 +433,9 @@ module Surface
       bind = {}
       for index in 0..127
         group = @desc.get(
-                          name + '.bindgroup' + index.to_i.to_s + '.name', nil)
+          name + '.bindgroup' + index.to_i.to_s + '.name', nil)
         default = @desc.get(
-                            name + '.bindgroup' + index.to_i.to_s + '.default', 0)
+          name + '.bindgroup' + index.to_i.to_s + '.default', 0)
         if group != nil
           bind[index] = [group, default]
         end
@@ -471,7 +449,7 @@ module Surface
           begin
             key = key.to_i
           rescue # except:
-            pass
+            #pass
           else
             if bind.include?(key)
               group = bind[key][0].split(',')
@@ -488,10 +466,10 @@ module Surface
         tooltips = @__tooltips[name]
       end
       surface_window = SurfaceWindow.new(
-                                         gtk_window, side, @desc, surface_alias, @__surface, tooltips,
-                                         @__surfaces, seriko, @__region, mayuna, bind,
-                                         default_id, @maxsize)
-      surface_window.set_responsible(self)#.handle_request)
+        gtk_window, side, @desc, surface_alias, @__surface, tooltips,
+        @__surfaces, seriko, @__region, mayuna, bind,
+        default_id, @maxsize)
+      surface_window.set_responsible(self)
       @window << surface_window
     end
 
@@ -517,7 +495,6 @@ module Surface
         for value in config[key].split(',')
           spec << value.strip()
         end
-#            spec = [value.strip() for value in config[key].split(',')]
         begin
           method, filename, x, y = spec
           x = x.to_i
@@ -550,12 +527,10 @@ module Surface
           error = 'unknown method for ' + key + ': ' + method
           break
         end
-#        logging.debug(key + ': ' + meyhod + ' ' + filename + ', x=' + x.to_i.to_s + ', y=' + y.to_i.to_s)
-        print(key + ': ' + method + ' ' + filename + ', x=' + x.to_i.to_s + ', y=' + y.to_i.to_s, "\n")
+        #logging.debug(key + ': ' + meyhod + ' ' + filename + ', x=' + x.to_i.to_s + ', y=' + y.to_i.to_s)
       end
       if error != nil
-#        logging.error(error)
-        print(error, "\n")
+        #logging.error(error)
         surface_list = []
       end
       return surface_list
@@ -676,11 +651,11 @@ module Surface
           x = left + scrn_w - w
         else
           b0w, b0h = @parent.handle_request(
-                                            'GET', 'get_balloon_size', side - 1)
+                 'GET', 'get_balloon_size', side - 1)
           b1w, b1h = @parent.handle_request(
-                                            'GET', 'get_balloon_size', side)
+                 'GET', 'get_balloon_size', side)
           bpx, bpy = @parent.handle_request(
-                                            'GET', 'get_balloon_windowposition', side)
+                 'GET', 'get_balloon_windowposition', side)
           o0x, o0y = get_balloon_offset(side - 1)
           o1x, o1y = get_balloon_offset(side)
           offset = [0, b1w - (b0w - o0x)].max
@@ -925,8 +900,14 @@ module Surface
       end
       x1, y1 = get_position(1)
       s1w, s1h = get_surface_size(1)
-      if (x0 < x1 + s1w / 2 < x0 + s0w and y0 < y1 + s1h / 2 < y0 + s0h) or \
-        (x1 < x0 + s0w / 2 < x1 + s1w and y1 < y0 + s0h / 2 < y1 + s1h)
+      if (x0 < x1 + s1w / 2 and
+          x1 + s1w / 2 < x0 + s0w and
+          y0 < y1 + s1h / 2 and
+          y1 + s1h / 2 < y0 + s0h) or
+        (x1 < x0 + s0w / 2 and
+         x0 + s0w / 2 < x1 + s1w and
+         y1 < y0 + s0h / 2 and
+         y0 + s0h / 2 < y1 + s1h)
         kasanari = true
       else
         kasanari = false
@@ -955,7 +936,7 @@ module Surface
       @surfaces = surfaces
       @image_surface = nil # XXX
       @seriko = Seriko::Controller.new(seriko)
-      @seriko.set_responsible(self)#.handle_request)
+      @seriko.set_responsible(self)
       @region = region
       @mayuna = mayuna
       @bind = bind
@@ -1007,11 +988,10 @@ module Surface
         end
       end
       # DnD data types
-## FIXME
-#      dnd_targets = [Gtk.TargetEntry.new('text/uri-list', 0, 0)]
-#      @darea.drag_dest_set(Gtk.DestDefaults.ALL, dnd_targets,
-#                           Gdk.DragAction.COPY)
-#      @darea.drag_dest_add_uri_targets()
+      dnd_targets = [['text/uri-list', 0, 0]]
+      @darea.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+                           Gdk::DragContext::Action::COPY)
+      @darea.drag_dest_add_uri_targets()
     end
 
     def get_seriko
@@ -1031,8 +1011,8 @@ module Surface
         @parent.handle_request('NOTIFY', 'reset_position') # XXX
         left, top, scrn_w, scrn_h = Pix.get_workarea()
         @parent.handle_request(
-                               'NOTIFY', 'notify_event', 'OnDisplayChange',
-                               Gdk.Visual.get_best_depth(), scrn_w, scrn_h)
+          'NOTIFY', 'notify_event', 'OnDisplayChange',
+          Gdk.Visual.get_best_depth(), scrn_w, scrn_h)
       end
     end
 
@@ -1040,19 +1020,18 @@ module Surface
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       ##assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
             }
       if handlers.include?(event)
-        result = handlers[event].call #( *arglist, **argdict)
+        result = handlers[event].call # no argument
       else
-#      handler = handlers.get(event, getattr(self, event, nil))
-#      if handler == nil
-        result = @parent.handle_request(
-                                        event_type, event, *arglist, **argdict)
-#      else
-#        result = handler(*arglist, **argdict)
+        if SurfaceWindow.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = @parent.handle_request(event_type, event, *arglist)
+        end
       end
       if event_type == 'GET'
         return result
@@ -1067,7 +1046,7 @@ module Surface
     def direction=(direction)
       @__direction = direction # 0: left, 1: right
       @parent.handle_request(
-                             'NOTIFY', 'set_balloon_direction', @side, direction)
+        'NOTIFY', 'set_balloon_direction', @side, direction)
     end
 
 #    @property
@@ -1082,18 +1061,10 @@ module Surface
         side = @side
         if side == 0
           name = 'sakura'
-#          x = config.get_with_type(
-#                                   name + '.balloon.offsetx', int)
-#          y = config.get_with_type(
-#                                   name + '.balloon.offsety', int)
           x = config.get(name + '.balloon.offsetx').to_i
           y = config.get(name + '.balloon.offsety').to_i
         elsif side == 1
           name = 'kero'
-#          x = config.get_with_type(
-#                                   name + '.balloon.offsetx', int)
-#          y = config.get_with_type(
-#                                   name + '.balloon.offsety', int)
           x = config.get(name + '.balloon.offsetx').to_i
           y = config.get(name + '.balloon.offsety').to_i
         else
@@ -1101,8 +1072,6 @@ module Surface
           x, y = nil, nil # XXX
         end
         if x == nil
-#          x = @desc.get_with_type(
-#                                  name + '.balloon.offsetx', int, 0)
           x = @desc.get(name + '.balloon.offsetx')
           if x == nil
             x = 0
@@ -1111,8 +1080,6 @@ module Surface
           end
         end
         if y == nil
-#          y = @desc.get_with_type(
-#                                  name + '.balloon.offsety', int, 0)
           y = @desc.get(name + '.balloon.offsety')
           if y == nil
             y = 0
@@ -1143,8 +1110,8 @@ module Surface
       end
       if filelist
         @parent.handle_request(
-                               'NOTIFY', 'enqueue_event',
-                               'OnFileDrop2', chr(1).join(filelist), @side)
+          'NOTIFY', 'enqueue_event',
+          'OnFileDrop2', chr(1).join(filelist), @side)
       end
     end
 
@@ -1185,7 +1152,7 @@ module Surface
         @seriko.terminate(self)
       end
       if ['-1', '-2'].include?(surface_id)
-        pass
+        #pass
       elsif not @surfaces.include?(surface_id)
         @surface_id = @default_id
       else
@@ -1222,13 +1189,13 @@ module Surface
       w, h = get_surface_size(@surface_id)
       new_x, new_y = get_position()
       @parent.handle_request(
-                             'NOTIFY', 'notify_event',
-                             'OnSurfaceChange',
-                             @parent.handle_request('GET', 'get_surface_id', 0),
-                             @parent.handle_request('GET', 'get_surface_id', 1),
-                             [@side, @surface_id, w, h].join(','),
-                             prev_id.to_s,
-                             [new_x, new_y, new_x + w, new_y + h].join(','))
+        'NOTIFY', 'notify_event',
+        'OnSurfaceChange',
+        @parent.handle_request('GET', 'get_surface_id', 0),
+        @parent.handle_request('GET', 'get_surface_id', 1),
+        [@side, @surface_id, w, h].join(','),
+        prev_id.to_s,
+        [new_x, new_y, new_x + w, new_y + h].join(','))
       update_frame_buffer() #XXX
     end
 
@@ -1277,10 +1244,9 @@ module Surface
       end
       begin
         surface = Pix.create_surface_from_file(
-                                               @surfaces[surface_id][0], is_pnr=is_pnr, use_pna=use_pna)
+          @surfaces[surface_id][0], is_pnr=is_pnr, use_pna=use_pna)
       rescue # except:
-#        logging.debug('cannot load surface #{0}'.format(surface_id))
-        print('cannot load surface #' + surface_id, "\n")
+        #logging.debug('cannot load surface #{0}'.format(surface_id))
         return Pix.create_blank_surface(100, 100)
       end
       for element, x, y, method in @surfaces[surface_id][1, @surfaces[surface_id].length - 1]
@@ -1291,10 +1257,10 @@ module Surface
           else
             is_pnr = true
             use_pna = @parent.handle_request(
-                                             'GET', 'get_preference', 'use_pna')
+              'GET', 'get_preference', 'use_pna')
           end
           overlay = Pix.create_surface_from_file(
-                                                 element, is_pnr=is_pnr, use_pna=use_pna)
+            element, is_pnr=is_pnr, use_pna=use_pna)
         rescue # except:
           next
         end
@@ -1322,8 +1288,7 @@ module Surface
 
     def get_image_surface(surface_id, is_asis=false)
       if not @surfaces.include?(surface_id)
-#        logging.debug('cannot load surface #{0}'.format(surface_id))
-        print('cannot load surface #' + surface_id.to_s, "\n")
+        #logging.debug('cannot load surface #{0}'.format(surface_id))
         return Pix.create_blank_surface(100, 100)
       end
       return create_surface_from_file(surface_id, is_asis=is_asis)
@@ -1347,13 +1312,10 @@ module Surface
           font_desc = Pango::FontDescription.new
           font_desc.set_size(8 * Pango::SCALE)
           layout = cr.create_pango_layout
-#          layout = Pango::Layout.new(@darea.pango_context)
           layout.set_font_description(font_desc)
           layout.set_wrap(Pango::WRAP_WORD_CHAR) # XXX
           layout.set_text(part)
           cr.show_pango_layout(layout)
-#          PangoCairo.update_layout(cr, layout)
-#          PangoCairo.show_layout(cr, layout)
         end
         cr.set_operator(Cairo::OPERATOR_ATOP)
         cr.set_source_rgba(0.2, 0.0, 0.0, 0.4) # XXX
@@ -1415,7 +1377,7 @@ module Surface
       for surface_id, x, y, method in @seriko.iter_overlays()
         begin
           overlay_surface = get_image_surface(
-                                              surface_id, is_asis=(method == 'asis'))
+            surface_id, is_asis=(method == 'asis'))
         rescue # except:
           next
         end
@@ -1437,7 +1399,7 @@ module Surface
         else
           cr.paint()
         end
-#        del cr
+        #del cr
       end
       @image_surface = new_surface
       @darea.queue_draw()
@@ -1471,7 +1433,7 @@ module Surface
       if @side < 2
         args = [@side, xoffset, yoffset]
         @parent.handle_request(
-                               'NOTIFY', 'notify_observer', 'move surface', args) # animation
+          'NOTIFY', 'notify_observer', 'move surface', args) # animation
       end
     end
 
@@ -1526,33 +1488,45 @@ module Surface
       end
       for part, x1, y1, x2, y2 in @collisions
         if x1 <= x and x <= x2 and y1 <= y and y <= y2
-          ##logging.debug('{0} touched'.format(part))
+          #logging.debug('{0} touched'.format(part))
           return part
         end
       end
       return ''
     end
 
-    def __get_with_scaling(name, conv)
+    def __get_with_scaling(name)
       basename = ['surface', @surface_id].join('')
       path, config = @surface_info[basename]
-      value = config.get_with_type(name, conv)
+      value = config.get(name)
       if value != nil
         scale = get_scale
-        value = conv(value * scale / 100)
+        value = value.to_f * scale / 100
       end
       return value
     end
 
     def get_center
-      centerx = __get_with_scaling('point.centerx', int)
-      centery = __get_with_scaling('point.centery', int)
+      centerx = __get_with_scaling('point.centerx')
+      centery = __get_with_scaling('point.centery')
+      if centerx
+        centerx = centerx.to_i
+      end
+      if centery
+        centery = centery.to_i
+      end
       return centerx, centery
     end
 
     def get_kinoko_center
-      centerx = __get_with_scaling('point.kinoko.centerx', int)
-      centery = __get_with_scaling('point.kinoko.centery', int)
+      centerx = __get_with_scaling('point.kinoko.centerx')
+      centery = __get_with_scaling('point.kinoko.centery')
+      if centerx
+        centerx = centerx.to_i
+      end
+      if centery
+        centery = centery.to_i
+      end
       return centerx, centery
     end
 
@@ -1582,7 +1556,7 @@ module Surface
       end
       base_y = new_y + oy
       @parent.handle_request(
-                             'NOTIFY', 'set_balloon_position', @side, base_x, base_y)
+        'NOTIFY', 'set_balloon_position', @side, base_x, base_y)
       @parent.handle_request('NOTIFY', 'notify_observer', 'set position')
       @parent.handle_request('NOTIFY', 'check_mikire_kasanari')
     end
@@ -1615,7 +1589,7 @@ module Surface
         sy = top
         set_position(sx, sy)
       else # free
-        pass
+        #pass
       end
     end
 
@@ -1652,69 +1626,65 @@ module Surface
         @window.hide()
         @__shown = false
         @parent.handle_request(
-                               'NOTIFY', 'notify_observer', 'hide', (@side))
+          'NOTIFY', 'notify_observer', 'hide', (@side))
       end
     end
 
     def raise_
-      @window.get_window().raise_()
+      @window.window.raise_()
       @parent.handle_request('NOTIFY', 'notify_observer', 'raise', (@side))
     end
 
     def lower
-      @window.get_window().lower()
+      @window.window.lower()
       @parent.handle_request('NOTIFY', 'notify_observer', 'lower', (@side))
     end
 
     def button_press(window, event)
       @parent.handle_request('NOTIFY', 'reset_idle_time')
       x, y = @window.winpos_to_surfacepos(
-                                          event.x.to_i, event.y.to_i, get_scale)
+           event.x.to_i, event.y.to_i, get_scale)
       @x_root = event.x_root
       @y_root = event.y_root
       # automagical raise
       @parent.handle_request('NOTIFY', 'notify_observer', 'raise', (@side))
       if event.event_type == Gdk::Event::BUTTON2_PRESS
-        click_count = 2
-      else
-        click_count = 1
+        @click_count = 2
+      else # XXX
+        @click_count = 1
       end
-      ## FIXME
-      #delivered, click_count = event.get_click_count()
-      #if delivered
-      if true
-        @click_count = click_count
-        if [1, 2, 3].include?(event.button)
-          num_button = [0, 2, 1][event.button - 1]
-          @parent.handle_request('NOTIFY', 'notify_event', 'OnMouseDown',
-                                 x, y, 0, @side, @__current_part,
-                                 num_button,
-                                 'mouse') # FIXME
-        end
-        if [2, 8, 9].include?(event.button)
-          ex_button = {
-            2 => 'middle',
-            8 => 'xbutton1',
-            9 => 'xbutton2'
-          }[event.button]
-          @parent.handle_request('NOTIFY', 'notify_event', 'OnMouseDownEx',
-                                 x, y, 0, @side, @__current_part,
-                                 ex_button,
-                                 'mouse') # FIXME
-        end
+      if [1, 2, 3].include?(event.button)
+        num_button = [0, 2, 1][event.button - 1]
+        @parent.handle_request('NOTIFY', 'notify_event', 'OnMouseDown',
+                               x, y, 0, @side, @__current_part,
+                               num_button,
+                               'mouse') # FIXME
+      end
+      if [2, 8, 9].include?(event.button)
+        ex_button = {
+          2 => 'middle',
+          8 => 'xbutton1',
+          9 => 'xbutton2'
+        }[event.button]
+        @parent.handle_request('NOTIFY', 'notify_event', 'OnMouseDownEx',
+                               x, y, 0, @side, @__current_part,
+                               ex_button,
+                               'mouse') # FIXME
       end
       return true
     end
 
+    CURSOR_HAND1 = Gdk::Cursor.new(Gdk::Cursor::Type::HAND1)
+
     def button_release(window, event)
       x, y = @window.winpos_to_surfacepos(
-                                          event.x.to_i, event.y.to_i, get_scale)
+           event.x.to_i, event.y.to_i, get_scale)
       if @dragged
         @dragged = false
         set_alignment_current()
         @parent.handle_request(
-                               'NOTIFY', 'notify_event',
-                               'OnMouseDragEnd', x, y, '', @side, @__current_part, '')
+          'NOTIFY', 'notify_event',
+          'OnMouseDragEnd', x, y, '', @side, @__current_part, '')
       end
       @x_root = nil
       @y_root = nil
@@ -1738,10 +1708,10 @@ module Surface
       if part != @__current_part
         if part == ''
           @window.set_tooltip_text('')
-          @darea.get_window().set_cursor(nil)
+          @darea.window.set_cursor(nil)
           @parent.handle_request(
-                                 'NOTIFY', 'notify_event',
-                                 'OnMouseLeave', x, y, '', @side, @__current_part)
+            'NOTIFY', 'notify_event',
+            'OnMouseLeave', x, y, '', @side, @__current_part)
         else
           if @tooltips.include?(part)
             tooltip = @tooltips[part]
@@ -1749,23 +1719,22 @@ module Surface
           else
             @window.set_tooltip_text('')
           end
-          cursor = Gdk.Cursor.new(Gdk.CursorType.HAND1)
-          @darea.get_window().set_cursor(cursor)
+          @darea.window.set_cursor(CURSOR_HAND1)
           @parent.handle_request(
-                                 'NOTIFY', 'notify_event',
-                                 'OnMouseEnter', x, y, '', @side, part)
+            'NOTIFY', 'notify_event',
+            'OnMouseEnter', x, y, '', @side, part)
         end
       end
       @__current_part = part
       if not @parent.handle_request('GET', 'busy')
-        if state & Gdk.ModifierType.BUTTON1_MASK
+        if (state & Gdk::Window::ModifierType::BUTTON1_MASK).nonzero?
           if @x_root != nil and \
             @y_root != nil
             if not @dragged
               @parent.handle_request(
-                                     'NOTIFY', 'notify_event',
-                                     'OnMouseDragStart', x, y, '',
-                                     @side, @__current_part, '')
+                'NOTIFY', 'notify_event',
+                'OnMouseDragStart', x, y, '',
+                @side, @__current_part, '')
             end
             @dragged = true
             x_delta = (event.x_root - @x_root).to_i
@@ -1775,9 +1744,9 @@ module Surface
             @x_root = event.x_root
             @y_root = event.y_root
           end
-        elsif state & Gdk.ModifierType.BUTTON2_MASK or \
-          state & Gdk.ModifierType.BUTTON3_MASK
-          pass
+        elsif (state & Gdk::Window::ModifierType::BUTTON2_MASK).nonzero? or \
+             (state & Gdk::Window::ModifierType::BUTTON3_MASK).nonzero?
+          #pass
         else
           @parent.handle_request('NOTIFY', 'notify_surface_mouse_motion',
                                  @side, x, y, part)
@@ -1788,10 +1757,10 @@ module Surface
 
     def scroll(darea, event)
       x, y = @window.winpos_to_surfacepos(
-                                          event.x.to_i, event.y.to_i, get_scale)
-      if event.direction == Gdk.ScrollDirection.UP
+           event.x.to_i, event.y.to_i, get_scale)
+      if event.direction == Gdk::EventScroll::UP
         count = 1
-      elsif event.direction == Gdk.ScrollDirection.DOWN
+      elsif event.direction == Gdk::EventScroll::DOWN
         count = -1
       else
         count = 0
@@ -1838,13 +1807,13 @@ module Surface
       x, y = @window.winpos_to_surfacepos(x, y, get_scale)
       if @__current_part != '' # XXX
         @parent.handle_request(
-                               'NOTIFY', 'notify_event',
-                               'OnMouseLeave', x, y, '', @side, @__current_part)
+          'NOTIFY', 'notify_event',
+          'OnMouseLeave', x, y, '', @side, @__current_part)
         @__current_part = ''
       end
       @parent.handle_request(
-                             'NOTIFY', 'notify_event',
-                             'OnMouseLeaveAll', x, y, '', @side, '')
+        'NOTIFY', 'notify_event',
+        'OnMouseLeaveAll', x, y, '', @side, '')
       return true
     end
   end

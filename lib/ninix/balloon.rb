@@ -45,18 +45,16 @@ module Balloon
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       #assert event_type in ['GET', 'NOTIFY']
       handlers = {
         'reset_user_interaction' => 'reset_user_interaction',
       }
-#      handler = handlers.get(event)
-#      if handler == nil
       if !handlers.include?(event)
         result = @parent.handle_request(
-                                        event_type, event, *arglist, **argdict)
+          event_type, event, *arglist)
       else
-        result = handler(*arglist, **argdict)
+        result = handlers[event].call(*arglist)
       end
       if event_type == 'GET'
         return result
@@ -142,7 +140,6 @@ module Balloon
       communicate3 = nil
       for key in balloon.keys
         value = balloon[key]
-#      for key, value in balloon.items()
         if ['arrow0', 'arrow1'].include?(key)
           balloon0[key] = value
           balloon1[key] = value
@@ -182,7 +179,7 @@ module Balloon
     end
 
     def add_window(side)
-#      assert @window.length == side
+      #assert @window.length == side
       if side == 0
         name = 'balloon.sakura'
         id_format = 's'
@@ -198,8 +195,7 @@ module Balloon
       end
       gtk_window = create_gtk_window(name)
       balloon_window = BalloonWindow.new(
-                                         gtk_window, side, @desc, balloon,
-                                         id_format)
+        gtk_window, side, @desc, balloon, id_format)
       balloon_window.set_responsible(self)
       @window << balloon_window
     end
@@ -569,7 +565,7 @@ module Balloon
       @parent = parent
     end
 
-#    @property
+    #@property
     def scale
       scaling = @parent.handle_request('GET', 'get_preference', 'balloon_scaling')
       scale = @parent.handle_request('GET', 'get_preference', 'surface_scale')
@@ -580,12 +576,12 @@ module Balloon
       end
     end
 
-#    @property
+    #@property
     def direction
       return @__direction
     end
 
-#    @direction.setter
+    #@direction.setter
     def direction(direction)
       if @__direction != direction
         @__direction = direction # 0: left, 1: right
@@ -658,7 +654,7 @@ module Balloon
 
     def reset_sstp_marker
       if @side == 0
-#        assert @balloon_surface != nil
+        #assert @balloon_surface != nil
         w = @balloon_surface.width
         h = @balloon_surface.height
         # sstp marker position
@@ -677,7 +673,7 @@ module Balloon
     def reset_arrow
       # arrow positions
       @arrow = []
-#      assert @balloon_surface != nil
+      #assert @balloon_surface != nil
       w = @balloon_surface.width
       h = @balloon_surface.height
       x = config_adjust('arrow0.x', w, -10)
@@ -767,7 +763,7 @@ module Balloon
     def get_balloon_size(scaling=true)
       w = @width
       h = @height
-#      scale = @scale
+      #scale = @scale
       if scaling
         w = (w * scale / 100.0).to_i
         h = (h * scale / 100.0).to_i
@@ -787,13 +783,13 @@ module Balloon
         balloon_id = @id_format + (0 + @__direction).to_i.to_s
         @balloon_surface = get_image_surface(balloon_id)
       end
-#      assert @balloon_surface != nil
+      #assert @balloon_surface != nil
       @balloon_id = balloon_id
       # change surface and window position
       x, y = @position
       @width = @balloon_surface.width
       @height = @balloon_surface.height
-#      scale = @scale
+      #scale = @scale
       w = (@width * scale / 100.0).to_i
       h = (@height * scale / 100.0).to_i
       @window.update_size(w, h)
@@ -825,18 +821,6 @@ module Balloon
       return value.to_i
     end
 
-    def __get_with_type(name, conv, default_value)
-      path, config = @balloon[@balloon_id]
-      value = config.get_with_type(name, conv)
-      if value == nil
-        value = @desc.get_with_type(name, conv)
-        if value == nil
-          value = default_value
-        end
-      end
-      return conv(value)
-    end
-
     def __get(name, default_value)
       path, config = @balloon[@balloon_id]
       value = config.get(name)
@@ -848,18 +832,6 @@ module Balloon
       end
       return value
     end
-
-#    def __get_with_scaling(name, conv, default_value)
-#      path, config = @balloon[@balloon_id]
-#      value = config.get_with_type(name, conv)
-#      if value == nil
-#        value = @desc.get_with_type(name, conv)
-#        if value == nil
-#          value = default_value
-#        end
-#      end
-#      return conv(value * scale / 100)
-#    end
 
     def __get_with_scaling(name, default_value)
       path, config = @balloon[@balloon_id]
@@ -910,11 +882,7 @@ module Balloon
     end
 
     def is_shown
-      if @__shown
-        return 1
-      else
-        return 0
-      end
+      return @__shown
     end
 
     def show
@@ -960,15 +928,14 @@ module Balloon
       end
       @sstp_message = message.to_s + " (" + sender.to_s + ")"
       x, y, w, h = @sstp_region
-#      @sstp_layout.set_text(@sstp_message, -1)
       @sstp_layout.set_text(@sstp_message)
       message_width, message_height = @sstp_layout.pixel_size
       if message_width > w
-        @sstp_message = '... ({0})'.format(sender)
+        @sstp_message = '... (' + sender + ')'
         i = 0
         while 1
           i += 1
-          s = '{0}... ({1})'.format(message[0, i], sender)
+          s = message[0, i] + '... (' + sender + ')'
           @sstp_layout.set_text(s, -1)
           message_width, message_height = \
           @sstp_layout.get_pixel_size()
@@ -999,13 +966,10 @@ module Balloon
       end
       # draw sstp message
       x, y, w, h = @sstp_region
-#      @sstp_layout.set_text(@sstp_message, -1)
       @sstp_layout.set_text(@sstp_message)
       cr.set_source_rgba(*@sstp_message_color)
       cr.move_to(x, y)
       cr.show_pango_layout(@sstp_layout)
-#      PangoCairo.update_layout(cr, @sstp_layout)
-#      PangoCairo.show_layout(cr, @sstp_layout)
       cr.restore()
     end
 
@@ -1134,8 +1098,6 @@ module Balloon
         cr.set_source_rgba(*@text_normal_color)
         cr.move_to(x, y)
         cr.show_pango_layout(@layout)
-#        PangoCairo.update_layout(cr, @layout)
-#        PangoCairo.show_layout(cr, @layout)
         if @sstp_surface != nil
           for l, c in @sstp_marker
             if l == i
@@ -1221,8 +1183,7 @@ module Balloon
             cr.fill()
             cr.move_to(x, y)
             cr.set_source_rgba(*@text_active_color)
-            PangoCairo.update_layout(cr, @layout)
-            PangoCairo.show_layout(cr, @layout)
+            cr.show_pango_layout(@layout)
           end
         end
       end
@@ -1234,7 +1195,7 @@ module Balloon
       for i in 0..(@link_buffer.length - 1)
         sl = @link_buffer[i][0]
         el = @link_buffer[i][2]
-        if @lineno <= sl <= @lineno + @lines
+        if @lineno <= sl and sl <= @lineno + @lines
           sn = @link_buffer[i][1]
           en = @link_buffer[i][3]
           for n in sl..el
@@ -1258,7 +1219,7 @@ module Balloon
             @layout.set_markup(markup, -1)
             text_w, text_h = @layout.get_pixel_size()
             w = text_w
-            if x <= px < x + w and y <= py < y + h
+            if x <= px and px < x + w and y <= py and py < y + h
               new_selection = i
               break
             end
@@ -1270,8 +1231,8 @@ module Balloon
           sl, sn, el, en, link_id, raw_text, text = \
           @link_buffer[new_selection]
           @parent.handle_request(
-                                 'NOTIFY', 'notify_event',
-                                 'OnChoiceEnter', raw_text, link_id, @selection)
+            'NOTIFY', 'notify_event',
+            'OnChoiceEnter', raw_text, link_id, @selection)
         end
       else
         if @selection != nil
@@ -1290,9 +1251,9 @@ module Balloon
       if event.hint?
         _, x, y, state = widget.window.get_device_position(event.device)
       else
-        x, y, state = event.x, event.y, event.get_state()
+        x, y, state = event.x, event.y, event.state
       end
-#      scale = @scale
+      #scale = @scale
       px, py = @window.winpos_to_surfacepos(x, y, scale)
       if @link_buffer
         if check_link_region(px, py)
@@ -1300,7 +1261,7 @@ module Balloon
         end
       end
       if not @parent.handle_request('GET', 'busy')
-        if state & Gdk.ModifierType.BUTTON1_MASK
+        if (state & Gdk::Window::ModifierType::BUTTON1_MASK).nonzero?
           if @x_root != nil and \
             @y_root != nil
             @dragged = true
@@ -1309,8 +1270,8 @@ module Balloon
             @x_fractions = x_delta - x_delta.to_i
             @y_fractions = y_delta - y_delta.to_i
             @parent.handle_request(
-                                   'NOTIFY', 'update_balloon_offset',
-                                   @side, x_delta.to_i, y_delta.to_i)
+              'NOTIFY', 'update_balloon_offset',
+              @side, x_delta.to_i, y_delta.to_i)
             @x_root = event.x_root
             @y_root = event.y_root
           end
@@ -1321,14 +1282,14 @@ module Balloon
 
     def scroll(darea, event)
       px, py = @window.winpos_to_surfacepos(
-                                            event.x.to_i, event.y.to_i, scale)
-      if event.direction == Gdk.ScrollDirection.UP
+            event.x.to_i, event.y.to_i, scale)
+      if event.direction == Gdk::EventScroll::UP
         if @lineno > 0
           @lineno = [@lineno - 2, 0].max
           check_link_region(px, py)
           @darea.queue_draw()
         end
-      elsif event.direction == Gdk.ScrollDirection.DOWN
+      elsif event.direction == Gdk::EventScroll::DOWN
         if @lineno + @lines < @text_buffer.length
           @lineno = [@lineno + 2,
                      @text_buffer.length - @lines].min
@@ -1353,12 +1314,12 @@ module Balloon
       end
       # arrows
       px, py = @window.winpos_to_surfacepos(
-                                            event.x.to_i, event.y.to_i, scale)
+            event.x.to_i, event.y.to_i, scale)
       # up arrow
       w = @arrow0_surface.get_width()
       h = @arrow0_surface.get_height()
       x, y = @arrow[0]
-      if x <= px <= x + w and y <= py <= y + h
+      if x <= px and px <= x + w and y <= py and py <= y + h
         if @lineno > 0
           @lineno = [@lineno - 2, 0].max
           @darea.queue_draw()
@@ -1369,7 +1330,7 @@ module Balloon
       w = @arrow1_surface.get_width()
       h = @arrow1_surface.get_height()
       x, y = @arrow[1]
-      if x <= px <= x + w and y <= py <= y + h
+      if x <= px and px <= x + w and y <= py and py <= y + h
         if @lineno + @lines < @text_buffer.length
           @lineno = [@lineno + 2,
                      @text_buffer.length - @lines].min
@@ -1395,7 +1356,7 @@ module Balloon
 
     def button_release(window, event)
       x, y = @window.winpos_to_surfacepos(
-                                          event.x.to_i, event.y.to_i, scale)
+           event.x.to_i, event.y.to_i, scale)
       if @dragged
         @dragged = false
       end
@@ -1582,7 +1543,7 @@ module Balloon
         return
       end
       line = @text_buffer.length - 1
-      if @lineno <= line && line < @lineno + @lines
+      if @lineno <= line and line < @lineno + @lines
         x, y, w, h = @line_regions[line - @lineno]
         if @text_buffer[line].end_with?('\n[half]')
           offset = line - @lineno + 1
@@ -1654,10 +1615,10 @@ module Balloon
         drag_data_received(w, e)
       end
       # DnD data types
-#      dnd_targets = [Gtk.TargetEntry.new('text/plain', 0, 0)]
-#      @window.drag_dest_set(Gtk.DestDefaults.ALL, dnd_targets,
-#                            Gdk.DragAction.COPY)
-#      @window.drag_dest_add_text_targets()
+      dnd_targets = [['text/plain', 0, 0]]
+      @window.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+                            Gdk::DragContext::Action::COPY)
+      @window.drag_dest_add_text_targets()
       @window.set_events(Gdk::Event::BUTTON_PRESS_MASK)
       @window.set_modal(true)
       @window.set_window_position(Gtk::Window::Position::CENTER)
@@ -1709,7 +1670,7 @@ module Balloon
       else
         box = Gtk::HBox.new(spacing=10)
         box.set_border_width(10)
-        if ENTRY
+        if not ENTRY.empty?
           label = Gtk::Label.new(label=ENTRY)
           box.pack_start(label, false, true, 0)
           label.show()
@@ -1726,15 +1687,25 @@ module Balloon
 
     def redraw(widget, cr, surface)
       cr.set_source_surface(surface, 0, 0)
-      cr.set_operator(cairo.OPERATOR_SOURCE)
+      cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.paint()
-      region = Gdk.cairo_region_create_from_surface(cr.get_target())
+      w, h = @window.size
+      image_surface = cr.target.map_to_image
+      region = Cairo::Region.new()
+      data = image_surface.data
+      for i in 0..(data.size / 4 - 1)
+        if (data[i * 4 + 3].ord) != 0
+          x = i % image_surface.width
+          y = i / image_surface.width
+          region.union!(x, y, 1, 1)
+        end
+      end
       # XXX: to avoid losing focus in the text input region
       x = @entry.get_margin_left()
       y = @entry.get_margin_top()
       w = @entry.get_allocated_width()
       h = @entry.get_allocated_height()
-      region.union(cairo.RectangleInt(x, y, w, h))
+      region.union!(x, y, w, h)
       @window.input_shape_combine_region(region)
     end
 
@@ -1752,7 +1723,7 @@ module Balloon
     end
 
     def key_press(widget, event)
-      if event.keyval == Gdk.KEY_Escape
+      if event.keyval == Gdk::Keyval::GDK_KEY_Escape
         @window.hide()
         cancel()
         return true
@@ -1763,8 +1734,8 @@ module Balloon
     def button_press(widget, event)
       if [1, 2].include?(event.button)
         @window.begin_move_drag(
-                                event.button, event.x_root.to_i, event.y_root.to_i,
-                                Gtk.get_current_event_time())
+          event.button, event.x_root.to_i, event.y_root.to_i,
+          Gtk.current_event_time())
       end
       return true
     end
@@ -1780,14 +1751,14 @@ module Balloon
       @window.show()
     end
 
-#    @abc.abstractmethod
+    #@abc.abstractmethod
     def enter
-#      pass
+      #pass
     end
 
-#    @abc.abstractmethod
+    #@abc.abstractmethod
     def cancel
-#      pass
+      #pass
     end
   end
 
@@ -1810,7 +1781,7 @@ module Balloon
     end
 
     def key_press(widget, event)
-      if event.keyval == Gdk.KEY_Escape
+      if event.keyval == Gdk::Keyval::GDK_KEY_Escape
         @window.hide()
         cancel()
         @parent.handle_request('NOTIFY', 'reset_user_interaction')

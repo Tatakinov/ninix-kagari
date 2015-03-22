@@ -181,7 +181,7 @@ module Home
         next
       end
       if balloon_info.include?('balloon_dir') # XXX
-        logging.warninig('Oops: balloon id confliction')
+        #logging.warninig('Oops: balloon id confliction')
         next
       else
         balloon_info['balloon_dir'] = [subdir, NConfig.null_config()]
@@ -325,7 +325,7 @@ module Home
         end
         line = line.encode('UTF-8', :invalid => :replace)
         if not line.include?('=')
-          error = 'line {0:d}: syntax error'.format(lineno)
+          error = 'line ' + lineno.to_s + ': syntax error'
           break
         end
         x = line.split('=', 2)
@@ -341,7 +341,7 @@ module Home
           kinoko[name] = value.to_i
         end
         if error
-          logging.error('Error: {0}\n{1} (skipped)'.format(error, path))
+          #logging.error('Error: {0}\n{1} (skipped)'.format(error, path))
           return nil
         end
       end
@@ -669,7 +669,7 @@ module Home
           begin
             charset = temp.split(',', 2)[1].strip().force_encoding('ascii')
           rescue #except:
-            pass
+            #pass
           end
           next
         end
@@ -687,8 +687,7 @@ module Home
             buf << temp[0, temp.length - 2]
           end
           if not opened
-            logging.error(
-                          'syntax error: unbalnced "}" in surfaces.txt.')
+            #logging.error('syntax error: unbalnced "}" in surfaces.txt.')
           end
           match = re_alias.match(key)
           if match
@@ -702,7 +701,7 @@ module Home
             begin
               key = key[0, -10]
             rescue #except:
-              pass
+              #pass
             end
             value = {}
             for line in buf
@@ -722,13 +721,13 @@ module Home
                 begin
                   key = [key[0, 7], key[7, key.length - 1].to_i.to_s].join('')
                 rescue #except ValueError:
-                  pass
+                  #pass
                 end
               else
                 begin
                   key = ['surface', key.to_i.to_s].join('')
                 rescue #except ValueError:
-                  pass
+                  #pass
                 end
               end
               config_list << [key, NConfig.create_from_buffer(buf, charset)]
@@ -769,8 +768,8 @@ module Home
         x = x.to_i
         y = y.to_i
       rescue #except ValueError:
-        logging.error(
-                      'invalid element spec for {0}: {1}'.format(key, config[key]))
+        #logging.error(
+        #  'invalid element spec for {0}: {1}'.format(key, config[key]))
         next
       end
       buf << [key, method, filename, x, y]
