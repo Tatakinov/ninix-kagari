@@ -26,7 +26,7 @@ module NinixTest
           end
           print(event, "\n")
         end
-        if code == 0
+        if not code
           break
         end
         if update.state == 5 and not update.get_schedule.empty?

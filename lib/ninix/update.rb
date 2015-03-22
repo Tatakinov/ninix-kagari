@@ -62,9 +62,9 @@ module Update
 
     def has_events
       if @event_queue.empty?
-        return 0
+        return false
       else
-        return 1
+        return true
       end
     end
 
@@ -147,7 +147,7 @@ module Update
       len_pre = 5
       if @state == nil or \
         @parent.handle_request('GET', 'check_event_queue')
-        return 0
+        return false
       elsif @state == 0
         start_updates()
       elsif @state == 1
@@ -159,7 +159,7 @@ module Update
       elsif @state == 4
         @schedule = make_schedule()
         if @schedule == nil
-          return 0
+          return false
         end
         @final_state = @schedule.length * len_state + len_pre
       elsif @state == @final_state
@@ -179,7 +179,7 @@ module Update
         filename, checksum = @schedule.shift
         update_file(filename, checksum)
       end
-      return 1
+      return true
     end
 
     def start_updates
@@ -191,7 +191,7 @@ module Update
       download(File.join(@path, 'updates2.dau'))
     end
 
-    def download(locator, event=0)
+    def download(locator, event=false)
       @locator = URI.escape(locator)
       @http = Net::HTTP.new(@host, @port)
       if event
@@ -253,15 +253,15 @@ module Update
     def redirect
       location = @response.getheader('location', nil)
       if location == nil
-        return 0
+        return false
       end
       begin
         url = URI.parse(location)
       rescue
-        return 0
+        return false
       end
       if url.scheme != 'http'
-        return 0
+        return false
       end
 #      logging.info('redirected to {0}'.format(location))
       @http.close()
@@ -270,7 +270,7 @@ module Update
       @path = url.path.dirname
       @state -= 2
       download(url[2])
-      return 1
+      return true
     end
 
     def get_content
@@ -354,7 +354,7 @@ module Update
           return nil
         end
         if filename == ""
-          continue
+          next
         end
         checksum = checksum.encode('ascii') # XXX
         path = File.join(@ghostdir, adjust_path(filename))
@@ -477,7 +477,7 @@ module Update
         list << x
       end
       update_list = list.join(',')
-      if not update_list
+      if update_list.empty?
         enqueue_event('OnUpdateComplete', 'none', '', '',
                       'ghost') # XXX
       else
@@ -494,8 +494,8 @@ module Update
         f = open(File.join(@ghostdir, 'delete.txt'), 'rb')
         for line in f
           line = line.strip()
-          if not line
-            continue
+          if line.empty?
+            next
           end
           filename = line
           filelist << Home.get_normalized_path(filename)

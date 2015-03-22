@@ -24,7 +24,6 @@ module Menu
     bindtextdomain("ninix-aya")
 
     def initialize
-#        self.request_parent = lambda *a: None # dummy
       @parent = nil
       ui_info = "
         <ui>
@@ -168,7 +167,6 @@ module Menu
       }
       actions = Gtk::ActionGroup.new('Actions')
       entry = []
-#      for key, value in @__menu_list.items()
       for key in @__menu_list.keys
         value = @__menu_list[key]
         if key != 'Stick'
@@ -216,14 +214,14 @@ module Menu
       @__align['background'] = align_background
       @__align['foreground'] = align_foreground
       @__align['sidebar'] = align_sidebar
-      if path_background != nil and os.path.exists(path_background)
+      if path_background != nil and File.exists?(path_background)
         begin
           color = ninix.pix.get_png_lastpix(path_background)
           @__imagepath['background'] = ["background-image: url('",
                                         path_background, "');\n",
                                         "background-color: ",
                                         color, ";\n"].join('')
-          if path_sidebar != nil and os.path.exists(path_sidebar)
+          if path_sidebar != nil and File.exists?(path_sidebar)
               sidebar_width, sidebar_height = ninix.pix.get_png_size(path_sidebar)
             @__imagepath['background_with_sidebar'] = ["background-image: url('",
                                                        path_sidebar,
@@ -243,14 +241,14 @@ module Menu
         @__imagepath['background'] = ["background-image: none;\n",
                                       "background-color: transparent;\n"].join('')
       end
-      if path_foreground != nil and os.path.exists(path_foreground)
+      if path_foreground != nil and File.exists?(path_foreground)
         begin
           color = ninix.pix.get_png_lastpix(path_foreground)
           @__imagepath['foreground'] = ["background-image: url('",
                                         path_foreground, "');\n",
                                         "background-color: ",
                                         color, ";\n"].join('')
-          if path_sidebar != nil and os.path.exists(path_sidebar)
+          if path_sidebar != nil and File.exists?(path_sidebar)
             sidebar_width, sidebar_height = ninix.pix.get_png_size(path_sidebar)
             @__imagepath['foreground_with_sidebar'] = ["background-image: url('",
                                                        path_sidebar, "'),url('",
@@ -290,14 +288,14 @@ module Menu
           index = 1
         elsif side.startswith('char')
           begin
-            index = int(side[4, side.length])
+            index = side[4, side.length].to_i
           rescue #except:
             next
           end
         else
           next
         end
-        for _ in range(@__mayuna_menu.length, index + 1)
+        for _ in @__mayuna_menu.length..index 
           @__mayuna_menu << nil
         end
         if mayuna_menu[side]
@@ -305,7 +303,7 @@ module Menu
           item = Gtk::TearoffMenuItem.new()
           item.show()
           @__mayuna_menu[index] << item
-          for j in range(mayuna_menu[side].length)
+          for j in 0..mayuna_menu[side].length-1
             key, name, state = mayuna_menu[side][j]
             if key != '-'
               item = Gtk::CheckMenuItem.new(name)
@@ -377,13 +375,13 @@ module Menu
               if caption
                 break
               end
-              if caption
-                caption = __modify_shortcut(caption)
-                if caption == __cut_mnemonic(caption)
-                  caption = [caption, @__ui[key][1]].join('')
-                end
-                __set_caption(key, caption)
+            end
+            if caption
+              caption = __modify_shortcut(caption)
+              if caption == __cut_mnemonic(caption)
+                caption = [caption, @__ui[key][1]].join('')
               end
+              __set_caption(key, caption)
             end
           end
         end
@@ -432,7 +430,7 @@ module Menu
       __update_ui(side)
       if side == 0
         portal = @parent.handle_request(
-                                        'GET', 'getstring', 'sakura.portalsites')
+          'GET', 'getstring', 'sakura.portalsites')
       else
         portal = nil
       end
@@ -488,80 +486,78 @@ module Menu
       if side >= 1
         __set_visible('Portal', false)
       else
-            if portal
-              menu = Gtk::Menu.new()
-              portal_list = portal.split(chr(2))
-              for site in portal_list
-                entry = site.split(chr(1))
-                if not entry
-                  continue
-                end
-                title = entry[0]
-                if title == '-'
-                  item = Gtk::SeparatorMenuItem.new()
-                else
-                  item = Gtk::MenuItem.new(title)
-                  if entry.length < 2
-                    item.set_sensitive(false)
-                  end
-                  if entry.length > 1    
-                    url = entry[1]
-                  end
-                  if entry.length > 2
-                    base_path = @parent.handle_request(
-                                                       'GET', 'get_prefix')
-                    filename = entry[2].lower()
-                    head, tail = os.path.splitext(filename)
-                    if not tail
-                      for ext in ['.png', '.jpg', '.gif']
-                        filename = [filename, ext].join('')
-                        banner = os.path.join(
-                                              base_path, 'ghost/master/banner',
-                                              os.fsencode(filename))
-                        if not os.path.exists(banner)
-                          banner = nil
-                        else
-                          break
-                        end
-                      end
+        if portal
+          menu = Gtk::Menu.new()
+          portal_list = portal.split(chr(2))
+          for site in portal_list
+            entry = site.split(chr(1))
+            if entry.empty?
+              next
+            end
+            title = entry[0]
+            if title == '-'
+              item = Gtk::SeparatorMenuItem.new()
+            else
+              item = Gtk::MenuItem.new(title)
+              if entry.length < 2
+                item.set_sensitive(false)
+              end
+              if entry.length > 1    
+                url = entry[1]
+              end
+              if entry.length > 2
+                base_path = @parent.handle_request(
+                  'GET', 'get_prefix')
+                filename = entry[2].lower()
+                tail = File.extname(filename)
+                if not tail
+                  for ext in ['.png', '.jpg', '.gif']
+                    filename = [filename, ext].join('')
+                    banner = File.join(
+                      base_path, 'ghost/master/banner', filename)
+                    if not File.exists?(banner)
+                      banner = nil
                     else
-                      banner = os.path.join(
-                                            base_path, 'ghost/master/banner',
-                                            os.fsencode(filename))
-                      if not os.path.exists(banner)
-                        banner = nil
-                      end
+                      break
                     end
-                  else
+                  end
+                else
+                  banner = File.join(
+                    base_path, 'ghost/master/banner', filename)
+                  if not File.exists?(banner)
                     banner = nil
                   end
-                  if entry.length > 1    
-                    item.signal_connect('activate') do |a, i|
+                end
+              else
+                banner = nil
+              end
+              if entry.length > 1    
+                item.signal_connect('activate') do |a, i|
                   @parent.handle_request(
-                                         'NOTIFY', 'notify_site_selection', title, url)
+                    'NOTIFY', 'notify_site_selection', title, url)
                 end
-                    item.set_has_tooltip(true)
-                    item.signal_connect('query-tooltip') do ||
-                    on_tooltip(banner)
+                item.set_has_tooltip(true)
+                item.signal_connect('query-tooltip') do 
+                  on_tooltip(banner)
                 end
-                  end
-                end
-                item.signal_connect('draw') do |i, *a|
+              end
+            end
+            item.signal_connect('draw') do |i, *a|
               set_stylecontext(i, *a)
             end
-                menu.add(item)
-                item.show()
-              end
-              menuitem = @ui_manager.get_widget(['/popup/', 'Portal'].join(''))
-              menuitem.set_submenu(menu)
-              menu.signal_connect('realize') do |i, *a|
+            menu.add(item)
+            item.show()
+          end
+          menuitem = @ui_manager.get_widget(['/popup/', 'Portal'].join(''))
+          menuitem.set_submenu(menu)
+          menu.signal_connect('realize') do |i, *a|
             set_stylecontext(i, *a)
           end
-              menu.show()
-              __set_visible('Portal', true)
-            else
-              __set_visible('Portal', false)
-            end
+          menu.show()
+          __set_visible('Portal', true)
+        else
+          __set_visible('Portal', false)
+        end
       end
     end
 
@@ -571,8 +567,8 @@ module Menu
         recommend_list = recommend.split(chr(2))
         for site in recommend_list
           entry = site.split(chr(1))
-          if not entry
-            continue
+          if entry.empty?
+            next
           end
           title = entry[0]
           if title == '-'
@@ -588,24 +584,22 @@ module Menu
             if entry.length > 2
               base_path = @parent.handle_request('GET', 'get_prefix')
               filename = entry[2].lower()
-              head, tail = os.path.splitext(filename)
+              tail = File.extname(filename)
               if not tail
                 for ext in ['.png', '.jpg', '.gif']
                   filename = [filename, ext].join('')
-                  banner = os.path.join(
-                                        base_path, 'ghost/master/banner',
-                                        os.fsencode(filename))
-                  if not os.path.exists(banner)
+                  banner = File.join(
+                    base_path, 'ghost/master/banner', filename)
+                  if not File.exists?(banner)
                     banner = nil
                   else
                     break
                   end
                 end
               else
-                banner = os.path.join(
-                                      base_path, 'ghost/master/banner',
-                                      os.fsencode(filename))
-                if not os.path.exists(banner)
+                banner = File.join(
+                  base_path, 'ghost/master/banner', filename)
+                if not File.exists?(banner)
                   banner = nil
                 end
               end
@@ -617,8 +611,8 @@ module Menu
                 @parent.handle_request('NOTIFY', 'notify_site_selection', title, url)
               end
               item.set_has_tooltip(true)
-              item.signal_connect('query-tooltip') do ||
-                  on_tooltip(banner)
+              item.signal_connect('query-tooltip') do
+                on_tooltip(banner)
               end
             end
           end
@@ -938,9 +932,9 @@ module Menu
     def get_stick
       item = @ui_manager.get_widget(['/popup/', 'Stick'].join(''))
       if item != nil and item.get_active()
-        return 1 #true
+        return true
       else
-        return 0 #false
+        return false
       end
     end
   end

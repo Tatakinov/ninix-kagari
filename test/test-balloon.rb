@@ -29,6 +29,8 @@ module NinixTest
     def handle_request(event_type, event, *arglist, **argdict)
       if event == 'lock_repaint'
         return false
+      elsif event == 'busy'
+        return false
       else
         return 100 # XXX
       end

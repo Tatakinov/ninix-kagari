@@ -50,6 +50,8 @@ module NinixTest
         end
       elsif event == "lock_repaint"
         return false
+      elsif event == "busy"
+        return false
       else
         return 1 # XXX
       end
