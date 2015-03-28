@@ -916,7 +916,7 @@ module NGM
 
     def install_current
       begin
-        filetype, target_dir = @installer.install(self.get('ArchiveUrl'),
+        filetype, target_dir = @installer.install(get('ArchiveUrl'),
                                                   Home.get_ninix_home())
       rescue #except:
         target_dir = nil
@@ -928,7 +928,7 @@ module NGM
     end
 
     def update_current ## FIXME
-      @parent.handle_request('NOTIFY', 'update_sakura', self.get('Name'), 'NGM')
+      @parent.handle_request('NOTIFY', 'update_sakura', get('Name'), 'NGM')
     end
   end
 end

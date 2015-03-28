@@ -1862,7 +1862,7 @@ module Balloon
     def show(default)
       if default != nil
         begin
-          text = str(default)
+          text = default.to_s
         rescue # except:
           text = ''
         end

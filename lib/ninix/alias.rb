@@ -87,7 +87,7 @@ module Alias
               table[key] = []
               for value in values[1, values.length - 2].split(',')
                 begin
-                  value = str(int(value))
+                  value = value.to_i.to_s
                 rescue
                   #except ValueError:
                   #pass

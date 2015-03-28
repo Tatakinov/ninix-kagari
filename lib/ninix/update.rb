@@ -226,7 +226,7 @@ module Update
         return
       elsif @state == 2 # updates2.dau
         enqueue_event(
-                      'OnUpdateFailure', str(code), 'updates2.dau', '',
+                      'OnUpdateFailure', code.to_s, 'updates2.dau', '',
                       'ghost') # XXX
         @state = nil
         return

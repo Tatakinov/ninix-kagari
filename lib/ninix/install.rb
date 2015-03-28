@@ -428,13 +428,13 @@ module Install
         filelist << [thumbnail_pnr,
                      File.join(prefix, 'thumbnail.pnr')]
       end
-      for path in self.list_all_files(ghost_src, '')
+      for path in list_all_files(ghost_src, '')
         filelist << [File.join(ghost_src, path),
                      File.join(ghost_dst, path)]
       end
       ghost_name = inst.get('name')
       # find shell
-      for path in self.list_all_files(shell_src, '')
+      for path in list_all_files(shell_src, '')
         filelist << [File.join(shell_src, path),
                      File.join(shell_dst, path)]
       end
@@ -544,7 +544,7 @@ module Install
           #logging.info('not found')
           return nil, nil, 4
         else
-          target = self.select(candidates)
+          target = select(candidates)
           if target == nil
             return nil, nil, 4
           end

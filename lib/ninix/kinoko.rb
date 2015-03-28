@@ -289,7 +289,7 @@ module Kinoko
       @__shown = false
       @surface_id = 0 # dummy
       @window = Pix::TransparentWindow.new()
-      ##self.window.set_title(''.join(('surface.', name)))
+      ##@window.set_title(['surface.', name].join(''))
       @window.set_skip_taskbar_hint(true)
       @window.signal_connect('delete_event') do |w, e|
         delete(w, e)
@@ -487,7 +487,7 @@ module Kinoko
       if File.exists?(path)
         @path = path
       else
-        #self.path = None
+        #path = nil
         @path = File.join(@data['dir'], @data['base'])
       end
     end

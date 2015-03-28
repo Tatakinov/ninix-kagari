@@ -15,6 +15,7 @@
 
 require "gtk3"
 require "gst"
+require "cgi"
 
 require "ninix/surface"
 require "ninix/balloon"
@@ -78,12 +79,6 @@ module Sakura
     # script origins
     FROM_SSTP_CLIENT = 1
     FROM_GHOST       = 2
-    # HTML entity definitions
-    begin
-        from html.entities import name2codepoint
-    rescue # except:
-        name2codepoint = nil
-    end
  
     def initialize
       @parent = nil
@@ -215,7 +210,7 @@ module Sakura
     def notify_installedshellname()
       installed = []
       for key in @shells
-        installed.append(@shells[key].baseinfo[0])
+        installed << @shells[key].baseinfo[0]
       end
       notify_event('installedshellname', *installed)
     end
@@ -317,21 +312,21 @@ module Sakura
           f = open(path, 'r')
           for line in f
             if not line.include?(',')
-              continue
+              next
             end
             key, value = line.split(',', 1)
             key = key.strip()
             if key == 'time'
               begin
-                ghost_time = int(value.strip())
+                ghost_time = value.strip().to_i
               rescue #except:
-                pass
+                #pass
               end
             elsif key == 'vanished_count'
               begin
-                ghost_vanished_count = int(value.strip())
+                ghost_vanished_count = value.strip().to_i
               rescue #except:
-                pass
+                #pass
               end
             end
           end
@@ -356,7 +351,7 @@ module Sakura
           f = open(path, 'r')
           for line in f
             if not line.include?(',')
-              continue
+              next
             end
             key, value = line.split(',', 1)
             if key.strip() == 'balloon_directory'
@@ -510,9 +505,9 @@ module Sakura
         end
         reset_script(1)
       end
-      @script_queue.append([event, script, sender, handle, host,
-                            show_sstp_marker, use_translator,
-                            db, request_handler])
+      @script_queue << [event, script, sender, handle, host,
+                        show_sstp_marker, use_translator,
+                        db, request_handler]
     end
 
     reset_event = ['OnGhostChanging', 'OnShellChanging', 'OnVanishSelected']
@@ -528,7 +523,7 @@ module Sakura
       if @reset_event.include?(event)
         reset_script(1)
       end
-      @event_queue.append([event, arglist, argdict])
+      @event_queue << [event, arglist, argdict]
     end
 
     EVENT_SCRIPTS = {
@@ -553,7 +548,7 @@ module Sakura
         argdict = {'default' => EVENT_SCRIPTS.get(event)}
         if notify_event(event, *arglist, **argdict)
           if proc != nil
-            @script_post_proc.append(proc)
+            @script_post_proc << proc
           end
           return 1
         elsif proc != nil
@@ -785,10 +780,10 @@ module Sakura
       for line in response.splitlines()
         line = str(line, @__charset, 'ignore').strip()
         if not line
-          continue
+          next
         end
         if not line.include?(':')
-          continue
+          next
         end
         key, value = line.split(':', 1)
         key = key.strip()
@@ -839,9 +834,9 @@ module Sakura
         value = ref[i]
         if value != nil
           value = value if isinstance(value, str) \
-        else str(value)
+        else value.to_s
           header = ''.join([header,
-                            'Reference', str(i), ': ',
+                            'Reference', i.to_s, ': ',
                             value, '\r\n'])
         end
       end
@@ -950,7 +945,7 @@ module Sakura
           notify_event('OnBoot', @surface.name, default=default)
         end
       else
-        pass ## FIXME
+        #pass ## FIXME
       end
     end
 
@@ -1219,7 +1214,7 @@ module Sakura
           value = arglist[n]
           if value != nil
             value = value if isinstance(value, str) \
-          else str(value)
+          else value.to_s
             logging.debug(
               'Reference{0:d}: {1}'.format(n, value))
           end
@@ -1274,7 +1269,7 @@ module Sakura
       start_script(script)
       @balloon.hide_sstp_message()
       if @boot_event.include?(event)
-        @script_finally.append(@surface_bootup)
+        @script_finally << @surface_bootup
       end
       def proc(flag_break=false)
         @parent.handle_request(
@@ -1285,7 +1280,7 @@ module Sakura
           flag_break, communication,
           nil, false, script, arglist)
       end
-      @script_finally.append(proc)
+      @script_finally << proc
       return 1
     end
 
@@ -1374,11 +1369,11 @@ module Sakura
       color_g = getstring('menu.background.font.color.g')
       color_b = getstring('menu.background.font.color.b')
       begin
-        color_r = max(0, min(255, int(color_r)))
-        color_g = max(0, min(255, int(color_g)))
-        color_b = max(0, min(255, int(color_b)))
+        color_r = max(0, min(255, color_r.to_i))
+        color_g = max(0, min(255, color_g.to_i))
+        color_b = max(0, min(255, color_b.to_i))
       rescue #except:
-        pass
+        #pass
       else
         background = [color_r, color_g, color_b]
       end
@@ -1386,11 +1381,11 @@ module Sakura
       color_g = getstring('menu.foreground.font.color.g')
       color_b = getstring('menu.foreground.font.color.b')
       begin
-        color_r = max(0, min(255, int(color_r)))
-        color_g = max(0, min(255, int(color_g)))
-        color_b = max(0, min(255, int(color_b)))
+        color_r = max(0, min(255, color_r.to_i))
+        color_g = max(0, min(255, color_g.to_i))
+        color_b = max(0, min(255, color_b.to_i))
       rescue #except:
-        pass
+        #pass
       else
         foreground = [color_r, color_g, color_b]
       end
@@ -1469,7 +1464,7 @@ module Sakura
     end
 
     def get_uptime()
-      uptime = (int(time.time() - @start_time) / 3600).to_i
+      uptime = ((time.time() - @start_time).to_i / 3600).to_i
       if uptime < 0
         @start_time = time.time()
         return 0
@@ -1745,13 +1740,13 @@ module Sakura
         @old_otherghostname = otherghostname
       end
       if not @__running
-        pass
+        #pass
       elsif [PAUSE_MODE, PAUSE_NOCLEAR_MODE].include?(@script_mode)
         ##if idle > PAUSE_TIMEOUT:
         ##    @script_mode = BROWSE_MODE
-        pass
+        #pass
       elsif @script_mode == WAIT_MODE
-        pass
+        #pass
       elsif @processed_script or @processed_text
         interpret_script()
       elsif @script_post_proc
@@ -1766,7 +1761,7 @@ module Sakura
         @script_finally = []
       elsif @script_mode == SELECT_MODE
         if @passivemode
-          pass
+          #pass
         elsif idle > SELECT_TIMEOUT
           @script_mode = BROWSE_MODE
           if @sstp_request_handler
@@ -1780,7 +1775,7 @@ module Sakura
       elsif @sstp_handle != nil
         close_sstp_handle()
       elsif @balloon.user_interaction
-        pass
+        #pass
       elsif idle > @__balloon_life > 0 and not @passivemode
         @__balloon_life = 0
         for side in range(@char)
@@ -1795,7 +1790,7 @@ module Sakura
           @surface.lower_all()
         end
       elsif @event_queue and handle_event()
-        pass
+        #pass
       elsif @script_queue and not @passivemode
         if get_silent_time() > 0
           keep_silence(true) # extend silent time
@@ -1821,7 +1816,7 @@ module Sakura
               flag_break, nil,
               [sender, host], (not use_translator), script, [])
           end
-          @script_finally.append(proc)
+          @script_finally << proc
         end
       elsif get_silent_time() > 0
         if now - get_silent_time() > SILENT_TIME
@@ -1832,13 +1827,13 @@ module Sakura
                         @surface.get_mikire(),
                         @surface.get_kasanari(),
                         (not @passivemode and @cantalk))
-        pass
+        #pass
       elsif @clock[1] != minute and \
            notify_event('OnMinuteChange', get_uptime(),
                         @surface.get_mikire(),
                         @surface.get_kasanari(),
                         (not @passivemode and @cantalk))
-        pass
+        #pass
       elsif @surface_mouse_motion != nil
         side, x, y, part = @surface_mouse_motion
         notify_event('OnMouseMove', x, y, '', side, part)
@@ -1992,7 +1987,7 @@ module Sakura
 
     def __yen_p(args)
       begin
-        chr_id = int(args[0])
+        chr_id = args[0].to_i
       rescue #except:
         return
       end
@@ -2082,7 +2077,7 @@ module Sakura
         @balloon.hide(@script_side)
       else
         begin
-          balloon_id = (int(args[0]) / 2).to_i
+          balloon_id = (args[0].to_i / 2).to_i
         rescue #except ValueError:
           balloon_id = 0
         else
@@ -2125,7 +2120,7 @@ module Sakura
 
     def __set_weight(value, unit)
       begin
-        amount = int(value) * unit - 0.01
+        amount = value.to_i * unit - 0.01
       rescue #except ValueError:
         amount = 0
       end
@@ -2161,7 +2156,7 @@ module Sakura
     def __yen__s(args)
       list = []
       for arg in args
-        list.append(int(arg))
+        list << arg.to_i
       end
       set_synchronized_session(list)
     end
@@ -2230,9 +2225,9 @@ module Sakura
 
     def __yen_i(args)
       begin
-        actor_id = int(args[0])
+        actor_id = args[0].to_i
       rescue #except ValueError:
-        pass
+        #pass
       else
         @surface.invoke(@script_side, actor_id)
       end
@@ -2264,13 +2259,9 @@ module Sakura
     end
 
     def __yen_and(args)
-      if @name2codepoint != nil
-        begin
-          text = chr(@name2codepoint.get(args[0]))
-        rescue #except:
-          text = nil
-        end
-      else
+      begin
+        text = CGI.unescape_html("&" + args[0].to_s +";")
+      rescue #except:
         text = nil
       end
       if text == nil
@@ -2281,7 +2272,7 @@ module Sakura
 
     def __yen__m(args)
       begin
-        num = int(args[0], 16)
+        num = args[0].to_i(16)
       rescue #except ValueError:
         num = 0
       end
@@ -2356,7 +2347,7 @@ module Sakura
       argc = len(args)
       args = []
       for s in args
-        args.append(expand_meta(s))
+        args << expand_meta(s)
       end
       if args[0] == 'raise' and argc >= 2
         notify_event(*args[1, 9])
@@ -2486,7 +2477,7 @@ module Sakura
         elsif args[2] == 'enable'
           @balloon.set_autoscroll(true)
         else
-          pass ## FIXME
+          #pass ## FIXME
         end
       elsif args[0, 2] == ['set', 'windowstate'] and argc > 2
         if args[2] == 'minimize'
@@ -2544,7 +2535,7 @@ module Sakura
                                  ''.join(['file://', path]))
             gsettings.set_string('picture-options', opt)
           else
-            pass # not implemented yet
+            #pass # not implemented yet
           end
         end
       elsif args[0, 2] == ['set', 'otherghosttalk'] and argc > 2
@@ -2553,7 +2544,7 @@ module Sakura
         elsif args[2] == 'false'
           @__listening['OnOtherGhostTalk'] = false
         else
-          pass ## FIXME
+          #pass ## FIXME
         end
       elsif args[0, 2] == ['set', 'othersurfacechange'] and argc > 2
         if args[2] == 'true'
@@ -2561,14 +2552,14 @@ module Sakura
         elsif args[2] == 'false'
           @__listening['OnOtherSurfaceChange'] = false
         else
-          pass ## FIXME
+          #pass ## FIXME
         end
       elsif args[0, 2] == ['set', 'balloonoffset'] and argc > 3
         begin
-          x = int(args[2])
-          y = int(args[3])
+          x = args[2].to_i
+          y = args[3].to_i
         rescue #except:
-          pass
+          #pass
         else
           @surface.set_balloon_offset(@script_side, [x, y])
         end
@@ -2595,7 +2586,7 @@ module Sakura
         elsif command == 'cdplay' and argc > 2
           @audio_player.set_state(Gst::State::NULL)
           begin
-            track = int(args[2])
+            track = args[2].to_i
           rescue #except:
             return
           end
@@ -2631,7 +2622,7 @@ module Sakura
             @audio_player.set_state(Gst::State::PLAYING)
           end
         else
-          pass ## FIXME
+          #pass ## FIXME
         end
       elsif args[0] == '*'
         @balloon.append_sstp_marker(@script_side)
@@ -2641,7 +2632,7 @@ module Sakura
         elsif args[1] == 'false'
           @quick_session = 0
         else
-          pass ## FIXME
+          #pass ## FIXME
         end
       elsif args[0] == 'bind' and argc > 2
         category = args[1]
@@ -2655,26 +2646,26 @@ module Sakura
         for key in bind
           group = bind[key][0].split(',')
           if category != group[0]
-            continue
+            next
           end
           if name and name != group[1]
-            continue
+            next
           end
           if ['true', '1'].include?(flag)
             if bind[key][1]
-              continue
+              next
             end
           elsif ['false', '0'].include?(flag)
             if not bind[key][1]
-              continue
+              next
             end
           else # 'toggle'
-            pass
+            #pass
           end
           @surface.toggle_bind([@script_side, key])
         end
       else
-        pass ## FIXME
+        #pass ## FIXME
       end
     end
 
@@ -2720,7 +2711,7 @@ module Sakura
           tag = '</u>'
         end
       else
-        pass ## FIXME
+        #pass ## FIXME
       end
       if tag != nil
         @balloon.append_meta(@script_side, tag)
@@ -2804,7 +2795,7 @@ module Sakura
         if @__script_tag.include?(name)
           @__script_tag[name].call(self, args)
         else
-          pass ## FIMXE
+          #pass ## FIMXE
         end
       elsif node[0] == ninix.script.SCRIPT_TEXT
         text = expand_meta(node[1])
@@ -2863,48 +2854,47 @@ module Sakura
       buf = []
       for chunk in text_node
         if chunk[0] == ninix.script.TEXT_STRING
-          buf.append(chunk[1])
+          buf << chunk[1]
         elsif chunk[1] == '%month'
-          buf.append(str(@current_time[1]))
+          buf << @current_time[1].to_s
         elsif chunk[1] == '%day'
-          buf.append(str(@current_time[2]))
+          buf << @current_time[2].to_s
         elsif chunk[1] == '%hour'
-          buf.append(str(@current_time[3]))
+          buf << @current_time[3].to_s
         elsif chunk[1] == '%minute'
-          buf.append(str(@current_time[4]))
+          buf << @current_time[4].to_s
         elsif chunk[1] == '%second'
-          buf.append(str(@current_time[5]))
+          buf << @current_time[5].to_s
         elsif ['%username', '%c'].include?(chunk[1])
-          buf.append(get_username())
+          buf << get_username()
         elsif chunk[1] == '%selfname'
-          buf.append(get_selfname())
+          buf << get_selfname()
         elsif chunk[1] == '%selfname2'
-          buf.append(get_selfname2())
+          buf << get_selfname2()
         elsif chunk[1] == '%keroname'
-          buf.append(get_keroname())
+          buf << get_keroname()
         elsif chunk[1] == '%friendname'
-          buf.append(get_friendname())
+          buf << get_friendname()
         elsif chunk[1] == '%screenwidth'
           left, top, scrn_w, scrn_h = ninix.pix.get_workarea()
-          buf.append(str(scrn_w))
+          buf << scrn_w.to_s
         elsif chunk[1] == '%screenheight'
           left, top, scrn_w, scrn_h = ninix.pix.get_workarea()
-          buf.append(str(scrn_h))
+          buf << scrn_h.to_s
         elsif chunk[1] == '%et'
-          buf.append('{0:d}万年'.format(@current_time[7]))
+          buf << '{0:d}万年'.format(@current_time[7])
         elsif chunk[1] == '%wronghour'
           wrongtime = time.time() + random.choice([-2, -1, 1, 2]) * 3600
-          buf.append(str(time.localtime(wrongtime)[3]))
+          buf << time.localtime(wrongtime)[3].to_s
         elsif chunk[1] == '%exh'
-          buf.append(str(get_uptime()))
+          buf << get_uptime().to_s
         elsif ['%ms', '%mz', '%ml', '%mc', '%mh', \
                '%mt', '%me', '%mp', '%m?'].include?(chunk[1])
-          buf.append(
-            getword(''.join(['\\', chunk[1][1..-1]])))
+          buf << getword(''.join(['\\', chunk[1][1..-1]]))
         elsif chunk[1] == '%dms'
-          buf.append(getdms())
+          buf << getdms()
         else # %c, %songname
-          buf.append(chunk[1])
+          buf << chunk[1]
         end
       end
       return ''.join(buf)
@@ -2919,7 +2909,7 @@ module Sakura
       begin
         @sstp_handle.send(''.join([data, '\n']))
       rescue #except socket.error:
-        pass
+        #pass
       end
     end
 
@@ -2940,7 +2930,7 @@ module Sakura
       begin
         @sstp_handle.close()
       rescue #except socket.error
-        pass
+        #pass
       end
       @sstp_handle = nil
     end

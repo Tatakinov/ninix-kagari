@@ -21,7 +21,6 @@ module SSTPLib
 
     def initialize(hostname="", port)
       super(hostname, port)
-      #allow_reuse_address = True
       setsockopt(Socket::SOL_SOCKET, Socket::SO_REUSEADDR, true)
     end
   end
@@ -29,7 +28,7 @@ module SSTPLib
   class AsynchronousSSTPServer < SSTPServer
 
     def handle_request
-      r, w, e = select.select([self.socket], [], [], 0)
+      r, w, e = select.select([@socket], [], [], 0)
       if not r
         return
       end

@@ -23,7 +23,7 @@ module NConfig
         keylist = [name]
       end
       for key in keylist
-        if self.has_key?(key)
+        if has_key?(key)
           return self[key]
         end
       end
