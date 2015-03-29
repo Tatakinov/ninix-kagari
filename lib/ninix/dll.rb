@@ -204,7 +204,7 @@ module DLL
 
     def __import_module(name)
       path = get_path()
-      loader = importlib.find_loader(name, [os.fsdecode(path)])
+      loader = importlib.find_loader(name, [path])
       begin
         return loader.load_module(name)
       rescue

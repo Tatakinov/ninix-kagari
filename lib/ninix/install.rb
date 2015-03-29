@@ -376,7 +376,7 @@ module Install
     end
 
     def select(candidates)
-      #assert len(candidates) >= 1
+      #assert candidates.length >= 1
       if candidates.length == 1
         return candidates[0]
       end

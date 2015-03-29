@@ -266,7 +266,7 @@ module Balloon
 
     def is_shown(side)
       if @window.length <= side
-        return 0
+        return false
       else
         return @window[side].is_shown()
       end

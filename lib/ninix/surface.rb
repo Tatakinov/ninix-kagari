@@ -437,7 +437,7 @@ module Surface
         default = @desc.get(
           name + '.bindgroup' + index.to_i.to_s + '.default', 0)
         if group != nil
-          bind[index] = [group, default]
+          bind[index] = [group, default != 0]
         end
       end
       @mayuna[name] = []
@@ -786,7 +786,7 @@ module Surface
       if @window.length > side
         return @window[side].invoke_talk(surface_id, count)
       else
-        return 0
+        return false
       end
     end
 
@@ -1111,7 +1111,7 @@ module Surface
       if filelist
         @parent.handle_request(
           'NOTIFY', 'enqueue_event',
-          'OnFileDrop2', chr(1).join(filelist), @side)
+          'OnFileDrop2', filelist.join(1.chr), @side)
       end
     end
 

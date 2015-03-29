@@ -261,16 +261,6 @@ module SSTP
       return false
     end
 
-#    def get_script
-#      script = @headers.get('Script', nil)
-#      if script == nil
-#        send_response(400) # Bad Request
-#        log_error('Script: header field not found')
-#        return nil
-#      end
-#      return script
-#    end
-
     def get_script_odict
       script_odict = {} #OrderedDict()
       if_ghost = nil
@@ -297,43 +287,6 @@ module SSTP
       end
       return script_odict
     end
-
-#    def get_script_if_ghost(current=0)
-#      default = nil
-#      if_ghost = nil
-#      for header, value in @headers.items()
-#        if header == 'IfGhost'
-#          if_ghost = value.strip()
-#          continue
-#        elsif header == 'Script'
-#          if if_ghost == nil
-#            continue
-#          end
-#          script = value.strip()
-#        else
-#          if_ghost = nil
-#          continue
-#        end
-#        if current # NOTIFY
-#          ghost = @server.request_parent('GET', 'get_ghost_name')
-#          if ghost == if_ghost
-#            return script, if_ghost
-#          end
-#        else # SEND
-#          if @server.request_parent('GET', 'if_ghost', if_ghost)
-#            return script, if_ghost
-#          end
-#        end
-#        if default == nil
-#          default = script, if_ghost
-#        end
-#      end
-#      if default == nil
-#        script = @headers.get('Script', nil)
-#        default = script, nil
-#      end
-#      return default
-#    end
 
     def get_entry_db
       entry_db = EntryDB::EntryDatabase.new
@@ -441,15 +394,15 @@ module SSTP
     end
 
     def get_options
-      show_sstp_marker = use_translator = 1
+      show_sstp_marker = use_translator = true
       if @headers.assoc("Option") != nil
         options = @headers.reverse.assoc("Option")[1].split(",")
         for option in options
           option = option.strip()
           if option == 'nodescript' and local_request()
-            show_sstp_marker = 0
+            show_sstp_marker = false
           elsif option == 'notranslate'
-            use_translator = 0
+            use_translator = false
           end
         end
       end

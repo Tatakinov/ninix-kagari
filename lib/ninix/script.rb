@@ -28,65 +28,65 @@ module Script
   TEXT_META   = 1
   TEXT_STRING = 2
 
-  class ParserError < Exception
-
-    def initialize(message, error='strict',
-                   script=nil, src=nil, column=nil, length=nil, skip=nil)
-      if not ['strict', 'loose'].include?(error)
-        raise ValueError('unknown error scheme: {0}'.format(str(error)))
-      end
-      @message = message
-      @error = error
-      @script = script or []
-      @src = src or ''
-      @column = column
-      @length = length or 0
-      @skip = skip or 0
-    end
-
-    def __getitem__(n)
-      if n == 0
-        if @error == 'strict'
-          return []
-        else
-          return @script
-        end
-      elsif n == 1
-        if @error == 'strict' or @column == nil
-          return ''
-        else
-          return @src[@column + @skip, @src.length]
-        end
-      else
-        raise IndexError('tuple index out of range')
-      end
-    end
-
-    def __str__
-      if @column != nil
-        column = @column
-        if @src
-          dump = [@src[:column],
-                  '\x1b[7m',
-                  (@src[column, column + @length] or ' '),
-                  '\x1b[m',
-                  @src[column + @length, @src.length]].join('')
-        else
-          dump = ''
-        end
-      else
-        column = '??'
-        dump = @src
-      end
-      return 'ParserError: column {0}: {1}\n{2}'.format(column, @message, dump)
-    end
-  end
+#  class ParserError < Exception
+#
+#    def initialize(message, error='strict',
+#                   script=nil, src=nil, column=nil, length=nil, skip=nil)
+#      if not ['strict', 'loose'].include?(error)
+#        raise ValueError('unknown error scheme: {0}'.format(str(error)))
+#      end
+#      @message = message
+#      @error = error
+#      @script = script or []
+#      @src = src or ''
+#      @column = column
+#      @length = length or 0
+#      @skip = skip or 0
+#    end
+#
+#    def __getitem__(n)
+#      if n == 0
+#        if @error == 'strict'
+#          return []
+#        else
+#          return @script
+#        end
+#      elsif n == 1
+#        if @error == 'strict' or @column == nil
+#          return ''
+#        else
+#          return @src[@column + @skip, @src.length]
+#        end
+#      else
+#        raise IndexError('tuple index out of range')
+#      end
+#    end
+#
+#    def __str__
+#      if @column != nil
+#        column = @column
+#        if not @src.empty?
+#          dump = [@src[:column],
+#                  '\x1b[7m',
+#                  (@src[column, column + @length] or ' '),
+#                  '\x1b[m',
+#                  @src[column + @length, @src.length]].join('')
+#        else
+#          dump = ''
+#        end
+#      else
+#        column = '??'
+#        dump = @src
+#      end
+#      return 'ParserError: column {0}: {1}\n{2}'.format(column, @message, dump)
+#    end
+#  end
 
   class Parser
 
     def initialize(error='strict')
       if not ['strict', 'loose'].include?(error)
-        raise ValueError('unknown error scheme: {0}'.format(str(error)))
+#        raise ValueError('unknown error scheme: {0}'.format(str(error)))
       end
       @error = error
     end
@@ -146,7 +146,7 @@ module Script
 #        print(match.methods.sort, "\n")
 #        print("X: ", match.to_s, "\n")
         if match == nil ## FIXME
-          raise RuntimeError('should not reach here')
+#          raise RuntimeError('should not reach here')
         end
 #        print("MATCH(end):", match.end(0), "\n")
         tokens << [token, match.to_s]
@@ -162,9 +162,9 @@ module Script
       begin
         token, lexeme = @tokens.shift
       rescue # except IndexError:
-        raise perror('unexpected end of script', position='eol')
+#        raise perror('unexpected end of script', position='eol')
       end
-      print("NEXT: ", token, " ", lexeme, "\n")
+#      print("NEXT: ", token, " ", lexeme, "\n")
       if token == nil
         return "", ""
       end
@@ -174,14 +174,14 @@ module Script
     end
 
     def parse(s)
-      print("PARSE: ", s, "\n")
-      if not s
+#      print("PARSE: ", s, "\n")
+      if not s or s.empty?
         return []
       end
       # tokenize the script
       @src = s
       @tokens = tokenize(@src)
-      print("TOKENS: ", @tokens, "\n")
+#      print("TOKENS: ", @tokens, "\n")
       @column = 0
       @length = 0
       # parse the sequence of tokens
@@ -190,13 +190,13 @@ module Script
       string_chunks = []
       scope = 0
       anchor = nil
-      while @tokens
+      while !@tokens.empty?
         token, lexeme = next_token()
         if token == TOKEN_STRING and lexeme == '\\'
           if string_chunks
             text << [TEXT_STRING, string_chunks.join('')]
           end
-          if text
+          if not text.empty?
             @script << [SCRIPT_TEXT, text, @column]
           end
 #          raise perror('unknown tag', skip='length')
@@ -204,7 +204,7 @@ module Script
           string_chunks << lexeme
           text << [TEXT_STRING, string_chunks.join('')]
           @script << [SCRIPT_TEXT, text, @column]
-          #raise perror('unknown meta string', skip='length')
+#          raise perror('unknown meta string', skip='length')
           return []
         end
         if [TOKEN_NUMBER, TOKEN_OPENED_SBRA,
@@ -214,7 +214,7 @@ module Script
           string_chunks << lexeme
           next
         end
-        if string_chunks
+        if not string_chunks.empty?
           text << [TEXT_STRING, string_chunks.join('')]
           string_chunks = []
         end
@@ -223,7 +223,7 @@ module Script
             argument = read_sbra_id()
             text << [TEXT_META, lexeme, argument]
           elsif lexeme == '%*'
-            if text
+            if not text.empty?
               @script << [SCRIPT_TEXT, text, @column]
               text = []
             end
@@ -234,7 +234,7 @@ module Script
           next
         end
         if !text.empty?
-          print(text, "\n")
+#          print(text, "\n")
           @script << [SCRIPT_TEXT, text, @column]
           text = []
         end
@@ -260,7 +260,7 @@ module Script
           lexeme.start_with?('\\w')
           num = lexeme[2]
           if lexeme.start_with?('\\s') and scope == 1
-            num = str(int(num) + 10)
+            num = (num.to_i + 10).to_s
           end
           @script << [SCRIPT_TAG, lexeme[0, 2], num, @column]
         elsif ['\\_w'].include?(lexeme)
@@ -311,10 +311,10 @@ module Script
             @script << [SCRIPT_TAG, lexeme, arg1, arg2, arg3, @column]
           end
         elsif ['\\_s'].include?(lexeme)
-          if @tokens and @tokens[0][0] == TOKEN_OPENED_SBRA
+          if not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
             args = []
             for arg in split_params(read_sbra_text())
-              print("ARG: ", arg, "\n")
+#              print("ARG: ", arg, "\n")
               args  << arg[0][1]
             end
             @script << [SCRIPT_TAG, lexeme] + args + [@column, ]
@@ -336,7 +336,7 @@ module Script
           end
           @script << [SCRIPT_TAG, lexeme] + args + [@column, ]
         else
-          #raise perror('unknown tag ({0})'.format(lexeme), skip='length')
+#          raise perror('unknown tag ({0})'.format(lexeme), skip='length')
           return []
         end
         if anchor != nil
@@ -346,11 +346,11 @@ module Script
           else
             @script << [SCRIPT_TAG, '\_a', @column]
           end
-          #anchor.script = @script
-          #raise anchor
+#          anchor.script = @script
+#          raise anchor
           return []
         end
-        if string_chunks
+        if not string_chunks.empty?
           text << [TEXT_STRING, string_chunks.join('')]
         end
         if text
@@ -363,7 +363,7 @@ module Script
     def read_number
       token, number = next_token()
       if token != TOKEN_NUMBER
-        raise perror('syntax error (expected a number)')
+#        raise perror('syntax error (expected a number)')
       end
       return number
     end
@@ -371,15 +371,15 @@ module Script
     def read_sbra_number
       token, lexeme = next_token()
       if token != TOKEN_OPENED_SBRA
-        raise perror('syntax error (expected a square bracket)')
+#        raise perror('syntax error (expected a square bracket)')
       end
       token, number = next_token()
       if token != TOKEN_NUMBER
-        raise perror('syntax error (expected a number)', skip='length')
+#        raise perror('syntax error (expected a number)', skip='length')
       end
       token, lexeme = next_token()
       if token != TOKEN_CLOSED_SBRA
-        raise perror('syntax error (expected a square bracket)', skip='length')
+#        raise perror('syntax error (expected a square bracket)', skip='length')
       end
       return number
     end
@@ -391,7 +391,7 @@ module Script
         return []
       end
       begin
-        sbra_id = str(int(text[0][1]))
+        sbra_id = text[0][1].to_i.to_s
       rescue #  except:
         # pass
       else
@@ -404,12 +404,11 @@ module Script
       token, lexeme = next_token()
       if token != TOKEN_OPENED_SBRA
 #        raise perror('syntax error (expected a square bracket)')
-        print('syntax error (expected a square bracket)', "\n")
       end
       text = []
       string_chunks = []
-      while @tokens
-        print("TOKENS: ", @tokens, "\n")
+      while not @tokens.empty?
+#        print("TOKENS: ", @tokens, "\n")
         token, lexeme = next_token()
         if [TOKEN_NUMBER, TOKEN_STRING, TOKEN_OPENED_SBRA, TOKEN_TAG].include?(token)
           lexeme = lexeme.gsub('\\', '\\')
@@ -434,46 +433,44 @@ module Script
 #      else
 #        raise perror('unexpected end of script', position='eol')
       end
-      print("TEXT: ", text, "\n")
+#      print("TEXT: ", text, "\n")
       return text
     end
 
     def split_params(text)
-#      re_param = Regexp.new('("[^"]*"|[^,])*')
-#      re_quote = Regexp.new('"([^"]*)"')
       re_param = Regexp.new(/("[^"]*"|[^,])*/)
       re_quote = Regexp.new(/([^"]*)/)
 
       params = []
       buf = []
       for token, lexeme in text
-        print("TOKEN: ", token, "\n")
-        print("LEXEME: ", lexeme, "\n")
+#        print("TOKEN: ", token, "\n")
+#        print("LEXEME: ", lexeme, "\n")
         i = 0
         j = lexeme.length
         if token == TEXT_STRING
           while i < j
             match = re_param.match(lexeme, i)
-            print("MATCH: ", match, "\n")
+#            print("MATCH: ", match, "\n")
             if match == nil
               break
             end
             
 #            param, n = re_quote.subn(lambda m: m.group(1), match.group())
             param = re_quote.match(match[0])
-            print("PARAM: ", param, "\n")
+#            print("PARAM: ", param, "\n")
             if param != nil
               param = param[1]
             end
             if param != nil or not buf.empty?
               buf << [token, param]
             end
-            print("BUF: ", buf, "\n")
+#            print("BUF: ", buf, "\n")
             params << buf
             buf = []
             i = match.end(0)
             if i < j
-#              assert lexeme[i] == ','
+              #assert lexeme[i] == ','
               i += 1
             end
           end
