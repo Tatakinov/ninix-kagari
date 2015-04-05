@@ -1837,19 +1837,25 @@ module Ninix_Main
       @dialog = Gtk::Dialog.new
       @dialog.set_title('Usage')
       @dialog.signal_connect('delete_event') do |w, e|
-        return true # XXX
+        #return true # XXX
       end
       @darea = Gtk::DrawingArea.new
-      @darea.set_events(Gdk.EventMask.EXPOSURE_MASK)
+      @darea.set_events(Gdk::Event::EXPOSURE_MASK)
       @size = [550, 330]
       @darea.set_size_request(*@size)
-      @darea.connect('configure_event', self.configure)
-      @darea.connect('draw', self.redraw)
-      content_area = @dialog.get_content_area()
+      @darea.signal_connect('configure_event') do |w, e|
+        configure(w, e)
+      end
+      @darea.signal_connect('draw') do |w, e|
+        redraw(w, e)
+      end
+      content_area = @dialog.content_area
       content_area.pack_start(@darea, true, true, 0)
       @darea.show()
-      @dialog.add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
-      @dialog.connect('response', self.response)
+      @dialog.add_button(Gtk::Stock::CLOSE, Gtk::ResponseType::CLOSE)
+      @dialog.signal_connect('response') do |w, e|
+        response(w, e)
+      end
       @opened = false
     end
 
@@ -1859,7 +1865,7 @@ module Ninix_Main
       end
       @history = history
       @items = []
-      for item in @history.items()
+      for item in @history
         name = item[0]
         clock = item[1][0]
         path = item[1][1]
@@ -1868,11 +1874,10 @@ module Ninix_Main
       @items.sort_by! {|item| item[1] }
       @items.reverse!
       ai_list = @items[0][2]
-      if ai_list
-        path = random.choice(ai_list)
+      if not ai_list.empty?
+        path = ai_list.sample
         #assert File.exists?(path)
-        @pixbuf = ninix.pix.create_pixbuf_from_file(
-          path, is_pnr=false)
+        @pixbuf = Pix.create_pixbuf_from_file(path, is_pnr=false)
         @pixbuf.saturate_and_pixelate(@pixbuf, 1.0, true)
       else
         @pixbuf = nil
@@ -1888,15 +1893,15 @@ module Ninix_Main
     end
 
     def response(widget, response)
-      func = {Gtk.ResponseType.CLOSE => self.close,
-              Gtk.ResponseType.DELETE_EVENT => self.close,
+      func = {Gtk::ResponseType::CLOSE.to_i => 'close',
+              Gtk::ResponseType::DELETE_EVENT.to_i => 'close',
              }
       method(func[response]).call()
       return true
     end
 
     def configure(darea, event)
-      alloc = darea.get_allocation()
+      alloc = darea.allocation
       @size = [alloc.width, alloc.height]
     end
 
@@ -1904,13 +1909,13 @@ module Ninix_Main
       if @items.empty?
         return # should not reach here
       end
-      total = float(0)
+      total = 0.0
       for name, clock, path in @items
         total += clock
       end
-      layout = Pango.Layout(widget.get_pango_context())
-      font_desc = Pango.FontDescription()
-      font_desc.set_size(9 * Pango.SCALE)
+      layout = Pango::Layout.new(widget.pango_context)
+      font_desc = Pango::FontDescription.new()
+      font_desc.set_size(9 * Pango::SCALE)
       font_desc.set_family('Sans') # FIXME
       layout.set_font_description(font_desc)
       # redraw graph
@@ -1925,16 +1930,16 @@ module Ninix_Main
       w3 = w4 = 0
       rows = []
       for name, clock, path in @items[0..13]
-        layout.set_text(name, -1)
-        name_w, name_h = layout.get_pixel_size()
+        layout.set_text(name)
+        name_w, name_h = layout.pixel_size
         rate = sprintf("%.1f%%", clock / total * 100)
-        layout.set_text(rate, -1)
-        rate_w, rate_h = layout.get_pixel_size()
-        w3 = max(rate_w, w3)
+        layout.set_text(rate)
+        rate_w, rate_h = layout.pixel_size
+        w3 = [rate_w, w3].max
         time = sprintf("%d:%02d", *(clock / 60).to_i.divmod(60))
-        layout.set_text(time, -1)
-        time_w, time_h = layout.get_pixel_size()
-        w4 = max(time_w, w4)
+        layout.set_text(time)
+        time_w, time_h = layout.pixel_size
+        w4 = [time_w, w4].max
         rows << [clock, name, name_w, name_h, rate, rate_w, rate_h,
                  time, time_w, time_h]
       end
@@ -1944,28 +1949,25 @@ module Ninix_Main
       y = 15
       x += w1 + 10
       label = 'name'
-      layout.set_text(label, -1)
-      label_name_w, label_name_h = layout.get_pixel_size()
+      layout.set_text(label)
+      label_name_w, label_name_h = layout.pixel_size
       cr.set_source_rgb(0.8, 0.8, 0.8) # gray
       cr.move_to(x, y)
-      PangoCairo.update_layout(cr, layout)
-      PangoCairo.show_layout(cr, layout)
+      cr.show_pango_layout(layout)
       x = x + w2 + 10
       label = 'rate'
-      layout.set_text(label, -1)
-      label_rate_w, label_rate_h = layout.get_pixel_size()
+      layout.set_text(label)
+      label_rate_w, label_rate_h = layout.pixel_size
       cr.set_source_rgb(0.8, 0.8, 0.8) # gray
       cr.move_to(x + w3 - label_rate_w, y)
-      PangoCairo.update_layout(cr, layout)
-      PangoCairo.show_layout(cr, layout)
+      cr.show_pango_layout(layout)
       x += w3 + 10
       label = 'time'
-      layout.set_text(label, -1)
-      label_time_w, label_time_h = layout.get_pixel_size()
+      layout.set_text(label)
+      label_time_w, label_time_h = layout.pixel_size
       cr.set_source_rgb(0.8, 0.8, 0.8) # gray
       cr.move_to(x + w4 - label_time_w, y)
-      PangoCairo.update_layout(cr, layout)
-      PangoCairo.show_layout(cr, layout)
+      cr.show_pango_layout(layout)
       y += [label_name_h, label_rate_h, label_time_h].max + 4
       for clock, name, name_w, name_h, rate, rate_w, rate_h, time, time_w, \
           time_h in rows
@@ -1982,34 +1984,31 @@ module Ninix_Main
         cr.rectangle(x, y, bw, bh)
         cr.stroke()
         x += w1 + 10
-        layout.set_text(name, -1)
+        layout.set_text(name)
         end_ = name.length
         while end_ > 0
-          w, h = layout.get_pixel_size()
+          w, h = layout.pixel_size
           if w > 168
             end_ -= 1
-            layout.set_text([name[0..end_-1], '...'].join(''), -1)
+            layout.set_text([name[0..end_-1], '...'].join(''))
           else
             break
           end
         end
         cr.set_source_rgb(0.0, 0.0, 0.0) # black
         cr.move_to(x, y)
-        PangoCairo.update_layout(cr, layout)
-        PangoCairo.show_layout(cr, layout)
+        cr.show_pango_layout(layout)
         x += w2 + 10
-        layout.set_text(rate, -1)
+        layout.set_text(rate)
         cr.set_source_rgb(0.0, 0.0, 0.0) # black
         cr.move_to(x + w3 - rate_w, y)
-        PangoCairo.update_layout(cr, layout)
-        PangoCairo.show_layout(cr, layout)
+        cr.show_pango_layout(layout)
         x += w3 + 10
-        layout.set_text(time, -1)
+        layout.set_text(time)
         cr.set_source_rgb(0.0, 0.0, 0.0) # black
         cr.move_to(x + w4 - time_w, y)
-        PangoCairo.update_layout(cr, layout)
-        PangoCairo.show_layout(cr, layout)
-        y += max([name_h, rate_h, time_h]) + 4
+        cr.show_pango_layout(layout)
+        y += [name_h, rate_h, time_h].max + 4
       end
     end
   end
