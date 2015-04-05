@@ -767,7 +767,7 @@ module Menu
         ghost_menu = Gtk::Menu.new()
         for items in @parent.handle_request('GET', 'get_ghost_menus')
           item = items[path]
-          if item.get_parent()
+          if item.parent
             item.reparent(ghost_menu)
           else
             ghost_menu << item
@@ -796,7 +796,7 @@ module Menu
     def create_meme_menu(menuitem)
       menu = Gtk::Menu.new()
       for item in menuitem.values()
-        if item.get_parent()
+        if item.parent
           item.reparent(menu)
         else
           menu << item

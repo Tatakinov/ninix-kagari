@@ -36,6 +36,7 @@
 #import gettext
 #gettext.install('ninix')
 
+require 'optparse'
 require 'uri'
 require 'gettext'
 require "gtk3"
@@ -55,6 +56,12 @@ require "ninix/kinoko"
 require "ninix/menu"
 require "ninix/metamagic"
 
+opt = OptionParser.new
+opt.on('--sstp-port sstp_port', 'additional port for listening SSTP requests') {|v| }
+opt.on('--debug', 'debug') {|v| }
+opt.on('--logfile logfile_name', 'logfile name') {|v| }
+#opt.parse!(ARGV)
+opt.parse(ARGV)
 #parser = argparse.ArgumentParser('ninix')
 #parser.add_argument('--sstp-port', type=int, dest='sstp_port',
 #                    help='additional port for listening SSTP requests')
@@ -115,9 +122,9 @@ module Ninix_Main
 
   def self.main
     # parse command line arguments
-    args = parser.parse_args()
-    if args.logfile != nil
-      logger.addHandler(logging.FileHandler(args.logfile))
+    args = ARGV.getopts("logfile:", "sstp_port:", "debug")
+    if args["logfile"]
+      #logger.addHandler(logging.FileHandler(args.logfile))
     end
     # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
     # UDP 7743：伺か（未使用）(IANA Registered Port for SSTP)
@@ -127,17 +134,17 @@ module Ninix_Main
     # TCP 11000：伺か（廃止） (IANA Registered Port for IRISA)
     sstp_port = [9801]
     # parse command line arguments
-    if args.sstp_port != nil
-      if args.sstp_port < 1024
-        logging.warning('Invalid --sstp-port number (ignored)')
+    if args["sstp_port"]
+      if args["sstp_port"].to_i < 1024
+        #logging.warning('Invalid --sstp-port number (ignored)')
       else
-        sstp_port << args.sstp_port
+        sstp_port << args["sstp_port"].to_i
       end
     end
-    if args.debug
-      logger.setLevel(logging.DEBUG)
+    if args["debug"]
+      #logger.setLevel(logging.DEBUG)
     end
-    home_dir = ninix.home.get_ninix_home()
+    home_dir = Home.get_ninix_home()
     if not File.exists?(home_dir)
       begin
         FileUtils.mkdir_p(home_dir)
@@ -145,10 +152,10 @@ module Ninix_Main
         raise SystemExit('Cannot create Home directory (abort)\n')
       end
     end
-    lockfile_path = File.join(ninix.home.get_ninix_home(), '.lock')
+    lockfile_path = File.join(Home.get_ninix_home(), '.lock')
     if File.exists?(lockfile_path)
       f = open(lockfile_path, 'r')
-      abend = f.readline()
+      abend = f.gets
       if not abend
         abend = nil
       end
@@ -158,14 +165,14 @@ module Ninix_Main
     # aquire Inter Process Mutex (not Global Mutex)
     f = open(lockfile_path, 'w')
     begin
-      ninix.lock.lockfile(f)
+      Lock.lockfile(f)
     rescue #except
       raise SystemExit('ninix-aya is already running')
     end
     # start
-    logging.info('loading...')
-    app = Application(f, sstp_port)
-    logging.info('done.')
+    #logging.info('loading...')
+    app = Application.new(f, sstp_port)
+    #logging.info('done.')
     app.run(abend)
     f.truncate(0)
     begin
@@ -588,22 +595,26 @@ module Ninix_Main
       @parent = parent
     end
 
+    def handle_request(event_type, event, *arglist)
+      return @parent.handle_request(event_type, event, *arglist)
+    end
+ 
     def create_menuitem(data)
       desc, balloon = data
       subdir = balloon['balloon_dir'][0]
       name = desc.get('name', subdir)
-      home_dir = ninix.home.get_ninix_home()
+      home_dir = Home.get_ninix_home()
       thumbnail_path = File.join(home_dir, 'balloon',
                                  subdir, 'thumbnail.png')
       if not File.exists?(thumbnail_path)
         thumbnail_path = nil
       end
-      return self.request_parent(
+      return handle_request(
                'GET', 'create_balloon_menuitem', name, @key, thumbnail_path)
     end
 
     def delete_by_myself
-      self.request_parent('NOTIFY', 'delete_balloon', @key)
+      handle_request('NOTIFY', 'delete_balloon', @key)
     end
   end
 
@@ -616,6 +627,10 @@ module Ninix_Main
 
     def set_responsible(parent)
       @parent = parent
+    end
+
+    def handle_request(event_type, event, *arglist)
+      return @parent.handle_request(event_type, event, *arglist)
     end
 
     def create_menuitem(data)
@@ -638,68 +653,100 @@ module Ninix_Main
       @abend = nil
       @loaded = false
       @confirmed = false
-      @console = Console(self)
+      @console = Console.new(self)
       # create preference dialog
-      @prefs = ninix.prefs.PreferenceDialog()
+      @prefs = Prefs::PreferenceDialog.new
       @prefs.set_responsible(self)
-      @sstp_controler = SSTPControler(sstp_port)
+      @sstp_controler = SSTPControler.new(sstp_port)
       @sstp_controler.set_responsible(self)
       # create usage dialog
       @usage_dialog = UsageDialog.new
-      @communicate = ninix.communicate.Communicate()
+      @communicate = Communicate::Communicate.new
       # create plugin manager
       @plugin_controler = PluginControler.new
       @plugin_controler.set_responsible(self)
       # create ghost manager
-      @__ngm = ninix.ngm.NGM.new
+      @__ngm = NGM::NGM.new
       @__ngm.set_responsible(self)
       @current_sakura = nil
       # create installer
-      @installer = ninix.install.Installer.new
+      @installer = Install::Installer.new
       # create popup menu
-      @__menu = ninix.menu.Menu()
-      @__menu.set_responsible(self.handle_request)
+      @__menu = Menu::Menu.new
+      @__menu.set_responsible(self)
       @__menu_owner = nil
       @ghosts = {} # OrderedDict
-      odict_baseinfo = ninix.home.search_ghosts()
-      for key, value in odict_baseinfo.items()
-        holon = Ghost(key)
+      odict_baseinfo = Home.search_ghosts()
+      for key, value in odict_baseinfo
+        holon = Ghost.new(key)
         holon.set_responsible(self)
         @ghosts[key] = holon 
         holon.baseinfo = value
       end
       @balloons = {} # OrderedDict
-      odict_baseinfo = ninix.home.search_balloons()
-      for key, value in odict_baseinfo.items()
-        meme = BalloonMeme(key)
+      odict_baseinfo = Home.search_balloons()
+      for key, value in odict_baseinfo
+        meme = BalloonMeme.new(key)
         meme.set_responsible(self)
         @balloons[key] = meme
         meme.baseinfo = value
       end
       @balloon_menu = create_balloon_menu()
-      @plugins = ninix.home.search_plugins()
-      @nekoninni = ninix.home.search_nekoninni()
-      @katochan = ninix.home.search_katochan()
-      @kinoko = ninix.home.search_kinoko()
+      @plugins = Home.search_plugins()
+      @nekoninni = Home.search_nekoninni()
+      @katochan = Home.search_katochan()
+      @kinoko = Home.search_kinoko()
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def edit_preferences(*arglist)
+      return @prefs.edit_preferences(*arglist)
+    end
+
+    def prefs_get(*arglist)
+      return @prefs.get(*arglist)
+    end
+
+    def get_otherghostname(*arglist)
+      return @communicate.get_otherghostname(*arglist)
+    end
+
+    def rebuild_ghostdb(*arglist)
+      return @communicate.rebuild_ghostdb(*arglist)
+    end
+
+    def notify_other(*arglist)
+      return @communicate.notify_other(*arglist)
+    end
+
+    def reset_sstp_flag(*arglist)
+      return @sstp_controler.reset_sstp_flag(*arglist)
+    end
+
+    def get_sstp_port(*arglist)
+      return @sstp_controler.get_sstp_port(*arglist)
+    end
+
+    def handle_request(event_type, event, *arglist)
       #assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
-        'close_all' => self.close_all_ghosts,
-        'edit_preferences' => self.prefs.edit_preferences,
-        'get_preference' => self.prefs.get,
-        'get_otherghostname' => self.communicate.get_otherghostname,
-        'rebuild_ghostdb' =>  self.communicate.rebuild_ghostdb,
-        'notify_other' => self.communicate.notify_other,
-        'reset_sstp_flag' => self.sstp_controler.reset_sstp_flag,
-        'get_sstp_port' => self.sstp_controler.get_sstp_port,
-        'get_prefix' => self.get_sakura_prefix,
+        'close_all' => 'close_all_ghosts',
+        'edit_preferences' => 'edit_preferences',
+        'get_preference' => 'prefs_get',
+        'get_otherghostname' => 'get_otherghostname',
+        'rebuild_ghostdb' =>  'rebuild_ghostdb',
+        'notify_other' => 'notify_other',
+        'reset_sstp_flag' => 'reset_sstp_flag',
+        'get_sstp_port' => 'get_sstp_port',
+        'get_prefix' => 'get_sakura_prefix',
       }
       if not handlers.include?(event)
-        #pass
+        if Application.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = nil
+        end
       else
-        result = method(handlers[event]).call(*arglist, **argdict)
+        result = method(handlers[event]).call(*arglist)
       end
       if event_type == 'GET'
         return result
@@ -992,14 +1039,15 @@ module Ninix_Main
 
     def create_balloon_menuitem(balloon_name, balloon_key, thumbnail)
       return @__menu.create_meme_menuitem(
-               balloon_name, balloon_key, self.select_balloon, thumbnail)
+        balloon_name, balloon_key, lambda {|v| select_balloon(v) }, thumbnail)
     end
 
     def create_balloon_menu
-      balloon_menuitems = OrderedDict()
+      balloon_menuitems = {} # OrderedDict()
       for key in @balloons.keys()
         balloon_menuitems[key] = @balloons[key].menuitem
       end
+      print("ITEMS: ", balloon_menuitems, "\n")
       return @__menu.create_meme_menu(balloon_menuitems)
     end
 
@@ -1183,15 +1231,15 @@ module Ninix_Main
 
     def run(abend)
       @abend = abend
-      if os.name == "nt"
-        # The SIGTERM signal is not generated under Windows NT.
-        import win32api
-        win32api.SetConsoleCtrlHandler(self.exit_handler, true)
-      else
-        import signal
-        signal.signal(signal.SIGTERM, self.exit_handler)
-      end
-      @timeout_id = GLib.timeout_add(100, self.do_idle_tasks) # 100[ms]
+#      if os.name == "nt"
+#        # The SIGTERM signal is not generated under Windows NT.
+#        import win32api
+#        win32api.SetConsoleCtrlHandler(self.exit_handler, true)
+#      else
+#        import signal
+#        signal.signal(signal.SIGTERM, self.exit_handler)
+#      end
+      @timeout_id = GLib::Timeout.add(100) { do_idle_tasks } # 100[ms]
       Gtk.main()
     end
 
@@ -1292,7 +1340,7 @@ module Ninix_Main
     end
 
     def quit
-      GLib.source_remove(@timeout_id)
+      GLib::Source.remove(@timeout_id)
       @usage_dialog.close()
       @sstp_controler.quit() ## FIXME
       @plugin_controler.terminate_plugin() ## FIXME
@@ -1471,7 +1519,7 @@ module Ninix_Main
             stop_sakura(sakura, proc)
           end
         else
-          holon = Ghost(ghost_dir)
+          holon = Ghost.new(ghost_dir)
           holon.set_responsible(self.handle_request)
           @ghosts[ghost_dir] = holon
           holon.baseinfo = ghost_conf[ghost_dir]
@@ -1627,6 +1675,10 @@ module Ninix_Main
         history[name] = [ghost_time, ai_list]
       end
       @usage_dialog.open(history)
+    end
+
+    def confirmed
+      return @confirmed
     end
 
     def search_ghosts ## FIXME
