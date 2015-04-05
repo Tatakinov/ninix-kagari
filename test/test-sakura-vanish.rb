@@ -21,4 +21,3 @@ module NinixTest
 end
 
 test = NinixTest::VanishTest.new
-test.do_tests

@@ -1611,13 +1611,13 @@ module Balloon
       @window.signal_connect('button_press_event') do |w, e|
         button_press(w, e)
       end
-      @window.signal_connect('drag_data_received') do |w, e|
-        drag_data_received(w, e)
+      @window.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
+        drag_data_received(widget, context, x, y, data, info, time)
       end
       # DnD data types
-      dnd_targets = [['text/plain', 0, 0]]
-      @window.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
-                            Gdk::DragContext::Action::COPY)
+      #dnd_targets = [['text/plain', 0, 0]]
+      #@window.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+      #                      Gdk::DragContext::Action::COPY)
       @window.drag_dest_add_text_targets()
       @window.set_events(Gdk::Event::BUTTON_PRESS_MASK)
       @window.set_modal(true)
@@ -1682,7 +1682,7 @@ module Balloon
     end
 
     def drag_data_received(widget, context, x, y, data, info, time)
-      @entry.set_text(data.get_text())
+      @entry.set_text(data.text)
     end
 
     def redraw(widget, cr, surface)

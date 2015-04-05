@@ -975,8 +975,8 @@ module Surface
       @darea.signal_connect('motion_notify_event') do |w, e|
         motion_notify(w, e)
       end
-      @darea.signal_connect('drag_data_received') do |w, e|
-        drag_data_received(w, e)
+      @darea.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
+        drag_data_received(widget, context, x, y, data, info, time)
       end
       @darea.signal_connect('scroll_event') do |w, e|
         scroll(w, e)
@@ -988,9 +988,9 @@ module Surface
         end
       end
       # DnD data types
-      dnd_targets = [['text/uri-list', 0, 0]]
-      @darea.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
-                           Gdk::DragContext::Action::COPY)
+      #dnd_targets = [['text/uri-list', 0, 0]]
+      #@darea.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+      #                     Gdk::DragContext::Action::COPY)
       @darea.drag_dest_add_uri_targets()
     end
 
@@ -1100,15 +1100,14 @@ module Surface
 
     def drag_data_received(widget, context, x, y, data, info, time)
       filelist = []
-      for uri in data.get_uris()
-        scheme, host, path, params, query, fragment = \
-        urllib.parse.urlparse(uri)
-        pathname = urllib.request.url2pathname(path)
-        if scheme == 'file' and File.exists?(pathname)
-          filelist << pathname # XXX: don't use os.fsencode() here
+      for uri in data.uris
+        uri_parsed = URI.parse(uri)
+        pathname = URI.unescape(uri_parsed.path)
+        if uri_parsed.scheme == 'file' and File.exists?(pathname)
+          filelist << pathname
         end
       end
-      if filelist
+      if not filelist.empty?
         @parent.handle_request(
           'NOTIFY', 'enqueue_event',
           'OnFileDrop2', filelist.join(1.chr), @side)

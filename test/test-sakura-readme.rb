@@ -21,4 +21,3 @@ module NinixTest
 end
 
 test = NinixTest::ReadmeTest.new
-test.do_tests

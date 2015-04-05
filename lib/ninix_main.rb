@@ -36,6 +36,8 @@
 #import gettext
 #gettext.install('ninix')
 
+require 'uri'
+require 'gettext'
 require "gtk3"
 
 require "ninix/pix"
@@ -1658,66 +1660,64 @@ module Ninix_Main
   end
 
   class Console
+    include GetText
 
     def initialize(app)
       @app = app
       @dialog = Gtk::Dialog.new
       @dialog.signal_connect('delete_event') do |w, e|
-        return true # XXX
+        #return true # XXX
       end
-      @log_handler = logging.handlers.BufferingHandler(0)
-      @log_handler.shouldFlush = self.shouldFlush
-      logging.getLogger().addHandler(self.log_handler)
+      #@log_handler = logging.handlers.BufferingHandler(0)
+      #@log_handler.shouldFlush = self.shouldFlush
+      #logging.getLogger().addHandler(self.log_handler)
       @sw = Gtk::ScrolledWindow.new
-      @sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.ALWAYS)
+      @sw.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::ALWAYS)
       @sw.show()
       @tv = Gtk::TextView.new
-      @tv.set_wrap_mode(Gtk.WrapMode.CHAR)
+      @tv.set_wrap_mode(Gtk::TextTag::WrapMode::CHAR)
       @tv.override_background_color(
-        Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 0, 0, 255))
+        Gtk::StateFlags::NORMAL, Gdk::RGBA.new(0, 0, 0, 255))
       @tv.set_cursor_visible(true)
       @tv.set_editable(true) # important
-      @tb = @tv.get_buffer()
-      @tag_critical = @tb.create_tag()
-      @tag_critical.set_property('foreground', 'red')
-      @tag_error = @tb.create_tag()
-      @tag_error.set_property('foreground', 'red')
-      @tag_warning = @tb.create_tag()
-      @tag_warning.set_property('foreground', 'orange')
-      @tag_info = @tb.create_tag()
-      @tag_info.set_property('foreground', 'green')
-      @tag_debug = @tb.create_tag()
-      @tag_debug.set_property('foreground', 'yellow')
-      @tag_notset = @tb.create_tag()
-      @tag_notset.set_property('foreground', 'blue')
-      ## DnD data types
-      ##dnd_targets = [Gtk.TargetEntry.new('text/uri-list', 0, 0)]
-      ##@tv.drag_dest_set(Gtk.DestDefaults.ALL, dnd_targets,
-      ##                             Gdk.DragAction.COPY)
+      @tb = @tv.buffer
+      @tag_critical = @tb.create_tag(nil, 'foreground' => 'red')
+      @tag_error = @tb.create_tag(nil, 'foreground' => 'red')
+      @tag_warning = @tb.create_tag(nil, 'foreground' => 'orange')
+      @tag_info = @tb.create_tag(nil, 'foreground' => 'green')
+      @tag_debug = @tb.create_tag(nil, 'foreground' => 'yellow')
+      @tag_notset = @tb.create_tag(nil, 'foreground' => 'blue')
+      # DnD data types
+      #dnd_targets = [['text/uri-list', 0, 0]]
+      #@tv.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+      #                  Gdk::DragContext::Action::COPY)
       @tv.drag_dest_set_target_list(nil) # important
       @tv.drag_dest_add_uri_targets()
-      @tv.connect('drag_data_received', self.drag_data_received)
+      @tv.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
+        drag_data_received(widget, context, x, y, data, info, time)
+      end
       @tv.show()
       @sw.add(@tv)
       @tv.set_size_request(400, 250)
       @sw.set_size_request(400, 250)
-      content_area = @dialog.get_content_area()
+      content_area = @dialog.content_area
       content_area.pack_start(@sw, true, true, 0)
       @dialog.add_button('Install', 1)
-      @dialog.add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
-      @dialog.connect('response', self.response)
+      @dialog.add_button(Gtk::Stock::CLOSE, Gtk::ResponseType::CLOSE)
+      @dialog.signal_connect('response') do |w, e|
+        response(w, e)
+      end
       @file_chooser = Gtk::FileChooserDialog.new(
-        "Install..",
-        nil,
-        Gtk.FileChooserAction.OPEN,
-        [Gtk.STOCK_OPEN, Gtk.ResponseType.OK,
-         Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL])
-      @file_chooser.set_default_response(Gtk.ResponseType.CANCEL)
+        :title => "Install..",
+        :action => Gtk::FileChooser::Action::OPEN,
+        :buttons => [[Gtk::Stock::OPEN, Gtk::ResponseType::OK],
+                    [Gtk::Stock::CANCEL, Gtk::ResponseType::CANCEL]])
+      @file_chooser.set_default_response(Gtk::ResponseType::CANCEL)
       filter = Gtk::FileFilter.new
       filter.set_name("All files")
       filter.add_pattern("*")
       @file_chooser.add_filter(filter)
-      filter = Gtk.FileFilter()
+      filter = Gtk::FileFilter.new
       filter.set_name("nar/zip")
       filter.add_mime_type("application/zip")
       filter.add_pattern("*.nar")
@@ -1791,9 +1791,9 @@ module Ninix_Main
     end
 
     def response(widget, response)
-      func = {1 =>  self.open_file_chooser,
-              Gtk.ResponseType.CLOSE => self.close,
-              Gtk.ResponseType.DELETE_EVENT => self.close,
+      func = {1 =>  'open_file_chooser',
+              Gtk::ResponseType::CLOSE.to_i => 'close',
+              Gtk::ResponseType::DELETE_EVENT.to_i => 'close',
              }
       method(func[response]).call()
       return true
@@ -1801,11 +1801,11 @@ module Ninix_Main
 
     def open_file_chooser
       response = @file_chooser.run()
-      if response == Gtk.ResponseType.OK
-        filename = @file_chooser.get_filename()
+      if response == Gtk::ResponseType::OK
+        filename = @file_chooser.filename
         @app.do_install(filename)
         update()
-      elsif response == Gtk.ResponseType.CANCEL
+      elsif response == Gtk::ResponseType::CANCEL
         #pass
       end
       @file_chooser.hide()
@@ -1813,17 +1813,16 @@ module Ninix_Main
 
     def drag_data_received(widget, context, x, y, data, info, time)
       filelist = []
-      for uri in data.get_uris()
-        scheme, host, path, params, query, fragment = \
-                                           urllib.parse.urlparse(uri)
-        pathname = urllib.request.url2pathname(path)
-        if scheme == 'file' and File.exists?(pathname)
-          filelist << pathname # XXX: don't use os.fsencode() here
-        elsif scheme == 'http' or scheme == 'ftp'
+      for uri in data.uris
+        uri_parsed = URI.parse(uri)
+        pathname = URI.unescape(uri_parsed.path)
+        if uri_parsed.scheme == 'file' and File.exists?(pathname)
+          filelist << pathname
+        elsif uri_parsed.scheme == 'http' or uri_parsed.scheme == 'ftp'
           filelist << uri
         end
       end
-      if filelist
+      if not filelist.empty?
         for filename in filelist
           @app.do_install(filename)
         end
