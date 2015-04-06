@@ -764,7 +764,7 @@ module Ninix_Main
       @communicate.notify_all('OnInstallBegin', [])
       begin
         filetype, target_dirs, names, errno = @installer.install(
-                                        filename, ninix.home.get_ninix_home())
+                                        filename, Home.get_ninix_home())
       rescue # except:
         target_dirs = nil
       end
@@ -775,8 +775,11 @@ module Ninix_Main
           3 => 'artificial',
           4 => 'unsupported',
         }
-        @communicate.notify_all('OnInstallFailure',
-                                [error_reason.get(errno, 'unkown')])
+        if error_reason.include?(errno)
+          @communicate.notify_all('OnInstallFailure', [error_reason[errno]])
+        else
+          @communicate.notify_all('OnInstallFailure', ['unknown'])
+        end
         # XXX: ninix-ayaでは発生しない.
         ##@communicate.notify_all('OnInstallRefuse', [])
       else
@@ -2068,3 +2071,4 @@ end
 
 #if __name__ == '__main__':
 #    main()
+Ninix_Main.main

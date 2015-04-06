@@ -26,7 +26,7 @@ require "ninix/version"
 
 module Install
 
-  class InstallError < Exception
+  class InstallError < StandardError
     #pass
   end
 
