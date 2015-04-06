@@ -472,7 +472,7 @@ module Kinoko
     def reset_surface() ## FIXME
       @seriko.reset(self, '') # XXX
       path = File.join(@data['dir'], @data['base'])
-      w, h = ninix.pix.get_png_size(path)
+      w, h = Pix.get_png_size(path)
       w = [8, (w * @__scale / 100).to_i].max
       h = [8, (h * @__scale / 100).to_i].max
       @w, @h = w, h # XXX

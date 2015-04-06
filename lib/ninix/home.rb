@@ -92,7 +92,7 @@ module Home
     ghosts = {}
     if target
       dirlist = []
-      dirlist.extend(target)
+      dirlist += target
     else
       begin
         dirlist = []
@@ -153,7 +153,7 @@ module Home
     balloon_dir = File.join(home_dir, 'balloon')
     if target
       dirlist = []
-      dirlist.extend(target)
+      dirlist += target
     else
       begin
         dirlist = []

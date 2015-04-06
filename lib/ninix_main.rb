@@ -176,7 +176,7 @@ module Ninix_Main
     app.run(abend)
     f.truncate(0)
     begin
-      ninix.lock.unlockfile(f)
+      Lock.unlockfile(f)
     rescue # except:
       #pass
     end
@@ -331,7 +331,7 @@ module Ninix_Main
     def start_servers
       for port in @sstp_port
         begin
-          server = ninix.sstp.SSTPServer.new(['', port])
+          server = SSTP.SSTPServer.new(['', port])
         rescue # except socket.error as e:
           code, message = e.args
           #logging.warning(
@@ -437,11 +437,11 @@ module Ninix_Main
       if not @data.include?(plugin_dir)
         return
       end
-      home_dir = ninix.home.get_ninix_home()
+      home_dir = Home.get_ninix_home()
       target_dir = File.join(home_dir, 'plugin', plugin_dir)
       path = File.join(target_dir, 'SAVEDATA')
       f = open(path, 'w', encoding='utf-8')
-      f.write('#plugin: {0:1.1f}\n'.format(ninix.home.PLUGIN_STANDARD[1]))
+      f.write('#plugin: {0:1.1f}\n'.format(Home.PLUGIN_STANDARD[1]))
       for name, value in @data[plugin_dir].items()
         if value == nil
           next
@@ -451,7 +451,7 @@ module Ninix_Main
     end
 
     def load_data(plugin_dir)
-      home_dir = ninix.home.get_ninix_home()
+      home_dir = Home.get_ninix_home()
       target_dir = File.join(home_dir, 'plugin', plugin_dir)
       path = File.join(target_dir, 'SAVEDATA')
       if not File.exists?(path)
@@ -470,8 +470,8 @@ module Ninix_Main
         rescue # except:
           return {}
         end
-        if standard < ninix.home.PLUGIN_STANDARD[0] or \
-          standard > ninix.home.PLUGIN_STANDARD[1]
+        if standard < Home.PLUGIN_STANDARD[0] or \
+          standard > Home.PLUGIN_STANDARD[1]
           return {}
         end
         for line in f
@@ -538,7 +538,7 @@ module Ninix_Main
       end
       module_name = File.basename(argv[0])
       ext = File.extname(argv[0])
-      home_dir = ninix.home.get_ninix_home()
+      home_dir = Home.get_ninix_home()
       target_dir = File.join(home_dir, 'plugin', plugin_dir)
       plugin_module = self.__import_module(module_name, target_dir)
       if plugin_module == nil
@@ -552,7 +552,7 @@ module Ninix_Main
       data = @data[plugin_dir]
       p = plugin_module.Plugin(port, target_dir, argv[1..-1], home_dir, caller,
                                queue, data)
-      if not isinstance(p, ninix.plugin.BasePlugin)
+      if not isinstance(p, Plugin.BasePlugin)
         return
       end
       @jobs[plugin_dir] = p
@@ -805,33 +805,33 @@ module Ninix_Main
       if target_dirs
         if filetype == 'ghost'
           add_sakura(target_dirs[0])
-          ninix.sakura.ReadmeDialog().show(
+          Sakura.ReadmeDialog().show(
             target_dirs[0],
-            File.join(ninix.home.get_ninix_home(),
+            File.join(Home.get_ninix_home(),
                       'ghost', target_dirs[0]))
           if target_dirs[1]
             add_balloon(target_dirs[1])
-            ninix.sakura.ReadmeDialog().show(
+            Sakura.ReadmeDialog().show(
               target_dirs[1],
-              File.join(ninix.home.get_ninix_home(),
+              File.join(Home.get_ninix_home(),
                         'balloon', target_dirs[1]))
           end
         elsif filetype == 'supplement'
           add_sakura(target_dirs) # XXX: reload
         elsif filetype == 'balloon'
           add_balloon(target_dirs)
-          ninix.sakura.ReadmeDialog().show(
+          Sakura.ReadmeDialog().show(
             target_dirs,
-            File.join(ninix.home.get_ninix_home(),
+            File.join(Home.get_ninix_home(),
                       'balloon', target_dirs))
         elsif filetype == 'plugin'
-          @plugins = ninix.home.search_plugins()
+          @plugins = Home.search_plugins()
         elsif filetype == 'nekoninni'
-          @nekoninni = ninix.home.search_nekoninni()
+          @nekoninni = Home.search_nekoninni()
         elsif filetype == 'katochan'
-          @katochan = ninix.home.search_katochan()
+          @katochan = Home.search_katochan()
         elsif filetype == 'kinoko'
-          @kinoko = ninix.home.search_kinoko()
+          @kinoko = Home.search_kinoko()
           @communicate.notify_all('OnKinokoObjectInstalled', names)
         end
       end
@@ -883,7 +883,7 @@ module Ninix_Main
     end
 
     def create_ghost(data)
-      ghost = ninix.sakura.Sakura()
+      ghost = Sakura::Sakura.new
       ghost.set_responsible(self)
       ghost.new(*data)
       return ghost
@@ -1201,7 +1201,7 @@ module Ninix_Main
           if desc.get('name') == name
             return key
           end
-          if balloon['balloon_dir'][0] == ninix.home.get_normalized_path(name) # XXX
+          if balloon['balloon_dir'][0] == Home.get_normalized_path(name) # XXX
             return key
           end
         rescue # except: # old preferences(EUC-JP)
@@ -1218,7 +1218,7 @@ module Ninix_Main
           if balloon['balloon_dir'][0] == subdir
             return key
           end
-          if ninix.home.get_normalized_path(desc.get('name')) == subdir # XXX
+          if Home.get_normalized_path(desc.get('name')) == subdir # XXX
             return key
           end
         rescue # except: # old preferences(EUC-JP)
@@ -1482,7 +1482,7 @@ module Ninix_Main
       save_preferences()
       key = sakura.key
       ghost_dir = File.split(sakura.get_prefix())[1] # XXX
-      ghost_conf = ninix.home.search_ghosts([ghost_dir])
+      ghost_conf = Home.search_ghosts([ghost_dir])
       if ghost_conf
         @ghosts[key].baseinfo = ghost_conf[key]
       else
@@ -1501,7 +1501,7 @@ module Ninix_Main
         exists = 0
         #logging.info('NEW GHOST INSTALLED: {0}'.format(ghost_dir))
       end
-      ghost_conf = ninix.home.search_ghosts([ghost_dir])
+      ghost_conf = Home.search_ghosts([ghost_dir])
       if ghost_conf
         if exists
           sakura = @ghosts[ghost_dir].instance
@@ -1547,7 +1547,7 @@ module Ninix_Main
         exists = 0
         #logging.info('NEW BALLOON INSTALLED: {0}'.format(balloon_dir))
       end
-      balloon_conf = ninix.home.search_balloons([balloon_dir])
+      balloon_conf = Home.search_balloons([balloon_dir])
       if balloon_conf
         if exists
           @balloons[balloon_dir].baseinfo = balloon_conf[balloon_dir]
@@ -1603,9 +1603,9 @@ module Ninix_Main
       plugin_name, plugin_dir, startup, menu_items = @plugins[i]
       label, argv = menu_items[j]
       if label == 'Uninstall'
-        home_dir = ninix.home.get_ninix_home()
+        home_dir = Home.get_ninix_home()
         @installer.uninstall_plugin(home_dir, plugin_name)
-        @plugins = ninix.home.search_plugins() # reload
+        @plugins = Home.search_plugins() # reload
         return
       end
       caller = {}
@@ -1617,13 +1617,13 @@ module Ninix_Main
 
     def select_nekodorif(nekodorif_dir)
       target = @__menu_owner
-      ninix.nekodorif.Nekoninni().load(nekodorif_dir,
-                                       @katochan, target)
+      Nekodorif::Nekoninni.new.load(nekodorif_dir,
+                                    @katochan, target)
     end
 
     def select_kinoko(data)
       target = @__menu_owner
-      ninix.kinoko.Kinoko(@kinoko).load(data, target)
+      Kinoko::Kinoko.new(@kinoko).load(data, target)
     end
 
     def open_console

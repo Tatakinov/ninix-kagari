@@ -59,6 +59,7 @@ module MetaMagic
 
 
   class Holon
+    attr_reader :baseinfo, :instance
 
     def initialize(key)
       @key = key

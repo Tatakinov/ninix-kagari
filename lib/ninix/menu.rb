@@ -216,13 +216,13 @@ module Menu
       @__align['sidebar'] = align_sidebar
       if path_background != nil and File.exists?(path_background)
         begin
-          color = ninix.pix.get_png_lastpix(path_background)
+          color = Pix.get_png_lastpix(path_background)
           @__imagepath['background'] = ["background-image: url('",
                                         path_background, "');\n",
                                         "background-color: ",
                                         color, ";\n"].join('')
           if path_sidebar != nil and File.exists?(path_sidebar)
-              sidebar_width, sidebar_height = ninix.pix.get_png_size(path_sidebar)
+              sidebar_width, sidebar_height = Pix.get_png_size(path_sidebar)
             @__imagepath['background_with_sidebar'] = ["background-image: url('",
                                                        path_sidebar,
                                                        "'),url('",
@@ -243,13 +243,13 @@ module Menu
       end
       if path_foreground != nil and File.exists?(path_foreground)
         begin
-          color = ninix.pix.get_png_lastpix(path_foreground)
+          color = Pix.get_png_lastpix(path_foreground)
           @__imagepath['foreground'] = ["background-image: url('",
                                         path_foreground, "');\n",
                                         "background-color: ",
                                         color, ";\n"].join('')
           if path_sidebar != nil and File.exists?(path_sidebar)
-            sidebar_width, sidebar_height = ninix.pix.get_png_size(path_sidebar)
+            sidebar_width, sidebar_height = Pix.get_png_size(path_sidebar)
             @__imagepath['foreground_with_sidebar'] = ["background-image: url('",
                                                        path_sidebar, "'),url('",
                                                        path_foreground, "');\n",
@@ -636,7 +636,7 @@ module Menu
 
     def create_ghost_menuitem(name, icon, key, handler, thumbnail)
       if icon != nil
-        pixbuf = ninix.pix.create_icon_pixbuf(icon)
+        pixbuf = Pix.create_icon_pixbuf(icon)
         if pixbuf == nil
           item = Gtk::MenuItem.new(name)
         else
@@ -757,7 +757,7 @@ module Menu
       if thumbnail == nil
         return false
       end
-      pixbuf = ninix.pix.create_pixbuf_from_file(thumbnail, is_pnr=false)
+      pixbuf = Pix.create_pixbuf_from_file(thumbnail, is_pnr=false)
       tooltip.set_icon(pixbuf)
       return true
     end

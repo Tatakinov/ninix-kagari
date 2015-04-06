@@ -377,9 +377,9 @@ module Sakura
       @__charset = 'Shift_JIS' # default
       get_event_response('OnInitialize', event_type='NOTIFY')
       get_event_response('basewareversion',
-                         ninix.version.VERSION,
+                         Version.VERSION,
                          'ninix-aya',
-                         ninix.version.NUMBER,
+                         Version.NUMBER,
                          event_type='NOTIFY')
     end
 
@@ -755,7 +755,7 @@ module Sakura
     def translate(s)
       if s != nil
         if @use_makoto
-          s = ninix.makoto.execute(s)
+          s = Makoto.execute(s)
         else
           r = get_event_response('OnTranslate', s, translate=0)
           if r
@@ -866,7 +866,7 @@ module Sakura
       if @__temp_mode != 0
         default = nil
       else
-        default = ninix.version.VERSION_INFO
+        default = Version.VERSION_INFO
       end
       if init
         if @ghost_time == 0
@@ -892,7 +892,7 @@ module Sakura
                          default=default)
           end
         end
-        left, top, scrn_w, scrn_h = ninix.pix.get_workarea()
+        left, top, scrn_w, scrn_h = Pix.get_workarea()
         notify_event('OnDisplayChange',
                      Gdk.Visual.get_best_depth(),
                      scrn_w, scrn_h, event_type='NOTIFY')
@@ -1946,7 +1946,7 @@ module Sakura
       set_synchronized_session([], reset=true)
       @balloon.hide_all()
       node = @processed_script[0]
-      if node[0] == ninix.script.SCRIPT_TAG and node[1] == '\C'
+      if node[0] == Script.SCRIPT_TAG and node[1] == '\C'
         @processed_script.pop(0)
         @script_position = node[-1]
       else
@@ -2000,7 +2000,7 @@ module Sakura
       end
       w, h = get_surface_size(@script_side)
       x, y = get_surface_position(@script_side)
-      left, top, scrn_w, scrn_h = ninix.pix.get_workarea()
+      left, top, scrn_w, scrn_h = Pix.get_workarea()
       if sx + (sw / 2).to_i > left + (scrn_w / 2).to_i
         new_x = min(x - (scrn_w / 20).to_i, sx - (scrn_w / 20).to_i)
       else
@@ -2029,7 +2029,7 @@ module Sakura
       end
       w, h = get_surface_size(@script_side)
       x, y = get_surface_position(@script_side)
-      left, top, scrn_w, scrn_h = ninix.pix.get_workarea()
+      left, top, scrn_w, scrn_h = Pix.get_workarea()
       if x < sx + (sw / 2).to_i < x + w or sx < x + (w / 2).to_i < sx + sw
         return
       end
@@ -2782,7 +2782,7 @@ module Sakura
       end
       node = @processed_script.pop(0)
       @script_position = node[-1]
-      if node[0] == ninix.script.SCRIPT_TAG
+      if node[0] == Script.SCRIPT_TAG
         name, args = node[1], node[2..-1]
         if @__script_tag.include?(name) and \
            Sakura.method_defined?(@__script_tag[name])
@@ -2790,7 +2790,7 @@ module Sakura
         else
           #pass ## FIMXE
         end
-      elsif node[0] == ninix.script.SCRIPT_TEXT
+      elsif node[0] == Script.SCRIPT_TEXT
         text = expand_meta(node[1])
         if @anchor
           @anchor[1] = ''.join([@anchor[1], text])
@@ -2846,7 +2846,7 @@ module Sakura
     def expand_meta(text_node)
       buf = []
       for chunk in text_node
-        if chunk[0] == ninix.script.TEXT_STRING
+        if chunk[0] == Script.TEXT_STRING
           buf << chunk[1]
         elsif chunk[1] == '%month'
           buf << @current_time[1].to_s
@@ -2869,10 +2869,10 @@ module Sakura
         elsif chunk[1] == '%friendname'
           buf << get_friendname()
         elsif chunk[1] == '%screenwidth'
-          left, top, scrn_w, scrn_h = ninix.pix.get_workarea()
+          left, top, scrn_w, scrn_h = Pix.get_workarea()
           buf << scrn_w.to_s
         elsif chunk[1] == '%screenheight'
-          left, top, scrn_w, scrn_h = ninix.pix.get_workarea()
+          left, top, scrn_w, scrn_h = Pix.get_workarea()
           buf << scrn_h.to_s
         elsif chunk[1] == '%et'
           buf << '{0:d}万年'.format(@current_time[7])
@@ -2948,7 +2948,7 @@ module Sakura
         Gdk.beep() ## FIXME
         return
       end
-      start_script(ninix.version.VERSION_INFO)
+      start_script(Version.VERSION_INFO)
       @balloon.hide_sstp_message()
     end
 
