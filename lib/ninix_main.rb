@@ -634,15 +634,15 @@ module Ninix_Main
     end
 
     def create_menuitem(data)
-      return self.request_parent('GET', 'create_menuitem', @key, data)
+      return @parent.handle_request('GET', 'create_menuitem', @key, data)
     end
 
     def delete_by_myself
-      self.request_parent('NOTIFY', 'delete_ghost', @key)
+      @parent.handle_request('NOTIFY', 'delete_ghost', @key)
     end
 
     def create_instance(data)
-      return self.request_parent('GET', 'create_ghost', data)
+      return @parent.handle_request('GET', 'create_ghost', data)
     end
   end
 
@@ -805,13 +805,13 @@ module Ninix_Main
       if target_dirs
         if filetype == 'ghost'
           add_sakura(target_dirs[0])
-          Sakura.ReadmeDialog().show(
+          Sakura::ReadmeDialog.new.show(
             target_dirs[0],
             File.join(Home.get_ninix_home(),
                       'ghost', target_dirs[0]))
           if target_dirs[1]
             add_balloon(target_dirs[1])
-            Sakura.ReadmeDialog().show(
+            Sakura::ReadmeDialog.new.show(
               target_dirs[1],
               File.join(Home.get_ninix_home(),
                         'balloon', target_dirs[1]))
@@ -820,7 +820,7 @@ module Ninix_Main
           add_sakura(target_dirs) # XXX: reload
         elsif filetype == 'balloon'
           add_balloon(target_dirs)
-          Sakura.ReadmeDialog().show(
+          Sakura::ReadmeDialog.new.show(
             target_dirs,
             File.join(Home.get_ninix_home(),
                       'balloon', target_dirs))
@@ -1495,14 +1495,14 @@ module Ninix_Main
 
     def add_sakura(ghost_dir)
       if @ghosts.include?(ghost_dir)
-        exists = 1
+        exists = true
         #logging.warning('INSTALLED GHOST CHANGED: {0}'.format(ghost_dir))
       else
-        exists = 0
+        exists = false
         #logging.info('NEW GHOST INSTALLED: {0}'.format(ghost_dir))
       end
       ghost_conf = Home.search_ghosts([ghost_dir])
-      if ghost_conf
+      if not ghost_conf.empty?
         if exists
           sakura = @ghosts[ghost_dir].instance
           if sakura.is_running() # restart if working
@@ -1541,14 +1541,14 @@ module Ninix_Main
 
     def add_balloon(balloon_dir)
       if @balloons.include?(balloon_dir)
-        exists = 1
+        exists = true
         #logging.warning('INSTALLED BALLOON CHANGED: {0}'.format(balloon_dir))
       else
-        exists = 0
+        exists = false
         #logging.info('NEW BALLOON INSTALLED: {0}'.format(balloon_dir))
       end
       balloon_conf = Home.search_balloons([balloon_dir])
-      if balloon_conf
+      if not balloon_conf.empty?
         if exists
           @balloons[balloon_dir].baseinfo = balloon_conf[balloon_dir]
         else
@@ -1656,7 +1656,7 @@ module Ninix_Main
               key = key.strip()
               if key == 'time'
                 begin
-                  ghost_time = int(value.strip())
+                  ghost_time = value.strip().to_i
                 rescue # except:
                   #pass
                 end

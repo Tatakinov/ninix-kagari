@@ -155,16 +155,20 @@ module Sakura
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       #assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'lock_repaint' => "get_lock_repaint"
       }
       if not handlers.include?(event)
-        result = @parent.handle_request(
-          event_type, event, *arglist, **argdict)
+        if Sakura.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = @parent.handle_request(
+            event_type, event, *arglist)
+        end
       else
-        result = method(handlers[event]).call(*arglist, **argdict)
+        result = method(handlers[event]).call(*arglist)
       end
       if event_type == 'GET'
         return result

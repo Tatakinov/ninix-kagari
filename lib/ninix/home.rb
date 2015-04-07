@@ -76,7 +76,7 @@ module Home
         if ['.rb'].include?(ext)
           name = basename
         end
-        if !name.empty? and not table.include?(name)
+        if name and not table.include?(name)
           shiori = shiori_lib.request(['', name])
           if shiori
             table[name] = shiori
@@ -122,7 +122,7 @@ module Home
       }
       # SHIORI compatible modules
       for name, shiori in shiori_table.each_entry
-        score = int(shiori.find(ghost_dir, shiori_dll))
+        score = shiori.find(ghost_dir, shiori_dll).to_i
         if score > candidate['score']
           candidate['name'] = name
           candidate['score'] = score
