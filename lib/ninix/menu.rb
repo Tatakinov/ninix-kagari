@@ -640,9 +640,9 @@ module Menu
         if pixbuf == nil
           item = Gtk::MenuItem.new(name)
         else
-          image = Gtk::Image.new()
-          image.set_from_pixbuf(pixbuf)
-          image.show()
+          image = Gtk::Image.new
+          image.pixbuf = pixbuf
+          image.show
           item = Gtk::ImageMenuItem.new(name)
           item.set_image(image)
           item.set_always_show_image(true) # XXX

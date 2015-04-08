@@ -99,7 +99,7 @@ module MetaMagic
         delete_by_myself()
         return
       else
-        @instance.new(data) # reset
+        @instance.new_(*data) # reset
         menuitem = create_menuitem(data)
         if menuitem == nil
           delete_by_myself()

@@ -478,11 +478,11 @@ module Prefs
       while listiter != nil
         value = model.get_value(listiter, 1)
         if value == directory or directory == nil
-          @balloon_treeview.get_selection().select_iter(listiter)
+          @balloon_treeview.selection.select_iter(listiter)
           selected = true
           break
         end
-        listiter = model.iter_next(listiter) 
+        listiter.next!
       end
       if not selected
         listiter = model.iter_first

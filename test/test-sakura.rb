@@ -11,7 +11,7 @@ module NinixTest
       @ghosts = Home.search_ghosts(target=nil, check_shiori=false)
       key = @ghosts.keys.sample
       @baseinfo = @ghosts[key]
-      @sakura.new(*@baseinfo)
+      @sakura.new_(*@baseinfo)
     end
 
     def update
@@ -31,7 +31,7 @@ module NinixTest
       @index = 0
       #INIT#OK#@sakura.initialize
       #INIT#OK#@sakura.set_responsible(parent)
-      #INIT#OK#@sakura.new(desc, shiori_dir, use_makoto, surface_set, prefix,
+      #INIT#OK#@sakura.new_(desc, shiori_dir, use_makoto, surface_set, prefix,
       ##@sakura.handle_request(event_type, event, *arglist, **argdict)
       #OK#@sakura.attach_observer(self)
       #OK#@sakura.notify_observer("OBSERVER TEST", args=nil)

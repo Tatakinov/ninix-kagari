@@ -885,7 +885,7 @@ module Ninix_Main
     def create_ghost(data)
       ghost = Sakura::Sakura.new
       ghost.set_responsible(self)
-      ghost.new(*data)
+      ghost.new_(*data)
       return ghost
     end
 
@@ -1060,7 +1060,8 @@ module Ninix_Main
 
     def create_shell_menuitem(shell_name, shell_key, thumbnail)
       return @__menu.create_meme_menuitem(
-        shell_name, shell_key, self.select_shell, thumbnail)
+        shell_name, shell_key,
+        lambda {|key| select_shell(key) }, thumbnail)
     end
 
     def create_menuitem(key, baseinfo)
@@ -1081,10 +1082,10 @@ module Ninix_Main
         thumbnail_path = nil
       end
       start_menuitem = @__menu.create_ghost_menuitem(
-        name, icon_path, key, self.start_sakura_cb, # XXX
+        name, icon_path, key, lambda {|key| start_sakura_cb(key) }, # XXX
         thumbnail_path)
       select_menuitem = @__menu.create_ghost_menuitem(
-        name, icon_path, key, self.select_sakura,
+        name, icon_path, key, lambda {|key| select_sakura(key) },
         thumbnail_path)
       menuitem = {
         'Summon' => start_menuitem,
@@ -1388,7 +1389,10 @@ module Ninix_Main
       if sakura.key == key # XXX: needs reloading?
         return
       end
-      proc = lambda { stop_sakura(sakura, self.start_sakura, key, sakura.key) }
+      proc = lambda { stop_sakura(
+                        sakura,
+                        lambda {|key, prev| start_sakura(key, prev) },
+                        key, sakura.key) }
 #      def proc(self=self, key=key)
 #        stop_sakura(sakura, self.start_sakura, key, sakura.key)
 #      end
@@ -1523,7 +1527,7 @@ module Ninix_Main
           end
         else
           holon = Ghost.new(ghost_dir)
-          holon.set_responsible(self.handle_request)
+          holon.set_responsible(self)
           @ghosts[ghost_dir] = holon
           holon.baseinfo = ghost_conf[ghost_dir]
         end
@@ -1553,7 +1557,7 @@ module Ninix_Main
           @balloons[balloon_dir].baseinfo = balloon_conf[balloon_dir]
         else
           meme = BalloonMeme(balloon_dir)
-          meme.set_responsible(self.handle_request)
+          meme.set_responsible(self)
           @balloons[balloon_dir] = meme
           meme.baseinfo = balloon_conf[balloon_dir]
         end

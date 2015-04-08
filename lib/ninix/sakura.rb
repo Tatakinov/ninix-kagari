@@ -220,8 +220,8 @@ module Sakura
       return @shell_menu
     end
 
-    def new(desc, shiori_dir, use_makoto, surface_set, prefix,
-            shiori_dll, shiori_name) ## FIXME
+    def new_(desc, shiori_dir, use_makoto, surface_set, prefix,
+             shiori_dll, shiori_name) ## FIXME
       @shiori = nil
       @desc = desc
       @shiori_dir = shiori_dir
@@ -506,7 +506,7 @@ module Sakura
                         db, request_handler]
     end
 
-    reset_event = ['OnGhostChanging', 'OnShellChanging', 'OnVanishSelected']
+    RESET_EVENT = ['OnGhostChanging', 'OnShellChanging', 'OnVanishSelected']
 
     def check_event_queue()
       return (not @event_queue.empty?)
@@ -516,7 +516,7 @@ module Sakura
       #for key in argdict
       #  assert ['proc'].include?(key) # trap typo, etc.
       #end
-      if @reset_event.include?(event)
+      if RESET_EVENT.include?(event)
         reset_script(true)
       end
       @event_queue << [event, arglist, argdict]
@@ -1179,13 +1179,13 @@ module Sakura
                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     boot_event = ['OnBoot', 'OnFirstBoot', 'OnGhostChanged', 'OnShellChanged',
                   'OnUpdateComplete']
-    reset_event = ['OnVanishSelecting', 'OnVanishCancel'] ## FIXME
+    RESET_EVENT = ['OnVanishSelecting', 'OnVanishCancel'] ## FIXME
 
     def notify_event(event, *arglist, **argdict)
       if @time_critical_session and event.startswith('OnMouse')
         return 0
       end
-      if @reset_event.include?(event)
+      if RESET_EVENT.include?(event)
         reset_script(true)
       end
       #for key in argdict
