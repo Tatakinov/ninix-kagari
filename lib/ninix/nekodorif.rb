@@ -337,7 +337,7 @@ module Nekodorif
       end
       @id = [0, nil]
       set_surface()
-      set_position(reset=1)
+      set_position(:reset => 1)
       @window.show_all()
     end
 
@@ -382,7 +382,7 @@ module Nekodorif
       if event.state & (Gdk::Window::ModifierType::CONTROL_MASK | Gdk::Window::ModifierType::SHIFT_MASK)
         if event.keyval == Gdk::Keyval::GDK_KEY_F12
           #logging.info('reset skin position')
-          set_position(reset=1)
+          set_position(:reset => 1)
         end
       end
       return true
@@ -437,7 +437,7 @@ module Nekodorif
       @darea.queue_draw()
     end
 
-    def set_position(reset=0)
+    def set_position(reset: 0)
       left, top, scrn_w, scrn_h = Pix.get_workarea()
       if reset != 0
         @x = left

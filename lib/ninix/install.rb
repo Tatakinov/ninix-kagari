@@ -477,11 +477,11 @@ module Install
       end
       if Dir.exists?(prefix)
         inst_dst = Home.read_install_txt(prefix)
-        if inst.get('refresh', 0).to_i != 0
+        if inst.get('refresh', :default => 0).to_i != 0
           # uninstall older versions of the ghost
           if confirm_refresh(prefix, 'ghost')
             mask = []
-            for path in inst.get('refreshundeletemask', '').split(':')
+            for path in inst.get('refreshundeletemask', :default => '').split(':')
               mask << Home.get_normalized_path(path)
             end
             mask << 'HISTORY'
@@ -592,11 +592,11 @@ module Install
       ##             File.join(dstdir, 'install.txt')]
       if Dir.exists?(dstdir)
         inst_dst = Home.read_install_txt(dstdir)
-        if inst.get('refresh', 0).to_i
+        if inst.get('refresh', :default => 0).to_i
           # uninstall older versions of the balloon
           if confirm_refresh(dstdir, 'balloon')
             mask = []
-            for path in inst.get('refreshundeletemask', '').split(':')
+            for path in inst.get('refreshundeletemask', :default => '').split(':')
               mask << Home.get_normalized_path(path)
             end
             remove_files_and_dirs(dstdir, mask)

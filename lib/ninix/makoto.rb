@@ -80,7 +80,7 @@ module Makoto
     end
   end
 
-  def self.test(verbose=0)
+  def self.test(verbose: 0)
     for test, expected in [['a(1)b', ['a1b']],
                            ['a(1|2)b', ['a1b', 'a2b']],
                            ['a(1)2b', ['ab', 'a1b', 'a11b']],

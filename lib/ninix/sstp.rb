@@ -59,7 +59,7 @@ module SSTP
       end
     end
 
-    def send_response(code, data=nil)
+    def send_response(code, data: nil)
       begin
         @request_handler.send_response(code)
         if data != nil
@@ -77,7 +77,7 @@ module SSTP
     def send_answer(value)
       charset = @request_handler.get_charset
       answer = [value.encode(charset, :invalid => :replace), "\r\n\r\n"].join("")
-      send_response(200, answer) # OK
+      send_response(200, :data => answer) # OK
     end
 
     def send_no_content
@@ -385,7 +385,7 @@ module SSTP
         charset = 'Shift_JIS'
       end
       if not Encoding.name_list.include?(charset)
-        send_response(420, 'Refuse (unsupported charset)')
+        send_response(420, :data => 'Refuse (unsupported charset)')
         log_error('Unsupported charset {0}'.format(repr(charset)))
       else
         return true

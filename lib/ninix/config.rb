@@ -16,7 +16,7 @@ module NConfig
 
   class Config < Hash
 
-    def get(name, default=nil)
+    def get(name, default: nil)
       if name.class == Array
         keylist = name
       else
@@ -47,10 +47,10 @@ module NConfig
         buf << line.strip
       end
     end
-    return create_from_buffer(buf, charset)
+    return create_from_buffer(buf, :charset => charset)
   end
 
-  def self.create_from_buffer(buf, charset='CP932')
+  def self.create_from_buffer(buf, charset: 'CP932')
     dic = Config.new
     for line in buf
       line = line.force_encoding(charset).encode("UTF-8", :invalid => :replace)

@@ -21,6 +21,7 @@ require "ninix/pix"
 module Balloon
 
   class Balloon
+    attr_accessor :window, :user_interaction
 
     def initialize
       @parent = nil
@@ -386,7 +387,7 @@ module Balloon
       end
     end
 
-    def append_link(side, label, value, newline_required=0)
+    def append_link(side, label, value, newline_required: 0)
       if not @synchronized.empty?
         for side in @synchronized
           if @window.length > side
@@ -453,7 +454,7 @@ module Balloon
       end
     end
 
-    def open_inputbox(symbol, limittime=-1, default=nil)
+    def open_inputbox(symbol, limittime: -1, default: nil)
       if not @user_interaction
         @user_interaction = true
         @inputbox.set_symbol(symbol)
@@ -462,7 +463,7 @@ module Balloon
       end
     end
 
-    def open_passwordinputbox(symbol, limittime=-1, default=nil)
+    def open_passwordinputbox(symbol, limittime: -1, default: nil)
       if not @user_interaction
         @user_interaction = true
         @passwordinputbox.set_symbol(symbol)
@@ -482,6 +483,7 @@ module Balloon
 
 
   class BalloonWindow
+    attr_accessor :direction
 
     def initialize(window, side, desc, balloon, id_format)
       @window = window
@@ -532,13 +534,13 @@ module Balloon
       end
       @layout = Pango::Layout.new(@darea.pango_context)
       @sstp_layout = Pango::Layout.new(@darea.pango_context())
-      mask_r = desc.get('maskcolor.r', 128).to_i
-      mask_g = desc.get('maskcolor.g', 128).to_i
-      mask_b = desc.get('maskcolor.b', 128).to_i
+      mask_r = desc.get('maskcolor.r', :default => 128).to_i
+      mask_g = desc.get('maskcolor.g', :default => 128).to_i
+      mask_b = desc.get('maskcolor.b', :default => 128).to_i
       @cursor_color = [mask_r / 255.0, mask_g / 255.0, mask_b / 255.0]
-      text_r = desc.get(['font.color.r', 'fontcolor.r'], 0).to_i
-      text_g = desc.get(['font.color.g', 'fontcolor.g'], 0).to_i
-      text_b = desc.get(['font.color.b', 'fontcolor.b'], 0).to_i
+      text_r = desc.get(['font.color.r', 'fontcolor.r'], :default => 0).to_i
+      text_g = desc.get(['font.color.g', 'fontcolor.g'], :default => 0).to_i
+      text_b = desc.get(['font.color.b', 'fontcolor.b'], :default => 0).to_i
       @text_normal_color = [text_r / 255.0, text_g / 255.0, text_b / 255.0]
       if desc.get('maskmethod').to_i == 1
         text_r = 255 - text_r
@@ -546,9 +548,9 @@ module Balloon
         text_b = 255 - text_b
       end
       @text_active_color = [text_r / 255.0, text_g / 255.0, text_b / 255.0]
-      sstp_r = desc.get('sstpmessage.font.color.r', text_r).to_i
-      sstp_g = desc.get('sstpmessage.font.color.g', text_g).to_i
-      sstp_b = desc.get('sstpmessage.font.color.b', text_b).to_i
+      sstp_r = desc.get('sstpmessage.font.color.r', :default => text_r).to_i
+      sstp_g = desc.get('sstpmessage.font.color.g', :default => text_g).to_i
+      sstp_b = desc.get('sstpmessage.font.color.b', :default => text_b).to_i
       @sstp_message_color = [sstp_r / 255.0, sstp_g / 255.0, sstp_b / 255.0]
       # initialize
       @__direction = [side, 1].min ## kluge: multi character
@@ -622,7 +624,7 @@ module Balloon
       pango_size = @font_desc.size
       if pango_size == 0
         default_size = 12 # for Windows environment
-        size = @desc.get(['font.height', 'font.size'], default_size).to_i
+        size = @desc.get(['font.height', 'font.size'], :default => default_size).to_i
         pango_size = size * 3 / 4 # convert from Windows to GTK+
         pango_size *= Pango::SCALE
       end
@@ -636,7 +638,7 @@ module Balloon
         pango_size = @sstp_font_desc.size
         if pango_size == 0
           default_size = 10 # for Windows environment
-          size = @desc.get('sstpmessage.font.height', default_size).to_i
+          size = @desc.get('sstpmessage.font.height', :default => default_size).to_i
           pango_size = size * 3 / 4 # convert from Windows to GTK+
           pango_size *= Pango::SCALE
         end
@@ -760,7 +762,7 @@ module Balloon
       end
     end
 
-    def get_balloon_size(scaling=true)
+    def get_balloon_size(scaling: true)
       w = @width
       h = @height
       #scale = @scale
@@ -803,7 +805,7 @@ module Balloon
     end
 
     def set_autoscroll(flag)
-      @autoscroll = bool(flag)
+      @autoscroll = flag
     end
 
     def config_adjust(name, base, default_value)
@@ -877,7 +879,7 @@ module Balloon
       return @position
     end
 
-    def destroy(finalize=0)
+    def destroy(finalize: 0)
       @window.destroy()
     end
 
@@ -1055,7 +1057,7 @@ module Balloon
         w = image_surface.get_width()
         h = image_surface.get_height()
         if x == 'centerx'
-          bw, bh = get_balloon_size(scaling=false)
+          bw, bh = get_balloon_size(:scaling => false)
           x = (bw - w) / 2
         else
           begin
@@ -1065,7 +1067,7 @@ module Balloon
           end
         end
         if y == 'centery'
-          bw, bh = get_balloon_size(scaling=false)
+          bw, bh = get_balloon_size(:scaling => false)
           y = (bh - h) / 2
         else
           begin
@@ -1414,7 +1416,7 @@ module Balloon
       while 1
         if i >= j
           @text_buffer << text[p, i]
-          draw_last_line(column)
+          draw_last_line(:column => column)
           break
         end
         if text[i] == '\n'
@@ -1425,7 +1427,7 @@ module Balloon
             @text_buffer << text[p, i]
             p = i = i + 1
           end
-          draw_last_line(column)
+          draw_last_line(:column => column)
           column = 0
           next
         end
@@ -1438,7 +1440,7 @@ module Balloon
         text_width, text_height =  @layout.pixel_size
         if text_width > @line_width
           @text_buffer << text[p, i]
-          draw_last_line(column)
+          draw_last_line(:column => column)
           column = 0
           p = i
         end
@@ -1476,7 +1478,7 @@ module Balloon
         end
       end
       append_text(space)
-      draw_last_line(offset)
+      draw_last_line(:column => offset)
     end
 
     def append_link_in(link_id)
@@ -1538,7 +1540,7 @@ module Balloon
       @darea.queue_draw()
     end
 
-    def draw_last_line(column=0)
+    def draw_last_line(column: 0)
       if not @__shown
         return
       end
@@ -1623,8 +1625,8 @@ module Balloon
       @window.set_modal(true)
       @window.set_window_position(Gtk::Window::Position::CENTER)
       @window.realize()
-      w = desc.get('communicatebox.width', 250).to_i
-      h = desc.get('communicatebox.height', -1).to_i
+      w = desc.get('communicatebox.width', :default => 250).to_i
+      h = desc.get('communicatebox.height', :default => -1).to_i
       @entry = Gtk::Entry.new
       @entry.signal_connect('activate') do |w|
         activate(w)
@@ -1653,8 +1655,8 @@ module Balloon
           redraw(w, e, surface)
         end
         darea.show()
-        x = desc.get('communicatebox.x', 10).to_i
-        y = desc.get('communicatebox.y', 20).to_i
+        x = desc.get('communicatebox.x', :default => 10).to_i
+        y = desc.get('communicatebox.y', :default => 20).to_i
         overlay = Gtk::Overlay.new()
         @entry.set_margin_left(x)
         @entry.set_margin_top(y)
@@ -1746,7 +1748,7 @@ module Balloon
       return true
     end
 
-    def show(default='')
+    def show(default: '')
       @entry.set_text(default)
       @window.show()
     end
@@ -1874,12 +1876,12 @@ module Balloon
       else
         @timeout_id = GLib.timeout_add(@limittime, @timeout)
       end
-      CommunicateWindow.show(self, text)
+      super(:default => text)
     end
 
     def timeout
       @window.hide()
-      send('timeout', timeout=true)
+      send('timeout', :timeout => true)
     end
 
     def enter
@@ -1887,7 +1889,7 @@ module Balloon
     end
 
     def cancel
-      send(nil, cancel=true)
+      send(nil, :cancel => true)
     end
 
     def close(symbol)
@@ -1901,7 +1903,7 @@ module Balloon
       cancel()
     end
 
-    def send(data, cancel=false, timeout=false)
+    def send(data, cancel: false, timeout: false)
       if @timeout_id != nil
         GLib.source_remove(@timeout_id)
       end

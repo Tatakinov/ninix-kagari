@@ -15,7 +15,7 @@ module EntryDB
 
   class EntryDatabase
 
-    def initialize(db=nil)
+    def initialize(db: nil)
       if db != nil
         @__db = db
       elsif
@@ -33,7 +33,7 @@ module EntryDB
       @__db[key] = entries
     end
 
-    def get(key, default=nil)
+    def get(key, default: nil)
       if @__db.has_key?(key)
         entries = @__db[key]
         return entries.sample

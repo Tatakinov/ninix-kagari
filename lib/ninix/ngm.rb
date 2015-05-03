@@ -348,7 +348,7 @@ module NGM
       @dialog.hide()
     end
 
-    def show(default=nil)
+    def show(default: nil)
       if default != nil
         set_pattern(default)
       end
@@ -553,7 +553,7 @@ module NGM
     end
 
     def open_search_dialog
-      @search_dialog.show(default=@search_word)
+      @search_dialog.show(:default => @search_word)
     end
 
     def search(word)
@@ -834,7 +834,7 @@ module NGM
       return @catalog.image_filename(@current, side)
     end
 
-    def search(word, set_id=0)
+    def search(word, set_id: 0)
       while set_id < IDLIMIT
         if @catalog.data.include?(set_id)
           entry = @catalog.data[set_id]
@@ -856,7 +856,7 @@ module NGM
     end
 
     def search_forward(word)
-      return search(word, set_id=@current + 1)
+      return search(word, :set_id => @current + 1)
     end
 
     def open_preference_dialog

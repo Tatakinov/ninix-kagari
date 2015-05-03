@@ -147,7 +147,7 @@ module Kinoko
       elsif event == 'move surface'
         side, xoffset, yoffset = args
         if side == 0 # sakura side
-          @skin.set_position(xoffset, yoffset)
+          @skin.set_position(:xoffset => xoffset, :yoffset => yoffset)
         end
       elsif event == 'raise'
         side = args
@@ -386,7 +386,7 @@ module Kinoko
       @seriko.append_actor(frame, actor)
     end
 
-    def set_position(xoffset=0, yoffset=0)
+    def set_position(xoffset: 0, yoffset: 0)
       base_x, base_y = @parent.handle_request('GET', 'get_kinoko_position', @data['baseposition'])
       a, b = [[0.5, 1], [0.5, 0], [0, 0.5], [1, 0.5], [0, 1],
               [1, 1], [0, 0], [1, 0], [0.5, 0.5]][@data['baseadjust']]
@@ -482,7 +482,7 @@ module Kinoko
       @seriko.invoke_kinoko(self)
     end
 
-    def set_surface(surface_id, restart=1) ## FIXME
+    def set_surface(surface_id, restart: 1) ## FIXME
       path = File.join(@data['dir'], 'surface' + surface_id.to_s + '.png')
       if File.exists?(path)
         @path = path
@@ -492,7 +492,7 @@ module Kinoko
       end
     end
 
-    def invoke(actor_id, update=0)
+    def invoke(actor_id, update: 0)
       @seriko.invoke(self, actor_id, update)
     end
 

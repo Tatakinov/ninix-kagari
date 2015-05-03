@@ -87,7 +87,7 @@ module Home
     return table
   end
 
-  def self.search_ghosts(target=nil, check_shiori=true)
+  def self.search_ghosts(target: nil, check_shiori: true)
     home_dir = get_ninix_home()
     ghosts = {}
     if target
@@ -147,7 +147,7 @@ module Home
     return ghosts
   end
 
-  def self.search_balloons(target=nil)
+  def self.search_balloons(target: nil)
     home_dir = get_ninix_home()
     balloons = {}
     balloon_dir = File.join(home_dir, 'balloon')
@@ -279,7 +279,7 @@ module Home
         dirlist << file
       end
     rescue # except OSError:
-        dirlist = []
+      dirlist = []
     end
     for subdir in dirlist
       kinoko = read_kinoko_ini(File.join(kinoko_dir, subdir))
@@ -473,8 +473,8 @@ module Home
 
   def self.find_surface_set(top_dir)
     desc = read_descript_txt(File.join(top_dir, 'ghost', 'master'))
-    default_sakura = desc.get('sakura.seriko.defaultsurface', '0')
-    default_kero = desc.get('kero.seriko.defaultsurface', '10')
+    default_sakura = desc.get('sakura.seriko.defaultsurface', :default => '0')
+    default_kero = desc.get('kero.seriko.defaultsurface', :default => '10')
     if desc
       shell_name = desc.get('name')
     else
@@ -534,7 +534,7 @@ module Home
         if desc == nil
           desc = NConfig.null_config()
         end
-        name = desc.get('name', subdir)
+        name = desc.get('name', :default => subdir)
         buf << [name, desc, subdir]
       end
     end
@@ -730,10 +730,10 @@ module Home
                   #pass
                 end
               end
-              config_list << [key, NConfig.create_from_buffer(buf, charset)]
+              config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
             end
           elsif key == 'descript'
-            config_list << [key, NConfig.create_from_buffer(buf, charset)]
+            config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
           end
           buf = []
           key = nil

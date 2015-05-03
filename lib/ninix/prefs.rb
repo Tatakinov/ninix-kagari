@@ -235,8 +235,10 @@ module Prefs
       selected = @balloon_treeview.selection.selected
       if selected
         model, listiter = selected
-        directory = model.get_value(listiter, 1)
-        @__prefs.set('default_balloon', directory)
+        if listiter # XXX
+          directory = model.get_value(listiter, 1)
+          @__prefs.set('default_balloon', directory)
+        end
       end
       @__prefs.set('ignore_default', (@ignore_button.active? ? 1 : 0).to_s)
       @__prefs.set('surface_scale', RANGE_SCALE[@surface_scale_combo.active].to_i.to_s)

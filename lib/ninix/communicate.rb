@@ -21,7 +21,7 @@ module Communicate
       @ghosts = {}
     end
 
-    def rebuild_ghostdb(sakura, name='', s0=0, s1=10)
+    def rebuild_ghostdb(sakura, name: '', s0: 0, s1: 10)
       if @ghosts.include?(sakura)
         @ghosts.delete(sakura)
       end

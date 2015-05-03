@@ -205,7 +205,7 @@ module Sakura
 
     def notify_installedshellname()
       installed = []
-      for key in @shells
+      for key in @shells.keys
         installed << @shells[key].baseinfo[0]
       end
       notify_event('installedshellname', *installed)
@@ -276,8 +276,8 @@ module Sakura
         f.write('time, {0}\n'.format(@ghost_time))
         f.write('vanished_count, {0}\n'.format(@vanished_count))
       rescue #except IOError as e:
-        code, message = e.args
-        logging.error('cannot write {0}'.format(path))
+        #code, message = e.args
+        #logging.error('cannot write {0}'.format(path))
       end
     end
 
@@ -294,8 +294,8 @@ module Sakura
                    @shell_directory))
         end
       rescue #except IOError as e:
-        code, message = e.args
-        logging.error('cannot write {0}'.format(path))
+        #code, message = e.args
+        #logging.error('cannot write {0}'.format(path))
       end
     end
 
@@ -327,8 +327,8 @@ module Sakura
             end
           end
         rescue #except IOError as e:
-          code, message = e.args
-          logging.error('cannot read {0}'.format(path))
+          #code, message = e.args
+          #logging.error('cannot read {0}'.format(path))
           @ghost_time = ghost_time
           @vanished_count = ghost_vanished_count
         else
@@ -358,8 +358,8 @@ module Sakura
             end
           end
         rescue #except IOError as e:
-          code, message = e.args
-          logging.error('cannot read {0}'.format(path))
+          #code, message = e.args
+          #logging.error('cannot read {0}'.format(path))
         end
         @balloon_directory = balloon_directory
         @shell_directory = shell_directory
@@ -379,12 +379,12 @@ module Sakura
         #               get_selfname(), @shiori_name))
       end
       @__charset = 'Shift_JIS' # default
-      get_event_response('OnInitialize', event_type='NOTIFY')
+      get_event_response('OnInitialize', :event_type => 'NOTIFY')
       get_event_response('basewareversion',
                          Version.VERSION,
                          'ninix-aya',
                          Version.NUMBER,
-                         event_type='NOTIFY')
+                         :event_type => 'NOTIFY')
     end
 
     def finalize()
@@ -395,7 +395,7 @@ module Sakura
         @script_finally = []
       end
       if @__temp_mode == 0
-        get_event_response('OnDestroy', event_type='NOTIFY')
+        get_event_response('OnDestroy', :event_type => 'NOTIFY')
         @shiori.unload()
       end
       stop()
@@ -435,21 +435,21 @@ module Sakura
       elsif t == Gst::MessageType::ERROR
         @audio_player.set_state(Gst::State::NULL)
         err, debug = message.parse_error()
-        logging.error('Error: {0}, {1}'.format(err, debug))
+        #logging.error('Error: {0}, {1}'.format(err, debug))
         @audio_loop = false
       end
     end
 
     def set_surface(desc, surface_alias, surface, name, surface_dir, tooltips, seriko_descript)
-      default_sakura = @desc.get('sakura.seriko.defaultsurface', '0')
-      default_kero = @desc.get('kero.seriko.defaultsurface', '10')
+      default_sakura = @desc.get('sakura.seriko.defaultsurface', :default => '0')
+      default_kero = @desc.get('kero.seriko.defaultsurface', :default => '10')
       @surface.new_(desc, surface_alias, surface, name, surface_dir, tooltips, seriko_descript,
                    default_sakura, default_kero)
       for side in 2..@char-1
         default = @desc.get('char' + side.to_s + '.seriko.defaultsurface')
         @surface.add_window(side, default)
       end
-      icon = @desc.get('icon', nil)
+      icon = @desc.get('icon', :default => nil)
       if icon != nil
         icon_path = File.join(@shiori_dir, icon)
         if not File.exist?(icon_path)
@@ -540,7 +540,7 @@ module Sakura
     def handle_event() ## FIXME
       while not @event_queue.empty?
         event, arglist, argdict = @event_queue.pop(0)
-        proc = argdict.get('proc', nil)
+        proc = argdict.get('proc', :default => nil)
         argdict = {'default' => EVENT_SCRIPTS.get(event)}
         if notify_event(event, *arglist, **argdict)
           if proc != nil
@@ -708,33 +708,33 @@ module Sakura
     end
 
     def get_name(default=_('Sakura&Unyuu'))
-      return @desc.get('name', default)
+      return @desc.get('name', :default => default)
     end
 
     def get_username()
       return (getstring('username') or \
               @surface.get_username() or \
-              @desc.get('user.defaultname', _('User')))
+              @desc.get('user.defaultname', :default => _('User')))
     end
 
     def get_selfname(default=_('Sakura'))
       return (@surface.get_selfname() or \
-              @desc.get('sakura.name', default))
+              @desc.get('sakura.name', :default => default))
     end
 
     def get_selfname2()
       return (@surface.get_selfname2() or \
-              @desc.get('sakura.name2', _('Sakura')))
+              @desc.get('sakura.name2', :default => _('Sakura')))
     end
 
     def get_keroname()
       return (@surface.get_keroname() or \
-              @desc.get('kero.name', _('Unyuu')))
+              @desc.get('kero.name', :default => _('Unyuu')))
     end
 
     def get_friendname()
       return (@surface.get_friendname() or \
-              @desc.get('sakura.friend.name', _('Tomoyo')))
+              @desc.get('sakura.friend.name', :default => _('Tomoyo')))
     end
 
     def getaistringrandom() # obsolete
@@ -761,7 +761,7 @@ module Sakura
         if @use_makoto
           s = Makoto.execute(s)
         else
-          r = get_event_response('OnTranslate', s, translate=0)
+          r = get_event_response('OnTranslate', s, :translate => 0)
           if r
             s = r
           end
@@ -773,7 +773,7 @@ module Sakura
     def get_value(response) # FIXME: check return code
       result = {}
       to = nil
-      for line in response.splitlines()
+      for line in response.split
         line = str(line, @__charset, 'ignore').strip()
         if line.empty?
           next
@@ -789,8 +789,8 @@ module Sakura
             begin
               codecs.lookup(charset)
             rescue #except:
-              logging.warning(
-                'Unsupported charset {0}'.format(repr(charset)))
+              #logging.warning(
+              #  'Unsupported charset {0}'.format(repr(charset)))
             else
               @__charset = charset
             end
@@ -798,8 +798,8 @@ module Sakura
         end
         result[key] = value
       end
-      for key, value in result.items()
-        result[key] = value.strip()
+      for key in result.keys
+        result[key].strip!
       end
       if result.include?('Reference0')
         to = result['Reference0']
@@ -811,7 +811,8 @@ module Sakura
       end
     end
 
-    def get_event_response_with_communication(event, *arglist, **argdict)
+    def get_event_response_with_communication(event, *arglist,
+                                              event_type: 'GET', translate: 1)
       if @__temp_mode == 1
         return ''
       end
@@ -819,25 +820,24 @@ module Sakura
       #  assert ['event_type', 'translate'].include?(key) # trap typo, etc.
       #end
       ref = arglist
-      event_type = argdict.get('event_type', 'GET')
-      translate = argdict.get('translate', 1)
-      header = ''.join(['{0} SHIORI/3.0\r\n'.format(event_type),
-                        'Sender: {0}\r\n'.format(@__sender),
-                        'ID: {0}\r\n'.format(event),
-                        'SecurityLevel: local\r\n',
-                        'Charset: {0}\r\n'.format(@__charset)])
+      #event_type = argdict.get('event_type', :default => 'GET')
+      #translate = argdict.get('translate', :default => 1)
+      header = [event_type.to_s, ' SHIORI/3.0\r\n',
+                'Sender: ', @__sender.to_s, '\r\n',
+                'ID: ', event.to_s, '\r\n',
+                'SecurityLevel: local\r\n',
+                'Charset: ', @__charset.to_s, '\r\n'].join('')
       for i in 0..ref.length-1
         value = ref[i]
         if value != nil
-          value = value if isinstance(value, str) \
-        else value.to_s
-          header = ''.join([header,
-                            'Reference', i.to_s, ': ',
-                            value, '\r\n'])
+          value = value.to_s
+          header = [header,
+                    'Reference', i.to_s, ': ',
+                    value, '\r\n'].join('')
         end
       end
-      header = ''.join([header, '\r\n'])
-      header = header.encode(@__charset, 'ignore')
+      header = [header, '\r\n'].join('')
+      header = header.encode(@__charset, :invalid => :replace, :undef => :replace)
       response = @shiori.request(header)
       if event_type != 'NOTIFY' and @cantalk
         result, to = get_value(response)
@@ -858,8 +858,10 @@ module Sakura
       return result, communication
     end
 
-    def get_event_response(event, *arglist, **argdict)
-      result, communication = get_event_response_with_communication(event, *arglist, **argdict)
+    def get_event_response(event, *arglist, event_type: 'GET', translate: 1)
+      result, communication = get_event_response_with_communication(
+                event, *arglist,
+                :event_type => event_type, :translate => translate)
       return result
     end
 
@@ -898,7 +900,7 @@ module Sakura
         end
         left, top, scrn_w, scrn_h = Pix.get_workarea()
         notify_event('OnDisplayChange',
-                     Gdk.Visual.get_best_depth(),
+                     Gdk::Visual.best_depth,
                      scrn_w, scrn_h, event_type='NOTIFY')
       elsif vanished
         if @ghost_time == 0
@@ -997,7 +999,7 @@ module Sakura
         stand_by(false)
       elsif @sstp_entry_db
         # leave the previous sstp message as it is
-        start_script(@sstp_entry_db.get(link_id, '\e'))
+        start_script(@sstp_entry_db.get(link_id, :default => '\e'))
         @sstp_entry_db = nil
       elsif not notify_event('OnChoiceSelect', link_id, text, number)
         reset_script(true)
@@ -1175,13 +1177,13 @@ module Sakura
     end
 
 
-    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    boot_event = ['OnBoot', 'OnFirstBoot', 'OnGhostChanged', 'OnShellChanged',
+    BOOT_EVENT = ['OnBoot', 'OnFirstBoot', 'OnGhostChanged', 'OnShellChanged',
                   'OnUpdateComplete']
     RESET_EVENT = ['OnVanishSelecting', 'OnVanishCancel'] ## FIXME
 
-    def notify_event(event, *arglist, **argdict)
+    def notify_event(event, *arglist, event_type: 'GET', default: nil)
       if @time_critical_session and event.startswith('OnMouse')
         return 0
       end
@@ -1191,28 +1193,28 @@ module Sakura
       #for key in argdict
       #  assert ['event_type', 'default'].include?(key) # trap typo, etc.
       #end
-      event_type = argdict.get('event_type', 'GET')
-      default = argdict.get('default', nil)
-      argdict = {'event_type' => event_type} ## FIXME
-      result = get_event_response_with_communication(event, *arglist, **argdict)
+      #event_type = argdict.get('event_type', :default => 'GET')
+      #default = argdict.get('default', :default => nil)
+      #argdict = {'event_type' => event_type} ## FIXME
+      result = get_event_response_with_communication(event, *arglist,
+                                                     :event_type => event_type)
       if result != nil
         script, communication = result
       else
         script, communication = [default, nil]
       end
       if not script.empty? or (script.empty? and event != 'OnSecondChange')
-        t = time.localtime(time.time())
-        m = @month_names[t[1] - 1]
-        logging.debug('\n[{0:02d}/{1}/{2:d}:{3:02d}:{4:02d}:{5:02d} {6:+05d}]'.format(
-                       t[2], m, t[0], t[3], t[4], t[5], (- time.timezone / 36).to_i))
-        logging.debug('Event: {0}'.format(event))
+        t = Time.new.localtime.to_a
+        m = MONTH_NAMES[t[4] - 1]
+        #logging.debug('\n[{0:02d}/{1}/{2:d}:{3:02d}:{4:02d}:{5:02d} {6:+05d}]'.format(
+        #               t[2], m, t[0], t[3], t[4], t[5], (- time.timezone / 36).to_i))
+        #logging.debug('Event: {0}'.format(event))
         for n in 0..arglist.length-1
           value = arglist[n]
           if value != nil
-            value = value if isinstance(value, str) \
-          else value.to_s
-            logging.debug(
-              'Reference{0:d}: {1}'.format(n, value))
+            value = value.to_s
+            #logging.debug(
+            #  'Reference{0:d}: {1}'.format(n, value))
           end
         end
       end
@@ -1220,7 +1222,7 @@ module Sakura
         @force_quit = true
         if script.empty? # fallback
           result = get_event_response_with_communication(
-            'OnClose', *arglist, **argdict)
+            'OnClose', *arglist, :event_type => event_type)
           if result != nil
             script, communication = result
           else
@@ -1237,7 +1239,7 @@ module Sakura
         @force_quit = true
       end
       if script.empty? # an empty script is ignored
-        if @boot_event.include?(event)
+        if BOOT_EVENT.include?(event)
           surface_bootup()
         end
         if event == 'OnMouseClick' and arglist[5] == 1
@@ -1253,7 +1255,7 @@ module Sakura
           nil, false, script, arglist)
         return 0
       end
-      logging.debug('=> "{0}"'.format(script))
+      #logging.debug('=> "{0}"'.format(script))
       if @__temp_mode == 2
         @parent.handle_request('NOTIFY', 'reset_sstp_flag')
         leave_temp_mode()
@@ -1407,13 +1409,13 @@ module Sakura
     def get_default_shell()
       default = @shell_directory or 'master'            
       if not @shells.include?(default)
-        default = list(@shells.keys())[0] # XXX
+        default = @shells.keys()[0] # XXX
       end
       return default
     end
 
     def get_balloon_default_id()
-      return @desc.get('balloon.defaultsurface', '0')
+      return @desc.get('balloon.defaultsurface', :default => '0')
     end
 
     def select_shell(shell_key)
@@ -1422,7 +1424,7 @@ module Sakura
       surface_name, surface_dir, surface_desc, surface_alias, surface, surface_tooltips, seriko_descript = \
                                                                                          @shells[shell_key].baseinfo
       def proc(arg=self, key=shell_key)
-        logging.info('ghost {0} {1}'.format(@key, key))
+        #logging.info('ghost {0} {1}'.format(@key, key))
         set_surface(surface_desc, surface_alias, surface, surface_name,
                     surface_dir, surface_tooltips, seriko_descript)
         @surface.reset_alignment()
@@ -1445,8 +1447,8 @@ module Sakura
       set_balloon(desc, balloon)
       @balloon.set_balloon_default()
       position_balloons()
-      name = desc.get('name', '')
-      logging.info('balloon {0} {1}'.format(name, path))
+      name = desc.get('name', :default => '')
+      #logging.info('balloon {0} {1}'.format(name, path))
       notify_event('OnBalloonChange', name, path)
     end
 
@@ -1460,9 +1462,9 @@ module Sakura
     end
 
     def get_uptime()
-      uptime = ((time.time() - @start_time).to_i / 3600).to_i
+      uptime = ((Time.new.to_f - @start_time).to_i / 3600).to_i
       if uptime < 0
-        @start_time = time.time()
+        @start_time = Time.new.to_f
         return 0
       end
       return uptime
@@ -1593,8 +1595,8 @@ module Sakura
     def stand_by(reset_surface)
       @balloon.hide_all()
       @balloon.hide_sstp_message()
-      default_sakura = @desc.get('sakura.seriko.defaultsurface', '0')
-      default_kero = @desc.get('kero.seriko.defaultsurface', '10')
+      default_sakura = @desc.get('sakura.seriko.defaultsurface', :default => '0')
+      default_kero = @desc.get('kero.seriko.defaultsurface', :default => '10')
       if reset_surface
         set_surface_default()
         @balloon.set_balloon_default()
@@ -1628,7 +1630,7 @@ module Sakura
       @__temp_mode = temp
       @key = key
       @force_quit = false
-      logging.info('ghost {0}'.format(key))
+      #logging.info('ghost {0}'.format(key))
       load_settings()
       shell_key = get_default_shell()
       @shell_directory = shell_key # XXX
@@ -1644,8 +1646,8 @@ module Sakura
                        surface_dir, surface_tooltips, seriko_descript)
       balloon = nil
       if not @parent.handle_request('GET', 'get_preference', 'ignore_default') ## FIXME: change prefs key
-        balloon_path = @desc.get('deault.balloon.path', '')
-        balloon_name = @desc.get('balloon', '')
+        balloon_path = @desc.get('deault.balloon.path', :default => '')
+        balloon_name = @desc.get('balloon', :default => '')
         if not balloon_path.empty?
           balloon = @parent.handle_request(
             'GET', 'find_balloon_by_subdir', balloon_path)
@@ -1670,11 +1672,11 @@ module Sakura
         load_shiori()
       end
       restart()
-      @start_time = time.time()
+      @start_time = Time.new.to_f
       notify_start(
         init, vanished, ghost_changed,
         name, prev_name, prev_shell, surface_dir, last_script, abend)
-      GLib.timeout_add(10, self.do_idle_tasks) # 10[ms]
+      GLib::Timeout.add(10) { do_idle_tasks } # 10[ms]
     end
 
     def restart()
@@ -1710,9 +1712,9 @@ module Sakura
     end
 
     def process_script()
-      now = time.time()
+      now = Time.new
       idle = get_idle_time()
-      minute, second = time.localtime(now)[4, 6]
+      second, minute = now.localtime.to_a[0, 2]
       if @clock[0] != second ## FIXME
         if @__temp_mode == 0
           @ghost_time += 1
@@ -1720,18 +1722,14 @@ module Sakura
         @parent.handle_request(
           'NOTIFY', 'rebuild_ghostdb',
           self,
-          get_selfname(),
-          get_surface_id(0),
-          get_surface_id(1))
+          :name => get_selfname(),
+          :s0 => get_surface_id(0),
+          :s1 => get_surface_id(1))
         otherghostname = @parent.handle_request(
           'GET', 'get_otherghostname', get_selfname())
         if otherghostname != @old_otherghostname
-          args = []
-          args.extend(otherghostname)
-          args.insert(0, 'otherghostname')
-          args = tuple(args)
-          keyword = {'event_type' => 'NOTIFY'}
-          notify_event(*args, **keyword)
+          notify_event('otherghostname', [otherghostname],
+                       :event_type => 'NOTIFY')
         end
         @old_otherghostname = otherghostname
       end
@@ -1772,7 +1770,7 @@ module Sakura
         close_sstp_handle()
       elsif @balloon.user_interaction
         #pass
-      elsif idle > @__balloon_life > 0 and not @passivemode
+      elsif idle > @__balloon_life and @__balloon_life > 0 and not @passivemode
         @__balloon_life = 0
         for side in 0..@char-1
           if balloon_is_shown(side)
@@ -1815,7 +1813,7 @@ module Sakura
           @script_finally << proc
         end
       elsif get_silent_time() > 0
-        if now - get_silent_time() > SILENT_TIME
+        if now.to_f - get_silent_time() > SILENT_TIME
           keep_silence(false)
         end
       elsif @clock[0] != second and \
@@ -1834,7 +1832,7 @@ module Sakura
         side, x, y, part = @surface_mouse_motion
         notify_event('OnMouseMove', x, y, '', side, part)
         @surface_mouse_motion = nil
-      elsif idle > @__surface_life > 0 and not @passivemode
+      elsif idle > @__surface_life and @__surface_life > 0 and not @passivemode
         @__surface_life = 0
         notify_event('OnSurfaceRestore',
                      get_surface_id(0),
@@ -1934,8 +1932,8 @@ module Sakura
         begin
           @processed_script.extend(@script_parser.parse(script))
         rescue #except ninix.script.ParserError as e:
-          logging.error('-' * 50)
-          logging.error('{0}'.format(e)) # 'UTF-8'
+          #logging.error('-' * 50)
+          #logging.error('{0}'.format(e)) # 'UTF-8'
           done, script = e
           @processed_script.extend(done)
         else
@@ -2172,7 +2170,7 @@ module Sakura
       end
       text = expand_meta(text)
       @balloon.append_link(@script_side, link_id, text,
-                           newline_required)
+                           :newline_required => newline_required)
       @script_mode = SELECT_MODE
     end
 
@@ -2234,7 +2232,7 @@ module Sakura
       if is_URL(jump_id)
         webbrowser.open(jump_id)
       elsif @sstp_entry_db
-        start_script(@sstp_entry_db.get(jump_id, '\e'))
+        start_script(@sstp_entry_db.get(jump_id, :default => '\e'))
       end
     end
 
@@ -2357,17 +2355,17 @@ module Sakura
         @balloon.open_teachbox()
       elsif args[0, 2] == ['open', 'inputbox'] and argc > 2
         if argc > 4
-          @balloon.open_inputbox(args[2], args[3], args[4])
+          @balloon.open_inputbox(args[2], :limittime => args[3], :default => args[4])
         elsif argc == 4
-          @balloon.open_inputbox(args[2], args[3])
+          @balloon.open_inputbox(args[2], :limittime => args[3])
           else
             @balloon.open_inputbox(args[2])
         end
       elsif args[0, 2] == ['open', 'passwordinputbox'] and argc > 2
         if argc > 4
-          @balloon.open_passwordinputbox(args[2], args[3], args[4])
+          @balloon.open_passwordinputbox(args[2], :limittime => args[3], :default => args[4])
         elsif argc == 4
-          @balloon.open_passwordinputbox(args[2], args[3])
+          @balloon.open_passwordinputbox(args[2], :limittime => args[3])
         else
           @balloon.open_passwordinputbox(args[2])
         end
@@ -2970,8 +2968,8 @@ module Sakura
         return
       end
       ghostdir = get_prefix()
-      logging.info('homeurl = {0}'.format(homeurl))
-      logging.info('ghostdir = {0}'.format(ghostdir))
+      #logging.info('homeurl = {0}'.format(homeurl))
+      #logging.info('ghostdir = {0}'.format(ghostdir))
       @updateman.start(homeurl, ghostdir)
     end
 

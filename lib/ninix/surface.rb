@@ -22,6 +22,7 @@ require "ninix/seriko"
 module Surface
 
   class Surface
+    attr_reader :name
 
     def initialize
       @window = []
@@ -226,7 +227,7 @@ module Surface
       surfaces = {}
       elements = {}
       begin
-        maxwidth = @seriko_descript.get('maxwidth', '0').to_i
+        maxwidth = @seriko_descript.get('maxwidth', :default => '0').to_i
       rescue # except:
         maxwidth = 0
       end
@@ -393,16 +394,16 @@ module Surface
     end
 
     def get_menu_fontcolor
-      fontcolor_r = @desc.get('menu.background.font.color.r', 0).to_i
-      fontcolor_g = @desc.get('menu.background.font.color.g', 0).to_i
-      fontcolor_b = @desc.get('menu.background.font.color.b', 0).to_i
+      fontcolor_r = @desc.get('menu.background.font.color.r', :default => 0).to_i
+      fontcolor_g = @desc.get('menu.background.font.color.g', :default => 0).to_i
+      fontcolor_b = @desc.get('menu.background.font.color.b', :default => 0).to_i
       fontcolor_r = [0, [255, fontcolor_r].min].max
       fontcolor_g = [0, [255, fontcolor_g].min].max
       fontcolor_b = [0, [255, fontcolor_b].min].max
       background = [fontcolor_r, fontcolor_g, fontcolor_b]
-      fontcolor_r = @desc.get('menu.foreground.font.color.r', 0).to_i
-      fontcolor_g = @desc.get('menu.foreground.font.color.g', 0).to_i
-      fontcolor_b = @desc.get('menu.foreground.font.color.b', 0).to_i
+      fontcolor_r = @desc.get('menu.foreground.font.color.r', :default => 0).to_i
+      fontcolor_g = @desc.get('menu.foreground.font.color.g', :default => 0).to_i
+      fontcolor_b = @desc.get('menu.foreground.font.color.b', :default => 0).to_i
       fontcolor_r = [0, [255, fontcolor_r].min].max
       fontcolor_g = [0, [255, fontcolor_g].min].max
       fontcolor_b = [0, [255, fontcolor_b].min].max
@@ -433,16 +434,16 @@ module Surface
       bind = {}
       for index in 0..127
         group = @desc.get(
-          name + '.bindgroup' + index.to_i.to_s + '.name', nil)
+          name + '.bindgroup' + index.to_i.to_s + '.name', :default => nil)
         default = @desc.get(
-          name + '.bindgroup' + index.to_i.to_s + '.default', 0)
+          name + '.bindgroup' + index.to_i.to_s + '.default', :default => 0)
         if group != nil
           bind[index] = [group, default != 0]
         end
       end
       @mayuna[name] = []
       for index in 0..127
-        key = @desc.get(name + '.menuitem' + index.to_i.to_s, nil)
+        key = @desc.get(name + '.menuitem' + index.to_i.to_s, :default => nil)
         if key == '-'
           @mayuna[name] << [key, nil, 0]
         else
@@ -1118,7 +1119,7 @@ module Surface
       @seriko.append_actor(frame, actor)
     end
 
-    def invoke(actor_id, update=0)
+    def invoke(actor_id, update: 0)
       @seriko.invoke(self, actor_id, update)
     end
 
@@ -1199,16 +1200,19 @@ module Surface
     end
 
     def iter_mayuna(surface_width, surface_height, mayuna, done)
+      mayuna_list = [] # XXX: FIXME
       for surface_id, interval, method, args in mayuna.get_patterns
         if ['bind', 'add'].include?(method)
           if @surfaces.include?(surface_id)
             dest_x, dest_y = args
-            yield method, surface_id, dest_x, dest_y
+#            yield method, surface_id, dest_x, dest_y
+            mayuna_list << [method, surface_id, dest_x, dest_y]
           end
         elsif method == 'reduce'
           if @surfaces.include?(surface_id)
             dest_x, dest_y = args
-            yield method, surface_id, dest_x, dest_y
+#            yield method, surface_id, dest_x, dest_y
+            mayuna_list << [method, surface_id, dest_x, dest_y]
           end
         elsif method == 'insert'
           index = args[0]
@@ -1219,7 +1223,8 @@ module Surface
                 not done.include?(actor_id)
                 done << actor_id
                 for result in iter_mayuna(surface_width, surface_height, actor, done)
-                  yield result
+#                  yield result
+                  mayuna_list += result
                 end
               else
                 break
@@ -1230,6 +1235,7 @@ module Surface
           raise RuntimeError('should not reach here')
         end
       end
+      return mayuna_list
     end
     
     def create_surface_from_file(surface_id, is_asis=false)

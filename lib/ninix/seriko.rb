@@ -432,9 +432,9 @@ module Seriko
       elsif method == 'base'
         window.get_seriko.set_base_id(window, surface) ## FIXME
       elsif method == 'start'
-        window.invoke(args[0], update=1)
+        window.invoke(args[0], :update => 1)
       elsif method == 'alternativestart'
-        window.invoke(args.sample, update=1)
+        window.invoke(args.sample, :update => 1)
       elsif method == 'stop'
         window.get_seriko.stop_actor(args[0]) ## FIXME
       elsif method == 'alternativestop'
@@ -899,7 +899,7 @@ ed)', "\n")
           actor.add_pattern(surface, interval, method, args)
         end
       rescue # except ValueError as error:
-        logging.error('seriko.py: ' + error.to_s)
+        #logging.error('seriko.py: ' + error.to_s)
         next
       end
       if actor.get_patterns().empty?

@@ -308,7 +308,7 @@ module Ninix_Main
           sstp_server.handle_request()
         end
       rescue # except socket.error as e:
-        code, message = e.args
+        #code, message = e.args
         #logging.error('socket.error: {0} ({1:d})'.format(message, code))
       rescue # except ValueError: # may happen when ninix is terminated
         return
@@ -331,9 +331,9 @@ module Ninix_Main
     def start_servers
       for port in @sstp_port
         begin
-          server = SSTP.SSTPServer.new(['', port])
+          server = SSTP.SSTPServer.new(port)
         rescue # except socket.error as e:
-          code, message = e.args
+          #code, message = e.args
           #logging.warning(
           #  'Port {0:d}: {1} (ignored)'.format(port, message))
           next
@@ -480,8 +480,8 @@ module Ninix_Main
           data[key] = value
         end
       rescue # except IOError as e:
-        code, message = e.args
-        logging.error('cannot read {0}'.format(path))
+        #code, message = e.args
+        #logging.error('cannot read {0}'.format(path))
       end
       return data
     end
@@ -602,7 +602,7 @@ module Ninix_Main
     def create_menuitem(data)
       desc, balloon = data
       subdir = balloon['balloon_dir'][0]
-      name = desc.get('name', subdir)
+      name = desc.get('name', :default => subdir)
       home_dir = Home.get_ninix_home()
       thumbnail_path = File.join(home_dir, 'balloon',
                                  subdir, 'thumbnail.png')
@@ -863,7 +863,7 @@ module Ninix_Main
       for value in @balloons.values()
         desc, balloon = value.baseinfo
         subdir = balloon['balloon_dir'][0]
-        installed << desc.get('name', subdir)
+        installed << desc.get('name', :default => subdir)
       end
       if key != nil
         if @ghosts.include?(key)
@@ -923,6 +923,7 @@ module Ninix_Main
     end
 
     def get_working_ghost(cantalk=false)
+      ghosts = []
       for value in @ghosts.values()
         sakura = value.instance
         if sakura == nil
@@ -934,8 +935,10 @@ module Ninix_Main
         if cantalk and not sakura.cantalk
           next
         end
-        yield sakura
+#        yield sakura
+        ghosts << sakura
       end
+      return ghosts
     end
 
     def get_sakura_prefix
@@ -975,7 +978,7 @@ module Ninix_Main
         caller = @__menu_owner
       end
       caller.notify_event('OnGhostCalling', sakura_name, 'manual', name, key)
-      start_sakura(key, init=true) # XXX
+      start_sakura(key, :init => true) # XXX
     end
 
     def select_sakura(key)
@@ -1050,7 +1053,6 @@ module Ninix_Main
       for key in @balloons.keys()
         balloon_menuitems[key] = @balloons[key].menuitem
       end
-      print("ITEMS: ", balloon_menuitems, "\n")
       return @__menu.create_meme_menu(balloon_menuitems)
     end
 
@@ -1067,7 +1069,7 @@ module Ninix_Main
     def create_menuitem(key, baseinfo)
       desc = baseinfo[0]
       shiori_dir = baseinfo[1]
-      icon = desc.get('icon', nil)
+      icon = desc.get('icon', :default => nil)
       if icon != nil
         icon_path = File.join(shiori_dir, icon)
         if not File.exists?(icon_path)
@@ -1104,7 +1106,7 @@ module Ninix_Main
       for key in @balloons.keys()
         desc, balloon = @balloons[key].baseinfo
         subdir = balloon['balloon_dir'][0]
-        name = desc.get('name', subdir)
+        name = desc.get('name', :default => subdir)
         balloon_list << [name, subdir]
       end
       return balloon_list
@@ -1166,7 +1168,7 @@ module Ninix_Main
       ##for i, name in enumerate(self.get_ghost_names()):
       ##    logging.info(
       ##        'GHOST({0:d}): {1}'.format(i, name))
-      start_sakura(@current_sakura, init=true, abend=@abend)
+      start_sakura(@current_sakura, :init => true, :abend => @abend)
     end
 
     def find_ghost_by_dir(directory)
@@ -1213,7 +1215,7 @@ module Ninix_Main
     end
 
     def find_balloon_by_subdir(subdir)
-      for key in @balloons
+      for key in @balloons.keys
         desc, balloon = @balloons[key].baseinfo
         begin
           if balloon['balloon_dir'][0] == subdir
@@ -1282,7 +1284,7 @@ module Ninix_Main
       end
       sakura = @ghosts[key].instance
       if not sakura.is_running()
-        start_sakura(key, init=true)
+        start_sakura(key, :init => true)
       end
       sakura.enqueue_script(nil, '\![updatebymyself]\e', sender,
                             nil, nil, 0, 0, nil)
@@ -1299,7 +1301,7 @@ module Ninix_Main
           if sakura.ifghost(ifghost)
             if not sakura.is_running()
               @current_sakura = value.key
-              start_sakura(@current_sakura, init=true, temp=1) ## FIXME
+              start_sakura(@current_sakura, :init => true, :temp => 1) ## FIXME
             else
               @current_sakura = sakura.key
             end
@@ -1391,14 +1393,14 @@ module Ninix_Main
       end
       proc = lambda { stop_sakura(
                         sakura,
-                        lambda {|key, prev| start_sakura(key, prev) },
+                        lambda {|key, prev| start_sakura(key, :prev => prev) },
                         key, sakura.key) }
 #      def proc(self=self, key=key)
 #        stop_sakura(sakura, self.start_sakura, key, sakura.key)
 #      end
       if vanished
         sakura.finalize()
-        start_sakura(key, sakura.key, vanished)
+        start_sakura(key, :prev => sakura.key, :vanished => vanished)
         close_ghost(sakura)
       elsif not event
         proc()
@@ -1419,7 +1421,7 @@ module Ninix_Main
       close_ghost(sakura)
     end
 
-    def start_sakura(key, prev=nil, vanished=false, init=false, temp=false, abend=nil)
+    def start_sakura(key, prev: nil, vanished: false, init: false, temp: false, abend: nil)
       sakura = @ghosts[key].instance
       #assert sakura != nil
       if prev != nil
@@ -1486,7 +1488,7 @@ module Ninix_Main
       save_preferences()
       key = sakura.key
       ghost_dir = File.split(sakura.get_prefix())[1] # XXX
-      ghost_conf = Home.search_ghosts([ghost_dir])
+      ghost_conf = Home.search_ghosts(:target => [ghost_dir])
       if ghost_conf
         @ghosts[key].baseinfo = ghost_conf[key]
       else
@@ -1494,7 +1496,7 @@ module Ninix_Main
         del @ghosts[key]
         return ## FIXME
       end
-      start_sakura(key, key, init=true) 
+      start_sakura(key, :prev => key, :init => true) 
     end
 
     def add_sakura(ghost_dir)
@@ -1505,7 +1507,7 @@ module Ninix_Main
         exists = false
         #logging.info('NEW GHOST INSTALLED: {0}'.format(ghost_dir))
       end
-      ghost_conf = Home.search_ghosts([ghost_dir])
+      ghost_conf = Home.search_ghosts(:target => [ghost_dir])
       if not ghost_conf.empty?
         if exists
           sakura = @ghosts[ghost_dir].instance
@@ -1514,13 +1516,13 @@ module Ninix_Main
             proc = lambda {
               @ghosts[ghost_dir].baseinfo = ghost_conf[ghost_dir]
               logging.info('restarting....')
-              start_sakura(key, key, init=true)
+              start_sakura(key, :prev => key, :init => true)
               logging.info('done.')
             }
 #            def proc(self=self)
 #              @ghosts[ghost_dir].baseinfo = ghost_conf[ghost_dir]
 #              logging.info('restarting....')
-#              start_sakura(key, key, init=true)
+#              start_sakura(key, :prev => key, :init => true)
 #              logging.info('done.')
 #            end
             stop_sakura(sakura, proc)
@@ -1551,7 +1553,7 @@ module Ninix_Main
         exists = false
         #logging.info('NEW BALLOON INSTALLED: {0}'.format(balloon_dir))
       end
-      balloon_conf = Home.search_balloons([balloon_dir])
+      balloon_conf = Home.search_balloons(:target => [balloon_dir])
       if not balloon_conf.empty?
         if exists
           @balloons[balloon_dir].baseinfo = balloon_conf[balloon_dir]

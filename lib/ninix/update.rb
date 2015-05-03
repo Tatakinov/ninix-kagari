@@ -68,7 +68,7 @@ module Update
       end
     end
 
-    def start(homeurl, ghostdir, timeout=60)
+    def start(homeurl, ghostdir, timeout: 60)
       begin
         url = URI.parse(homeurl)
       rescue
@@ -98,10 +98,10 @@ module Update
                              'OnUpdateFailure', 'artificial', '', '',
                              'ghost') # XXX
       @state = nil
-      stop(revert=true)
+      stop(:revert => true)
     end
 
-    def stop(revert=false)
+    def stop(revert: false)
       @buffer = []
       if revert
         for path in @backups
@@ -168,7 +168,7 @@ module Update
         filename, checksum = @schedule[0]
 #        logging.info('UPDATE: {0} {1}'.format(filename, checksum))
         download(File.join(@path, URI.escape(filename)),
-                 event=1)
+                 :event => true)
       elsif (@state - len_pre) % len_state == 1
         connect()
       elsif (@state - len_pre) % len_state == 2
@@ -191,7 +191,7 @@ module Update
       download(File.join(@path, 'updates2.dau'))
     end
 
-    def download(locator, event=false)
+    def download(locator, event: false)
       @locator = URI.escape(locator)
       @http = Net::HTTP.new(@host, @port)
       if event
@@ -215,7 +215,7 @@ module Update
         enqueue_event('OnUpdateFailure', 'timeout', '', '',
                       'ghost') # XXX
         @state = nil
-        stop(revert=true)
+        stop(:revert => true)
         return
       end
       code = @response.code.to_i
@@ -280,7 +280,7 @@ module Update
           enqueue_event('OnUpdateFailure', 'timeout', '', '',
                         'ghost') # XXX
           @state = nil
-          stop(revert=true)
+          stop(:revert => true)
           return
         elsif data == nil
           return
@@ -290,7 +290,7 @@ module Update
                       'OnUpdateFailure', 'data retrieval failed', '', '',
                       'ghost') # XXX
         @state = nil
-        stop(revert=true)
+        stop(:revert => true)
         return
       end
       if not data.empty?
@@ -300,7 +300,7 @@ module Update
         enqueue_event('OnUpdateFailure', 'timeout', '', '',
                       'ghost') # XXX
         @state = nil
-        stop(revert=true)
+        stop(:revert => true)
         return
       end
       @state += 1
@@ -405,7 +405,7 @@ module Update
                           path, '',
                           'ghost') # XXX
             @state = nil
-            stop(revert=true)
+            stop(:revert => true)
             return
           end
         end
@@ -429,7 +429,7 @@ module Update
                           path, '',
                           'ghost') # XXX
             @state = nil
-            stop(revert=true)
+            stop(:revert => true)
             return
           end
         rescue #except IOError:
@@ -439,7 +439,7 @@ module Update
                         path, '',
                         'ghost') # XXX
           @state = nil
-          stop(revert=true)
+          stop(:revert => true)
           return
         end
         @updated_files << filename
@@ -449,7 +449,7 @@ module Update
         enqueue_event(event, filename, checksum, digest,
                       'ghost') # XXX
         @state = nil
-        stop(revert=true)
+        stop(:revert => true)
         return
       end
       enqueue_event(event, filename, checksum, digest)

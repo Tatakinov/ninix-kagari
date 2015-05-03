@@ -19,7 +19,7 @@ module SSTPLib
 
   class SSTPServer < TCPServer
 
-    def initialize(hostname="", port)
+    def initialize(port, hostname: "")
       super(hostname, port)
       setsockopt(Socket::SOL_SOCKET, Socket::SO_REUSEADDR, true)
     end
@@ -108,7 +108,7 @@ module SSTPLib
       match = re_requestsyntax.match(requestline)
       if not match
         @equestline = '-'
-        send_error(400, 'Bad Request ' + requestline.to_s)
+        send_error(400, :message => 'Bad Request ' + requestline.to_s)
         return 0
       end
       @command, @version = match[1, 2]
@@ -127,19 +127,19 @@ module SSTPLib
       rescue
         send_error(
           501,
-          'Not Implemented (' + @command + '/' + @version + ')')
+          :message => 'Not Implemented (' + @command + '/' + @version + ')')
         return
       end
     end
 
-    def send_error(code, message=nil)
+    def send_error(code, message: nil)
       @error = code
       log_error((message or RESPONSES[code]))
-      send_response(code, RESPONSES[code])
+      send_response(code, :message => RESPONSES[code])
     end
 
-    def send_response(code, message=nil)
-      log_request(code, message)
+    def send_response(code, message: nil)
+      log_request(code, :message => message)
       @fp.write("SSTP/" + (@version or "1.0") + " " + code.to_i.to_s + " " + RESPONSES[code] + "\r\n\r\n")
     end
 
@@ -147,7 +147,7 @@ module SSTPLib
 #      logging.error('[{0}] {1}\n'.format(self.timestamp(), message))
     end
 
-    def log_request(code, message=None)
+    def log_request(code, message: nil)
       if @requestline == '-'
         request = @requestline
       else

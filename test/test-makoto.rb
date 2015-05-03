@@ -9,7 +9,7 @@ module NinixTest
       for i in 0...1000
         Makoto.test()
       end
-      Makoto.test(1)
+      Makoto.test(:verbose => 1)
     end
   end
 end
