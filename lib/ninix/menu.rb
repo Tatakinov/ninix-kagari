@@ -281,12 +281,12 @@ module Menu
 
     def create_mayuna_menu(mayuna_menu)
       @__mayuna_menu = []
-      for side in mayuna_menu
+      for side in mayuna_menu.keys
         if side == 'sakura'
           index = 0
         elsif side == 'kero'
           index = 1
-        elsif side.startswith('char')
+        elsif side.start_with?('char')
           begin
             index = side[4, side.length].to_i
           rescue #except:

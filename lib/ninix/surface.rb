@@ -22,7 +22,7 @@ require "ninix/seriko"
 module Surface
 
   class Surface
-    attr_reader :name
+    attr_reader :name, :prefix
 
     def initialize
       @window = []
@@ -367,21 +367,21 @@ module Surface
       top_dir = @prefix
       name = @desc.get('menu.background.bitmap.filename')
       if name
-        name = name.replace('\\', '/')
+        name = name.gsub('\\', '/')
         path_background = File.join(top_dir, name)
       else
         path_background = nil
       end
       name = @desc.get('menu.sidebar.bitmap.filename')
       if name
-        name = name.replace('\\', '/')
+        name = name.gsub('\\', '/')
         path_sidebar = File.join(top_dir, name)
       else
         path_sidebar = nil
       end
       name = @desc.get('menu.foreground.bitmap.filename')
       if name
-        name = name.replace('\\', '/')
+        name = name.gsub('\\', '/')
         path_foreground = File.join(top_dir, name)
       else
         path_foreground = nil
@@ -749,13 +749,13 @@ module Surface
 
     def raise_all
       for side in 0..@window.length-1
-        @window[side].raise_()
+        @window[side].raise
       end
     end
 
-    def raise_(side)
+    def raise(side)
       if @window.length > side
-        @window[side].raise_()
+        @window[side].raise
       end
     end
 
@@ -1635,8 +1635,8 @@ module Surface
       end
     end
 
-    def raise_
-      @window.window.raise_()
+    def raise
+      @window.window.raise
       @parent.handle_request('NOTIFY', 'notify_observer', 'raise', (@side))
     end
 

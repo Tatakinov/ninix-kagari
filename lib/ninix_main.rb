@@ -462,7 +462,7 @@ module Ninix_Main
         f = open(path, 'r', encoding='utf-8')
         line = f.readline()
         line = line.rstrip('\r\n')
-        if not line.startswith('#plugin:')
+        if not line.start_with('#plugin:')
           return {}
         end
         begin
@@ -506,7 +506,7 @@ module Ninix_Main
           data = @queue[plugin_dir].get()
           @queue[plugin_dir].task_done()
           if isinstance(data, str)
-            if data.startswith('DIALOG:')
+            if data.start_with('DIALOG:')
               message = data[7..-1]
               open_dialog(plugin_dir, message)
               next
@@ -1025,9 +1025,12 @@ module Ninix_Main
     end
 
     def get_ghost_menus
+      menus = []
       for value in @ghosts.values()
-        yield value.menuitem
+        #yield value.menuitem
+        menus << value.menuitem
       end
+      return menus
     end
 
     def get_shell_menu
@@ -1036,7 +1039,7 @@ module Ninix_Main
 
     def get_balloon_menu
       current_key = get_current_balloon_directory()
-      for key in @balloons
+      for key in @balloons.keys
         menuitem = @balloons[key].menuitem
         menuitem.set_sensitive(key != current_key) # not working
       end
@@ -1050,7 +1053,7 @@ module Ninix_Main
 
     def create_balloon_menu
       balloon_menuitems = {} # OrderedDict()
-      for key in @balloons.keys()
+      for key in @balloons.keys
         balloon_menuitems[key] = @balloons[key].menuitem
       end
       return @__menu.create_meme_menu(balloon_menuitems)
@@ -1103,7 +1106,7 @@ module Ninix_Main
 
     def get_balloon_list ## FIXME
       balloon_list = []
-      for key in @balloons.keys()
+      for key in @balloons.keys
         desc, balloon = @balloons[key].baseinfo
         subdir = balloon['balloon_dir'][0]
         name = desc.get('name', :default => subdir)
@@ -1114,6 +1117,7 @@ module Ninix_Main
 
     def get_plugin_list ## FIXME
       plugin_list = []
+      return plugin_list ## FIXME
       for i, plugin in enumerate(@plugins)
         plugin_name = plugin[0]
         menu_items = plugin[3]
@@ -1180,7 +1184,7 @@ module Ninix_Main
     end
 
     def find_ghost_by_name(name)
-      for key in @ghosts
+      for key in @ghosts.keys
         sakura = @ghosts[key].instance
         begin
           if sakura.get_name(default=nil) == name
@@ -1198,7 +1202,7 @@ module Ninix_Main
     end
 
     def find_balloon_by_name(name)
-      for key in @balloons
+      for key in @balloons.keys
         desc, balloon = @balloons[key].baseinfo
         begin
           if desc.get('name') == name
@@ -1645,7 +1649,7 @@ module Ninix_Main
         sakura.save_history()
       end
       history = {}
-      for key in @ghosts
+      for key in @ghosts.keys
         sakura = @ghosts[key].instance
         name = sakura.get_name(default=key)
         ghost_time = 0

@@ -213,7 +213,7 @@ module Sakura
 
     def get_shell_menu()
       current_key = get_current_shell()
-      for key in @shells
+      for key in @shells.keys
         menuitem = @shells[key].menuitem
         menuitem.set_sensitive(key != current_key) # not working
       end
@@ -669,9 +669,9 @@ module Sakura
     end
 
     def is_URL(s)
-      return (s.startswith('http://') or \
-              s.startswith('ftp://') or \
-              s.startswith('file:/'))
+      return (s.start_with?('http://') or \
+              s.start_with?('ftp://') or \
+              s.start_with?('file:/'))
     end
 
     def is_anchor(link_id)
@@ -1184,8 +1184,8 @@ module Sakura
     RESET_EVENT = ['OnVanishSelecting', 'OnVanishCancel'] ## FIXME
 
     def notify_event(event, *arglist, event_type: 'GET', default: nil)
-      if @time_critical_session and event.startswith('OnMouse')
-        return 0
+      if @time_critical_session and event.start_with?('OnMouse')
+        return false
       end
       if RESET_EVENT.include?(event)
         reset_script(true)
@@ -1233,7 +1233,7 @@ module Sakura
           start_script(script)
           @balloon.hide_sstp_message()
         end
-        return 1
+        return true
       end
       if event == 'OnClose' and arglist[0] == 'shutdown' # XXX
         @force_quit = true
@@ -1253,7 +1253,7 @@ module Sakura
           get_current_shell_name(),
           false, communication,
           nil, false, script, arglist)
-        return 0
+        return false
       end
       #logging.debug('=> "{0}"'.format(script))
       if @__temp_mode == 2
@@ -1262,7 +1262,7 @@ module Sakura
       end
       if @passivemode and \
         (event == 'OnSecondChange' or event == 'OnMinuteChange')
-        return 0
+        return false
       end
       start_script(script)
       @balloon.hide_sstp_message()
@@ -1279,7 +1279,7 @@ module Sakura
           nil, false, script, arglist)
       end
       @script_finally << proc
-      return 1
+      return true
     end
 
     def get_prefix()
@@ -1340,7 +1340,7 @@ module Sakura
       if not ['lefttop', 'righttop', 'centertop'].include?(align_background)
         align_background = 'lefttop'
       end
-      align_background = align_background[0..-3].encode('ascii') # XXX
+      align_background = align_background[0..-4].encode('ascii') # XXX
       align = getstring('menu.sidebar.alignment')
       if not align.empty?
         align_sidebar = align
@@ -1356,7 +1356,7 @@ module Sakura
       if not ['lefttop', 'righttop', 'centertop'].include?(align_foreground)
         align_foreground = 'lefttop'
       end
-      align_foreground = align_foreground[0..-3].encode('ascii') # XXX
+      align_foreground = align_foreground[0..-4].encode('ascii') # XXX
       return path_background, path_sidebar, path_foreground, \
              align_background, align_sidebar, align_foreground
     end
@@ -1920,22 +1920,23 @@ module Sakura
         return
       end
       @last_script = script
-      @script_origin = origin or self.FROM_GHOST
+      @script_origin = origin or FROM_GHOST
       reset_script(true)
       @__current_script = script
-      if not script.rstrip().endswith('\e')
+      if not script.rstrip().end_with?('\e')
         script = ''.join([script, '\e'])
       end
       @processed_script = []
       @script_position = 0
       while 1
         begin
-          @processed_script.extend(@script_parser.parse(script))
+          #@processed_script.extend(@script_parser.parse(script))
+          @processed_script << @script_parser.parse(script)
         rescue #except ninix.script.ParserError as e:
           #logging.error('-' * 50)
           #logging.error('{0}'.format(e)) # 'UTF-8'
-          done, script = e
-          @processed_script.extend(done)
+          #done, script = e
+          #@processed_script.extend(done)
         else
           break
         end
@@ -1948,14 +1949,14 @@ module Sakura
       set_synchronized_session([], reset=true)
       @balloon.hide_all()
       node = @processed_script[0]
-      if node[0] == Script.SCRIPT_TAG and node[1] == '\C'
+      if node[0] == Script::SCRIPT_TAG and node[1] == '\C'
         @processed_script.pop(0)
         @script_position = node[-1]
       else
         @balloon.clear_text_all()
       end
       @balloon.set_balloon_default()
-      @current_time = time.localtime(time.time())
+      @current_time = Time.new.to_a
       reset_idle_time()
       if @parent.handle_request('GET', 'get_preference', 'raise_before_talk')
         raise_all()
@@ -2381,7 +2382,7 @@ module Sakura
           select_balloon(key, desc, balloon)
         end
       elsif args[0, 2] == ['change', 'shell'] and argc > 2
-        for key in @shells
+        for key in @shells.keys
           shell_name = @shells[key].baseinfo[0]
           if shell_name == args[2]
             select_shell(key)
@@ -2637,7 +2638,7 @@ module Sakura
           flag = args[3]
         end
         bind = @surface.window[@script_side].bind # XXX
-        for key in bind
+        for key in bind.keys
           group = bind[key][0].split(',')
           if category != group[0]
             next
@@ -2784,7 +2785,7 @@ module Sakura
       end
       node = @processed_script.pop(0)
       @script_position = node[-1]
-      if node[0] == Script.SCRIPT_TAG
+      if node[0] == Script::SCRIPT_TAG
         name, args = node[1], node[2..-1]
         if @__script_tag.include?(name) and \
            Sakura.method_defined?(@__script_tag[name])
@@ -2792,7 +2793,7 @@ module Sakura
         else
           #pass ## FIMXE
         end
-      elsif node[0] == Script.SCRIPT_TEXT
+      elsif node[0] == Script::SCRIPT_TEXT
         text = expand_meta(node[1])
         if @anchor
           @anchor[1] = ''.join([@anchor[1], text])
@@ -2851,15 +2852,15 @@ module Sakura
         if chunk[0] == Script.TEXT_STRING
           buf << chunk[1]
         elsif chunk[1] == '%month'
-          buf << @current_time[1].to_s
-        elsif chunk[1] == '%day'
-          buf << @current_time[2].to_s
-        elsif chunk[1] == '%hour'
-          buf << @current_time[3].to_s
-        elsif chunk[1] == '%minute'
           buf << @current_time[4].to_s
+        elsif chunk[1] == '%day'
+          buf << @current_time[3].to_s
+        elsif chunk[1] == '%hour'
+          buf << @current_time[2].to_s
+        elsif chunk[1] == '%minute'
+          buf << @current_time[1].to_s
         elsif chunk[1] == '%second'
-          buf << @current_time[5].to_s
+          buf << @current_time[0].to_s
         elsif ['%username', '%c'].include?(chunk[1])
           buf << get_username()
         elsif chunk[1] == '%selfname'
@@ -2877,7 +2878,7 @@ module Sakura
           left, top, scrn_w, scrn_h = Pix.get_workarea()
           buf << scrn_h.to_s
         elsif chunk[1] == '%et'
-          buf << '{0:d}万年'.format(@current_time[7])
+          buf << '{0:d}万年'.format(@current_time[5])
         elsif chunk[1] == '%wronghour'
           wrongtime = time.time() + random.choice([-2, -1, 1, 2]) * 3600
           buf << time.localtime(wrongtime)[3].to_s
