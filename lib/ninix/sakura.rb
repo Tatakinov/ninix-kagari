@@ -61,6 +61,7 @@ module Sakura
   end
 
   class Sakura
+    attr_reader :key
 
     include GetText
 
@@ -512,14 +513,14 @@ module Sakura
       return (not @event_queue.empty?)
     end
 
-    def enqueue_event(event, *arglist, **argdict) ## FIXME
+    def enqueue_event(event, *arglist, proc: nil) ## FIXME
       #for key in argdict
       #  assert ['proc'].include?(key) # trap typo, etc.
       #end
       if RESET_EVENT.include?(event)
         reset_script(true)
       end
-      @event_queue << [event, arglist, argdict]
+      @event_queue << [event, arglist, proc]
     end
 
     EVENT_SCRIPTS = {
@@ -539,10 +540,13 @@ module Sakura
 
     def handle_event() ## FIXME
       while not @event_queue.empty?
-        event, arglist, argdict = @event_queue.pop(0)
-        proc = argdict.get('proc', :default => nil)
-        argdict = {'default' => EVENT_SCRIPTS.get(event)}
-        if notify_event(event, *arglist, **argdict)
+        event, arglist, proc = @event_queue.shift
+        if EVENT_SCRIPTS.include?(event)
+          default = EVENT_SCRIPTS[event]
+        else
+          default = nil
+        end
+        if notify_event(event, *arglist, :default => default)
           if proc != nil
             @script_post_proc << proc
           end
@@ -955,7 +959,7 @@ module Sakura
             @parent.handle_request('NOTIFY', 'vanish_sakura', a, args)
         }
       end
-      enqueue_event('OnVanishSelected', proc=proc)
+      enqueue_event('OnVanishSelected', :proc => proc)
       @vanished = true ## FIXME
     end
 
@@ -1433,7 +1437,7 @@ module Sakura
                      surface_name, surface_name, surface_dir)
       end
       enqueue_event('OnShellChanging', surface_name, surface_dir,
-                    proc=proc)
+                    :proc => proc)
     end
 
     def select_balloon(item, desc, balloon)
@@ -1442,7 +1446,7 @@ module Sakura
         return # need reloadning?
       end
       #assert item == balloon['balloon_dir'][0]
-      path = File.join(get_ninix_home(), 'balloon', item)
+      path = File.join(Home.get_ninix_home(), 'balloon', item)
       @balloon.hide_all()
       set_balloon(desc, balloon)
       @balloon.set_balloon_default()
@@ -1701,7 +1705,7 @@ module Sakura
       @__running = false
       save_settings()
       save_history()
-      @parent.handle_request('NOTIFY', 'rebuild_ghostdb', self, nil)
+      @parent.handle_request('NOTIFY', 'rebuild_ghostdb', self, :name => nil)
       hide_all()
       @surface.finalize()
       @balloon.finalize()

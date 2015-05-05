@@ -54,8 +54,14 @@ module Prefs
       end
     end
 
+    def delete(key)
+      if @dic.include?(key)
+        @dic.delete(key)
+      end
+    end
+
     def include?(name)
-      if @dic.include?(key) or @__stack.include?(key)
+      if @dic.include?(name) or @__stack.include?(name)
         return true
       else
         return false
@@ -216,13 +222,13 @@ module Prefs
     def set_current_sakura(directory)
       key = 'sakura_name' # obsolete
       if @__prefs.include?(key)
-        del @__prefs[key]
+        @__prefs.delete(key)
       end
       key = 'sakura_dir'
       if @__prefs.include?(key)
-        del @__prefs[key]
+        @__prefs.delete(key)
       end
-      @__prefs[key] = directory
+      @__prefs.set(key, directory)
     end
 
     def edit_preferences

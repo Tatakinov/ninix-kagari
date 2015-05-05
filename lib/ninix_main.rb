@@ -1335,7 +1335,7 @@ module Ninix_Main
     end
 
     def close_ghost(sakura)
-      if not any(get_working_ghost())
+      if get_working_ghost.empty?
         @prefs.set_current_sakura(sakura.key)
         quit()
       elsif @current_sakura == sakura.key

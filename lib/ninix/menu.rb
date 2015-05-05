@@ -537,8 +537,8 @@ module Menu
                     'NOTIFY', 'notify_site_selection', title, url)
                 end
                 item.set_has_tooltip(true)
-                item.signal_connect('query-tooltip') do 
-                  on_tooltip(banner)
+                item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
+                  on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
                 end
               end
             end
@@ -611,8 +611,8 @@ module Menu
                 @parent.handle_request('NOTIFY', 'notify_site_selection', title, url)
               end
               item.set_has_tooltip(true)
-              item.signal_connect('query-tooltip') do
-                on_tooltip(banner)
+              item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
+                on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
               end
             end
           end
@@ -653,11 +653,11 @@ module Menu
       item.set_name('popup menu item')
       item.show()
       item.signal_connect('activate') do |a, v|
-        handler(key)
+        handler.call(key)
       end
       item.set_has_tooltip(true)
-      item.signal_connect('query-tooltip') do ||
-          on_tooltip(thumbnail)
+      item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
+          on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
       end
       item.signal_connect('draw') do |i, *a|
         set_stylecontext(i, *a)
@@ -813,11 +813,11 @@ module Menu
       item.set_name('popup menu item')
       item.show()
       item.signal_connect('activate') do |a, v|
-        handler(value)
+        handler.call(value)
       end
       item.set_has_tooltip(true)
-      item.signal_connect('query-tooltip') do ||
-          on_tooltip(thumbnail)
+      item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
+        on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
       end
       item.signal_connect('draw') do |i, *a|
         set_stylecontext(i, *a)
