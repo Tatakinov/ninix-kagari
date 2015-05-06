@@ -917,6 +917,7 @@ module Surface
   end
 
   class SurfaceWindow
+    attr_reader :bind
 
     def initialize(window, side, desc, surface_alias, surface_info, tooltips,
                    surfaces, seriko, region, mayuna, bind, default_id, maxsize)
@@ -1224,7 +1225,7 @@ module Surface
                 done << actor_id
                 for result in iter_mayuna(surface_width, surface_height, actor, done)
 #                  yield result
-                  mayuna_list += result
+                  mayuna_list << result
                 end
               else
                 break
@@ -1280,13 +1281,13 @@ module Surface
           'asis' =>        Cairo::OPERATOR_OVER,
         }[method]
         cr.set_operator(op)
-        cr.set_source_surface(overlay, x, y)
+        cr.set_source(overlay, x, y)
         if ['overlay', 'overlayfast'].include?(method)
-          cr.mask_surface(overlay, x, y)
+          cr.mask(overlay, x, y)
         else
           cr.paint()
         end
-        del cr
+        #del cr
       end
       return surface
     end
@@ -1351,16 +1352,16 @@ module Surface
               mayuna_surface = get_image_surface(mayuna_id)
               cr = Cairo::Context.new(surface)
               if ['bind', 'add'].include?(method)
-                cr.set_source_surface(mayuna_surface, dest_x, dest_y)
-                cr.mask_surface(mayuna_surface, dest_x, dest_y)
+                cr.set_source(mayuna_surface, dest_x, dest_y)
+                cr.mask(mayuna_surface, dest_x, dest_y)
               elsif method == 'reduce'
                 cr.set_operator(Cairo::OPERATOR_DEST_IN)
-                cr.set_source_surface(mayuna_surface, dest_x, dest_y)
+                cr.set_source(mayuna_surface, dest_x, dest_y)
                 cr.paint()
               else
                 raise RuntimeError('should not reach here')
               end
-              del cr
+              #del cr
             end
           end
         end

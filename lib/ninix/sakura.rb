@@ -3077,8 +3077,8 @@ module Sakura
       vbox = Gtk::Box.new(orientation=Gtk::Orientation::VERTICAL)
       vbox.set_size_request(720, 460)
       vbox.show()
-      vbox.pack_start(@label, false, true, 0)
-      vbox.pack_start(scroll, true, true, 0)
+      vbox.pack_start(@label, :expand => false, :fill => true, :padding => 0)
+      vbox.pack_start(scroll, :expand => true, :fill => true, :padding => 0)
       content_area = @dialog.content_area
       content_area.add(vbox)
       @dialog.add_button(Gtk::Stock::CLOSE, Gtk::ResponseType::CLOSE)

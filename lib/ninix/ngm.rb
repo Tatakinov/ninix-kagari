@@ -509,31 +509,31 @@ module NGM
       vbox = Gtk::Box.new(orientation=Gtk::Orientation::VERTICAL)
       @window.add(vbox)
       vbox.show()
-      vbox.pack_start(ui.get_widget('/MenuBar'), false, false, 0)
-      separator = Gtk::HSeparator.new()
-      vbox.pack_start(separator, false, true, 0)
+      vbox.pack_start(ui.get_widget('/MenuBar'), :expand => false, :fill => false, :padding => 0)
+      separator = Gtk::Separator.new(:horizontal)
+      vbox.pack_start(separator, :expand => false, :fill => true, :padding => 0)
       separator.show()
       hbox = Gtk::Box.new(orientation=Gtk::Orientation::HORIZONTAL)
-      vbox.pack_start(hbox, false, true, 10)
+      vbox.pack_start(hbox, :expand => false, :fill => true, :padding => 10)
       hbox.show()
       @surface_area_sakura = create_surface_area(0)
-      hbox.pack_start(@surface_area_sakura, false, true, 10)
+      hbox.pack_start(@surface_area_sakura, :expand => false, :fill => true, :padding => 10)
       @surface_area_kero = create_surface_area(1)
-      hbox.pack_start(@surface_area_kero, false, true, 10)
+      hbox.pack_start(@surface_area_kero, :expand => false, :fill => true, :padding => 10)
       @info_area = create_info_area()
-      hbox.pack_start(@info_area, false, true, 10)
+      hbox.pack_start(@info_area, :expand => false, :fill => true, :padding => 10)
       box = Gtk::ButtonBox.new(orientation=Gtk::Orientation::HORIZONTAL)
       box.set_layout_style(Gtk::ButtonBox::Style::SPREAD)
-      vbox.pack_start(box, false, true, 4)
+      vbox.pack_start(box, :expand => false, :fill => true, :padding => 4)
       box.show()
-      button = Gtk::Button.new(_('Previous'))
+      button = Gtk::Button.new(:label => _('Previous'))
       button.signal_connect('clicked') do |b, w=self|
         w.show_previous()
       end
       box.add(button)
       button.show()
       @button['previous'] = button
-      button = Gtk::Button.new(_('Next'))
+      button = Gtk::Button.new(:label => _('Next'))
       button.signal_connect('clicked') do |b, w=self|
         w.show_next()
       end
@@ -541,7 +541,7 @@ module NGM
       button.show()
       @button['next'] = button
       @statusbar = Gtk::Statusbar.new()
-      vbox.pack_start(@statusbar, false, true, 0)
+      vbox.pack_start(@statusbar, :expand => false, :fill => true, :padding => 0)
       @statusbar.show()
     end
 
@@ -594,11 +594,11 @@ module NGM
       textview = Gtk::TextView.new()
       textview.set_editable(false)
       textview.set_size_request(128, 16)
-      vbox.pack_start(textview, false, true, 0)
+      vbox.pack_start(textview, :expand => false, :fill => true, :padding => 0)
       textview.show()
       @textview[side] = textview
       darea = Gtk::DrawingArea.new()
-      vbox.pack_start(darea, false, true, 0)
+      vbox.pack_start(darea, :expand => false, :fill => true, :padding => 0)
       darea.set_events(Gdk::Event::EXPOSURE_MASK)
       darea.signal_connect('draw') do |w, c|
         redraw(w, c, side)
@@ -656,7 +656,7 @@ module NGM
       box = Gtk::ButtonBox.new(orientation=Gtk::Orientation::HORIZONTAL)
       box.set_layout_style(Gtk::ButtonBox::Style::SPREAD)
       box.show()
-      button = Gtk::Button.new(_('Install'))
+      button = Gtk::Button.new(:label => _('Install'))
       button.signal_connect(
                      'clicked') do |b, w=self|
         w.handle_request('NOTIFY', 'install_current')
@@ -664,7 +664,7 @@ module NGM
       box.add(button)
       button.show()
       @button['install'] = button
-      button = Gtk::Button.new(_('Update'))
+      button = Gtk::Button.new(:label => _('Update'))
       button.signal_connect(
                      'clicked') do |b, w=self|
         w.handle_request('NOTIFY', 'update_current')
@@ -672,35 +672,35 @@ module NGM
       box.add(button)
       button.show()
       @button['update'] = button
-      hbox.pack_start(box, true, true, 10)
+      hbox.pack_start(box, :expand => true, :fill => true, :padding => 10)
       vbox2 = Gtk::Box.new(orientation=Gtk::Orientation::VERTICAL)
-      hbox.pack_start(vbox2, false, true, 0)
+      hbox.pack_start(vbox2, :expand => false, :fill => true, :padding => 0)
       vbox2.show()
-      button = Gtk::Button.new('') # with GtkLabel
+      button = Gtk::Button.new(:label => '') # with GtkLabel
       button.set_relief(Gtk::ReliefStyle::NONE)
       @url['HP'] = [nil, button.child]
-      vbox2.pack_start(button, false, true, 0)
+      vbox2.pack_start(button, :expand => false, :fill => true, :padding => 0)
       button.signal_connect(
                      'clicked') do |b|
         webbrowser.open(@url['HP'][0])
       end
       button.show()
-      button = Gtk::Button.new('')
+      button = Gtk::Button.new(:label => '')
       button.set_relief(Gtk::ReliefStyle::NONE)
       button.set_use_underline(true)
       @url['Public'] = [nil, button.child]
-      vbox2.pack_start(button, false, true, 0)
+      vbox2.pack_start(button, :expand => false, :fill => true, :padding => 0)
       button.signal_connect(
                      'clicked') do |b|
         webbrowser.open(@url['Public'][0])
       end
       button.show()
-      vbox.pack_start(hbox, false, true, 0)
+      vbox.pack_start(hbox, :expand => false, :fill => true, :padding => 0)
       hbox.show()
       textview = Gtk::TextView.new()
       textview.set_editable(false)
       textview.set_size_request(256, 144)
-      vbox.pack_start(textview, false, true, 0)
+      vbox.pack_start(textview, :expand => false, :fill => true, :padding => 0)
       textview.show()
       @info = textview
       return vbox

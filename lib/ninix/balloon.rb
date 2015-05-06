@@ -1674,10 +1674,10 @@ module Balloon
         box.set_border_width(10)
         if not ENTRY.empty?
           label = Gtk::Label.new(label=ENTRY)
-          box.pack_start(label, false, true, 0)
+          box.pack_start(label, :expand => false, :fill => true, :padding => 0)
           label.show()
         end
-        box.pack_start(@entry, true, true, 0)
+        box.pack_start(@entry, :expand => true, :fill => true, :padding => 0)
         @window.add(box)
         box.show()
       end

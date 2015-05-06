@@ -368,9 +368,9 @@ module Ninix_Main
         box = Gtk::VBox.new(spacing=10)
         box.set_border_width(10)
         label = Gtk::Label.new(message)
-        box.pack_start(label, false, true, 0)
+        box.pack_start(label, :expand => false, :fill => true, :padding => 0)
         label.show()
-        box.pack_start(entry, false, true, 0)
+        box.pack_start(entry, :expand => false, :fill => true, :padding => 0)
         dialog.add(box)
         box.show()
         @dialog = dialog
@@ -1770,7 +1770,7 @@ module Ninix_Main
       @tv.set_size_request(400, 250)
       @sw.set_size_request(400, 250)
       content_area = @dialog.content_area
-      content_area.pack_start(@sw, true, true, 0)
+      content_area.pack_start(@sw, :expand => true, :fill => true, :padding => 0)
       @dialog.add_button('Install', 1)
       @dialog.add_button(Gtk::Stock::CLOSE, Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
@@ -1919,7 +1919,7 @@ module Ninix_Main
         redraw(w, e)
       end
       content_area = @dialog.content_area
-      content_area.pack_start(@darea, true, true, 0)
+      content_area.pack_start(@darea, :expand => true, :fill => true, :padding => 0)
       @darea.show()
       @dialog.add_button(Gtk::Stock::CLOSE, Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|

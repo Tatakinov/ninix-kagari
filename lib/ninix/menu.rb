@@ -308,10 +308,9 @@ module Menu
             if key != '-'
               item = Gtk::CheckMenuItem.new(name)
               item.set_name('popup menu item')
-              item.set_active(bool(state))
-              item.signal_connect('activate') do |a, k|
-                @parent.handle_request(
-                                       'NOTIFY', 'toggle_bind', index, key)
+              item.set_active(state)
+              item.signal_connect('activate', [index, key]) do |a, ik|
+                @parent.handle_request('NOTIFY', 'toggle_bind', ik)
               end
               item.signal_connect('draw') do |i, *a|
                   set_stylecontext(i, *a)
@@ -643,7 +642,7 @@ module Menu
           image = Gtk::Image.new
           image.pixbuf = pixbuf
           image.show
-          item = Gtk::ImageMenuItem.new(name)
+          item = Gtk::ImageMenuItem.new(:label => name)
           item.set_image(image)
           item.set_always_show_image(true) # XXX
         end
@@ -930,7 +929,7 @@ module Menu
 
     def get_stick
       item = @ui_manager.get_widget(['/popup/', 'Stick'].join(''))
-      if item != nil and item.get_active()
+      if item != nil and item.active?
         return true
       else
         return false
