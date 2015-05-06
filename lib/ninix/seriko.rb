@@ -167,7 +167,7 @@ module Seriko
       actor.invoke(window, @next_tick)
     end
 
-    def invoke(window, actor_id, update=0)
+    def invoke(window, actor_id, update: 0)
       if not @seriko.include?(@base_id)
         return
       end
@@ -610,7 +610,7 @@ module Seriko
   end
 
 
-  def self.get_actors(config, version=1)
+  def self.get_actors(config, version: 1)
     re_seriko_interval = Regexp.new('^([0-9]+)interval$')
     re_seriko_interval_value = Regexp.new('^(sometimes|rarely|random,[0-9]+|always|runonce|yesn-e|talk,[0-9]+|never)$')
     re_seriko_pattern = Regexp.new('^([0-9]+|-[12])\s*,\s*([+-]?[0-9]+)\s*,\s*(overlay|overlayfast|base|move|start|alternativestart|)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?$')

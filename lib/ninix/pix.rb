@@ -303,11 +303,11 @@ module Pix
     return pixbuf
   end
 
-  def self.create_surface_from_file(path, is_pnr=true, use_pna=false)
+  def self.create_surface_from_file(path, is_pnr: true, use_pna: false)
     head = File.dirname(path)
     basename = File.basename(path, '.*')
     ext = File.extname(path)
-    pixbuf = create_pixbuf_from_file(path, is_pnr, use_pna)
+    pixbuf = create_pixbuf_from_file(path, :is_pnr => is_pnr, :use_pna => use_pna)
     surface = Cairo::ImageSurface.new(Cairo::FORMAT_ARGB32,
                                       pixbuf.width, pixbuf.height)
     cr = Cairo::Context.new(surface)
@@ -317,7 +317,7 @@ module Pix
     return surface
   end
 
-  def self.create_pixbuf_from_file(path, is_pnr=true, use_pna=false)
+  def self.create_pixbuf_from_file(path, is_pnr: true, use_pna: false)
     head = File.dirname(path)
     basename = File.basename(path, '.*')
     ext = File.extname(path)

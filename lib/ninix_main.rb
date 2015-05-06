@@ -276,7 +276,7 @@ module Ninix_Main
           if script_odict.include?('') # XXX
             default_script = script_odict['']
           else
-            default_script = list(script_odict.values())[0]
+            default_script = script_odict.values[0]
           end
         end
         if event != nil
@@ -852,7 +852,7 @@ module Ninix_Main
           sakura.notify_event('installedghostname', *installed)
         end
       else
-        for sakura in get_working_ghost()
+        for sakura in get_working_ghost
           sakura.notify_event('installedghostname', *installed)
         end
       end
@@ -871,7 +871,7 @@ module Ninix_Main
           sakura.notify_event('installedballoonname', *installed)
         end
       else
-        for sakura in get_working_ghost()
+        for sakura in get_working_ghost
           sakura.notify_event('installedballoonname', *installed)
         end
       end
@@ -922,7 +922,7 @@ module Ninix_Main
                             db, request_handler)
     end
 
-    def get_working_ghost(cantalk=false)
+    def get_working_ghost(cantalk: false)
       ghosts = []
       for value in @ghosts.values()
         sakura = value.instance
@@ -1164,9 +1164,13 @@ module Ninix_Main
       # choose default ghost/shell
       directory = @prefs.get('sakura_dir')
       name = @prefs.get('sakura_name') # XXX: backward compat
-      default_sakura = find_ghost_by_dir(directory) or \
-      find_ghost_by_name(name) or \
-      choose_default_sakura()
+      default_sakura = find_ghost_by_dir(directory)
+      if not default_sakura
+        default_sakura = find_ghost_by_name(name)
+      end
+      if not default_sakura
+        default_sakura = choose_default_sakura()
+      end
       # load ghost
       @current_sakura = default_sakura
       ##for i, name in enumerate(self.get_ghost_names()):
@@ -1198,7 +1202,7 @@ module Ninix_Main
     end
 
     def choose_default_sakura
-      return list(@ghosts.keys())[0]
+      return @ghosts.keys[0]
     end
 
     def find_balloon_by_name(name)
@@ -1318,9 +1322,9 @@ module Ninix_Main
           return
         end
       else
-        working_list = list(get_working_ghost(cantalk=true))
-        if working_list
-          @current_sakura = random.choice(working_list).key
+        working_list = get_working_ghost(:cantalk => true)
+        if not working_list.empty?
+          @current_sakura = working_list.sample.key
         else
           return ## FIXME
         end
@@ -1344,7 +1348,7 @@ module Ninix_Main
     end
 
     def close_all_ghosts(reason='user')
-      for sakura in get_working_ghost()
+      for sakura in get_working_ghost
         sakura.notify_event('OnCloseAll', reason)
       end
     end
@@ -1368,8 +1372,8 @@ module Ninix_Main
       end
     end
 
-    def select_ghost(sakura, sequential, event=1, vanished=false)
-      keys = list(@ghosts.keys())
+    def select_ghost(sakura, sequential, event: 1, vanished: false)
+      keys = @ghosts.keys
       if keys.length < 2
         return
       end
@@ -1378,20 +1382,20 @@ module Ninix_Main
         key = (keys.index(sakura.key) + 1) % keys.length
       else
         keys.remove(sakura.key)
-        key = random.choice(keys)
+        key = keys.sample
       end
-      change_sakura(sakura, key, 'automatic', event, vanished)
+      change_sakura(sakura, key, 'automatic', :event => event, :vanished => vanished)
     end
 
-    def select_ghost_by_name(sakura, name, event=1, vanished=false)
+    def select_ghost_by_name(sakura, name, event: 1, vanished: false)
       key = find_ghost_by_name(name)
       if key == nil
         return
       end
-      change_sakura(sakura, key, 'automatic', event, vanished)
+      change_sakura(sakura, key, 'automatic', :event => event, :vanished => vanished)
     end
 
-    def change_sakura(sakura, key, method, event=1, vanished=false)
+    def change_sakura(sakura, key, method, event: 1, vanished: false)
       if sakura.key == key # XXX: needs reloading?
         return
       end
@@ -1470,7 +1474,7 @@ module Ninix_Main
     end
 
     def notify_preference_changed
-      for sakura in get_working_ghost()
+      for sakura in get_working_ghost
         sakura.notify_preference_changed()
       end
     end
@@ -1483,7 +1487,7 @@ module Ninix_Main
         key = find_balloon_by_subdir(default_balloon)
       end
       if key == nil
-        key = list(@balloons.keys())[0]
+        key = @balloons.keys[0]
       end
       return @balloons[key].baseinfo
     end
@@ -1600,9 +1604,9 @@ module Ninix_Main
         end
       }
       if next_ghost != nil
-        select_ghost_by_name(sakura, next_ghost, vanished=true)
+        select_ghost_by_name(sakura, next_ghost, :vanished => true)
       else
-        select_ghost(sakura, 0, vanished=true)
+        select_ghost(sakura, 0, :vanished => true)
       end
       del @ghosts[sakura.key]
     end
@@ -1645,7 +1649,7 @@ module Ninix_Main
     end
 
     def show_usage
-      for sakura in get_working_ghost()
+      for sakura in get_working_ghost
         sakura.save_history()
       end
       history = {}
@@ -1942,7 +1946,7 @@ module Ninix_Main
       if not ai_list.empty?
         path = ai_list.sample
         #assert File.exists?(path)
-        @pixbuf = Pix.create_pixbuf_from_file(path, is_pnr=false)
+        @pixbuf = Pix.create_pixbuf_from_file(path, :is_pnr => false)
         @pixbuf.saturate_and_pixelate(@pixbuf, 1.0, true)
       else
         @pixbuf = nil

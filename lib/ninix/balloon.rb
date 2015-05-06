@@ -604,7 +604,7 @@ module Balloon
       begin
         path, config = @balloon[balloon_id]
         use_pna = @parent.handle_request('GET', 'get_preference', 'use_pna')
-        surface = Pix.create_surface_from_file(path, use_pna=use_pna)
+        surface = Pix.create_surface_from_file(path, :use_pna => use_pna)
       rescue # except:
         return nil
       end

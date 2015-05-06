@@ -61,7 +61,7 @@ module Sakura
   end
 
   class Sakura
-    attr_reader :key
+    attr_reader :key, :cantalk
 
     include GetText
 
@@ -390,8 +390,8 @@ module Sakura
 
     def finalize()
       if not @script_finally.empty? # XXX
-        for proc in @script_finally
-          proc(flag_break=false)
+        for proc_obj in @script_finally
+          proc_obj.call(flag_break=false)
         end
         @script_finally = []
       end
@@ -413,7 +413,10 @@ module Sakura
     end
 
     def is_listening(key)
-      return @__listening.get(key)
+      if not @__listening.include?(key)
+        return false
+      end
+      return @__listening[key]
     end
 
     def on_audio_message(bus, message)
@@ -513,14 +516,14 @@ module Sakura
       return (not @event_queue.empty?)
     end
 
-    def enqueue_event(event, *arglist, proc: nil) ## FIXME
+    def enqueue_event(event, *arglist, proc_obj: nil) ## FIXME
       #for key in argdict
       #  assert ['proc'].include?(key) # trap typo, etc.
       #end
       if RESET_EVENT.include?(event)
         reset_script(true)
       end
-      @event_queue << [event, arglist, proc]
+      @event_queue << [event, arglist, proc_obj]
     end
 
     EVENT_SCRIPTS = {
@@ -540,19 +543,19 @@ module Sakura
 
     def handle_event() ## FIXME
       while not @event_queue.empty?
-        event, arglist, proc = @event_queue.shift
+        event, arglist, proc_obj = @event_queue.shift
         if EVENT_SCRIPTS.include?(event)
           default = EVENT_SCRIPTS[event]
         else
           default = nil
         end
         if notify_event(event, *arglist, :default => default)
-          if proc != nil
-            @script_post_proc << proc
+          if proc_obj != nil
+            @script_post_proc << proc_obj
           end
           return 1
-        elsif proc != nil
-          proc()
+        elsif proc_obj != nil
+          proc_obj.call()
           return 1
         end
       end
@@ -820,12 +823,7 @@ module Sakura
       if @__temp_mode == 1
         return ''
       end
-      #for key in argdict
-      #  assert ['event_type', 'translate'].include?(key) # trap typo, etc.
-      #end
       ref = arglist
-      #event_type = argdict.get('event_type', :default => 'GET')
-      #translate = argdict.get('translate', :default => 1)
       header = [event_type.to_s, ' SHIORI/3.0\r\n',
                 'Sender: ', @__sender.to_s, '\r\n',
                 'ID: ', event.to_s, '\r\n',
@@ -952,14 +950,14 @@ module Sakura
     end
 
     def notify_vanish_selected()
-      def proc(arg=self)
+      proc_obj = lambda {
         @vanished_count += 1
         @ghost_time = 0
-        GLib::Idle.add([arg, nil]){|a, args| 
+        GLib::Idle.add([self, nil]){|a, args|
             @parent.handle_request('NOTIFY', 'vanish_sakura', a, args)
         }
-      end
-      enqueue_event('OnVanishSelected', :proc => proc)
+      }
+      enqueue_event('OnVanishSelected', :proc_obj => proc_obj)
       @vanished = true ## FIXME
     end
 
@@ -1273,7 +1271,8 @@ module Sakura
       if @boot_event.include?(event)
         @script_finally << @surface_bootup
       end
-      def proc(flag_break=false)
+      proc_obj = lambda {
+        flag_break = false
         @parent.handle_request(
           'NOTIFY', 'notify_other', @key,
           event, get_name(default=''),
@@ -1281,8 +1280,8 @@ module Sakura
           get_current_shell_name(),
           flag_break, communication,
           nil, false, script, arglist)
-      end
-      @script_finally << proc
+      }
+      @script_finally << proc_obj
       return true
     end
 
@@ -1427,17 +1426,17 @@ module Sakura
       @shell_directory = shell_key # save user's choice
       surface_name, surface_dir, surface_desc, surface_alias, surface, surface_tooltips, seriko_descript = \
                                                                                          @shells[shell_key].baseinfo
-      def proc(arg=self, key=shell_key)
-        #logging.info('ghost {0} {1}'.format(@key, key))
+      proc_obj = lambda {
+        #logging.info('ghost {0} {1}'.format(@key, shell_key))
         set_surface(surface_desc, surface_alias, surface, surface_name,
                     surface_dir, surface_tooltips, seriko_descript)
         @surface.reset_alignment()
         @surface.reset_position()
         notify_event('OnShellChanged',
                      surface_name, surface_name, surface_dir)
-      end
+      }
       enqueue_event('OnShellChanging', surface_name, surface_dir,
-                    :proc => proc)
+                    :proc_obj => proc_obj)
     end
 
     def select_balloon(item, desc, balloon)
@@ -1531,6 +1530,10 @@ module Sakura
 
     def surface_is_shown(side)
       return (@surface and @surface.is_shown(side))
+    end
+
+    def get_target_window
+      return @surface.get_window(0).window
     end
 
     def get_kinoko_position(baseposition)
@@ -1748,13 +1751,13 @@ module Sakura
       elsif not @processed_script.empty? or not @processed_text.empty?
         interpret_script()
       elsif not @script_post_proc.empty?
-        for proc in @script_post_proc
-          proc()
+        for proc_obj in @script_post_proc
+          proc_obj.call()
         end
         @script_post_proc = []
       elsif not @script_finally.empty?
-        for proc in @script_finally
-          proc()
+        for proc_obj in @script_finally
+          proc_obj.call()
         end
         @script_finally = []
       elsif @script_mode == SELECT_MODE
@@ -1805,7 +1808,8 @@ module Sakura
           end
           # XXX: how about the use_translator flag?
           start_script(script, FROM_SSTP_CLIENT)
-          def proc(flag_break=false)
+          proc_obj = lambda {
+            flag_break = false
             @parent.handle_request(
               'NOTIFY', 'notify_other', @key,
               event, get_name(default=''),
@@ -1813,8 +1817,8 @@ module Sakura
               get_current_shell_name(),
               flag_break, nil,
               [sender, host], (not use_translator), script, [])
-          end
-          @script_finally << proc
+          }
+          @script_finally << proc_obj
         end
       elsif get_silent_time() > 0
         if now.to_f - get_silent_time() > SILENT_TIME
@@ -2395,10 +2399,10 @@ module Sakura
         end
       elsif args[0, 2] == ['change', 'ghost'] and argc > 2
         if args[2] == 'random'
-          @parent.handle_request('NOTIFY', 'select_ghost', self, 0, 0)
+          @parent.handle_request('NOTIFY', 'select_ghost', self, 0, :event => 0)
         else
           @parent.handle_request(
-            'NOTIFY', 'select_ghost_by_name', self, args[2], 0)
+            'NOTIFY', 'select_ghost_by_name', self, args[2], :event => 0)
         end
       elsif args[0, 2] == ['call', 'ghost'] and argc > 2
         key = @parent.handle_request('GET', 'find_ghost_by_name', args[2])
@@ -2816,8 +2820,8 @@ module Sakura
       if reset_all
         @script_mode = BROWSE_MODE
         if not @script_finally.empty?
-          for proc in @script_finally
-            proc(flag_break=true)
+          for proc_obj in @script_finally
+            proc_obj.call(flag_break=true)
           end
           @script_finally = []
         end

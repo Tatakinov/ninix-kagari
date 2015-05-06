@@ -211,7 +211,7 @@ module Surface
         if @seriko_descript['version'] == '1'
           version = 2 # SERIKO/2.0
         end
-        seriko[key] = Seriko.get_actors(config, version=version)
+        seriko[key] = Seriko.get_actors(config, :version => version)
       end
       return seriko
     end
@@ -1120,7 +1120,7 @@ module Surface
     end
 
     def invoke(actor_id, update: 0)
-      @seriko.invoke(self, actor_id, update)
+      @seriko.invoke(self, actor_id, :update => update)
     end
 
     def invoke_yen_e(surface_id)
@@ -1238,7 +1238,7 @@ module Surface
       return mayuna_list
     end
     
-    def create_surface_from_file(surface_id, is_asis=false)
+    def create_surface_from_file(surface_id, is_asis: false)
       ##assert @surfaces.include?(surface_id)
       if is_asis
         use_pna = false
@@ -1249,7 +1249,7 @@ module Surface
       end
       begin
         surface = Pix.create_surface_from_file(
-          @surfaces[surface_id][0], is_pnr=is_pnr, use_pna=use_pna)
+          @surfaces[surface_id][0], :is_pnr => is_pnr, :use_pna => use_pna)
       rescue # except:
         #logging.debug('cannot load surface #{0}'.format(surface_id))
         return Pix.create_blank_surface(100, 100)
@@ -1265,7 +1265,7 @@ module Surface
               'GET', 'get_preference', 'use_pna')
           end
           overlay = Pix.create_surface_from_file(
-            element, is_pnr=is_pnr, use_pna=use_pna)
+            element, :is_pnr => is_pnr, :use_pna => use_pna)
         rescue # except:
           next
         end
@@ -1291,12 +1291,12 @@ module Surface
       return surface
     end
 
-    def get_image_surface(surface_id, is_asis=false)
+    def get_image_surface(surface_id, is_asis: false)
       if not @surfaces.include?(surface_id)
         #logging.debug('cannot load surface #{0}'.format(surface_id))
         return Pix.create_blank_surface(100, 100)
       end
-      return create_surface_from_file(surface_id, is_asis=is_asis)
+      return create_surface_from_file(surface_id, :is_asis => is_asis)
     end
 
     def draw_region(cr)
@@ -1382,7 +1382,7 @@ module Surface
       for surface_id, x, y, method in @seriko.iter_overlays()
         begin
           overlay_surface = get_image_surface(
-            surface_id, is_asis=(method == 'asis'))
+            surface_id, :is_asis => (method == 'asis'))
         rescue # except:
           next
         end

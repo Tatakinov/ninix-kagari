@@ -757,7 +757,7 @@ module Menu
       if thumbnail == nil
         return false
       end
-      pixbuf = Pix.create_pixbuf_from_file(thumbnail, is_pnr=false)
+      pixbuf = Pix.create_pixbuf_from_file(thumbnail, :is_pnr => false)
       tooltip.set_icon(pixbuf)
       return true
     end
@@ -912,9 +912,8 @@ module Menu
         item.set_name('popup menu item')
         item.show()
         kinoko_menu << item
-        item.signal_connect('activate') do |a, k|
-          @parent.handle_request(
-                                 'NOTIFY', 'select_kinoko', kinoko_list[i])
+        item.signal_connect('activate', kinoko_list[i]) do |a, k|
+          @parent.handle_request('NOTIFY', 'select_kinoko', k)
         end
         item.signal_connect('draw') do |i, *a|
             set_stylecontext(i, *a)

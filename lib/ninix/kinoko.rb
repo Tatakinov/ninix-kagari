@@ -169,11 +169,11 @@ module Kinoko
     def handle_request(event_type, event, *arglist, **argdict)
       #assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
-        'get_target_window' =>  lambda { return @target.get_window }, # XXX
-        'get_kinoko_position' => lambda { return @target.get_kinoko_position }
+        'get_target_window' =>  lambda { return @target.get_target_window }, # XXX
+        'get_kinoko_position' => lambda {|a| return @target.get_kinoko_position(a) }
       }
       if handlers.include?(event)
-        result = handlers[event].call # no argument
+        result = handlers[event].call(*arglist)
       else
         if Kinoko.method_defined?(event)
           result = method(event).call(*arglist)
@@ -493,7 +493,7 @@ module Kinoko
     end
 
     def invoke(actor_id, update: 0)
-      @seriko.invoke(self, actor_id, update)
+      @seriko.invoke(self, actor_id, :update => update)
     end
 
     def delete()
