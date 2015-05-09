@@ -387,7 +387,7 @@ module Balloon
       end
     end
 
-    def append_link(side, label, value, newline_required: 0)
+    def append_link(side, label, value, newline_required: false)
       if not @synchronized.empty?
         for side in @synchronized
           if @window.length > side
@@ -1375,7 +1375,7 @@ module Balloon
       @text_buffer = []
       @meta_buffer = []
       @link_buffer = []
-      @newline_required = 0
+      @newline_required = false
       @images = []
       @sstp_marker = []
       @darea.queue_draw()
@@ -1390,7 +1390,7 @@ module Balloon
     end
 
     def set_newline
-      @newline_required = 1
+      @newline_required = true
     end
 
     def append_text(text)
@@ -1401,11 +1401,11 @@ module Balloon
       elsif @newline_required
         s = ''
         column = 0
-        @newline_required = 0
+        @newline_required = false
         index = @text_buffer.length
       else
         index = @text_buffer.length - 1
-        s = @text_buffer.pop(-1)
+        s = @text_buffer.pop
         column = s.length
       end
       i = s.length
@@ -1415,17 +1415,17 @@ module Balloon
       p = 0
       while 1
         if i >= j
-          @text_buffer << text[p, i]
+          @text_buffer << text[p..i-1]
           draw_last_line(:column => column)
           break
         end
-        if text[i] == '\n'
-          if j >= i + 7 and text[i, i + 7] == '\n[half]'
-            @text_buffer << [text[p, i], '\n[half]'].join('')
-            p = i = i + 7
+        if text[i, 2] == '\n'
+          if j >= i + 8 and text[i, 8] == '\n[half]'
+            @text_buffer << [text[p..i-1], '\n[half]'].join('')
+            p = i = i + 8
           else
-            @text_buffer << text[p, i]
-            p = i = i + 1
+            @text_buffer << text[p..i-1]
+            p = i = i + 2
           end
           draw_last_line(:column => column)
           column = 0
@@ -1435,11 +1435,11 @@ module Balloon
         if not @__shown
           show()
         end
-        markup = set_markup(index, text[p, n])
+        markup = set_markup(index, text[p..n-1])
         @layout.set_markup(markup, -1)
         text_width, text_height =  @layout.pixel_size
         if text_width > @line_width
-          @text_buffer << text[p, i]
+          @text_buffer << text[p..i-1]
           draw_last_line(:column => column)
           column = 0
           p = i
@@ -1508,7 +1508,7 @@ module Balloon
         if @link_buffer[i][4] == link_id
           sl = @link_buffer[i][0]
           sn = @link_buffer[i][1]
-          @link_buffer.pop(i)
+          @link_buffer.pop(i) ## FIXME
           @link_buffer.insert(i, [sl, sn, el, en, link_id, raw_text, text])
           break
         end

@@ -61,7 +61,7 @@ module Sakura
   end
 
   class Sakura
-    attr_reader :key, :cantalk
+    attr_reader :key, :cantalk, :last_script
 
     include GetText
 
@@ -593,7 +593,7 @@ module Sakura
 
     def keep_silence(quiet)
       if quiet
-        @silent_time = Time.now.to_f
+        @silent_time = Time.new.to_f
       else
         @silent_time = 0
         reset_idle_time()
@@ -601,13 +601,13 @@ module Sakura
     end
 
     def get_idle_time()
-      now = Time.now.to_f
+      now = Time.new.to_f
       idle = now - @idle_start
       return idle
     end
 
     def reset_idle_time()
-      @idle_start = Time.now.to_f
+      @idle_start = Time.new.to_f
     end
 
     def notify_preference_changed() ## FIXME
@@ -1799,7 +1799,7 @@ module Sakura
         event, script, sender, @sstp_handle, \
         host, show_sstp_marker, use_translator, \
         @sstp_entry_db, @sstp_request_handler = \
-                            script_queue.pop(0)
+                            script_queue.shift
         if @cantalk
           if show_sstp_marker
             @balloon.show_sstp_message(sender, host)
@@ -1928,7 +1928,11 @@ module Sakura
         return
       end
       @last_script = script
-      @script_origin = origin or FROM_GHOST
+      if not origin
+        @script_origin = FROM_GHOST
+      else
+        @script_origin = origin
+      end
       reset_script(true)
       @__current_script = script
       if not script.rstrip().end_with?('\e')
@@ -1939,14 +1943,15 @@ module Sakura
       while 1
         begin
           #@processed_script.extend(@script_parser.parse(script))
-          @processed_script << @script_parser.parse(script)
+          @processed_script =  @script_parser.parse(script)
+          break
         rescue #except ninix.script.ParserError as e:
           #logging.error('-' * 50)
           #logging.error('{0}'.format(e)) # 'UTF-8'
           #done, script = e
           #@processed_script.extend(done)
-        else
-          break
+        #else
+        #  break
         end
       end
       @script_mode = BROWSE_MODE
@@ -1958,7 +1963,7 @@ module Sakura
       @balloon.hide_all()
       node = @processed_script[0]
       if node[0] == Script::SCRIPT_TAG and node[1] == '\C'
-        @processed_script.pop(0)
+        @processed_script.shift
         @script_position = node[-1]
       else
         @balloon.clear_text_all()
@@ -2128,7 +2133,7 @@ module Sakura
         amount = 0
       end
       if amount > 0
-        @script_wait = time.time() + amount
+        @script_wait = Time.new.to_f + amount
       end
     end
 
@@ -2170,10 +2175,10 @@ module Sakura
     end
 
     def __yen_q(args)
-      newline_required = 0
+      newline_required = false
       if args.length == 3 # traditional syntax
         num, link_id, text = args
-        newline_required = 1
+        newline_required = true
       else # new syntax
         text, link_id = args
       end
@@ -2721,7 +2726,7 @@ module Sakura
       end
     end
 
-    __script_tag = {
+    SCRIPT_TAG = {
         '\e' => "__yen_e",
         '\y' => "__yen_e",
         '\z' => "__yen_e",
@@ -2770,7 +2775,7 @@ module Sakura
 
     def interpret_script()
       if @script_wait != nil
-        if time.time() < @script_wait
+        if Time.new.to_f < @script_wait
           return
         end
         @script_wait = nil
@@ -2787,17 +2792,17 @@ module Sakura
         script_speed = @parent.handle_request(
           'GET', 'get_preference', 'script_speed')
         if script_speed > 0
-          @script_wait = time.time() + script_speed * 0.02
+          @script_wait = Time.new.to_f + script_speed * 0.02
         end
         return
       end
-      node = @processed_script.pop(0)
+      node = @processed_script.shift
       @script_position = node[-1]
       if node[0] == Script::SCRIPT_TAG
-        name, args = node[1], node[2..-1]
-        if @__script_tag.include?(name) and \
-           Sakura.method_defined?(@__script_tag[name])
-          method(@__script_tag[name]).call(args)
+        name, args = node[1], node[2..-2]
+        if SCRIPT_TAG.include?(name) and \
+           Sakura.method_defined?(SCRIPT_TAG[name])
+          method(SCRIPT_TAG[name]).call(args)
         else
           #pass ## FIMXE
         end
@@ -2857,7 +2862,7 @@ module Sakura
     def expand_meta(text_node)
       buf = []
       for chunk in text_node
-        if chunk[0] == Script.TEXT_STRING
+        if chunk[0] == Script::TEXT_STRING
           buf << chunk[1]
         elsif chunk[1] == '%month'
           buf << @current_time[4].to_s
@@ -2888,7 +2893,7 @@ module Sakura
         elsif chunk[1] == '%et'
           buf << '{0:d}万年'.format(@current_time[5])
         elsif chunk[1] == '%wronghour'
-          wrongtime = time.time() + random.choice([-2, -1, 1, 2]) * 3600
+          wrongtime = Time.new.to_f + [-2, -1, 1, 2].sample * 3600
           buf << time.localtime(wrongtime)[3].to_s
         elsif chunk[1] == '%exh'
           buf << get_uptime().to_s
@@ -2901,7 +2906,7 @@ module Sakura
           buf << chunk[1]
         end
       end
-      return ''.join(buf)
+      return buf.join('')
     end
 
     ###   SEND SSTP/1.3   ###

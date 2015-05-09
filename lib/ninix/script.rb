@@ -233,7 +233,7 @@ module Script
           end
           next
         end
-        if !text.empty?
+        if not text.empty?
 #          print(text, "\n")
           @script << [SCRIPT_TEXT, text, @column]
           text = []
@@ -353,11 +353,11 @@ module Script
         if not string_chunks.empty?
           text << [TEXT_STRING, string_chunks.join('')]
         end
-        if text
+        if not text.empty?
           @script << [SCRIPT_TEXT, text, @column]
         end
-        return @script
       end
+      return @script
     end
 
     def read_number
@@ -417,7 +417,7 @@ module Script
           string_chunks << lexeme
           next
         end
-        print("STR_CH: ", string_chunks, "\n")
+#        print("STR_CH: ", string_chunks, "\n")
         if not string_chunks.empty?
           text << [TEXT_STRING, string_chunks.join('')]
           string_chunks = []

@@ -1399,10 +1399,11 @@ module Ninix_Main
       if sakura.key == key # XXX: needs reloading?
         return
       end
-      proc = lambda { stop_sakura(
-                        sakura,
-                        lambda {|key, prev| start_sakura(key, :prev => prev) },
-                        key, sakura.key) }
+      proc_obj = lambda { stop_sakura(
+                            sakura,
+                            lambda {|key, prev|
+                              start_sakura(key, :prev => prev) },
+                            key, sakura.key) }
 #      def proc(self=self, key=key)
 #        stop_sakura(sakura, self.start_sakura, key, sakura.key)
 #      end
@@ -1411,19 +1412,20 @@ module Ninix_Main
         start_sakura(key, :prev => sakura.key, :vanished => vanished)
         close_ghost(sakura)
       elsif not event
-        proc()
+        proc_obj.call()
       else
         sakura_name = @ghosts[key].instance.get_selfname(default='')
         name = @ghosts[key].instance.get_name(default='')
         sakura.enqueue_event(
-          'OnGhostChanging', sakura_name, method, name, key, proc=proc)
+          'OnGhostChanging', sakura_name, method, name, key,
+          :proc_obj => proc_obj)
       end
     end
 
     def stop_sakura(sakura, starter=nil, *args)
       sakura.finalize()
       if starter != nil
-        starter(*args)
+        starter.call(*args)
       end
       set_menu_sensitive(sakura.key, true)
       close_ghost(sakura)
