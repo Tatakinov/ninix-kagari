@@ -569,7 +569,7 @@ module Balloon
 
     #@property
     def scale
-      scaling = @parent.handle_request('GET', 'get_preference', 'balloon_scaling')
+      scaling = (@parent.handle_request('GET', 'get_preference', 'balloon_scaling') != 0)
       scale = @parent.handle_request('GET', 'get_preference', 'surface_scale')
       if scaling
         return scale
@@ -603,7 +603,7 @@ module Balloon
       end
       begin
         path, config = @balloon[balloon_id]
-        use_pna = @parent.handle_request('GET', 'get_preference', 'use_pna')
+        use_pna = (@parent.handle_request('GET', 'get_preference', 'use_pna') != 0)
         surface = Pix.create_surface_from_file(path, :use_pna => use_pna)
       rescue # except:
         return nil

@@ -359,8 +359,8 @@ module Surface
       @window = []
       @__surface = surface
       @maxsize = [maxwidth, maxheight]
-      add_window(0, default_sakura, surface_alias, mayuna)
-      add_window(1, default_kero, surface_alias, mayuna)
+      add_window(0, default_sakura, surface_alias, :mayuna => mayuna)
+      add_window(1, default_kero, surface_alias, :mayuna => mayuna)
     end
 
     def get_menu_pixmap
@@ -411,7 +411,7 @@ module Surface
       return background, foreground
     end
 
-    def add_window(side, default_id, config_alias, mayuna={})
+    def add_window(side, default_id, config_alias, mayuna: {})
       ##assert @window.length == side
       if side == 0
         name = 'sakura'
@@ -1164,7 +1164,7 @@ module Surface
       @collisions = @region[@surface_id]
       # update window offset
       x, y = @position # XXX: without window_offset
-      w, h = get_surface_size(@surface_id)
+      w, h = get_surface_size(:surface_id => @surface_id)
       dw, dh = get_max_size()
       xoffset = (dw - w) / 2
       if get_alignment() == 0
@@ -1187,7 +1187,7 @@ module Surface
       if @side < 2
         @parent.handle_request('NOTIFY', 'notify_observer', 'set surface')
       end
-      w, h = get_surface_size(@surface_id)
+      w, h = get_surface_size(:surface_id => @surface_id)
       new_x, new_y = get_position()
       @parent.handle_request(
         'NOTIFY', 'notify_event',
@@ -1245,7 +1245,7 @@ module Surface
         use_pna = false
         is_pnr = false
       else
-        use_pna = @parent.handle_request('GET', 'get_preference', 'use_pna')
+        use_pna = (@parent.handle_request('GET', 'get_preference', 'use_pna') != 0)
         is_pnr = true
       end
       begin
@@ -1262,8 +1262,8 @@ module Surface
             use_pna = false
           else
             is_pnr = true
-            use_pna = @parent.handle_request(
-              'GET', 'get_preference', 'use_pna')
+            use_pna = (@parent.handle_request(
+                        'GET', 'get_preference', 'use_pna') != 0)
           end
           overlay = Pix.create_surface_from_file(
             element, :is_pnr => is_pnr, :use_pna => use_pna)
@@ -1311,7 +1311,7 @@ module Surface
       cr.scale(scale / 100.0, scale / 100.0)
       for part, x1, y1, x2, y2 in @collisions
         if @parent.handle_request('GET', 'get_preference',
-                                  'check_collision_name')
+                                  'check_collision_name') != 0
           cr.set_operator(Cairo::OPERATOR_SOURCE)
           cr.set_source_rgba(0.4, 0.0, 0.0, 1.0) # XXX
           cr.move_to(x1 + 2, y1)
@@ -1416,7 +1416,7 @@ module Surface
         return
       end
       @window.set_surface(cr, @image_surface, get_scale)
-      if @parent.handle_request('GET', 'get_preference', 'check_collision')
+      if @parent.handle_request('GET', 'get_preference', 'check_collision') != 0
         draw_region(cr)
       end
       @window.set_shape(cr)
@@ -1469,7 +1469,7 @@ module Surface
       return w, h
     end
 
-    def get_surface_size(surface_id=nil)
+    def get_surface_size(surface_id: nil)
       if surface_id == nil
         surface_id = @surface_id
       end

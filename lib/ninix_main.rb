@@ -263,7 +263,7 @@ module Ninix_Main
         end
       end
       if not break_flag
-        if not request_parent('GET', 'get_preference', 'allowembryo')
+        if request_parent('GET', 'get_preference', 'allowembryo') == 0
           if event == nil
             if request_handler
               request_handler.send_response(420) # Refuse
@@ -1668,7 +1668,7 @@ module Ninix_Main
               if not line.include?(',')
                 next
               end
-              key, value = line.split(',', 1)
+              key, value = line.split(',', 2)
               key = key.strip()
               if key == 'time'
                 begin
@@ -1679,8 +1679,8 @@ module Ninix_Main
               end
             end
           rescue # except IOError as e:
-            code, message = e.args
-            logging.error('cannot read {0}'.format(path))
+            #code, message = e.args
+            #logging.error('cannot read {0}'.format(path))
           end
         end
         ai_list = []

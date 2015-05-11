@@ -1652,7 +1652,7 @@ module Sakura
       set_surface(surface_desc, surface_alias, surface, surface_name,
                        surface_dir, surface_tooltips, seriko_descript)
       balloon = nil
-      if not @parent.handle_request('GET', 'get_preference', 'ignore_default') ## FIXME: change prefs key
+      if @parent.handle_request('GET', 'get_preference', 'ignore_default') == 0 ## FIXME: change prefs key
         balloon_path = @desc.get('deault.balloon.path', :default => '')
         balloon_name = @desc.get('balloon', :default => '')
         if not balloon_path.empty?
@@ -1787,7 +1787,7 @@ module Sakura
           end
         end
         stand_by(false)
-        if @parent.handle_request('GET', 'get_preference', 'sink_after_talk')
+        if @parent.handle_request('GET', 'get_preference', 'sink_after_talk') != 0
           @surface.lower_all()
         end
       elsif not @event_queue.empty? and handle_event()
@@ -1971,7 +1971,7 @@ module Sakura
       @balloon.set_balloon_default()
       @current_time = Time.new.to_a
       reset_idle_time()
-      if @parent.handle_request('GET', 'get_preference', 'raise_before_talk')
+      if @parent.handle_request('GET', 'get_preference', 'raise_before_talk') != 0
         raise_all()
       end
     end

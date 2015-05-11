@@ -72,6 +72,7 @@ module Prefs
       if @dic.include?(key) and not @__stack.include?(key)
         @__stack[key] = @dic[key]
       end
+      @dic[key] = item
     end
 
     def commit
@@ -176,8 +177,7 @@ module Prefs
     def reset ### FIXME ###
       @fontchooser.set_font_name(get('balloon_fonts', DEFAULT_BALLOON_FONTS))
       set_default_balloon(get('default_balloon'))
-      @ignore_button.set_active(
-                                !!get('ignore_default', 0))
+      @ignore_button.set_active(get('ignore_default', 0) != 0)
       scale = get('surface_scale', Prefs.get_default_surface_scale())
       if not RANGE_SCALE.include?(scale)
         @surface_scale_combo.set_active(RANGE_SCALE.index(Prefs.get_default_surface_scale()))
@@ -191,13 +191,13 @@ module Prefs
       else
         @script_speed_combo.set_active(RANGE_SCRIPT_SPEED.index(script_speed))
       end
-      @balloon_scaling_button.set_active(!!get('balloon_scaling'))
-      @allowembryo_button.set_active(!!get('allowembryo'))
-      @check_collision_button.set_active(!!get('check_collision', 0))
-      @check_collision_name_button.set_active(!!get('check_collision_name', 0))
-      @use_pna_button.set_active(!!get('use_pna', 1))
-      @sink_after_talk_button.set_active(!!get('sink_after_talk'))
-      @raise_before_talk_button.set_active(!!get('raise_before_talk'))
+      @balloon_scaling_button.set_active(get('balloon_scaling') != 0)
+      @allowembryo_button.set_active(get('allowembryo') != 0)
+      @check_collision_button.set_active(get('check_collision', 0) != 0)
+      @check_collision_name_button.set_active(get('check_collision_name', 0) != 0)
+      @use_pna_button.set_active(get('use_pna', 1) != 0)
+      @sink_after_talk_button.set_active(get('sink_after_talk') != 0)
+      @raise_before_talk_button.set_active(get('raise_before_talk') != 0)
       @animation_quality_adjustment.set_value(get('animation_quality', 1.0))
     end
 
