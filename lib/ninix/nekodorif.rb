@@ -525,6 +525,7 @@ module Nekodorif
   end
 
   class Katochan
+    attr_reader :loaded
 
     CATEGORY_LIST = ['pain',      # 痛い
                      'stab',      # 刺さる

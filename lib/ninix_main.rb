@@ -756,7 +756,7 @@ module Ninix_Main
     def set_collisionmode(flag, rect=false)
       @prefs.check_collision_button.set_active(flag)
       @prefs.check_collision_name_button.set_active((not rect))
-      @prefs.update(commit=true) # XXX
+      @prefs.update(:commit => true) # XXX
       notify_preference_changed()
     end
 

@@ -21,7 +21,7 @@ module Pix
     def initialize(type=Gtk::Window::Type::TOPLEVEL)
       super(type)
       set_decorated(false)
-      #set_resizable(false) # XXX
+      set_resizable(false)
       screen_changed()
     end
 

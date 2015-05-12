@@ -85,7 +85,7 @@ module Prefs
     end
 
     def update(stack)
-      for key in stack
+      for key in stack.keys
         @dic[key] = stack[key]
       end
     end
@@ -235,7 +235,7 @@ module Prefs
       show()
     end
 
-    def update(commit=false) ## FIXME
+    def update(commit: false) ## FIXME
       @__prefs.set('allowembryo', (@allowembryo_button.active? ? 1 : 0).to_s)
       @__prefs.set('balloon_fonts', @fontchooser.font_name)
       selected = @balloon_treeview.selection.selected
@@ -263,7 +263,7 @@ module Prefs
 
     def ok
       hide()
-      update(commit=true)
+      update(:commit => true)
       @parent.handle_request('NOTIFY', 'notify_preference_changed')
     end
 
