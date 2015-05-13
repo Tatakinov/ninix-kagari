@@ -41,11 +41,10 @@ module Install
       @dialog = Gtk::MessageDialog.new(:type => Gtk::MessageType::QUESTION,
                                        :buttons_type => :yes_no)
       @select_dialog = Gtk::Dialog.new()
-      @select_dialog.add_button(Gtk::Stock::CANCEL, Gtk::ResponseType::REJECT)
-      @select_dialog.add_button(Gtk::Stock::OK, Gtk::ResponseType::ACCEPT)
+      @select_dialog.add_button("_Cancel", Gtk::ResponseType::REJECT)
+      @select_dialog.add_button("_OK", Gtk::ResponseType::ACCEPT)
       ls = Gtk::ListStore.new(Integer, String)
       tv = Gtk::TreeView.new(model=ls)
-      tv.set_rules_hint(true)
       renderer = Gtk::CellRendererText.new()
       col0 = Gtk::TreeViewColumn.new('No.', renderer, :text => 0)
       col1 = Gtk::TreeViewColumn.new('Path', renderer, :text => 1)

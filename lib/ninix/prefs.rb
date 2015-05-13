@@ -149,9 +149,9 @@ module Prefs
                             Gtk::Label.new(_('Misc')))
       @notebook.append_page(make_page_debug(),
                             Gtk::Label.new(_('Debug')))
-      @dialog.add_button(Gtk::Stock::OK, Gtk::ResponseType::OK)
-      @dialog.add_button(Gtk::Stock::APPLY, Gtk::ResponseType::APPLY)
-      @dialog.add_button(Gtk::Stock::CANCEL, Gtk::ResponseType::CANCEL)
+      @dialog.add_button("_OK", Gtk::ResponseType::OK)
+      @dialog.add_button("_Apply", Gtk::ResponseType::APPLY)
+      @dialog.add_button("_Cancel", Gtk::ResponseType::CANCEL)
       @dialog.signal_connect('response') do |i, *a|
         response(i, *a)
       end
@@ -175,16 +175,16 @@ module Prefs
     end
 
     def reset ### FIXME ###
-      @fontchooser.set_font_name(get('balloon_fonts', DEFAULT_BALLOON_FONTS))
+      @fontchooser.set_font_name(get('balloon_fonts', :default => DEFAULT_BALLOON_FONTS))
       set_default_balloon(get('default_balloon'))
-      @ignore_button.set_active(get('ignore_default', 0) != 0)
-      scale = get('surface_scale', Prefs.get_default_surface_scale())
+      @ignore_button.set_active(get('ignore_default', :default => 0) != 0)
+      scale = get('surface_scale', :default => Prefs.get_default_surface_scale())
       if not RANGE_SCALE.include?(scale)
         @surface_scale_combo.set_active(RANGE_SCALE.index(Prefs.get_default_surface_scale()))
       else
         @surface_scale_combo.set_active(RANGE_SCALE.index(scale))
       end
-      script_speed = get('script_speed', Prefs.get_default_script_speed())
+      script_speed = get('script_speed', :default => Prefs.get_default_script_speed())
       if not RANGE_SCRIPT_SPEED.include?(script_speed)
         @script_speed_combo.set_active(
                                        RANGE_SCRIPT_SPEED.index(Prefs.get_default_script_speed()))
@@ -193,15 +193,15 @@ module Prefs
       end
       @balloon_scaling_button.set_active(get('balloon_scaling') != 0)
       @allowembryo_button.set_active(get('allowembryo') != 0)
-      @check_collision_button.set_active(get('check_collision', 0) != 0)
-      @check_collision_name_button.set_active(get('check_collision_name', 0) != 0)
-      @use_pna_button.set_active(get('use_pna', 1) != 0)
+      @check_collision_button.set_active(get('check_collision', :default => 0) != 0)
+      @check_collision_name_button.set_active(get('check_collision_name', :default => 0) != 0)
+      @use_pna_button.set_active(get('use_pna', :default => 1) != 0)
       @sink_after_talk_button.set_active(get('sink_after_talk') != 0)
       @raise_before_talk_button.set_active(get('raise_before_talk') != 0)
-      @animation_quality_adjustment.set_value(get('animation_quality', 1.0))
+      @animation_quality_adjustment.set_value(get('animation_quality', :default => 1.0))
     end
 
-    def get(name, default=nil)
+    def get(name, default: nil)
       #assert name in self.PREFS_TYPE
       if ['sakura_name', # XXX: backward compat
           'sakura_dir', 'default_balloon', 'balloon_fonts'].include?(name)

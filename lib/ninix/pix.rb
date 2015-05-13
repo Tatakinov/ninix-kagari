@@ -18,14 +18,17 @@ module Pix
   class BaseTransparentWindow < Gtk::Window
     alias :base_move :move
 
-    def initialize(type=Gtk::Window::Type::TOPLEVEL)
+    def initialize(type: Gtk::Window::Type::TOPLEVEL)
       super(type)
       set_decorated(false)
       set_resizable(false)
-      screen_changed()
+      signal_connect("screen-changed") do |widget, old_screen|
+        screen_changed(widget, :old_screen => old_screen)
+      end
+      screen_changed(self)
     end
 
-    def screen_changed(old_screen=nil)
+    def screen_changed(widget, old_screen: nil)
       if composited?
         set_visual(screen.rgba_visual)
         @supports_alpha = true

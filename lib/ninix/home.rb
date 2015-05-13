@@ -62,7 +62,7 @@ module Home
 
   def self.get_shiori()
     table = {}
-    shiori_lib = DLL::Library.new('shiori', saori_lib=nil)
+    shiori_lib = DLL::Library.new('shiori', :saori_lib => nil)
     path = DLL.get_path()
     Dir.foreach(path, :encoding => 'UTF-8') do |filename|
       if filename == '..' or filename == '.'

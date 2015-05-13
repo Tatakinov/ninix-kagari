@@ -1617,9 +1617,9 @@ module Balloon
         drag_data_received(widget, context, x, y, data, info, time)
       end
       # DnD data types
-      #dnd_targets = [['text/plain', 0, 0]]
-      #@window.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
-      #                      Gdk::DragContext::Action::COPY)
+      dnd_targets = [['text/plain', 0, 0]]
+      @window.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+                            Gdk::DragContext::Action::COPY)
       @window.drag_dest_add_text_targets()
       @window.set_events(Gdk::Event::BUTTON_PRESS_MASK)
       @window.set_modal(true)
@@ -1635,7 +1635,7 @@ module Balloon
       @entry.set_has_frame(false)
       font_desc = Pango::FontDescription.new()
       font_desc.set_size(9 * 3 / 4 * Pango::SCALE) # XXX
-      @entry.modify_font(font_desc)
+      @entry.override_font(font_desc)
       @entry.set_size_request(w, h)
       @entry.show()
       surface = nil

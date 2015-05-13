@@ -84,7 +84,7 @@ module Ninix_Main
     dialog.set_position(Gtk.WindowPosition.CENTER)
     dialog.set_gravity(Gdk.Gravity.CENTER)
     button = dialog.add_button(_('Show Details'), response_id)
-    dialog.add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+    dialog.add_button("_Close", Gtk.ResponseType.CLOSE)
     textview = Gtk::TextView.new
     textview.set_editable(false)
     left, top, scrn_w, scrn_h = Pix.get_workarea()
@@ -1774,15 +1774,15 @@ module Ninix_Main
       content_area = @dialog.content_area
       content_area.pack_start(@sw, :expand => true, :fill => true, :padding => 0)
       @dialog.add_button('Install', 1)
-      @dialog.add_button(Gtk::Stock::CLOSE, Gtk::ResponseType::CLOSE)
+      @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
         response(w, e)
       end
       @file_chooser = Gtk::FileChooserDialog.new(
         :title => "Install..",
         :action => Gtk::FileChooser::Action::OPEN,
-        :buttons => [[Gtk::Stock::OPEN, Gtk::ResponseType::OK],
-                    [Gtk::Stock::CANCEL, Gtk::ResponseType::CANCEL]])
+        :buttons => [["_Open", Gtk::ResponseType::OK],
+                    ["_Cancel", Gtk::ResponseType::CANCEL]])
       @file_chooser.set_default_response(Gtk::ResponseType::CANCEL)
       filter = Gtk::FileFilter.new
       filter.set_name("All files")
@@ -1923,7 +1923,7 @@ module Ninix_Main
       content_area = @dialog.content_area
       content_area.pack_start(@darea, :expand => true, :fill => true, :padding => 0)
       @darea.show()
-      @dialog.add_button(Gtk::Stock::CLOSE, Gtk::ResponseType::CLOSE)
+      @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
         response(w, e)
       end

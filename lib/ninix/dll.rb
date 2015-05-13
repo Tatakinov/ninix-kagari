@@ -35,7 +35,7 @@ module DLL
       return 1
     end
 
-    def load(dir=nil)
+    def load(dir: nil)
       if dir == nil
         dir = File.expand_path(File.dirname(__FILE__))
       end
@@ -135,7 +135,7 @@ module DLL
 
   class Library
 
-    def initialize(dll_type, sakura=nil, saori_lib=nil)
+    def initialize(dll_type, sakura: nil, saori_lib: nil)
       @type = dll_type
       @sakura = sakura
       @saori_lib = saori_lib

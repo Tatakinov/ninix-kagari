@@ -990,9 +990,9 @@ module Surface
         end
       end
       # DnD data types
-      #dnd_targets = [['text/uri-list', 0, 0]]
-      #@darea.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
-      #                     Gdk::DragContext::Action::COPY)
+      dnd_targets = [['text/uri-list', 0, 0]]
+      @darea.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+                           Gdk::DragContext::Action::COPY)
       @darea.drag_dest_add_uri_targets()
     end
 

@@ -116,8 +116,8 @@ module Sakura
       @cantalk = true
       @__sender = 'ninix-aya'
       @__charset = 'Shift_JIS'
-      saori_lib = DLL::Library.new('saori', sakura=self)
-      @__dll = DLL::Library.new('shiori', saori_lib=saori_lib)
+      saori_lib = DLL::Library.new('saori', :sakura => self)
+      @__dll = DLL::Library.new('shiori', :saori_lib => saori_lib)
       @__temp_mode = 0
       @__observers = {}
       @__listening = {
@@ -371,7 +371,7 @@ module Sakura
     end
 
     def load_shiori()
-      if @shiori and @shiori.load(@shiori_dir) != 0
+      if @shiori and @shiori.load(:dir => @shiori_dir) != 0
         if @shiori.respond_to?("show_description")
           @shiori.show_description()
         end
@@ -510,7 +510,7 @@ module Sakura
                         db, request_handler]
     end
 
-    RESET_EVENT = ['OnGhostChanging', 'OnShellChanging', 'OnVanishSelected']
+    RESET_ENQUEUE_EVENT = ['OnGhostChanging', 'OnShellChanging', 'OnVanishSelected']
 
     def check_event_queue()
       return (not @event_queue.empty?)
@@ -520,7 +520,7 @@ module Sakura
       #for key in argdict
       #  assert ['proc'].include?(key) # trap typo, etc.
       #end
-      if RESET_EVENT.include?(event)
+      if RESET_ENQUEUE_EVENT.include?(event)
         reset_script(true)
       end
       @event_queue << [event, arglist, proc_obj]
@@ -1183,13 +1183,13 @@ module Sakura
                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     BOOT_EVENT = ['OnBoot', 'OnFirstBoot', 'OnGhostChanged', 'OnShellChanged',
                   'OnUpdateComplete']
-    RESET_EVENT = ['OnVanishSelecting', 'OnVanishCancel'] ## FIXME
+    RESET_NOTIFY_EVENT = ['OnVanishSelecting', 'OnVanishCancel'] ## FIXME
 
     def notify_event(event, *arglist, event_type: 'GET', default: nil)
       if @time_critical_session and event.start_with?('OnMouse')
         return false
       end
-      if RESET_EVENT.include?(event)
+      if RESET_NOTIFY_EVENT.include?(event)
         reset_script(true)
       end
       #for key in argdict
@@ -3016,8 +3016,8 @@ module Sakura
       content_area = @dialog.content_area
       content_area.add(@label)
       @label.show()
-      @dialog.add_button(Gtk::Stock::YES, Gtk::ResponseType::YES)
-      @dialog.add_button(Gtk::Stock::NO, Gtk::ResponseType::NO)
+      @dialog.add_button("_Yes", Gtk::ResponseType::YES)
+      @dialog.add_button("_No", Gtk::ResponseType::NO)
       @dialog.signal_connect('response') do |w, e|
         response(w, e)
       end
@@ -3086,7 +3086,7 @@ module Sakura
       vbox.pack_start(scroll, :expand => true, :fill => true, :padding => 0)
       content_area = @dialog.content_area
       content_area.add(vbox)
-      @dialog.add_button(Gtk::Stock::CLOSE, Gtk::ResponseType::CLOSE)
+      @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
         response(w, e)
       end

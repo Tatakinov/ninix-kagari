@@ -325,8 +325,8 @@ module NGM
       @pattern_entry.set_size_request(300, -1)
       content_area.add(@pattern_entry)
       content_area.show_all()
-      @dialog.add_button(Gtk::Stock::OK, Gtk::ResponseType::OK)
-      @dialog.add_button(Gtk::Stock::CANCEL, Gtk::ResponseType::CANCEL)
+      @dialog.add_button("_OK", Gtk::ResponseType::OK)
+      @dialog.add_button("_Cancel", Gtk::ResponseType::CANCEL)
       @dialog.signal_connect('response') do |w, r|
         response(w, r)
       end
