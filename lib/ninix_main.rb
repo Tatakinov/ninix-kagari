@@ -255,8 +255,8 @@ module Ninix_Main
       working = (event != nil)
       break_flag = false
       for if_ghost in script_odict.keys()
-        if if_ghost and request_parent('GET', 'if_ghost', if_ghost, working)
-          request_parent('NOTIFY', 'select_current_sakura', if_ghost)
+        if if_ghost and request_parent('GET', 'if_ghost', if_ghost, :working => working)
+          request_parent('NOTIFY', 'select_current_sakura', :if_ghost => if_ghost)
           default_script = script_odict[if_ghost]
           break_flag = true
           break
@@ -1240,7 +1240,7 @@ module Ninix_Main
     end
 
     def exit_handler(sig_no, frame=nil)
-      close_all_ghosts(reason='shutdown')
+      close_all_ghosts(:reason => 'shutdown')
     end
 
     def run(abend)
@@ -1265,7 +1265,7 @@ module Ninix_Main
       end
     end
 
-    def if_ghost(if_ghost, working=false)
+    def if_ghost(if_ghost, working: false)
       instance_list = []
       for value in @ghosts.values()
         if value.instance != nil
@@ -1298,7 +1298,7 @@ module Ninix_Main
                             nil, nil, 0, 0, nil)
     end
 
-    def select_current_sakura(ifghost=nil)
+    def select_current_sakura(ifghost: nil)
       if ifghost != nil
         break_flag = false
         for value in @ghosts.values()
@@ -1347,7 +1347,7 @@ module Ninix_Main
       end
     end
 
-    def close_all_ghosts(reason='user')
+    def close_all_ghosts(reason: 'user')
       for sakura in get_working_ghost
         sakura.notify_event('OnCloseAll', reason)
       end
@@ -1379,9 +1379,9 @@ module Ninix_Main
       end
       # select another ghost
       if sequential
-        key = (keys.index(sakura.key) + 1) % keys.length
+        key = keys[(keys.index(sakura.key) + 1) % keys.length]
       else
-        keys.remove(sakura.key)
+        keys.delete(sakura.key)
         key = keys.sample
       end
       change_sakura(sakura, key, 'automatic', :event => event, :vanished => vanished)
@@ -1404,9 +1404,6 @@ module Ninix_Main
                             lambda {|key, prev|
                               start_sakura(key, :prev => prev) },
                             key, sakura.key) }
-#      def proc(self=self, key=key)
-#        stop_sakura(sakura, self.start_sakura, key, sakura.key)
-#      end
       if vanished
         sakura.finalize()
         start_sakura(key, :prev => sakura.key, :vanished => vanished)
@@ -1523,19 +1520,13 @@ module Ninix_Main
           sakura = @ghosts[ghost_dir].instance
           if sakura.is_running() # restart if working
             key = sakura.key
-            proc = lambda {
+            proc_obj = lambda {
               @ghosts[ghost_dir].baseinfo = ghost_conf[ghost_dir]
-              logging.info('restarting....')
+              #logging.info('restarting....')
               start_sakura(key, :prev => key, :init => true)
-              logging.info('done.')
+              #logging.info('done.')
             }
-#            def proc(self=self)
-#              @ghosts[ghost_dir].baseinfo = ghost_conf[ghost_dir]
-#              logging.info('restarting....')
-#              start_sakura(key, :prev => key, :init => true)
-#              logging.info('done.')
-#            end
-            stop_sakura(sakura, proc)
+            stop_sakura(sakura, proc_obj)
           end
         else
           holon = Ghost.new(ghost_dir)
@@ -1608,9 +1599,9 @@ module Ninix_Main
       if next_ghost != nil
         select_ghost_by_name(sakura, next_ghost, :vanished => true)
       else
-        select_ghost(sakura, 0, :vanished => true)
+        select_ghost(sakura, false, :vanished => true)
       end
-      del @ghosts[sakura.key]
+      @ghosts.delete(sakura.key)
     end
 
     def select_plugin(item)

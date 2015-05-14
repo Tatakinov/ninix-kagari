@@ -1054,8 +1054,8 @@ module Balloon
       # draw images
       for i in 0..(@images.length - 1)
         image_surface, (x, y) = @images[i]
-        w = image_surface.get_width()
-        h = image_surface.get_height()
+        w = image_surface.width
+        h = image_surface.height
         if x == 'centerx'
           bw, bh = get_balloon_size(:scaling => false)
           x = (bw - w) / 2
@@ -1103,8 +1103,8 @@ module Balloon
         if @sstp_surface != nil
           for l, c in @sstp_marker
             if l == i
-              mw = @sstp_surface.get_width()
-              mh = @sstp_surface.get_height()
+              mw = @sstp_surface.width
+              mh = @sstp_surface.height
               @layout.set_text(@text_buffer[i][0, c], -1)
               text_w, text_h = @layout.get_pixel_size()
               mx = x + text_w
@@ -1318,8 +1318,8 @@ module Balloon
       px, py = @window.winpos_to_surfacepos(
             event.x.to_i, event.y.to_i, scale)
       # up arrow
-      w = @arrow0_surface.get_width()
-      h = @arrow0_surface.get_height()
+      w = @arrow0_surface.width
+      h = @arrow0_surface.height
       x, y = @arrow[0]
       if x <= px and px <= x + w and y <= py and py <= y + h
         if @lineno > 0
@@ -1329,8 +1329,8 @@ module Balloon
         return true
       end
       # down arrow
-      w = @arrow1_surface.get_width()
-      h = @arrow1_surface.get_height()
+      w = @arrow1_surface.width
+      h = @arrow1_surface.height
       x, y = @arrow[1]
       if x <= px and px <= x + w and y <= py and py <= y + h
         if @lineno + @lines < @text_buffer.length
@@ -1464,8 +1464,8 @@ module Balloon
         offset = 0
       end
       @sstp_marker << [line, offset]
-      w = @sstp_surface.get_width()
-      h = @sstp_surface.get_height()
+      w = @sstp_surface.width
+      h = @sstp_surface.height
       i = 1
       while 1
         space = '\u3000' * i ## FIXME
@@ -1557,8 +1557,8 @@ module Balloon
         if @sstp_surface != nil
           for l, c in @sstp_marker
             if l == line
-              mw = @sstp_surface.get_width()
-              mh = @sstp_surface.get_height()
+              mw = @sstp_surface.width
+              mh = @sstp_surface.height
               @layout.set_text(@text_buffer[l][0, c], -1)
               text_w, text_h = @layout.get_pixel_size()
               mx = x + text_w

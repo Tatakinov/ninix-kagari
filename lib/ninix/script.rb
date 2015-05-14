@@ -84,14 +84,14 @@ module Script
 
   class Parser
 
-    def initialize(error='strict')
+    def initialize(error: 'strict')
       if not ['strict', 'loose'].include?(error)
 #        raise ValueError('unknown error scheme: {0}'.format(str(error)))
       end
       @error = error
     end
 
-    def perror(msg, position='column', skip=nil)
+    def perror(msg, position: 'column', skip: nil)
       if not ['column', 'eol'].include?(position)
 #        raise ValueError('unknown position scheme: ', position.to_s)
       end
@@ -162,7 +162,7 @@ module Script
       begin
         token, lexeme = @tokens.shift
       rescue # except IndexError:
-#        raise perror('unexpected end of script', position='eol')
+#        raise perror('unexpected end of script', :position => 'eol')
       end
 #      print("NEXT: ", token, " ", lexeme, "\n")
       if token == nil
@@ -199,12 +199,12 @@ module Script
           if not text.empty?
             @script << [SCRIPT_TEXT, text, @column]
           end
-#          raise perror('unknown tag', skip='length')
+#          raise perror('unknown tag', :skip => 'length')
         elsif token == TOKEN_STRING and lexeme == '%'
           string_chunks << lexeme
           text << [TEXT_STRING, string_chunks.join('')]
           @script << [SCRIPT_TEXT, text, @column]
-#          raise perror('unknown meta string', skip='length')
+#          raise perror('unknown meta string', :skip => 'length')
           return []
         end
         if [TOKEN_NUMBER, TOKEN_OPENED_SBRA,
@@ -294,11 +294,11 @@ module Script
           if not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
             args = split_params(read_sbra_text())
             if args.length != 2
-#              raise perror('wrong number of arguments', skip='length')
+#              raise perror('wrong number of arguments', :skip => 'length')
               return []
             end
             if args[1].length != 1 or not args[1][0][1]
-#              raise perror('syntax error (expected an ID)', skip='length')
+#              raise perror('syntax error (expected an ID)', :skip => 'length')
               return []
             end
             arg1 = args[0]
@@ -323,7 +323,7 @@ module Script
           end
         elsif ['\\_a'].include?(lexeme)
           if anchor == nil
-            anchor = perror('syntax error (unbalanced \_a tag)', skip='rest')
+            anchor = perror('syntax error (unbalanced \_a tag)', :skip => 'rest')
             @script << [SCRIPT_TAG, lexeme, read_sbra_id(), @column]
           else
             anchor = nil
@@ -336,7 +336,7 @@ module Script
           end
           @script << [SCRIPT_TAG, lexeme] + args + [@column, ]
         else
-#          raise perror('unknown tag ({0})'.format(lexeme), skip='length')
+#          raise perror('unknown tag ({0})'.format(lexeme), :skip => 'length')
           return []
         end
         if anchor != nil
@@ -375,11 +375,11 @@ module Script
       end
       token, number = next_token()
       if token != TOKEN_NUMBER
-#        raise perror('syntax error (expected a number)', skip='length')
+#        raise perror('syntax error (expected a number)', :skip => 'length')
       end
       token, lexeme = next_token()
       if token != TOKEN_CLOSED_SBRA
-#        raise perror('syntax error (expected a square bracket)', skip='length')
+#        raise perror('syntax error (expected a square bracket)', :skip => 'length')
       end
       return number
     end
@@ -387,7 +387,7 @@ module Script
     def read_sbra_id
       text = read_sbra_text()
       if text.length != 1
-        #raise perror('syntax error (expected a single ID)', skip='length')
+        #raise perror('syntax error (expected a single ID)', :skip => 'length')
         return []
       end
       begin
@@ -427,11 +427,11 @@ module Script
         elsif token == TOKEN_META
           text << [TEXT_META, lexeme]
         else
-          #raise perror('syntax error (wrong type of argument)', skip='length')
+          #raise perror('syntax error (wrong type of argument)', :skip => 'length')
           return []
         end
 #      else
-#        raise perror('unexpected end of script', position='eol')
+#        raise perror('unexpected end of script', :position => 'eol')
       end
 #      print("TEXT: ", text, "\n")
       return text

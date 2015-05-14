@@ -87,7 +87,7 @@ module Sakura
       @sstp_entry_db = nil
       @sstp_request_handler = nil
       # error = 'loose'(default) or 'strict'
-      @script_parser = Script::Parser.new(error='loose')
+      @script_parser = Script::Parser.new(:error => 'loose')
       @char = 2 # 'sakura' and 'kero'
       @script_queue = []
       @script_mode = BROWSE_MODE
@@ -953,8 +953,8 @@ module Sakura
       proc_obj = lambda {
         @vanished_count += 1
         @ghost_time = 0
-        GLib::Idle.add([self, nil]){|a, args|
-            @parent.handle_request('NOTIFY', 'vanish_sakura', a, args)
+        GLib::Idle.add{
+          @parent.handle_request('NOTIFY', 'vanish_sakura', self, nil)
         }
       }
       enqueue_event('OnVanishSelected', :proc_obj => proc_obj)
@@ -1609,7 +1609,7 @@ module Sakura
         @balloon.set_balloon_default()
       elsif get_surface_id(0) != default_sakura or \
            get_surface_id(1) != default_kero
-        @__surface_life = random.randint(20, 30)
+        @__surface_life = Array(20..30).sample
         ##logging.debug('surface_life = {0:d}'.format(@__surface_life))
       end
     end
@@ -2255,11 +2255,11 @@ module Sakura
     end
 
     def __yen_plus(args)
-      @parent.handle_request('NOTIFY', 'select_ghost', self, 1)
+      @parent.handle_request('NOTIFY', 'select_ghost', self, true)
     end
 
     def __yen__plus(args)
-      @parent.handle_request('NOTIFY', 'select_ghost', self, 0)
+      @parent.handle_request('NOTIFY', 'select_ghost', self, false)
     end
 
     def __yen_m(args)
@@ -2404,7 +2404,7 @@ module Sakura
         end
       elsif args[0, 2] == ['change', 'ghost'] and argc > 2
         if args[2] == 'random'
-          @parent.handle_request('NOTIFY', 'select_ghost', self, 0, :event => 0)
+          @parent.handle_request('NOTIFY', 'select_ghost', self, false, :event => 0)
         else
           @parent.handle_request(
             'NOTIFY', 'select_ghost_by_name', self, args[2], :event => 0)
