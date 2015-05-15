@@ -186,8 +186,10 @@ module Sakura
       end
     end
 
-    def notify_observer(event, args=nil)
-      args = args or ()
+    def notify_observer(event, args: nil)
+      if not args
+        args = []
+      end
       for observer in @__observers.keys()
         observer.observer_update(event, args)
       end
@@ -391,7 +393,7 @@ module Sakura
     def finalize()
       if not @script_finally.empty? # XXX
         for proc_obj in @script_finally
-          proc_obj.call(flag_break=false)
+          proc_obj.call(:flag_break => false)
         end
         @script_finally = []
       end
@@ -578,7 +580,7 @@ module Sakura
       end
     end
 
-    def busy(check_updateman=true)
+    def busy(check_updateman: true)
       return (@time_critical_session or \
               @balloon.user_interaction or \
               not @event_queue.empty? or \
@@ -1271,8 +1273,7 @@ module Sakura
       if @boot_event.include?(event)
         @script_finally << @surface_bootup
       end
-      proc_obj = lambda {
-        flag_break = false
+      proc_obj = lambda {|flag_break: false|
         @parent.handle_request(
           'NOTIFY', 'notify_other', @key,
           event, get_name(default=''),
@@ -1455,7 +1456,7 @@ module Sakura
       notify_event('OnBalloonChange', name, path)
     end
 
-    def surface_bootup(flag_break=false)
+    def surface_bootup(flag_break: false)
       for side in [0, 1]
         if not @__boot[side]
           set_surface_default(side)
@@ -1807,9 +1808,8 @@ module Sakura
             @balloon.hide_sstp_message()
           end
           # XXX: how about the use_translator flag?
-          start_script(script, FROM_SSTP_CLIENT)
-          proc_obj = lambda {
-            flag_break = false
+          start_script(script, :origin => FROM_SSTP_CLIENT)
+          proc_obj = lambda {|flag_break: false|
             @parent.handle_request(
               'NOTIFY', 'notify_other', @key,
               event, get_name(default=''),
@@ -1923,7 +1923,7 @@ module Sakura
     end
 
     ###   SCRIPT PLAYER   ###
-    def start_script(script, origin=nil)
+    def start_script(script, origin: nil)
       if script.empty?
         return
       end
@@ -2415,7 +2415,7 @@ module Sakura
           @parent.handle_request('NOTIFY', 'start_sakura_cb', key, self)
         end
       elsif args[0, 1] == ['updatebymyself']
-        if not busy(check_updateman=false)
+        if not busy(:check_updateman => false)
           __update()
         end
       elsif args[0, 1] == ['vanishbymyself']
@@ -2826,7 +2826,7 @@ module Sakura
         @script_mode = BROWSE_MODE
         if not @script_finally.empty?
           for proc_obj in @script_finally
-            proc_obj.call(flag_break=true)
+            proc_obj.call(:flag_break => true)
           end
           @script_finally = []
         end
@@ -2944,7 +2944,7 @@ module Sakura
       @sstp_handle = nil
     end
 
-    def close(reason='user')
+    def close(reason: 'user')
       if busy()
         if reason == 'user'
           Gdk.beep() ## FIXME

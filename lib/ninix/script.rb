@@ -119,41 +119,32 @@ module Script
     end
 
     def tokenize(s)
-  patterns = [
-              [TOKEN_TAG, Regexp.new(/\\[Cehunjcxtqzy*v0123456789fmia!&+-]|\\[sbp][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|\\__[ct]|\\URL/)],
-              [TOKEN_META, Regexp.new(/%month|%day|%hour|%minute|%second|%username|%selfname2?|%keroname|%friendname|%songname|%screen(width|height)|%exh|%et|%m[szlchtep?]|%dms|%j|%c|%wronghour|%\*/)],
-              [TOKEN_NUMBER, Regexp.new(/[0-9]+/)],
-              [TOKEN_OPENED_SBRA, Regexp.new(/\[/)],
-              [TOKEN_CLOSED_SBRA, Regexp.new(/\]/)],
-              [TOKEN_STRING, Regexp.new(/(\\\\|\\%|\\\]|[^\\\[\]%0-9])+/)],
-              [TOKEN_STRING, Regexp.new(/[%\\]/)],
-             ]
+      patterns = [
+        [TOKEN_TAG, Regexp.new(/\\[Cehunjcxtqzy*v0123456789fmia!&+-]|\\[sbp][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|\\__[ct]|\\URL/)],
+        [TOKEN_META, Regexp.new(/%month|%day|%hour|%minute|%second|%username|%selfname2?|%keroname|%friendname|%songname|%screen(width|height)|%exh|%et|%m[szlchtep?]|%dms|%j|%c|%wronghour|%\*/)],
+        [TOKEN_NUMBER, Regexp.new(/[0-9]+/)],
+        [TOKEN_OPENED_SBRA, Regexp.new(/\[/)],
+        [TOKEN_CLOSED_SBRA, Regexp.new(/\]/)],
+        [TOKEN_STRING, Regexp.new(/(\\\\|\\%|\\\]|[^\\\[\]%0-9])+/)],
+        [TOKEN_STRING, Regexp.new(/[%\\]/)],
+      ]
       tokens = []
       pos = 0
       end_ = s.length
       while pos < end_
         for token, pattern in patterns
-#          print("s, pos: ", s, "  ", pos, "\n")
           match = pattern.match(s, pos)
-#          print("MATCH: ", match, "\n")
-#          print("MATCH: ", match.begin(0), "\n")
           if match != nil and match.begin(0) == pos
             break
           end
 #        else
 #          raise RuntimeError('should not reach here')
         end
-#        print(match.methods.sort, "\n")
-#        print("X: ", match.to_s, "\n")
         if match == nil ## FIXME
 #          raise RuntimeError('should not reach here')
         end
-#        print("MATCH(end):", match.end(0), "\n")
         tokens << [token, match.to_s]
-#        print("TOKEN: ", token, " - ", s[pos, match.end(0)], "\n")
         pos += match.to_s.length
-#        print("TOKENS: ", tokens, "\n")
-#        print("NEXT: ", s[pos, s.length - 1], "\n")
       end
       return tokens
     end
@@ -164,7 +155,6 @@ module Script
       rescue # except IndexError:
 #        raise perror('unexpected end of script', :position => 'eol')
       end
-#      print("NEXT: ", token, " ", lexeme, "\n")
       if token == nil
         return "", ""
       end
@@ -174,14 +164,12 @@ module Script
     end
 
     def parse(s)
-#      print("PARSE: ", s, "\n")
       if not s or s.empty?
         return []
       end
       # tokenize the script
       @src = s
       @tokens = tokenize(@src)
-#      print("TOKENS: ", @tokens, "\n")
       @column = 0
       @length = 0
       # parse the sequence of tokens
@@ -234,7 +222,6 @@ module Script
           next
         end
         if not text.empty?
-#          print(text, "\n")
           @script << [SCRIPT_TEXT, text, @column]
           text = []
         end
@@ -314,7 +301,6 @@ module Script
           if not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
             args = []
             for arg in split_params(read_sbra_text())
-#              print("ARG: ", arg, "\n")
               args  << arg[0][1]
             end
             @script << [SCRIPT_TAG, lexeme] + args + [@column, ]
@@ -408,7 +394,6 @@ module Script
       text = []
       string_chunks = []
       while not @tokens.empty?
-#        print("TOKENS: ", @tokens, "\n")
         token, lexeme = next_token()
         if [TOKEN_NUMBER, TOKEN_STRING, TOKEN_OPENED_SBRA, TOKEN_TAG].include?(token)
           lexeme = lexeme.gsub('\\', '\\')
@@ -417,7 +402,6 @@ module Script
           string_chunks << lexeme
           next
         end
-#        print("STR_CH: ", string_chunks, "\n")
         if not string_chunks.empty?
           text << [TEXT_STRING, string_chunks.join('')]
           string_chunks = []
@@ -433,7 +417,6 @@ module Script
 #      else
 #        raise perror('unexpected end of script', :position => 'eol')
       end
-#      print("TEXT: ", text, "\n")
       return text
     end
 
@@ -444,28 +427,21 @@ module Script
       params = []
       buf = []
       for token, lexeme in text
-#        print("TOKEN: ", token, "\n")
-#        print("LEXEME: ", lexeme, "\n")
         i = 0
         j = lexeme.length
         if token == TEXT_STRING
           while i < j
             match = re_param.match(lexeme, i)
-#            print("MATCH: ", match, "\n")
             if match == nil
               break
             end
-            
-#            param, n = re_quote.subn(lambda m: m.group(1), match.group())
             param = re_quote.match(match[0])
-#            print("PARAM: ", param, "\n")
             if param != nil
               param = param[1]
             end
             if param != nil or not buf.empty?
               buf << [token, param]
             end
-#            print("BUF: ", buf, "\n")
             params << buf
             buf = []
             i = match.end(0)

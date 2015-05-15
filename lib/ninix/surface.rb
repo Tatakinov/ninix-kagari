@@ -1439,7 +1439,7 @@ module Surface
       if @side < 2
         args = [@side, xoffset, yoffset]
         @parent.handle_request(
-          'NOTIFY', 'notify_observer', 'move surface', args) # animation
+          'NOTIFY', 'notify_observer', 'move surface', :args => args) # animation
       end
     end
 
@@ -1623,8 +1623,8 @@ module Surface
       x, y = get_position()
       @window.move(x, y) # XXX: call before showing the window
       @window.show()
-      @parent.handle_request('NOTIFY', 'notify_observer', 'show', (@side))
-      @parent.handle_request('NOTIFY', 'notify_observer', 'raise', (@side))
+      @parent.handle_request('NOTIFY', 'notify_observer', 'show', :args => [@side])
+      @parent.handle_request('NOTIFY', 'notify_observer', 'raise', :args => [@side])
     end
 
     def hide
@@ -1632,18 +1632,18 @@ module Surface
         @window.hide()
         @__shown = false
         @parent.handle_request(
-          'NOTIFY', 'notify_observer', 'hide', (@side))
+          'NOTIFY', 'notify_observer', 'hide', :args => [@side])
       end
     end
 
     def raise
       @window.window.raise
-      @parent.handle_request('NOTIFY', 'notify_observer', 'raise', (@side))
+      @parent.handle_request('NOTIFY', 'notify_observer', 'raise', :args => [@side])
     end
 
     def lower
       @window.window.lower()
-      @parent.handle_request('NOTIFY', 'notify_observer', 'lower', (@side))
+      @parent.handle_request('NOTIFY', 'notify_observer', 'lower', :args => [@side])
     end
 
     def button_press(window, event)
@@ -1653,7 +1653,7 @@ module Surface
       @x_root = event.x_root
       @y_root = event.y_root
       # automagical raise
-      @parent.handle_request('NOTIFY', 'notify_observer', 'raise', (@side))
+      @parent.handle_request('NOTIFY', 'notify_observer', 'raise', :args => [@side])
       if event.event_type == Gdk::Event::BUTTON2_PRESS
         @click_count = 2
       else # XXX
