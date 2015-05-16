@@ -260,7 +260,7 @@ module Sakura
       end
       @last_script = nil
       @status_icon = Gtk::StatusIcon.new
-      @status_icon.set_title(get_name(default=''))
+      @status_icon.set_title(get_name(:default => ''))
       @status_icon.set_visible(false)
     end
 
@@ -498,14 +498,14 @@ module Sakura
 
     def enqueue_script(event, script, sender, handle,
                        host, show_sstp_marker, use_translator,
-                       db=nil, request_handler=nil)
+                       db: nil, request_handler: nil)
       if @script_queue.empty? and \
         not @time_critical_session and not @passivemode
         if @sstp_request_handler
           @sstp_request_handler.send_sstp_break()
           @sstp_request_handler = nil
         end
-        reset_script(true)
+        reset_script(:reset_all => true)
       end
       @script_queue << [event, script, sender, handle, host,
                         show_sstp_marker, use_translator,
@@ -523,7 +523,7 @@ module Sakura
       #  assert ['proc'].include?(key) # trap typo, etc.
       #end
       if RESET_ENQUEUE_EVENT.include?(event)
-        reset_script(true)
+        reset_script(:reset_all => true)
       end
       @event_queue << [event, arglist, proc_obj]
     end
@@ -716,7 +716,7 @@ module Sakura
       return [name, names].include?(ifghost)
     end
 
-    def get_name(default=_('Sakura&Unyuu'))
+    def get_name(default: _('Sakura&Unyuu'))
       return @desc.get('name', :default => default)
     end
 
@@ -726,7 +726,7 @@ module Sakura
               @desc.get('user.defaultname', :default => _('User')))
     end
 
-    def get_selfname(default=_('Sakura'))
+    def get_selfname(default: _('Sakura'))
       return (@surface.get_selfname() or \
               @desc.get('sakura.name', :default => default))
     end
@@ -872,7 +872,7 @@ module Sakura
     ###   CALLBACK   ###
     def notify_start(init, vanished, ghost_changed,
                      name, prev_name, prev_shell, path, last_script,
-                     abend=nil)
+                     abend: nil)
       if @__temp_mode != 0
         default = nil
       else
@@ -971,7 +971,7 @@ module Sakura
       @cantalk = false
       @parent.handle_request('NOTIFY', 'select_current_sakura')
       if not @passivemode
-        reset_script(true)
+        reset_script(:reset_all => true)
         stand_by(true)
         notify_event('OnWindowStateMinimize')
       end
@@ -999,14 +999,14 @@ module Sakura
         notify_event('OnAnchorSelect', link_id[1])
       elsif is_URL(link_id)
         webbrowser.open(link_id)
-        reset_script(true)
+        reset_script(:reset_all => true)
         stand_by(false)
       elsif @sstp_entry_db
         # leave the previous sstp message as it is
         start_script(@sstp_entry_db.get(link_id, :default => '\e'))
         @sstp_entry_db = nil
       elsif not notify_event('OnChoiceSelect', link_id, text, number)
-        reset_script(true)
+        reset_script(:reset_all => true)
         stand_by(false)
       end
     end
@@ -1029,7 +1029,7 @@ module Sakura
             @sstp_request_handler.send_sstp_break()
             @sstp_request_handler = nil
           end
-          reset_script(true)
+          reset_script(:reset_all => true)
           notify_event('OnVanishButtonHold', default='\e')
           @vanished = false
         end
@@ -1139,7 +1139,7 @@ module Sakura
         if @sstp_request_handler
           @sstp_request_handler.send_sstp_break()
           @sstp_request_handler = nil
-          reset_script(true)
+          reset_script(:reset_all => true)
           stand_by(false)
         end
       elsif button == 3 and click == 1
@@ -1153,7 +1153,7 @@ module Sakura
                        @script_position)
         else
           notify_event('OnBalloonClose', @__current_script)
-          reset_script(true)
+          reset_script(:reset_all => true)
           stand_by(false)
         end
       end
@@ -1192,7 +1192,7 @@ module Sakura
         return false
       end
       if RESET_NOTIFY_EVENT.include?(event)
-        reset_script(true)
+        reset_script(:reset_all => true)
       end
       #for key in argdict
       #  assert ['event_type', 'default'].include?(key) # trap typo, etc.
@@ -1252,8 +1252,8 @@ module Sakura
         end
         @parent.handle_request(
           'NOTIFY', 'notify_other', @key,
-          event, get_name(default=''),
-          get_selfname(default=''),
+          event, get_name(:default => ''),
+          get_selfname(:default => ''),
           get_current_shell_name(),
           false, communication,
           nil, false, script, arglist)
@@ -1276,8 +1276,8 @@ module Sakura
       proc_obj = lambda {|flag_break: false|
         @parent.handle_request(
           'NOTIFY', 'notify_other', @key,
-          event, get_name(default=''),
-          get_selfname(default=''),
+          event, get_name(:default => ''),
+          get_selfname(:default => ''),
           get_current_shell_name(),
           flag_break, communication,
           nil, false, script, arglist)
@@ -1459,7 +1459,7 @@ module Sakura
     def surface_bootup(flag_break: false)
       for side in [0, 1]
         if not @__boot[side]
-          set_surface_default(side)
+          set_surface_default(:side => side)
           @surface.show(side)
         end
       end
@@ -1500,7 +1500,7 @@ module Sakura
               @balloon.identify_window(win))
     end
 
-    def set_surface_default(side=nil)
+    def set_surface_default(side: nil)
       @surface.set_surface_default(side)
     end
 
@@ -1627,7 +1627,7 @@ module Sakura
             notify_start(
               init, vanished, ghost_changed,
               prev_self_name, prev_name, prev_shell,
-              '', last_script, abend)
+              '', last_script, :abend => abend)
           end
         end
         return
@@ -1683,7 +1683,7 @@ module Sakura
       @start_time = Time.new.to_f
       notify_start(
         init, vanished, ghost_changed,
-        name, prev_name, prev_shell, surface_dir, last_script, abend)
+        name, prev_name, prev_shell, surface_dir, last_script, :abend => abend)
       GLib::Timeout.add(10) { do_idle_tasks } # 10[ms]
     end
 
@@ -1692,7 +1692,7 @@ module Sakura
       @vanished = false
       @__boot = [false, false]
       @old_otherghostname = nil ## FIXME
-      reset_script(true)
+      reset_script(:reset_all => true)
       @surface.reset_alignment()
       stand_by(true)
       @surface.reset_position()
@@ -1812,8 +1812,8 @@ module Sakura
           proc_obj = lambda {|flag_break: false|
             @parent.handle_request(
               'NOTIFY', 'notify_other', @key,
-              event, get_name(default=''),
-              get_selfname(default=''),
+              event, get_name(:default => ''),
+              get_selfname(:default => ''),
               get_current_shell_name(),
               flag_break, nil,
               [sender, host], (not use_translator), script, [])
@@ -1933,7 +1933,7 @@ module Sakura
       else
         @script_origin = origin
       end
-      reset_script(true)
+      reset_script(:reset_all => true)
       @__current_script = script
       if not script.rstrip().end_with?('\e')
         script = ''.join([script, '\e'])
@@ -1959,7 +1959,7 @@ module Sakura
       @script_side = 0
       @time_critical_session = false
       @quick_session = false
-      set_synchronized_session([], reset=true)
+      set_synchronized_session(:list => [], :reset => true)
       @balloon.hide_all()
       node = @processed_script[0]
       if node[0] == Script::SCRIPT_TAG and node[1] == '\C'
@@ -2166,7 +2166,7 @@ module Sakura
       for arg in args
         list << arg.to_i
       end
-      set_synchronized_session(list)
+      set_synchronized_session(:list => list)
     end
 
     def __yen__e(args)
@@ -2412,7 +2412,7 @@ module Sakura
       elsif args[0, 2] == ['call', 'ghost'] and argc > 2
         key = @parent.handle_request('GET', 'find_ghost_by_name', args[2])
         if key != nil
-          @parent.handle_request('NOTIFY', 'start_sakura_cb', key, self)
+          @parent.handle_request('NOTIFY', 'start_sakura_cb', key, :caller => self)
         end
       elsif args[0, 1] == ['updatebymyself']
         if not busy(:check_updateman => false)
@@ -2442,7 +2442,7 @@ module Sakura
         if args[0, 1] == ['enter']
           if args[2, 1] == ['rect']
             @parent.handle_request(
-              'NOTIFY', 'set_collisionmode', true, rect=true)
+              'NOTIFY', 'set_collisionmode', true, :rect => true)
           else
             @parent.handle_request(
               'NOTIFY', 'set_collisionmode', true)
@@ -2821,7 +2821,7 @@ module Sakura
       end
     end
 
-    def reset_script(reset_all=false)
+    def reset_script(reset_all: false)
       if reset_all
         @script_mode = BROWSE_MODE
         if not @script_finally.empty?
@@ -2839,12 +2839,12 @@ module Sakura
       @time_critical_session = false
       @quick_session = false
       @lock_repaint = false # SSP compat
-      set_synchronized_session([], reset=true)
+      set_synchronized_session(:list => [], :reset => true)
       @balloon.set_autoscroll(true)
       reset_idle_time()
     end
 
-    def set_synchronized_session(list=[], reset=false)
+    def set_synchronized_session(list: [], reset: false)
       if reset
         @synchronized_session = []
       elsif list.empty?
@@ -2955,7 +2955,7 @@ module Sakura
           end
         end
       end
-      reset_script(true)
+      reset_script(:reset_all => true)
       enqueue_event('OnClose', reason)
     end
 

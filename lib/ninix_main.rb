@@ -171,7 +171,7 @@ module Ninix_Main
     end
     # start
     #logging.info('loading...')
-    app = Application.new(f, sstp_port)
+    app = Application.new(f, :sstp_port => sstp_port)
     #logging.info('done.')
     app.run(abend)
     f.truncate(0)
@@ -297,8 +297,8 @@ module Ninix_Main
         request_parent(
           'NOTIFY', 'enqueue_script',
           event, script, sender, handle, address,
-          show_sstp_marker, use_translator, entry_db,
-          request_handler, temp_mode=true)
+          show_sstp_marker, use_translator, :db => entry_db,
+          :request_handler => request_handler, :temp_mode => true)
       end
     end
 
@@ -648,7 +648,7 @@ module Ninix_Main
 
   class Application
 
-    def initialize(lockfile, sstp_port=[9801, 11000])
+    def initialize(lockfile, sstp_port: [9801, 11000])
       @lockfile = lockfile
       @abend = nil
       @loaded = false
@@ -753,7 +753,7 @@ module Ninix_Main
       end
     end
 
-    def set_collisionmode(flag, rect=false)
+    def set_collisionmode(flag, rect: false)
       @prefs.check_collision_button.set_active(flag)
       @prefs.check_collision_name_button.set_active((not rect))
       @prefs.update(:commit => true) # XXX
@@ -837,14 +837,14 @@ module Ninix_Main
       end
     end
 
-    def notify_installedghostname(key=nil)
+    def notify_installedghostname(key: nil)
       installed = []
       for value in @ghosts.values()
         sakura = value.instance
         if sakura == nil
           next
         end
-        installed << sakura.get_name(default='')
+        installed << sakura.get_name(:default => '')
       end
       if key != nil
         if @ghosts.include?(key)
@@ -858,7 +858,7 @@ module Ninix_Main
       end
     end
 
-    def notify_installedballoonname(key=nil)
+    def notify_installedballoonname(key: nil)
       installed = []
       for value in @balloons.values()
         desc, balloon = value.baseinfo
@@ -912,14 +912,14 @@ module Ninix_Main
 
     def enqueue_script(event, script, sender, handle,
                        host, show_sstp_marker, use_translator,
-                       db=nil, request_handler=nil, temp_mode=false)
+                       db: nil, request_handler: nil, temp_mode: false)
       sakura = current_sakura_instance
       if temp_mode
         sakura.enter_temp_mode()
       end
       sakura.enqueue_script(event, script, sender, handle,
                             host, show_sstp_marker, use_translator,
-                            db, request_handler)
+                            :db => db, :request_handler => request_handler)
     end
 
     def get_working_ghost(cantalk: false)
@@ -971,9 +971,9 @@ module Ninix_Main
       return @__menu_owner.get_current_balloon_directory()
     end
 
-    def start_sakura_cb(key, caller=nil)
-      sakura_name = @ghosts[key].instance.get_selfname(default='')
-      name = @ghosts[key].instance.get_name(default='')
+    def start_sakura_cb(key, caller: nil)
+      sakura_name = @ghosts[key].instance.get_selfname(:default => '')
+      name = @ghosts[key].instance.get_name(:default => '')
       if caller == nil
         caller = @__menu_owner
       end
@@ -1191,7 +1191,7 @@ module Ninix_Main
       for key in @ghosts.keys
         sakura = @ghosts[key].instance
         begin
-          if sakura.get_name(default=nil) == name
+          if sakura.get_name(:default => nil) == name
             return key
           end
         rescue # except: # old preferences(EUC-JP)
@@ -1295,7 +1295,7 @@ module Ninix_Main
         start_sakura(key, :init => true)
       end
       sakura.enqueue_script(nil, '\![updatebymyself]\e', sender,
-                            nil, nil, 0, 0, nil)
+                            nil, nil, false, false, :db => nil)
     end
 
     def select_current_sakura(ifghost: nil)
@@ -1411,8 +1411,8 @@ module Ninix_Main
       elsif not event
         proc_obj.call()
       else
-        sakura_name = @ghosts[key].instance.get_selfname(default='')
-        name = @ghosts[key].instance.get_name(default='')
+        sakura_name = @ghosts[key].instance.get_selfname(:default => '')
+        name = @ghosts[key].instance.get_name(:default => '')
         sakura.enqueue_event(
           'OnGhostChanging', sakura_name, method, name, key,
           :proc_obj => proc_obj)
@@ -1459,8 +1459,8 @@ module Ninix_Main
       sakura.notify_preference_changed()
       sakura.start(key, init, temp, vanished, ghost_changed,
                    self_name, name, shell, last_script, abend)
-      notify_installedghostname(key)
-      notify_installedballoonname(key)
+      notify_installedghostname(:key => key)
+      notify_installedballoonname(:key => key)
       sakura.notify_installedshellname()
       set_menu_sensitive(key, false)
     end
@@ -1648,7 +1648,7 @@ module Ninix_Main
       history = {}
       for key in @ghosts.keys
         sakura = @ghosts[key].instance
-        name = sakura.get_name(default=key)
+        name = sakura.get_name(:default => key)
         ghost_time = 0
         prefix = sakura.get_prefix()
         path = File.join(prefix, 'HISTORY')

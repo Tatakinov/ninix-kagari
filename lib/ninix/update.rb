@@ -185,7 +185,7 @@ module Update
     def start_updates
       enqueue_event(
                     'OnUpdateBegin',
-                    @parent.handle_request('GET', 'get_name', ''),
+                    @parent.handle_request('GET', 'get_name', :default => ''),
                     @path, '',
                     'ghost') # XXX
       download(File.join(@path, 'updates2.dau'))

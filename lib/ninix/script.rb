@@ -30,8 +30,8 @@ module Script
 
 #  class ParserError < Exception
 #
-#    def initialize(message, error='strict',
-#                   script=nil, src=nil, column=nil, length=nil, skip=nil)
+#    def initialize(message, error: 'strict',
+#                   script: nil, src: nil, column: nil, length: nil, skip: nil)
 #      if not ['strict', 'loose'].include?(error)
 #        raise ValueError('unknown error scheme: {0}'.format(str(error)))
 #      end
@@ -113,8 +113,8 @@ module Script
         length = 0
         skip = 0
       end
-#      return ParserError(msg, @error,
-#                         @script, @src, column, length, skip)
+#      return ParserError(msg, :error => @error,
+#                         :script => @script, :src => @src, :column => column, :lenght => length, :skip => skip)
       return "" # XXX
     end
 
