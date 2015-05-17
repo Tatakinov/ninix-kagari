@@ -584,9 +584,9 @@ module Balloon
     end
 
     #@direction.setter
-    def direction(direction)
-      if @__direction != direction
-        @__direction = direction # 0: left, 1: right
+    def direction=(value)
+      if @__direction != value
+        @__direction = value # 0: left, 1: right
         reset_balloon()
       end
     end

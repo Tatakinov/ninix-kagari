@@ -22,7 +22,7 @@ require "ninix/seriko"
 module Surface
 
   class Surface
-    attr_reader :name, :prefix
+    attr_reader :name, :prefix, :window
 
     def initialize
       @window = []
@@ -1045,10 +1045,10 @@ module Surface
       return @__direction
     end
 
-    def direction=(direction)
-      @__direction = direction # 0: left, 1: right
+    def direction=(value)
+      @__direction = value # 0: left, 1: right
       @parent.handle_request(
-        'NOTIFY', 'set_balloon_direction', @side, direction)
+        'NOTIFY', 'set_balloon_direction', @side, value)
     end
 
 #    @property
@@ -1545,16 +1545,16 @@ module Surface
       @window.move(new_x, new_y)
       left, top, scrn_w, scrn_h = Pix.get_workarea()
       if x > left + scrn_w / 2
-        direction = 0
+        new_direction = 0
       else
-        direction = 1
+        new_direction = 1
       end
-      @direction = direction
+      @__direction = new_direction
       ox, oy = get_balloon_offset # without scaling
       scale = get_scale
       ox = (ox * scale / 100).to_i
       oy = (oy * scale / 100).to_i
-      if direction == 0 # left
+      if new_direction == 0 # left
         base_x = new_x + ox
       else
         w, h = get_surface_size()

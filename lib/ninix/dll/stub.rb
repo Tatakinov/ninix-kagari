@@ -15,6 +15,10 @@ module Stub
     def unload()
     end
 
+    def show_description
+      print("Currently SHIORI stub is working.\n")
+    end
+
     def request(req_str)
       return ""
     end

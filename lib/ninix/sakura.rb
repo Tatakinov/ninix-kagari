@@ -190,7 +190,7 @@ module Sakura
       if not args
         args = []
       end
-      for observer in @__observers.keys()
+      for observer in @__observers.keys
         observer.observer_update(event, args)
       end
     end
@@ -203,7 +203,7 @@ module Sakura
 
     def delete_shell(key)
       #assert @shells.include?(key)
-      del @shells[key]
+      @shells.delete(key)
     end
 
     def notify_installedshellname()
@@ -254,9 +254,9 @@ module Sakura
       end
       # XXX
       if @desc.get('name') == 'BTH小っちゃいってことは便利だねっ'
-        set_SSP_mode(1)
+        set_SSP_mode(true)
       else
-        set_SSP_mode(0)
+        set_SSP_mode(false)
       end
       @last_script = nil
       @status_icon = Gtk::StatusIcon.new
@@ -275,9 +275,10 @@ module Sakura
     def save_history()
       path = File.join(get_prefix(), 'HISTORY')
       begin
-        f = open(path, 'w')
-        f.write('time, {0}\n'.format(@ghost_time))
-        f.write('vanished_count, {0}\n'.format(@vanished_count))
+        open(path, 'w') do |file|
+          file.write("time, ", @ghost_time.to_s, "\n")
+          file.write("vanished_count, ", @vanished_count.to_s, "\n")
+        end
       rescue #except IOError as e:
         #code, message = e.args
         #logging.error('cannot write {0}'.format(path))
@@ -287,14 +288,13 @@ module Sakura
     def save_settings()
       path = File.join(get_prefix(), 'SETTINGS')
       begin
-        f = open(path, 'w')
-        if @balloon_directory != nil
-          f.write('balloon_directory, {0}\n'.format(
-                   @balloon_directory))
-        end
-        if @shell_directory != nil
-          f.write('shell_directory, {0}\n'.format(
-                   @shell_directory))
+        open(path, 'w') do |file|
+          if @balloon_directory != nil
+            file.write("balloon_directory, ", @balloon_directory, "\n")
+          end
+          if @shell_directory != nil
+            file.write("shell_directory, ", @shell_directory, "\n")
+          end
         end
       rescue #except IOError as e:
         #code, message = e.args
@@ -483,7 +483,7 @@ module Sakura
       if side >= @char
         return
       end
-      ox, oy = @surface.window[side].balloon_offset # without scaling
+      ox, oy = @surface.window[side].get_balloon_offset # without scaling
       direction = @balloon.window[side].direction
       sx, sy = get_surface_position(side)
       if direction == 0 # left
@@ -555,13 +555,13 @@ module Sakura
           if proc_obj != nil
             @script_post_proc << proc_obj
           end
-          return 1
+          return true
         elsif proc_obj != nil
           proc_obj.call()
-          return 1
+          return true
         end
       end
-      return 0
+      return false
     end
 
     def is_running()
