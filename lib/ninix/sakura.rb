@@ -685,9 +685,9 @@ module Sakura
 
     def is_anchor(link_id)
       if link_id.length == 2 and link_id[0] == 'anchor'
-        return 1
+        return true
       else
-        return 0
+        return false
       end
     end
 
@@ -707,7 +707,7 @@ module Sakura
     end
 
     def get_ifghost()
-      return ''.join([get_selfname(), ',', get_keroname()])
+      return [get_selfname(), ',', get_keroname()].join('')
     end
 
     def ifghost(ifghost)
@@ -771,7 +771,7 @@ module Sakura
           s = Makoto.execute(s)
         else
           r = get_event_response('OnTranslate', s, :translate => 0)
-          if r
+          if not r.empty?
             s = r
           end
         end
@@ -783,21 +783,19 @@ module Sakura
       result = {}
       to = nil
       for line in response.split
-        line = str(line, @__charset, 'ignore').strip()
+        line = line.encode(@__charset, :invalid => :replace, :undef => :replace).strip()
         if line.empty?
           next
         end
         if not line.include?(':')
           next
         end
-        key, value = line.split(':', 1)
+        key, value = line.split(':', 2)
         key = key.strip()
         if key == 'Charset'
           charset = value.strip()
           if charset != @__charset
-            begin
-              codecs.lookup(charset)
-            rescue #except:
+            if not Encoding.name_list.include?(charset)
               #logging.warning(
               #  'Unsupported charset {0}'.format(repr(charset)))
             else
@@ -886,26 +884,26 @@ module Sakura
             if abend != nil
               notify_event('OnBoot', @surface.name,
                            nil, nil, nil, nil, nil,
-                           'halt', abend, default=default)
+                           'halt', abend, :default => default)
             else
               notify_event('OnBoot', @surface.name,
-                           default=default)
+                           :default => default)
             end
           end
         else
           if abend != nil
             notify_event('OnBoot', @surface.name,
                          nil, nil, nil, nil, nil,
-                         'halt', abend, default=default)
+                         'halt', abend, :default => default)
           else
             notify_event('OnBoot', @surface.name,
-                         default=default)
+                         :default => default)
           end
         end
         left, top, scrn_w, scrn_h = Pix.get_workarea()
         notify_event('OnDisplayChange',
                      Gdk::Visual.best_depth,
-                     scrn_w, scrn_h, event_type='NOTIFY')
+                     scrn_w, scrn_h, :event_type => 'NOTIFY')
       elsif vanished
         if @ghost_time == 0
           if notify_event('OnFirstBoot', @vanished_count,
@@ -923,9 +921,9 @@ module Sakura
         if abend != nil
           notify_event('OnBoot', @surface.name,
                        nil, nil, nil, nil, nil, nil,
-                       'halt', abend, default=default)
+                       'halt', abend, :default => default)
         else
-          notify_event('OnBoot', @surface.name, default=default)
+          notify_event('OnBoot', @surface.name, :default => default)
         end
       elsif ghost_changed
         if @ghost_time == 0
@@ -942,9 +940,9 @@ module Sakura
         if abend != nil
           notify_event('OnBoot', @surface.name,
                        nil, nil, nil, nil, nil,
-                       'halt', abend, default=default)
+                       'halt', abend, :default => default)
         else
-          notify_event('OnBoot', @surface.name, default=default)
+          notify_event('OnBoot', @surface.name, :default => default)
         end
       else
         #pass ## FIXME
@@ -1030,7 +1028,7 @@ module Sakura
             @sstp_request_handler = nil
           end
           reset_script(:reset_all => true)
-          notify_event('OnVanishButtonHold', default='\e')
+          notify_event('OnVanishButtonHold', :default => '\e')
           @vanished = false
         end
         return
