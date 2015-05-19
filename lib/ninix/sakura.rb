@@ -1012,7 +1012,13 @@ module Sakura
     def notify_site_selection(args)
       title, url = args
       if is_URL(url)
-        webbrowser.open(url)
+        if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+          system "start #{url}"
+        elsif RbConfig::CONFIG['host_os'] =~ /darwin/
+          system "open #{url}"
+        elsif RbConfig::CONFIG['host_os'] =~ /linux|bsd/
+          system "xdg-open #{url}"
+        end
       end
       enqueue_event('OnRecommandedSiteChoice', title, url)
     end
@@ -1161,7 +1167,7 @@ module Sakura
       if @surface_mouse_motion != nil
         return
       end
-      if part
+      if not part.empty?
         @surface_mouse_motion = [side, x, y, part]
       else
         @surface_mouse_motion = nil
@@ -1171,7 +1177,7 @@ module Sakura
     def notify_user_teach(word)
       if word != nil
         script = translate(get_event_response('OnTeach', word))
-        if script
+        if not script.empty?
           start_script(script)
           @balloon.hide_sstp_message()
         end
@@ -1192,12 +1198,6 @@ module Sakura
       if RESET_NOTIFY_EVENT.include?(event)
         reset_script(:reset_all => true)
       end
-      #for key in argdict
-      #  assert ['event_type', 'default'].include?(key) # trap typo, etc.
-      #end
-      #event_type = argdict.get('event_type', :default => 'GET')
-      #default = argdict.get('default', :default => nil)
-      #argdict = {'event_type' => event_type} ## FIXME
       result = get_event_response_with_communication(event, *arglist,
                                                      :event_type => event_type)
       if result != nil
@@ -1304,7 +1304,7 @@ module Sakura
       ghost_dir = File.join(get_prefix(), 'ghost', 'master')
       name = getstring('menu.background.bitmap.filename')
       if not name.empty?
-        name = name.replace('\\', '/')
+        name = name.gsub('\\', '/')
         path_background = File.join(top_dir, name)
       end
       if path_background == nil
@@ -1315,7 +1315,7 @@ module Sakura
       end
       name = getstring('menu.sidebar.bitmap.filename')
       if not name.empty?
-        name = name.replace('\\', '/')
+        name = name.gsub('\\', '/')
         path_sidebar = File.join(top_dir, name)
       end
       if path_sidebar == nil
@@ -1326,7 +1326,7 @@ module Sakura
       end
       name = getstring('menu.foreground.bitmap.filename')
       if not name.empty?
-        name = name.replace('\\', '/')
+        name = name.gsub('\\', '/')
         path_foreground = File.join(top_dir, name)
       end
       if path_foreground == nil
@@ -1369,9 +1369,9 @@ module Sakura
       color_g = getstring('menu.background.font.color.g')
       color_b = getstring('menu.background.font.color.b')
       begin
-        color_r = max(0, min(255, color_r.to_i))
-        color_g = max(0, min(255, color_g.to_i))
-        color_b = max(0, min(255, color_b.to_i))
+        color_r = [0, [255, color_r.to_i].min].max
+        color_g = [0, [255, color_g.to_i].min].max
+        color_b = [0, [255, color_b.to_i].min].max
       rescue #except:
         #pass
       else
@@ -1381,9 +1381,9 @@ module Sakura
       color_g = getstring('menu.foreground.font.color.g')
       color_b = getstring('menu.foreground.font.color.b')
       begin
-        color_r = max(0, min(255, color_r.to_i))
-        color_g = max(0, min(255, color_g.to_i))
-        color_b = max(0, min(255, color_b.to_i))
+        color_r = [0, [255, color_r.to_i].min].max
+        color_g = [0, [255, color_g.to_i].min].max
+        color_b = [0, [255, color_b.to_i].min].max
       rescue #except:
         #pass
       else
@@ -1409,7 +1409,7 @@ module Sakura
     end
 
     def get_default_shell()
-      default = @shell_directory or 'master'            
+      default = @shell_directory or 'master'
       if not @shells.include?(default)
         default = @shells.keys()[0] # XXX
       end
@@ -1551,17 +1551,17 @@ module Sakura
         rect = @surface.get_collision_area(side, 'bust')
         if rect != nil
           x1, y1, x2, y2 = rect
-          return x + (x2 - x1) // 2, y + (y2 - y1) // 2
+          return x + ((x2 - x1) / 2).to_i, y + ((y2 - y1) / 2).to_i
         else
-          return x + w // 2, y + h // 2
+          return x + (w / 2).to_i, y + (h / 2).to_i
         end
       elsif baseposition == 3
         centerx, centery = @surface.get_center(side)
         if centerx == nil
-          centerx = w // 2
+          centerx = (w / 2).to_i
         end
         if centery == nil
-          centery = h // 2
+          centery = (h / 2).to_i
         end
         return x + centerx, y + centery
       else # baseposition == 0 or baseposition not in [1, 2, 3]: # AKF
@@ -1570,9 +1570,9 @@ module Sakura
           rect = @surface.get_collision_area(side, 'head')
           if rect != nil
             x1, y1, x2, y2 = rect
-            return x + (x2 - x1) // 2, y + (y2 - y1) // 2
+            return x + ((x2 - x1) / 2).to_i, y + ((y2 - y1) / 2).to_i
           else
-            return x + w // 2, y + h // 8
+            return x + (w / 2).to_i, y + (h / 8).to_i
           end
         end
         return x + centerx, y + centery
@@ -2016,9 +2016,9 @@ module Sakura
       x, y = get_surface_position(@script_side)
       left, top, scrn_w, scrn_h = Pix.get_workarea()
       if sx + (sw / 2).to_i > left + (scrn_w / 2).to_i
-        new_x = min(x - (scrn_w / 20).to_i, sx - (scrn_w / 20).to_i)
+        new_x = [x - (scrn_w / 20).to_i, sx - (scrn_w / 20).to_i].min
       else
-        new_x = max(x + (scrn_w / 20).to_i, sx + (scrn_w / 20).to_i)
+        new_x = [x + (scrn_w / 20).to_i, sx + (scrn_w / 20).to_i].max
       end
       if x > new_x
         step = -10
@@ -2052,8 +2052,8 @@ module Sakura
       else
         new_x = sx + sw - (w / 2).to_i - 1
       end
-      new_x = max(new_x, left)
-      new_x = min(new_x, left + scrn_w - w)
+      new_x = [new_x, left].max
+      new_x = [new_x, left + scrn_w - w].min
       if x > new_x
         step = -10
       else
@@ -2533,7 +2533,7 @@ module Sakura
           opt = 'centered' # default
         end
         if File.exist?(path)
-          if RUBY_PLATFORM =~ /linux/ # 'posix'
+          if RbConfig::CONFIG['host_os'] =~ /linux/ # 'posix'
             # for GNOME3
             gsettings = Gio::Settings.new(
               'org.gnome.desktop.background')
