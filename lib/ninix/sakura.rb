@@ -16,6 +16,7 @@
 require "gtk3"
 require "gst"
 require "cgi"
+require "uri"
 
 require "ninix/surface"
 require "ninix/balloon"
@@ -150,6 +151,7 @@ module Sakura
         @audio_player = nil
       end
       @audio_loop = false
+      @reload_event = nil
     end
 
     def set_responsible(parent)
@@ -996,7 +998,7 @@ module Sakura
       if is_anchor(link_id)
         notify_event('OnAnchorSelect', link_id[1])
       elsif is_URL(link_id)
-        webbrowser.open(link_id)
+        browser_open(link_id)
         reset_script(:reset_all => true)
         stand_by(false)
       elsif @sstp_entry_db
@@ -1009,16 +1011,20 @@ module Sakura
       end
     end
 
+    def browser_open(url)
+      if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+        system "start #{url}"
+      elsif RbConfig::CONFIG['host_os'] =~ /darwin/
+        system "open #{url}"
+      elsif RbConfig::CONFIG['host_os'] =~ /linux|bsd/
+        system "xdg-open #{url}"
+      end
+    end
+
     def notify_site_selection(args)
       title, url = args
       if is_URL(url)
-        if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
-          system "start #{url}"
-        elsif RbConfig::CONFIG['host_os'] =~ /darwin/
-          system "open #{url}"
-        elsif RbConfig::CONFIG['host_os'] =~ /linux|bsd/
-          system "xdg-open #{url}"
-        end
+        browser_open(url)
       end
       enqueue_event('OnRecommandedSiteChoice', title, url)
     end
@@ -1847,8 +1853,6 @@ module Sakura
       @clock = [second, minute]
     end
 
-    reload_event = nil
-
     def do_idle_tasks()
       if not @__running
         return false
@@ -1865,7 +1869,7 @@ module Sakura
           not (not @processed_script.empty? or \
                not @processed_text.empty?)
           if @__temp_mode == 1
-            time.sleep(1.4)
+            sleep(1.4)
             finalize()
             @parent.handle_request('NOTIFY', 'close_ghost', self)
             @parent.handle_request('NOTIFY', 'reset_sstp_flag')
@@ -1882,25 +1886,24 @@ module Sakura
       if @reload_event and not busy() and \
         not (not @processed_script.empty? or not @processed_text.empty?)
         hide_all()
-        logging.info('reloading....')
+        #logging.info('reloading....')
         @shiori.unload()
         @updateman.clean_up() # Don't call before unloading SHIORI
-### FIXME
-#        @parent.handle_request(
-#          'NOTIFY', 'stop_sakura', self,
-#          lambda a: @parent.handle_request(
-#                   'NOTIFY', 'reload_current_sakura', a),
-#                 (self))
+        @parent.handle_request(
+          'NOTIFY', 'stop_sakura', self,
+          lambda {|a|
+            @parent.handle_request('NOTIFY', 'reload_current_sakura', a) },
+          [self])
         load_settings()
         restart() ## FIXME
-        logging.info('done.')
-        enqueue_event(*self.reload_event)
+        #logging.info('done.')
+        enqueue_event(*@reload_event)
         @reload_event = nil
       end
       # continue network update (enqueue events)
       if @updateman.is_active()
         @updateman.run()
-        while 1
+        while true
           event = @updateman.get_event()
           if not event
             break
@@ -1934,11 +1937,11 @@ module Sakura
       reset_script(:reset_all => true)
       @__current_script = script
       if not script.rstrip().end_with?('\e')
-        script = ''.join([script, '\e'])
+        script = [script, '\e'].join('')
       end
       @processed_script = []
       @script_position = 0
-      while 1
+      while true
         begin
           #@processed_script.extend(@script_parser.parse(script))
           @processed_script =  @script_parser.parse(script)
@@ -2105,7 +2108,7 @@ module Sakura
       if File.file?(path)
         @balloon.append_image(@script_side, path, x, y)
       else
-        path = ''.join([path, '.png'])
+        path = [path, '.png'].join('')
         if File.file?(path)
           @balloon.append_image(@script_side, path, x, y)
         end
@@ -2242,7 +2245,7 @@ module Sakura
     def __yen_j(args)
       jump_id = args[0]
       if is_URL(jump_id)
-        webbrowser.open(jump_id)
+        browser_open(jump_id)
       elsif @sstp_entry_db
         start_script(@sstp_entry_db.get(jump_id, :default => '\e'))
       end
@@ -2292,7 +2295,7 @@ module Sakura
 
     def __yen__u(args)
       if re.match('0x[a-fA-F0-9]{4}', args[0])
-        text = eval(''.join(['"\\u', args[0][2..-1], '"']))
+        text = eval(['"\\u', args[0][2..-1], '"'].join(''))
         @balloon.append_text(@script_side, text)
       else
         @balloon.append_text(@script_side, '?')
@@ -2309,7 +2312,7 @@ module Sakura
       if File.file?(path)
         @audio_player.set_state(Gst::State::NULL)
         @audio_player.set_property(
-          'uri', 'file://' + urllib.parse.quote(path))
+          'uri', 'file://' + URI.escape(path))
         @audio_loop = false
         @audio_player.set_state(Gst::State::PLAYING)
       end
@@ -2331,7 +2334,7 @@ module Sakura
       if File.file?(path)
         @audio_player.set_state(Gst::State::NULL)
         @audio_player.set_property(
-          'uri', 'file://' + urllib.parse.quote(path))
+          'uri', 'file://' + URI.escape(path))
         @audio_loop = false
         @audio_player.set_state(Gst::State::PLAYING)
       end
@@ -2360,7 +2363,7 @@ module Sakura
       elsif args[0, 2] == ['open', 'readme']
         ReadmeDialog().show(get_name(), get_prefix())
       elsif args[0, 2] == ['open', 'browser'] and argc > 2
-        webbrowser.open(args[2])
+        browser_open(args[2])
       elsif args[0, 2] == ['open', 'communicatebox']
         @balloon.open_communicatebox()
       elsif args[0, 2] == ['open', 'teachbox']
@@ -2538,7 +2541,7 @@ module Sakura
             gsettings = Gio::Settings.new(
               'org.gnome.desktop.background')
             gsettings.set_string('picture-uri',
-                                 ''.join(['file://', path]))
+                                 ['file://', path].join(''))
             gsettings.set_string('picture-options', opt)
           else
             #pass # not implemented yet
@@ -2581,11 +2584,11 @@ module Sakura
           filename = args[2]
           filename = get_normalized_path(filename)
           path = File.join(get_prefix(),
-                              'ghost/master', filename)
+                           'ghost/master', filename)
           if File.file?(path)
             @audio_player.set_state(Gst::State::NULL)
             @audio_player.set_property(
-              'uri', 'file://' + urllib.parse.quote(path))
+              'uri', 'file://' + URI.escape(path))
             @audio_loop = false
             @audio_player.set_state(Gst::State::PLAYING)
           end
@@ -2597,18 +2600,18 @@ module Sakura
             return
           end
           @audio_player.set_property(
-            'uri', 'cdda://{}'.format(track))
+            'uri', 'cdda://' + track.to_s)
           @audio_loop = false
           @audio_player.set_state(Gst::State::PLAYING)
         elsif command == 'loop' and argc > 2
           filename = args[2]
           filename = get_normalized_path(filename)
           path = File.join(get_prefix(),
-                              'ghost/master', filename)
+                           'ghost/master', filename)
           if File.file?(path)
             @audio_player.set_state(Gst::State::NULL)
             @audio_player.set_property(
-              'uri', 'file://' + urllib.parse.quote(path))
+              'uri', 'file://' + URI.escape(path))
             @audio_loop = true
             @audio_player.set_state(Gst::State::PLAYING)
           end
