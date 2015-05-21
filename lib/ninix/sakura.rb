@@ -2810,7 +2810,7 @@ module Sakura
       elsif node[0] == Script::SCRIPT_TEXT
         text = expand_meta(node[1])
         if @anchor
-          @anchor[1] = ''.join([@anchor[1], text])
+          @anchor[1] = [@anchor[1], text].join('')
         end
         script_speed = @parent.handle_request(
           'GET', 'get_preference', 'script_speed')
@@ -2892,7 +2892,7 @@ module Sakura
           left, top, scrn_w, scrn_h = Pix.get_workarea()
           buf << scrn_h.to_s
         elsif chunk[1] == '%et'
-          buf << '{0:d}万年'.format(@current_time[5])
+          buf << @current_time[5].to_s[-1] + '万年'
         elsif chunk[1] == '%wronghour'
           wrongtime = Time.new.to_f + [-2, -1, 1, 2].sample * 3600
           buf << time.localtime(wrongtime)[3].to_s
@@ -2912,12 +2912,12 @@ module Sakura
 
     ###   SEND SSTP/1.3   ###
     def _send_sstp_handle(data)
-      r, w, e = select.select([], [@sstp_handle], [], 0)
+      r, w, e = IO.select([], [@sstp_handle], [], 0)
       if not w
         return
       end
       begin
-        @sstp_handle.send(''.join([data, '\n']))
+        @sstp_handle.send([data, '\n'].join(''))
       rescue #except socket.error:
         #pass
       end
@@ -2927,7 +2927,7 @@ module Sakura
       if @sstp_handle == nil
         return
       end
-      _send_sstp_handle(''.join(['+', data]))
+      _send_sstp_handle(['+', data].join(''))
       ##logging.debug('write_sstp_handle({0})'.format(repr(data)))
     end
 
@@ -2976,9 +2976,9 @@ module Sakura
       homeurl = getstring('homeurl')
       if homeurl.empty?
         start_script(
-          ''.join(['\t\h\s[0]',
-                   _("I'm afraid I don't have Network Update yet."),
-                   '\e']))
+          ['\t\h\s[0]',
+           _("I'm afraid I don't have Network Update yet."),
+           '\e'].join(''))
         @balloon.hide_sstp_message()
         return
       end
