@@ -197,16 +197,19 @@ module Ninix_Main
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       #assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
       }
-      handler = handlers.get(event, getattr(self, event, nil))
-      if handler == nil
-        result = self.request_parent(
-          event_type, event, *arglist, **argdict)
+      if not handlers.include?(event)
+        if SSTPControler.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = @parent.handle_request(
+            event_type, event, *arglist)
+        end
       else
-        result = handler(*arglist, **argdict)
+        result = method(handlers[event]).call(*arglist)
       end
       if event_type == 'GET'
         return result
@@ -251,19 +254,19 @@ module Ninix_Main
       end
       event, script_odict, sender, handle, address, \
       show_sstp_marker, use_translator, \
-      entry_db, request_handler = @__sstp_queue.pop(0)
+      entry_db, request_handler = @__sstp_queue.shift
       working = (event != nil)
       break_flag = false
       for if_ghost in script_odict.keys()
-        if if_ghost and request_parent('GET', 'if_ghost', if_ghost, :working => working)
-          request_parent('NOTIFY', 'select_current_sakura', :if_ghost => if_ghost)
+        if not if_ghost.empty? and @parent.handle_request('GET', 'if_ghost', if_ghost, :working => working)
+          @parent.handle_request('NOTIFY', 'select_current_sakura', :if_ghost => if_ghost)
           default_script = script_odict[if_ghost]
           break_flag = true
           break
         end
       end
       if not break_flag
-        if request_parent('GET', 'get_preference', 'allowembryo') == 0
+        if @parent.handle_request('GET', 'get_preference', 'allowembryo') == 0
           if event == nil
             if request_handler
               request_handler.send_response(420) # Refuse
@@ -280,7 +283,7 @@ module Ninix_Main
           end
         end
         if event != nil
-          script = request_parent('GET', 'get_event_response', event)
+          script = @parent.handle_request('GET', 'get_event_response', event)
         else
           script = nil
         end
@@ -294,7 +297,7 @@ module Ninix_Main
           return
         end
         set_sstp_flag(sender)
-        request_parent(
+        @parent.handle_request(
           'NOTIFY', 'enqueue_script',
           event, script, sender, handle, address,
           show_sstp_marker, use_translator, :db => entry_db,
@@ -303,15 +306,21 @@ module Ninix_Main
     end
 
     def receive_sstp_request
-      begin
-        for sstp_server in self.sstp_servers
-          sstp_server.handle_request()
+      for sstp_server in @sstp_servers
+        begin
+          socket = sstp_server.accept_nonblock
+        rescue
+          next
+        #rescue # except socket.error as e:
+          #code, message = e.args
+          #logging.error('socket.error: {0} ({1:d})'.format(message, code))
+        #rescue # except ValueError: # may happen when ninix is terminated
+          #return
         end
-      rescue # except socket.error as e:
-        #code, message = e.args
-        #logging.error('socket.error: {0} ({1:d})'.format(message, code))
-      rescue # except ValueError: # may happen when ninix is terminated
-        return
+        handler = SSTP::SSTPRequestHandler.new(sstp_server, socket)
+        buffer = socket.gets
+        handler.handle(buffer)
+        socket.close
       end
     end
 
@@ -331,14 +340,14 @@ module Ninix_Main
     def start_servers
       for port in @sstp_port
         begin
-          server = SSTP.SSTPServer.new(port)
+          server = SSTP::SSTPServer.new(port)
         rescue # except socket.error as e:
           #code, message = e.args
           #logging.warning(
           #  'Port {0:d}: {1} (ignored)'.format(port, message))
           next
         end
-        server.set_responsible(self.handle_request)
+        server.set_responsible(self)
         @sstp_servers << server
         #logging.info('Serving SSTP on port {0:d}'.format(port))
       end
@@ -544,7 +553,7 @@ module Ninix_Main
       if plugin_module == nil
         return
       end
-      port = self.request_parent('GET', 'get_sstp_port')
+      port = @parent.handle_request('GET', 'get_sstp_port')
       queue = multiprocessing.JoinableQueue()
       if not @data.include?(plugin_dir)
         @data[plugin_dir] = load_data(plugin_dir)
@@ -1269,7 +1278,7 @@ module Ninix_Main
       instance_list = []
       for value in @ghosts.values()
         if value.instance != nil
-          instance_list << value
+          instance_list << value.instance
         end
       end
       for sakura in instance_list

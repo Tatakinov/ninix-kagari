@@ -109,11 +109,11 @@ module SSTPLib
       if not match
         @equestline = '-'
         send_error(400, :message => 'Bad Request ' + requestline.to_s)
-        return 0
+        return false
       end
       @command, @version = match[1, 2]
       @headers = parse_headers()
-      return 1
+      return true
     end
 
     def handle(line)

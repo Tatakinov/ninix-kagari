@@ -21,6 +21,7 @@ require "ninix/sstplib"
 module SSTP
 
   class SSTPServer < SSTPLib::AsynchronousSSTPServer
+    attr_reader :socket
 
     def initialize(address)
       @parent = nil
@@ -41,9 +42,9 @@ module SSTP
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       if @parent != nil
-        @parent.handle_request(event_type, event, *arglist, **argdict)
+        @parent.handle_request(event_type, event, *arglist)
       end
     end
     
@@ -93,7 +94,7 @@ module SSTP
     end
 
     def close
-      socket.close()
+      # NOP
     end
   end
   
@@ -183,6 +184,7 @@ module SSTP
     end
 
     def handle_notify(version)
+      script_odict = {}
       if not check_decoder()
         return
       end
@@ -239,7 +241,7 @@ module SSTP
       if not local_request()
         parser = Script::Parser.new
         nodes = []
-        while 1
+        while true
           begin
             nodes.concat(parser.parse(script))
           rescue #except ninix.script.ParserError as e:

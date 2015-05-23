@@ -938,9 +938,9 @@ module Balloon
         while 1
           i += 1
           s = message[0, i] + '... (' + sender + ')'
-          @sstp_layout.set_text(s, -1)
+          @sstp_layout.set_text(s)
           message_width, message_height = \
-          @sstp_layout.get_pixel_size()
+          @sstp_layout.pixel_size
           if message_width > w
             break
           end
@@ -1105,8 +1105,8 @@ module Balloon
             if l == i
               mw = @sstp_surface.width
               mh = @sstp_surface.height
-              @layout.set_text(@text_buffer[i][0, c], -1)
-              text_w, text_h = @layout.get_pixel_size()
+              @layout.set_text(@text_buffer[i][0, c])
+              text_w, text_h = @layout.pixel_size
               mx = x + text_w
               my = y + (@font_height + @line_space) / 2
               my = my - mh / 2
@@ -1144,36 +1144,36 @@ module Balloon
             if sl == el
               markup = set_markup(n, @text_buffer[n][0, sn])
               @layout.set_markup(markup, -1)
-              text_w, text_h =  @layout.get_pixel_size()
+              text_w, text_h =  @layout.pixel_size
               x += text_w
               markup = set_markup(n, @text_buffer[n][sn, en])
               @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.get_pixel_size()
+              text_w, text_h = @layout.pixel_size
               w = text_w
               start = sn
               end_ = en
             elsif n == sl
               markup = set_markup(n, @text_buffer[n][0, sn])
               @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.get_pixel_size()
+              text_w, text_h = @layout.pixel_size
               x += text_w
               markup = set_markup(n, @text_buffer[n][sn, @text_buffer.length])
               @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.get_pixel_size()
+              text_w, text_h = @layout.pixel_size
               w = text_w
               start = sn
               end_ = @text_buffer[n].length
             elsif n == el
               markup = set_markup(n, @text_buffer[n][0, en])
               @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.get_pixel_size()
+              text_w, text_h = @layout.pixel_size
               w = text_w
               start = 0
               end_ = en
             else
               markup = set_markup(n, @text_buffer[n])
               @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.get_pixel_size()
+              text_w, text_h = @layout.pixel_size
               w = text_w
               start = 0
               end_ = @text_buffer[n].length
@@ -1208,7 +1208,7 @@ module Balloon
             if n == sl
               markup = set_markup(n, @text_buffer[n][0, sn])
               @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.get_pixel_size()
+              text_w, text_h = @layout.pixel_size
               x += text_w
             end
             if n == sl and n == el
@@ -1219,7 +1219,7 @@ module Balloon
               markup = set_markup(n, @text_buffer[n])
             end
             @layout.set_markup(markup, -1)
-            text_w, text_h = @layout.get_pixel_size()
+            text_w, text_h = @layout.pixel_size
             w = text_w
             if x <= px and px < x + w and y <= py and py < y + h
               new_selection = i
@@ -1469,8 +1469,8 @@ module Balloon
       i = 1
       while 1
         space = '\u3000' * i ## FIXME
-        @layout.set_text(space, -1)
-        text_w, text_h = @layout.get_pixel_size()
+        @layout.set_text(space)
+        text_w, text_h = @layout.pixel_size
         if text_w > w
           break
         else
@@ -1559,8 +1559,8 @@ module Balloon
             if l == line
               mw = @sstp_surface.width
               mh = @sstp_surface.height
-              @layout.set_text(@text_buffer[l][0, c], -1)
-              text_w, text_h = @layout.get_pixel_size()
+              @layout.set_text(@text_buffer[l][0, c])
+              text_w, text_h = @layout.pixel_size
               mx = x + text_w
               my = y + (@font_height + @line_space) / 2
               my = my - mh / 2

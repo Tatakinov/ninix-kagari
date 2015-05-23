@@ -1804,7 +1804,7 @@ module Sakura
         event, script, sender, @sstp_handle, \
         host, show_sstp_marker, use_translator, \
         @sstp_entry_db, @sstp_request_handler = \
-                            script_queue.shift
+                        @script_queue.shift
         if @cantalk
           if show_sstp_marker
             @balloon.show_sstp_message(sender, host)
