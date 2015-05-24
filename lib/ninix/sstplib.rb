@@ -13,28 +13,8 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "socket"
 
 module SSTPLib
-
-  class SSTPServer < TCPServer
-
-    def initialize(port, hostname: "")
-      super(hostname, port)
-      setsockopt(Socket::SOL_SOCKET, Socket::SO_REUSEADDR, true)
-    end
-  end
-
-  class AsynchronousSSTPServer < SSTPServer
-
-    def handle_request
-      r, w, e = select.select([@socket], [], [], 0)
-      if not r
-        return
-      end
-      SSTPServer.handle_request(self)
-    end
-  end
 
   class BaseSSTPRequestHandler
 
@@ -144,7 +124,7 @@ module SSTPLib
     end
 
     def log_error(message)
-#      logging.error('[{0}] {1}\n'.format(self.timestamp(), message))
+      #logging.error('[{0}] {1}\n'.format(self.timestamp(), message))
     end
 
     def log_request(code, message: nil)
@@ -153,28 +133,28 @@ module SSTPLib
       else
         request = ['"', @requestline, '"'].join("")
       end
-#      logging.info('{0} [{1}] {2} {3:d} {4}\n'.format(
-#                    self.client_hostname(), self.timestamp(),
-#                    request, code, (message or RESPONSES[code])))
+      #logging.info('{0} [{1}] {2} {3:d} {4}\n'.format(
+      #              self.client_hostname(), self.timestamp(),
+      #              request, code, (message or RESPONSES[code])))
     end
 
-    def client_hostname
-      begin
-        sock_domain, remote_port, remote_hostname, remote_ip = @fp.peeraddr
-        return remote_hostname
-      rescue #except:
-        return 'localhost'
-      end
-    end
+    #def client_hostname
+    #  begin
+    #    sock_domain, remote_port, remote_hostname, remote_ip = @fp.peeraddr
+    #    return remote_hostname
+    #  rescue #except:
+    #    return 'localhost'
+    #  end
+    #end
 
-    def timestamp
-      month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      t = Time.now.localtime
-      m = month_names[t.month - 1]
-      ## FIXME ##
-      return t'{0:02d}/{1}/{2:d}:{3:02d}:{4:02d}:{5:02d} {6:+05d}'.format(
-               t[2], m, t[0], t[3], t[4], t[5], (-time.timezone / 36).to_i)
-    end
+    #def timestamp
+    #  month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    #                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    #  t = Time.now.localtime
+    #  m = month_names[t.month - 1]
+    #  ## FIXME ##
+    #  return t'{0:02d}/{1}/{2:d}:{3:02d}:{4:02d}:{5:02d} {6:+05d}'.format(
+    #           t[2], m, t[0], t[3], t[4], t[5], (-time.timezone / 36).to_i)
+    #end
   end
 end

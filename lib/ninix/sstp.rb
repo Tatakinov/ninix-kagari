@@ -12,6 +12,8 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
+require "socket"
+
 require "ninix/entry_db"
 require "ninix/script"
 require "ninix/version"
@@ -20,12 +22,13 @@ require "ninix/sstplib"
 
 module SSTP
 
-  class SSTPServer < SSTPLib::AsynchronousSSTPServer
+  class SSTPServer < TCPServer
     attr_reader :socket
 
     def initialize(address)
       @parent = nil
       super(address)
+      setsockopt(Socket::SOL_SOCKET, Socket::SO_REUSEADDR, true)
       @request_handler = nil
     end
 
@@ -37,7 +40,7 @@ module SSTP
 #        super(request) #AsynchronousSSTPServer.shutdown_request(self, request)
 #      end
 #    end
-    
+
     def set_responsible(parent)
       @parent = parent
     end
@@ -47,7 +50,7 @@ module SSTP
         @parent.handle_request(event_type, event, *arglist)
       end
     end
-    
+
     def set_request_handler(handler) ## FIXME
       @request_handler = handler
     end
@@ -97,7 +100,8 @@ module SSTP
       # NOP
     end
   end
-  
+
+
   class SSTPRequestHandler < SSTPLib::BaseSSTPRequestHandler
 
     def handle(line)
