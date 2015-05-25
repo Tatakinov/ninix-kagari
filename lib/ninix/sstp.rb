@@ -32,15 +32,6 @@ module SSTP
       @request_handler = nil
     end
 
-#    def shutdown_request(request)
-#      if @request_handler != nil
-#        # XXX: send_* methods can be called from outside of the handler
-#        pass # keep alive
-#      else
-#        super(request) #AsynchronousSSTPServer.shutdown_request(self, request)
-#      end
-#    end
-
     def set_responsible(parent)
       @parent = parent
     end
@@ -67,10 +58,8 @@ module SSTP
       begin
         @request_handler.send_response(code)
         if data != nil
-#          @request_handler.wfile.write(data)
           @request_handler.write(data) # FIXME
         end
-#        @request_handler.force_finish()
         @request_handler.shutdown(Socket::SHUT_WR) # XXX
       rescue #except IOError:
         #pass
@@ -115,16 +104,6 @@ module SSTP
         super(line)
       end
     end
-
-#    def force_finish
-#      BaseSSTPRequestHandler.finish(self)
-#    end
-
-#    def finish
-#      if @server.request_handler == nil
-#        BaseSSTPRequestHandler.finish(self)
-#      end
-#    end
 
     # SEND
     def do_SEND_1_0
@@ -268,7 +247,7 @@ module SSTP
     end
 
     def get_script_odict
-      script_odict = {} #OrderedDict()
+      script_odict = {} # Ordered Hash
       if_ghost = nil
       for item in @headers
         name, value = item

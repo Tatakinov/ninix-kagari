@@ -27,7 +27,6 @@
 #import importlib
 #import locale
 #import multiprocessing
-#from collections import OrderedDict
 
 #if os.name == 'nt': # locale setting for windows
 #    lang = os.getenv('LANG')
@@ -684,7 +683,7 @@ module Ninix_Main
       @__menu = Menu::Menu.new
       @__menu.set_responsible(self)
       @__menu_owner = nil
-      @ghosts = {} # OrderedDict
+      @ghosts = {} # Ordered Hash
       odict_baseinfo = Home.search_ghosts()
       for key, value in odict_baseinfo
         holon = Ghost.new(key)
@@ -692,7 +691,7 @@ module Ninix_Main
         @ghosts[key] = holon 
         holon.baseinfo = value
       end
-      @balloons = {} # OrderedDict
+      @balloons = {} # Ordered Hash
       odict_baseinfo = Home.search_balloons()
       for key, value in odict_baseinfo
         meme = BalloonMeme.new(key)
@@ -1061,7 +1060,7 @@ module Ninix_Main
     end
 
     def create_balloon_menu
-      balloon_menuitems = {} # OrderedDict()
+      balloon_menuitems = {} # Ordered Hash
       for key in @balloons.keys
         balloon_menuitems[key] = @balloons[key].menuitem
       end
