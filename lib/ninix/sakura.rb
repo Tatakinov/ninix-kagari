@@ -28,6 +28,7 @@ require "ninix/version"
 require "ninix/update"
 require "ninix/home"
 require "ninix/metamagic"
+require "ninix/logging"
 
 module Sakura
 
@@ -283,7 +284,7 @@ module Sakura
         end
       rescue #except IOError as e:
         #code, message = e.args
-        #logging.error('cannot write {0}'.format(path))
+        Logging::Logging.error('cannot write ' + path)
       end
     end
 
@@ -300,7 +301,7 @@ module Sakura
         end
       rescue #except IOError as e:
         #code, message = e.args
-        #logging.error('cannot write {0}'.format(path))
+        Logging::Logging.error('cannot write ' + path)
       end
     end
 
@@ -333,7 +334,7 @@ module Sakura
           end
         rescue #except IOError as e:
           #code, message = e.args
-          #logging.error('cannot read {0}'.format(path))
+          Logging::Logging.error('cannot read ' + path)
           @ghost_time = ghost_time
           @vanished_count = ghost_vanished_count
         else
@@ -364,7 +365,7 @@ module Sakura
           end
         rescue #except IOError as e:
           #code, message = e.args
-          #logging.error('cannot read {0}'.format(path))
+          Logging::Logging.error('cannot read ' + path)
         end
         @balloon_directory = balloon_directory
         @shell_directory = shell_directory
@@ -380,8 +381,7 @@ module Sakura
           @shiori.show_description()
         end
       else
-        #logging.error('{0} cannot load SHIORI({1})'.format(
-        #               get_selfname(), @shiori_name))
+        Logging::Logging.error(get_selfnam + ' cannot load SHIORI(' + @shiori_name + ')')
       end
       @__charset = 'Shift_JIS' # default
       get_event_response('OnInitialize', :event_type => 'NOTIFY')
@@ -443,7 +443,7 @@ module Sakura
       elsif t == Gst::MessageType::ERROR
         @audio_player.set_state(Gst::State::NULL)
         err, debug = message.parse_error()
-        #logging.error('Error: {0}, {1}'.format(err, debug))
+        Logging::Logging.error('Error: ' + err + ', ' + debug)
         @audio_loop = false
       end
     end
@@ -798,8 +798,8 @@ module Sakura
           charset = value.strip()
           if charset != @__charset
             if not Encoding.name_list.include?(charset)
-              #logging.warning(
-              #  'Unsupported charset {0}'.format(repr(charset)))
+              Logging::Logging.warning(
+                'Unsupported charset ' + charset)
             else
               @__charset = charset
             end
@@ -1214,15 +1214,17 @@ module Sakura
       if not script.empty? or (script.empty? and event != 'OnSecondChange')
         t = Time.new.localtime.to_a
         m = MONTH_NAMES[t[4] - 1]
-        #logging.debug('\n[{0:02d}/{1}/{2:d}:{3:02d}:{4:02d}:{5:02d} {6:+05d}]'.format(
-        #               t[2], m, t[0], t[3], t[4], t[5], (- time.timezone / 36).to_i))
-        #logging.debug('Event: {0}'.format(event))
+        ## FIXME
+        #Logging::Logging.debug(
+        #  '\n[{0:02d}/{1}/{2:d}:{3:02d}:{4:02d}:{5:02d} {6:+05d}]'.format(
+        #  t[2], m, t[0], t[3], t[4], t[5], (- time.timezone / 36).to_i))
+        Logging::Logging.debug('Event: ' + event)
         for n in 0..arglist.length-1
           value = arglist[n]
           if value != nil
             value = value.to_s
-            #logging.debug(
-            #  'Reference{0:d}: {1}'.format(n, value))
+            Logging::Logging.debug(
+              'Reference' + n.to_s + ': ' + value)
           end
         end
       end
@@ -1263,7 +1265,7 @@ module Sakura
           nil, false, script, arglist)
         return false
       end
-      #logging.debug('=> "{0}"'.format(script))
+      Logging::Logging.debug('=> "' + script + '"')
       if @__temp_mode == 2
         @parent.handle_request('NOTIFY', 'reset_sstp_flag')
         leave_temp_mode()
@@ -1432,7 +1434,7 @@ module Sakura
       surface_name, surface_dir, surface_desc, surface_alias, surface, surface_tooltips, seriko_descript = \
                                                                                          @shells[shell_key].baseinfo
       proc_obj = lambda {
-        #logging.info('ghost {0} {1}'.format(@key, shell_key))
+        Logging::Logging.info('ghost ' + @key + ' ' + shell_key)
         set_surface(surface_desc, surface_alias, surface, surface_name,
                     surface_dir, surface_tooltips, seriko_descript)
         @surface.reset_alignment()
@@ -1456,7 +1458,7 @@ module Sakura
       @balloon.set_balloon_default()
       position_balloons()
       name = desc.get('name', :default => '')
-      #logging.info('balloon {0} {1}'.format(name, path))
+      Logging::Logging.info('balloon ' + name + ' ' + path)
       notify_event('OnBalloonChange', name, path)
     end
 
@@ -1615,7 +1617,7 @@ module Sakura
       elsif get_surface_id(0) != default_sakura or \
            get_surface_id(1) != default_kero
         @__surface_life = Array(20..30).sample
-        ##logging.debug('surface_life = {0:d}'.format(@__surface_life))
+        ##Logging::Logging.debug('surface_life = ' + @__surface_life)
       end
     end
 
@@ -1642,7 +1644,7 @@ module Sakura
       @__temp_mode = temp
       @key = key
       @force_quit = false
-      #logging.info('ghost {0}'.format(key))
+      Logging::Logging.info('ghost ' + key)
       load_settings()
       shell_key = get_default_shell()
       @shell_directory = shell_key # XXX
@@ -1886,7 +1888,7 @@ module Sakura
       if @reload_event and not busy() and \
         not (not @processed_script.empty? or not @processed_text.empty?)
         hide_all()
-        #logging.info('reloading....')
+        Logging::Logging.info('reloading....')
         @shiori.unload()
         @updateman.clean_up() # Don't call before unloading SHIORI
         @parent.handle_request(
@@ -1896,7 +1898,7 @@ module Sakura
           [self])
         load_settings()
         restart() ## FIXME
-        #logging.info('done.')
+        Logging::Logging.info('done.')
         enqueue_event(*@reload_event)
         @reload_event = nil
       end
@@ -2983,8 +2985,8 @@ module Sakura
         return
       end
       ghostdir = get_prefix()
-      #logging.info('homeurl = {0}'.format(homeurl))
-      #logging.info('ghostdir = {0}'.format(ghostdir))
+      Logging::Logging.info('homeurl = ' + homeurl)
+      Logging::Logging.info('ghostdir = ' + ghostdir)
       @updateman.start(homeurl, ghostdir)
     end
 

@@ -13,6 +13,8 @@
 require "digest/md5"
 require "gtk3"
 
+require "ninix/logging"
+
 module Pix
 
   class BaseTransparentWindow < Gtk::Window
@@ -34,7 +36,7 @@ module Pix
         @supports_alpha = true
       else
         set_visual(screen.system_visual)
-        #logging.debug('screen does NOT support alpha.\n')
+        Logging::Logging.debug('screen does NOT support alpha.\n')
         @supports_alpha = false
       end
       #assert visual is not None
@@ -187,7 +189,7 @@ module Pix
     end
     key_length = key.length
     if key_length == 0 # not encrypted
-      ##logging.warning(''.join((filename, ' generates a null key.')))
+      Logging::Logging.warning([filename, ' generates a null key.'].join(''))
       return get_png_IHDR(path)
     end
     key = [key[1..-1], key[0]].join('')
@@ -268,7 +270,7 @@ module Pix
     end
     key_length = key.length
     if key_length == 0 # not encrypted
-      ##logging.warning(''.join((filename, ' generates a null key.')))
+      Logging::Logging.warning([filename, ' generates a null key.'].join(''))
       pixbuf = pixbuf_new_from_file(filename)
       return pixbuf
     end

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  install.py - an installer module for ninix
+#  install.rb - an installer module for ninix
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
 #  Copyright (C) 2002-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
@@ -21,6 +21,7 @@ require "fileutils"
 require "gtk3"
 
 require "ninix/home"
+require "ninix/logging"
 require "ninix/version"
 
 
@@ -31,7 +32,7 @@ module Install
   end
 
   def self.fatal(error)
-    #logging.error(error) # XXX
+    Logging::Logging.error(error) # XXX
     raise InstallError.new(error)
   end
 
@@ -230,7 +231,7 @@ module Install
     end
 
     def download(url, basedir)
-      #logging.debug('downloading {0}'.format(url))
+      Logging::Logging.debug('downloading ' + url)
       begin
         ifile = open(url)
       rescue # except IOError:
@@ -344,8 +345,8 @@ module Install
         path = File.join(top_dir, filename2)
         if filename != filename2
           File.rename(File.join(top_dir, filename), path)
-          #logging.info(
-          #  'renamed {0}'.format(File.join(top_dir, filename)))
+          Logging::Logging.info(
+            'renamed ' + File.join(top_dir, filename))
           n += 1
         end
         if File.directory?(path)
@@ -495,7 +496,7 @@ module Install
         end
       end
       # install files
-      #logging.info('installing {0} (ghost)'.format(archive))
+      Logging::Logging.info('installing ' + archive + ' (ghost)')
       install_files(filelist)
       # create SETTINGS
       path = File.join(prefix, 'SETTINGS')
@@ -506,8 +507,8 @@ module Install
             f.write(["balloon_directory, ", balloon_dir, "\n"].join(''))
           end
         rescue # except IOError as e:
-          code, message = e.args
-          #logging.error('cannot write {0}'.format(path))
+          #code, message = e.args
+          Logging::Logging.error('cannot write ' + path)
         ensure
           f.close()
         end
@@ -521,7 +522,7 @@ module Install
     def install_supplement(archive, tmpdir, homedir)
       inst = Home.read_install_txt(tmpdir)
       if inst and inst.include?('accept')
-        #logging.info('searching supplement target ...')
+        Logging::Logging.info('searching supplement target ...')
         candidates = []
         begin
           dirlist = Dir.entries(File.join(homedir, 'ghost'))
@@ -540,7 +541,7 @@ module Install
           end
         end
         if candidates.empty?
-          #logging.info('not found')
+          Logging:Logging.info('not found')
           return nil, nil, 4
         else
           target = select(candidates)
@@ -553,14 +554,14 @@ module Install
               path = File.join(path, 'shell', inst['directory'])
             else
               if not inst.include?('type')
-                #logging.error('supplement type not specified')
+                Logging::Logging.error('supplement type not specified')
               else
-#                logging.error('unsupported supplement type: {0}'.format(inst['type']))
+                Logging::Logging.error('unsupported supplement type: ' + inst['type'])
               end
               return nil, nil, 4
             end
           end
-          logging.info('found')
+          Logging::Logging.info('found')
           if not Dir.exists?(path)
             FileUtils.mkdir_p(path)
           end
@@ -609,7 +610,7 @@ module Install
         end
       end
       # install files
-      #logging.info('installing {0} (balloon)'.format(archive))
+      Logging::Logging.info('installing ' + archive + ' (balloon)')
       install_files(filelist)
       return target_dir, inst.get('name'), 0
     end
@@ -655,7 +656,7 @@ module Install
       # uninstall older versions of the plugin
       uninstall_plugin(homedir, plugin_name)
       # install files
-      #logging.info('installing {0} (plugin)'.format(archive))
+      Logging::Logging.info('installing ' + archive + ' (plugin)')
       install_files(filelist)
       return plugin_dir, plugin_name, 0
     end
@@ -706,7 +707,7 @@ module Install
       # uninstall older versions of the kinoko
       uninstall_kinoko(homedir, kinoko_name)
       # install files
-      #logging.info('installing {0} (kinoko)'.format(archive))
+      Logging::Logging.info('installing ' + archive + ' (kinoko)')
       install_files(filelist)
       return dstdir, [kinoko_name, kinoko['ghost'], kinoko['category']], 0
     end
@@ -744,7 +745,7 @@ module Install
       # uninstall older versions of the skin
       uninstall_nekoninni(homedir, target_dir)
       # install files
-      #logging.info('installing {0} (nekodorif skin)'.format(archive))
+      Logging::Logging.info('installing ' + archive + ' (nekodorif skin)')
       install_files(filelist)
       return target_dir, inst.get('name'), 0
     end
@@ -782,7 +783,7 @@ module Install
       # uninstall older versions of the skin
       uninstall_katochan(homedir, target_dir)
       # install files
-      #logging.info('installing {0} (nekodorif katochan)'.format(archive))
+      Logging::Logging.info('installing ' + archive + ' (nekodorif katochan)')
       install_files(filelist)
       return target_dir, inst.get('name'), 0
     end

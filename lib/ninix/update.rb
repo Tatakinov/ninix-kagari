@@ -18,6 +18,7 @@ require "fileutils"
 require "digest/md5"
 
 require "ninix/home"
+require "ninix/logging"
 
 module Update
 
@@ -166,7 +167,7 @@ module Update
         end_updates()
       elsif (@state - len_pre) % len_state == 0
         filename, checksum = @schedule[0]
-#        logging.info('UPDATE: {0} {1}'.format(filename, checksum))
+        Logging::Logging.info('UPDATE: ' + filename + ' ' + checksum)
         download(File.join(@path, URI.escape(filename)),
                  :event => true)
       elsif (@state - len_pre) % len_state == 1
@@ -232,9 +233,8 @@ module Update
         return
       else
         filename, checksum = @schedule.pop(0)
-#        logging.error(
-#                      'failed to download {0} ({1:d} {2})'.format(
-#                                                                  filename, code, message))
+        Logging::Logging.error(
+          'failed to download ' + filename + ' (' + code.to_s + ' ' + message + ')')
         @file_number += 1
         @state += 3
         return
@@ -263,7 +263,7 @@ module Update
       if url.scheme != 'http'
         return false
       end
-#      logging.info('redirected to {0}'.format(location))
+      Logging::Logging.info('redirected to ' + location)
       @http.close()
       @host = url.host
       @port = url.port
@@ -465,9 +465,9 @@ module Update
           if File.exists?(path) and File.file?(path)
             begin
               File.unlink(path)
-#              logging.info('deleted {0}'.format(path))
+              Logging::Logging.info('deleted ' + path)
             rescue #except OSError as e:
-#              logging.error(e)
+              ##logging.error(e)
             end
           end
         end

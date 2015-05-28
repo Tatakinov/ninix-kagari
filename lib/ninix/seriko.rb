@@ -14,6 +14,8 @@
 
 require "gtk3"
 
+require "ninix/logging"
+
 module Seriko
 
   class Controller
@@ -773,14 +775,12 @@ module Seriko
           actor.add_pattern(surface, interval, method, args)
         end
       rescue # except ValueError as error:
-        #logging.error('seriko.py: ' + error.to_s)
+        Logging::Logging.error('seriko.rb: ' + error.to_s)
         next
       end
       if actor.get_patterns().empty?
-#        logging.error(
-#                      'seriko.py: animation group #{0:d} has no pattern (ignored)'.format(actor_id))
-        print('seriko.py: animation group #', actor_id, ' has no pattern (ignor
-ed)', "\n")
+        Logging::Logging.error(
+          'seriko.rb: animation group #' + actor_id.to_s + ' has no pattern (ignored)')
         next
       end
       actors << actor
@@ -899,12 +899,11 @@ ed)', "\n")
           actor.add_pattern(surface, interval, method, args)
         end
       rescue # except ValueError as error:
-        #logging.error('seriko.py: ' + error.to_s)
+        Logging::Logging.error('seriko.rb: ' + error.to_s)
         next
       end
       if actor.get_patterns().empty?
-        ## FIXME
-        #logging.error('seriko.py: animation group #{0:d} has no pattern (ignored)'.format(mayuna_id))
+        Logging::Logging.error('seriko.rb: animation group #' + mayuna_id.to_s + ' has no pattern (ignored)')
         next
       end
       mayuna << actor

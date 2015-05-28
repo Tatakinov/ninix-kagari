@@ -12,6 +12,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
+require "ninix/logging"
 
 module Communicate
 
@@ -123,8 +124,14 @@ module Communicate
           refs << value.to_s
         end
         refs = refs.join('\x01')
-        #logging.debug("NOTIFY OTHER: {}, {}, {}, {}, {}, {}, {}".format(
-        #        on_other_event, name, self_name, flags, event, script, refs))
+        Logging::Logging.debug("NOTIFY OTHER: " \
+                               + on_other_event + ", " \
+                               + name + ", " \
+                               + self_name + ", " \
+                               + flags + ", " \
+                               + event + ", " \
+                               + script + ", " \
+                               + refs)
         args = [name, selfname, flags, event, script, refs]
       else # XXX: should not reach here
         return

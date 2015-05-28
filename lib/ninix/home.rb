@@ -15,6 +15,7 @@
 require "ninix/config"
 require "ninix/alias"
 require "ninix/dll"
+require "ninix/logging"
 
 
 module Home
@@ -181,7 +182,7 @@ module Home
         next
       end
       if balloon_info.include?('balloon_dir') # XXX
-        #logging.warninig('Oops: balloon id confliction')
+        Logging::Logging.warninig('Oops: balloon id confliction')
         next
       else
         balloon_info['balloon_dir'] = [subdir, NConfig.null_config()]
@@ -341,7 +342,7 @@ module Home
           kinoko[name] = value.to_i
         end
         if error
-          #logging.error('Error: {0}\n{1} (skipped)'.format(error, path))
+          Logging::Logging.error('Error: ' + error + "\n" + path +' (skipped)')
           return nil
         end
       end
@@ -428,7 +429,7 @@ module Home
         end
       end
       if error
-        #logging.error('Error: {0}\n{1} (skipped)'.format(error, path))
+        Logging::Logging.error('Error: ' + error + "\n" + path + ' (skipped)')
         return nil
       end
     end
@@ -687,7 +688,7 @@ module Home
             buf << temp[0, temp.length - 2]
           end
           if not opened
-            #logging.error('syntax error: unbalnced "}" in surfaces.txt.')
+            Logging::Logging.error('syntax error: unbalnced "}" in surfaces.txt.')
           end
           match = re_alias.match(key)
           if match
@@ -768,8 +769,8 @@ module Home
         x = x.to_i
         y = y.to_i
       rescue #except ValueError:
-        #logging.error(
-        #  'invalid element spec for {0}: {1}'.format(key, config[key]))
+        Loggin::Logging.error(
+          'invalid element spec for ' + key + ': ' + config[key])
         next
       end
       buf << [key, method, filename, x, y]

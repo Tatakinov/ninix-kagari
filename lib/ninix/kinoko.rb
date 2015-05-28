@@ -21,6 +21,7 @@ require "gtk3"
 require "ninix/config"
 require "ninix/seriko"
 require "ninix/pix"
+require "ninix/logging"
 
 module Kinoko
 
@@ -155,7 +156,7 @@ module Kinoko
           @skin.set_position() ## FIXME
         end
       else
-        #logging.debug('OBSERVER(kinoko): ignore - {0}'.format(event))
+        Logging::Logging.debug('OBSERVER(kinoko): ignore - ' + event)
       end
     end
 

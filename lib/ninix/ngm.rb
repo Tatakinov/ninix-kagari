@@ -22,6 +22,7 @@ require "gtk3"
 require "ninix/home"
 require "ninix/pix"
 require "ninix/install"
+require "ninix/logging"
 
 module NGM
 
@@ -504,7 +505,7 @@ module NGM
       begin
         mergeid = ui.add_ui(@ui_info)
       rescue #except GObject.GError as msg:
-        #logging.error('building menus failed: {0}'.format(msg))
+        Logging::Logging.error('building menus failed: ' + msg)
       end
       vbox = Gtk::Box.new(orientation=Gtk::Orientation::VERTICAL)
       @window.add(vbox)

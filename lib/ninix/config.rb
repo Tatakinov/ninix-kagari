@@ -11,6 +11,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
+require "ninix/logging"
 
 module NConfig
 
@@ -64,8 +65,7 @@ module NConfig
         if Encoding.name_list.include?(value)
           charset = value
         else
-          #logging.error('Unsupported charset {0}'.format(value))
-          print('Unsupported charset ', value, "\n")
+          Logging::Logging.error('Unsupported charset ' + value)
         end
       elsif ['refreshundeletemask', 'icon', 'cursor', 'shiori', 'makoto'].include?(key)
         dic[key] = value

@@ -54,6 +54,7 @@ require "ninix/nekodorif"
 require "ninix/kinoko"
 require "ninix/menu"
 require "ninix/metamagic"
+require "ninix/logging"
 
 opt = OptionParser.new
 opt.on('--sstp-port sstp_port', 'additional port for listening SSTP requests') {|v| }
@@ -135,7 +136,7 @@ module Ninix_Main
     # parse command line arguments
     if args["sstp_port"]
       if args["sstp_port"].to_i < 1024
-        #logging.warning('Invalid --sstp-port number (ignored)')
+        Logging::Logging.warning('Invalid --sstp-port number (ignored)')
       else
         sstp_port << args["sstp_port"].to_i
       end
@@ -169,9 +170,9 @@ module Ninix_Main
       raise SystemExit('ninix-aya is already running')
     end
     # start
-    #logging.info('loading...')
+    Logging::Logging.info('loading...')
     app = Application.new(f, :sstp_port => sstp_port)
-    #logging.info('done.')
+    Logging::Logging.info('done.')
     app.run(abend)
     f.truncate(0)
     begin
@@ -348,7 +349,7 @@ module Ninix_Main
         end
         server.set_responsible(self)
         @sstp_servers << server
-        #logging.info('Serving SSTP on port {0:d}'.format(port))
+        Logging::Logging.info('Serving SSTP on port ' + port.to_s)
       end
     end
   end
@@ -541,7 +542,7 @@ module Ninix_Main
 
     def exec_plugin(plugin_dir, argv, caller)
       if @jobs.include?(plugin_dir) and @jobs[plugin_dir].is_alive()
-        #logging.warning('plugin {0} is already running'.format(plugin_dir))
+        Logging::Logging.warning('plugin ' + plugin_dir + ' is already running')
         return
       end
       module_name = File.basename(argv[0])
@@ -1182,8 +1183,8 @@ module Ninix_Main
       # load ghost
       @current_sakura = default_sakura
       ##for i, name in enumerate(self.get_ghost_names()):
-      ##    logging.info(
-      ##        'GHOST({0:d}): {1}'.format(i, name))
+      ##    Logging::Logging.info(
+      ##        'GHOST(' + i.to_s +'): ' + name)
       start_sakura(@current_sakura, :init => true, :abend => @abend)
     end
 
@@ -1374,7 +1375,7 @@ module Ninix_Main
       begin
         @prefs.save()
       rescue # except IOError:
-        #logging.error('Cannot write preferences to file (ignored).')
+        Logging::Logging.error('Cannot write preferences to file (ignored).')
       rescue # except:
         #pass ## FIXME
       end
@@ -1489,7 +1490,7 @@ module Ninix_Main
     def get_balloon_description(subdir) ## FIXME
       key = find_balloon_by_subdir(subdir)
       if key == nil
-        ##logging.warning('Balloon {0} not found.'.format(subdir))
+        ##Logging::Logging.warning('Balloon ' + subdir + ' not found.')
         default_balloon = @prefs.get('default_balloon')
         key = find_balloon_by_subdir(default_balloon)
       end
@@ -1517,10 +1518,10 @@ module Ninix_Main
     def add_sakura(ghost_dir)
       if @ghosts.include?(ghost_dir)
         exists = true
-        #logging.warning('INSTALLED GHOST CHANGED: {0}'.format(ghost_dir))
+        Logging::Logging.warning('INSTALLED GHOST CHANGED: ' + ghost_dir)
       else
         exists = false
-        #logging.info('NEW GHOST INSTALLED: {0}'.format(ghost_dir))
+        Logging::Logging.info('NEW GHOST INSTALLED: ' + ghost_dir)
       end
       ghost_conf = Home.search_ghosts(:target => [ghost_dir])
       if not ghost_conf.empty?
@@ -1530,9 +1531,9 @@ module Ninix_Main
             key = sakura.key
             proc_obj = lambda {
               @ghosts[ghost_dir].baseinfo = ghost_conf[ghost_dir]
-              #logging.info('restarting....')
+              Logging::Logging.info('restarting....')
               start_sakura(key, :prev => key, :init => true)
-              #logging.info('done.')
+              Logging::Logging.info('done.')
             }
             stop_sakura(sakura, proc_obj)
           end

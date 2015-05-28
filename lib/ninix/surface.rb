@@ -18,6 +18,7 @@ require "gtk3"
 require "ninix/keymap"
 require "ninix/pix"
 require "ninix/seriko"
+require "ninix/logging"
 
 module Surface
 
@@ -167,11 +168,11 @@ module Surface
           (Gdk::Window::ModifierType::CONTROL_MASK | \
            Gdk::Window::ModifierType::SHIFT_MASK)).nonzero?
         if name == 'f12'
-          #logging.info('reset surface position')
+          Logging::Logging.info('reset surface position')
           reset_position()
         end
         if name == 'f10'
-          #logging.info('reset balloon offset')
+          Logging::Logging.info('reset balloon offset')
           for side in 0..@window.length-1
             set_balloon_offset(side, nil)
           end
@@ -244,8 +245,8 @@ module Surface
           if not File.exists?(dgp_path)
             ddp_path = [name, '.ddp'].join('')
             if not File.exists?(ddp_path)
-              #logging.error(
-              #  '{0}: file not found (ignored)'.format(path))
+              Logging::Logging.error(
+                path + ': file not found (ignored)')
               next
             else
               path = ddp_path
@@ -275,7 +276,7 @@ module Surface
         end
         key = match[1]
         if config.include?('element0')
-          #logging.debug('surface {0}'.format(key))
+          Logging::Logging.debug('surface ' + key)
           composite_surface[key] = compose_elements(elements, config)
         end
       end
@@ -528,10 +529,10 @@ module Surface
           error = 'unknown method for ' + key + ': ' + method
           break
         end
-        #logging.debug(key + ': ' + meyhod + ' ' + filename + ', x=' + x.to_i.to_s + ', y=' + y.to_i.to_s)
+        Logging::Logging.debug(key + ': ' + meyhod + ' ' + filename + ', x=' + x.to_i.to_s + ', y=' + y.to_i.to_s)
       end
       if error != nil
-        #logging.error(error)
+        Logging::Logging.error(error)
         surface_list = []
       end
       return surface_list
@@ -1252,7 +1253,7 @@ module Surface
         surface = Pix.create_surface_from_file(
           @surfaces[surface_id][0], :is_pnr => is_pnr, :use_pna => use_pna)
       rescue # except:
-        #logging.debug('cannot load surface #{0}'.format(surface_id))
+        Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
         return Pix.create_blank_surface(100, 100)
       end
       for element, x, y, method in @surfaces[surface_id][1, @surfaces[surface_id].length - 1]
@@ -1294,7 +1295,7 @@ module Surface
 
     def get_image_surface(surface_id, is_asis: false)
       if not @surfaces.include?(surface_id)
-        #logging.debug('cannot load surface #{0}'.format(surface_id))
+        Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
         return Pix.create_blank_surface(100, 100)
       end
       return create_surface_from_file(surface_id, :is_asis => is_asis)
@@ -1494,7 +1495,7 @@ module Surface
       end
       for part, x1, y1, x2, y2 in @collisions
         if x1 <= x and x <= x2 and y1 <= y and y <= y2
-          #logging.debug('{0} touched'.format(part))
+          Logging::Logging.debug(part + ' touched')
           return part
         end
       end

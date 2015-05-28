@@ -51,6 +51,7 @@ require "gtk3"
 
 require "ninix/pix"
 require "ninix/home"
+require "ninix/logging"
 
 module Nekodorif
 
@@ -158,7 +159,7 @@ module Nekodorif
       elsif event == 'finalize'
         finalize()
       else
-        #logging.debug('OBSERVER(nekodorif): ignore - {0}'.format(event))
+        Logging::Logging.debug('OBSERVER(nekodorif): ignore - ' + event)
       end
     end
 
@@ -381,7 +382,7 @@ module Nekodorif
     def key_press(window, event)
       if event.state & (Gdk::Window::ModifierType::CONTROL_MASK | Gdk::Window::ModifierType::SHIFT_MASK)
         if event.keyval == Gdk::Keyval::GDK_KEY_F12
-          #logging.info('reset skin position')
+          Logging::Logging.info('reset skin position')
           set_position(:reset => 1)
         end
       end
@@ -696,7 +697,7 @@ module Nekodorif
         category = @data['category'].split(',')
         if not category.empty?
           if not CATEGORY_LIST.include?(category[0])
-            #logging.warning('WARNING: unknown major category - {0}'.format(category[0]))
+            Logging::Logging.warning('WARNING: unknown major category - ' + category[0])
             ##self.data['category'] = self.CATEGORY_LIST[-1]
           end
         else

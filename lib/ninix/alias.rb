@@ -11,13 +11,13 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "logger"
 require "ninix/config"
+require "ninix/logging"
 
 module Alias
 
   def self.fatal(error)
-    #logging.error('alias.py: {0}'.format(str(error)))
+    Logging::Logging.error('alias.rb: ' + error.to_s)
     return NConfig.null_config()
   end
 

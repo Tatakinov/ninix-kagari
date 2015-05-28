@@ -12,6 +12,8 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
+require "ninix/logging"
+
 module DLL
 
   def self.get_path() # XXX
@@ -118,7 +120,7 @@ module DLL
         if key == 'Charset'
           charset = value.strip()
           if not Encoding.name_list.include?(charset) ##FIXME
-            #logging.warning('DLL: Unsupported charset {0}'.format(repr(charset)))
+            Logging::Logging.warning('DLL: Unsupported charset ' + charset)
           end
           @charset = charset
         end

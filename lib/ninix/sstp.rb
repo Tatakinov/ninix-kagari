@@ -18,6 +18,7 @@ require "ninix/entry_db"
 require "ninix/script"
 require "ninix/version"
 require "ninix/sstplib"
+require "ninix/logging"
 
 
 module SSTP
