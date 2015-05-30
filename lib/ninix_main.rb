@@ -49,7 +49,6 @@ require "ninix/communicate"
 require "ninix/ngm"
 require "ninix/lock"
 require "ninix/install"
-##require "ninix/plugin"
 require "ninix/nekodorif"
 require "ninix/kinoko"
 require "ninix/menu"
@@ -354,244 +353,6 @@ module Ninix_Main
     end
   end
   
-  class PluginDialog
-
-    def initialize(plugin_dir, queue, message)
-        @plugin_dir = plugin_dir
-        @queue = queue
-        dialog = Gtk.Window()
-        dialog.set_title(plugin_dir)
-        ##dialog.set_decorated(false)
-        ##dialog.set_resizable(false)
-        dialog.connect('delete_event', self.delete)
-        dialog.connect('key_press_event', self.key_press)
-        dialog.connect('button_press_event', self.button_press)
-        dialog.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
-        ##dialog.set_modal(true)
-        dialog.set_position(Gtk.WindowPosition.CENTER)
-        dialog.realize()
-        entry = Gtk::Entry.new
-        entry.connect('activate', self.activate)
-        entry.set_size_request(320, -1)
-        entry.show()
-        box = Gtk::VBox.new(spacing=10)
-        box.set_border_width(10)
-        label = Gtk::Label.new(message)
-        box.pack_start(label, :expand => false, :fill => true, :padding => 0)
-        label.show()
-        box.pack_start(entry, :expand => false, :fill => true, :padding => 0)
-        dialog.add(box)
-        box.show()
-        @dialog = dialog
-    end
-
-    def open
-      @dialog.show()
-    end
-
-    def delete(widget, event)
-      @dialog.hide()
-      cancel()
-      return true
-    end
-
-    def key_press(widget, event)
-      if event.keyval == Gdk.KEY_Escape
-        @dialog.hide()
-        cancel()
-        return true
-      end
-      return false
-    end
-
-    def button_press(widget, event)
-      if [1, 2].include?(event.button)
-        @dialog.begin_move_drag(
-          event.button, event.x_root.to_i, event.y_root.to_i,
-          Gtk.current_event_time)
-      end
-      return true
-    end
-
-    def activate(widget)
-      @dialog.hide()
-      enter(widget.get_text())
-      return true
-    end
-
-    def enter(text)
-      @queue.put(text)
-    end
-
-    def cancel
-      @queue.put('')
-    end
-  end
-
-  class PluginControler
-
-    def initialize
-      @jobs = {}
-      @queue = {}
-      @data = {}
-      @dialog = {}
-      @parent = nil
-    end
-
-    def set_responsible(parent)
-      @parent = parent
-    end
-
-    def save_data(plugin_dir)
-      if not @data.include?(plugin_dir)
-        return
-      end
-      home_dir = Home.get_ninix_home()
-      target_dir = File.join(home_dir, 'plugin', plugin_dir)
-      path = File.join(target_dir, 'SAVEDATA')
-      f = open(path, 'w', encoding='utf-8')
-      f.write('#plugin: {0:1.1f}\n'.format(Home.PLUGIN_STANDARD[1]))
-      for name, value in @data[plugin_dir].items()
-        if value == nil
-          next
-        end
-        f.write('{0}:{1}\n'.format(name, value))
-      end
-    end
-
-    def load_data(plugin_dir)
-      home_dir = Home.get_ninix_home()
-      target_dir = File.join(home_dir, 'plugin', plugin_dir)
-      path = File.join(target_dir, 'SAVEDATA')
-      if not File.exists?(path)
-        return {}
-      end
-      data = {}
-      begin
-        f = open(path, 'r', encoding='utf-8')
-        line = f.readline()
-        line = line.rstrip('\r\n')
-        if not line.start_with('#plugin:')
-          return {}
-        end
-        begin
-          standard = float(line[8..-1])
-        rescue # except:
-          return {}
-        end
-        if standard < Home.PLUGIN_STANDARD[0] or \
-          standard > Home.PLUGIN_STANDARD[1]
-          return {}
-        end
-        for line in f
-          line = line.rstrip('\r\n')
-          key, value = line.split(':', 1)
-          data[key] = value
-        end
-      rescue # except IOError as e:
-        #code, message = e.args
-        #logging.error('cannot read {0}'.format(path))
-      end
-      return data
-    end
-
-    def terminate_plugin
-      for plugin_dir in @data.keys()
-        save_data(plugin_dir)
-      end
-      return ## FIXME
-    end
-
-    def open_dialog(plugin_dir, message)
-      @dialog[plugin_dir] = PluginDialog(plugin_dir,
-                                         @queue[plugin_dir],
-                                         message)
-      @dialog[plugin_dir].open()
-    end
-
-    def check_queue
-      for plugin_dir in @jobs.keys()
-        if not @queue[plugin_dir].empty()
-          data = @queue[plugin_dir].get()
-          @queue[plugin_dir].task_done()
-          if isinstance(data, str)
-            if data.start_with('DIALOG:')
-              message = data[7..-1]
-              open_dialog(plugin_dir, message)
-              next
-            end
-          elsif not isinstance(data, dict)
-            continue
-          end
-          break_flag = false
-          for name, value in data.items()
-            if not isinstance(name, str) or \
-              name.include?(':') or \
-              not (isinstance(value, str) or value == nil)
-              break_flag = true
-              break
-            end
-          end
-          if not break_flag
-            #assert @data.include?(plugin_dir)
-            @data[plugin_dir].update(data)
-          end
-        end
-      end
-    end
-
-    def exec_plugin(plugin_dir, argv, caller)
-      if @jobs.include?(plugin_dir) and @jobs[plugin_dir].is_alive()
-        Logging::Logging.warning('plugin ' + plugin_dir + ' is already running')
-        return
-      end
-      module_name = File.basename(argv[0])
-      ext = File.extname(argv[0])
-      home_dir = Home.get_ninix_home()
-      target_dir = File.join(home_dir, 'plugin', plugin_dir)
-      plugin_module = self.__import_module(module_name, target_dir)
-      if plugin_module == nil
-        return
-      end
-      port = @parent.handle_request('GET', 'get_sstp_port')
-      queue = multiprocessing.JoinableQueue()
-      if not @data.include?(plugin_dir)
-        @data[plugin_dir] = load_data(plugin_dir)
-      end
-      data = @data[plugin_dir]
-      p = plugin_module.Plugin(port, target_dir, argv[1..-1], home_dir, caller,
-                               queue, data)
-      if not isinstance(p, Plugin.BasePlugin)
-        return
-      end
-      @jobs[plugin_dir] = p
-      @queue[plugin_dir] = queue
-      p.daemon = true
-      p.start()
-#      if os.name == 'nt' and target_dir in sys.path
-#        # XXX: an opposite of the BasePlugin.__init__ hack
-#        sys.path.remove(target_dir)
-#      end
-    end
-
-    def start_plugins(plugins)
-      for plugin_name, plugin_dir, startup, menu_items in plugins
-        if startup != nil
-          exec_plugin(plugin_dir, startup,
-                      {'name' => '', 'directory' => ''})
-        end
-      end
-    end
-
-    def __import_module(name, directory)
-      loader = importlib.find_loader(name, [directory])
-      begin
-        return loader.load_module(name)
-      rescue # except:
-        return nil
-      end
-    end
-  end
 
   class BalloonMeme < MetaMagic::Meme
 
@@ -671,9 +432,6 @@ module Ninix_Main
       # create usage dialog
       @usage_dialog = UsageDialog.new
       @communicate = Communicate::Communicate.new
-      # create plugin manager
-      @plugin_controler = PluginControler.new
-      @plugin_controler.set_responsible(self)
       # create ghost manager
       @__ngm = NGM::NGM.new
       @__ngm.set_responsible(self)
@@ -701,7 +459,6 @@ module Ninix_Main
         meme.baseinfo = value
       end
       @balloon_menu = create_balloon_menu()
-      @plugins = Home.search_plugins()
       @nekoninni = Home.search_nekoninni()
       @katochan = Home.search_katochan()
       @kinoko = Home.search_kinoko()
@@ -833,8 +590,6 @@ module Ninix_Main
             target_dirs,
             File.join(Home.get_ninix_home(),
                       'balloon', target_dirs))
-        elsif filetype == 'plugin'
-          @plugins = Home.search_plugins()
         elsif filetype == 'nekoninni'
           @nekoninni = Home.search_nekoninni()
         elsif filetype == 'katochan'
@@ -1124,30 +879,6 @@ module Ninix_Main
       return balloon_list
     end
 
-    def get_plugin_list ## FIXME
-      plugin_list = []
-      return plugin_list ## FIXME
-      for i, plugin in enumerate(@plugins)
-        plugin_name = plugin[0]
-        menu_items = plugin[3]
-        if not menu_items
-          next
-        end
-        item = {}
-        item['name'] = plugin_name
-        item['icon'] = nil
-        item_list = []
-        for j, menu_item in enumerate(menu_items)
-          label = menu_item[0]
-          value = [i, j]
-          item_list << [label, value]
-        end
-        item['items'] = item_list
-        plugin_list << item
-      end
-      return plugin_list
-    end
-
     def get_nekodorif_list ## FIXME
       nekodorif_list = []
       nekoninni = @nekoninni
@@ -1366,7 +1097,6 @@ module Ninix_Main
       GLib::Source.remove(@timeout_id)
       @usage_dialog.close()
       @sstp_controler.quit() ## FIXME
-      @plugin_controler.terminate_plugin() ## FIXME
       save_preferences()
       Gtk.main_quit()
     end
@@ -1613,24 +1343,6 @@ module Ninix_Main
       @ghosts.delete(sakura.key)
     end
 
-    def select_plugin(item)
-      target = @__menu_owner
-      i, j = item
-      plugin_name, plugin_dir, startup, menu_items = @plugins[i]
-      label, argv = menu_items[j]
-      if label == 'Uninstall'
-        home_dir = Home.get_ninix_home()
-        @installer.uninstall_plugin(home_dir, plugin_name)
-        @plugins = Home.search_plugins() # reload
-        return
-      end
-      caller = {}
-      caller['name'] = target.get_name()
-      caller['directory'] = target.get_prefix()
-      caller['ifghost'] = target.get_ifghost()
-      @plugin_controler.exec_plugin(plugin_dir, argv, caller)
-    end
-
     def select_nekodorif(nekodorif_dir)
       target = @__menu_owner
       Nekodorif::Nekoninni.new.load(nekodorif_dir,
@@ -1717,13 +1429,10 @@ module Ninix_Main
           load()
           # start SSTP server
           @sstp_controler.start_servers()
-          # start plugins
-          @plugin_controler.start_plugins(@plugins)
           @loaded = true
         else
           @sstp_controler.handle_sstp_queue()
           @sstp_controler.receive_sstp_request()
-          @plugin_controler.check_queue()
         end
       end
       return true

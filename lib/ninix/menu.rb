@@ -33,8 +33,6 @@ module Menu
             <menu action='Portal'>
             </menu>
             <separator/>
-            <menu action='Plugin'>
-            </menu>
             <menuitem action='Stick'/>
             <separator/>
             <menu action='Options'>
@@ -145,9 +143,6 @@ module Menu
                 'visible' => true},
             'Kinoko' => {
                 'entry' => ['Kinoko', nil, _('Kinoko(_K)'), nil],
-                'visible' => true},
-            'Plugin' => {
-                'entry' => ['Plugin', nil, _('Plugin(_P)'), nil],
                 'visible' => true},
             }
       @__fontcolor = {
@@ -446,7 +441,6 @@ module Menu
       __set_ghost_menu()
       __set_shell_menu()
       __set_balloon_menu()
-      __set_plugin_menu()
       __set_mayuna_menu(side)
       __set_nekodorif_menu()
       __set_kinoko_menu()
@@ -822,59 +816,6 @@ module Menu
         set_stylecontext(i, *a)
       end
       return item
-    end
-
-    def __set_plugin_menu
-      plugin_list = @parent.handle_request('GET', 'get_plugin_list')
-      plugin_menu = Gtk::Menu.new()
-      for i in 0..(plugin_list.length - 1)
-        name = plugin_list[i]['name']
-        item = Gtk::MenuItem.new(name)
-        item.set_name('popup menu item')
-        item.signal_connect('draw') do |i, *a|
-            set_stylecontext(i, *a)
-        end
-        item.show()
-        plugin_menu << item
-        item_list = plugin_list[i]['items']
-        if item_list.length <= 1
-          label, value = item_list[0]
-          item.signal_connect('activate') do |a, v|
-            @parent.handle_request('NOTIFY', 'select_plugin', value)
-          end
-          item.signal_connect('draw') do |i, *a|
-            set_stylecontext(i, *a)
-          end
-          ##if working
-          ##  item.set_sensitive(false)
-        else
-          submenu = Gtk::Menu.new()
-          submenu.set_name('popup menu')
-          item.set_submenu(submenu)
-          for label, value in item_list
-            item = Gtk::MenuItem.new(label)
-            item.set_name('popup menu item')
-            item.signal_connect('activate') do |a, v|
-              @parent.handle_request('NOTIFY', 'select_plugin', value)
-            end
-            item.signal_connect('draw') do |i, *a|
-              set_stylecontext(i, *a)
-            end
-            item.show()
-            ##if working
-            ##  item.set_sensitive(false)
-            submenu << item
-          end
-          submenu.signal_connect('realize') do |i, *a|
-            set_stylecontext(i, *a)
-          end
-        end
-      end
-      menuitem = @ui_manager.get_widget(['/popup/', 'Plugin'].join(''))
-      menuitem.set_submenu(plugin_menu)
-      plugin_menu.signal_connect('realize') do |i, *a|
-        set_stylecontext(i, *a)
-      end
     end
 
     def __set_nekodorif_menu

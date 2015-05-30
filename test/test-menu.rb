@@ -60,8 +60,6 @@ module NinixTest
 #      print("ARGS: ", a, "\n")
       if event == 'get_ghost_menus'
         return []
-      elsif event == 'get_plugin_list'
-        return []
       elsif event == 'get_nekodorif_list'
         return []
       elsif event == 'get_kinoko_list'

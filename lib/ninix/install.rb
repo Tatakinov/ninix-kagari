@@ -142,8 +142,6 @@ module Install
       if not inst
         if File.exists?(File.join(tmpdir, 'kinoko.ini'))
           filetype = 'kinoko'
-        elsif File.exists?(File.join(tmpdir, 'plugin.txt'))
-          filetype = 'plugin'
         else
           Install.fatal('cannot read install.txt from the archive')
         end
@@ -163,8 +161,6 @@ module Install
           filetype = 'shell.inverse'
         end
       elsif filetype == 'balloon'
-        # pass
-      elsif filetype == 'plugin'
         # pass
       elsif filetype == 'skin'
         filetype = 'nekoninni'
@@ -208,8 +204,6 @@ module Install
           target_dirs, names, errno = install_supplement(filename, tmpdir, homedir)
         elsif filetype == "balloon"
           target_dirs, names, errno = install_balloon(filename, tmpdir, homedir)
-        elsif filetype == "plugin"
-          target_dirs, names, errno = install_plugin(filename, tmpdir, homedir)
         elsif filetype == "kinoko"
           target_dirs, names, errno = install_kinoko(filename, tmpdir, homedir)
         elsif filetype == "nekoninni"
@@ -609,52 +603,6 @@ module Install
       Logging::Logging.info('installing ' + archive + ' (balloon)')
       install_files(filelist)
       return target_dir, inst.get('name'), 0
-    end
-
-    def uninstall_plugin(homedir, name)
-      begin
-        dirlist = Dir.entries(File.join(homedir, 'plugin'))
-      rescue SystemCallError
-        return
-      end
-      for subdir in dirlist
-        path = File.join(homedir, 'plugin', subdir)
-        plugin = Home.read_plugin_txt(path)
-        if plugin == nil
-          next
-        end
-        plugin_name, plugin_dir, startup, menu_items = plugin
-        if plugin_name == name
-          plugin_dir = File.join(homedir, 'plugin', subdir)
-          if confirm_removal(plugin_dir, 'plugin')
-            FileUtils.remove_entry_secure(plugin_dir)
-          end
-        end
-      end
-    end
-
-    def install_plugin(archive, srcdir, homedir)
-      filelist = []
-      # find plugin.txt
-      plugin = Home.read_plugin_txt(srcdir)
-      if plugin == nil
-        Install.fatal('failed to read plugin.txt')
-      end
-      plugin_name, plugin_dir, startup, menu_items = plugin
-      # find files
-      Dir.foreach(srcdir) { |filename|
-        next if /^\.+$/ =~ filename
-        path = File.join(srcdir, filename)
-        if File.file?(path)
-          filelist << [path, File.join(homedir, 'plugin', plugin_dir, filename)]
-        end
-      }
-      # uninstall older versions of the plugin
-      uninstall_plugin(homedir, plugin_name)
-      # install files
-      Logging::Logging.info('installing ' + archive + ' (plugin)')
-      install_files(filelist)
-      return plugin_dir, plugin_name, 0
     end
 
     def uninstall_kinoko(homedir, name)

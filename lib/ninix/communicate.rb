@@ -118,7 +118,6 @@ module Communicate
             flags = flags + 'notranslate'
           end
         end
-        ## FIXME: plugin-script, plugin-event
         refs = []
         for value in references
           refs << value.to_s

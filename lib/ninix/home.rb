@@ -20,8 +20,6 @@ require "ninix/logging"
 
 module Home
 
-  PLUGIN_STANDARD = [3.0, 3.1]
-
   def self.get_ninix_home()
     return File.join(File.expand_path('~'), '.ninix')
   end
@@ -54,11 +52,10 @@ module Home
     end
     ghosts = search_ghosts()
     balloons = search_balloons()
-    plugins = search_plugins()
     nekoninni = search_nekoninni()
     katochan = search_katochan()
     kinoko = search_kinoko()
-    return ghosts, balloons, plugins, nekoninni, katochan, kinoko
+    return ghosts, balloons, nekoninni, katochan, kinoko
   end
 
   def self.get_shiori()
@@ -190,31 +187,6 @@ module Home
       balloons[subdir] = [desc, balloon_info]
     end
     return balloons
-  end
-
-  def self.search_plugins()
-    home_dir = get_ninix_home()
-    buf = []
-    plugin_dir = File.join(home_dir, 'plugin')
-    begin
-      dirlist = []
-      Dir.foreach(plugin_dir, :encoding => 'UTF-8') do |file|
-        if file == '..' or file == '.'
-          next
-        end
-        dirlist << file
-      end
-    rescue SystemCallError
-      dirlist = []
-    end
-    for subdir in dirlist
-      plugin = read_plugin_txt(File.join(plugin_dir, subdir))
-      if plugin == nil
-        next
-      end
-      buf << plugin
-    end
-    return buf
   end
 
   def self.search_nekoninni()
@@ -828,89 +800,5 @@ module Home
       balloon[key] = [img, config]
     end
     return balloon
-  end
-
-  def self.read_plugin_txt(src_dir)
-    path = File.join(src_dir, 'plugin.txt')
-    plugin_dir = src_dir # XXX
-    begin
-      error = nil
-      f = open(path, 'rb')
-      charset = 'UTF-8' # default
-      standard = 0.0
-      plugin_name = startup = nil
-      menu_items = []
-      lineno = 0
-      if f.read(3).bytes == [239, 187, 191] # "\xEF\xBB\xBF"
-        f.close
-        f = File.open(path, 'rb:BOM|UTF-8')
-        charset = 'UTF-8'
-      else
-        f.seek(0) # rewind
-      end
-      error = nil
-      for line in f
-        lineno += 1
-        if line.strip.empty? or line.start_with?('#')
-          next
-        end
-        if not line.include?(':')
-          error = 'line ' + lineno.to_s + ': syntax error'
-          break
-        end
-        x = line.split(':', 2)
-        name = x[0].strip()
-        value = x[1].strip()
-        if name == 'charset'
-          charset = value.force_encoding('ascii')
-        elsif name == 'standard'
-          standard = value.to_f
-        elsif name == 'name'
-          plugin_name = value.force_encoding(charset).encode("UTF-8", :invalid => :replace)
-        elsif name == 'startup'
-          startup_list = value.force_encoding(charset).encode("UTF-8", :invalid => :replace).split(',')
-          if not File.exists?(File.join(src_dir, startup_list[0]))
-            error = 'line ' + lineno.to_s + ': invalid program name'
-            break
-          end
-          startup = startup_list
-        elsif name == 'menuitem'
-          menuitem_list = value.force_encoding(charset).encode("UTF-8", :invalid => :replace).split(',')
-          if menuitem_list.length < 2
-            error = 'line ' + lineno.to_s + ': syntax error'
-            break
-          end
-          menuitem_list[1] = File.join(plugin_dir, menuitem_list[1])
-          if not File.exists?(File.join(src_dir, menuitem_list[1]))
-            error = 'line ' + lineno.to_s + ': invalid program name'
-            break
-          end
-          menu_items << [menuitem_list[0], menuitem_list[1, menuitem_list.length - 1]]
-        elsif name == 'directory'
-          plugin_dir = value.force_encoding(charset).encode("UTF-8", :invalid => :replace)
-        else
-          error = 'line ' + lineno.to_s + ': syntax error'
-          break
-        end
-      end
-      if error == nil
-        if plugin_name == nil
-          error = "the 'name' header field is required"
-        elsif not startup and menu_items.empty?
-          error = "either 'startup' or 'menuitem' header field is required"
-        elsif standard < PLUGIN_STANDARD[0] or \
-          standard > PLUGIN_STANDARD[1]
-          error = "standard version mismatch"
-        end
-      end
-    rescue SystemCallError
-      return nil
-    end
-    if error
-      STDERR.write('Error: ' + error + '\n' + path + ' (skipped)\n')
-      return nil
-    end
-    menu_items << ['Uninstall', []]
-    return plugin_name, plugin_dir, startup, menu_items
   end
 end

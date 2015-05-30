@@ -10,7 +10,7 @@ module NinixTest
       if config == nil
         raise SystemExit('Home directory not found.\n')
       end
-      ghosts, balloons, plugins, nekoninni, katochan, kinoko = config
+      ghosts, balloons, nekoninni, katochan, kinoko = config
       ghosts = Home.search_ghosts(target=nil, check_shiori=false) # over write
       # ghosts
       for key in ghosts.keys
@@ -84,18 +84,6 @@ module NinixTest
             end
           end
           print("\n")
-        end
-      end
-      # plugins
-      for plugin_name, plugin_dir, startup, menu_items in plugins
-        print('PLUGIN ', '=' * 50, "\n")
-        print('name = ', plugin_name, "\n")
-        if startup
-          print('startup = ', ['["', startup.join('", "'), '"]'].join(''), "\n")
-        end
-        for label, argv in menu_items
-          print("menuitem ", "'", label.to_s, "'", " = ", "\n")
-          print(['["', argv.join('", "'), '"]'].join(''), "\n")
         end
       end
       # nekoninni
