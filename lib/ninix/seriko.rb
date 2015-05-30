@@ -91,8 +91,7 @@ module Seriko
     end
 
     def update(window)
-      ##current_tick = GLib.get_monotonic_time() # [microsec]
-      ## FIXME: GLib.get_monotonic_time
+      ## FIXME: use GLib.get_monotonic_time
       current_tick = (Time.now.to_f * 1000000).to_i # [microsec]
       quality = @parent.handle_request('GET', 'get_preference', 'animation_quality')
       @fps = DEFAULT_FPS * quality
@@ -334,7 +333,6 @@ module Seriko
         ##logging.debug(
         ##    'actor={0:d}, id={1}, x={2:d}, y={3:d}'.format(
         ##        actor.get_id(), surface_id, x, y))
-        #yield surface_id, x, y, method
         result << [surface_id, x, y, method]
       end
       return result
@@ -694,11 +692,7 @@ module Seriko
             match = re_seriko2_pattern.match(pattern)
           end
           if not match
-#            raise ValueError('unsupported pattern: {0}'.format(pattern))
-#            raise ValueError, 'unsupported pattern: ' + pattern + "\n"
-#            raise 'unsupported pattern: ' + pattern + "\n"
-            print('unsupported pattern: ' + pattern + "\n")
-            next ## FIXME
+            raise ('unsupported pattern: ' + pattern)
           end
           if version == 1
             surface = match[1].to_i.to_s
@@ -728,21 +722,13 @@ module Seriko
               group = match[4]
             end
             if group == nil
-#              raise ValueError('syntax error: {0}'.format(pattern))
-#              raise ValueError, 'syntax error: ' + pattern + "\n"
-#              raise 'syntax error: ' + pattern + "\n"
-              print('syntax error: ' + pattern + "\n")
-              next ## FIXME
+              raise ('syntax error: ' + pattern)
             end
             args = [group.to_i]
           elsif ['alternativestart', 'alternativestop'].include?(method)
             args = match[6]
             if args == nil
-#              raise ValueError('syntax error: {0}'.format(pattern))
-#              raise ValueError, 'syntax error: ' + pattern + "\n"
-#              raise 'syntax error: ' + pattern + "\n"
-              print('syntax error: ' + pattern + "\n")
-              next ## FIXME
+              raise ('syntax error: ' + pattern)
             end
             t = []
             for x in args[1, args.length - 2].split('.')
@@ -774,8 +760,8 @@ module Seriko
           end
           actor.add_pattern(surface, interval, method, args)
         end
-      rescue # except ValueError as error:
-        Logging::Logging.error('seriko.rb: ' + error.to_s)
+      rescue => e
+        Logging::Logging.error('seriko.rb: ' + e.message)
         next
       end
       if actor.get_patterns().empty?
@@ -861,11 +847,7 @@ module Seriko
             match = re_mayuna2_pattern.match(pattern)
           end
           if not match
-#            raise ValueError('unsupported pattern: {0}'.format(pattern))
-#            raise ValueError, 'unsupported pattern: ' + pattern + "\n"
-#            raise 'unsupported pattern: ' + pattern + "\n"
-            print('unsupported pattern: ' + pattern + "\n")
-            next ## FIXME
+            raise ('unsupported pattern: ' + pattern)
           end
           if version == 1
             surface = match[1].to_i.to_s
@@ -898,8 +880,8 @@ module Seriko
           end
           actor.add_pattern(surface, interval, method, args)
         end
-      rescue # except ValueError as error:
-        Logging::Logging.error('seriko.rb: ' + error.to_s)
+      rescue => e
+        Logging::Logging.error('seriko.rb: ' + e.message)
         next
       end
       if actor.get_patterns().empty?

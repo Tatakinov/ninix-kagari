@@ -316,13 +316,13 @@ module Kinoko
         @image_surface = Pix.create_surface_from_file(path)
         w = [8, (@image_surface.width * @__scale / 100).to_i].max
         h = [8, (@image_surface.height * @__scale / 100).to_i].max
-      rescue #except: ## FIXME
+      rescue ## FIXME
         @parent.handle_request('NOTIFY', 'close')
         return
       end
       @path = path
       @w, @h = w, h
-      @darea = @window.darea # @window.get_child()
+      @darea = @window.darea
       @darea.set_events(Gdk::Event::EXPOSURE_MASK|
                         Gdk::Event::BUTTON_PRESS_MASK|
                         Gdk::Event::BUTTON_RELEASE_MASK|
@@ -440,14 +440,13 @@ module Kinoko
       for surface_id, x, y, method in @seriko.iter_overlays()
         begin
           overlay_surface = get_image_surface(surface_id)
-        rescue #except:
+        rescue
           next
         end
         # overlay surface
         cr = Cairo::Context.new(new_surface)
         cr.set_source(overlay_surface, x, y)
         cr.mask(overlay_surface, x, y)
-        #del cr
       end
       #@darea.queue_draw_area(0, 0, w, h)
       @image_surface = new_surface

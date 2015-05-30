@@ -529,7 +529,7 @@ module Surface
           error = 'unknown method for ' + key + ': ' + method
           break
         end
-        Logging::Logging.debug(key + ': ' + meyhod + ' ' + filename + ', x=' + x.to_i.to_s + ', y=' + y.to_i.to_s)
+        Logging::Logging.debug(key + ': ' + method + ' ' + filename + ', x=' + x.to_i.to_s + ', y=' + y.to_i.to_s)
       end
       if error != nil
         Logging::Logging.error(error)

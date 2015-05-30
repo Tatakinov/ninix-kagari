@@ -346,7 +346,7 @@ module Update
       for line in @buffer.split("\n")
         begin
           filename, checksum, newline = line.split("\001", 4)
-        rescue #except ValueError:
+        rescue
           enqueue_event('OnUpdateFailure', 'broken updates2.dau',
                         'updates2.dau', '',
                         'ghost') # XXX
@@ -362,7 +362,7 @@ module Update
           f = open(path, 'rb')
           data = f.read()
           f.close()
-        rescue #except IOError: # does not exist or broken
+        rescue IOError # does not exist or broken
           data = nil
         end
         if data != nil
@@ -398,7 +398,7 @@ module Update
           @newdirs << subroot
           begin
             FileUtils.mkdir_p(subdir)
-          rescue #except OSError:
+          rescue SystemCallError
             enqueue_event(
                           'OnUpdateFailure',
                           ["can't mkdir ", subdir].join(''),
@@ -422,7 +422,7 @@ module Update
           f = open(path, 'wb')
           begin
             f.write(data)
-          rescue #except IOError:
+          rescue IOError, SystemCallError
             enqueue_event(
                           'OnUpdateFailure',
                           ["can't write ", File.basename(path)].join(''),
@@ -432,7 +432,7 @@ module Update
             stop(:revert => true)
             return
           end
-        rescue #except IOError:
+        rescue IOError
           enqueue_event(
                         'OnUpdateFailure',
                         ["can't open ", File.basename(path)].join(''),
@@ -466,8 +466,8 @@ module Update
             begin
               File.unlink(path)
               Logging::Logging.info('deleted ' + path)
-            rescue #except OSError as e:
-              ##logging.error(e)
+            rescue SystemCallError => e
+              Logging::Logging.error(e.message)
             end
           end
         end
@@ -500,7 +500,7 @@ module Update
           filename = line
           filelist << Home.get_normalized_path(filename)
         end
-      rescue #except IOError:
+      rescue IOError
         return nil
       end
       return filelist

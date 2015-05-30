@@ -314,7 +314,7 @@ module Nekodorif
         key_press(w, e)
       end
       @window.add_accel_group(@accelgroup)
-      @darea = @window.darea # @window.get_child()
+      @darea = @window.darea
       @darea.set_events(Gdk::Event::EXPOSURE_MASK|
                         Gdk::Event::BUTTON_PRESS_MASK|
                         Gdk::Event::BUTTON_RELEASE_MASK|
@@ -428,7 +428,7 @@ module Nekodorif
         new_surface = Pix.create_surface_from_file(path)
         w = [8, (new_surface.width * @__scale / 100).to_i].max
         h = [8, (new_surface.height * @__scale / 100).to_i].max
-      rescue # except:
+      rescue
         @parent.handle_request('NOTIFY', 'finalize')
         return
       end
@@ -679,7 +679,7 @@ module Nekodorif
         new_surface = Pix.create_surface_from_file(path)
         w = [8, (new_surface.width * @__scale / 100).to_i].max
         h = [8, (new_surface.height * @__scale / 100).to_i].max
-      rescue # except:
+      rescue
         @parent.handle_request('NOTIFY', 'finalize')
         return
       end
@@ -698,7 +698,7 @@ module Nekodorif
         if not category.empty?
           if not CATEGORY_LIST.include?(category[0])
             Logging::Logging.warning('WARNING: unknown major category - ' + category[0])
-            ##self.data['category'] = self.CATEGORY_LIST[-1]
+            ##@data['category'] = CATEGORY_LIST[-1]
           end
         else
           @data['category'] = CATEGORY_LIST[-1]
@@ -762,7 +762,7 @@ module Nekodorif
       @window.signal_connect('delete_event') do |w, e|
         delete(w, e)
       end
-      @darea = @window.darea #@window.get_child()
+      @darea = @window.darea
       @darea.set_events(Gdk::Event::EXPOSURE_MASK)
       @darea.signal_connect('draw') do |w, cr|
         redraw(w, cr)

@@ -228,8 +228,8 @@ module SSTP
         while true
           begin
             nodes.concat(parser.parse(script))
-          rescue #except ninix.script.ParserError as e:
-            done, script = e ## FIXME
+          rescue Script::ParserError => e
+            done, script = e.get_item
             nodes.concat(done)
           else
             break

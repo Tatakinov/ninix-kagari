@@ -233,7 +233,7 @@ module Menu
           else
             @sidebar_width = 0
           end
-        rescue #except:
+        rescue
           # pass
         end
       end
@@ -259,7 +259,7 @@ module Menu
           else
             @sidebar_width = 0
           end
-        rescue # except:
+        rescue
           @pass
         end
       end
@@ -289,7 +289,7 @@ module Menu
         elsif side.start_with?('char')
           begin
             index = side[4, side.length].to_i
-          rescue #except:
+          rescue
             next
           end
         else
@@ -843,10 +843,10 @@ module Menu
             @parent.handle_request('NOTIFY', 'select_plugin', value)
           end
           item.signal_connect('draw') do |i, *a|
-              set_stylecontext(i, *a)
+            set_stylecontext(i, *a)
           end
-          ##if working:
-          ##    item.set_sensitive(false)
+          ##if working
+          ##  item.set_sensitive(false)
         else
           submenu = Gtk::Menu.new()
           submenu.set_name('popup menu')
@@ -858,11 +858,11 @@ module Menu
               @parent.handle_request('NOTIFY', 'select_plugin', value)
             end
             item.signal_connect('draw') do |i, *a|
-                set_stylecontext(i, *a)
+              set_stylecontext(i, *a)
             end
             item.show()
-            ##if working:
-            ##    item.set_sensitive(false)
+            ##if working
+            ##  item.set_sensitive(false)
             submenu << item
           end
           submenu.signal_connect('realize') do |i, *a|
@@ -890,10 +890,10 @@ module Menu
           @parent.handle_request('NOTIFY', 'select_nekodorif', nekodorif_list[i]['dir'])
         end
         item.signal_connect('draw') do |i, *a|
-            set_stylecontext(i, *a)
+          set_stylecontext(i, *a)
         end
-        ##if working:
-        ##    item.set_sensitive(false)
+        ##if working
+        ##  item.set_sensitive(false)
       end
       menuitem = @ui_manager.get_widget(['/popup/', 'Nekodorif'].join(''))
       menuitem.set_submenu(nekodorif_menu)
@@ -915,10 +915,10 @@ module Menu
           @parent.handle_request('NOTIFY', 'select_kinoko', k)
         end
         item.signal_connect('draw') do |i, *a|
-            set_stylecontext(i, *a)
+          set_stylecontext(i, *a)
         end
-        ##if working:
-        ##    item.set_sensitive(false)
+        ##if working
+        ##  item.set_sensitive(false)
       end
       menuitem = @ui_manager.get_widget(['/popup/', 'Kinoko'].join(''))
       menuitem.set_submenu(kinoko_menu)

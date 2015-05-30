@@ -146,8 +146,8 @@ module Pix
     else
       buf = get_png_IHDR(path)
     end
-#    assert buf[0:8] == b'\x89PNG\r\n\x1a\n' # png format
-#    assert buf[12:16] == b'IHDR' # name of the first chunk in a PNG datastream
+    #assert buf[0:8] == b'\x89PNG\r\n\x1a\n' # png format
+    #assert buf[12:16] == b'IHDR' # name of the first chunk in a PNG datastream
     w = buf[16, 4]
     h = buf[20, 4]
     width = (w[0].ord << 24) + (w[1].ord << 16) + (w[2].ord << 8) + w[3].ord

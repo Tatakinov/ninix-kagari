@@ -85,7 +85,7 @@ module Install
       FileUtils.remove_entry_secure(tmpdir)
       begin
         FileUtils.mkdir_p(tmpdir)
-      rescue # except:
+      rescue
         Install.fatal('cannot make temporary directory')
       end
       url = nil
@@ -117,7 +117,7 @@ module Install
           of.close()
         end
         zf.close()
-      rescue # except:
+      rescue
         FileUtils.remove_entry_secure(tmpdir)
         Install.fatal('cannot extract files from the archive')
       end
@@ -185,8 +185,7 @@ module Install
       errno = 0
       begin
         tmpdir = extract_files(filename)
-#        print("TMP: ", tmpdir, "\n")
-      rescue #except:
+      rescue
         errno = 1
       end
       if errno != 0
@@ -194,7 +193,7 @@ module Install
       end
       begin
         filetype, errno = get_file_type(tmpdir)
-      rescue #except:
+      rescue
         errno = 4
         filetype = nil
       end
@@ -220,7 +219,7 @@ module Install
         else
           # should not reach here
         end
-      rescue #except:
+      rescue
         target_dirs = nil
         names = nil
         errno = 5
@@ -231,16 +230,14 @@ module Install
     end
 
     def download(url, basedir)
-      Logging::Logging.debug('downloading ' + url)
+      #Logging::Logging.debug('downloading ' + url)
       begin
         ifile = open(url)
-      rescue # except IOError:
+      rescue IOError
         return nil
       end
-      #headers = ifile.info()
-      #if 'content-length' in headers:
-      #    logging.debug(
-      #        '(size = {0} bytes)'.format(headers.get('content-length')))
+      #Logging::Logging.debug(
+      #  '(size = ' + ifile.length.to_s + ' bytes)')
       arcdir = Home.get_archive_dir()
       if not Dir.exists?(arcdir)
         FileUtils.mkdir_p(arcdir)
@@ -256,7 +253,7 @@ module Install
           end
           ofile.write(data)
         end
-      rescue #except IOError:
+      rescue IOError, SystemCallError
         return nil
       end
       ofile.close()
@@ -265,7 +262,7 @@ module Install
       check_archive(filename) ## FIXME
       begin
         zf = Zip::File.new(filename)
-      rescue #except:
+      rescue
         return nil
       ensure
         zf.close()
@@ -506,8 +503,7 @@ module Install
           if balloon_dir
             f.write(["balloon_directory, ", balloon_dir, "\n"].join(''))
           end
-        rescue # except IOError as e:
-          #code, message = e.args
+        rescue IOError, SystemCallError => e
           Logging::Logging.error('cannot write ' + path)
         ensure
           f.close()
@@ -526,7 +522,7 @@ module Install
         candidates = []
         begin
           dirlist = Dir.entries(File.join(homedir, 'ghost'))
-        rescue # except OSError:
+        rescue SystemCallError
           dirlist = []
         end
         for dirname in dirlist
@@ -618,7 +614,7 @@ module Install
     def uninstall_plugin(homedir, name)
       begin
         dirlist = Dir.entries(File.join(homedir, 'plugin'))
-      rescue # except OSError:
+      rescue SystemCallError
         return
       end
       for subdir in dirlist
@@ -664,7 +660,7 @@ module Install
     def uninstall_kinoko(homedir, name)
       begin
         dirlist = Dir.entries(File.join(homedir, 'kinoko'))
-      rescue # except OSError:
+      rescue SystemCallError
         return
       end
       for subdir in dirlist

@@ -100,7 +100,7 @@ module Prefs
           value = prefs[1]
           @dic[key] = value
         end
-      rescue #except IOError:
+      rescue IOError
         return
       end
     end
@@ -108,7 +108,7 @@ module Prefs
     def save
       begin
         Dir.mkdir(File.dirname(@filename), 0755)
-      rescue #except OSError:
+      rescue SystemCallError
         #pass
       end
       f = open(@filename, 'w')
@@ -344,7 +344,7 @@ module Prefs
       scrolled.show()
       treeview = Gtk::TreeView.new(nil)
       column = Gtk::TreeViewColumn.new(_('Balloon Name'),
-                                       Gtk::CellRendererText.new())#, text=0)
+                                       Gtk::CellRendererText.new())
       treeview.append_column(column)
       treeview.selection.set_mode(Gtk::SelectionMode::SINGLE)
       @balloon_treeview = treeview

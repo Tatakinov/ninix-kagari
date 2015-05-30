@@ -88,7 +88,6 @@ module Script
     end
 
     def perror(msg, position: 'column', skip: nil)
-      print("PERROR: ", msg, "\n")
       if not ['column', 'eol'].include?(position)
         raise ArgumentError('unknown position scheme: ', position.to_s)
       end

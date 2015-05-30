@@ -92,7 +92,7 @@ module NGM
         open(uri) {|f|
           import_from_fileobj(f)
         }
-      rescue #except:
+      rescue
         return ## FIXME
       end
       save_MasterList()
@@ -106,7 +106,7 @@ module NGM
           #pass
         end
         f.close()
-      rescue #except IOError:
+      rescue IOError
         return
       end
     end
@@ -276,7 +276,7 @@ module NGM
     TYPE = ['Sakura', 'Kero']
 
     def image_filename(set_id, side)
-      p = TYPE[side] + "_" + set_id.to_s + ".png" # FIXME: {1:d}
+      p = TYPE[side] + "_" + set_id.to_s + ".png"
       d = File.join(@datadir, p)
       if File.exists?(d)
         return d
@@ -300,7 +300,7 @@ module NGM
               file.write(data.read)
             end
           end
-        rescue #except:
+        rescue
           return ## FIXME
         end
       end
@@ -318,7 +318,7 @@ module NGM
         return true # XXX
       end
       @dialog.set_modal(true)
-#      @dialog.set_position(Gtk::Window::Position::CENTER)
+      @dialog.set_window_position(Gtk::Window::Position::CENTER)
       label = Gtk::Label.new(label=_('Search for'))
       content_area = @dialog.content_area
       content_area.add(label)
@@ -495,8 +495,8 @@ module NGM
       @window.signal_connect('delete_event') do |a|
         close()
       end
-#      @window.set_position(Gtk::Window::Position::CENTER)
-#      @window.set_gravity(Gdk.Gravity.CENTER)
+      @window.set_window_position(Gtk::Window::Position::CENTER)
+      @window.gravity = Gdk::Window::Gravity::CENTER
       actions = Gtk::ActionGroup.new('Actions')
       actions.add_actions(@entries)
       ui = Gtk::UIManager.new()
@@ -504,8 +504,8 @@ module NGM
       @window.add_accel_group(ui.accel_group)
       begin
         mergeid = ui.add_ui(@ui_info)
-      rescue #except GObject.GError as msg:
-        Logging::Logging.error('building menus failed: ' + msg)
+      rescue => e #except GObject.GError as msg:
+        Logging::Logging.error('building menus failed: ' + e.message)
       end
       vbox = Gtk::Box.new(orientation=Gtk::Orientation::VERTICAL)
       @window.add(vbox)
@@ -636,7 +636,7 @@ module NGM
         if filename != nil and not filename.empty?
           begin
             surface = Pix.create_surface_from_file(filename)
-          rescue #except:
+          rescue
             surface = nil
           end
             w = surface.width
@@ -919,7 +919,7 @@ module NGM
       begin
         filetype, target_dir = @installer.install(get('ArchiveUrl'),
                                                   Home.get_ninix_home())
-      rescue #except:
+      rescue
         target_dir = nil
       end
       assert filetype == 'ghost'

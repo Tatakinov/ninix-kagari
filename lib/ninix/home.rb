@@ -103,7 +103,7 @@ module Home
           end
           dirlist << file
         end
-      rescue #except OSError:
+      rescue SystemCallError
         dirlist = []
       end
     end
@@ -164,7 +164,7 @@ module Home
           end
           dirlist << file
         end
-      rescue # except OSError:
+      rescue SystemCallError
         dirlist = []
       end
     end
@@ -204,7 +204,7 @@ module Home
         end
         dirlist << file
       end
-    rescue #except OSError:
+    rescue SystemCallError
       dirlist = []
     end
     for subdir in dirlist
@@ -229,7 +229,7 @@ module Home
         end
         dirlist << file
       end
-    rescue # except OSError:
+    rescue SystemCallError
       dirlist = []
     end
     for subdir in dirlist
@@ -254,7 +254,7 @@ module Home
         end
         dirlist << file
       end
-    rescue #except OSError:
+    rescue SystemCallError
       dirlist = []
     end
     for subdir in dirlist
@@ -279,7 +279,7 @@ module Home
         end
         dirlist << file
       end
-    rescue # except OSError:
+    rescue SystemCallError
       dirlist = []
     end
     for subdir in dirlist
@@ -527,7 +527,7 @@ module Home
           end
           dirlist << file
         end
-      rescue #except OSError:
+      rescue SystemCallError
         dirlist = []
       end
       for subdir in dirlist
@@ -553,7 +553,7 @@ module Home
         end
         filelist << file
       end
-    rescue #except OSError:
+    rescue SystemCallError
       filelist = []
     end
     filename_alias = {}
@@ -605,11 +605,10 @@ module Home
       elsif key == '__tooltips__'
         tooltips = config
       elsif key.start_with?('surface')
-        begin
+        if surface.keys.include?(key)
           img, prev_config = surface[key]
-          prev_config.update(config)
-          config = prev_config
-        rescue #except KeyError:
+          config = prev_config.merge(config)
+        else
           img = nil
         end
         surface[key] = [img, config]
@@ -669,14 +668,14 @@ module Home
         if temp.start_with?('charset')
           begin
             charset = temp.split(',', 2)[1].strip().force_encoding('ascii')
-          rescue #except:
+          rescue
             #pass
           end
           next
         end
         if key == nil
           if temp.end_with?('{')
-            key = temp[0, temp.length - 2].force_encoding(charset).encode("UTF-8", :invalid => :replace)
+            key = temp[0, temp.length - 1].force_encoding(charset).encode("UTF-8", :invalid => :replace)
             opened = true
           else
             key = temp.force_encoding(charset).encode("UTF-8", :invalid => :replace)
@@ -701,14 +700,14 @@ module Home
           elsif key.end_with?('.tooltips')
             begin
               key = key[0, -10]
-            rescue #except:
+            rescue
               #pass
             end
             value = {}
             for line in buf
-              line = line.split(',', 2)
-              region << s[0].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace)
-              text << s[1].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace)
+              s = line.split(',', 2)
+              region = s[0].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace)
+              text = s[1].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace)
               value[region] = text
               tooltips[key] = value
             end
@@ -721,13 +720,13 @@ module Home
               if key.start_with?('surface')
                 begin
                   key = [key[0, 7], key[7, key.length - 1].to_i.to_s].join('')
-                rescue #except ValueError:
+                rescue
                   #pass
                 end
               else
                 begin
                   key = ['surface', key.to_i.to_s].join('')
-                rescue #except ValueError:
+                rescue
                   #pass
                 end
               end
@@ -743,7 +742,7 @@ module Home
           buf << temp
         end
       end
-    rescue #except IOError:
+    rescue SystemCallError
       return config_list
     end
     if not alias_buffer.empty?
@@ -768,7 +767,7 @@ module Home
         method, filename, x, y = spec
         x = x.to_i
         y = y.to_i
-      rescue #except ValueError:
+      rescue
         Loggin::Logging.error(
           'invalid element spec for ' + key + ': ' + config[key])
         next
@@ -790,7 +789,7 @@ module Home
         end
         filelist << file
       end
-    rescue #except OSError:
+    rescue SystemCallError
       filelist = []
     end
     for filename in filelist
@@ -833,6 +832,7 @@ module Home
 
   def self.read_plugin_txt(src_dir)
     path = File.join(src_dir, 'plugin.txt')
+    plugin_dir = src_dir # XXX
     begin
       error = nil
       f = open(path, 'rb')
@@ -903,12 +903,11 @@ module Home
           error = "standard version mismatch"
         end
       end
-    rescue #except IOError:
+    rescue SystemCallError
       return nil
     end
     if error
-      #sys.stderr.write('Error: ' + error + '\n' + path + ' (skipped)\n')
-      print("Error: " + error + "\n" + path + " (skipped)\n")
+      STDERR.write('Error: ' + error + '\n' + path + ' (skipped)\n')
       return nil
     end
     menu_items << ['Uninstall', []]

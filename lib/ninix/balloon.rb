@@ -231,7 +231,7 @@ module Balloon
       default_id = @parent.handle_request('GET', 'get_balloon_default_id')
       begin
         default_id = default_id.to_i
-      rescue # except:
+      rescue
         default_id = 0
       end
       for side in 0..@window.length-1
@@ -510,7 +510,7 @@ module Balloon
       @y_root = nil
       @x_fractions = 0
       @y_fractions = 0
-      @darea = @window.darea # get_child()
+      @darea = @window.darea
       @darea.set_events(Gdk::Event::EXPOSURE_MASK|
                         Gdk::Event::BUTTON_PRESS_MASK|
                         Gdk::Event::BUTTON_RELEASE_MASK|
@@ -578,12 +578,10 @@ module Balloon
       end
     end
 
-    #@property
     def direction
       return @__direction
     end
 
-    #@direction.setter
     def direction=(value)
       if @__direction != value
         @__direction = value # 0: left, 1: right
@@ -605,7 +603,7 @@ module Balloon
         path, config = @balloon[balloon_id]
         use_pna = (@parent.handle_request('GET', 'get_preference', 'use_pna') != 0)
         surface = Pix.create_surface_from_file(path, :use_pna => use_pna)
-      rescue # except:
+      rescue
         return nil
       end
       return surface
@@ -765,7 +763,6 @@ module Balloon
     def get_balloon_size(scaling: true)
       w = @width
       h = @height
-      #scale = @scale
       if scaling
         w = (w * scale / 100.0).to_i
         h = (h * scale / 100.0).to_i
@@ -791,7 +788,6 @@ module Balloon
       x, y = @position
       @width = @balloon_surface.width
       @height = @balloon_surface.height
-      #scale = @scale
       w = (@width * scale / 100.0).to_i
       h = (@height * scale / 100.0).to_i
       @window.update_size(w, h)
@@ -1062,7 +1058,7 @@ module Balloon
         else
           begin
             x = x.to_i
-          rescue # except:
+          rescue
             next
           end
         end
@@ -1072,7 +1068,7 @@ module Balloon
         else
           begin
             y = y.to_i
-          rescue # except:
+          rescue
             next
           end
         end
@@ -1255,7 +1251,6 @@ module Balloon
       else
         x, y, state = event.x, event.y, event.state
       end
-      #scale = @scale
       px, py = @window.winpos_to_surfacepos(x, y, scale)
       if @link_buffer
         if check_link_region(px, py)
@@ -1508,7 +1503,7 @@ module Balloon
         if @link_buffer[i][4] == link_id
           sl = @link_buffer[i][0]
           sn = @link_buffer[i][1]
-          @link_buffer.pop(i) ## FIXME
+          @link_buffer.slice!(i)
           @link_buffer.insert(i, [sl, sn, el, en, link_id, raw_text, text])
           break
         end
@@ -1532,7 +1527,7 @@ module Balloon
     def append_image(path, x, y)
       begin
         image_surface = Pix.create_surface_from_file(path)
-      rescue # except:
+      rescue
         return
       end
       show()
@@ -1644,7 +1639,7 @@ module Balloon
         # load pixbuf
         begin
           surface = Pix.create_surface_from_file(path)
-        rescue #   except:
+        rescue
           surface = nil
         end
       end
@@ -1753,12 +1748,10 @@ module Balloon
       @window.show()
     end
 
-    #@abc.abstractmethod
     def enter
       #pass
     end
 
-    #@abc.abstractmethod
     def cancel
       #pass
     end
@@ -1855,7 +1848,7 @@ module Balloon
     def set_limittime(limittime)
       begin
         limittime = limittime.to_i
-      rescue # except ValueError:
+      rescue
         limittime = -1
       end
       @limittime = limittime
@@ -1865,7 +1858,7 @@ module Balloon
       if default != nil
         begin
           text = default.to_s
-        rescue # except:
+        rescue
           text = ''
         end
       else
