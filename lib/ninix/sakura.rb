@@ -279,10 +279,10 @@ module Sakura
       path = File.join(get_prefix(), 'HISTORY')
       begin
         open(path, 'w') do |file|
-          file.write("time, ", @ghost_time.to_s, "\n")
-          file.write("vanished_count, ", @vanished_count.to_s, "\n")
+          file.write("time, " + @ghost_time.to_s + "\n")
+          file.write("vanished_count, " + @vanished_count.to_s + "\n")
         end
-      rescue #except IOError as e:
+      rescue IOError => e
         #code, message = e.args
         Logging::Logging.error('cannot write ' + path)
       end
@@ -293,13 +293,13 @@ module Sakura
       begin
         open(path, 'w') do |file|
           if @balloon_directory != nil
-            file.write("balloon_directory, ", @balloon_directory, "\n")
+            file.write("balloon_directory, " + @balloon_directory + "\n")
           end
           if @shell_directory != nil
-            file.write("shell_directory, ", @shell_directory, "\n")
+            file.write("shell_directory, " + @shell_directory + "\n")
           end
         end
-      rescue #except IOError as e:
+      rescue IOError => e
         #code, message = e.args
         Logging::Logging.error('cannot write ' + path)
       end
@@ -316,23 +316,23 @@ module Sakura
             if not line.include?(',')
               next
             end
-            key, value = line.split(',', 1)
+            key, value = line.split(',', 2)
             key = key.strip()
             if key == 'time'
               begin
                 ghost_time = value.strip().to_i
-              rescue #except:
+              rescue
                 #pass
               end
             elsif key == 'vanished_count'
               begin
                 ghost_vanished_count = value.strip().to_i
-              rescue #except:
+              rescue
                 #pass
               end
             end
           end
-        rescue #except IOError as e:
+        rescue IOError => e
           #code, message = e.args
           Logging::Logging.error('cannot read ' + path)
           @ghost_time = ghost_time
@@ -355,7 +355,7 @@ module Sakura
             if not line.include?(',')
               next
             end
-            key, value = line.split(',', 1)
+            key, value = line.split(',', 2)
             if key.strip() == 'balloon_directory'
               balloon_directory = value.strip()
             end
@@ -363,7 +363,7 @@ module Sakura
               shell_directory = value.strip()
             end
           end
-        rescue #except IOError as e:
+        rescue IOError => e
           #code, message = e.args
           Logging::Logging.error('cannot read ' + path)
         end
@@ -1212,12 +1212,11 @@ module Sakura
         script, communication = [default, nil]
       end
       if not script.empty? or (script.empty? and event != 'OnSecondChange')
-        t = Time.new.localtime.to_a
-        m = MONTH_NAMES[t[4] - 1]
-        ## FIXME
-        #Logging::Logging.debug(
-        #  '\n[{0:02d}/{1}/{2:d}:{3:02d}:{4:02d}:{5:02d} {6:+05d}]'.format(
-        #  t[2], m, t[0], t[3], t[4], t[5], (- time.timezone / 36).to_i))
+        t = Time.new.localtime
+        m = MONTH_NAMES[t.month - 1]
+        Logging::Logging.debug(
+          sprintf("\n[%02d/%s/%d:%02d:%02d:%02d %+05d]",
+                  t.day, m, t.year, t.hour, t.min, t.sec, t.utc_offset / 36))
         Logging::Logging.debug('Event: ' + event)
         for n in 0..arglist.length-1
           value = arglist[n]
@@ -1380,7 +1379,7 @@ module Sakura
         color_r = [0, [255, color_r.to_i].min].max
         color_g = [0, [255, color_g.to_i].min].max
         color_b = [0, [255, color_b.to_i].min].max
-      rescue #except:
+      rescue
         #pass
       else
         background = [color_r, color_g, color_b]
@@ -1392,7 +1391,7 @@ module Sakura
         color_r = [0, [255, color_r.to_i].min].max
         color_g = [0, [255, color_g.to_i].min].max
         color_b = [0, [255, color_b.to_i].min].max
-      rescue #except:
+      rescue
         #pass
       else
         foreground = [color_r, color_g, color_b]
@@ -1945,16 +1944,13 @@ module Sakura
       @script_position = 0
       while true
         begin
-          #@processed_script.extend(@script_parser.parse(script))
-          @processed_script =  @script_parser.parse(script)
+          @processed_script.concat(@script_parser.parse(script))
           break
-        rescue #except ninix.script.ParserError as e:
-          #logging.error('-' * 50)
-          #logging.error('{0}'.format(e)) # 'UTF-8'
-          #done, script = e
-          #@processed_script.extend(done)
-        #else
-        #  break
+        rescue Script::ParserError => e
+          Logging::Logging.error('-' * 50)
+          Logging::Logging.error(e.format) # 'UTF-8'
+          done, script = e.get_item
+          @processed_script.concat(done)
         end
       end
       @script_mode = BROWSE_MODE
@@ -1964,6 +1960,9 @@ module Sakura
       @quick_session = false
       set_synchronized_session(:list => [], :reset => true)
       @balloon.hide_all()
+      if @processed_script.empty?
+        return
+      end
       node = @processed_script[0]
       if node[0] == Script::SCRIPT_TAG and node[1] == '\C'
         @processed_script.shift
@@ -1999,7 +1998,7 @@ module Sakura
     def __yen_p(args)
       begin
         chr_id = args[0].to_i
-      rescue #except:
+      rescue ArgumentError
         return
       end
       if chr_id >= 0
@@ -2089,7 +2088,7 @@ module Sakura
       else
         begin
           balloon_id = (args[0].to_i / 2).to_i
-        rescue #except ValueError:
+        rescue ArgumentError
           balloon_id = 0
         else
           @balloon.set_balloon(@script_side, balloon_id)
@@ -2100,7 +2099,7 @@ module Sakura
     def __yen__b(args)
       begin
         filename, x, y = expand_meta(args[0]).split(',')
-      rescue #except:
+      rescue ArgumentError
         filename, param = expand_meta(args[0]).split(',')
         #assert param == 'inline'
         x, y = 0, 0 ## FIXME
@@ -2132,7 +2131,7 @@ module Sakura
     def __set_weight(value, unit)
       begin
         amount = value.to_i * unit - 0.01
-      rescue #except ValueError:
+      rescue ArgumentError
         amount = 0
       end
       if amount > 0
@@ -2237,7 +2236,7 @@ module Sakura
     def __yen_i(args)
       begin
         actor_id = args[0].to_i
-      rescue #except ValueError:
+      rescue ArgumentError
         #pass
       else
         @surface.invoke(@script_side, actor_id)
@@ -2272,7 +2271,7 @@ module Sakura
     def __yen_and(args)
       begin
         text = CGI.unescape_html("&" + args[0].to_s + ";")
-      rescue #except:
+      rescue ArgumentError
         text = nil
       end
       if text == nil
@@ -2284,7 +2283,7 @@ module Sakura
     def __yen__m(args)
       begin
         num = args[0].to_i(16)
-      rescue #except ValueError:
+      rescue ArgumentError
         num = 0
       end
       if 0x20 <= num and num <= 0x7e
@@ -2569,7 +2568,7 @@ module Sakura
         begin
           x = args[2].to_i
           y = args[3].to_i
-        rescue #except:
+        rescue ArgumentError
           #pass
         else
           @surface.set_balloon_offset(@script_side, [x, y])
@@ -2598,7 +2597,7 @@ module Sakura
           @audio_player.set_state(Gst::State::NULL)
           begin
             track = args[2].to_i
-          rescue #except:
+          rescue ArgumentError
             return
           end
           @audio_player.set_property(
@@ -2920,7 +2919,7 @@ module Sakura
       end
       begin
         @sstp_handle.send([data, '\n'].join(''))
-      rescue #except socket.error:
+      rescue SystemCallError => e
         #pass
       end
     end
@@ -2941,7 +2940,7 @@ module Sakura
       ##logging.debug('close_sstp_handle()')
       begin
         @sstp_handle.close()
-      rescue #except socket.error
+      rescue SystemCallError => e
         #pass
       end
       @sstp_handle = nil

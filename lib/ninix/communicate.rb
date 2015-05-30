@@ -125,13 +125,13 @@ module Communicate
         end
         refs = refs.join('\x01')
         Logging::Logging.debug("NOTIFY OTHER: " \
-                               + on_other_event + ", " \
-                               + name + ", " \
-                               + self_name + ", " \
-                               + flags + ", " \
-                               + event + ", " \
-                               + script + ", " \
-                               + refs)
+                               + on_other_event.to_s + ", " \
+                               + name.to_s + ", " \
+                               + selfname.to_s + ", " \
+                               + flags.to_s + ", " \
+                               + event.to_s + ", " \
+                               + script.to_s + ", " \
+                               + refs.to_s)
         args = [name, selfname, flags, event, script, refs]
       else # XXX: should not reach here
         return

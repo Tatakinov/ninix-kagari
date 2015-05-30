@@ -141,7 +141,7 @@ module SSTPLib
       begin
         sock_domain, remote_port, remote_hostname, remote_ip = @fp.peeraddr
         return remote_hostname
-      rescue #except:
+      rescue
         return 'localhost'
       end
     end
@@ -151,9 +151,8 @@ module SSTPLib
                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       t = Time.now.localtime
       m = month_names[t.month - 1]
-      ## FIXME ##
-      return t'{0:02d}/{1}/{2:d}:{3:02d}:{4:02d}:{5:02d} {6:+05d}'.format(
-               t[2], m, t[0], t[3], t[4], t[5], (-time.timezone / 36).to_i)
+      return sprintf('%02d/%s/%d:%02d:%02d:%02d %+05d',
+                     t.day, m, t.year, t.hour, t.min, t.sec, t.utc_offset / 36)
     end
   end
 end
