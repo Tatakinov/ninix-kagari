@@ -36,18 +36,21 @@ require "ninix/logging"
 
 module Ninix_Main
   
-  def self.handleException(exception_type, value, tb)
-    #logger.error('Uncaught exception',
-    #             exc_info=(exception_type, value, tb))
+  def self.handleException(exception)
+    message = 'Uncaught exception (' + exception.class.to_s + ")\n" + exception.backtrace.join("\n")
+    Logging::Logging.error(message)
     response_id = 1
     dialog = Gtk::MessageDialog.new(
-      nil, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.NONE,
-      _('A ninix-aya error has been detected.'))
-    dialog.set_title(_('Bug Detected'))
-    dialog.set_position(Gtk.WindowPosition.CENTER)
-    dialog.set_gravity(Gdk.Gravity.CENTER)
-    button = dialog.add_button(_('Show Details'), response_id)
-    dialog.add_button("_Close", Gtk.ResponseType.CLOSE)
+      nil, 0, Gtk::MessageType::ERROR, Gtk::MessageDialog::ButtonsType::NONE,
+      #      _('A ninix-aya error has been detected.'))
+      'A ninix-aya error has been detected.')
+    #    dialog.set_title(_('Bug Detected'))
+    dialog.set_title('Bug Detected')
+    dialog.set_window_position(Gtk::Window::Position::CENTER)
+    dialog.gravity = Gdk::Window::Gravity::CENTER
+    #    button = dialog.add_button(_('Show Details'), response_id)
+    button = dialog.add_button('Show Details', response_id)
+    dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
     textview = Gtk::TextView.new
     textview.set_editable(false)
     left, top, scrn_w, scrn_h = Pix.get_workarea()
@@ -57,22 +60,21 @@ module Ninix_Main
     textview.show()
     sw = Gtk::ScrolledWindow.new
     sw.show()
-    sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+    sw.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC)
     sw.add(textview)
     frame = Gtk::Frame.new
-    frame.set_shadow_type(Gtk.ShadowType.IN)
+    frame.set_shadow_type(Gtk::ShadowType::IN)
     frame.add(sw)
     frame.set_border_width(7)
-    content_area = dialog.get_content_area()
+    frame.set_size_request(480, 320) # XXX
+    content_area = dialog.content_area
     content_area.add(frame)
-    stringio = io.StringIO()
-    traceback.print_exception(exception_type, value, tb, nil, stringio)
-    textbuffer = textview.get_buffer()
-    textbuffer.set_text(stringio.getvalue())
+    textbuffer = textview.buffer
+    textbuffer.set_text(message)
     while true
       if dialog.run() == response_id
         frame.show()
-        button.set_sensitive(0)
+        button.set_sensitive(false)
       else # close button
         break
       end
@@ -81,12 +83,10 @@ module Ninix_Main
     raise SystemExit
   end
   
-#  sys.excepthook = handleException
-
   def self.main(option)
     # parse command line arguments
     if option[:logfile]
-      #logger.addHandler(logging.FileHandler(args.logfile))
+      Logging::Logging.add_logger(Logger.new(option[:logfile]))
     end
     # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
     # UDP 7743：伺か（未使用）(IANA Registered Port for SSTP)
@@ -132,9 +132,7 @@ module Ninix_Main
       raise SystemExit('ninix-aya is already running')
     end
     # start
-    Logging::Logging.info('loading...')
     app = Application.new(f, :sstp_port => sstp_port)
-    Logging::Logging.info('done.')
     app.run(abend)
     f.truncate(0)
     begin
@@ -273,16 +271,21 @@ module Ninix_Main
           socket = sstp_server.accept_nonblock
         rescue
           next
-        #rescue # except socket.error as e:
-          #code, message = e.args
-          #logging.error('socket.error: {0} ({1:d})'.format(message, code))
-        #rescue # except ValueError: # may happen when ninix is terminated
-          #return
         end
-        handler = SSTP::SSTPRequestHandler.new(sstp_server, socket)
-        buffer = socket.gets
-        handler.handle(buffer)
-        socket.close
+        begin
+          handler = SSTP::SSTPRequestHandler.new(sstp_server, socket)
+          buffer = socket.gets
+          handler.handle(buffer)
+          socket.close
+        rescue SocketError  => e
+          Logging::Logging.error(
+            'socket.error: ' + e.message)
+        rescue SystemCallError => e
+          Logging::Logging.error(
+            'socket.error: ' + e.message + ' (' + e.errno.to_s + ')')
+        rescue # may happen when ninix is terminated
+          return
+        end
       end
     end
 
@@ -303,10 +306,9 @@ module Ninix_Main
       for port in @sstp_port
         begin
           server = SSTP::SSTPServer.new(port)
-        rescue # except socket.error as e:
-          #code, message = e.args
-          #logging.warning(
-          #  'Port {0:d}: {1} (ignored)'.format(port, message))
+        rescue SystemCallError => e
+          Logging::Logging.warning(
+            'Port ' + port.to_s + ': ' + e.message + ' (ignored)')
           next
         end
         server.set_responsible(self)
@@ -387,6 +389,7 @@ module Ninix_Main
       @loaded = false
       @confirmed = false
       @console = Console.new(self)
+      Logging::Logging.info('loading...')
       # create preference dialog
       @prefs = Prefs::PreferenceDialog.new
       @prefs.set_responsible(self)
@@ -425,6 +428,7 @@ module Ninix_Main
       @nekoninni = Home.search_nekoninni()
       @katochan = Home.search_katochan()
       @kinoko = Home.search_kinoko()
+      Logging::Logging.info('done.')
     end
 
     def edit_preferences(*arglist)
@@ -945,14 +949,12 @@ module Ninix_Main
 
     def run(abend)
       @abend = abend
-#      if os.name == "nt"
-#        # The SIGTERM signal is not generated under Windows NT.
-#        import win32api
-#        win32api.SetConsoleCtrlHandler(self.exit_handler, true)
-#      else
-#        import signal
-#        signal.signal(signal.SIGTERM, self.exit_handler)
-#      end
+      if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+        # The SIGTERM signal is not generated under Windows NT.
+        #win32api.SetConsoleCtrlHandler(exit_handler, true)
+      else
+        Signal.trap(:TERM) {|signo| exit_handler(signo) }
+      end
       @timeout_id = GLib::Timeout.add(100) { do_idle_tasks } # 100[ms]
       Gtk.main()
     end
@@ -1248,10 +1250,10 @@ module Ninix_Main
     def add_balloon(balloon_dir)
       if @balloons.include?(balloon_dir)
         exists = true
-        #logging.warning('INSTALLED BALLOON CHANGED: {0}'.format(balloon_dir))
+        Logging::Logging.warning('INSTALLED BALLOON CHANGED: ' + balloon_dir)
       else
         exists = false
-        #logging.info('NEW BALLOON INSTALLED: {0}'.format(balloon_dir))
+        Logging::Logging.info('NEW BALLOON INSTALLED: ' + balloon_dir)
       end
       balloon_conf = Home.search_balloons(:target => [balloon_dir])
       if not balloon_conf.empty?
@@ -1282,16 +1284,16 @@ module Ninix_Main
             begin
               File.delete(File.join(prefix, filename))
             rescue
-              #logging.error(
-              #  '*** REMOVE FAILED *** : {0}'.format(filename))
+              Logging::Logging.error(
+                '*** REMOVE FAILED *** : ' + filename)
             end
           end
         else # dir
           begin
             FileUtils.remove_entry_secure(File.join(prefix, filename))
           rescue
-            #logging.error(
-            #  '*** REMOVE FAILED *** : {0}'.format(filename))
+            Logging::Logging.error(
+              '*** REMOVE FAILED *** : ' + filename)
           end
         end
       }
@@ -1351,7 +1353,7 @@ module Ninix_Main
               end
             end
           rescue IOError => e
-            #logging.error('cannot read {0}'.format(path))
+            Logging::Logging.error('cannot read ' + path)
           end
         end
         ai_list = []
@@ -1400,6 +1402,7 @@ module Ninix_Main
 
   class Console
     include GetText
+    attr_writer :level
 
     def initialize(app)
       @app = app
@@ -1407,9 +1410,8 @@ module Ninix_Main
       @dialog.signal_connect('delete_event') do |w, e|
         #return true # XXX
       end
-      #@log_handler = logging.handlers.BufferingHandler(0)
-      #@log_handler.shouldFlush = self.shouldFlush
-      #logging.getLogger().addHandler(self.log_handler)
+      @level = Logger::WARN # XXX
+      Logging::Logging.add_logger(self)
       @sw = Gtk::ScrolledWindow.new
       @sw.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::ALWAYS)
       @sw.show()
@@ -1427,9 +1429,9 @@ module Ninix_Main
       @tag_debug = @tb.create_tag(nil, 'foreground' => 'yellow')
       @tag_notset = @tb.create_tag(nil, 'foreground' => 'blue')
       # DnD data types
-      #dnd_targets = [['text/uri-list', 0, 0]]
-      #@tv.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
-      #                  Gdk::DragContext::Action::COPY)
+      dnd_targets = [['text/uri-list', 0, 0]]
+      @tv.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+                        Gdk::DragContext::Action::COPY)
       @tv.drag_dest_set_target_list(nil) # important
       @tv.drag_dest_add_uri_targets()
       @tv.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
@@ -1465,48 +1467,80 @@ module Ninix_Main
       @opened = false
     end
 
-    def shouldFlush(record)
-      it = @tb.get_end_iter()
-      if record.levelno >= 50
-        tag = @tag_critical
-      elsif record.levelno >= 40
-        tag = @tag_error
-      elsif record.levelno >= 30
-        tag = @tag_warning
-      elsif record.levelno >= 20
-        tag = @tag_info
-      elsif record.levelno >= 10
-        tag = @tag_debug
-      else
-        tag = @tag_notset
-      end
-      @tb.insert_with_tags(
-        it,
-        [record.levelname, ':', record.getMessage(), '\n'].join(''),
-        tag)
-      it = @tb.get_end_iter()
+    def message_with_tag(message, tag)
+      it = @tb.end_iter
+      @tb.insert(it, [Logger::SEV_LABEL[@level], ':', message, "\n"].join(""), tag)
+      it = @tb.end_iter
       # scroll_to_iter may not have the desired effect.
       mark = @tb.create_mark("end", it, false)
       @tv.scroll_to_mark(mark, 0.0, false, 0.5, 0.5)
+    end
+
+    def info(message)
+      if @level > Logger::INFO
+        return
+      end
+      tag = @tag_info
+      message_with_tag(message, tag)
+    end
+
+    def debug(message)
+      if @level > Logger::DEBUG
+        return
+      end
+      tag = @tag_debug
+      message_with_tag(message, tag)
+    end
+
+    def fatal(message)
+      if @level > Logger::FATAL
+        return
+      end
+      tag = @tag_critical
+      message_with_tag(message, tag)
+    end
+
+    def error(message)
+      if @level > Logger::ERROR
+        return
+      end
+      tag = @tag_error
+      message_with_tag(message, tag)
+    end
+
+    def warn(message)
+      if @level > Logger::WARN
+        return
+      end
+      tag = @tag_warning
+      message_with_tag(message, tag)
+    end
+
+    def unknown(message)
+      if @level > Logger::UNKNOWN
+        return
+      end
+      tag = @tag_notset
+      message_with_tag(message, tag)
     end
 
     def update
       ghosts, balloons = @app.search_ghosts() # XXX
       if ghosts > 0 and balloons > 0
         @dialog.set_title(_('Console'))
-        #logging.info('Ghosts: {0:d}'.format(ghosts))
-        #logging.info('Balloons: {0:d}'.format(balloons))
+        Logging::Logging.info('Ghosts: ' + ghosts.to_s)
+        Logging::Logging.info('Balloons: ' + balloons.to_s)
       else
         @dialog.set_title(_('Nanntokashitekudasai.'))
         if ghosts > 0
-          #logging.info('Ghosts: {0:d}'.format(ghosts))
+          Logging::Logging.info('Ghosts: ' + ghosts.to_s)
         else
-          #logging.warning('Ghosts: {0:d}'.format(ghosts))
+          Logging::Logging.warning('Ghosts: ' + ghosts.to_s)
         end
         if balloons > 0
-          #logging.info('Balloons: {0:d}'.format(balloons))
+          Logging::Logging.info('Balloons: ' + balloons.to_s)
         else
-          #logging.warning('Balloons: {0:d}'.format(balloons))
+          Logging::Logging.warning('Balloons: ' + balloons.to_s)
         end
       end
     end
@@ -1763,4 +1797,8 @@ opt.on('--debug', 'debug') {|v| option[:debug] = v}
 opt.on('--logfile logfile_name', 'logfile name') {|v| option[:logfile] = v}
 opt.parse!(ARGV)
 
-Ninix_Main.main(option)
+begin
+  Ninix_Main.main(option)
+rescue => e # should never rescue Exception
+  Ninix_Main.handleException(e)
+end
