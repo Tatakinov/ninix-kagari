@@ -167,7 +167,7 @@ module Kinoko
       @skin.load(@data, scale)
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       #assert ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'get_target_window' =>  lambda { return @target.get_target_window }, # XXX

@@ -282,8 +282,7 @@ module Sakura
           file.write("time, " + @ghost_time.to_s + "\n")
           file.write("vanished_count, " + @vanished_count.to_s + "\n")
         end
-      rescue IOError => e
-        #code, message = e.args
+      rescue IOError, SystemCallError => e
         Logging::Logging.error('cannot write ' + path)
       end
     end
@@ -299,8 +298,7 @@ module Sakura
             file.write("shell_directory, " + @shell_directory + "\n")
           end
         end
-      rescue IOError => e
-        #code, message = e.args
+      rescue IOError, SystemCallError => e
         Logging::Logging.error('cannot write ' + path)
       end
     end
@@ -333,7 +331,6 @@ module Sakura
             end
           end
         rescue IOError => e
-          #code, message = e.args
           Logging::Logging.error('cannot read ' + path)
           @ghost_time = ghost_time
           @vanished_count = ghost_vanished_count
@@ -364,7 +361,6 @@ module Sakura
             end
           end
         rescue IOError => e
-          #code, message = e.args
           Logging::Logging.error('cannot read ' + path)
         end
         @balloon_directory = balloon_directory
@@ -521,9 +517,6 @@ module Sakura
     end
 
     def enqueue_event(event, *arglist, proc_obj: nil) ## FIXME
-      #for key in argdict
-      #  assert ['proc'].include?(key) # trap typo, etc.
-      #end
       if RESET_ENQUEUE_EVENT.include?(event)
         reset_script(:reset_all => true)
       end
@@ -2772,7 +2765,7 @@ module Sakura
         '\__t' => "__yen___t", 
         '\v' => "__yen_v",
         '\f' => "__yen_f",
-        '\C' => nil ## lambda *a: None, # dummy
+        '\C' => nil # dummy
         }
 
     def interpret_script()
@@ -2929,7 +2922,7 @@ module Sakura
         return
       end
       _send_sstp_handle(['+', data].join(''))
-      ##logging.debug('write_sstp_handle({0})'.format(repr(data)))
+      ##Logging::Logging.debug('write_sstp_handle(' + data.to_s + ')')
     end
 
     def close_sstp_handle()
@@ -2937,7 +2930,7 @@ module Sakura
         return
       end
       _send_sstp_handle('-')
-      ##logging.debug('close_sstp_handle()')
+      ##Logging::Logging.debug('close_sstp_handle()')
       begin
         @sstp_handle.close()
       rescue SystemCallError => e

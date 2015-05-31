@@ -6,7 +6,11 @@ module Logging
     @@logger = Logger.new(STDOUT)
 
     def initialize
-      ##@@logger.level = Logger::SEV_LABEL[2]
+      ##@@logger.level = Logger::WARN
+    end
+
+    def self.set_level(level)
+      @@logger.level = level
     end
 
     def self.info(message)

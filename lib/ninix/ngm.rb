@@ -469,18 +469,18 @@ module NGM
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist, **argdict)
+    def handle_request(event_type, event, *arglist)
       #assert event_type in ['GET', 'NOTIFY']
       handlers = {
       }
       if handlers.include?(event)
-        result = handlers[event].call #( *arglist, **argdict)
+        result = handlers[event].call #(*arglist)
       else
         begin
           result = public_send(event, *arglist)
         rescue
           result = @parent.handle_request(
-            event_type, event, *arglist, **argdict)
+            event_type, event, *arglist)
         end
       end
       if event_type == 'GET'

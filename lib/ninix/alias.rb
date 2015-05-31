@@ -80,7 +80,7 @@ module Alias
               key = line[0].strip
               values = line[1].strip
             else
-              #raise ValueError('malformed line found')
+              raise 'malformed line found'
             end
             if !values.empty? and \
               values.start_with?('[') and values.end_with?(']')
@@ -89,17 +89,16 @@ module Alias
                 begin
                   value = value.to_i.to_s
                 rescue
-                  #except ValueError:
                   #pass
                 end
                 table[key] << value
-            #  else
-            #    raise ValueError('malformed line found')
               end
+            else
+              raise 'malformed line found'
             end
           end
-        rescue# except ValueError as error
-          return fatal(error)
+        rescue => e
+          return fatal(e.message)
         end
         dic[name] = table
       else
@@ -108,7 +107,7 @@ module Alias
           key = line[0].strip
           value = line[1].strip
         else
-          #return fatal('malformed line found')
+          return fatal('malformed line found')
         end
         if key == 'makoto'
           if !value.empty? and \

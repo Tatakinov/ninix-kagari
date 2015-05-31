@@ -229,7 +229,7 @@ module Surface
       elements = {}
       begin
         maxwidth = @seriko_descript.get('maxwidth', :default => '0').to_i
-      rescue # except:
+      rescue
         maxwidth = 0
       end
       maxheight = 0
@@ -315,7 +315,7 @@ module Surface
             y1 = values[1].to_i
             x2 = values[2].to_i
             y2 = values[3].to_i
-          rescue # except ValueError:
+          rescue
             next
           end
           buf << [values[4].strip(), x1, y1, x2, y2]
@@ -332,7 +332,7 @@ module Surface
             y1 = values[1].to_i
             x2 = values[2].to_i
             y2 = values[3].to_i
-          rescue # except ValueError:
+          rescue
             #pass
           end
           buf << [part.capitalize(), x1, y1, x2, y2].join('')
@@ -450,7 +450,7 @@ module Surface
         else
           begin
             key = key.to_i
-          rescue # except:
+          rescue
             #pass
           else
             if bind.include?(key)
@@ -501,7 +501,7 @@ module Surface
           method, filename, x, y = spec
           x = x.to_i
           y = y.to_i
-        rescue # except ValueError:
+        rescue
           error = 'invalid element spec for ' + key + ': ' + config[key]
           break
         end
@@ -959,7 +959,7 @@ module Surface
       @window.signal_connect('enter_notify_event') do |w, e|
         window_enter_notify(w, e) # XXX
       end
-      @darea = @window.darea # get_child()
+      @darea = @window.darea
       @darea.set_events(Gdk::Event::EXPOSURE_MASK|
                         Gdk::Event::BUTTON_PRESS_MASK|
                         Gdk::Event::BUTTON_RELEASE_MASK|
@@ -1052,12 +1052,10 @@ module Surface
         'NOTIFY', 'set_balloon_direction', @side, value)
     end
 
-#    @property
     def get_scale
       return @parent.handle_request('GET', 'get_preference', 'surface_scale')
     end
 
-#    @property
     def get_balloon_offset
       if @__balloon_offset == nil
         path, config = @surface_info[['surface', @surface_id].join('')]
@@ -1207,13 +1205,11 @@ module Surface
         if ['bind', 'add'].include?(method)
           if @surfaces.include?(surface_id)
             dest_x, dest_y = args
-#            yield method, surface_id, dest_x, dest_y
             mayuna_list << [method, surface_id, dest_x, dest_y]
           end
         elsif method == 'reduce'
           if @surfaces.include?(surface_id)
             dest_x, dest_y = args
-#            yield method, surface_id, dest_x, dest_y
             mayuna_list << [method, surface_id, dest_x, dest_y]
           end
         elsif method == 'insert'
@@ -1225,7 +1221,6 @@ module Surface
                 not done.include?(actor_id)
                 done << actor_id
                 for result in iter_mayuna(surface_width, surface_height, actor, done)
-#                  yield result
                   mayuna_list << result
                 end
               else
@@ -1252,7 +1247,7 @@ module Surface
       begin
         surface = Pix.create_surface_from_file(
           @surfaces[surface_id][0], :is_pnr => is_pnr, :use_pna => use_pna)
-      rescue # except:
+      rescue
         Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
         return Pix.create_blank_surface(100, 100)
       end
@@ -1268,7 +1263,7 @@ module Surface
           end
           overlay = Pix.create_surface_from_file(
             element, :is_pnr => is_pnr, :use_pna => use_pna)
-        rescue # except:
+        rescue
           next
         end
         cr = Cairo::Context.new(surface)
@@ -1288,7 +1283,6 @@ module Surface
         else
           cr.paint()
         end
-        #del cr
       end
       return surface
     end
@@ -1362,7 +1356,6 @@ module Surface
               else
                 raise RuntimeError('should not reach here')
               end
-              #del cr
             end
           end
         end
@@ -1385,7 +1378,7 @@ module Surface
         begin
           overlay_surface = get_image_surface(
             surface_id, :is_asis => (method == 'asis'))
-        rescue # except:
+        rescue
           next
         end
         # overlay surface
@@ -1406,7 +1399,6 @@ module Surface
         else
           cr.paint()
         end
-        #del cr
       end
       @image_surface = new_surface
       @darea.queue_draw()

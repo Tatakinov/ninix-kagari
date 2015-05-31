@@ -13,28 +13,6 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-#import argparse
-#import urllib.parse
-#import urllib.request
-#import os
-#import socket
-#import sys
-#import logging
-#import logging.handlers
-#import random
-#import traceback
-#import io
-#import importlib
-#import locale
-#import multiprocessing
-
-#if os.name == 'nt': # locale setting for windows
-#    lang = os.getenv('LANG')
-#    if lang is None:
-#        os.environ['LANG'] = locale._build_localename(locale.getdefaultlocale())
-#import gettext
-#gettext.install('ninix')
-
 require 'optparse'
 require 'uri'
 require 'gettext'
@@ -55,20 +33,6 @@ require "ninix/menu"
 require "ninix/metamagic"
 require "ninix/logging"
 
-opt = OptionParser.new
-opt.on('--sstp-port sstp_port', 'additional port for listening SSTP requests') {|v| }
-opt.on('--debug', 'debug') {|v| }
-opt.on('--logfile logfile_name', 'logfile name') {|v| }
-#opt.parse!(ARGV)
-opt.parse(ARGV)
-#parser = argparse.ArgumentParser('ninix')
-#parser.add_argument('--sstp-port', type=int, dest='sstp_port',
-#                    help='additional port for listening SSTP requests')
-#parser.add_argument('--debug', action='store_true', help='debug')
-#parser.add_argument('--logfile', type=str, help='logfile name')
-
-#logger = logging.getLogger()
-#logger.setLevel(logging.INFO) # XXX
 
 module Ninix_Main
   
@@ -119,10 +83,9 @@ module Ninix_Main
   
 #  sys.excepthook = handleException
 
-  def self.main
+  def self.main(option)
     # parse command line arguments
-    args = ARGV.getopts("logfile:", "sstp_port:", "debug")
-    if args["logfile"]
+    if option[:logfile]
       #logger.addHandler(logging.FileHandler(args.logfile))
     end
     # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
@@ -133,21 +96,21 @@ module Ninix_Main
     # TCP 11000：伺か（廃止） (IANA Registered Port for IRISA)
     sstp_port = [9801]
     # parse command line arguments
-    if args["sstp_port"]
-      if args["sstp_port"].to_i < 1024
+    if option[:sstp_port]
+      if option[:sstp_port].to_i < 1024
         Logging::Logging.warning('Invalid --sstp-port number (ignored)')
       else
-        sstp_port << args["sstp_port"].to_i
+        sstp_port << option[:sstp_port].to_i
       end
     end
-    if args["debug"]
-      #logger.setLevel(logging.DEBUG)
+    if option[:debug]
+      Logging::Logging.set_level(Logger::DEBUG)
     end
     home_dir = Home.get_ninix_home()
     if not File.exists?(home_dir)
       begin
         FileUtils.mkdir_p(home_dir)
-      rescue #except
+      rescue
         raise SystemExit('Cannot create Home directory (abort)\n')
       end
     end
@@ -165,7 +128,7 @@ module Ninix_Main
     f = open(lockfile_path, 'w')
     begin
       Lock.lockfile(f)
-    rescue #except
+    rescue
       raise SystemExit('ninix-aya is already running')
     end
     # start
@@ -176,7 +139,7 @@ module Ninix_Main
     f.truncate(0)
     begin
       Lock.unlockfile(f)
-    rescue # except:
+    rescue
       #pass
     end
   end
@@ -531,7 +494,7 @@ module Ninix_Main
       begin
         filetype, target_dirs, names, errno = @installer.install(
                                         filename, Home.get_ninix_home())
-      rescue # except:
+      rescue
         target_dirs = nil
       end
       if errno != 0
@@ -641,7 +604,6 @@ module Ninix_Main
       end
     end
 
-    #@property
     def current_sakura_instance
       return @ghosts[@current_sakura].instance
     end
@@ -657,7 +619,7 @@ module Ninix_Main
       return current_sakura_instance.cantalk
     end
 
-    def get_event_response(event, *arglist, **argdict) ## FIXME
+    def get_event_response(event, *arglist) ## FIXME
       return current_sakura_instance.get_event_response(*event)
     end
 
@@ -670,8 +632,8 @@ module Ninix_Main
       return sakura.get_ifghost()
     end
 
-    def enqueue_event(event, *arglist, **argdict)
-      current_sakura_instance.enqueue_event(event, *arglist, **argdict)
+    def enqueue_event(event, *arglist)
+      current_sakura_instance.enqueue_event(event, *arglist)
     end
 
     def enqueue_script(event, script, sender, handle,
@@ -699,7 +661,6 @@ module Ninix_Main
         if cantalk and not sakura.cantalk
           next
         end
-#        yield sakura
         ghosts << sakura
       end
       return ghosts
@@ -791,7 +752,6 @@ module Ninix_Main
     def get_ghost_menus
       menus = []
       for value in @ghosts.values()
-        #yield value.menuitem
         menus << value.menuitem
       end
       return menus
@@ -934,7 +894,7 @@ module Ninix_Main
           if sakura.get_name(:default => nil) == name
             return key
           end
-        rescue # except: # old preferences(EUC-JP)
+        rescue # old preferences(EUC-JP)
           #pass
         end
       end
@@ -955,7 +915,7 @@ module Ninix_Main
           if balloon['balloon_dir'][0] == Home.get_normalized_path(name) # XXX
             return key
           end
-        rescue # except: # old preferences(EUC-JP)
+        rescue # old preferences(EUC-JP)
           #pass
         end
       end
@@ -972,7 +932,7 @@ module Ninix_Main
           if Home.get_normalized_path(desc.get('name')) == subdir # XXX
             return key
           end
-        rescue # except: # old preferences(EUC-JP)
+        rescue # old preferences(EUC-JP)
           #pass
         end
       end
@@ -1104,9 +1064,9 @@ module Ninix_Main
     def save_preferences
       begin
         @prefs.save()
-      rescue # except IOError:
+      rescue IOError, SystemCallError
         Logging::Logging.error('Cannot write preferences to file (ignored).')
-      rescue # except:
+      rescue
         #pass ## FIXME
       end
     end
@@ -1321,7 +1281,7 @@ module Ninix_Main
           if filename != 'HISTORY'
             begin
               File.delete(File.join(prefix, filename))
-            rescue # except:
+            rescue
               #logging.error(
               #  '*** REMOVE FAILED *** : {0}'.format(filename))
             end
@@ -1329,7 +1289,7 @@ module Ninix_Main
         else # dir
           begin
             FileUtils.remove_entry_secure(File.join(prefix, filename))
-          rescue # except:
+          rescue
             #logging.error(
             #  '*** REMOVE FAILED *** : {0}'.format(filename))
           end
@@ -1385,13 +1345,12 @@ module Ninix_Main
               if key == 'time'
                 begin
                   ghost_time = value.strip().to_i
-                rescue # except:
+                rescue
                   #pass
                 end
               end
             end
-          rescue # except IOError as e:
-            #code, message = e.args
+          rescue IOError => e
             #logging.error('cannot read {0}'.format(path))
           end
         end
@@ -1794,6 +1753,14 @@ module Ninix_Main
   end
 end
 
-#if __name__ == '__main__':
-#    main()
-Ninix_Main.main
+
+Logging::Logging.set_level(Logger::INFO)
+
+opt = OptionParser.new
+option = {}
+opt.on('--sstp-port sstp_port', 'additional port for listening SSTP requests') {|v| option[:sstp_port] = v}
+opt.on('--debug', 'debug') {|v| option[:debug] = v}
+opt.on('--logfile logfile_name', 'logfile name') {|v| option[:logfile] = v}
+opt.parse!(ARGV)
+
+Ninix_Main.main(option)
