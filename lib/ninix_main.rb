@@ -219,7 +219,7 @@ module Ninix_Main
       break_flag = false
       for if_ghost in script_odict.keys()
         if not if_ghost.empty? and @parent.handle_request('GET', 'if_ghost', if_ghost, :working => working)
-          @parent.handle_request('NOTIFY', 'select_current_sakura', :if_ghost => if_ghost)
+          @parent.handle_request('NOTIFY', 'select_current_sakura', :ifghost => if_ghost)
           default_script = script_odict[if_ghost]
           break_flag = true
           break
@@ -242,27 +242,27 @@ module Ninix_Main
             default_script = script_odict.values[0]
           end
         end
-        if event != nil
-          script = @parent.handle_request('GET', 'get_event_response', event)
-        else
-          script = nil
-        end
-        if not script
-          script = default_script
-        end
-        if script == nil
-          if request_handler
-            request_handler.send_response(204) # No Content
-          end
-          return
-        end
-        set_sstp_flag(sender)
-        @parent.handle_request(
-          'NOTIFY', 'enqueue_script',
-          event, script, sender, handle, address,
-          show_sstp_marker, use_translator, :db => entry_db,
-          :request_handler => request_handler, :temp_mode => true)
       end
+      if event != nil
+        script = @parent.handle_request('GET', 'get_event_response', event)
+      else
+        script = nil
+      end
+      if not script
+        script = default_script
+      end
+      if script == nil
+        if request_handler
+          request_handler.send_response(204) # No Content
+        end
+        return
+      end
+      set_sstp_flag(sender)
+      @parent.handle_request(
+        'NOTIFY', 'enqueue_script',
+        event, script, sender, handle, address,
+        show_sstp_marker, use_translator, :db => entry_db,
+        :request_handler => request_handler, :temp_mode => true)
     end
 
     def receive_sstp_request
@@ -276,8 +276,7 @@ module Ninix_Main
           handler = SSTP::SSTPRequestHandler.new(sstp_server, socket)
           buffer = socket.gets
           handler.handle(buffer)
-          socket.close
-        rescue SocketError  => e
+        rescue SocketError => e
           Logging::Logging.error(
             'socket.error: ' + e.message)
         rescue SystemCallError => e

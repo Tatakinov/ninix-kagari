@@ -62,7 +62,7 @@ module SSTP
           @request_handler.write(data) # FIXME
         end
         @request_handler.shutdown(Socket::SHUT_WR) # XXX
-      rescue #except IOError:
+      rescue
         #pass
       end
       @request_handler = nil
@@ -330,7 +330,7 @@ module SSTP
 
     def get_handle
       if @headers.assoc("HWnd") != nil
-        path = @headers.assoc("HWnd")
+        path = @headers.assoc("HWnd")[1]
       else
         path = nil
       end
@@ -339,19 +339,18 @@ module SSTP
         log_error('HWnd: header field not found')
         return nil
       end
-#      handle = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-      handle = nil # FIXME
-#      begin
-#        handle.connect(path)
-#      rescue #except socket.error:
-#        handle = nil # discard socket object
-#        logging.error('cannot open Unix socket: {0}'.format(path))
-#      end
-#      if handle == nil
-#        send_response(400) # Bad Request
-#        log_error('Invalid HWnd: header field')
-#        return nil
-#      end
+      handle = Socket.new(Socket::AF_UNIX, Socket::SOCK_STREAM)
+      begin
+        handle.connect(path)
+      rescue SystemCallError
+        handle = nil # discard socket object
+        Logging::Logging.error('cannot open Unix socket: ' + path)
+      end
+      if handle == nil
+        send_response(400) # Bad Request
+        log_error('Invalid HWnd: header field')
+        return nil
+      end
       return handle
     end
 
@@ -372,7 +371,7 @@ module SSTP
       end
       if not Encoding.name_list.include?(charset)
         send_response(420, :data => 'Refuse (unsupported charset)')
-        log_error('Unsupported charset {0}'.format(repr(charset)))
+        log_error('Unsupported charset ' + charset.to_s)
       else
         return true
       end
