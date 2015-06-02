@@ -36,6 +36,7 @@ require "ninix/logging"
 
 module Ninix_Main
   include GetText
+  bindtextdomain("ninix-aya")
 
   def self.handleException(exception)
     message = 'Uncaught exception (' + exception.class.to_s + ")\n" + exception.backtrace.join("\n")
