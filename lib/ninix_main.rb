@@ -35,21 +35,19 @@ require "ninix/logging"
 
 
 module Ninix_Main
-  
+  include GetText
+
   def self.handleException(exception)
     message = 'Uncaught exception (' + exception.class.to_s + ")\n" + exception.backtrace.join("\n")
     Logging::Logging.error(message)
     response_id = 1
     dialog = Gtk::MessageDialog.new(
       nil, 0, Gtk::MessageType::ERROR, Gtk::MessageDialog::ButtonsType::NONE,
-      #      _('A ninix-aya error has been detected.'))
-      'A ninix-aya error has been detected.')
-    #    dialog.set_title(_('Bug Detected'))
-    dialog.set_title('Bug Detected')
+      _('A ninix-aya error has been detected.'))
+    dialog.set_title(_('Bug Detected'))
     dialog.set_window_position(Gtk::Window::Position::CENTER)
     dialog.gravity = Gdk::Window::Gravity::CENTER
-    #    button = dialog.add_button(_('Show Details'), response_id)
-    button = dialog.add_button('Show Details', response_id)
+    button = dialog.add_button(_('Show Details'), response_id)
     dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
     textview = Gtk::TextView.new
     textview.set_editable(false)
