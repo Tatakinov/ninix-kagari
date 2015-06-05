@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  Copyright (C) 2001-2004 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2004-2015 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2004-2015 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
