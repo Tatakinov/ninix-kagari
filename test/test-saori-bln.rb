@@ -7,7 +7,7 @@ module NinixTest
     def initialize
       @x = [600, 220]
       @y = [600, 700]
-      saori = Saori.new
+      saori = Bln::Saori.new
       path = "./test/bln"
       saori.need_ghost_backdoor(self)
       saori.load(:dir => path)

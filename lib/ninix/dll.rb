@@ -142,7 +142,7 @@ module DLL
       @sakura = sakura
       @saori_lib = saori_lib
     end
-    
+
     def request(name)
       if @type == 'shiori'
         dll_name, name = name
