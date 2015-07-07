@@ -1130,7 +1130,7 @@ module Balloon
       cr.save()
       sl = @link_buffer[index][0]
       el = @link_buffer[index][2]
-      if @lineno <= sl <= @lineno + @lines
+      if @lineno <= sl and sl <= @lineno + @lines
         sn = @link_buffer[index][1]
         en = @link_buffer[index][3]
         for n in sl..el

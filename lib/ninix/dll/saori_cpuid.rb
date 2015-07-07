@@ -59,7 +59,7 @@ class Saori < DLL::SAORI
       value = ENTRY[argument[0]].sample
     end
     if value
-      return ('SAORI/1.0 200 OK\r\nResult: ' + value.to_s + '\r\n\r\n').encode(@charset, :invalid => :replace)
+      return ("SAORI/1.0 200 OK\r\nResult: " + value.to_s + "\r\n\r\n").encode(@charset, :invalid => :replace)
     else
       return RESPONSE[204]
     end

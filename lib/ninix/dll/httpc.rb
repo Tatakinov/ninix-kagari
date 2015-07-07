@@ -121,27 +121,27 @@ class Saori < DLL::SAORI
     end
     if argument.empty?
       ##assert bg == nil and process_tag == nil
-      return 'SAORI/1.0 200 OK\r\nResult: ' + @loaded.to_s + ' \r\n\r\n'
+      return "SAORI/1.0 200 OK\r\nResult: " + @loaded.to_s + " \r\n\r\n"
     elsif argument.length > 3
       return RESPONSE[400]
     elsif argument.length == 2 # FIXME: not supported yet
-      return 'SAORI/1.0 200 OK\r\nResult: 0\r\n\r\n'
+      return "SAORI/1.0 200 OK\r\nResult: 0\r\n\r\n"
     else
       if bg # needs multi-threading?
         timeout_id = GLib::Timeout.add(1000) { notify(bg, argument, process_tag) } # XXX
         @__bg[timeout_id] = bg
-        return nil # 'SAORI/1.0 204 No Content\r\n\r\n'
+        return nil # "SAORI/1.0 204 No Content\r\n\r\n"
       else
         data = get(*argument)
         if not data
-          return nil # b'SAORI/1.0 204 No Content\r\n\r\n'
+          return nil # "SAORI/1.0 204 No Content\r\n\r\n"
         end
-        result = 'SAORI/1.0 200 OK\r\n' + 'Result: ' + data[0].to_s + '\r\n'
+        result = "SAORI/1.0 200 OK\r\n" + "Result: " + data[0].to_s + "\r\n"
         for n in 0..data.length-1
           result = [result,
-                    'Value' + n.to_s + ': ' + data[n].to_s + '\r\n'].join("")
+                    "Value" + n.to_s + ": " + data[n].to_s + "\r\n"].join("")
         end
-        result += '\r\n'
+        result += "\r\n"
         return result.encode('Shift_JIS', :invalid => :replace, :undef => :replace)
       end
     end

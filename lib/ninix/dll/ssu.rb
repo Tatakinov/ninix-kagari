@@ -80,14 +80,14 @@ class Saori < DLL::SAORI
     @value = []
     result = method(@function[name][0]).call(args)
     if result != nil and not result.to_s.empty?
-      s = 'SAORI/1.0 200 OK\r\nResult: ' + result.to_s + '\r\n'
+      s = "SAORI/1.0 200 OK\r\nResult: " + result.to_s + "\r\n"
       if @value
         for i in 0..@value.length-1
-          s = [s, 'Value' + i.to_s + ': ' + @value[i].to_s + '\r\n'].join("")
+          s = [s, "Value" + i.to_s + ": " + @value[i].to_s + "\r\n"].join("")
         end
       end
-      s = [s, 'Charset: ' + charset.to_s + '\r\n'].join("")
-      s = [s, '\r\n'].join("")
+      s = [s, "Charset: " + charset.to_s + "\r\n"].join("")
+      s = [s, "\r\n"].join("")
       return s.encode(charset)
     else
       return RESPONSE[204]

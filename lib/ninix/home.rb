@@ -37,7 +37,7 @@ module Home
   end
 
   def self.get_normalized_path(path)
-    path = path.gsub('\\', '/')
+    path = path.gsub("\\", '/')
     if File.absolute_path(path) != path
       path = path.downcase
     end

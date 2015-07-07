@@ -39,16 +39,16 @@ module Ninix_Main
   bindtextdomain("ninix-aya")
 
   def self.handleException(exception)
-    message = 'Uncaught exception (' + exception.class.to_s + ")\n" + exception.backtrace.join("\n")
+    message = "Uncaught exception (" + exception.class.to_s + ")\n" + exception.backtrace.join("\n")
     Logging::Logging.error(message)
     response_id = 1
     dialog = Gtk::MessageDialog.new(
       nil, 0, Gtk::MessageType::ERROR, Gtk::MessageDialog::ButtonsType::NONE,
-      _('A ninix-aya error has been detected.'))
-    dialog.set_title(_('Bug Detected'))
+      _("A ninix-aya error has been detected."))
+    dialog.set_title(_("Bug Detected"))
     dialog.set_window_position(Gtk::Window::Position::CENTER)
     dialog.gravity = Gdk::Window::Gravity::CENTER
-    button = dialog.add_button(_('Show Details'), response_id)
+    button = dialog.add_button(_("Show Details"), response_id)
     dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
     textview = Gtk::TextView.new
     textview.set_editable(false)
@@ -97,7 +97,7 @@ module Ninix_Main
     # parse command line arguments
     if option[:sstp_port]
       if option[:sstp_port].to_i < 1024
-        Logging::Logging.warning('Invalid --sstp-port number (ignored)')
+        Logging::Logging.warning("Invalid --sstp-port number (ignored)")
       else
         sstp_port << option[:sstp_port].to_i
       end
@@ -110,10 +110,10 @@ module Ninix_Main
       begin
         FileUtils.mkdir_p(home_dir)
       rescue
-        raise SystemExit('Cannot create Home directory (abort)\n')
+        raise SystemExit("Cannot create Home directory (abort)\n")
       end
     end
-    lockfile_path = File.join(Home.get_ninix_home(), '.lock')
+    lockfile_path = File.join(Home.get_ninix_home(), ".lock")
     if File.exists?(lockfile_path)
       f = open(lockfile_path, 'r')
       abend = f.gets
@@ -128,7 +128,7 @@ module Ninix_Main
     begin
       Lock.lockfile(f)
     rescue
-      raise SystemExit('ninix-aya is already running')
+      raise SystemExit("ninix-aya is already running")
     end
     # start
     app = Application.new(f, :sstp_port => sstp_port)
@@ -387,7 +387,7 @@ module Ninix_Main
       @loaded = false
       @confirmed = false
       @console = Console.new(self)
-      Logging::Logging.info('loading...')
+      Logging::Logging.info("loading...")
       # create preference dialog
       @prefs = Prefs::PreferenceDialog.new
       @prefs.set_responsible(self)
@@ -426,7 +426,7 @@ module Ninix_Main
       @nekoninni = Home.search_nekoninni()
       @katochan = Home.search_katochan()
       @kinoko = Home.search_kinoko()
-      Logging::Logging.info('done.')
+      Logging::Logging.info("done.")
     end
 
     def edit_preferences(*arglist)
@@ -1529,7 +1529,7 @@ module Ninix_Main
         Logging::Logging.info('Ghosts: ' + ghosts.to_s)
         Logging::Logging.info('Balloons: ' + balloons.to_s)
       else
-        @dialog.set_title(_('Nanntokashitekudasai.'))
+        @dialog.set_title(_("Nanntokashitekudasai."))
         if ghosts > 0
           Logging::Logging.info('Ghosts: ' + ghosts.to_s)
         else

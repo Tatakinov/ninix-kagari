@@ -111,13 +111,13 @@ class Saori < DLL::SAORI
         file_count += count
         dir_size += size
       end
-      return ['SAORI/1.0 200 OK\r\n',
-              'Result: ',
+      return ["SAORI/1.0 200 OK\r\n",
+              "Result: ",
               file_count.to_s.encode('ascii'),
-              '\r\n',
-              'Reference0: ',
+              "\r\n",
+              "Reference0: ",
               dir_size.to_s.encode('ascii'),
-              '\r\n\r\n'].join("")
+              "\r\n\r\n"].join("")
     elsif args['empty'] or args['e']
       if args['force'] or args['f']
         empty_trash(@home_trash)
@@ -129,10 +129,10 @@ class Saori < DLL::SAORI
           'EmptyTrash', nil, ## GLib.Variant('()', ()),
           Gio::DBusCallFlags::NONE, -1, nil)
       end
-      return ['SAORI/1.0 200 OK\r\n',
-              'Result: ',
-              '1', # FIXME
-              '\r\n\r\n'].join("")
+      return ["SAORI/1.0 200 OK\r\n",
+              "Result: ",
+              "1", # FIXME
+              "\r\n\r\n"].join("")
     end
   end
 end

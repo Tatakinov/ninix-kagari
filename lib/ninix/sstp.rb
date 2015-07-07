@@ -456,7 +456,7 @@ module SSTP
         @fp.write("\r\n")
       elsif command == 'getversion'
         send_response(200)
-        @fp.write(['ninix-aya ',
+        @fp.write(["ninix-aya ",
                    Version.VERSION.encode(charset),
                    "\r\n"].join(""))
         @fp.write("\r\n")

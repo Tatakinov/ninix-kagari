@@ -32,7 +32,7 @@ module Makoto
     j = s.length
     buf = []
     while i < j
-      if s[i] == '\\'
+      if s[i] == "\\"
         if i + 1 < j and '(|)'.include?(s[i + 1])
           buf << s[i + 1]
         else

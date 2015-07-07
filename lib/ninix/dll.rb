@@ -24,9 +24,9 @@ module DLL
   class SAORI
 
     RESPONSE = {
-      204 => 'SAORI/1.0 204 No Content\r\n\r\n',
-      400 => 'SAORI/1.0 400 Bad Request\r\n\r\n',
-      500 => 'SAORI/1.0 500 Internal Server Error\r\n\r\n',
+      204 => "SAORI/1.0 204 No Content\r\n\r\n",
+      400 => "SAORI/1.0 400 Bad Request\r\n\r\n",
+      500 => "SAORI/1.0 500 Internal Server Error\r\n\r\n",
     }
 
     def initialize

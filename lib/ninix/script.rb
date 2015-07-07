@@ -198,7 +198,7 @@ module Script
         end
         if [TOKEN_NUMBER, TOKEN_OPENED_SBRA,
             TOKEN_STRING, TOKEN_CLOSED_SBRA].include?(token)
-          lexeme = lexeme.gsub('\\', '\\')
+          lexeme = lexeme.gsub('\\', "\\")
           lexeme = lexeme.gsub('\%', '%')
           string_chunks << lexeme
           next
@@ -216,7 +216,7 @@ module Script
               @script << [SCRIPT_TEXT, text, @column]
               text = []
             end
-            @script << [SCRIPT_TAG, '\\!', [[TEXT_STRING, '*'],], @column]
+            @script << [SCRIPT_TAG, "\\!", [[TEXT_STRING, '*'],], @column]
           else
             text << [TEXT_META, lexeme]
           end
@@ -226,59 +226,59 @@ module Script
           @script << [SCRIPT_TEXT, text, @column]
           text = []
         end
-        if ['\\a', '\\c', '\\e', '\\t', '\\_e',
-            '\\v', '\\y', '\\z', '\\_q',
-            '\\4', '\\5', '\\6', '\\7',
-            '\\2', '\\*', '\\-', '\\+', '\\_+',
-            '\\_n', '\\_V', '\\__c', '\\__t',
-            '\\C'].include?(lexeme)
+        if ["\\a", "\\c", "\\e", "\\t", "\\_e",
+            "\\v", "\\y", "\\z", "\\_q",
+            "\\4", "\\5", "\\6", "\\7",
+            "\\2", "\\*", "\\-", "\\+", "\\_+",
+            "\\_n", "\\_V", "\\__c", "\\__t",
+            "\\C"].include?(lexeme)
           @script << [SCRIPT_TAG, lexeme, @column]
-        elsif ['\\0', '\\h'].include?(lexeme)
+        elsif ["\\0", "\\h"].include?(lexeme)
           @script << [SCRIPT_TAG, lexeme, @column]
           scope = 0
-        elsif ['\\1', '\\u'].include?(lexeme)
+        elsif ["\\1", "\\u"].include?(lexeme)
           @script << [SCRIPT_TAG, lexeme, @column]
           scope = 1
-        elsif ['\\s', '\\b', '\\p'].include?(lexeme)
+        elsif ["\\s", "\\b", "\\p"].include?(lexeme)
           argument = read_sbra_id()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
-        elsif lexeme.start_with?('\\s') or \
-          lexeme.start_with?('\\b') or \
-          lexeme.start_with?('\\p') or \
-          lexeme.start_with?('\\w')
+        elsif lexeme.start_with?("\\s") or \
+          lexeme.start_with?("\\b") or \
+          lexeme.start_with?("\\p") or \
+          lexeme.start_with?("\\w")
           num = lexeme[2]
-          if lexeme.start_with?('\\s') and scope == 1
+          if lexeme.start_with?("\\s") and scope == 1
             num = (num.to_i + 10).to_s
           end
           @script << [SCRIPT_TAG, lexeme[0, 2], num, @column]
-        elsif ['\\_w'].include?(lexeme)
+        elsif ["\\_w"].include?(lexeme)
           argument = read_sbra_number()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
-        elsif ['\\i', '\\j', '\\&', '\\_u', '\\_m'].include?(lexeme)
+        elsif ["\\i", "\\j", "\\&", "\\_u", "\\_m"].include?(lexeme)
           argument = read_sbra_id()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
-        elsif ['\\_b', '\\_c', '\\_l', '\\_v', '\\m',
-               '\\3', '\\8', '\\9'].include?(lexeme)
+        elsif ["\\_b", "\\_c", "\\_l", "\\_v", "\\m",
+               "\\3", "\\8", "\\9"].include?(lexeme)
           argument = read_sbra_text()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
-        elsif ['\\n', '\\x'].include?(lexeme)
+        elsif ["\\n", "\\x"].include?(lexeme)
           if not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
             argument = read_sbra_text()
             @script << [SCRIPT_TAG, lexeme, argument, @column]
           else
             @script << [SCRIPT_TAG, lexeme, @column]
           end
-        elsif ['\\URL'].include?(lexeme)
+        elsif ["\\URL"].include?(lexeme)
           buf = [read_sbra_text()]
           while not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
             buf << read_sbra_text()
             buf << read_sbra_text()
           end
           @script << [SCRIPT_TAG, lexeme] + buf + [@column, ]
-        elsif ['\\!'].include?(lexeme)
+        elsif ["\\!"].include?(lexeme)
           args = split_params(read_sbra_text())
           @script << [SCRIPT_TAG, lexeme] + args + [@column, ]
-        elsif ['\\q'].include?(lexeme)
+        elsif ["\\q"].include?(lexeme)
           if not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
             args = split_params(read_sbra_text())
             if args.length != 2
@@ -298,7 +298,7 @@ module Script
             arg3 = read_sbra_text()
             @script << [SCRIPT_TAG, lexeme, arg1, arg2, arg3, @column]
           end
-        elsif ['\\_s'].include?(lexeme)
+        elsif ["\\_s"].include?(lexeme)
           if not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
             args = []
             for arg in split_params(read_sbra_text())
@@ -308,7 +308,7 @@ module Script
           else
             @script << [SCRIPT_TAG, lexeme, @column]
           end
-        elsif ['\\_a'].include?(lexeme)
+        elsif ["\\_a"].include?(lexeme)
           if anchor == nil
             anchor = perror(:skip => 'rest')
             @script << [SCRIPT_TAG, lexeme, read_sbra_id(), @column]
@@ -316,7 +316,7 @@ module Script
             anchor = nil
             @script << [SCRIPT_TAG, lexeme, @column]
           end
-        elsif ['\\f'].include?(lexeme)
+        elsif ["\\f"].include?(lexeme)
           args = []
           for arg in split_params(read_sbra_text())
             args << arg[0][1]
@@ -397,7 +397,7 @@ module Script
       while not @tokens.empty?
         token, lexeme = next_token()
         if [TOKEN_NUMBER, TOKEN_STRING, TOKEN_OPENED_SBRA, TOKEN_TAG].include?(token)
-          lexeme = lexeme.gsub('\\', '\\')
+          lexeme = lexeme.gsub('\\', "\\")
           lexeme = lexeme.gsub('\%', '%')
           lexeme = lexeme.gsub('\]', ']')
           string_chunks << lexeme

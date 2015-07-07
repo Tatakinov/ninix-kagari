@@ -501,7 +501,7 @@ module Menu
               if entry.length > 2
                 base_path = @parent.handle_request(
                   'GET', 'get_prefix')
-                filename = entry[2].lower()
+                filename = entry[2].downcase
                 tail = File.extname(filename)
                 if not tail
                   for ext in ['.png', '.jpg', '.gif']
@@ -576,7 +576,7 @@ module Menu
             end
             if entry.length > 2
               base_path = @parent.handle_request('GET', 'get_prefix')
-              filename = entry[2].lower()
+              filename = entry[2].downcase
               tail = File.extname(filename)
               if not tail
                 for ext in ['.png', '.jpg', '.gif']

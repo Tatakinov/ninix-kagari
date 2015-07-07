@@ -260,7 +260,7 @@ module Bln
         destroy()
         return
       end
-      path = File.join(@dir, skin.gsub('\\', '/'))
+      path = File.join(@dir, skin.gsub("\\", '/'))
       begin
         balloon_surface = Pix.create_surface_from_file(path)
       rescue

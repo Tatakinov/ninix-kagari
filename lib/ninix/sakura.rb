@@ -777,8 +777,8 @@ module Sakura
     def get_value(response) # FIXME: check return code
       result = {}
       to = nil
-      for line in response.split
-        line = line.encode(@__charset, :invalid => :replace, :undef => :replace).strip()
+      for line in response.force_encoding(@__charset).split(/\r?\n/)
+        line = line.encode("UTF-8", :invalid => :replace, :undef => :replace).strip()
         if line.empty?
           next
         end
@@ -819,21 +819,21 @@ module Sakura
         return ''
       end
       ref = arglist
-      header = [event_type.to_s, ' SHIORI/3.0\r\n',
-                'Sender: ', @__sender.to_s, '\r\n',
-                'ID: ', event.to_s, '\r\n',
-                'SecurityLevel: local\r\n',
-                'Charset: ', @__charset.to_s, '\r\n'].join('')
+      header = [event_type.to_s, " SHIORI/3.0\r\n",
+                "Sender: ", @__sender.to_s, "\r\n",
+                "ID: ", event.to_s, "\r\n",
+                "SecurityLevel: local\r\n",
+                "Charset: ", @__charset.to_s, "\r\n"].join("")
       for i in 0..ref.length-1
         value = ref[i]
         if value != nil
           value = value.to_s
           header = [header,
-                    'Reference', i.to_s, ': ',
-                    value, '\r\n'].join('')
+                    "Reference", i.to_s, ": ",
+                    value, "\r\n"].join("")
         end
       end
-      header = [header, '\r\n'].join('')
+      header = [header, "\r\n"].join("")
       header = header.encode(@__charset, :invalid => :replace, :undef => :replace)
       response = @shiori.request(header)
       if event_type != 'NOTIFY' and @cantalk
@@ -1268,8 +1268,8 @@ module Sakura
       end
       start_script(script)
       @balloon.hide_sstp_message()
-      if @boot_event.include?(event)
-        @script_finally << @surface_bootup
+      if BOOT_EVENT.include?(event)
+        @script_finally << lambda { @surface_bootup }
       end
       proc_obj = lambda {|flag_break: false|
         @parent.handle_request(
@@ -1304,7 +1304,7 @@ module Sakura
       ghost_dir = File.join(get_prefix(), 'ghost', 'master')
       name = getstring('menu.background.bitmap.filename')
       if not name.empty?
-        name = name.gsub('\\', '/')
+        name = name.gsub("\\", '/')
         path_background = File.join(top_dir, name)
       end
       if path_background == nil
@@ -1315,7 +1315,7 @@ module Sakura
       end
       name = getstring('menu.sidebar.bitmap.filename')
       if not name.empty?
-        name = name.gsub('\\', '/')
+        name = name.gsub("\\", '/')
         path_sidebar = File.join(top_dir, name)
       end
       if path_sidebar == nil
@@ -1326,7 +1326,7 @@ module Sakura
       end
       name = getstring('menu.foreground.bitmap.filename')
       if not name.empty?
-        name = name.gsub('\\', '/')
+        name = name.gsub("\\", '/')
         path_foreground = File.join(top_dir, name)
       end
       if path_foreground == nil
@@ -2113,7 +2113,7 @@ module Sakura
       if not args.empty? and expand_meta(args[0]) == 'half'
         @balloon.append_text(@script_side, '\n[half]')
       else
-        @balloon.append_text(@script_side, '\n')
+        @balloon.append_text(@script_side, "\n")
       end
     end
 
@@ -2894,7 +2894,7 @@ module Sakura
           buf << get_uptime().to_s
         elsif ['%ms', '%mz', '%ml', '%mc', '%mh', \
                '%mt', '%me', '%mp', '%m?'].include?(chunk[1])
-          buf << getword(''.join(['\\', chunk[1][1..-1]]))
+          buf << getword(''.join(["\\", chunk[1][1..-1]]))
         elsif chunk[1] == '%dms'
           buf << getdms()
         else # %c, %songname
@@ -2911,7 +2911,7 @@ module Sakura
         return
       end
       begin
-        @sstp_handle.send([data, '\n'].join(''))
+        @sstp_handle.send([data, "\n"].join(''))
       rescue SystemCallError => e
         #pass
       end

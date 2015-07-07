@@ -36,7 +36,7 @@ module Pix
         @supports_alpha = true
       else
         set_visual(screen.system_visual)
-        Logging::Logging.debug('screen does NOT support alpha.\n')
+        Logging::Logging.debug("screen does NOT support alpha.\n")
         @supports_alpha = false
       end
       #assert visual is not None
