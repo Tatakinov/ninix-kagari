@@ -1238,10 +1238,10 @@ module Balloon
         end
       end
       if new_selection == @selection
-        return 0
+        return false
       else
         @selection = new_selection
-        return 1 # dirty flag
+        return true # dirty flag
       end
     end
 
@@ -1252,7 +1252,7 @@ module Balloon
         x, y, state = event.x, event.y, event.state
       end
       px, py = @window.winpos_to_surfacepos(x, y, scale)
-      if @link_buffer
+      if not @link_buffer.empty?
         if check_link_region(px, py)
           widget.queue_draw()
         end
@@ -1408,7 +1408,7 @@ module Balloon
       j = text.length
       @text_count += j
       p = 0
-      while 1
+      while true
         if i >= j
           @text_buffer << text[p..i-1]
           draw_last_line(:column => column)
@@ -1419,7 +1419,11 @@ module Balloon
             @text_buffer << [text[p..i-1], '\n[half]'].join('')
             p = i = i + 8
           else
-            @text_buffer << text[p..i-1]
+            if i == 0
+              @text_buffer << ""
+            else
+              @text_buffer << text[p..i-1]
+            end
             p = i = i + 2
           end
           draw_last_line(:column => column)

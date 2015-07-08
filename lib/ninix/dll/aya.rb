@@ -1841,7 +1841,7 @@ module Aya
               result_of_inner_block = evaluate(local_namespace,
                                                inner_block,
                                                -1, 1)
-              if result_of_inner_block
+              if result_of_inner_block and not result_of_inner_block.empty?
                 alternatives << result_of_inner_block
               end
               break
@@ -1855,7 +1855,7 @@ module Aya
             local_namespace = AyaNamespace.new(@dic.aya, namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1)
-            if result_of_inner_block != nil
+            if result_of_inner_block and not result_of_inner_block.empty?
               alternatives << result_of_inner_block
             end
             if @status == CODE_RETURN
@@ -1880,7 +1880,7 @@ module Aya
             local_namespace = AyaNamespace.new(@dic.aya, namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1)
-            if result_of_inner_block != nil
+            if result_of_inner_block and not result_of_inner_block.empty?
               alternatives << result_of_inner_block
             end
             if @status == CODE_RETURN
@@ -1906,7 +1906,7 @@ module Aya
           local_namespace = AyaNamespace.new(@dic.aya, namespace)
           result_of_inner_block = evaluate(local_namespace,
                                            inner_block, index, 1)
-          if result_of_inner_block
+          if result_of_inner_block and not result_of_inner_block.empty?
             alternatives << result_of_inner_block
           end
         elsif line[0] == TYPE_CASE
@@ -1923,10 +1923,10 @@ module Aya
               value_min, value_max = entry[0]
               value_min = evaluate_statement(namespace, value_min, 1)
               value_max = evaluate_statement(namespace, value_max, 1)
-              if value_min <= left <= value_max
+              if value_min <= left and left <= value_max
                 result_of_inner_block = evaluate(
                   local_namespace, inner_block, -1, 1)
-                if result_of_inner_block
+                if result_of_inner_block and not result_of_inner_block.empty?
                   alternatives << result_of_inner_block
                   break_flag = true
                   break
@@ -1938,18 +1938,18 @@ module Aya
             end
           end
           if not break_flag
-            if default_result
+            if default_result and not default_result.empty?
               alternatives << default_result
             end
           end
         elsif line[0] == TYPE_STATEMENT
           result_of_func = evaluate_statement(namespace, line, 0)
-          if result_of_func
+          if result_of_func and not result_of_func.empty?
             alternatives << result_of_func
           end
         else
           result_of_eval = evaluate_token(namespace, line)
-          if result_of_eval
+          if result_of_eval and not result_of_eval.empty?
             alternatives << result_of_eval
           end
         end
@@ -2019,7 +2019,7 @@ module Aya
           end
         end
       end
-      if not result
+      if not result or result.empty?
         return nil
       elsif result.length == 1
         return result[0]

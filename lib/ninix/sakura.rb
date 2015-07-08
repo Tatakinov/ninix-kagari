@@ -1269,7 +1269,7 @@ module Sakura
       start_script(script)
       @balloon.hide_sstp_message()
       if BOOT_EVENT.include?(event)
-        @script_finally << lambda { @surface_bootup }
+        @script_finally << lambda {|flag_break: false| @surface_bootup }
       end
       proc_obj = lambda {|flag_break: false|
         @parent.handle_request(
@@ -2113,7 +2113,7 @@ module Sakura
       if not args.empty? and expand_meta(args[0]) == 'half'
         @balloon.append_text(@script_side, '\n[half]')
       else
-        @balloon.append_text(@script_side, "\n")
+        @balloon.append_text(@script_side, '\n')
       end
     end
 
