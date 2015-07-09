@@ -716,7 +716,7 @@ module Ninix_Main
       change_sakura(@__menu_owner, key, 'manual')
     end
 
-    def notify_site_selection(args)
+    def notify_site_selection(*args)
       @__menu_owner.notify_site_selection(args)
     end
 

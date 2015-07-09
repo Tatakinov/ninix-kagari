@@ -29,7 +29,7 @@ module Surface
       @window = []
       @desc = nil
       @mikire = 0
-      @kawanari = 0
+      @kasanari = 0
       @key_press_count = 0
     end
 
@@ -884,7 +884,7 @@ module Surface
 
     def check_mikire_kasanari
       if not is_shown(0)
-        @mikire = @kasanari = false
+        @mikire = @kasanari = 0
         return
       end
       left, top, scrn_w, scrn_h = Pix.get_workarea()
@@ -892,12 +892,12 @@ module Surface
       s0w, s0h = get_surface_size(0)
       if x0 + s0w / 3 < left or x0 + s0w * 2 / 3 > left + scrn_w or \
         y0 + s0h / 3 < top or y0 + s0h * 2 / 3 > top + scrn_h
-        mikire = true
+        @mikire = 1
       else
-        mikire = false
+        @mikire = 0
       end
       if not is_shown(1)
-        kasanari = false
+        @kasanari = 0
         return
       end
       x1, y1 = get_position(1)
@@ -910,9 +910,9 @@ module Surface
          x0 + s0w / 2 < x1 + s1w and
          y1 < y0 + s0h / 2 and
          y0 + s0h / 2 < y1 + s1h)
-        kasanari = true
+        @kasanari = 1
       else
-        kasanari = false
+        @kasanari = 0
       end
     end
   end
