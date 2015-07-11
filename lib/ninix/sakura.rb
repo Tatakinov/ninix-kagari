@@ -317,27 +317,26 @@ module Sakura
             key, value = line.split(',', 2)
             key = key.strip()
             if key == 'time'
-              begin
+              if value.strip() =~ /[[:digit:]]/
                 ghost_time = value.strip().to_i
-              rescue
+              else
                 #pass
               end
             elsif key == 'vanished_count'
-              begin
+              if value.strip() =~ /[[:digit:]]/
                 ghost_vanished_count = value.strip().to_i
-              rescue
+              else
                 #pass
               end
             end
           end
         rescue IOError => e
           Logging::Logging.error('cannot read ' + path)
-          @ghost_time = ghost_time
-          @vanished_count = ghost_vanished_count
-        else
-          @ghost_time = 0
-          @vanished_count = 0
+          ghost_time = 0
+          vanished_count = 0
         end
+        @ghost_time = ghost_time
+        @vanished_count = ghost_vanished_count
       end
     end
  
@@ -1616,7 +1615,7 @@ module Sakura
     def start(key, init, temp, vanished, ghost_changed,
               prev_self_name, prev_name, prev_shell, last_script, abend)
       if is_running()
-        if temp
+        if temp != 0
           enter_temp_mode()
         else
           if @__temp_mode == 1
@@ -1674,7 +1673,7 @@ module Sakura
       desc, balloon = @parent.handle_request(
               'GET', 'get_balloon_description', balloon)
       set_balloon(desc, balloon)
-      if not temp
+      if temp == 0
         load_shiori()
       end
       restart()

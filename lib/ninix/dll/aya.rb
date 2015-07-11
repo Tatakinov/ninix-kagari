@@ -227,16 +227,16 @@ module Aya
 
 
   class Shiori
-    attr_reader :aya_dir, :dic, :req_header, :req_command, :req_key
-
-    @__AYA_TXT = 'aya.txt'
-    @__DBNAME = 'aya_variable.cfg'
+    attr_reader :aya_dir, :dic, :req_header, :req_command, :req_key, :dbpath, :filelist, :saori_library
 
     def initialize(dll_name)
       @dll_name = dll_name
       if dll_name != nil
         @__AYA_TXT = [dll_name[0..-4], 'txt'].join('')
         @__DBNAME = [dll_name[0..-5], '_variable.cfg'].join('')
+      else
+        @__AYA_TXT = 'aya.txt'
+        @__DBNAME = 'aya_variable.cfg'
       end
       @saori = nil
       @dic_files = []
@@ -392,7 +392,7 @@ module Aya
         path = File.join(@aya_dir, filename)
         @dic_files << path
       elsif key == 'log'
-        path = File.join(@aya_dir, os.fsencode(value.to_s))
+        path = File.join(@aya_dir, value.to_s)
         begin
           f = open(path, 'w')
         rescue
@@ -478,6 +478,7 @@ module Aya
           if line.empty?
             next
           end
+          line = line.encode("UTF-8", :invalid => :replace, :undef => :replace)
           if not line.include?(':')
             next
           end
@@ -511,10 +512,10 @@ module Aya
       result = ''
       func = @dic.get_function('OnRequest')
       if not func and @req_header.include?('ID') # Ver.3
-        for i in range(9)
+        for i in 0..8
           @global_namespace.remove(['reference', i.to_s].join(''))
         end
-        for i in range(9)
+        for i in 0..8
           key = ['Reference', i.to_s].join('')
           if @req_header.include?(key)
             @global_namespace.put(['reference', i.to_s].join(''),
@@ -563,17 +564,17 @@ module Aya
 
   class AyaSecurity
 
-    __DENY = 0
-    __ACCEPT = 1
-    __CONFIG = 'aya_security.cfg'
+    DENY = 0
+    ACCEPT = 1
+    CONFIG = 'aya_security.cfg'
 
     def initialize(aya)
       @__aya = aya
       @__cfg = ''
       @__aya_dir = File.absolute_path(@__aya.aya_dir)
-      @__fwrite = [[@__DENY, '*'], [@__ACCEPT, @__aya_dir]]
-      @__fread = [[@__ACCEPT, '*']]
-      @__loadlib = [[@__ACCEPT, '*']]
+      @__fwrite = [[DENY, '*'], [ACCEPT, @__aya_dir]]
+      @__fread = [[ACCEPT, '*']]
+      @__loadlib = [[ACCEPT, '*']]
       @__logfile = nil
       load_cfg()
       @__fwrite.reverse()
@@ -597,11 +598,11 @@ module Aya
         path << current
       end
       current_dir = ''
-      break_flag = flase
-      while path
+      break_flag = false
+      while not path.empty?
         current_dir = File.join(current_dir, path.pop)
-        if os.path.exists(File.join(current_dir, @__CONFIG))
-          @__cfg = File.join(current_dir, @__CONFIG)
+        if File.exist?(File.join(current_dir, CONFIG))
+          @__cfg = File.join(current_dir, CONFIG)
           break_flag = true
           break
         end
@@ -651,18 +652,18 @@ module Aya
                 if key.start_with?('deny.')
                   key = key[5..-1]
                   list_ = data.get(key, [])
-                  list_ << [@__DENY, value]
+                  list_ << [DENY, value]
                   data[key] = list_
                 elsif key.start_swith?('accept.')
                   key = key[7..-1]
                   list_ = data.get(key, [])
-                  list_ << [@__ACCEPT, value]
+                  list_ << [ACCEPT, value]
                   data[key] = list_
                 elsif key == 'log'
-                  head, tail = os.path.split(@__cfg)
+                  head, tail = File.split(@__cfg)
                   value = ['./', value].join('')
                   value = File.join(head, value)
-                  value = os.path.abspath(value)
+                  value = File.absolute_path(value)
                   data[key] = value
                 else
                   #pass # error
@@ -673,8 +674,7 @@ module Aya
           end
           if not break_flag
             if name.empty?
-              Logging::Logging.warning('*WARNING : aya_security.cfg - no entry found for {0}.'.format( \
-                                                                                                       File.join(@__aya_dir, 'aya.dll')))
+              Logging::Logging.warning('*WARNING : aya_security.cfg - no entry found for ' + File.join(@__aya_dir, 'aya.dll') + '.')
               return
             end
           end
@@ -687,11 +687,11 @@ module Aya
         return
       end
       @__fwrite.concat(data.get('fwrite', []))
-      for i in range(@__fwrite.length)
+      for i in 0..@__fwrite.length-1
         @__fwrite[i][1] = expand_path(@__fwrite[i][1])
       end
       @__fread.concat(data.get('fread', []))
-      for i in range(@__fread.length)
+      for i in 0..@__fread.length-1
         @__fread[i][1] = expand_path(@__fread[i][1])
       end
       @__loadlib.concat(data.get('loadlib', []))
@@ -701,7 +701,7 @@ module Aya
     end
 
     def expand_path(path)
-      head, tail = os.path.split(@__cfg)
+      head, tail = File.split(@__cfg)
       if path == '*'
         return path
       end
@@ -716,7 +716,7 @@ module Aya
       else
         path = Home.get_normalized_path(path)
       end
-      path = os.path.abspath(path)
+      path = File.absolute_path(path)
       return path
     end
 
@@ -757,15 +757,15 @@ module Aya
 
     def check_path(path, flag='w')
       result = 0
-      abspath = os.path.abspath(path)
-      head, tail = os.path.split(abspath)
+      abspath = File.absolute_path(path)
+      head, tail = File.split(abspath)
       if tail != 'aya_security.cfg'
         if ['w', 'w+', 'r+', 'a', 'a+'].include?(flag)
           for perm, name in @__fwrite
             if name == '*' or abspath[0..name.length-1] == name
-              if perm == @__ACCEPT
+              if perm == ACCEPT
                 result = 1
-              elsif perm == @__DENY
+              elsif perm == DENY
                 result = 0
               else
                 next
@@ -777,9 +777,9 @@ module Aya
           result = 1 # default
           for perm, name in @__fread
             if name == '*' or abspath[0..name.length-1] == name
-              if perm == @__ACCEPT
+              if perm == ACCEPT
                 result = 1
-              elsif perm == @__DENY
+              elsif perm == DENY
                 result = 0
               else
                 next
@@ -792,10 +792,10 @@ module Aya
       if @__logfile and result == 0
         if flag == 'r'
           logging('許可されていないファイルまたはディレクトリ階層の読み取りをブロックしました.',
-                  'file', os.fsdecode(abspath))
+                  'file', abspath)
         else
           logging('許可されていないファイルまたはディレクトリ階層への書き込みをブロックしました.',
-                  'file', os.fsdecode(abspath))
+                  'file', abspath)
         end
       end
       return result
@@ -803,13 +803,13 @@ module Aya
 
     def check_lib(dll)
       result = 1 # default
-      head, tail = os.path.split(Home.get_normalized_path(dll))
+      head, tail = File.split(Home.get_normalized_path(dll))
       dll_name = tail
       for perm, name in @__loadlib
         if name == '*' or dll_name == name
-          if perm == @__ACCEPT
+          if perm == ACCEPT
           result = 1
-          elsif perm == @__DENY
+          elsif perm == DENY
             result = 0
           end
         end
@@ -1216,16 +1216,16 @@ module Aya
           end_ = Aya.find_not_quoted(line, ';')
           if end_ < 0
             Logging::Logging.debug(
-              'syntax error in function "{0}": ' \
-              'illegal for statement "{1}"'.format(@name, line))
+              'syntax error in function "' + @name.to_s + '": ' \
+              'illegal for statement "' + line.to_s + '"')
           else
             init = parse([line[3..end_-1].strip()])
             condition = line[end_ + 1..-1].strip()
             end_ = Aya.find_not_quoted(condition, ';')
             if end_ < 0
               Logging::Logging.debug(
-                'syntax error in function "{0}": ' \
-                'illegal for statement "{1}"'.format(@name, line))
+                'syntax error in function "' + @name.to_s + '": ' \
+                'illegal for statement "' + line.to_s + '"')
             else
               reset = parse([condition[end_ + 1..-1].strip()])
               condition_tokens = AyaStatement(
@@ -1277,7 +1277,7 @@ module Aya
                   if tokens[0] != '-'
                     Logging::Logging.debug(
                       'syntax error in function ' \
-                      '"{0}": when {1}'.format(@name, right))
+                      '"' + @name.to_s + '": when ' + right.to_s)
                     next
                   else
                     tokens.shift
@@ -1287,7 +1287,7 @@ module Aya
                      not ['-', '+'].include?(tokens[0]))
                     Logging::Logging.debug(
                       'syntax error in function ' \
-                      '"{0}": when {1}'.format(@name, right))
+                      '"' + @name + '": when ' + right.to_s)
                     next
                   else
                     value_max = parse_statement(tokens)
@@ -1442,8 +1442,8 @@ module Aya
             statement_tokens[-1].start_with?('"') and \
             statement_tokens[-1].end_with?('"')
             Logging::Logging.debug(
-              'syntax error in function "{0}": ' \
-              '\'"\' in string {1}'.format(@name, statement_tokens.join(' ')))
+              'syntax error in function "' + @name.to_s + '": ' \
+              '\'"\' in string ' + statement_tokens.join(' '))
             return parse_token(statement_tokens.join(' '))
           else
             Logging::Logging.debug(
@@ -1560,14 +1560,14 @@ module Aya
                           [result[1], nil]]
           else
             Logging::Logging.debug(
-              'syntax error in function "{0}": ' \
-              'illegal argument "{1}"'.format(@name, token))
+              'syntax error in function "' + @name.to_s + '": ' \
+              'illegal argument "' + token.to_s + '"')
           end
         elsif token.start_with?('(')
           if not token.end_with?(')')
             Logging::Logging.debug(
-              'syntax error in function "{0}": ' \
-              'unbalanced "(" in the string({1})'.format(@name, token))
+              'syntax error in function "' + @name.to_s + '": ' \
+              'unbalanced "(" in the string(' + token.to_s + ')')
             return nil
           else
             statement = AyaStatement.new(token[1..-2])
@@ -1593,8 +1593,8 @@ module Aya
         end
         if text.count('"') > 0
           Logging::Logging.debug(
-            'syntax error in function "{0}": ' \
-            '\'"\' in string "{1}"'.format(@name, text))
+            'syntax error in function "' + @name.to_s + '": ' \
+            '\'"\' in string "' + text.to_s + '"')
         end
         if not text.include?('%')
           result = [TYPE_STRING_LITERAL, text]
@@ -1609,7 +1609,7 @@ module Aya
            pos_parenthesis_open < pos_block_open) # function
           if not token.end_with?(')')
             Logging::Logging.debug(
-              'syntax error: unbalanced "(" in "{0}"'.format(token))
+              'syntax error: unbalanced "(" in "' + token.to_s + '"')
           else
             func_name = token[0..pos_parenthesis_open-1]
             arguments = parse_argument(
@@ -1652,8 +1652,8 @@ module Aya
             for char in SPECIAL_CHARS
               if array_name.include?(char)
                 Logging::Logging.debug(
-                  'illegal character "{0}" in ' \
-                  'the name of array "{1}"'.format(char, token))
+                  'illegal character "' + char.to_s + '" in ' \
+                  'the name of array "' + token.to_s + '"')
                 break_flag = true
                 break
               end
@@ -1808,7 +1808,7 @@ module Aya
             rescue
               Logging::Logging.debug(
                 'index of array has to be integer: ' \
-                '{0}[{1}]'.format(var_name, var[1][1][0]))
+                '' + var_name.to_s + '[' + var[1][1][0].to_s + ']')
               return nil
             else
               index = nil
@@ -1825,7 +1825,7 @@ module Aya
           else
             Logging::Logging.debug(
               'illegal increment/decrement:' \
-              'type of variable {0} is not number'.format(var_name))
+              'type of variable ' + var_name.to_s + ' is not number')
           end
         elsif line[0] == TYPE_IF
           inner_blocks = line[1]
@@ -2005,7 +2005,7 @@ module Aya
               end
             end
           end
-          next_ = random.choice(range(@nonoverlap[2].length))
+          next_ = Random.rand(0..@nonoverlap[2].length-1)
           @nonoverlap[1] = @nonoverlap[2][next_]
           @nonoverlap[2].delete(next_)
         end
@@ -2042,7 +2042,7 @@ module Aya
         begin
           index = index.to_i
         rescue
-          Logging::Logging.debug('Could not convert {0} to an integer'.format(index))
+          Logging::Logging.debug('Could not convert ' + index.to_s + ' to an integer')
         else
           if ope == '='
             elem = right
@@ -2076,7 +2076,7 @@ module Aya
           elsif system_functions.exists(token[1])
             result = system_functions.call(namespace, token[1], [])
           elsif token[1].start_with?('random') # ver.3
-            result = random.randrange(0, 100, 1).to_i
+            result = Random.rand(0..99)
           else
             if token[1].start_with?('_')
               target_namespace = namespace
@@ -2139,13 +2139,13 @@ module Aya
           index = index.to_i
         rescue
           Logging::Logging.debug(
-            'index of array has to be integer: {0}[{1}]'.format(var_name, token[1][1]))
+            'index of array has to be integer: ' + var_name.to_s + '[' + token[1][1].to_s + ']')
         else
           if var_name == 'random' # Ver.3
-            result = random.randrange(0, index, 1).to_i
+            result = Random.rand(0..index-1)
           elsif var_name == 'ascii' # Ver.3
-            if 0 <= index < 0x80 ## FIXME
-              result = chr(index)
+            if 0 <= index and index < 0x80 ## FIXME
+              result = index.chr
             else
               result = ' '
             end
@@ -2175,13 +2175,13 @@ module Aya
           index = index.to_i
         rescue
           Logging::Logging.debug(
-            'index of array has to be integer: {0}[{1}]'.format(var_name, token[1][1]))
+            'index of array has to be integer: ' + var_name.to_s + '[' + token[1][1].to_s + ']')
         else
           if var_name == 'random' # Ver.3
-            result = random.randrange(0, index, 1).to_i
+            result = Random.rand(0..index-1)
           elsif var_name == 'ascii' # Ver.3
-            if 0 <= index < 0x80 ## FIXME
-              result = chr(index)
+            if 0 <= index and index < 0x80 ## FIXME
+              result = index.chr
             else
               result = ' '
             end
@@ -2421,7 +2421,9 @@ module Aya
           startpoint = line.length
           next
         else
-          buf = [buf, line[startpoint..pos-1]].join('')
+          if pos != 0
+            buf = [buf, line[startpoint..pos-1]].join('')
+          end
           startpoint = pos
         end
         endpoint = line.length
@@ -2674,8 +2676,7 @@ module Aya
       @saori_value = {}
       @saori_protocol = ''
       @errno = 0
-## FIXME
-#    @security = AyaSecurity.new(@aya)
+      @security = AyaSecurity.new(@aya)
       @functions = {
         'TONUMBER' => ['TONUMBER', [0], [1], nil],
         'TOSTRING' => ['TOSTRING', [0], [1], nil],
@@ -2874,7 +2875,7 @@ module Aya
 
     def TOHEXSTR(namespace, argv)
       begin
-        return '{0:x}'.format(argv[0].to_i)
+        return argv[0].to_i.to_s(16)
       rescue
         return ''
       end
@@ -2973,8 +2974,7 @@ module Aya
       if start < 0
         start = 0
       end
-      return str([line[0..start-1], to_insert, line[start..-1]].join(''),
-                 'CP932', 'replace') # XXX
+      return [line[0..start-1], to_insert, line[start..-1]].join('').encode("UTF-8", :invalid => :replace, :undef => :replace) # XXX
     end
 
     def MSTRLEN(namespace, argv)
@@ -3120,14 +3120,14 @@ module Aya
 
     def RAND(namespace, argv)
       if not argv
-        return random.randrange(0, 100, 1).to_i
+        return Random.rand(0..99)
       else
         begin
           argv[0].to_i
         rescue
           return -1
         end
-        return random.randrange(0, argv[0].to_i, 1).to_i
+        return Random.rand(0..argv[0].to_i-1)
       end
     end
 
@@ -3339,7 +3339,7 @@ module Aya
     def LOADLIB(namespace, argv)
       dll = argv[0].to_s
       result = 0
-      if dll
+      if not dll.empty?
         if @security.check_lib(dll)
           result = @aya.saori_library.load(dll, @aya.aya_dir)
           if result == 0
@@ -3436,7 +3436,7 @@ module Aya
       result = 0
       path = File.join(@aya.aya_dir, filename)
       if @security.check_path(path, accessmode[0])
-        norm_path = os.path.normpath(path)
+        norm_path = File.expand_path(path)
         if @aya.filelist.include?(norm_path)
           result = 2
         else
@@ -3457,7 +3457,7 @@ module Aya
     def FCLOSE(namespace, argv)
       filename = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, filename)
-      norm_path = os.path.normpath(path)
+      norm_path = File.expand_path(path)
       if @aya.filelist.include?(norm_path)
         @aya.filelist[norm_path].close()
         @aya.filelist.delete(norm_path)
@@ -3468,7 +3468,7 @@ module Aya
     def FREAD(namespace, argv)
       filename = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, filename)
-      norm_path = os.path.normpath(path)
+      norm_path = File.expand_path(path)
       result = -1
       if @aya.filelist.include?(norm_path)
         f = @aya.filelist[norm_path]
@@ -3487,7 +3487,7 @@ module Aya
     def FWRITE(namespace, argv)
       filename = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, filename)
-      norm_path = os.path.normpath(path)
+      norm_path = File.expand_path(path)
       data = [argv[1].to_s, "\n"].join('')
       if @aya.filelist.include?(norm_path)
         f = @aya.filelist[norm_path]
@@ -3499,7 +3499,7 @@ module Aya
     def FWRITE2(namespace, argv)
       filename = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, filename)
-      norm_path = os.path.normpath(path)
+      norm_path = File.expand_path(path)
       data = argv[1].to_s
       if @aya.filelist.include?(norm_path)
         f = @aya.filelist[norm_path]
@@ -3510,14 +3510,14 @@ module Aya
 
     def FCOPY(namespace, argv)
       src = Home.get_normalized_path(argv[0].to_s)
-      head, tail = os.path.split(src)
+      head, tail = File.split(src)
       dst = [Home.get_normalized_path(argv[1].to_s), '/', tail].join('')
       src_path = File.join(@aya.aya_dir, src)
       dst_path = File.join(@aya.aya_dir, dst)
       result = 0
-      if not os.path.isfile(src_path)
+      if not File.file?(src_path)
         @errno = 260
-      elsif not os.path.isdir(dst_path)
+      elsif not File.directory?(dst_path)
         @errno = 261
       elsif @security.check_path(src_path, 'r') and \
             @security.check_path(dst_path)
@@ -3536,20 +3536,20 @@ module Aya
 
     def FMOVE(namespace, argv)
       src = Home.get_normalized_path(argv[0].to_s)
-      head, tail = os.path.split(src)
+      head, tail = File.split(src)
       dst = [Home.get_normalized_path(argv[1].to_s), '/', tail].join('')
       src_path = File.join(@aya.aya_dir, src)
       dst_path = File.join(@aya.aya_dir, dst)
       result = 0
-      head, tail = os.path.split(dst_path)
-      if not os.path.isfile(src_path)
+      head, tail = File.split(dst_path)
+      if not File.file?(src_path)
         @errno = 265
-      elsif not os.path.isdir(head)
+      elsif not File.directory?(head)
         @errno = 266
       elsif @security.check_path(src_path) and \
             @security.check_path(dst_path)
         begin
-          os.rename(src_path, dst_path)
+          File.rename(src_path, dst_path)
         rescue
           @errno = 267
         else
@@ -3565,11 +3565,11 @@ module Aya
       filename = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, filename)
       result = 0
-      if not os.path.isfile(path)
+      if not File.file?(path)
         @errno = 270
       elsif @security.check_path(path)
         begin
-          os.remove(path)
+          File.delete(path)
         rescue
           @errno = 271
         else
@@ -3587,14 +3587,14 @@ module Aya
       src_path = File.join(@aya.aya_dir, src)
       dst_path = File.join(@aya.aya_dir, dst)
       result = 0
-      head, tail = os.path.split(dst_path)
-      if not os.path.exists(src_path)
+      head, tail = File.split(dst_path)
+      if not File.exist?(src_path)
         @errno = 274
-      elsif not os.path.isdir(head)
+      elsif not File.directory?(head)
         @errno = 275
       elsif @security.check_path(dst_path)
         begin
-          os.rename(src_path, dst_path)
+          File.rename(src_path, dst_path)
         rescue
           @errno = 276
         else
@@ -3610,11 +3610,11 @@ module Aya
       filename = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, filename)
       size = -1
-      if not os.path.exists(path)
+      if not File.exist?(path)
         @errno = 279
       elsif @security.check_path(path, 'r')
         begin
-          size = os.path.getsize(path)
+          size = File.size(path)
         rescue
           @errno = 280
         end
@@ -3628,12 +3628,12 @@ module Aya
       dirname = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, dirname)
       result = 0
-      head, tail = os.path.split(path)
-      if not os.path.isdir(head)
+      head, tail = File.split(path)
+      if not File.directory?(head)
         @errno = 283
       elsif @security.check_path(path)
         begin
-          os.mkdir(path, 0o755)
+          Dir.mkdir(path, 0o755)
         rescue
           @errno = 284
         else
@@ -3649,11 +3649,11 @@ module Aya
       dirname = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, dirname)
       result = 0
-      if not os.path.isdir(path)
+      if not File.directory?(path)
         @errno = 287
       elsif @security.check_path(path)
         begin
-          os.rmdir(path)
+          Dir.rmdir(path)
         rescue
           @errno = 288
         else
@@ -3674,23 +3674,22 @@ module Aya
       dirname = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, dirname)
       filelist = []
-#FIXME
-#      if @security.check_path(path, 'r')
-#        begin
-#          filelist = os.listdir(path)
-#        rescue
-#          @errno = 291
-#        end
-#      else
-#        @errno = 292
-#      end
+      if @security.check_path(path, 'r')
+        begin
+          filelist = Dir.entries(path).reject{|entry| entry =~ /^\.{1,2}$/}
+        rescue
+          @errno = 291
+        end
+      else
+        @errno = 292
+      end
       result = ''
       for index in 0..filelist.length-1
         path = File.join(@aya.aya_dir, dirname, filelist[index])
-        if os.path.isdir(path)
+        if File.directory?(path)
           result = [result, "\\"].join('')
         end
-        result = [result, os.fsdecode(filelist[index])].join('')
+        result = [result, filelist[index]].join('')
         if index != filelist.length - 1
           result = [result, separator].join('')
         end
@@ -3872,7 +3871,7 @@ module Aya
             charset = 'utf-8'
         end
           for line in f
-            line = str(line, charset)
+            line = line.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
             comma = line.index(',')
             if comma and comma >= 0
               key = line[0..comma-1]
@@ -4138,7 +4137,7 @@ module Aya
       else
         if @type == TYPE_STRING
           @line = ''
-          for i in range(@array.length)
+          for i in 0..@array.length-1
             if i == index
               @line = [@line, value.to_s].join('')
             else
@@ -4149,7 +4148,7 @@ module Aya
             end
           end
           if index >= @array.length
-            for i in range(@array.length, index + 1)
+            for i in @array.length..index
               if i == index
                 @line = [@line, @separator,
                          value.to_s].join('')
@@ -4173,9 +4172,9 @@ module Aya
     def dump
       line = nil
       if @type == TYPE_STRING
-        line = '{0}, "{1}", "{2}"'.format(@name, @line, @separator)
+        line = @name.to_s + ', "' + @line.to_s + '", "' + @separator.to_s + '"'
       elsif @type != TYPE_ARRAY
-        line = '{0}, {1}'.format(@name, @line)
+        line = @name.to_s + ', ' + @line.to_s
       else
         #pass
       end
@@ -4256,8 +4255,8 @@ module Aya
 
     def load(name, top_dir)
       result = 0
-      head, name = os.path.split(name.replace("\\", '/')) # XXX: don't use os.fsencode() here
-      top_dir = File.join(top_dir, os.fsencode(head))
+      head, name = File.split(name.gsub("\\", '/')) # XXX: don't encode here
+      top_dir = File.join(top_dir, head)
       if @saori and not @saori_list.include?(name)
         module_ = @saori.request(name)
         if module_
@@ -4265,14 +4264,14 @@ module Aya
         end
       end
       if @saori_list.include?(name)
-        result = @saori_list[name].load(top_dir)
+        result = @saori_list[name].load(:dir => top_dir)
       end
       return result
     end
 
     def unload(name=nil)
       if name
-        name = os.path.split(name.replace("\\", '/'))[-1] # XXX: don't use os.fsencode() here
+        name = File.split(name.gsub("\\", '/'))[-1] # XXX: don't encode here
         if @saori_list.include?(name)
           @saori_list[name].unload()
           @saori_list.delete(name)
@@ -4287,7 +4286,7 @@ module Aya
 
     def request(name, req)
       result = '' # FIXME
-      name = os.path.split(name.replace("\\", '/'))[-1] # XXX: don't use os.fsencode() here
+      name = File.split(name.gsub("\\", '/'))[-1] # XXX: don't encode here
       if name and @saori_list.include?(name)
         result = @saori_list[name].request(req)
       end

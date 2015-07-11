@@ -1127,7 +1127,7 @@ module Ninix_Main
       close_ghost(sakura)
     end
 
-    def start_sakura(key, prev: nil, vanished: false, init: false, temp: false, abend: nil)
+    def start_sakura(key, prev: nil, vanished: false, init: false, temp: 0, abend: nil)
       sakura = @ghosts[key].instance
       #assert sakura != nil
       if prev != nil

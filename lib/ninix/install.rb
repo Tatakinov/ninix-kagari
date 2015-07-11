@@ -309,7 +309,7 @@ module Install
         current_path = File.join(path, name)
         if File.directory?(current_path)
           head, tail = File.split(current_path)
-          if not mask.include?(tail) and Dir.entries(current_path).empty?
+          if not mask.include?(tail) and Dir.entries(current_path).reject{|entry| entry =~ /^\.{1,2}$/}.empty?
             FileUtils.remove_entry_secure(current_path)
           end
         end
@@ -515,7 +515,7 @@ module Install
         Logging::Logging.info('searching supplement target ...')
         candidates = []
         begin
-          dirlist = Dir.entries(File.join(homedir, 'ghost'))
+          dirlist = Dir.entries(File.join(homedir, 'ghost')).reject{|entry| entry =~ /^\.{1,2}$/}
         rescue SystemCallError
           dirlist = []
         end
@@ -607,7 +607,7 @@ module Install
 
     def uninstall_kinoko(homedir, name)
       begin
-        dirlist = Dir.entries(File.join(homedir, 'kinoko'))
+        dirlist = Dir.entries(File.join(homedir, 'kinoko')).reject{|entry| entry =~ /^\.{1,2}$/}
       rescue SystemCallError
         return
       end
