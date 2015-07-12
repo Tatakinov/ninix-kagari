@@ -2210,9 +2210,9 @@ module Aya
     end
 
     def evaluate_condition(namespace, condition)
-      result = 0
+      result = false
       if condition[1] == nil
-        return 1
+        return true
       end
       left = condition[1][0]
       ope = condition[1][1]
@@ -2237,24 +2237,24 @@ module Aya
       elsif ope[1] == '!='
         result = (left_result != right_result)
       elsif ope[1] == '_in_'
-        if right_result.is_a?(String) and left_resultis_a?(String)
+        if right_result.is_a?(String) and left_result.is_a?(String)
           if right_result.include?(left_result)
-            result = 1
+            result = true
           else
-            result = 0
+            result = false
           end
         else
-          result = 0
+          result = false
         end
       elsif ope[1] == '!_in_'
         if right_result.is_a?(String) and left_result.is_a?(String)
           if not right_result.include?(left_result)
-            result = 1
+            result = true
           else
-            result = 0
+            result = false
           end
         else
-          result = 0
+          result = false
         end
       elsif ope[1] == '<'
         if right_result.is_a?(String) != left_result.is_a?(String)

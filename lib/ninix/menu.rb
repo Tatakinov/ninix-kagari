@@ -525,7 +525,7 @@ module Menu
                 banner = nil
               end
               if entry.length > 1    
-                item.signal_connect('activate') do |a, i|
+                item.signal_connect('activate', title, url) do |a, title, url|
                   @parent.handle_request(
                     'NOTIFY', 'notify_site_selection', title, url)
                 end
@@ -600,7 +600,7 @@ module Menu
               banner = nil
             end
             if entry.length > 1
-              item.signal_connect('activate') do |a, i|
+              item.signal_connect('activate', title, url) do |a, title, url|
                 @parent.handle_request('NOTIFY', 'notify_site_selection', title, url)
               end
               item.set_has_tooltip(true)

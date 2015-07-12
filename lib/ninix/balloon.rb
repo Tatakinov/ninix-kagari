@@ -55,7 +55,7 @@ module Balloon
         result = @parent.handle_request(
           event_type, event, *arglist)
       else
-        result = handlers[event].call(*arglist)
+        result = method(handlers[event]).call(*arglist)
       end
       if event_type == 'GET'
         return result
@@ -1072,7 +1072,7 @@ module Balloon
             next
           end
         end
-        cr.set_source_surface(image_surface, x, y)
+        cr.set_source(image_surface, x, y)
         cr.paint()
       end
       # draw text
@@ -1106,7 +1106,7 @@ module Balloon
               mx = x + text_w
               my = y + (@font_height + @line_space) / 2
               my = my - mh / 2
-              cr.set_source_surface(@sstp_surface, mx, my)
+              cr.set_source(@sstp_surface, mx, my)
               cr.paint()
             end
           end
@@ -1564,7 +1564,7 @@ module Balloon
               my = y + (@font_height + @line_space) / 2
               my = my - mh / 2
               cr = @darea.get_window().cairo_create()
-              cr.set_source_surface(@sstp_surface, mx, my)
+              cr.set_source(@sstp_surface, mx, my)
               cr.paint()
               del cr
             end
@@ -1687,25 +1687,16 @@ module Balloon
     end
 
     def redraw(widget, cr, surface)
-      cr.set_source_surface(surface, 0, 0)
+      cr.set_source(surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.paint()
       w, h = @window.size
-      image_surface = cr.target.map_to_image
-      region = Cairo::Region.new()
-      data = image_surface.data
-      for i in 0..(data.size / 4 - 1)
-        if (data[i * 4 + 3].ord) != 0
-          x = i % image_surface.width
-          y = i / image_surface.width
-          region.union!(x, y, 1, 1)
-        end
-      end
+      region = Pix.surface_to_region(cr.target.map_to_image)
       # XXX: to avoid losing focus in the text input region
-      x = @entry.get_margin_left()
-      y = @entry.get_margin_top()
-      w = @entry.get_allocated_width()
-      h = @entry.get_allocated_height()
+      x = @entry.margin_left
+      y = @entry.margin_top
+      w = @entry.allocated_width
+      h = @entry.allocated_height
       region.union!(x, y, w, h)
       @window.input_shape_combine_region(region)
     end
@@ -1796,7 +1787,7 @@ module Balloon
     end
 
     def enter
-      send(@entry.get_text())
+      send(@entry.text)
     end
 
     def cancel
@@ -1818,7 +1809,7 @@ module Balloon
     ENTRY = 'Teach'
 
     def enter
-      send(@entry.get_text())
+      send(@entry.text)
     end
 
     def cancel
@@ -1882,7 +1873,7 @@ module Balloon
     end
 
     def enter
-      send(@entry.get_text())
+      send(@entry.text)
     end
 
     def cancel

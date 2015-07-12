@@ -17,6 +17,36 @@ require "ninix/logging"
 
 module Pix
 
+  def self.surface_to_region(surface)
+    region = Cairo::Region.new()
+    data = surface.data
+    flag_t = false
+    start_x = -1
+    for y in 0..(data.size / 4 / surface.width - 1)
+      for x in 0..surface.width-1
+        index = (y * surface.width + x) * 4
+        if (data[index + 3].ord) == 0
+          if flag_t
+            region.union!(start_x, y, x - start_x, 1)
+          end
+          flag_t = false
+          start_x = -1
+        else
+          if not flag_t
+            start_x = x
+            flag_t = true
+          end
+        end
+      end
+      if flag_t
+        region.union!(start_x, y, surface.width - 1 - start_x, 1)
+      end
+      flag_t = false
+      start_x = -1
+    end
+    return region
+  end
+
   class BaseTransparentWindow < Gtk::Window
     alias :base_move :move
 
@@ -116,17 +146,7 @@ module Pix
     end
 
     def set_shape(cr)
-      w, h = size
-      image_surface = cr.target.map_to_image
-      region = Cairo::Region.new()
-      data = image_surface.data
-      for i in 0..(data.size / 4 - 1)
-        if (data[i * 4 + 3].ord) != 0
-          x = i % image_surface.width
-          y = i / image_surface.width
-          region.union!(x, y, 1, 1)
-        end
-      end
+      region = Pix.surface_to_region(cr.target.map_to_image)
       input_shape_combine_region(region)
     end
   end
