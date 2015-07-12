@@ -126,7 +126,7 @@ module Bln
     end
 
     def execute(argument)
-      if not argument
+      if not argument or argument.empty?
         return RESPONSE[400]
       end
       name = argument[0]
@@ -169,7 +169,7 @@ module Bln
           bln[bln_id].destroy()
           bln.delete(bln_id)
         end
-        if text
+        if not text.empty?
           if update == 0 or not bln.include?(bln_id)
             bln[bln_id] = Balloon.new(@__sakura, @dir,
                                       data, text,
@@ -810,7 +810,7 @@ module Bln
           @text = [@text, @processed_text[0]].join("")
           draw_text(@text)
           @processed_text = @processed_text[1..-1]
-          @script_wait = time.time() + 0.014
+          @script_wait = Time.now + 0.014
         end
         return
       end

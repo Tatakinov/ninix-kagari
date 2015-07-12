@@ -409,7 +409,7 @@ module Aya
       elsif key == 'aitalkinterval' # Ver.3
         if not @global_namespace.exists('aitalkinterval')
           begin
-            value.to_i
+            Integer(value)
           rescue
             Logging::Logging.debug(
               'Could not convert ' + value.to_s + ' to an integer')
@@ -419,9 +419,9 @@ module Aya
         end
       elsif key != nil and not key.empty?
         begin
-          value = value.to_i
+          value = Integer(value)
         rescue
-          value = value
+          value = value.to_s
         end
         @global_namespace.put(key, value)
       end
@@ -485,9 +485,9 @@ module Aya
           key, value = line.split(':', 2)
           key.strip!
           value.strip!
-          if value =~ /[[:digit:]]/
-            value = value.to_i
-          else
+          begin
+            value = Integer(value)
+          rescue
             value = value.to_s
           end
           @req_key << key
@@ -1804,14 +1804,12 @@ module Aya
           if var[0] == TYPE_ARRAY # _argv[n] only
             index = evaluate_token(namespace, var[1][1])
             begin
-              index = index.to_i
+              index = Integer(index)
             rescue
               Logging::Logging.debug(
                 'index of array has to be integer: ' \
                 '' + var_name.to_s + '[' + var[1][1][0].to_s + ']')
               return nil
-            else
-              index = nil
             end
           end
           if value.is_a?(Fixnum) or value.is_a?(Float)
@@ -1899,7 +1897,7 @@ module Aya
           index = evaluate_token(namespace, line[1][0])
           inner_block = line[1][1]
           begin
-            index = index.to_i
+            index = Integer(index)
           rescue
             index = 0
           end
@@ -1984,7 +1982,7 @@ module Aya
             @nonoverlap[0] = list_
             @nonoverlap[2] = []
           end
-          if not @nonoverlap[2]
+          if @nonoverlap[2].empty?
             @nonoverlap[2] << ([0] * result.length)
             while true
               new = []
@@ -2040,7 +2038,7 @@ module Aya
       else
         index = evaluate_token(namespace, left[1][1])
         begin
-          index = index.to_i
+          index = Integer(index)
         rescue
           Logging::Logging.debug('Could not convert ' + index.to_s + ' to an integer')
         else
@@ -2136,7 +2134,7 @@ module Aya
         end
         index = evaluate_token(namespace, token[1][1])
         begin
-          index = index.to_i
+          index = Integer(index)
         rescue
           Logging::Logging.debug(
             'index of array has to be integer: ' + var_name.to_s + '[' + token[1][1].to_s + ']')
@@ -2172,7 +2170,7 @@ module Aya
         end
         index = evaluate_token(namespace, token[1][1])
         begin
-          index = index.to_i
+          index = Integer(index)
         rescue
           Logging::Logging.debug(
             'index of array has to be integer: ' + var_name.to_s + '[' + token[1][1].to_s + ']')
@@ -2444,7 +2442,7 @@ module Aya
           index_token = parse_token(line[startpoint + 2..endpoint-1])
           index = evaluate_token(namespace, index_token)
           begin
-            index = index.to_i
+            index = Integer(index)
           rescue
             Logging::Logging.debug(
               'illegal history index in the string(' + line + ')')
@@ -2576,11 +2574,11 @@ module Aya
                   line[endpoint + 1..end_of_block-1])
                 index = evaluate_token(namespace, index_token)
                 begin
-                  index = index.to_i
+                  index = Integer(index)
                 rescue
                   have_index = false
+                  index = nil
                 end
-                index = nil
               end
               value = target_namespace.get(token, index)
               if value != nil
@@ -3362,13 +3360,13 @@ module Aya
     def REQUESTLIB(namespace, argv)
       response = @aya.saori_library.request(
         argv[0].to_s,
-        argv[1].to_s.encode('Shift_JIS', 'ignore')) ## FIXME
-      header = response.encode("UTF-8", :invalid => :replace, :undef => :replace).splitlines()
+        argv[1].to_s.encode('Shift_JIS', :invalid => :replace, :undef => :replace)) ## FIXME
+      header = response.encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/)
       @saori_statuscode = ''
       @saori_header = []
       @saori_value = {}
       @saori_protocol = ''
-      if header
+      if header and not header.empty?
         line = header.shift
         line = line.strip()
         if line.include?(' ')

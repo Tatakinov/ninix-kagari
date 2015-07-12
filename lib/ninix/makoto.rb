@@ -36,7 +36,7 @@ module Makoto
         if i + 1 < j and '(|)'.include?(s[i + 1])
           buf << s[i + 1]
         else
-          buf << s[i, i + 2]
+          buf << s[i..i + 1]
         end
         i += 2
       elsif s[i] == '('

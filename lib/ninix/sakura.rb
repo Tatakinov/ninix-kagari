@@ -317,15 +317,15 @@ module Sakura
             key, value = line.split(',', 2)
             key = key.strip()
             if key == 'time'
-              if value.strip() =~ /[[:digit:]]/
-                ghost_time = value.strip().to_i
-              else
+              begin
+                ghost_time = Integer(value.strip())
+              rescue
                 #pass
               end
             elsif key == 'vanished_count'
-              if value.strip() =~ /[[:digit:]]/
-                ghost_vanished_count = value.strip().to_i
-              else
+              begin
+                ghost_vanished_count = Integer(value.strip())
+              rescue
                 #pass
               end
             end
@@ -2343,14 +2343,11 @@ module Sakura
     end
 
     def __yen_exclamation(args) ## FIXME
-      if not args.empty?
+      if args.empty?
         return
       end
       argc = args.length
-      args = []
-      for s in args
-        args << expand_meta(s)
-      end
+      args = args.map {|s| expand_meta(s)}
       if args[0] == 'raise' and argc >= 2
         notify_event(*args[1, 9])
       elsif args[0, 2] == ['open', 'readme']

@@ -43,12 +43,12 @@ module DLL
       end
       @dir = dir
       result = 0
-      if check_import != 0
+      if check_import == 0
         #pass
       elsif @loaded != 0
         result = 2
       else
-        if setup() != 0
+        if setup != 0
           @loaded = 1
           result = 1
         end
