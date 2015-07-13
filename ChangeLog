@@ -1,0 +1,4444 @@
+Tue July 14 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* バージョン4.500.0リリース.
+	* Ruby 2.x & Gtk+3 に移行した.
+	  (互換栞はAYA Ver.4のみ移行完了. 他は5.0リリースまでに移行予定.)
+
+Mon March 24 2014   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* アルファチャンネルがサポートされていない環境でも
+	  Shaped Window が使えるようにgtkhackを修正した.
+	  (Thanks to PaulLiuさん)
+	* NGMが文字コードがEUC-JPのMasterList.xmlを読めない問題を修正した.
+	  (Thanks to PaulLiuさん)
+	* NGMからのゴーストのインストールが実行されない問題を修正した.
+
+Mon November 11 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.18リリース.
+
+Sun November 10 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 以下のインストールイベントを実装した.
+	  OnInstallBegin
+	  OnInstallComplete
+	  OnInstallFailure
+	  OnKinokoObjectInstalled
+
+Thu November 7 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* リフレッシュインストールの場合には, そうであることが分かる様に
+	  ファイル削除の警告メッセージを変更した.
+
+Tue November 5 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* プラグインのアンインストール機能を追加した.
+
+Mon November 4 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* \![lock/unlock,repaint]が機能するように修正した.
+	  (SSP同様に実行中のスクリプト内でのみ有効とした.)
+
+Sun November 3 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* loggingモジュールへの出力をコンソールにも出すようにした.
+
+Wed August 28 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.17リリース.
+
+Sun August 25 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ユーザーがバルーンを動かしていない場合にも, サーフェスが持つ
+	  バルーンのオフセットを無視してしまっていたのを修正した.
+	* misaka.pyのchardetによる文字コード判定で, 結果がasciiと出た場合は
+	  そこで終了せずに他のファイルで判定を続行するようにした.
+	* サーフェス切り替え後にはサーフェス位置をリセットするようにした.
+	* passivemode中であってもinputbox, teachbox, communicateboxを
+	  開けるように修正した.
+
+Wed August 21 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.16リリース.
+	* アルファチャンネル付きpngに対するpnrの処理が正しく動作して
+	  いなかったのを修正した.(_gtkhack導入時のregression.)
+	* surfaces.txtの記述ミス対策を追加した.
+	* 一部のゴーストで最大サーフェスサイズが取得出来ていなかったのを
+	  修正した.
+
+Mon August 19 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* gomi.py: ごみ箱内にリンクがあると落ちる問題を修正した.
+	* aya5.py: ループ条件に整数値も使えるよう修正した.
+	* aya5.py: 条件式の評価が正しく行なわれないケースがあったのを修正した.
+	* SERIKOのbaseメソッドが複数指定されていた場合にサーフェスが
+	  正しく表示されない問題を修正した.
+
+Sat August 17 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* satori.pyでセーブデータの文字コード変換が間違っていたのを修正した.
+	* Python3.3でkawari8.pyがSAORI互換モジュールをアンロードする際に
+	  エラーで落ちるのを修正した.
+	* メニューのサイドバー画像が無い場合にエラーで落ちるのを修正した.
+
+Thu August 15 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 再度メニューのサイドバー画像を使用するようにした.
+
+Fri August 9 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.15リリース.
+
+Wed August 7 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ninix_main.py: Python3.3でプラグインが動作しない問題を修正した.
+	* プラグイン用ダイアログをPython3に対応させた.
+	* 上記修正に合わせてプラグインのstandard versionを2.6に上げた.
+
+Tue August 6 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* dll.py: Python3.3で動作しない問題を修正した.
+	  (併せて推奨されないimpパッケージからimportlibに移行した.)
+
+Tue July 2 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.14リリース.
+
+Sun June 30 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 複数ゴースト起動時にメニュー画像が正しく更新されない問題を修正した.
+	* メニューのGtkStyleContextの設定を実行するタイミングを
+	  見直すことで負荷を低減した.
+	* お気に入り/ポータルメニューのバナーやゴースト等のサムネイルが
+	  pnrとして処理されていたのを修正した.
+	* メニューのGtkStyleContextの設定でmenu.background.alignmentと
+	  menu.foreground.alignmentが反映されなくなっていたのを修正した.
+	* menu.sidebar.alignmentのデフォルト値が間違っていたのを修正した.
+
+Sat June 29 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* メニューのGtkStyleContextの設定方法を変更した.
+	  この修正で再びメニューのフォアグラウンド画像を使用するようになった.
+	  (サイドバー画像は非対応のまま.)
+
+Mon June 24 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* _gtkhackモジュールを復活させた.
+	  (新しいpycairoがリリースされるまでの暫定処置.)
+	  gdkpixbuf_get_pixels_array, gtkwindow_set_input_shapeの2つの
+	  メソッドを実装している.
+	  このメッソドを使うことで現在リリースされているpycairoに
+	  パッチを当てなくても動作するように出来る.
+	* lib/ninix/pix.pyで_gtkhackを使用するようにした.
+	* GdkWindowのメソッドraiseの呼び出し方法をraise_()に戻した.
+	  (pygobjectが修正された.)
+
+Tue February 26 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ウインドウ移動後の再描画処理要求をTransparentWindowの方で
+	  生成するようにした.
+
+Mon February 25 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Gtk.DrawingAreaを持たないBaseTransparentWindowクラスを追加し,
+	  TransparentWindowはこのクラスを継承するようにした.
+	* CommunicateWindowはGtk.Windowではなく, BaseTransparentWindowの
+	  インスタンスを作成して使うようにした.
+	* SurfaceWindow等で共通して行なっていた処理の幾つかを
+	  TransparentWindowに移した.
+	* NGM内でのサーフェス画像描画処理を修正した.
+
+Sun February 24 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 描画位置の補正処理はTransparentWindowクラス内で全て行ない
+	  SurfaceWindow等のクラスでは意識しなくて良いようにした.
+	* Gtk.DrawingAreaの生成とウインドウの背景色を透明に設定する処理を
+	  TransparentWindowクラスに移した.
+	* バルーンが見切れた際に描画位置の補正が2重に掛って、文字の位置が
+	  ずれる問題を修正した.
+
+Fri February 22 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.13リリース.
+	* TransparentWindowクラスをさらに改修し, それに合わせてサーフェスや
+	  バルーンなどの描画方法を変更した.
+	  (5.x系の描画システムの基本形が完成.)
+	* 「きのこ」などObserverクラスのインスタンスが残っている状態で
+	  ゴーストを終了すると落ちる問題を修正した.
+	* サーフェスの大きさの基準としてデフォルトサーフェスではなく
+	  最大のサーフェス画像のサイズを使用するようにした.
+	  surfaces.txtのdescriptスコープのmaxwidthの方が大きい場合には
+	  そちらを優先する.
+
+Sat February 16 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* TransparentWindowクラスの描画方法を変更した際に, サイズ変更後の
+	  ウインドウの移動処理を削ってしまっていたのを戻した.
+	  (リビジョン114f4bf202008297488b64a52ea571054f3c914dのコミットで
+	   発生したregressionの修正.)
+
+Fri February 15 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* surfaces.txtのdescriptスコープからSERIKOのバージョン情報を
+	  読み取って使用するようにした.
+	* SERIKO/2.0でstart/stopが動作するように再度修正した.
+
+Thu February 14 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.12リリース.
+	* SERIKOのstart/stopメソッドで落ちる問題を修正した.
+	 (リビジョンa37a6184e5a8f346a0357a141c9d4393497ff616のコミットに
+	  問題があった.)
+	* バルーンの位置をマウスドラッグで調整できるようにした.
+	  初期化するにはサーフェス上でCtrl-Shift-F10を入力する.
+
+Wed February 13 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* TransparentWindowクラスの描画方法を変更した.
+	  - ウインドウが見切れる際のちらつきを低減した.
+	  - 特定の条件下でウインドウが再描画されなくなる問題への対策をした.
+	    (再現条件はGtk.Window.hide()が呼ばれる時にそのウインドウ上で
+	     マウスのボタンを押したままにしていること. 問題の原因は
+	     Gtk+とウインドウマネージャのレースコンディション?)
+	* ウインドウの背景色を明示的に指定するようにした.
+	  (Gtk.Window.override_background_color()を使用.)
+	* typoを修正した.(scalling -> scaling)
+	* Pythonのビルトイン関数名と同じ変数名を変更した.(dir -> direction)
+
+Sat February 9 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SERIKO/2.0のstop, alternativestopの両メソッドを実装した.
+	* SERIKO/2.0のパターン処理用の正規表現変更でstartメソッドが
+	  動かなくなっていたのを修正した.
+	* SERIKOのasisメソッドを実装した.
+	* SERIKO/2.0のパターン処理用の正規表現に間違いがあったのを修正した.
+	* SERIKO/2.0のメソッドの一部でパラメータの取得に問題があったのを
+	  修正した.
+
+Fri February 8 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SERIKO/2.0のalternativestartのID区切り文字として
+	  ピリオドとカンマの両方を受け付けるようにした.
+	* SERIKO/2.0のパターン処理用の正規表現を修正した.
+
+Thu February 7 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SERIKO/MAYUNA/elementのメソッド対応を拡張した.
+	  - interpolateとreplaceメソッドを実装した.
+	  - reduceをMAYUNA以外でも使えるようにした.
+	  - overlayとoverlayfastの動作が同じになっていたのを修正した.
+
+Wed February 6 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\![set,balloonoffset]を実装した.
+
+Tue February 5 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SSPでSERIKOのintervalに追加されたperiodicを実装した.
+
+Mon February 4 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.11リリース.
+
+Sun February 3 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\![bind]を実装した.
+	* \![*], \![sound], \![quicksession]が動かない問題を修正した.
+	 (リビジョン06dbd307ba1e0f1652e035cc0bb7e7233d38ad3cのコミットに
+	  問題があった.)
+	* おすすめ/ポータルで名前だけのエントリ(URL以降省略)があった場合に
+	  メニューアイテム無効で表示するようにした.(SSP互換)
+
+Sat February 2 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* OnCloseイベントのReference0がshutdownの場合にはスクリプトの
+	  再生終了時点で強制的に終了するようにした.
+	* OnCloseAllイベントを実装した.
+
+Fri February 1 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* マウスボタンイベントの処理を改修した.
+	  - OnMouseClock, OnMouseDoubleClickに加えて
+	    OnMouseDown, OnMouseDownEx, OnMouseUp, OnMouseUpEx,
+	    OnMouseClickEx, OnMouseDoubleClickEx を実装した.
+	  - Reference0からReference6まで全てに対応した.
+	    (ただし, 現状ではReference6は常に"mouse"が来る.)
+	* OnDressupChangedのReference1が正しくなかったのを修正して,
+	  Reference3を追加した.
+
+Tue January 22 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.10リリース.
+
+Mon January 21 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\![close,inputbox,ID]を実装した.
+
+Sun January 20 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\![set,autoscroll,enable/disable]を実装した.
+	* SakuraScriptの\x[noclear]を実装した.
+
+Wed January 16 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* サーフェスエイリアス用の正規表現を修正した.
+
+Tue January 15 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* alias.txtおよびsurfaces.txtでchar?.surface.aliasによる
+	  \p[2]以降のサーフィスエイリアス定義を可能にした.
+
+Mon January 14 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* installedghostname, installedshellname, installedballoonname
+	  イベントを実装した.
+
+Sun January 13 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バルーンのdescript.txtでSSTPメッセージフォント色を指定する
+	  sstpmessage.font.color.[rgb]をサポートした.
+	* OnInitializeおよびOnDestroyイベントを実装した.
+	* シェルのdescript.txtでchar?.bindgroup/char?.menuitemによる
+	  \p[2]以降の着せ替え定義を可能にした.
+	* バルーンが本来表示すべき位置とは別の場所に一旦出てから正しい位置に
+	  移動してくることがある問題を修正した.
+	  (4.99.6で修正したのとは別の箇所に同じ問題が残っていた.)
+	* ゴーストのdescript.txtでバルーンの標準画像IDを指定する
+	  balloon.defaultsurfaceをサポートした.
+
+Fri January 11 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.9リリース.
+
+Thu January 10 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* READMEダイアログを閉じる動作がninix-ayaの終了と重なると落ちる
+	  問題を修正した.
+
+Wed January 9 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バルーン同梱ゴーストのインストールを行なった際には再起動しなくても
+	  メニューにそのゴーストだけでなくバルーンも追加されるよう修正した.
+	* READMEダイアログを複数開けるようにした.
+
+Tue January 8 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\![open,readme]を実装した.
+	  READMEダイアログはゴースト/バルーンのインストール時にも開く.
+	  (シェルやサプリメント等には未対応.)
+	* インストーラがファイル削除の途中で停止する問題を修正した.
+	* バルーン同梱ゴーストの上書きインストールが正しく実行されない
+	  問題を修正した.
+
+Mon January 7 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* お気に入り/ポータルメニューでバナーを表示するようにした.
+	  (表示方法はゴースト等のサムネイルと同様.)
+	  ローカル(ghost/master/banner/)にファイルがある場合のみ表示する.
+	  (URLが渡された場合の画像取得は行なっていない.)
+
+Sun January 6 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ゴースト/バルーン/サーフェス/着せ替えそれぞれにあるサムネイルを
+	  メニューのゴースト召喚/交代, バルーン切り替え, シェル切り替えの
+	  各項目にカーソルを合わせた時に表示するようにした.
+
+Sat January 5 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.8リリース.
+	* Copyrightを2013年に更新した.
+	* SakuraScriptの\CをSSTPで実行出来ないタグ
+	  (lib/ninix/sstp.py内のPROHIBITED_TAGS)に追加した.
+	  理由はゴーストのトークに追記することが出来てしまうため.
+	* SakuraScriptの\Cを実装した.
+
+Fri January 4 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ゴーストのdescript.txtの(sakura|kero).seriko.defaultsurface指定を
+	  サポートした.(char2以降の指定は以前からサポートしていた.)
+	  指定があるときにはSSPと同様に「0番10番がない」シェルを許容する.
+	* SakuraScriptの\![set,trayicon]を実装した.
+	* タイムクリティカルセッション中はOnMouse系イベントが起きないように
+	  Sakuraクラスのnotify_eventメソッドを修正した.
+
+Thu January 3 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 当たり判定の表示機能に文字列表示を追加した.
+	  (\![enter,collisionmode,rect]にも対応.)
+	* SakuraScriptの\![enter/leave,collisionmode]を実装した.
+
+Wed January 2 2013   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 異常終了後の起動でOnBootイベントのReference6, 7を送信するようにした.
+	  ~/.ninix/.lock ファイルにタイマ割り込みを処理中のゴースト名を
+	  書き込み, それが残っているかどうかを見ている. 正常終了時には
+	  このゴースト名は消去される.
+	  ゴーストを複数起動しても機能するが, 不正確な場合がある.
+	  (SERIKO, SAORI, 猫どりふ等のタイマ割り込みが別にあるため,
+	   そちらで落ちた場合はこの情報はあてにならない.)
+
+Sun December 9 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.7リリース.
+
+Fri December 7 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* menu.background.font.color.[rgb]および
+	  menu.foreground.font.color.[rgb]の値が0から255の範囲を出ないよう
+	  制限を加えた.(一部ゴーストでこの範囲外の値が指定されていたため
+	  落ちることがあった.)
+	* 「里々」互換モジュールの暗号化辞書の処理が動かなくなっていたのを
+	  修正した.
+
+Thu December 6 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ssu.dll互換モジュールが正常に動かなくなっていたのを修正した.
+
+Wed December 5 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* OnBalloonCloseイベントが間違ったタイミングで送られていたのを修正し,
+	  OnBalloonBreakおよびOnBalloonTimeoutイベントを実装した.
+	* Sakuraクラスのis_talkingメソッドで落ちる問題を修正した.
+
+Mon December 3 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\![set,*]の処理において引数の数のチェック漏れが
+	  あったのを修正した.
+	* SakuraScriptの\![set,alignmenttodesktop,default]を実装した.
+	* メニュー制御のためのShioriResouceの一部に対応した.
+	  (「裏子」のメニュー画像が出るようになった.)
+
+Sun December 2 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.6リリース.
+
+Sat December 1 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バルーンが本来表示すべき位置とは別の場所に一旦出てから正しい位置に
+	  移動してくることがある問題を修正した.
+	  (移動処理を表示の有無にかかわらず行なうよう修正した.)
+	* メニューが画像よりも大きい場合には画像の右下の端の色で
+	  画像が切れた部分を塗り潰すようにした.
+	* pix.pyにpng画像の右下の端の色情報を取り出すための関数
+	  get_png_lastpixを追加した.
+	* shellのdescript.txtにあるmenu.background.alignment,
+	  menu.foreground.alignment, menu.sidebar.alignmentの値を
+	  使用するようにした.
+	* 最後に再生したスクリプトを保持するメンバlast_scriptと
+	  現在のシェル名を取得するメソッドget_current_shell_nameを
+	  Sakuraクラスに追加した.
+	* ゴースト間コミュニケーションの機能をOnOther*イベントの処理と
+	  統合した. これにより1つのイベントでコミュニケート対象のゴーストに
+	  OnCommunicateとOnOther*の両方が来る問題が解消した.
+	  (Communicateクラスのsend_messageメソッドは廃止し, notify_otherに
+	   一本化した.)
+	* OnGhostChangedイベントのReference1, 2, 7の送信を実装した.
+	* 上記変更に併せてOnOtherGhostChangedイベントのReferenceを修正した.
+	* OnVanishedイベントにスクリプトを返さなかった場合に,
+	  OnBootへフォールバックする前にOnGhostChangedを試すよう修正した.
+
+Fri November 30 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* dll/aya.py: Python3対応漏れを修正.
+
+Wed November 28 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Sakuraクラスにスクリプト再生後に処理する内容を入れておくメンバ
+	  script_finallyを追加した. 既にあったscript_post_procとは異なり
+	  スクリプトがブレークされた場合にも実行される.
+	* Bootイベント後にサーフェスが出ていない場合にデフォルトサーフェスを
+	  出す処理は, Sakuraクラスのscript_post_procではなくscript_finallyに
+	  入れるようにした.(Bootイベントがブレークされた場合にも対応するため.)
+	* OnOther*イベントの送信に必要な機能をCommunicateクラスに実装した.
+	* SakuraScriptの\![set,otherghosttalk]と\![set,othersurfacechange]
+	  を実装した.
+	* OnOtherGhostBooted, OnOtherGhostClosed, OnOtherGhostChanged,
+	  OnOtherSurfaceChange, OnOtherGhostVanished, OnOtherGhostTalk
+	  イベントを実装した.
+	  ただし, OnOtherGhostChangedのReferenceは不完全である.
+	  (OnGhostChangedのReferenceの追加が完了次第修正予定.)
+	  また, OnSurfaceChangeのReference3に「旧サーフェスID」を,
+	  Reference4に「新しいサーフェスの大きさ(座標：左,上,右,下)」を
+	  独自に追加した.
+	  (上記2点はninix-ayaのOnOther*イベントの生成方法に関係している.
+	   元となるイベントの終了を受けて生成するので, そのイベントの時点で
+	   OnOther*の生成に必要な情報が渡されている必要があるため.)
+
+Tue November 20 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SERIKO baseに設定されているサーフェスを当たり判定領域の基準に
+	  するように変更した.
+
+Mon November 19 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\![change,balloon,バルーン名]を実装した.
+
+Sun November 18 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* OnUpdate系イベントのReference情報追加に対応した.
+	* ネットワーク更新イベントのOnUpdate.OnMD5CompareBeginを実装した.
+	* SakuraScriptの\![call,ghost,ゴースト名]を実装した.
+	* OnDisplayChangeイベントが複数回送信される問題を修正した.
+	* OnDisplayChangeイベントの送信の際にキャラウィンドウの位置を
+	  再調整するようにした.
+	* SakuraScriptの\![vanishbymyself]が動かなくなっていたのを修正した.
+	* SakuraScriptの\![vanishbymyself,ゴースト名]に対応した.
+
+Sat November 17 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\![quicksession,true/false]を実装した.
+
+Fri November 16 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.5リリース.
+	* SakuraScriptの\![sound]および\_Vを実装した.
+	  再生にはGstreamerを使用する.
+	  (\![sound]はplay, cdplay, loop, stop, wait, pause, resume全て対応.)
+	* lib/ninix/dll/mciaudior.py, mciaudio.py:
+	  再生状態を独自に管理するのではなく, 情報をGstreamerから
+	  取得するように修正した.
+
+Thu November 15 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* OnGhostChangingイベントのReferenceの内容を修正した.
+	  (Reference0からReference3まで全てに対応した.)
+	* OnGhostCalling(ゴースト呼び出し中)イベントを実装した.
+
+Wed November 14 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* OnDressupChanged(着せ替え変更通知)イベントを実装した.
+	* TransparentWindowクラスのinput_shape_combine_regionの処理を
+	  再度修正した. self.__childの位置のずれをオフセットとして
+	  GdkWindowに対してinput_shape_combine_regionを呼ぶようにした.
+
+Tue November 13 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\8(WAV再生)を実装した.
+	* SakuraScriptの\8および\_vをSSTPで実行出来ないタグ
+	  (lib/ninix/sstp.py内のPROHIBITED_TAGS)に追加した.
+
+Mon November 12 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptEnvの%*を実装した.
+
+Fri November 9 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* マウスイベントのOnMouseDragStart(マウスドラッグ開始)および
+	  OnMouseDragEnd(マウスドラッグ終了)を実装した.
+
+Thu November 8 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 終了イベントを補足してゴーストを終了させるようにした.
+	  (POSIX環境ではSIGTERMのみ補足し, SIGKILLは即終了になります.)
+	* OnCloseイベントのReference0に終了理由(user|shutdown)を
+	  入れる様にした.
+
+Wed November 7 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptEnvの%wronghour(正しくない現在時間)を実装した.
+
+Tue November 6 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* OnSurfaceChangeイベントの送信処理をSakuraクラスから
+	  SurfaceWindowクラスに移し, SSP同様にReference2を追加した.
+
+Mon November 5 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 起動時以外にも画面のサイズが変化した際にはその都度
+	  OnDisplayChangeイベントを送る様にした.
+
+Sun November 4 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\z, \yを実装した.(挙動は\eと同じ.)
+	* OnKeyPressイベントのReference2にキーを押したままのときの
+	  リピート回数を入れるようにした.
+	* TransparentWindowクラスではinput_shape_combine_regionメソッドは
+	  自分(self)ではなくself.__childに対して呼び出すように変更した.
+	  (ウインドウが見切れている場合に, self.__childの位置をselfとは
+	   ずらしていることがあるため.)
+
+Sun November 4 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.4リリース.
+
+Sat November 3 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* サーフェスのdrag_data_receivedメソッドの戻り値を修正した.
+	* インプットボックス等(CommunicateWindowクラスのウインドウ)に
+	  DnDでも入力出来るようにした.
+	* EscキーでTeachBoxを閉じても内部の状態管理がオープンのまま
+	  解除されず, ゴーストの終了等が出来なくなるバグを修正した.
+
+Fri November 2 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 選択したシェルの情報が正しく記録されないバグを修正した.
+
+Thu November 1 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* dll/mciaudio.py: typoを修正した.
+	* SAORIクラスを抽象化した.
+	* CommunicateWindowクラスを抽象化した.
+
+Tue October 30 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 入力文字を隠す入力ボックスを開くためのSakuraScript
+	  \[open,passwordinput] を実装した.
+	* 入力ボックスなどのコミュニケートウインドウのテキスト入力領域に
+	  マウスカーソルが入ると入力フォーカスが外れてしまう問題を修正した.
+	* OnCommunicateInputCancel, OnTeachInputCancel, OnUserInputCancel
+	  イベントを実装した.
+
+Sun October 28 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* コンソールへhttp, ftpのURIをDnDすることでもゴーストなどを
+	  インストール出来るようにした.
+
+Wed October 10 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.3リリース.
+	* dll/gomi.py:
+	  ゴミ箱がマウントされているボリュームのトップディレクトリに
+	  ある場合にも対応した.
+
+Mon October 8 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* dll/gomi.py:
+	  ユーザーのホームディレクトリにあるゴミ箱のパス指定方法を
+	  "The FreeDesktop.org Trash specification"に合わせた.
+	  (http://standards.freedesktop.org/trash-spec/trashspec-0.8.html)
+	* dll/gomi.py: -f, --force オプションに対応した.
+
+Thu September 27 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.2リリース.
+	* READMEのGStreamerに関する記述を更新した.
+	* lib/ninix/dll/mciaudior.py:
+	  GStreamer 1.0でループ再生が機能しない問題を修正した.
+	  (4.99.xではGStreamer 0.10でのループ再生はサポートしない.)
+
+Sun August 19 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.1リリース.
+
+Sat August 18 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* dll/gomi.py: dbus-pythonからGDBusに移行した.
+	* README: dbus-pythonに関する記述を削除した.
+
+Thu August 16 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.99.0(bulletproof)リリース.
+
+Wed August 15 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* README: gomi.pyが使用するdbus-pythonについての記述を追加した.
+
+Sat August 12 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* pix.py:
+	  TransparentWindowクラスにupdate_shapeメソッドを追加し,
+	  drawイベントの際にはこのメソッドを呼び出すようにした.
+	* pycairoおよびpygobjectのcairo_region_tサポートが無くても
+	  エラーが出ないようにした.
+	  (cairo_region_tサポートが無い場合にはウインドウ形状が矩形になる.)
+
+Fri August 11 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* READMEを更新した.
+	* doc/saori.txtにgomi.pyに関する記述を追加した.
+	* locale/ja.poを更新した.
+	* Python3移行作業をした.
+	  + 今回更新したファイル: setup.py, ninix_win32_postinst.py
+
+Fri August 10 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* プラグインもPython3環境に移行が必要なため, サポートする
+	  プラグインのstandard versionを2.5以上にすることで古い
+	  プラグインが起動出来ないようにした.
+	* ninix_main.py: optparseからargparseモジュールに移行した.
+
+Fri August 10 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* dll/gomi.py:
+	  gomi.dll互換モジュールを追加した.
+	  現状ではGNOME環境のみのサポートで, 動作にdbus-pythonが必要.
+
+Wed August 8 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ウインドウの形状を指定するタイミングをdrawイベントの処理時点に
+	  変更した.
+	* pix.py:
+	  ウインドウサイズの変更時にそれに合わせてGtk.DrawingAreaのサイズも
+	  明示的に変更するようにした.
+
+Mon August 6 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Python3移行作業をした.
+	  + 今回更新したファイル: dll/aya5.py
+	* dll/aya.py, dll/aya5.py:
+	  SAORIのロード時に渡すパス名がSHIORIのトップディレクトリだったのを
+	  SAORIの置かれているディレクトリ名も含めるよう修正した.
+
+Tue July 31 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Python3移行作業をした.
+	  + 今回更新したファイル: dll/aya5.py
+	* balloon.py:
+	  上下方向についてバルーンが画面外に見切れることがないようにした.
+
+Sat July 28 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Python3移行作業をした.
+	  + 今回更新したファイル: sakura.py
+
+Sat July 28 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Python3移行作業をした.
+	  + 今回更新したファイル:
+	    dll/aya.py
+	* dll/aya.py:
+	  データベースファイルの文字コードをUTF-8に変更し, フォーマットの
+	  バージョンを1.1から2.1に上げた.
+	  (EUC-JPを使用しているバージョン1.0および1.1のファイルも読み込める.)
+
+Fri July 27 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Python3移行作業をした.
+	  + 今回更新したファイル:
+	    dll/aya.py, dll/httpc.py, dll/kawari.py, dll/misaka.py,
+	    dll/satori.py, dll/ssu.py, dll/wmove.py
+	* dll/bln.py: クラス変数timeout_idの初期化タイミングを変更した.
+	* menu.py:
+	  Menuクラスの__imagepathクラス変数の内容をファイルのパスから
+	  背景画像の指定するCSSの文字列(bytes)に変更した.
+
+Mon July 23 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Python3移行作業をした.
+	  + 今回更新したファイル:
+	    menu.py
+	* menu.py:
+	  メニューの背景画像の指定にgtk-widget CSSを利用するようにした.
+	  ただし, sidebarは無しでprelightの指定は問題があるため使用せず.
+	  メニューが画像より大きい場合の余白の処理も未実装.
+
+Sun July 22 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Python3移行作業をした.
+	  + 今回更新したファイル:
+	    install.py, sakura.py, ninix_main.py
+
+Sat July 21 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Python3移行作業をした.
+	  + 今回更新したファイル:
+	    alias.py, home.py, plugin.py, prefs.py, sakura.py, sstp.py,
+	    sstplib.py, update.py, ninix_main.py
+	* prefs.py: mimetoolsからemailモジュールに移行した.
+	* sakura.py:
+	  PyGIを通してGStreameを利用するように変更した.
+	  (gst-pythonは不要になった.)
+	* ninix_main.py:
+	  バージョン4.2.10で導入したstderrのチェックはPython3では不要なので
+	  削除した.
+
+Thu July 19 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Python3移行作業をした.
+	  + 今回更新したファイル:
+	    balloon.py, dll/mciaudio.py, dll/mciaudior.py, dll/niseshiori.py,
+	    home.py, pix.py, sstplib.py, surface.py
+	* balloon.py:
+	  CommunicateWindowクラスもサーフェスなどと同様に
+	  Gtk.Window.input_shape_combine_region()を使用するように変更した.
+	* balloon.py:
+	  CommunicateWindowクラスの持つGtk.Entryについてフォントの指定を
+	  追加した.
+	* balloon.py:
+	  CommunicateWindowクラスでGtk.FixedではなくGtk.Overlayを
+	  使用するように変更した.
+	* dll/mciaudio.py, dll/mciaudior.py:
+	  PyGIを通してGStreameを利用するように変更した.
+	* sstplib.py: mimetoolsからemailモジュールに移行した.
+
+Sat July 14 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* doc/satori.txtの記述を修正した.
+	* Python3移行作業をした.
+	  + 今回更新したファイル:
+	    config.py, dll.py, dll/bln.py, dll/hanayu.py, dll/kawari8.py,
+	    dll/saori_cpuid.py, dll/yaya.py, kinoko.py, nekodorif.py, ngm.py
+	* cairo_region_tを利用してウインドウの形状を指定するようにした.
+	  (ただし, pycairoとpygobjectにパッチが必要.)
+	* dll/saori_cpuid.py: cpu.nameの処理が抜けていたのを追加した.
+	* ngm.py: NGMクラスのnextメソッドの名前をgo_nextに変更した.
+
+Thu July 12 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Python3移行を開始した.(以下は全ファイルで行なう共通の修正.)
+	  - 2to3で修正される部分については省略する.
+	  - 旧式classは無くなったので親クラスとしてobjectを指定する必要は
+	    無くなった.
+	  - ファイルパスとしてはstrではなくbytesクラスのオブジェクトを
+	    使用するようにした.
+	  - ファイルパスの文字コード処理にはos.fsencode(), osfsdecode()を
+	    使用するようにした.
+	  - 文字列についてstr(Unicode文字列)とbytesの区別を行なった.
+	  - 必要に応じて文字コード指定をShift-JISからCP932に変更した.
+	  - 結果に整数を必要とする除算は/ではなく//演算子を使うか明示的に
+	    intに変換するようにした.
+	  + 今回更新したファイル:
+	    communicate.py, dll/kawari8.py, dll/textcopy.py, entry_db.py,
+	    keymap.py, makoto.py, metamagic.py, script.py, seriko.py,
+	    version.py
+	* dll/osuwari.py: 動作しなくなっていたのを修正した.
+	* seriko.py: GLib.get_current_time()ではなく
+	             GLib.get_monotonic_time()を使用するようにした.
+	* version.py: バージョンを4.99.0(bulletproof)に上げた.
+
+Fri January 19 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* pix.py: 変数名を修正した.
+
+Thu January 18 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 一部の画像でpnrの処理が正しく動かない問題を修正した.
+	  (処理にはNumpyを使うようにした.)
+
+Wed January 18 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* pnrの処理を高速化した.
+
+Wed February 22 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.3.9リリース.
+
+Tue February 21 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* プラグインの保存していたデータが消える場合があるのを修正した.
+	* プラグインのstandard versionを2.3から2.4に上げた.
+	* プラグインがユーザーの入力を受け取るためのダイアログを追加した.
+	  BasePluginにダイアログを開くためのopen_dialogメソッドを追加した.
+
+Thu January 19 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* アルファチャンネル付きpngファイルに対するpnrの処理を高速化した.
+
+Mon January 16 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.3.8リリース.
+
+Sun January 15 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* kawari8.soがSegmentation faultで落ちる場合があったのを修正した.
+	  (詳細は http://shy.b.sourceforge.jp/2012/01/14/ninix-aya-with-kawari8%e3%81%ab%e3%83%90%e3%82%b0%e7%99%ba%e8%a6%8b/ を参照.)
+
+Sat January 14 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SERIKOによるサーフェスの書き換えを抑制するユーザー設定を削除した.
+	* SERIKOアニメーションの品質に関するユーザー設定の下限を
+	  0.1(3fpsに相当)から0.4(12fpsに相当)に引き上げた.
+
+Fri January 13 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* サーフェスとバルーンの透過率をユーザー設定から削除した.
+	  (これまでの実装では, 1.0以外の値を設定するとPNAファイルで
+	   設定されたアルファチャンネルが無視されるため.
+	   PNAファイルと折り合いの付く形の実装であれば再度追加する
+	   可能性はある.)
+
+Thu January 12 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Cairoによる描画処理のコードを整理した.
+
+Wed January 11 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Application.find_ghost_by_name()の引数を2箇所直し忘れていたのを
+	  修正した.
+
+Tue January 10 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* GNOMEデスクトップ環境でSakuraScriptの\![set,wallpaper]を
+	  処理する際にGConfではなくGioを使用するようにした.
+	  (python-gconfのインストールは不要になった.)
+
+Mon January 9 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* PyGTK2からPyGI GTK3へ移行した.(gtk3ブランチ)
+	  残っている作業はcairo_region_t, cairo_pattern_tを使用する部分.
+	  InputShape(ShapedWindow)とメニューの背景画像が該当する.
+
+Mon January 9 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* easyballoonのマウスドラッグによる移動が表示倍率の影響を
+	  受けないように修正した.
+
+Sun January 8 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* satori.pyの文字コード指定を修正した.(追加)
+	* 猫どりふ互換機能で無駄な描画があったのを修正した.
+	* ngm.pyの文字コード指定を修正した.
+
+Sun January 1 2012   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Copyrightを2012年に更新した.
+	* PyGTK All-in-one Installer for Windows 2.24.1がリリースされたので
+	  それに合わせてKNOWN_ISSUESの内容を更新した.
+
+Wed December 28 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* kawari.pyの文字コード指定を修正した.
+	* niseshiori.pyの文字コード指定を修正した.
+	* satori.pyの文字コード指定を修正した.
+	* aya5.pyの文字コード指定を修正した.
+	* aya5.pyにAYA Ver.4のシステム関数のコードが残っていたのを削除した.
+
+Sat December 24 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.3.7リリース.
+
+Fri December 23 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SERIKOで位置が変化している状態のサーフェスをマウスドラッグで
+	  移動すると落ちる問題を修正した.
+
+Wed December 21 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* balloon.pyのtypoを修正した.
+	* easyballoon互換モジュールでeasyballoonの全消去('clear')が
+	  機能しなくなっていたのを修正した.
+
+Tue December 20 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ゴースト起動時のバルーン検索で落ちる場合があるバグを修正した.
+	* aya.pyファイルの文字コードをutf-8に変更した.
+	  (内部の処理には従来通りEUC-JPを使用している.)
+	* bln.pyの文字コード指定を修正した.
+
+Mon December 19 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* BOM付きUTF-8で記述された設定ファイル(descript.txt, install.txt,
+	  surfaces.txt, plugin.txt)の読み込みに対応した.
+	* デフォルトの文字コードがutf-8であることに依存しないように,
+	  文字コードの指定を厳密にした.
+	  (現状では"import gtk"の結果としてutf-8にセットされているが,
+	   PyGTK2からPyGI GTK3に移行した場合にはasciiになるため.)
+	  ただし, dll/以下のファイルについてはまだ修正していない.
+
+Fri December 16 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* easyballoon互換モジュールの設定ファイルにfont.colorの指定が無い
+	  エントリがある場合に落ちる問題を修正した.
+	* nar(zip)アーカイブ内にディレクトリのみの項目がある場合に
+	  インストール出来ない問題を修正した.
+	  (Thanks to Donさん)
+	* 使用率グラフの表示で落ちる問題を修正した.
+
+Sat December 10 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.3.6リリース.
+	* install.pyに残っていたninix-installコマンドのためのコードを削除した.
+	* Sakuraクラスのifghostメソッドが落ちる問題(typo)を修正した.
+	* Installerを日本語(cp932)のファイル名を含むZIPアーカイブに対応させた.
+	  (文字コードを決め打ちしているので他の言語には非対応.)
+
+Wed December 7 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* コメントの単位は[]で括るようにした.
+	* satori.pyが落ちる問題を修正した.
+	  (Unicodeに変換した文字列とShift_JISのままの文字列を連結しようとして
+	   落ちていた.)
+	  この修正でゴースト「マイマイトーカ」が起動するようになった.
+	* ゴーストと同様にバルーンについてもデータ読み込みを指定した
+	  ディレクトリに対してのみ行なえるようにした.
+	  (バルーンがインストールされた際にその情報のみを読み込むため.)
+	* HolonとMemeクラスをlib/ninix/metamagic.pyファイルに分離した.
+	  それぞれを抽象ベースクラス(ABC)とし, Holonを継承してGhostクラスを
+	  Memeを継承してShellMemeとBalloonMemeクラスを作成した.
+	  (MemeとHolonの間の継承関係は敢えて作らなかった.)
+	* シェルとバルーンの管理にMemeクラスを使用するようにした.
+	* バルーンのメニューの項目をgtk.RadioMenuItemからシェルと同じ
+	  gtk.MenuItemに変更した.
+
+Sun December 4 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.3.5リリース.
+	* Windows環境でもGtk+に渡す場合にはファイル名の文字コードを
+	  utf-8に変換するようにした.
+	* 画像ファイルの読み込みが全てpix.py経由になるように修正した.
+	  (menu.pyに直接Gtk+を呼んでいる部分があった.)
+
+Sat December 3 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ゴースト等のインストール先ディレクトリ名の文字コードに
+	  Windows環境の場合にはmbcsを, それ以外の環境ではutf-8を
+	  使用するようにした.(これまでは環境によらずutf-8を使用していた.)
+	  (Thanks to Donさん)
+	* ユーザーが選択したシェルをSETTINGSファイルに記録しておき,
+	  次回の起動の際にはそのシェルで起動するようにした.
+	  そのためメニューの召喚/交代からはシェルの指定を削除した.
+	* シェルとバルーンの情報を管理するためのMemeクラスを追加した.
+	  (まだ構想段階で実際には使用していない.)
+	  シェル/バルーンを構築するのに必要な情報(baseinfo)とユーザーが
+	  シェル/バルーンにアクセスするための情報(menuitem)を保持するが,
+	  Holonクラスと異なりシェル/バルーンのinstanceへの参照は保持しない.
+	* Holonクラスのデータ構造を一部変更した.
+
+Wed November 30 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 既に起動しているゴーストを上書きインストールした場合には
+	  ゴーストを再起動するようにした.
+	* Sakuraクラスにデフォルトのシェルを取得するためのメソッドを追加した.
+	* SakuraクラスにIfGhostを処理するためのメソッドを追加した.
+	* ゴーストを管理するデータ構造としてHolonクラスを追加した.
+	  ゴーストを構築するのに必要な情報(baseinfo), ゴーストの本体
+	  (Sakuraクラスのinstanceへの参照)とユーザーがゴーストに
+	  アクセスするための情報(menuitem)を保持している.
+
+Mon November 28 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* シェル選択のメニュー項目も各ゴーストを管理しているデータ構造に
+	  一緒に格納するようにした.
+	* ゴーストが消滅した場合にも当該ゴーストのメニュー項目が有効になる
+	  (選択した場合には落ちる)バグを修正した.
+
+Sun November 27 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ゴーストの交代/召喚のメニュー項目は各ゴーストを管理している
+	  データ構造内に格納し, ゴーストの起動/終了の際に無効/有効を
+	  設定するようにした.
+	  ゴースト(A)と(B)が起動した状態で(A)に終了の指示を出してから
+	  (A)が終了する前に(B)の上でメニューを開くと(A)のメニュー項目は
+	  無効になっているが, (A)が終了した時点で有効に切り替わるようになった.
+	  (これまではメニューを閉じて再度開かないと有効に切り替わらなかった.)
+
+Sat November 26 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* メニューを管理するデータ構造をリストから辞書に変更した.
+	* これまでゴースト毎(正確にはSurfaceクラス毎)に持っていたメニューを
+	  Applicationクラスが管理する1つのメニューに統合した.
+	* ゴーストを管理するデータ構造(辞書とリストの2つ)を順序付き辞書1つに
+	  統合した.
+	* ゴーストの交代/召喚メニューのアイコンが表示されなくなっていたのを
+	  修正した.
+
+Sat November 19 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.3.4リリース.
+
+Fri November 18 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SSTPで送信されたスクリプトの再生中にSHIORIイベントが発生した場合に
+	  イベントが正しく処理されない問題を修正した.
+	* バルーンのダブルクリックでSSTP BREAKが発生した場合にはバルーンを
+	  閉じるようにした.
+
+Wed November 16 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* プラグインのstandard versionを2.2から2.3に上げた.
+	* BasePluginにプラグイン終了後も保存されるデータを扱うための
+	  set_variable, set_variables, get_variableの3つのメソッドを追加した.
+	* 同じプラグインは複数起動出来ないようにした.
+
+Sun November 13 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.3.3リリース.
+
+Sat November 12 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* BasePlugin.send_sstpメソッドでのSSTPリクエストのバージョン判定を
+	  修正した.
+	* BasePlugin.send_scriptメソッドはsend_sstpメソッドを使うようにした.
+	* sstp.pyに残っていたEXECUTE SSTP/1.5(ninix拡張)のコードを削除した.
+	* EXECUTE SSTPのレスポンスにはリクエストで指定されていた文字コードを
+	  使用するようにした.
+	* EXECUTE SSTPのレスポンスで追加データがある場合に最後のCR+LFが
+	  不足していたのを修正した.
+
+Fri November 11 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* プラグインを実行する際に既にプラグインがimportされていた場合には
+	  もう一度読み込み直す(reloadする)ように修正した.
+
+Thu November 10 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* READMEのPythonに関する記述を更新した.
+	  Python 2.7が必須になったので動作確認範囲からバージョン2.6を削除した.
+	* SSTPリクエストを受けた時ではなく, SSTPキューからリクエストを
+	  取り出して処理する際にゴーストの存在確認(IfGhost)を行なうように
+	  変更した.
+	* SEND SSTPリクエストとNOTIFY SSTPリクエストは全て1つのキューに入れて
+	  順番に処理していく様にした.
+	  (これまではSEND 1.4のみキューに入れて処理していた.)
+	* SEND SSTP/1.4で選択肢インターフェースとIfGhostを同時に使うことが
+	  出来ないバグを修正した.
+	* NOTIFY SSTPリクエストを受けるゴーストの選択の際に保険スクリプトの
+	  IfGhostを考慮するようにした.
+	  IfGhostのエントリに入っているゴーストが「起動していれば」
+	  そのゴーストに送る.(NOTIFY SSTPはSHIORIイベントの送信なので,
+	  SHIORIが動作していない一時起動では駄目.)
+	* プラグインを起動したゴーストのIfGhost名をプラグインに渡すようにした.
+	  (BasePlugin.caller['ifghost']に値が入っている.)
+
+Mon November 7 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* BasePluginにSEND SSTPリクエストを送信するためのsend_sstpメソッドを
+	  追加した.
+	* プラグインのstandard versionを2.1から2.2に上げた.
+	* BasePluginのnotify_sstpメソッドのevent引数を省略不可にした.
+	* sstp.pyのNOTIFY SSTP/1.1リクエストの処理でリクエストヘッダーに
+	  Eventの指定が無い場合には"400 Bad Request"を返すように戻した.
+
+Sun November 6 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.3.2リリース.
+
+Sat November 5 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* BasePluginクラスのnotify_eventメソッドの名前をnotify_sstpに変更し,
+	  NOTIFY SSTP/1.1の仕様を満たす事が出来る様に修正した.
+	* SSTPリクエストで選択肢インターフェースを使用した場合にエラーになる
+	  問題を修正した.
+	  (SSTPRequestHandler.handleメソッドの終了時点でソケットが
+	   閉じられてしまうために, レスポンスがhandleメソッドの外側で
+	   行なわれる場合に問題が発生していた.)
+	* BasePluginクラスにninix_homeとcaller変数を追加した.
+	* プラグインのstandard versionを2.0から2.1に上げた.
+
+Tue November 1 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* プラグインのstandard versionチェックが機能していなかったのを修正した.
+	* BasePluginクラス(plugin.py)にNOTIFY SSTP/1.1を送信するための
+	  notify_eventメソッドを追加した.(Thanks to Donさん)
+	* sstp.pyのNOTIFY SSTP/1.1に関するバグを2つ修正した.(Thanks to Donさん)
+	  (イベントのレスポンスが得られない.
+	   保険反応の指定が無い場合にエラーになる.)
+
+Tue October 25 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.3.1リリース.
+
+Sun October 23 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Windows環境でプラグインが動作しない問題を修正した.
+	* Windows用インストーラパッケージがメニュー内のショートカットの作成に
+	  失敗する問題を修正した.(typoによるエラー)
+	* Windows用インストーラが作成するメニュー内のショートカットに
+	  ターミナルを開いてninix-ayaを実行するショートカットを追加した.
+
+Thu October 20 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.3(juggling eggs)リリース.
+
+Wed October 19 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* メニューから「バージョン情報」を選択してバージョン情報を表示した際に
+	  sstpmessage領域をリセットしていなかったのを修正した.
+	* Windows用インストーラパッケージでインストールした際にショートカットを
+	  作成するスクリプトninix_win32_postinst.pyを追加した.
+
+Mon October 17 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ファイルのpermissionを修正した.(Thanks to PaulLiuさん)
+          lib/ninix_main.py, lib/ninix/dll/wmove.py, lib/ninix/dll/osuwari.py
+	* Windows環境でもgettext(多言語対応)が機能するようにした.
+	  各言語のメッセージファイル(ninix.mo)がインストールされていないと
+	  機能しない. 現在はja, zh_TWの2つの言語のファイルがあり,
+	  インストーラパッケージを使用すれば本体と一緒にインストールされる.
+
+Sun October 16 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/ja.poを更新した.
+	* setup.pyを更新した.
+
+Sat October 15 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ninix-installを削除した.
+	* main.pyの名前をninix_main.pyに変更した.
+
+Fri October 14 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ninix/dll/以下のファイルをインポートする際のパスの取得方法を変更した.
+	  これまではmain.pyの場所(sys.path[0])から求めていたが,
+	  dll.pyに追加したget_path関数はninixパッケージの場所
+	  (ninix.__path__[0])から求める.
+	  この変更で, main.pyとninixパッケージ(ninix/以下のファイル)を
+	  別の場所にインストールしても動作するようになった.
+	* sstplib.pyをninix/以下に移した.
+
+Thu October 13 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Windows環境ではゴーストの持つDLLを優先して使用するようにした.
+	  (現状では互換SHIORIモジュールは一切使用しない.
+	   将来はDLLと互換モジュールをユーザーが切り替えられるようにする予定.)
+
+Wed October 12 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* READMEを更新した.
+	* doc/extension.txtを更新した.
+	* プラグインをPOSIX/Windows両環境で動作する形で実装し直した.
+	  (Pythonのmultiprocessingモジュールを使用している.)
+	* 「猫どりふ」「きのこ」のinstallメソッドが戻り値として
+	  インストール先のディレクトリ名を返していなかったのを修正した.
+
+Sun October 9 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.10リリース.
+	* READMEのPythonに関する記述を更新した.
+	  (動作確認範囲にバージョン2.7.2を追加.)
+	* \pタグを[]無しでも使えるようにした.
+	  (非推奨のはずだが, Emilyも使っているので. というのは冗談で,
+	   使えるように実装していたはずが, 正規表現の方で\pタグを
+	   間違った所に入れていたため使えなかっただけ.)
+
+Sat October 8 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Windows環境でpythonw.exeを使用した場合に, 動作が不安定になって
+	  落ちる問題への対策をした.(Thanks to Donさん)
+	  (起動時にloggingのデフォルト出力先であるstderrをチェックし,
+	   使用出来ないと判断した場合にはログをstderrに送らないようにした.)
+	* win_dll.pyで実行環境が32bitか64bitかをチェックするようにした.
+	  64bitのPythonではDLLを利用出来ないと判断する.
+	  (現状ゴーストに入っているSHIORI DLLは32bitのはずなので.)
+	  注意: 64bit Windows上の32bit Pythonは実行環境としては32bitなので
+	        DLLを利用出来る.(今回使用した判定も32bitを返す.)
+	* yaya.pyからWindows環境でDLLを利用するためのコードを削除した.
+	  (Windows環境にはwin_dll.pyの方で対応する.)
+	* Windows環境でwin_dll.pyがデフォルトで動作するようにした.
+	  SHIORI互換モジュールとどちらが優先されるかは, 場合によって異なる.
+	  (この点についてはさらに調整が必要である.)
+
+Fri October 7 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* KNOWN_ISSUESにIDLEから起動した場合の問題に関する記述を追加した.
+	* READMEからhttplib2に関する記述を削除した.
+	* httplib2の使用をやめ, 以前のコードと同様の処理に戻した.
+
+Sun October 2 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.9リリース.
+	* win_dll.pyを追加した.
+	  このモジュールはWindows環境でゴーストの持つ任意のSHIORI DLLを
+	  使用することが出来るようにする.
+	  ただし, 動作チェックが不十分なため現在は動作しないようにしてある.
+	  (使用するにはwin_dll.pyのDEFAULT_SCOREの値を変更する必要がある.
+	   互換モジュールとどちらが優先されるかは, このスコアの値次第である.)
+	* SHIORI互換モジュールのレスポンスにCharsetエントリを追加した.
+	* 本体とSHIORIのやりとりでの文字コードの処理方法を変更した.
+	  (各リクエスト毎のCharsetエントリを使用する. 
+	   ninix-aya独自のSHIORIロード時の文字コードの問い合わせは削除した.)
+	* ネットワーク更新でSHIORI DLLが更新された場合でもエラーにならない
+	  ようにするために, バックアップファイルを消去するタイミングを
+	  ゴーストの再起動のためにSHIORIをアンロードした後に変更した.
+	  (Thanks to Donさん)
+
+Sat October 1 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ゴースト with バルーンのバルーンインストール先ディレクトリ名が
+	  常に"balloon"になっていたのを修正した.(Thanks to Donさん)
+	* YAYAゴーストを複数起動した状態から1体でも終了すると,
+	  残ったゴーストのYAYAが動作しなくなる問題を修正した.
+	  (Windows環境とPOSIX環境で起きる現象は同じだがその理由が異なるため,
+	   修正内容は環境によって違っている.)(Thanks to Donさん)
+
+Fri September 30 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.8リリース.
+	* sakura.pyのtypoを修正した.(Thanks to Donさん)
+	* surfaces.txtのサーフェススコープ名の列記と省略形に対応した.
+	* surfaces.txtの同じIDのsurfaceエントリの分割に対応した.
+	* yaya.py:
+	  Windows環境ではゴーストの持つyaya.dllをロードするようにした.
+	  (DLLはリネームされていてもOK.)
+	  POSIX環境ではこれまで通りlibaya5.soをロードする.
+
+Tue September 27 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.7aリリース.
+	* 「何とかしてください」ウインドウが開くと落ちる問題を修正した.
+	  (4.2.7でのregression.)(Thanks to Donさん)
+	* シェルを認識出来ないゴーストについてはとりあえず無視するようにした.
+	  (Thanks to Donさん)
+	* Installerクラスのinstallメソッドが常にインストール先の
+	  ディレクトリ名を返すようにした.
+
+Sun September 25 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.7リリース.
+
+Sat September 24 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Installerクラスのinstallメソッドの戻り値にインストールした
+	  アーカイブの種別を追加した.
+	  ゴーストやバルーン等を管理しているリストの更新は, 起動時と
+	  インストール/ネットワーク更新があった場合にだけ行なうようにした.
+	* dll.py:
+	  ゴーストのディレクトリ内でSHIORIを探す処理が起動中のゴーストの
+	  動作に影響を与えないように修正を加えた.
+	  (これまでは起動時のみサーチをしていたので問題無かったが,
+	   本体でゴーストをインストール出来るようになったので,
+	   起動後にもゴーストのインストールの度にサーチが発生する.)
+	* 「きのこ」のアーカイブがインストール出来なくなっていたのを修正した.
+
+Sun September 18 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* NARアーカイブ内のinstall.txtでtype,supplementが指定されている場合に
+	  インストール出来ない問題を修正した.
+	* Python3への移行の準備として以下の変更を行なった.
+	  (現在の動作環境はまだPython2.6もしくは2.7である.)
+	  ただし, 廃止予定のninix-installについては変更を加えていない.
+	  Python2での最適なコーディングからは外れる部分があるので,
+	  その部分についてはパフォーマンスが4.2.6よりも低下した可能性が
+	  ある.(下の項目の中で文末に(*)を付記したもの.)
+	  - exceptの変数指定には","ではなく"as"を使用するようにした.
+	  - %による文字列フォーマットはやめて文字列のformatメソッドを
+	    使用するようにした.
+	  - dict.keys()等のPython3でlistではなくviewを返すようになる
+	    メソッドに対してはlistのsortメソッドではなくsorted関数を
+	    使用するようにした.
+	  - dictのiterkeys, itervalues, iteritemsメソッドを使用していた所は 
+	    それぞれkeys, values, itemsメソッドに変更した.(*)
+	  - dictのkeys, values, itemsメソッドを使用している箇所の中で
+	    listを必要としている所では明示的にlist()を使用するようにした.
+	  - filterとmap関数をリストの内包表記で置き換えた.
+
+Fri September 9 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.6リリース.
+	* kinoko.pyの変更漏れを修正した.
+	* コーディングスタイルの微調整をした.
+
+Thu September 8 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 全てのクラスをNew-style classにした.
+	* 下位のクラスから上位のクラスのメソッドを呼び出す方法を変更した.
+	  (現状ではこれまでの実装よりもオブジェクト間の結合が強くなったが,
+	   必要なら各クラスのhandle_requestメソッド内で調整可能.)
+	* update.pyでhttplib2.Httpにキャッシュの保存ディレクトリとして
+	  ".cache"を指定していたのを削除した.
+	  (これだとninix-ayaを実行したディレクトリにキャッシュを作成して
+	   しまうので.)
+
+Tue September 6 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* prefs.py: corner caseの処理を追加した.
+
+Mon September 5 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* prefs.py:
+	  値の変更を記録しておいて後で破棄/確定するための機能を
+	  Preferencesクラスに追加した.
+	* 前回最後に起動していたゴーストの記録にはゴーストの名前ではなく
+	  インストール先ディレクトリ名を使用するようにした.
+	  (互換性のため, ディレクトリ名での記録が無く名前での記録がある場合には
+	   名前で探すようになっている.)
+	  また, シェルの選択が記録に反映されなくなっていたのを修正した.
+	* lib/ninix/install.py: ファイルのpermissionを修正した.
+
+Sun September 4 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Observer関連のメソッドを修正した.
+	  (SakuraクラスでのObserverの管理データはlist型からdict型に変更.)
+	* アイコン化解除イベントが間違って発行される場合があったのを修正した.
+
+Sat September 3 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* コード全体をリファクタリングした.
+	  - New-style classの使用を拡大.(property使用を増やした.)
+	  - リストの内包表記を積極的に使用.
+	* setup.pyのためにMANIFEST.inを追加した.
+	＊lib/main.py: 変数名の変更忘れがあったのを修正した.
+	＊install.py:
+	  コンソールからバルーンをインストールすると落ちる問題を修正した.
+	* \n[half]を使用するとバルーンの表示がおかしくなることがあったのを
+	  修正した.
+	  (高さが半分に変更された行がスクロールで表示範囲外に出た後に
+	   表示領域内の行の位置を修正する処理が抜けていた.)
+	* easyballoon互換モジュールで表示されるバルーンもサーフェスの
+	  倍率変更に即追従するようにした.
+
+Sun August 28 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.5リリース.
+
+Sat August 27 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バルーンとサーフェスを隠す場合にはgtk.DrawingAreaを隠すのではなく,
+	  gtk.Windowを隠すように戻した.
+	  (良く見ると分かるが, gtk.DrawingArea.hide()しても1ピクセル分の
+	   ウインドウが画面に残っていた.)
+
+Fri August 26 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* TransparentWindowにSurfaceWindowの機能の一部を移し, 改良を行なった.
+	  (ウインドウをワークエリア外に出せない仕様のウインドウマネージャでも
+	   画面の端を越えるウインドウの移動と同様の表現が出来るようにする機能が
+	   中心. バグ修正も含む.)
+	  TransparentWindowを使用しているバルーン, 猫どりふ, きのこ,
+	  easyballoonも変更の影響を受けており, 倍率変更等の際のウインドウの
+	  位置計算が改善された.
+	* バルーンの位置計算を簡素化した.
+	* バルーンと猫どりふもサーフェス同様に画面から見切れることが出来るよう
+	  変更した.
+	* サーフェスと猫どりふに位置を初期化する機能(Ctrl-Shift-F12)を実装した.
+	  それぞれキーボードフォーカスがある状態で上記のキーを入力すると
+	  初期位置に戻る.
+	* easyballoonのウインドウをgtk.WINDOW_POPUPからgtk.WINDOW_TOPLEVELに
+	  変更した.
+
+Sat August 20 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.4リリース.
+
+Fri August 19 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 見切れ/重なり判定はサーフェスの位置に変化があった時にだけ
+	  計算するようにした.
+
+Thu August 18 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* コンソール/「何とかしてください」ウインドウのInstallボタンを押して
+	  出てくるファイル選択ダイアログで, nar(zip)以外のファイルを指定すると
+	  落ちる問題を修正した.
+	* install.pyでファイルのダウンロード時に落ちる問題を修正した.
+	* NGMのゴーストインストール機能をinstall.pyを使って再実装した.
+	* BalloonDescriptのwindowposition.x, windowposition.yに対応した.
+	  (「ねこことショータＲＸ」同梱のバルーン「ねこのきもち」の
+	   \1側の表示位置が修正された.)
+
+Wed August 17 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 栞互換モジュールのエラー等のログの出力全てにloggingモジュールを
+	  使うように変更した.
+	* --debugオプションが値を取らないように変更した.
+	  オプションを指定するとloggingモジュールを使用したログ出力のレベルが
+	  logging.DEBUGになる.
+
+Mon August 15 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Windows環境用にsetup.pyを追加した.
+	  ("python.exe setup.py bdist_wininst"でWindows用にパッケージ化される.
+	   py2exeについては未テスト.)
+
+Sun August 14 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.3リリース.
+
+Sat August 13 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ネットワーク更新完了後のゴーストリロードで落ちる問題を修正.
+	  (4.2.2でのregression.)(Thanks to Donさん)
+	* サプリメントのインストール先ゴースト(acceptに対応)が複数見付かった
+	  場合にはユーザーに選択を求めるようにした.
+	  それに伴ないninix-installの-S(--supplement)オプションは廃止した.
+	* エラー等のログの出力全てにloggingモジュールを使うように変更した.
+	  (栞互換モジュールは未対応.)
+	  --logfileオプションで指定したファイルに出力することも可能.
+
+Wed August 10 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.2リリース.
+
+Tue August 9 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* メニューの「設定」からコンソールを開けるようにした.
+	* install.pyをゴーストwithバルーンのinstall.txt内での
+	  balloon.source.directory指定に対応させた.
+
+Mon August 8 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-install.pyを基にlib/ninix/install.pyを作成した.
+	  (Installerクラスを作成し, ninix-installもこれを使うようにした.)
+	* ninix-installの-L(--lower)オプションを削除した.
+	* コンソール/「何とかしてください」ウインドウからのインストールは
+	  ninix-installを呼ぶのではなく, Installerクラスを使用するようにした.
+	* コンソール/「何とかしてください」ウインドウにInstallボタンを追加した.
+	  このボタンを押すとファイル選択ダイアログが開き, 選択したファイルが
+	  インストールされる.(ファイルのDnDもこれまで通りサポートしている.)
+	* KNOWN_ISSUESファイルを追加した.
+	  (問題を抱えているソフトウエアの情報を記述している.)
+	* READMEのpygtk(GTK+)に関する記述を更新した.
+	* ninix-aya内部でのゴースト, バルーン, シェルの識別にはそれぞれの
+	  インストール先ディレクトリ名を使用するようにした.
+	  (ファイルシステムにより一意性が保証される.)
+	* ネットワーク更新が落ちる場合があったのを修正した.
+	  (4.1.12でのregression.)
+	* satori.pyが落ちる場合があったのを修正した.
+	  (φエスケープを処理するためのバッファの初期化に問題があった.)
+
+Wed August 3 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2.1リリース.
+	* ninix-installでバルーンがインストール出来なくなっていたのを修正した.
+	* Windows環境でninix-install, ネットワーク更新が落ちる場合があったのを
+	  修正した.
+	* READMEの「必要なもの」にpywin32の記述を追加した.
+
+Wed July 27 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.2(voodoo programming)リリース.
+	  必要なソフトウエアが全て揃っていれば, Windows環境でも
+	  動作することを確認した.
+
+Tue July 26 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* GStreamerがインストールされていなくてもninix-ayaが動くようにした.
+	  Gstreamerが無ければ音声ファイルの再生は機能しない.
+	  (READMEの「必要なもの」のGStreamerの記述を変更した.)
+
+Mon July 25 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ファイルのロックに関するコードをlib/ninix/lock.pyとして分離した.
+	  (現在のところmain.pyとaya.pyが使用している.)
+	* Windows環境でのファイルのロックがエラーで落ちる問題を修正.
+	* 長い間ほとんど使用されることのなかったプラグインシステムを削除した.
+	  それに伴いdoc/extension.txtを更新した.
+	  (将来的には違う形でのプラグインの実装を考える.
+	   ethos等のライブラリの使用も検討する.)
+	* main.pyとninix-install.pyのシェバン行(#!で始まる行)を削除した.
+
+Sat July 23 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* main.pyをlib/ninix/からlib/に移した.
+	* デフォルトのSSTPポートから11000を削除した.
+	  (デフォルトでは9801のみとした.)
+	* 環境変数NINIX_SSTP_PORTをを削除した.
+	* 環境変数NINIX_ARCHIVEとninix-installのコマンドラインオプション
+	  -A(--arcdir)を削除した.
+	* 環境変数NINIX_HOMEおよびninixとninix-installのコマンドライン
+	  オプション-H(--homedir)を削除した.
+	  ninix-ayaのホームディレクトリはこれまでのデフォルト~/.ninixで
+	  固定とした.(要望があればオプションで変更可能にします.)
+	* 環境変数NINIXを削除した.
+	* pygst.require()はsys.pathを改変してしまうため, 実行しないようにした.
+	* 環境変数PYTHONPATHにninixのインストール先を指定していたのを削除した.
+	  dll/以下のファイルについてはmain.pyの場所(sys.path[0])を基にして
+	  探すように変更した.
+	* 標準出力(sys.stdout)と標準エラー出力(sys.stderr)へのメッセージ出力を
+	  やめて, loggingモジュールを使用するようにした.
+	  (printを使用している部分の中にもloggingを使うべき所があるが,
+	   printについては今回はそのままにした.)
+	* pix.py:
+	  Windows環境で画面サイズの取得(get_workarea)の際に落ちる問題を修正.
+	* pix.py:
+	  画像ファイルをopen()する際のモード指定にb(バイナリ)を追加した.
+	  (Windows環境でも動作するようにするため.)
+
+Sat July 16 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.12リリース.
+
+Wed July 13 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* satori.py:
+	  ランダムトークの参照"（）"が正しく処理されていなかったのを修正した.
+	  (4.1.5でのregression.)
+	  (「シズクと冷しゃぶ」のメニュー「話して」が動かなくなっていた.)
+
+Sun July 10 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* main.py:
+	  使用率グラフの表示で落ちる問題を修正.(4.1.4でのregression.)
+	* aya5.py:
+	  AyaFunction.evaluate_token()で配列の処理が一部抜けていたのと,
+	  関数の引数に配列が来た場合の処理を修正.
+	  (「橘花」(taromati2)で音楽ファイルの再生が機能するようになった.)
+	* sakura.py, mciaudio.py, mciaudior.py:
+	  GStreamerに渡すファイル名にマルチバイト文字が入っている場合に
+	  ファイルが認識されない問題を修正した.
+	* update.pyがhttplibではなくhttplib2を使用するように変更した.
+	  この変更に伴いhttplib2を必須ライブラリにした.
+	  (READMEの「必要なもの」のhttplib2の記述を変更した.)
+	* main.py, aya.py:
+	  ファイルのロック方法を環境によって変えるようにした.
+	  POSIX系OSではこれまで通りfcntlモジュール, Windows環境では
+	  win32fileモジュールを使用するようにした.
+	  (ninix-ayaがWindows環境で動くようになるには, まだ変更が必要.)
+	* GTK+等を使用する部分でPythonモジュールのインポートの前に
+	  環境変数DISPLAYをチェックしていたのを削除.
+	* dll.py, sakura.py:
+	  文字列処理でstripメソッドを呼ぶ前にUnicodeへの文字コード変換を
+	  するように処理の順番を変更した.
+	* StringIOを使用しなくても文字列のsplitlinesメソッドで処理出来る
+	  部分についてはStringIOを使用しないように変更した.
+	* 全てのファイルについてコーディングスタイルの調整を行なった.
+	* 一部の例外を除いてファイルのopen()にはwithステートメントを
+	  使用するように変更した.
+
+Mon July 4 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.11リリース.
+	* httpc.py:
+	  致命的なバグ(引数3つの場合に無限ループに陥ることがあったの)を修正.
+	* balloon.py:
+	  PNAファイルを使用する等して半透明になった部分でマウス/キーボードの
+	  入力イベントが発生しなくなっていたのを修正.
+	  (インプットマスクの設定ミス.)
+
+Sun July 3 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.10リリース.
+	* yaya.py: 使用する文字コードをyaya.txtから取得する部分を修正.
+
+Sat July 2 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* aya.py, aya5.py:
+	  栞にYAYAを使用しているゴーストに対する栞判定のスコアとして
+	  0(動作しない)を返すようにした.
+	* yaya.py: Henryさんが作製したバージョンで置き換えた.
+	  (ctypesモジュールを使用してlibaya5.soをロードする.
+	   ninix-ayaの持つSAORI互換モジュールの呼び出しには未対応.)
+	* ninix-install.py:
+	  readme.txtの入っていないゴーストアーカイブのインストールで
+	  落ちる問題を修正.
+	* doc/saori.txt: typoを修正.
+
+Tue June 28 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.9リリース.
+	* satori.py:
+	  4.1.5で削除したParser.split()の呼び出しが残っていたのを修正.
+	  (Thanks to Paul Liuさん)
+	* satori.py:
+	  Satori.get_reserved()の戻り値の文字コードが1箇所だけ
+	  utf-8になっていたのを修正.
+	* saori_cpuid.py:
+	  OS情報の取得にsys, osではなくplatformを使用するように変更.
+
+Sun June 26 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.8リリース.
+	* satori.py: 4.1.5で入ったregressionを修正.(Thanks to Paul Liuさん)
+
+Sun June 5 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.7リリース.
+
+Tue May 31 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ninix-install.py:
+	  ファイル操作にos.system()を使って外部コマンドを呼び出していたのを
+	  Pythonの標準ライブラリで処理するよう変更.
+
+Sat May 28 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ninix-install.py:
+	  ファイルを展開する一時ディレクトリをユーザーが指定するオプション
+	  (--tempdir)を削除.(必要なら環境変数で設定可能.)
+	* 環境変数NINIX_USERと関連するオプションを削除.
+	  設定ファイルの置き場所もNINIX_HOMEに統一.
+	  (元々デフォルトではNINIX_HOMEと同じだった.)
+
+Tue May 17 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* README, NEWSを更新した.
+	* locale/ja.poを更新した.
+
+Mon May 16 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.6リリース.
+	* 「何とかしてください」ウインドウ(仮)を追加.
+	  (ゴーストもしくはバルーンが存在しない場合にのみこの名前で現われる.)
+	  ウインドウに対してアーカイブをDnDすることでインストールが出来る.
+	  (現在はninix-installを呼び出してインストールを行なう.
+	   ファイルダイアログでアーカイブを選んでのインストールにも対応予定.)
+	  将来はインストール機能の他に起動メッセージ等の表示に使う予定.
+
+Sat May 7 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.5リリース.
+
+Fri May 6 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* satori.py: ファイルの文字コードをeuc-jpからutf-8に変更.
+	* satori.py: 内部処理で使用する文字コードをEUC-JPからUnicodeに変更.
+	* satori.py: φエスケープの実装を開始.
+
+Fri March 25 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* satori.py: 引数区切りの追加と削除に対応.
+	* satori.py: SAORIの返り値は通常の変数とは別に管理するようにした.
+	* satori.py: 変数を評価する際のサーチ順序を変更.
+	  本体からのリクエスト情報(Ｒ０やＳ０とか)を通常の変数より先にした.
+
+Thu March 24 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* READMEの「必要なもの」を更新.
+	* httpc.py: SAORI/1.0でValue[0]の様に余分な括弧が付いていたのを修正.
+	* httpc.py: httplibとurlparseではなくhttplib2を使用するように変更.
+	* httpc.py: chardetの使用方法を変更.(処理時間を短かくするため.)
+	* satori.py: 内部関数nopで引数が評価されていなかったのを修正.
+	* satori.py:
+	  SAORIの結果について文字コード変換が抜けている部分があったのを修正.
+
+Wed March 23 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* satori.py:
+	  Filterクラスの内部で使用する文字コードをUnicodeにすることで
+	  処理を簡素化.
+	* satori.py:
+	  変数への代入で右辺が常に計算式として処理されていたのを修正.
+	  ("＝"を使用した場合のみ計算式として処理するように修正.)
+	* satori.py:
+	  関数/SAORI呼び出しの引数を区切る処理で引数内に（）がある場合も
+	  正しく処理するよう修正.
+	* satori.py:
+	  SAORI呼び出しの引数計算で+-の符号のみの場合には文字列として
+	  処理するように修正.
+	* satori.py:
+	  計算式内に小数点を含む数値がある場合に落ちる問題を修正.
+	  (計算自体は整数で行なう.)
+
+Tue March 22 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* httpc.py: 単純なミスを2つ修正.
+	            (forループの範囲指定と文字列のjoinの引数の括弧の付け忘れ.)
+	* mciaudio.py, mciaudior.py:
+	  再生の前にファイルのパスが設定されているかをチェックするように修正.
+
+Fri March 4 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* satori.py: 内部関数nop, whenを追加.
+	* satori.py: 条件式の結果は全角数字０/１で返すよう修正.
+	* satori.py: 引数区切り文字は"," "，" "､" "、" バイト値1の5つの中で
+	             最初に出てきたものだけを使うよう修正.
+
+Wed February 23 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.4リリース.
+	* READMEの「必要なもの」を更新.(UnZip, Numerical Pythonを削除.)
+
+Tue February 22 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* シェルの変更の場合にはゴーストの再起動をしないようにした.
+
+Mon February 21 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ninix-installに-r(--rebuild)オプションを追加.
+	  4.1.3以前のninix-installでインストールしたバルーン付属ゴーストの
+	  バルーンをballoon/以下に移動する.
+          4.1.4を起動する前に実行しておくことを推奨.(一回だけ実行すればOK.)
+	* シェルの変更はメニューの「交代」ではなく「シェル」から
+	  行なうようにした.
+	* デフォルトでPNAファイルを使用するように設定を変更.
+	  (最初にninix-ayaを起動した時に設定されるデフォルトです.
+	   既にninix-ayaを起動している場合には, PNAファイルを
+	   「使用しない」ようにデフォルトで設定されています.
+	   値の変更はメニューの「設定」から出来ます.)
+
+Sun February 20 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ninix-installでゴーストのreadme.txtとthumbnail.png(pnr)も
+	  インストールするようにした.
+	* ゴースト個別の設定ファイルSETTINGSを追加.
+	  現在記録しているのは使用するバルーンの値のみ.
+	  バールン付属のゴーストはインストール時に付属バルーンが
+	  使用するバルーンとしてこのファイルに記録される.
+	  メニューからバルーンを変更すると値は上書きされる.
+	* ゴースト, バルーン, プラグイン等のファイルを起動時に
+	  読み込んでいたのを, 必要になるまで読み込まないようにした.
+	* メニューからバルーンを変更した際にはすぐにバルーンの位置を
+	  再計算するようにした.
+	* OnBalloonChangeイベントのReference1にバルーンの絶対パスを
+	  入れるようにした.
+
+Fri February 18 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ninix-installの@ファイルリストのサポートを削除.
+	  (名前が@で始まるファイルにアーカイブを列記しておくと
+	   全てインストールされるというもの.)
+	* ninix-installでinstall.txtをインストールしないように修正.
+	* ネットワーク更新後のファイルの再読み込みで一部の変数に
+	  更新前のデータが残っていたのを修正.
+	* ninix-install.pyをunzipコマンドではなくpythonのzipfileを
+	  使用するように変更.
+	* ninix-installの-g(--ghost), -s(--shell), -b(--balloon),
+	  -P(--plugin), -K(--kinoko), -N(--nekoninni), -D(--katochan)
+	  オプションを削除.
+	  install.txtから得られる情報だけでインストール処理するようにした.
+	* ninix-installの-r(--reload), -p(--port)オプションを削除.
+	* 「スタンドアロンのシェル」(他のゴーストのシェルを置き換えて
+	  乗っ取る形で動作するシェル)を廃止.
+	  install.txtにacceptが無いシェル(inverse時代のもの?)や
+	  それ以外のゴースト/シェルでもオプション指定でスタンドアロンの
+	  シェルとしてインストール出来るようになっていた.
+	  既にインストール済みのものについては動作を保証しない.
+	* 「ゴーストwithバルーン」のバルーンのインストール先を仕様通り
+	  balloon/以下に変更.
+	* inverse時代のディレクトリ構成になっているアーカイブの
+	  サポートをninix-install.pyから全て削除した.
+
+Tue February 15 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.3リリース.
+	* ネットワーク更新対象ファイルのファイル名にマルチバイト文字が
+	  含まれている場合に対応.
+	  (updates2.dauの中身はShift_JISと仮定して処理.)
+	* ゴースト更新後の再起動で落ちる問題を修正.
+	  (サーフェスがセットされる前にExposeイベントが来た場合には
+	   描画処理をスキップするようにした.)
+	* SERIKOのbaseメソッドでサーフェスIDに-1が指定された場合の
+	  サーフェスを戻す処理が抜けていたのを修正.
+
+Mon February 14 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ゴースト更新後の再起動で落ちる問題を修正.
+	  (reload_current_sakuraがコールバックに登録されていなかったのを修正.)
+	* SERIKOのoverlayfastに対応.(内部の処理はoverlayと全く同じ.)
+	* pix.pyのget_workarea()で落ちる問題を修正.
+	  (GdkWindow.get_geometry()の戻り値の個数を間違えていた.)
+
+Sun February 13 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SakuraScriptの\![set,wallpaper]に対応.
+	  (GNOMEデスクトップ環境向け. python-gconfを使用している.
+	   この機能を利用しない場合はpython-gconfのインストールは不要.)
+
+Tue February 8 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.2リリース.
+	* サーフェスのマウスドラッグによる移動が終わった時に
+	  バルーンの位置を再計算するようにした.
+	* 「きのこ」互換機能を4.1.1でのseriko.pyの変更に合わせて再度修正.
+	* 「きのこ」と「猫どりふ」互換機能のtypoを修正.
+	* サーフェスのマウスドラッグによる移動中は, サーフェスウインドウを
+	  移動する前にgtkのイベントが全て処理されるようにする部分を
+	  実行しないように修正.(4.1で導入した処理.)
+	  サーフェスのマウスドラッグによる移動で位置がおかしくなるため.
+	  (ちなみに, このgtkのイベント処理が何故必要かはこの部分を
+	   コメントアウトした上でサーフェス倍率を100%未満にすると確認出来る.)
+	* サーフェスのマウスドラッグによる移動中にSurfaceWindow.set_position()
+	  を呼んでしまう部分が残っていたのを修正.
+	  (SurfaceWindow.set_alignment()の中.)
+	* サーフェス倍率が100%以外の場合にバルーンオフセットの計算が
+	  間違っていたのを修正.
+	* アルファチャンネル等のサーフェスやバルーンの描画に影響を与える
+	  設定をユーザーが変えた際の処理を変更.
+	  設定の変更があったかどうかをSurfaceとBalloonクラスでチェックし,
+	  変更があった時だけSurfaceWindowとBalloonWindowクラスに伝える.
+	  値のチェックもSurfaceとBalloonクラスが行ない, 各Windowクラスは
+	  チェックしない.
+	  また, 各WindowクラスとSERIKOのデフォルト設定もSurfaceと
+	  BalloonクラスがWindowクラスのインスタンス生成時に行なう.
+
+Sun February 6 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1.1リリース.
+	* サーフェスのマウスドラッグによる移動中はサーフェスが変更されても
+	  SurfaceWindow.set_position()を呼ばないように修正.
+
+Sat February 5 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バルーンとinputbox, communicatebox, teachboxの描画をCairoに移行.
+	  (バルーンのちらつきはこれで解消したはず.)
+
+Wed February 2 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* easyballoon互換モジュールの描画処理をCairoに移行.
+	* 花柚互換モジュールの描画処理をCairoに移行.
+	* 花柚互換モジュールのbackground.color設定に対応.
+	* 使用率グラフの描画をCairoに移行.
+	* NGMクローンの描画をCairoに移行.
+	* pix.pyのTransparentWindowクラス(gtk.Windowクラスを継承)で
+	  gtk.Window同様にウインドウのタイプを指定出来るようにした.
+	* SERIKOアニメーションでのサーフェスの更新とウインドウの移動を分離し,
+	  サーフェスの更新を先に行なうようにした.
+	  4.1リリース後最初のコミットで入ったバグの修正.
+	  (最初に表示されるサーフェスで最初からアニメーションによる
+	   移動があると落ちる.)
+	* サーフェスの当り判定領域の描画(デバッグ用)をCairoに移行.
+
+Tue February 1 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* satori.pyの関数呼び出しおよびSAORI呼び出しの処理の中で,
+	  文字数を入れるべきところにバイト数が入っていたのを修正.
+	  (関数名に多バイト文字が含まれている場合に引数がおかしくなっていた.)
+
+Sat January 29 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バルーンがちらつく問題を修正.(サーフェスについては4.1で修正済み.)
+	  (gtk.DrawingArea.windowではなくgtk.Window.windowに対して
+	   set_back_pixmapを呼ぶようにした.)
+	* 「きのこ」互換機能を新しいseriko.pyに合わせて変更.
+	* 「きのこ」と「猫どりふ」互換機能の描画処理をCairoに移行.
+	* 「きのこ」と「猫どりふ」のウインドウも登場する際にフォーカスを
+	  奪わないようset_focus_on_map(False)を追加.
+	* サーフェスのPNG画像先読み機能とGdkPixbufのキャッシュを削除.
+	  (今の実装だとこれらの機能が無くてもCPUの使用率はほぼ変わらず,
+	   メモリの使用率が低くなるので.)
+	* seriko.pyのタイマー処理を改良.
+	  (これまでの実装では割り込みが一定間隔で来ると仮定していたが,
+	   実際にはそうならないので実時間を測るようにした.)
+	* サーフェスのアニメーション処理を変更.
+	  無駄なサーフェスPixbufの更新が発生しないようにした.
+
+Fri January 21 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.1(black magick)リリース.
+
+Thu January 20 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Serikoのタイマー処理を変更.
+	  \iタグでアニメーションを発動した場合にサーフェスが更新されて
+	  いかなかったのを修正.
+	* \4タグの動作を変更.
+	  これまでは相方から一定距離(画面の1/20)離れた地点まで移動して
+	  それ以上は離れなかったが, 元々離れている場合にはそこからさらに
+	  一定距離(画面の1/20)離れる方向に移動するようにした.
+	* バルーンを隠す際にサーフェス同様GtkDrawingAreaを隠して
+	  GtkWindowは隠さないようにした.
+	* サーフェスとバルーンのウインドウが登場する際にフォーカスを
+	  奪わないようset_focus_on_map(False)を追加.
+	  (この設定は3.9.8bでバルーンから削除したものだが, Gnome標準の
+	   ウインドウマネージャMetacity 2.27.2で試した限り意図通りに
+	   動くので, サーフェスも含めて再度設定した.)
+
+Wed January 19 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 見切れと重なり判定の処理を分離した.
+	* 見切れと重なり判定で, デフォルトサーフェスと異なるサイズの
+	  サーフェスが出ている場合に判定を間違うことがあったのを修正.
+	* サーフェスウインドウを移動する前にgtkのイベントが全て
+	  処理されるようにした.
+	  (移動の前にウインドウサイズの変更があると, その処理が
+	   終わっているかどうかで移動の結果が変わってしまうため.)
+
+Tue January 18 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* サーフェス自由配置の際のバルーン位置計算にバグがあったのを修正.
+	* ウインドウをワークエリア外に出せない仕様のウインドウマネージャでも
+	  画面の端を越えるウインドウの移動と同様の表現が出来るようにした.
+	  (実際にはウインドウを端から削って画面外に出たかのように見せている.)
+	  これに合わせて, サーフェスのマウスドラッグによる移動に
+	  gtk.Window.begin_move_drag()を"使用しない"ように変更した.
+	  (上記の様なウインドウマネージャにおいても, begin_move_dragを使うと
+	   画面の端を越える移動が出来てしまい, 座標の計算が狂うため.
+	   begin_move_dragの終了を補足出来ない仕様が致命的.)
+	* ninix-aya起動時にゴーストのアイコンファイルを読み込んでいたのを,
+	  必要になるまで読み込まないように変更.
+	(以下は4.99.xからのバックポート)
+	* 花柚互換モジュールでタイトルの縦書きに対応.
+	* wmovel.dll互換モジュールで不要なgtkのimportを削除.
+	* keymap.pyの辞書に特殊キーの識別子を追加.
+	* \xタグの処理を修正. (改行を付加しない. クリックされてバルーンの
+	  内容を消去した後は一旦バルーンを閉じる.)
+	* pix.pyにpng画像のヘッダ部分だけを読み込んでサイズを取得する機能を
+	  追加.(DGP, DDPにも対応.)
+	* バルーンをダブルクリックした場合にもOnMouseDoubleClickイベントを
+	  発生させていたのを, 発生させないように変更.
+	* '\x'の処理を仕様書通りに修正.
+
+Fri January 14 2011   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Copyrightを2011年に更新.
+
+Mon December 20 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.0.8リリース.
+	* READMEの「必要なもの」を更新.
+
+Sun December 19 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	(以下は4.99.xからのバックポート)
+	* plugin.txtのデフォルト文字コードをEUC-JPからUTF-8に変更.
+	* plugin.pyにプラグインから本体にSSTP送信(SEND/1.4)するための
+	  メソッドを追加.(使用方法はサンプルプラグイン「お天気やん」参照.)
+	* OnBalloonChangeイベントのサポートを追加.
+	  (ただし, Reference1には空文字列が入っている.)
+	* \&[]タグの処理にエラー処理を追加.
+	* kawari.pyのShioriクラスにsaori_iniの初期化を追加.
+	* タイマー関連のメソッドがgobjectからglibに移動したのに対応.
+
+Mon June 21 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* README: lhaに関する記述を削除.
+	
+Tue June 15 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.0.7リリース.
+	* lib/ninix-install.py, doc/extension.txt:
+	  lzh形式アーカイブのサポートを削除.
+
+Wed June 2 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/ngm.py:
+	  データベースのネットワーク更新中もゴーストが動作するよう改良.
+	* lib/ninix/ngm.py: データベースの読み込みを高速化.
+	* lib/ninix/ngm.py:
+	  Gtk.Windowのdeleteイベントハンドラの戻り値をTrueに修正.
+	  (Falseだとハンドラの呼び出し後にGtk.Windowが破壊されてしまう.)
+	* lib/ninix/ngm.py:
+	  データベースのネットワーク更新でハングアップすることがあったのを修正.
+
+Wed May 19 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.0.6リリース.
+	* lib/ninix/prefs.py:
+	  初めてninix-ayaを起動した場合にユーザー設定のデフォルト値が
+	  セットされない問題(他のクラスが値を取得すると意図せずNoneを
+	  返してしまい落ちる)を修正.
+	* lib/ninix/main.py:
+	  コマンドラインオプションの処理にはgetoptモジュールではなく
+	  新しいoptparseモジュール(Python2.3以降で追加)を使用するよう変更.
+	* lib/ninix/plugin.py:
+	  ファイルのpermissionを修正.(Thanks to PaulLiuさん)
+	* lib/ninix/main.py:
+	  current_sakuraの定義が間違っていたのを修正.(4.0.5でのregression.)
+	  終了時のゴーストが正しく記録されるようになった.
+
+Thu April 29 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.0.5リリース.
+
+Wed April 28 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py:
+	  GStreamerの奇妙な振舞いへの対策を追加.
+	  (https://bugzilla.gnome.org/show_bug.cgi?id=549879 を参照.)
+	  具体的な動作としては--help(-h)コマンドラインオプションを指定すると
+	  GStreamerのヘルプが表示されていたのをninix-ayaのものが出るように修正.
+
+Mon April 26 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py:
+	  廃止したコマンドラインオプションの処理が残っていたのを削除.
+	* lib/ninix/menu.py:
+	  メニューからゴーストの再読み込みを削除.
+
+Fri April 23 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/httpc.py:
+	  HTTP Status Codeが200(OK)以外の場合にはデータを返さないように修正.
+	* クラスのインスタンス生成時に生成元のクラス等他のクラスへの参照を
+	  渡していたのを止めて, 代わりにコールバック関数の入った辞書型変数を
+	  渡すようにした.(lib/ninix/dll/以下のファイルについては除外.)
+	* lib/ninix/balloon.py:
+	  バルーンのウインドウにdeleteイベントが送られてもゴーストが終了しない
+	  ように変更.
+	* lib/ninix/dll.py:
+	  SAORI互換モジュールからPreferencesクラスへの参照を削除し, Sakuraへの
+	  参照を使うようにした.
+	* Pluginに関するコードをmain.pyから分離してplugin.pyを作成した.
+	* lib/ninix/main.py:
+	  SSTP Serverの管理をApplicationクラスから分離してSSTPControlerクラスを
+	  作成した.
+	* lib/ninix/main.py:
+	  ApplicationクラスをNew-style classにした.(今後全クラスを変更予定.)
+	  current_sakuraをApplicationクラスのpropertyにした.
+	  current_sakuraのsetter(a function for setting)内で変更をPreferences
+	  に伝えるようにした.
+
+Fri April 9 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* doc/saori.txt: osuwari.pyとhttpc.pyに関する記述を追加.
+	* lib/ninix/config.py:
+	  Configクラスのgetint, getfloatメソッドをget_with_typesに統合.
+	* lib/ninix/dll.py：
+	  SAORIクラスに辞書型変数RESPONSEを作成し, 戻り値を持たない
+	  SAORI/1.0のレスポンス(204, 400, 500)を入れた.
+	  SAORI互換モジュールはこの変数を使用するように修正.
+	* lib/ninix/main.py:
+	  Application.get_plugin_list()で変数の代入前に値を参照している部分が
+	  あったのを修正.
+	* lib/ninix/main.py:
+	  'OnShellChanging'イベントの引数に渡す変数名を間違えていたのを修正.
+	  (3.9.9でのregression.)
+	* lib/ninix/pix.py:
+	  create_pixbuf_from_file()の引数is_pnrとuse_pnaには1/0ではなく
+	  True/Falseを渡すように変更.
+	* lib/ninix/prefs.py:
+	  Preferences.get_with_type()の引数の順序を変更した.
+	* lib/ninix/sakura.py:
+	  専用バルーンを持つゴーストでバルーンを専用バルーンとは別のバルーンに
+	  変えてから専用バルーンに戻すと落ちる問題を修正.
+	* lib/ninix/balloon.py:
+	  BalloonWindowのconfig_getintメソッドを__get_with_scalingに変更.
+	  (__get_with_scalingでは戻り値の型を第2引数に渡す必要がある.)
+	* lib/ninix/surface.py:
+	  SurfaceWindowのget_config_intメソッドを__get_with_scalingに変更.
+	  (__get_with_scalingでは戻り値の型を第2引数に渡す必要がある.)
+	* lib/ninix/prefs.py:
+	  デフォルトバルーンに設定されているバルーンの存在確認を省略.
+	  (存在していない場合には最初に見付かったバルーンが選ばれる.)
+
+Tue April 6 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.0.4リリース.
+
+Mon April 5 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* doc/extension.txt: 削除した機能について注釈を追加.
+
+Sun April 4 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/balloon.py, lib/ninix/config.py:
+	  バルーンの設定での"--n"形式の値への対応を削除.
+	  (ninix 0.1.6で導入されたが, 現在手に入る仕様には記述が見当たらない.)
+	* lib/ninix/aya5.py:
+	  システム関数CHRCODEのバグ(変数名の間違い)を修正.
+	* lib/ninix/dll/bln.py: 未使用変数の削除等, コードを整理.
+	* lib/ninix/nekodorif.py: 未使用変数の削除等, コードを整理.
+	* lib/ninix/prefs.py:
+	  Preferencesクラスの_get, getint, getfloatメソッドを
+	  get_with_typesに統合.
+	* lib/ninix/sakura.py:
+	  Bootイベント後にサーフェスが出ていない場合にデフォルトサーフェスを
+	  出す処理がネットワーク更新後の再起動(OnUpdateCompleteイベント)で
+	  機能していなかったのを修正.
+	* httpc.dll互換モジュールhttpc.pyを追加.
+	* lib/ninix/surface.py:
+	  サーフェス倍率が100%以外の場合に当り判定領域の座標の計算結果が全て
+	  0になるバグを修正.(バージョン4.0.3でのregression.)
+
+Thu April 1 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Makefile: 使用していなかったPythonのdistutilsに関する部分を削除.
+	  それに合わせてPKG-INFOファイルを削除した.
+	* lib/ninix/surface.py:
+	  マウスドラッグでサーフェスを移動した後のサーフェス位置の再計算を
+	  configure-eventハンドラ内で行なうようにした.
+	  (gtk.Window.begin_move_drag()の後にfocus-in-eventが起きるかどうかは
+	   ウインドウマネージャに依存するため.
+	   ConfigureNotifyはICCCM 4.1.5でウインドウの移動があれば発生すると
+	   定められている.
+	   サーフェスの移動途中でも再計算が起きるため負荷が高くなる可能性が
+	   あるが, begin_move_drag()の終了を確実に捕捉出来る方法が無い.)
+	* lib/ninix/dll/aya5.py: システム関数SPLITPATHを実装した.
+
+Wed March 31 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.0.3リリース.
+
+Mon March 29 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 画像を拡大/縮小する際に8x8ピクセル以下にならないように制限をかけた.
+	  (これまでも一部で制限をかけてあったが1x1ピクセルであったり,
+           制限がかかっていない部分があったりと統一されていなかった.)
+	* lib/ninix/home.py: 「猫どりふ」のkatochan.txtの読み込み処理を修正.
+	  (スクリプトが複数指定されている場合でもエラーにならないようにした.
+	   スクリプト再生は未対応のまま.)
+	* lib/ninix/dll/aya5.py:
+	  未実装のシステム関数を呼び出そうとして落ちる問題を修正.
+
+Fri March 26 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* サーフェス/バルーンの拡大縮小で100%の場合を特別扱いするのをやめた.
+	* pixbuf, pixmapを明示的に削除するのをやめた.
+	  (処理はPythonのガーベジコレクタに任せる.)
+	* lib/ninix/sstp.py: ninix独自のreloadコマンドを削除.
+	* lib/ninix/sakura.py: Sakura.reload()を削除.
+	* lib/ninix/main.py: Application.reload()を削除.
+	  (ゴーストのリロードはreload_current_sakura()に統一.)
+	* lib/ninix/config.py: open()をcreate_from_file()に名称変更.
+	* lib/ninix/config.py: new_config()をcreate_from_buffer()に名称変更.
+	* lib/ninix/alias.py: open()をcreate_from_file()に名称変更.
+	* lib/ninix/alias.py: new_alias()をcreate_from_buffer()に名称変更.
+	* lib/ninix/sakura.py:
+	  OnBootのReference0が渡されていなかったのを修正.
+	* lib/ninix/sakura.py:
+	  OnFirstBootのReference7が渡されていなかったのを修正.
+	* lib/ninix/dll/misaka.py: 辞書の文字コード判定のバグを修正.
+	  (今まではたまたま動いていただけ.)
+	* lib/ninix/ngm.py:
+	  保存するDBファイルの文字コードをEUC-JPからUTF-8に変更.
+	  (自動的に変換されるのでユーザーは何もする必要はない.)
+	* lib/ninix/main.py, lib/ninix/sakura.py:
+	  ninix独自のOnNinixReloading, OnNinixReloadedイベントを削除.
+	* lib/ninix/dll/niseshiori.py: open()をns_open()に名称変更.
+	* lib/ninix/dll/misaka.py: open()をmisaka_open()に名称変更.
+	* lib/ninix/dll/kawari.py: open()をkawari_open()に名称変更.
+	* lib/ninix/dll/bln.py:
+	  Balloon.__init__()が巨大になっていたので分割.
+	* lib/ninix/dll/aya5.py:
+	  システム関数CHRCODE()の戻り値の文字コード指定が間違っていたのを修正.
+	* lib/ninix/balloon.py:
+	  pango.Layout.set_markup()に渡す文字列内の特殊記号を
+	  glib.markup_escape_text()を使ってエスケープするように修正.
+	  (これまでは"&"等が含まれている文字列に\f[sup]等の指定をすると
+	   エラーになっていた.)
+	* lib/ninix/kawari.py: read_local_script()内のtypoを修正.
+	  (readline() -> readlines())
+
+Thu February 25 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.0.2リリース.
+	* lib/ninix/main.py: ゴースト消滅後の交代で落ちる問題を修正.
+
+Tue February 23 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py:
+	  ドロップされたファイルのパスがURLエンコードされたままになっていたため
+	  os.path.exists()で見付けられない場合があったのを修正.
+	* lib/ninix/dll/hanayu.py:
+	  DrawingAreaとPixmapのdepthが一致するよう修正.
+	  (Composite拡張を使用している環境でグラフが描画されない問題を修正.)
+	* lib/ninix/dll/misaka.py:
+	  typoを修正. $insentenceが動作するようになった.
+	* lib/ninix/dll/osuwari.py: typoを修正.
+	* lib/ninix/dll/osuwari.py:
+	  アクティブウインドウの取得で落ちることがあるのを修正.
+	* lib/ninix/dll/osuwari.py: except設定への対応開始.(未完成)
+
+Mon February 22 2010   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Copyrightを2010年に更新.
+	* ninix-updateコマンドを削除.
+	* lib/ninix/dll/mciaudio.py, mciaudior.py:
+	  使用していないモジュールのimportを削除.
+	* lib/ninix/balloon.py:
+	  self.__scaleとするべきところがscaleになっていたのを修正.
+	* lib/ninix/dll/hanayu.py:
+	  整数値が必要なところでは明示的整数除算(//)を使用するようにした.
+	* lib/ninix/dll/textcopy.py:
+	  gtk.Entryではなくgtk.Clipboardを使用するように変更した.
+	* lib/ninix/update.py: md5をhashlibで置き換えた.(Python2.5以降対応)
+	* lib/ninix/kinoko.py: typoを修正.
+	* lib/ninix/sakura.py: execute_command()を削除.
+	* lib/ninix/seriko.py:
+	  Actor.invoke()の引数がActorのサブクラスと一致していなかったのを修正.
+	* lib/ninix/seriko.py: 使用していないモジュールのimportを削除.
+	* lib/ninix/ngm.py: 使用していないモジュールのimportを削除.
+	* lib/ninix/home.py, lib/ninix/main.py:
+	  gtkrcの読み込み処理を削除.
+	* lib/ninix/home.py:
+	  「きのこ」と「猫どりふ」の設定ファイルの読み込みでエラー処理が
+	  抜けていたのを修正.
+	* lib/ninix/dll/wmove.py, lib/ninix/dll/bln.py:
+	  コードを整理した. 動作自体は変えていない.
+	  (if文の場合分けを整理したり,
+	   1つのメソッドにreturnが多数ある状態を解消, etc.)
+	* lib/ninix/main.py:
+	  ゴースト消滅の際にファイルを消去するのにos.system()を使っていたのを
+	  os.remove()とshutil.rmtree()を使用するように変更した.
+	* lib/ninix/prefs.py: コードを整理した. 動作自体は変えていない.
+
+Thu December 24 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.0.1リリース.
+	* ゴーストの終了時/更新後のリロード時に落ちる問題を修正.
+
+Thu December 24 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン4.0(jump off into never-never land)リリース.
+	* locale/ja.poを更新した.
+	* ユーザー設定からヘルパーを削除した.
+	  それに合わせてdoc/saori.txtを修正した.
+	* れたす(lettuce.dll)互換モジュールを削除した.
+	  (要望があればGStreamerを使用して再度実装する.)
+	* 音声ファイルの再生にはGStreamerを使用するようにした.
+	  \_v[]タグとMCIAudio, MCIAudioR互換モジュールを変更した.
+	  MCIAudioRはループ演奏に対応した.
+	  READMEの「必要なもの」にGStreamer Python bindingsを追加した.
+
+Fri December 4 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Webブラウザの呼び出しにはPythonのwebbrowerモジュールを
+	  使用するようにした.(ユーザー設定からWebブラウザを削除した.)
+
+Sun November 29 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.9aリリース.
+	* CommunicateWindowクラス(とそれを継承しているクラス)を修正.
+	  (Thanks to addone@users.sourceforge.jp.)
+
+Wed July 22 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.9リリース.
+	* 「きのこ」の'ontop'の処理にgtk.Window.set_transient_for()を
+	  使用するようにした.
+	* 「猫どりふ」の見切れをゴースト同様に透明部分も含めたサーフェスの
+	  1/3が画面外に出ると発動するよう変更した.
+	* マウスドラッグによるサーフェスの移動終了直後にサーフェス位置の
+	  再計算を行なうようにした.
+	* locale/ja.poを更新した.
+
+Sun July 5 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.8fリリース.
+	* GhostクラスをSakuraクラスに統合した.
+	  (ghost.pyはsakura.pyに吸収される形で消滅した.)
+	* NGMクローンからのゴーストの更新方法を変更した.
+	  (Sakuraクラスのupdate()メソッドを直接呼ぶのではなく,
+	   "\![updatebymyself]\e"をスクリプトキューに入れるようにした.)
+
+Fri June 12 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.8eリリース.
+	* 3.9.8dでeasyballoon互換モジュールが落ちるのを修正した.
+
+Fri June 12 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.8dリリース.
+	* lib/ninix/pix.py:
+	  get_workarea()が現在のデスクトップの情報のみを取得するよう修正した.
+	  (複数のデスクトップがある場合に落ちる問題を修正した.)
+	* PreferenceDialogをlib/ninix/prefs.pyに移して, ユーザー設定の管理を
+	  集約した. ユーザー設定の項目も減らした.
+	  SHIORIイベントの発生を抑制する項目(PREFS_EVENT_KILL_LIST)と
+	  マウスボタンの機能を設定する項目(PREFS_MOUSE_BUTTON1,
+	  PREFS_MOUSE_BUTTON3)を削除した.
+	  また, メニューから個々のゴーストについてサーフェス倍率とスクリプトの
+	  再生スピードを設定する項目を削除した.(全ゴーストが同じ設定になる.)
+
+Mon May 11 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.8cリリース.
+	* Git移行に伴い, 全てのファイルからCVSの$Id$タグを削除した.
+	* 画面の上下方向の有効範囲(タスクバー等を除いた範囲)をユーザーが指定
+	  するための設定値(PREFS_TOP_MARGINとPREFS_BOTTOM_MARGIN)を削除した.
+	  画面の有効範囲はninix.pix.get_workarea()を使用して取得するように
+	  変更した.(上下だけでなく左右方向の有効範囲も得られる.)
+	  ("Extended Window Manager Hints"の_NET_WORKAREAを使用している.
+	   詳細は http://standards.freedesktop.org/wm-spec/wm-spec-latest.html
+	   を参照.)
+
+Wed May 6 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.8bリリース.
+	* sourceforge.jpにGitリポジトリを作成し, ソースコードの管理をGitに
+	  移行した. 今後CVSのリポジトリは更新しない.
+	* lib/ninix/ballon.py:
+          バルーンを出す際にバルーンがフォーカスを奪わないようにするための設定
+	  (バルーンのウインドウに対するset_focus_on_map(False))を削除した.
+	  この設定をすると, compiz等のウインドウマネージャがその時点で
+	  フォーカスしているウインドウの後方にバルーンを移動するため.
+	  その際set_transient_for()で親ウインドウに設定しているサーフェスも
+	  "勝手に"後方に移動してしまう.
+	  (set_transient_for()を削除するとバルーンだけがフォーカスしている
+	   ウインドウの後方に出る. サーフェスは影響を受けないが, バルーンが
+	   見えなくなるのは同じなので意味が無い.)
+          バルーンを出す際にバルーンがフォーカスを奪わないようにしつつ,
+	  バルーンのウインドウを前面に持ってくる方法は見付からなかった.
+	  この辺の処理はウインドウマネージャ次第で変わってしまい,
+	  確実な方法が無いので, ninix-ayaでは何もしないことにした.
+	* lib/ninix/ballon.py:
+	  バルーンウインドウを出した時にウインドウを前面に持って来る処理が
+	  機能していなかったのを修正した.
+	* lib/ninix/ghost.py:
+	  cantalkフラグはTrue/Falseではなく1/0を値としてSHIORIに渡すように
+	  修正した.
+	* lib/ninix/balloon.py, lib/ninix/surface.py:
+	  Composition拡張機能を使用している場合にはshape_combine_mask()ではなく
+	  input_shape_combine_mask()を使用するようにした.
+	* lib/ninix/main.py: ループ処理の無駄が少なくなるように修正した.
+	* lib/ninix/sakura.py: デフォルトのWebブラウザをfirefoxに変更した.
+
+Sun January 4 2009   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.8aリリース.
+	* SakuraクラスとGhostクラスの間での処理の分担の整理をした.(継続中)
+	* lib/ninix/balloon.py, lib/ninix/ghost.py, lib/ninix/sakura.py:
+	  InputBox, TeachBox, CommunicateBoxが開いているかどうかの状態管理を
+	  SakuraクラスからBalloonクラスに移動した.
+	* lib/ninix/ghost.py, lib/ninix/home.py, lib/ninix/main.py,
+	  lib/ninix/surface.py:
+	  サーフェスのツールチップ表示を実装した.(SSP互換)
+	* lib/ninix/home.py: surfaces.txtの文字コード指定に対応した.(SSP互換)
+	* lib/ninix/surface.py:
+	  見切れと重なりの判定が正しく機能していなかったのを修正した.
+	* _niseshiori.so(暗号化辞書の解読用C言語モジュール)を削除した.
+	  (速度は劣るがniseshiori.py内部にPythonで実装されたコードがあるので.)
+	  これでninix-aya本体にはC言語モジュールが無くなった.
+
+Wed December 24 2008   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.8リリース.
+	* lib/ninix/balloon.py, lib/ninix/dll/bln.py, lib/ninix/hanayu.py,
+	  lib/ninix/kinoko.py, lib/ninix/main.py, lib/ninix/menu.py,
+	  lib/ninix/nekodorif.py, lib/ninix/ngm.py, lib/ninix/pix.py,
+	  lib/ninix/surface.py: gcの処理を削除した.
+	* SakuraクラスとGhostクラスの間での処理の分担の整理をした.(未完成)
+	* lib/ninix/kinoko.py:
+	  存在しないオブジェクト(Skinクラス内のself.surface_pixmap)への参照で
+	  落ちるのを修正した.
+	* lib/ninix/balloon.py, lib/ninix/kinoko.py, lib/ninix/main.py,
+	  lib/ninix/menu.py, lib/ninix/nekodorif.py, lib/ninix/sstp.py,
+	  lib/ninix/surface.py, lib/ninix/update.py:
+	  Sakuraへの参照をGhostへの参照で置き換えた.
+	* lib/ninix/balloon.py, lib/ninix/surface.py:
+	  WindowのShape Maskの生成にrender_pixmap_and_maskではなく
+	  render_threshold_alphaを使用するよう変更した.
+	  (余分なpixmapの生成が無くなり高速になった.)
+	* lib/ninix/main.py:
+	  Shellを名前で選択するためのメソッドselect_shell_by_nameを追加した.
+	* lib/ninix/menu.py:
+	  使用していなかったGhost, Shell, Balloon, Plugin, Nekodorif, Kinokoの
+	  リストを削除した.
+	* lib/ninix/sstp.py:
+	  socketのopenはSakuraクラスを経由せず直接行うように変更した.
+	* lib/ninix/main.py, lib/ninix/menu.py, lib/ninix/sakura.py:
+	  range_script_speedをsakura.pyからmenu.pyへ移した.
+	* lib/ninix/main.py, lib/ninix/menu.py, lib/ninix/surface.py:
+	  range_scaleをsurface.pyからmenu.pyへ移した.
+	* lib/ninix/pix.py: md5をhashlibで置き換えた.(Python2.5対応)
+	* lib/ninix/pix.py:
+	  アルファチャンネル付きPNGファイルの処理をnumpyを使用して高速化した.
+	* lib/ninix/surface.py, lib/ninix/sakura.py:
+	  スケーリングによる数値の変換はSurfaceWindowクラスで行うようにした.
+	* lib/ninix/ghost.py, lib/ninix/surface.py, lib/ninix/kinoko.py,
+	  lib/ninix/nekodorif.py:
+	  Observerクラスへのイベント通知をSurfaceとSurfaceWindowで受け持つ
+	  ように変更した.
+	* lib/ninix/balloon.py: スクロールバーの矢印, SSTPマーカー, \_bタグの
+	  画像が表示されなくなっていたのを修正した.
+
+Mon December 24 2007   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.7リリース.
+	* Pythonプログラムファイルの文字コード指定を全て小文字に統一.
+	  (UTF-8 -> utf-8, EUC-JP -> euc-jp)
+	  asciiを指定していたものはutf-8に変更.
+	* lib/ninix/pix.py, lib/ninix/surface.py, lib/ninix/balloon.py:
+	  - 透過ウインドウ処理にGTK+2.10の新機能を使用するように変更.
+	  - 透過ウインドウの背景が黒で塗られる問題を修正.
+	* lib/ninix/surface.py:
+	  - 以前の変更で不要になった処理が残っていたのを削除.
+	  - ゴーストのサーフェスのマウスドラッグに使用するボタンを
+	    左ボタン(1番)に変更.
+	  - ゴーストのサーフェス移動後の位置の再計算のタイミングを変更.
+
+Sun July 29 2007   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* osuwari.dll互換SAORIモジュールosuwari.pyを追加.
+
+Sun July 22 2007   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.6リリース.
+	* OnBallonCloseイベントのサポートを追加.
+
+Sat July 21 2007   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* OnMouseEnterAll, OnMouseLeaveAll, OnMouseEnter, OnMouseLeave
+	イベントのサポートを追加.
+
+Sun July 8 2007   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.5リリース.
+	* SERIKOによるサーフェスの書き換えを抑制するオプションを追加.
+	(サーフェスの書き換えが起きないだけで内部でSERIKOは動作している.)
+	* YAYAローダーyaya.pyを追加.
+
+Sun April 29 2007   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.4リリース.
+	* locale/ja.poを更新.
+	* メニューコンテキストの配置がSSPに近付くよう変更.
+
+Tue April 10 2007   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* gdk-pixbufを使用している部分のメモリリーク対策をした.
+	* gdk-pixbuf関連のコードをSerikoからSurfaceクラスに移した.
+
+Sat March 24 2007   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* メニューアイコンの管理を各ゴーストからApplicationクラスに移した.
+
+Sun December 10 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.3リリース.
+
+Sat December 9 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: Surfaceクラスの終了処理でSerikoを停止する
+	ように修正.
+
+Sun October 22 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/pix.py: PNAファイルの処理でNumeric Pythonの機能を使う
+	ように修正.
+
+Tue October 10 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.2リリース.
+
+Mon October 9 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: サーフェスとバールンのアルファチャンネルの
+	設定値を~/.ninix/preferencesから読み出す部分で, 値はfloatなのに
+	intとして読み出していたのを修正.
+	* lib/ninix/ghost.py, lib/ninix/surface.py:
+	ゴースト終了後もサーフェスやバルーンのデータが残っていたのを修正.
+
+Mon October 9 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9.1リリース.
+
+Sat October 7 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/kinoko.py: seriko.pyの変更に追従.
+
+Thu October 5 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/ghost.py, lib/ninix/surface.py,
+	  lib/ninix/seriko.py:
+	  アニメーションの処理を変更. CPU負荷とコマ飛びを低減.
+
+Mon September 4 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.9リリース.
+
+Sat September 2 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/misaka.py:
+	python-chardet(http://chardet.feedparser.org/)による文字コードの
+	自動判定を実装. Shift_JIS以外の文字コードを使用したゴーストに対応.
+	python-chardetをインストールしていなければShift_JISのみ対応.
+
+Wed August 30 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8.9aリリース.
+	* lib/ninix/balloon.py: \q, \URLタグで落ちる問題を修正.
+
+Sun August 27 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8.9リリース.
+
+Sat August 26 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/script.py, lib/ninix/sakura.py, lib/ninix/balloon.py:
+	下線と字消し線のフォントタグ(\f[underline,], \f[strike,])を実装.
+	* lib/ninix/script.py: 括弧の無い(\p0のような)\pタグに対応.
+	* sys.exit()を"raise SystemExit"で置き換えた.
+
+Tue July 18 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8.8リリース.
+
+Mon July 17 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/balloon.py: SSTPの送信元表示のフォントサイズ計算を修正.
+	* lib/ninix/script.py, lib/ninix/sakura.py, lib/ninix/balloon.py:
+	上付きと下付きのフォントタグ(\f[sup,], \f[sub,])を実装.
+
+Sun June 11 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8.7リリース.
+
+Sat June 10 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ゴーストのサーフェスのマウスドラッグによる移動に
+	gtk.Window.begin_move_drag()を使用するように変更.
+	使用しているウインドウマネージャによっては画面外に出せなく
+	(見切れ状態にできなく)なっていたのを修正.
+
+Wed June 7 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ゴーストの見切れ処理を調整. 透明部分も含めたサーフェスの1/3が
+	画面外に出ると発動するよう変更.(これまでは1/4だった.)
+
+Sun June 4 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/aya5.py: 辞書のコメントの処理を修正.
+	(「さい子」が動くようになった.)
+
+Sun May 28 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8.6リリース.
+	* コミュニケート複数送信拡張に対応.
+	* コミュニケートの際に送信元のゴーストが喋り終わってからイベントを送信
+	するように修正.
+
+Thu May 25 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8.5リリース.
+
+Wed May 24 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/misaka.py: Lexerの文字列抽出部分を修正.
+	(「花ちゃん」が動かなくなっていたのを修正.)
+	* lib/ninix/surface.py, lib/ninix/balloon.py:
+	Cairoによる描画で背景を透明にする処理が抜けていたのを修正.
+	(このバグで半透明サーフェス/バルーンが機能しなくなっていたと思われる.)
+
+Tue April 25 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8.4リリース.
+	* 文5互換モジュールaya5.pyを追加.
+	* 文5ローダーaya5.pyを削除.
+
+Sun April 16 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8.3リリース.
+
+Sat April 8 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* タスクバー上にサーフェスウインドウ2つが表示されるのをゴースト1組で
+	  1つにするために, Sakura側のみが表示されるようにした.
+	* バルーンのgtk.WindowタイプをPOPUPからNORMALに変更.
+	* バルーンがアクティブウインドウより下に表示されるよう調整.
+	  (サーフェスがアクティブウインドウより上にある場合は除く.)
+
+Sat March 25 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8.2リリース.
+	* lib/ninix/dll/bln.py: マウスイベントの処理で落ちる問題を修正.
+	* バルーンの設定ファイルによるフォントサイズの指定とユーザーによる
+	  指定をきちんと区別し, ユーザー指定は3/4倍しないように修正.
+	  それに合わせてバルーンフォントのデフォルトサイズ指定を修正.
+
+Thu February 2 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8.1リリース.
+
+Tue January 31 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* サーフェスとバルーンの描画処理の一部にCairoグラフィックライブラリ
+	  (http://cairographics.org/)を使用するよう変更.
+	  そのためGTK+(pygtk)2.8以降が必要となった.
+	  pna, 本体設定によるサーフェスとバルーンの半透明化が可能.(NEWS参照)
+
+Thu January 26 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/pix.py: 本体設定でサーフェス/バルーンのアルファ
+	チャンネルを変更すると落ちる問題を修正.
+
+Mon January 16 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-install.py, lib/ninix/home.py, lib/ninix/pix.py,
+	lib/ninix/surface.py: ddp暗号化ファイルのサポートを追加.
+
+Sun January 15 2006   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.8リリース.
+	* lib/ninix/menu.py, lib/ninix/surface.py:
+	menu.foreground.font.colorの設定に対応.
+
+Wed December 28 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.7.8リリース.
+	* lib/ninix/menu.py, lib/ninix/surface.py:
+	メニューのフォアグラウンド画像も使用するようにした.
+	(フォントカラーの設定は未対応.)
+
+Tue December 27 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/menu.py: gtk+-2.6以降でメニューのバックグラウンドに
+	画像が表示されない問題を修正.
+	この変更でgtk+-2.4では画像が表示されなくなるが, これはgtk+側の問題.
+	http://bugzilla.gnome.org/show_bug.cgi?id=169532
+	(これまでの実装で動いていたのが間違い.)
+
+Tue December 27 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.7.7リリース.
+
+Mon December 26 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/ghost.py: SHIORIがNOTIFYイベントに対してスクリプトを
+	返しても破棄するように修正.
+
+Mon December 26 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.7.6リリース.
+	* lib/ninix/surface.py: サーフェスのプリフェッチの際にエイリアスの
+	情報を壊してしまっていたのを修正.
+
+Sun December 25 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/bln.py: easyballoonもサーフェスの倍率に合わせて
+	縮小(拡大)するようにした. ただし「猫どりふ」などとは違い,
+	サーフェスの倍率を変更しても, 既に生成されているバルーンは
+	生成時点の倍率のままになる.
+
+Fri December 2 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.7.5リリース.
+	* lib/ninix/surface.py: サーフェスの描画処理を修正.
+	(Pixbufの更新をexposeイベントの生成前に実行するよう変更.)
+
+Thu December 1 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: ウインドウ形状の取得をアルファチャンネルの
+	変更前に行なうように修正.
+
+Mon October 17 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/sstplib.py: ninix-aya終了後, 即座にSSTPサーバのソケットを
+	削除(TCPソケットのTIME_WAIT状態を回避)するために, ソケットに
+	SO_REUSEADDRオプションを適用.
+
+Thu October 6 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.7.4リリース.
+
+Wed October 5 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py, lib/ninix/seriko.py:
+	サーフェスの描画およびキャッシュの処理を変更.
+	- SurfaceWindowクラスのメソッドを整理.
+	- 画像のキャッシュからアクセスの少ないものを消去するコードを削除.
+	- baseメソッドのアニメーションはスクリプトの再生前に画像をキャッシュに
+	  入れるようにした.
+	- サーフェスのキャッシュを廃止し, MAYUNAの設定がある場合のみ使う
+	  着せ替え専用のキャッシュを用意した.
+	* lib/ninix/main.py, lib/ninix/seriko.py, lib/ninix/dll/kawari.py:
+	listのソートのやり方を修正.
+
+Mon October 3 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/pix.py: 3.7.3で削除した部分をより速い形に改良して再度追加.
+
+Thu September 29 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.7.3リリース.
+
+Wed September 28 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/pix.py: アルファチャンネル付きのpngファイルをサーフェスに
+	使用しているゴーストの一部が, 透過色(座標(0, 0)の色)とRGB値が同じで
+	アルファ値が違う色を非透過部分に使用している場合に対応するための
+	コードを削除.
+	(仕様の「同じ色」という表現はおそらくアルファ値まで含めてと思われるが,
+	 「さくら（俺的。）」のsurface9.pngでしか問題の発生が確認されておらず,
+	 他の問題の起きないゴーストの動作がかなり遅くなるため.)
+	* lib/ninix/surface.py: サーフェスウインドウ毎にSERIKOのActorと
+	Controlerのインスタンスを持つように修正.
+	(\0, \1,...で同じサーフェスを表示しても正しくアニメーションするように.)
+	* lib/ninix/seriko.py: インターバルがrandomのアニメーションが
+	動かなくなっていたのを修正.
+	* lib/ninix/seriko.py: アニメーションの発動処理の無駄を省いた.
+	* lib/ninix/seriko.py: exclusiveの処理を修正.
+
+Tue September 27 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.7.2リリース.
+	* lib/ninix/seriko.py: いくつかのアニメーションが動かなくなっていたのを
+	修正.
+	* lib/ninix/seriko.py: exclusive指定があるアニメーションで落ちる場合が
+	あったのを修正.
+
+Mon September 26 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.7.1リリース.
+
+Sun September 25 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py, lib/ninix/balloon.py, lib/ninix/kinoko.py,
+	lib/ninix/nekodorif.py: サーフェス, バルーン等の縮小でサイズが0に
+	ならないように修正.
+
+Thu September 22 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/seriko.py: SERIKOのタイマ割り込みの最小間隔をSERIKO/2.0に
+	合わせて1msecに.
+
+Wed September 21 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/seriko.py, lib/ninix/surface.py, lib/ninix/kinoko.py,
+	lib/ninix/sakura.py, lib/ninix/ghost.py:
+	SERIKOをゴーストのタイマ割り込みで駆動するのではなく, 個別に
+	タイマ割り込みを設定して処理するように変更.
+
+Mon September 12 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.7リリース.
+
+Sun September 11 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/balloon.py: バルーン縮小の設定が正しく初期化されて
+	いなかったのを修正.
+
+Thu September 8 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/mciaudio.py: ファイルパスの指定の際にSAORIの
+	置かれているディレクトリも考慮するよう修正.
+	* lib/ninix/dll/misaka.py: Lexerの処理を修正.
+	* lib/ninix/dll/mciaudior.py: 絶対パスでファイル名が渡された時は
+	小文字に変換しないように修正.
+	* lib/ninix/sakura.py: ファイルがドロップされた際の処理をOnFileDrop2に.
+	(OnFileDropping, OnFileDropped, OnDirectoryDropは発生しない.)
+	本体で設定されているヘルパーへの引き渡しはイベントの結果にかかわらず
+	実行されなくなっている.
+
+Wed September 7 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/misaka.py: SAORIのファイル名の処理を修正.
+	* lib/ninix/surface.py: 着せ換えメニュー生成のバグを修正.
+	* lib/ninix/seriko.py: アニメーションパターンの各コマの番号が途中で
+	抜けている場合に対応. (例. 0pattern0, 0pattern1, 0pattern3, ...)
+	* lib/ninix/kinoko.py: SERIKO互換処理を修正.
+	* lib/ninix/home.py: kinoko.iniで最後の行の末尾に\0が付いている場合が
+	見付かったのでその対策を追加. (具体的には「マタンゴ」のkinoko.ini.)
+	(他のファイルについても同様の対策が必要かどうかは要検討.)
+
+Fri September 2 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/config.py: ConfigクラスをUserDictではなくビルトインのdictの
+	サブクラスに変更.
+	* lib/ninix/prefs.py: PreferencesクラスをUserDictではなくビルトインの
+	dictのサブクラスに変更.
+
+Wed August 31 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* PYTHON: コーディングスタイルを調整.
+
+Tue August 30 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/ssu.py: evaluate_request()の戻り値を修正.
+	* lib/ninix/surface.py, lib/ninix/dll/aya.py, lib/ninix/dll/bln.py,
+	lib/ninix/dll/hanayu.py, lib/ninix/dll/niseshiori.py:
+	変数名の間違いを修正.
+
+Fri August 12 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.6リリース.
+
+Thu August 11 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py, lib/ninix/seriko.py: SERIKOの処理を改良.
+
+Tue August 9 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.5.9aリリース.
+	* lib/ninix/communicate.py: 起動中のゴーストのリストの生成で落ちる
+	問題を修正.
+
+Tue August 9 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.5.9リリース.
+
+Mon August 8 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* READMEファイルをREADMEとNEWSに分割.
+	* READMEの「必要なもの」にNumerical Pythonの記述を追加.
+	* READMEの「必要なもの」の日本語コーデックに関する記述を修正.
+	(Thanks to jadoさん)
+
+Mon August 8 2005   Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* バルーンフォントの変更が保存されていなかったのを修正.
+
+Thu August 4 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* PYTHON: コーディングスタイルを調整.
+
+Wed August 3 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* PYTHON: プレフィックスやサフィックスを調べるときに, 文字列の
+	スライスを使うのを避け, 代わりにstartswith()とendswith()を使うよう修正.
+
+Tue August 2 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* PYTHON: オブジェクト型の比較には常にisinstance()を使い
+	型を直接比較しないよう修正.
+
+Mon August 1 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* PYTHON: 文字列連結に+, +=ではなく''.join()を使うよう修正.
+	* PYTHON: stringモジュールではなく文字列メソッドを使うよう修正.
+
+Fri July 29 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* PYTHON: Noneとの比較に==, !=を使っている個所をis, is notを使うよう修正.
+
+Thu July 21 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.5.8リリース.
+
+Wed July 20 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py, lib/ninix/ghost.py, lib/ninix/sakura.py:
+	 OnBoot等のイベントでスクリプト終了時までにサーフェス定義が無かった場合には
+	\0, \1のみ強制的にサーフェスを表示するようにした.
+	* lib/ninix/surface.py: 起動後サーフェスがまだ指定されていない状態で\iタグが
+	来た場合に, デフォルトIDに対する指定として受け付けてしまっていた問題を修正.
+	* lib/ninix/sakura.py, lib/ninix/dll/niseshiori.py,
+	lib/ninix/dll/satori.py, lib/ninix/dll/kawari.py: %ms, %mc, %mz等を
+	SHIORI/3.0として処理する上で, IDに\ms, \mc, \mzの様に\を付けるよう修正.
+
+Fri July 8 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.5.7リリース.
+	* lib/ninix/ngm.py: ~/.ninix/ngm/data/MasterList.xmlが無いと落ちる問題を修正.
+
+Sat July 2 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.5.6リリース.
+	* lib/ninix/dll/kawari.py: KISコマンドfindposのサポートを追加.(Ying-Chun Liu)
+
+Tue June 21 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SHIORI/3.0 basewareversionをSHIORIのロード時に通知するようにした.
+	(Reference2には開発コードを除いた数値のみのバージョン番号が入っている.)
+	* OnShellChangedのReference1, Reference2を追加.
+	* OnShellChangingのReference1を追加.
+
+Mon June 20 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ポップアップメニューを出すかどうかを決めるリクエストの処理を追加.
+	(sakura.popupmenu.visible, kero.popupmenu.visible,
+	 char2.popupmenu.visiblel, char3.popupmenu.visiblel, ...)
+	* \![set,windowstate,stayontop], \![set,windowstate,!stayontop]を実装.
+	* \![set,windowstate,minimize]を実装.
+
+Sat June 18 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/misaka.py: エラー発生箇所の情報が出力されない場合があるのを
+	修正.(Ying-Chun Liu)
+
+Sun June 12 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.5.5リリース.
+
+Sat June 11 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* OnMouseClickイベントの処理をSHIORI/3.0仕様に準拠.
+
+Fri June 10 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 本体設定に「喋る時手前に出てくる」設定を追加. 設定されている場合には
+	喋り始める時に一回だけサーフェスとバルーンを手前に出す. この変更に合わせて
+	喋っている間常にサーフェスとバルーンを手前に出していた処理を削除.
+
+Thu June 9 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/ghost.py: ゴースト起動時のOnDisplayChangeは喋らないように修正.
+	* lib/ninix/sakura.py: \v(手前に出てくる)タグを実装.
+	* lib/ninix/script.py: \sタグでサーフェスIDが数値で指定されていて, 先頭に0が
+	付いている場合は0を削除する("0001"なら"1"に置き換える)ようにした.
+
+Wed May 25 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.5.4リリース.
+	* lib/ninix/sakura.py: \_uタグの処理を実装. (Ying-Chun Liu)
+
+Mon May 23 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: SHIORIの再読み込み時にNOTIFY otherghostnameが
+	送りなおされていなかった問題を修正.
+
+Fri May 20 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	＊ バージョン3.5.3リリース.
+
+Thu May 19 2005   Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* サーフェスとバルーンの透過率(アルファチャンネル)設定を追加.(未テスト)
+
+Tue March 22 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.5.2リリース.
+
+Mon March 21 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/home.py, lib/ninix/main.py: ゴースト側で指定されたバルーン名が
+	バルーンのインストールディレクトリ名の場合に対応.
+	* lib/ninix/sstp.py, lib/ninix/main.py: CheckQueueコマンドを拡張.
+	キューに残っている全てのリクエストの数も返すようにした.
+
+Fri March 18 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.5.1リリース.
+
+Thu March 17 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 本体設定に「喋り終わると裏へ沈む」設定を追加.
+
+Tue March 15 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* gtk.timeout_add(), gtk.timeout_remove()(共にdeprecated)を
+	gobject.timeout_add(), gobject.souce_remove()で置き換えた.
+	* lib/ninix/main.py: 使用率トップのゴーストのai.pngを使用率グラフの背景に
+	使用するようにした.
+
+Sat March 12 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.5(clover key)リリース.
+
+Fri March 11 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/misaka.py: $_Constant指定の変数への代入の扱いを変更.
+	* lib/ninix/dll/misaka.py: 関数の引数は{}が無くても評価するように修正.
+
+Thu March 10 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/misaka.py: if構文でelseが省略されている場合に対応.
+	* lib/ninix/dll/misaka.py: シンボル名に記号などを許すように修正.
+
+Mon February 28 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/menu.py: メニューのバックグラウンドが指定されている場合に
+	着せ替えメニューの表示で落ちる問題を修正.
+
+Sat February 19 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: マウスによるサーフェスの移動で座標が0より小さくなる
+	場所に移動できなくなっていたのを修正.
+
+Fri February 18 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: バルーンの位置計算を修正.
+
+Mon February 14 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.4(bagbiting)リリース.
+
+Sun February 13 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/aya.py: 「文」のバージョン判定を修正.
+	* 複数キャラクタに対応.
+
+Mon February 7 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	＊ バージョン3.3.7リリース.
+
+Sun February 6 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: サーフェスウインドウを閉じるとゴーストが終了する
+	よう修正.(これまでは幽霊(?)ゴースト化していた.)
+	* lib/ninix/balloon.py: バルーンの内容の描画を調整.
+
+Sat February 5 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: 単体のシェルを使用すると落ちる問題(typo)を修正.
+	* lib/ninix/kinoko.py: ウインドウを閉じると落ちる問題(typo)を修正.
+	* lib/ninix/nekodorif.py: ウインドウを閉じると落ちる問題(typo)を修正.
+
+Fri February 4 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: \![change,ghost]による自分自身への交代が正しく処理
+される
+	よう修正.
+	* lib/ninix/dll/aya5.py: ゴーストの辞書がShift_JIS以外の文字コードの場合にも
+	動作するように修正.
+	* lib/ninix/dll/aya.py: aya_shiori3.dicがShift_JIS以外の文字コードの場合に
+	バージョン判定に失敗するのを修正.
+	* ninix-installl, ninix-updateが動かなくなっていたのを修正.
+	* lib/ninix/main.pyからバージョン情報をversion.pyとして分離.
+	* lib/ninix/menu.py: メニューのサイドバーとフォントカラー変更の実装を修正.
+
+Thu January 27 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	＊ バージョン3.3.6リリース.
+
+Mon January 24 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/ja.poを更新.
+	* lib/ninix/main.py, lib/ninix/ghost.py: 本体設定でPNAファイルを使用するか
+	どうかを設定できるようにした.
+	* lib/ninix/balloon.py: PNAファイルによるバルーンのアルファチャンネル設定に
+	対応.
+	* lib/ninix/ghost.py: サーフェスのリセットで自由配置が無効になるバグを修正.
+	* lib/ninix/surface.py: サーフェスのリセットの際に必要以上にオーバーレイ等を
+	消去してしまうのを修正.
+
+Sun January 23 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: サーフェスの描画を調整.
+
+Thu January 20 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	＊ バージョン3.3.5リリース.
+
+Wed January 19 2005  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: 強制ガーベジコレクション処理を削除.
+	* lib/ninix/pix.py, lib/ninix/surface.py:
+	PNAファイルによるサーフェスのアルファチャンネル設定に対応.
+	(オーバーレイ等についても対応. 本体の透過処理にはXサーバが
+	 Composition拡張機能を持ち, 適切に設定されていることが必要.
+	 本体の透過処理についての動作は未確認.)
+
+Mon December 20 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	＊ バージョン3.3.4リリース.
+
+Sun December 19 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/ngm.py: ネットワーク更新機能を実装.
+	(ゴースト側の更新機能を使用.)
+
+Thu December 16 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/ja.poを更新.
+	* lib/ninix/ngm.pyをgettext化.
+
+Mon December 13 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/ngm.py: 検索機能を実装.
+
+Sun December 12 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/ngm.py: GUIを仮実装.
+
+Sat December 4 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/ngm.py: openngmをベースに実装を開始.
+
+Wed November 24 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.3.3リリース.
+
+Tue November 23 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-update.py: --listオプションが機能しなくなっていたのを修正.
+
+Mon November 22 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-lookup.py, lib/ninix/netlib.py, lib/ninix/httplib.py,
+	bin/ninix-lookup.inを削除.
+	* lib/ninix/update.py: Python標準のhttplib.HTTPConnectionを使用するよう変更.
+	* lib/ninix-update.py: update.pyの変更に合わせて修正.
+
+Wed November 10 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/ja.poを更新.
+	* NGMクローンlib/ninix/ngm.pyを追加.(機能は未実装)
+
+Tue November 9 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* doc/examples/gtkrcを削除.
+
+Sun October 24 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.3.2リリース.
+
+Sat October 23 2004  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/sakura.py, lib/ninix/script.py, lib/ninix/sstp.py:
+	スクリプトエラーからの復帰処理を追加.
+
+Wed October 20 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: gtk.CList(deprecated)ではなくgtk.TreeViewを使うよう変更.
+
+Sun October 17 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: ゴーストの起動時点でのサーフェス倍率とスクリプトウエイトの
+	デフォルト設定を反映させるよう修正.
+	* lib/ninix/main.py: gtk.Combo(deprecated)ではなくgtk.ComboBoxを使うよう変更.
+
+Wed October 13 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ポップアップメニューの生成にはGtkItemFactory(deprecated)ではなく
+	GtkUIManagerを使うよう変更.
+
+Mon October 11 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/kinoko.py: ontop設定対応にGTK+2.4の機能を使うように変更.
+	* lib/ninix/pix.py, lib/ninix/kinoko.py, lib/ninix/nekodorif.py,
+	lib/ninix/menu.py: 2.2以前のGTK+, pygtkに対応するためのコードを削除.
+
+Sun October 10 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.3.1リリース.
+
+Sat October 9 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/kawari8.py: _kawari8.soのマルチゴースト対応のために変更.
+	(従来の_kawari8.soでは動作しません.)
+
+Wed October 6 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.3(slayer)リリース.
+
+Tue October 5 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/satori.py: トーク展開の中でトークを呼び出す場合にはReferenceを
+	リセットするよう修正.
+
+Mon October 4 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.pyをsakura.pyとghost.pyに分割.
+
+Sun October 3 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: サーフェスを隠す際にはGtkDrawingAreaを隠して
+	GtkWindowは隠さないようにした.
+
+Tue September 28 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.2(codewalker)リリース.
+
+Tue September 28 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/satori.py: トーク展開の中でトークを呼び出す場合には\0側と\1側の
+	切り替え状態を継承しないように修正.
+
+Sat September 25 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/ja.poを更新.
+
+Fri September 24 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.1.8リリース.
+
+Thu September 23 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/sakura.py, lib/ninix/surface.py:
+	サーフェスの当たり判定領域の表示/非表示を本体設定から変更できるようにした.
+
+Wed September 22 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: ホームディレクトリが同じninix-ayaの多重起動を禁止.
+
+Tue September 21 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.1.7リリース.
+	* lib/ninix/main.py: SSTP EXECUTE/1.0 CheckQueueで再生中のスクリプトも
+	カウントするように修正.
+
+Mon September 20 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py, lib/ninix/seriko.py:
+	表示されているのと同じサーフェスが指定された場合にそれまでのアニメーション
+	パターンが残ったままリセットされない問題を修正.
+	(「猫刻」のSakura側サーフェスで起きていた問題の修正.)
+	* lib/ninix/dll/satori.py: OnCloseが返すスクリプトに'\-'を付加するよう修正.
+	* lib/ninix/dll/satori.py: 辞書フォルダが変更されてもmasterにあるreplace.txtと
+	replace_after.txtを適用するようにした.
+
+Sat September 18 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/sakura.py: '\-'タグが機能しなくなっていたのを
+	修正.
+	* lib/ninix/main.py, lib/ninix/sakura.py: ゴーストの終了はOnCloseイベントで
+	SHIORIが返すスクリプトの中にある'\-'タグによって行なうよう修正.
+
+Sat September 18 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.1.6リリース.
+
+Fri September 17 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/kinoko.py: ontop設定に仮対応.
+	* lib/ninix/kinoko.py: アニメーションでターゲットゴーストのサーフェスや
+	その位置が変わった時にもスキンの位置を合わせるようにした.
+	* lib/ninix/sstp.py, lib/ninix/main.py: SSTPのEXECUTE/1.0にCheckQueueコマンドを
+	追加. Senderに一致するクライアントからのリクエストが何個キューに残っているかを
+	返す. (SSTP Bottleクライアントが利用するのを想定した機能.)
+
+Wed September 15 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.1.5リリース.
+
+Tue September 14 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: GhostクラスからObserverへ状態変化を通知する機構を改良.
+	それに合わせてサーフェス等の状態変化の情報がGhostクラスに集まるように変更.
+	* lib/ninix/dll.py: SAORI DLL互換モジュールがSakuraクラスにアクセスできるように
+	する機能を削除. 代わりにGhostクラスへのアクセス方法を提供するよう変更.
+	* lib/ninix/kinoko.py: ターゲットゴーストのアイコン化に合わせてスキンを隠すよう
+	にした.
+
+Tue September 7 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/kinoko.py: ポップアップメニューの設定(settings)を選択すると落ちる
+	問題を修正.(Thanks to kawaharaさん)
+
+Mon September 6 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.1.4リリース.
+
+Sun September 5 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/nekodorif.py: 画面上端/下端からの距離設定を登場位置に反映させるよう
+	にした.
+	* lib/ninix/nekodorif.py: ターゲットゴーストの倍率に合わせてサーフェス倍率を
+	変えるようにした.
+	* lib/ninix/nekodorif.py: サーフェスをマウスドラッグで移動可能にした.
+	* lib/ninix/nekodorif.py: omni.txtによる自由移動の設定に対応.
+
+Mon August 30 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.1.3リリース.
+
+Sun August 29 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 「猫どりふ」互換機能を改良.
+	実際に物を落としてSHIORIイベントを発生させることが可能になった.
+
+Wed August 18 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.1.2リリース.
+
+Tue August 17 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/aya.py: 「文」のバージョン判定を修正.
+
+Mon August 16 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-install.py: 「猫どりふ」スキン/落下物のインストールに対応.
+
+Tue August 3 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.1.1リリース.
+
+Mon August 2 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-install.py: 「きのこ」スキンのインストールに対応.
+	* 「きのこ」互換機能を改良.
+	* 「猫どりふ」互換機能を改良.
+	* lib/ninix/sakura.py: Ghostクラスに他のオブジェクト(Observer)へ状態の変化を
+	通知する機構を仮実装.(現在は「きのこ」への通知に使用.)
+
+Thu July 15 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.1(heavy wizardry)リリース.
+
+Wed July 14 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 「きのこ」互換機能kinoko.pyを追加.（未完成）
+	* 「猫どりふ」互換機能nekodorif.pyを追加.（未完成）
+	* lib/ninix/dll/satori.py: カッコ展開の結果を返す際に先頭と末尾の空白を
+	削除するよう修正.(「翼の庭」でクシーイベントが発生しない問題への対策.)
+
+Tue June 22 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* whrandom(deprecated)ではなくrandomモジュールを使用するよう変更.
+
+Mon June 7 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン3.0(magic smoke)リリース.
+
+Thu June 3 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/balloon.py: バルーン上でのマウス移動イベントの処理を修正.
+
+Mon May 31 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: ninix-installが動かなくなっていたのを修正.
+
+Wed May 26 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.9.9リリース.
+
+Sun May 23 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/sakura.py, lib/ninix/surface.py:
+	ゴーストのアイコン化と復帰の際にはIfGhost指定の無いSSTPの送信対象となる
+	ゴーストを適当に選択し直すようにした.
+	* lib/ninix/sakura.py: スクリプトキューの処理でもcantalkフラグをチェックする
+	ように修正.
+
+Sat May 22 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/sakura.py: 一時起動と交代もしくは複数の交代で
+	交代先として同じゴーストが選択された場合にエラーが発生するのを修正.
+
+Thu May 20 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/balloon.py: バルーンの倍率が設定されない場合があるのを修正.
+
+Wed May 19 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: 一部の設定で$NINIX_HOME/preferencesに設定値が無い場合に
+	エラーが発生して起動しない問題を修正.(デフォルト値の設定個所を修正.)
+
+Tue May 18 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: SSTPサーバの受信処理のためのタイマー割り込みをApplication
+	に追加して, Ghostのタイマー割り込みから処理を削除.
+	* lib/ninix/main.py, lib/ninix/sakura.py: SSTP SEND/1.4のスクリプト再生が
+	停止してしまうバグを修正.
+
+Mon May 17 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.9.8リリース.
+
+Sun May 16 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/aya5.py: SAORI互換モジュール呼び出しに対応.
+	(_aya5.soについてもSAORI互換モジュール呼び出しに対応したものが必要.)
+
+Sat May 15 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py, lib/ninix/menu.py: \![open,configurationdialog]で
+	エラーが発生するのを修正.
+	* lib/ninix/sakura.py: サーフェスウインドウのアイコンが設定されなくなっていた
+	のを修正.
+
+Fri May 14 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.9.7リリース.
+
+Thu May 13 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/ja.poを更新.
+	* lib/ninix/sstp.py, lib.ninix/main.py, lib/ninix/sakura.py:
+	SSTP SEND/1.4の処理でスクリプト再生が終了するまでは次のリクエストのスクリプト
+	処理を(ゴーストの一時起動も含めて)開始しないようにした.
+	* lib/ninix/sstp.py, lib.ninix/main.py: SSTP SEND/1.4のリクエストのIfGhostで
+	指定されたゴーストがいない場合に, スクリプトを他のゴーストで再生するかどうかを
+	設定できるようにした.(本体設定の「色々」->「SSTP 設定」)
+
+Mon May 10 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.9.6リリース.
+
+Sun May 09 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: ゴーストの召喚で2重に起動処理を呼び出していたのを修正.
+	* lib/ninix/sakura.py, lib/ninix/communicate.py: 起動中ゴーストのリストが
+	正しく更新されていなかったのを修正.
+	* lib/ninix/surface.py, lib/ninix/seriko.py: アニメーションで別のパターンを
+	発動させる場合(start, alternativestart)は次のパターンを即開始するように修正.
+	(長い間原因不明だった「白子＆アフ郎」でのちらつきが修正された.)
+
+Sat May 08 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: \s[]タグで指定されたサーフェスIDがアニメーション
+	パターンだった場合にタグ処理の時点で(アニメーションの開始前に)デフォルト
+	サーフェスが表示されてしまうのを修正.
+	この修正の関係で存在しないサーフェスが指定された場合の動作が変更になった.
+	(これまでデフォルトサーフェスを表示していたのが表示しているサーフェスを
+	 変更しないようになった.)
+	* lib/ninix/seriko.py: baseメソッドで指定されたサーフェスのIDがアニメーション
+	開始前のサーフェスIDに一致した時に表示されない問題を修正.
+	(「フサギコ漫談」のフッサールとギコの登場アニメーションなど.)
+
+Fri May 07 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.9.5リリース.
+	* lib/ninix/main.py, lib/ninix/sakura.py: ゴーストの一時起動を実装.
+	IfGhost指定付きSSTPを処理する場合に当該ゴーストがインストールされていて
+	起動していない状態の時にはゴーストを起動してSSTPを処理する.
+	このモードではSHIORIリクエストやネットワーク更新などは機能せず, SSTPの
+	処理が終わるとゴーストは自動的に終了する.
+
+Thu May 06 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/sakura.py: ゴーストの再読み込みの処理を修正.
+	ゴーストの停止を確実に実行するようにしたのと交代/シェル変更の判定を修正.
+
+Fri April 30 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.9.4リリース.
+
+Wed April 28 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: 画像合成(element)でメソッドにbaseが指定された場合の
+	処理を追加.(仕様が不明なので適当に処理.)
+	* lib/ninix/sakura.py: 「BTH小っちゃいってことは便利だねっ」を動作させる時だけ
+	SHIORIリクエストのヘッダでSenderをSSPと詐称.(所長さん, 竜王さんゴメンなさい.)
+	一部SSP独自のSakura Scriptタグに対応できてないので動作は不完全.
+	* lib/ninix/aya.py: 文3ゴーストがサポートされなくなってしまっていたのを修正.
+
+Tue April 27 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: ninix 0.8で未実装のまま使われることのなかったISCP関係の
+	コードを削除.
+
+Tue April 27 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.9.3リリース.
+	* lib/ninix/surface.py: 拡大側のサーフェス倍率を追加.(動作確認無し)
+
+Mon April 26 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/aya5.pyを追加. 動作させるには_aya5.soモジュールが必要.
+	(Thanks to linjianさん)
+	* lib/ninix/dll/aya.py: 栞判定で文4のみサポートするように制限.
+
+Wed April 21 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sstp.py, lib/ninix/main.py: SSTPのEXECUTEにGetNamesコマンドを追加.
+	インストールされている起動可能な全ゴーストの名前(sakura.name)を返す.
+	(SSTP Bottleクライアントが利用するのを想定した機能.)
+
+Tue April 20 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/sakura.py: 起動時に全ゴーストについて
+	Ghostのインスタンスを作成して情報を管理するようにするための変更を開始.
+	* lib/ninix/sakura.py: SHIORIリクエストの文字コード設定をSakuraからGhostに移動.
+	* lib/ninix/balloon.py, lib/ninix/surface.py, lib/ninix/sakura.py,
+	lib/ninix/menu.py, lib/ninix/main.py:
+	サーフェス縮小, バルーン縮小のパラメータをそれぞれSurface, Balloonに移した.
+	* lib/ninix/sakura.py: ネットワーク更新後に落ちる問題を修正.
+
+Tue April 13 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.9.2リリース.
+
+Mon April 12 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sstp.py, lib/ninix/main.py: IfGhostによるSSTPの振り分けを実装.
+	* lib/sstplib.py, lib/ninix/sstp.py, lib/ninix/sakura.py, lib/ninix/main.py:
+	UNIXドメインソケット方式のDirectSSTPサーバを削除して新しいcommunicate.pyを
+	使用するように変更.
+	* lib/ninix/communicate.py: 複数ゴースト起動の実装に合わせてゴースト間
+	コミュニケーションの方法を簡素化.
+
+Sun April 11 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/ja.poを更新.
+	* lib/ninix/surface.py: サーフェスのアイコン化のイベントハンドラを修正.
+	* lib/ninix/main.py, lib/ninix/sstp.py, lib/ninix/sakura.py:
+	SSTPサーバのインスタンスの管理をSakuraからApplicationに移動.
+	* lib/ninix/main.py, lib/ninix/sakura.py: ゴーストの消滅指示確認ダイアログを
+	ApplicationからGhostのメンバに変更.
+	* lib/ninix/main.py, lib/ninix/sakura.py, lib/ninix/menu.py:
+	ゴーストの複数起動をサポート.
+	* lib/ninix/surface.pt, lib/ninix/balloon.py: サーフェス, バルーンにfinalize
+	メソッドを追加. 各ウインドウの破壊を実行.
+	* lib/ninix/balloon.py:	フォントの設定を全体の設定ファイル
+	$NINIX_HOME/preferencesに移動. pango_fontrcは廃止.
+
+Sun April 4 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: HISTORYファイルの保存処理をSakuraからGhostに移動.
+	* lib/ninix/sakura.py: CommunicateのインスタンスをSakuraからGhostに移動.
+	* lib/ninix/sakura.py: 消滅回数と起動時間の記録をSakuraからGhostに移動.
+	* lib/ninix/sakura.py: イベント処理関数の引数を可変個にした.
+	* lib/ninix/sakura.py, lib/ninix/surface.py: サーフェス上でのマウスホイール
+	イベントの処理をSakuraからSurfaceに移動.
+
+Sat April 3 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.9.1リリース.
+
+Fri April 2 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/balloon.py: バルーン上でのマウス移動イベントの生成と処理を
+	サーフェスと同じように変更.
+	* lib/ninix/sakura.py, lib/ninix/surface.py: キー入力イベントでのキーコードの
+	変換処理を最初にイベントを受け取るSurfaceに移動.
+	* lib/ninix/sakura.py, lib/ninix/surface.py: 見切れと重なり判定をSakuraから
+	Surfaceに移動.
+	* lib/ninix/sakura.py, lib/ninix/surface.py: サーフェス上でのマウスの移動
+	イベントの処理方法を変更.
+
+Thu April 1 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: サーフェス倍率と表示ウエイトのデフォルト設定が保存されて
+	いなかったのを修正.
+
+Wed March 31 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.9(firebottle)リリース.
+
+Tue March 30 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/misaka.py: 文字コード変換のバグを修正.
+	* Python2.xの新機能を使って一部のコードを書き直した.
+
+Mon March 29 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* Applicationからゴーストを構成するクラスのインスタンスへのアクセスを
+	Ghostへ集約.
+	* Ghost以外のゴーストを構成するクラスのインスタンス生成をApplicationから
+	Ghostに移した.
+
+Wed March 24 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* これまでは他のゴーストの専用バルーンも含めた全バルーンが選択できたのを
+	そのゴーストの専用バルーンと汎用バルーンに制限.
+	(デフォルトバルーンは汎用バルーンからのみ選択可能.)
+	* lib/ninix/menu.py: メニューの各項目のアップデート方法を変更.
+	* lib/ninix/menu.pyを追加. ポップアップメニューの処理をsurface.pyから移した.
+
+Tue March 16 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/seriko.py: SERIKO/2.0およびMAYUNA/1.x in SERIKO/2.0に対応.
+
+Mon March 15 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/sakura.py, lib/ninix/surface.py:
+	表示ウエイトとサーフェス倍率のメニューの管理をMenuクラスに移した.
+	それと合わせてこれらのデフォルト設定は本体設定で行なうように変更.
+	(将来の複数ゴースト起動の実装を考えての変更.)
+
+Tue March 9 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.7.2リリース.
+
+Sun March 7 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: 2.0.0までのpygtkのgtk.Menu.popup()のバグ対策を修正.
+
+Sat March 6 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/surface.py: pix.create_blank_pixbuf()を使用するよう変更.
+	* lib/ninix/pix.py: 2.0.0までのpygtkのバグへの対策が入ったcreate_blank_pixbuf
+	関数を追加.
+
+Wed March 3 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/mayuna.pyをlib/ninix/seriko.pyに統合.
+
+Tue March 2 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/kawari.py: ターミナル出力をUTF-8に変更.
+	* lib/ninix/niseshiori.py: ターミナル出力をUTF-8に変更.
+	* lib/ninix/niseshiori.py: 文字コードをUTF-8に変更.
+
+Mon March 1 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/aya.py: デバッグ出力はdebugの値が設定されている時のみターミナル
+	に出すよう修正.
+
+Sun February 29 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 互換栞モジュールのshow_descriptionメソッドで表示されるCopyrightを更新.
+
+Sat February 28 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* doc/extension.txt, doc/kawari.txt, doc/saori.txt: 文字コードをUTF-8に変更.
+
+Thu February 26 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ChangeLogとREADMEの文字コードをUTF-8に変更.
+	* Pythonコードのファイルに文字コード指定とCopyright表記を追加.
+
+Sun February 22 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 互換SAORIモジュールでdll.pyのテンプレートクラスを利用するよう変更.
+	* lib/ninix/dll.py: Saoriクラスのテンプレートクラスを追加.
+
+Sat February 21 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/hanayu.py: 文字コードをUTF-8に変更.
+	* lib/ninix/dll/mciaudior.py: 文字コードをUTF-8に変更.
+
+Thu February 19 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/entry_db.py, lib/ninix/script.py: 文字コードをUTF-8に変更.
+
+Wed February 18 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/balloon.py,
+	lib/ninix/dll/bln.py, lib/ninix/dll/hanayu.py:
+	pygtk-1.99.14以前のpango.Layout.set_text()の仕様に対応するためのコードを削除.
+
+Mon February 16 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/misaka.py: 文字列操作の修正忘れ2個所を修正.
+
+Thu February 12 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.7.1リリース.
+
+Wed February 11 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/htmllib.pyを削除.
+	* lib/ninix/sakura.py: 文字コードの変更が必要なhtmllibを捨ててPython2.3で
+	追加されたhtmlentitydefs.name2codepointを使用するようにした.
+	Python2.3以前の環境では"\&[id]"は正しく変換されない.
+
+Tue February 10 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: ファイルの文字コードをUTF-8に変更.
+	* lib/ninix/surface.py: サーフェスのPixbufをキャッシュから廃棄した際には
+	強制的にガーベジコレクションを実行するようにした.
+	* lib/ninix/dll/misaka.py: ターミナル出力の文字コードをUTF-8に変更.
+	* lib/ninix/dll/misaka.py: 内部文字コードをUnicodeに変更.(ファイルはUTF-8.)
+
+Mon February 9 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/kanjilib.pyを削除.
+	* lib/ninix/dll/aya.py, lib/ninix/dll/satori.py, lib/ninix/dll/misaka.py:
+	kanjilibを使用しないように変更.
+
+Sun February 8 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: sakura.py, surface.py, balloon.pyに分割.
+	* lib/ninix/sakura.py: Menuクラスを新設.
+
+Tue February 3 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-install.py: オーナードローメニュー用画像などの一部のファイルが
+	インストールされなかったのを修正.
+
+Mon February 2 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: オーナードローメニュー用画像をポップアップメニューで
+	利用するようにした.
+	* lib/ninix/home.py, lib/ninix/main.py, lib/ninix/sakura.py:
+	サーフェスの置かれているパスを後から取得できるよう変更.
+	* lib/ninix/sakura.py: サーフェスウインドウのタイトルをsakura.name, keronameに
+	それぞれ設定するようにした.
+
+Mon February 2 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.7リリース.
+	* lib/ninix/main.py: -Rオプションを削除.
+	* lib/ninix/main.py: Pythonのトレースバック出力専用ダイアログを追加.
+
+Mon February 2 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.6リリース.
+
+Fri January 30 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/kawari.py: 辞書のパスの文字コードが正しく変換されていなかった
+	のを修正.
+
+Thu January 29 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: 内部呼び出し, SAORI呼び出しの引数計算の戻り値の型を
+	修正.
+	* lib/ninix/dll/bln.py: 引数のチェックを追加.
+
+Tue January 27 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/hanayu.py: hanayu.txtの読み込みを修正.
+	* lib/ninix/sakura.py: バルーンの画像設定のエラー処理を修正.
+
+Mon January 26 2004  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/dll/satori.py: 改行処理を修正.
+
+Sun January 25 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/seriko.py: メソッドの省略時にはbaseとして処理するように変更.
+	* lib/ninix/seriko.py: インターバルが負値の場合には絶対値を使うように変更.
+	* lib/ninix/dll/satori.py: expand()の再帰で意図せずに\0側から\1側に切り替わって
+	しまう問題を修正.
+	* lib/ninix/dll/satori.py: 「会話時サーフェス戻し」の処理をスクリプト生成の時に
+	行なうよう変更.
+
+Thu January 22 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: 「会話時サーフェス戻し」の動作を再度修正.
+
+Thu January 15 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/saori_cpuid.py: OSとプラットフォーム情報の取得に対応.
+
+Tue January 13 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.5.8リリース.
+
+Mon January 12 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: Python2.3でバルーン配置がおかしくなる問題を修正.
+	* lib/ninix/sakura.py: descript.txtだけでなくsurfaces.txtの
+	sakura.balloon.offset[xy], kero.balloon.offset[xy]にも対応.
+
+Sun January 11 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py, locale/ja.po: メニューアイテムにアクセラレータを設定.
+
+Sat January 10 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: 表示する文字が含まれていないスクリプト(改行のみなど)の
+	場合にはバルーンを出さないようにした.
+	* lib/ninix/dll/satori.py: 「会話時サーフェス戻し」の動作を以前のものに戻した.
+
+Fri January 9 2004  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/dll/satori.py: タグ処理を修正.
+
+Thu January 8 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/hanayu.py: radar形式のグラフに対応.
+	* lib/ninix/dll/satori.py: 内部呼び出し, SAORI呼び出しの引数計算に対応.
+
+Wed January 7 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: SAORIの複数返値に対応.
+
+Tue January 6 2004  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: 一部のアニメーションが動かなかったのを修正.
+
+Mon January 5 2004  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/main.py: 子プロセス(プラグイン)処理の修正.
+	* lib/ninix/main.py: セッション周りの修正.
+
+Fri December 26 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.5.7リリース.
+
+Sun December 21 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/main.py, locale/ja.po: デフォルトバルーンの設定に
+	「常にこのバルーンを使う」チェックボックスを追加.
+
+Fri December 19 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/ssu.py: 関数追加.
+
+Thu December 18 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix-install.py: archiveディレクトリの作成を修正.
+
+Wed December 17 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/ssu.py: 関数追加.
+
+Wed December 17 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/dll/satori.py: タグ処理を再度修正.
+
+Tue December 16 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: 括弧内の改行を無視するようにした.
+	* lib/ninix/main.py: バルーン切り替えの際にSakuraを再起動しないように変更.
+
+Mon December 15 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ssu.dll互換モジュールssu.pyを追加.
+
+Mon December 15 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/dll/satori.py: 乱数の範囲指定に負の値が入っている場合に対応.
+
+Mon December 15 2003  Atzm Watanabe <atzm@users.sourceforge.jp>
+	* lib/ninix/dll/aya.py: _in_, !_in_の両辺の型をチェックするよう修正.
+
+Fri December 12 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.5.6リリース.
+
+Fri December 12 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/dll/satori.py: タグ処理を再度修正.
+	* lib/ninix/sakura.py: 明示的にサーフェス指定が来ない限りサーフェスを出さない
+	よう変更.
+	* lib/ninix/sakura.py: メニューラベルのアクセラレータ指定に対応.
+	* lib/ninix/sakura.py: メニューラベルのリソース取得範囲を拡張.
+
+Thu December 11 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/nini/dll/satori.py: SAORI互換モジュール呼び出しに対応.
+
+Thu December 11 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/dll/satori.py: 改行の挿入/削除処理を修正.
+	* lib/ninix/dll/satori.py: カッコ付きのセリフが消えていたのを修正.
+	* lib/ninix/dll/satori.py: 「次から○〜△回目のトーク」形式の予約トークに対応.
+
+Wed December 10 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: 辞書フォルダの切り替えタイミングを変更.
+	* lib/ninix/dll/satori.py: デフォルトサーフェスの記録をサーフェス加算値よりも
+	後になるように修正.
+
+Wed December 10 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+                      Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: 辞書フォルダと起動回数を保存するようにした.
+	* lib/ninix/dll/satori.py: 前回終了時サーフェスを2重に記録していたのを新しい値
+	のみ保存するよう修正.
+
+Tue December 9 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+                     Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-install.py: パス名に含まれるバッククオートをエスケープするように
+	修正.
+
+Fri December 5 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.5.5リリース.
+	* lib/ninix/dll/niseshiori.py: %m?を展開できるようにした.
+
+Thu December 4 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* saori_cpuid.dll似非互換モジュールsaori_cpuid.pyを追加.(動作テスト用)
+	* lib/ninix/sakura.py: %etの展開でエラーが発生するのを修正.
+	* lib/ninix/dll/kawari.py, lib/ninix/dll/niseshiori.py: メタ文字列の展開が機能
+	していなかったのを修正.
+
+Wed December 3 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/dll/kawari.py, lib/ninix/dll/niseshiori.py, lib/ninix/sakura.py:
+	デバッグ出力のエンコード処理を修正.
+
+Wed December 3 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: passivemode中に最小化された場合はイベントは発生させず,
+	サーフェスとバルーンの状態を維持するよう修正.
+	* lib/ninix/sakura.py: passivemode中にSSTPメッセージを受けてしまう問題が直って
+	いなかったのを修正.
+	* lib/ninix/dll/aya.py: システム関数ERASEVARIABLEをサポート.
+
+Tue December 2 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/hanayu.py: タイトルが空文字列の時にエラーが発生するのを修正.
+	* lib/ninix/dll/hanayu.py: 明示的にフォントファミリーを設定するよう修正.
+
+Tue December 2 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/sakura.py: サーフェスの当り判定のIDを0〜255に拡張.
+	* lib/ninix/sakura.py: エンコーディングまわりを修正.(Patch#3408)
+	cjkcodecs(要1.0.2)にも対応, iconvcodecはダメ.
+
+Mon December 1 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.5.4リリース.
+	* lib/ninix/dll/niseshiori.py: 「ポータル」, 「おすすめ」用URLの取得を修正.
+	* lib/ninix/sakura.py: フォントサイズの計算を調整.
+
+Sun November 30 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: 選択肢の処理を変更.
+
+Sun November 30 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.5.3リリース.
+
+Sat November 29 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: ゴースト交代後に古いポップアプメニュー関連のオブジェクトが
+	廃棄される前にApplicationクラスのメニューアイテムをdetachするよう修正.
+	* lib/ninix/sakura.py: BalloonWindow.motion_notify()の表示範囲のチェック忘れを
+	修正.
+
+Sat November 29 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+                      Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: バルーンのフォントサイズの設定が実際の表示に反映される
+	よう修正.(Patch#3380)
+
+Fri November 28 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: バルーンフォント設定の変更が即反映されるように修正.
+	* lib/ninix/sakura.py: %usernameの展開で最初にSHIORIで設定されている値を問い合
+	わせるようにした.
+	* lib/ninix/sakura.py: Ghost.get_event_response()がNoneを返してしまう問題を修正
+	(空文字列を返すようにした).
+
+Wed November 26 2003  Shun-ichi TAHARA <jado@flowernet.gr.jp>
+	* lib/ninix/sakura.py: Communicate Boxの入力後にSSTP COMMUNICATEが発生する時
+	UnicodeErrorが起きるのを修正.(Patch#3377)
+	* lib/ninix/sakura.py: Teach Boxからの入力でUnicodeErrorが発生するのを修正.(Patch#3377)
+	* lib/ninix/sakura.py: Communicate Boxへの入力の際にXIMの変換確定のEnterで入力
+	処理が呼ばれてしまい, 空文字列が入力されてしまうのを修正.(Patch#3377)
+	* lib/ninix/main.py: デフォルトバルーン設定のバグを修正.(Patch#3379)
+
+Tue November 25 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: 内部関数call, loopを実装.
+
+Mon November 24 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: 内部関数remember, setを実装.
+
+Fri November 14 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: 前回終了時サーフェスの取得をサポート.
+	* lib/ninix/dll/satori.py: 辞書情報の取得をサポート.
+
+Thu November 13 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.5.2リリース.
+
+Wed November 12 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: デフォルトサーフェスの設定が機能していなかったのを
+	修正して, サーフェス戻しの実装方法を変更.
+
+Tue November 11 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: アンカー辞書をサポート.
+	* lib/ninix/dll/satori.py: タイマーと予約トークもセーブするようにした.
+	* lib/ninix/dll/satori.py: 辞書フォルダをサポート.
+	* lib/ninix/dll/satori.py: 予約トークをサポート.
+	* lib/ninix/dll/satori.py: OnTalkイベントをサポート.
+	* lib/ninix/dll/satori.py: 文の途中でコメント(＃)を使えるようにした.
+	* lib/ninix/dll/satori.py: サーフェス加算値をサポート.
+	* lib/ninix/dll/satori.py: 自動セーブ, 手動セーブをサポート.
+	* lib/ninix/dll/satori.py: OnUpdateReadyの（Ｒ０）に1加算するようにした.
+
+Tue November 11 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.5.1リリース.
+
+Sun November 9 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: 変数と文と単語群の存在確認をサポート.
+
+Fri November 7 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+     　* lib/ninix/dll/satori.py: セーブデータの暗号保存をサポート.
+
+Thu November 6 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: OnRecommandedSiteChoiceイベントをサポート.
+	* lib/ninix/dll/satori.py: 「ポータル」, 「おすすめ」用のURLリスト取得の
+	サポートを追加.
+	* lib/ninix/sakura.py: 「ポータル」, 「おすすめ」の中の項目を選択した際に
+	OnRecommandedSiteChoiceイベントを発生させるようにした.
+
+Tue November 4 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: OnSatoriBoot, OnSatoriCloseのサポートを追加.
+	* lib/ninix/dll/satori.py: 改行の挿入位置を調整.
+	* lib/ninix/dll/satori.py: satori_conf.txtが暗号化されている場合に対応.
+	* lib/ninix/dll/satori.py: 選択ＩＤ, 選択ラベル, 選択番号を取得可能に.
+	* lib/ninix/sakura.py: OnChoiceSelectedとOnChoiceEnterのReferenceを勝手に拡張.
+	* lib/ninix/sakura.py: OnChoiceEnterイベントのサポートを追加.
+
+Tue November 4 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.5リリース.
+
+Mon November 3 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: 最終トークからの経過秒を取得可能に.
+	* lib/ninix/dll/satori.py: OnSatoriLoad, OnSatoriUnloadをサポート.
+	* lib/ninix/dll/satori.py: 自動挿入ウェイトの倍率をサポート.
+	* lib/ninix/dll/satori.py: さくらスクリプトを自動挿入ウェイトの計算対象にしない
+	よう修正.
+	* lib/ninix/dll/satori.py: マウスホイール反応をサポート.
+	* lib/ninix/dll/satori.py: なで反応の感度を調整.
+	* lib/ninix/dll/satori.py: cantalkが0の場合の処理を追加. 自発喋りのカウントを
+	行わないようにした. またタイマのカウントは実行するが発動は遅らせるようにした.
+	* lib/ninix/dll/satori.py: 選択肢(\qタグ)の形式を変更.
+	* lib/ninix/dll/satori.py: スコープ切り換えの際に改行を追加するようにした.
+	* lib/ninix/dll/satori.py: スコープ切り換えの際の改行の再配置を削除.
+
+Tue November 4 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.4リリース.
+
+Sun October 26 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.3.8リリース.
+
+Fri October 24 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/ja.poを更新.
+	* lib/ninix/main.py: サーフェス倍率の最小値を10%から40%に変更.
+	* lib/ninix/sakura.py: サーフェスに合わせてバルーンも縮小できるように変更.
+
+Mon October 20 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: 本体設定にデフォルトバルーンの設定を追加.
+	ポップアップメニューのバルーンの項目は起動中のゴーストのバルーンを一時的に変更
+	するのみにした.
+
+Thu October 16 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.3.7リリース.
+
+Wed October 15 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: 起動時点ではサーフェスはファイルチェックのみ行ない,
+	ファイルからのgtk.gdk.Pixbufの作成は必要になってから行うように変更.
+	作成したPixbufはキャッシュに入れられ, 参照されない状態が続くと破棄される.
+	* lib/ninix/pix.py: Segfaultを引き起こすためgtk.gdk.Pixbuf作成後に行なっていた
+	ガーベジコレクションの実行を削除.
+	* 全ての画像読み込みをpix.py経由に変更.
+
+Wed October 15 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.3.6リリース.
+
+Tue October 14 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* メモリリークを起こすgtk.gdk.pixbuf_new_from_file()のかわりに
+	gtk.gdk.PixbufLoaderを使用するよう変更.
+	また, pixbufの作成の後にガーベジコレクションを実行するようにした.
+
+Fri October 10 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.3.5リリース.
+
+Thu October 9 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: passivemode中にSSTPを受信した場合にはpassivemodeを抜ける
+	まで再生を始めないよう修正.
+
+Wed October 8 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: サーフェス移動中にゴーストの動作を停止させないよう変更.
+	* lib/ninix/dll/wmove.py: wmove.dll互換モジュール追加.
+
+Tue October 7 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sstp.py: UNIXドメインソケット版のSSTPサーバを追加した際に入ったバグ
+	を修正.
+	* lib/ninix/dll/aya.py: SAORIの戻り値(Value*)の処理を修正.
+	* lib/ninix/dll/aya.py: 四則演算の際の型変換のルールを修正.
+
+Sat October 4 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: ポップアップメニューの「ポータル」, 「おすすめ」を実装.
+	* lib/ninix/dll/kawari.py: SHIORI判定の戻り値を修正.
+
+Fri October 3 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.3.4リリース.
+
+Thu October 2 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: ポップアップメニューに項目を追加.(機能自体は未実装.)
+	それに伴ないlocale/ja.poを更新.
+	* lib/ninix/sakura.py: Shellのdescript.txtのseriko.alignmenttodesktopに対応.
+	* lib/ninix/sakura.py: 全てのデスクトップに居座るようにする設定をポップアップ
+	メニューに追加.(ウインドウマネージャによっては正しく機能しないことがある.)
+
+Tue September 30 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.3.3リリース.
+
+Mon September 29 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/sakura.py:
+	ポップアップメニューのサーフェス倍率と表示ウェイトの項目をApplicationクラスで
+	管理するよう変更.
+	* lib/ninix/main.py, lib/ninix/sakura.py, lib/ninix/dll/bln.py:
+	起動後に本体設定で画面下端からの距離を調整できるようにした.
+	(従来通り-Rオプションも使用可能で, オプションを指定した場合はそれが優先される.)
+	また画面上部に移動するゴースト向けに画面上端からの距離も指定できるようにした.
+	easyballoon互換モジュールの位置計算もこの設定の影響を受ける.
+
+Mon September 29 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.3.2リリース.
+
+Fri September 26 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: 前回の修正で問題があったためその部分は元に戻した.
+	(Python2.3で出る警告は無視しても問題無し.)
+	* lib/ninix/sakura.py, lib/ninix/dll/hanayu.py: gtk.Window.begin_move_drag()の
+	引数の型を修正.
+	* lib/ninix/dll/satori.py: Python2.3の仕様変更(Boolean型の追加)で動作に問題が
+	発生していたのを修正.
+
+Thu September 25 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.3.1リリース.
+
+Wed September 24 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/kawari.py: Python2.3の仕様変更(Boolean型の追加)で動作に問題が
+	発生していたのを修正.
+	* lib/ninix/sakura.py: ゴーストの再読み込みが機能しなくなっていたのを修正.
+	* lib/ninix/sakura.py: Python2.3で警告が出ていたのを修正.
+
+Wed September 24 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.3リリース.
+
+Tue September 23 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/ja.poを更新.
+	* ポップアップメニューの内部構造の変更を終了.
+
+Mon August 18 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/bln.py: 本体と同じプロセスで動作するように戻した.
+	* lib/ninix/dll/bln.py: actionにvibrateメソッドのサポートを追加.
+	* lib/ninix/dll/bln.py: スクリプト・アップデートおよびスクリプト・アペンドを
+	サポート.
+	* lib/ninix/dll/bln.py: \c, \b?, \_q, \l タグのサポートを追加.
+	* lib/ninix/dll/bln.py: font.boldをサポート.
+
+Sun August 17 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/bln.py: leftcenter, rightcenter, centertop, centerbottomの位置
+	指定に対応.
+	* lib/ninix/dll/bln.py: OnEBMouseMoveの通知周期を500msに変更.
+	* lib/ninix/dll/bln.py: OnEBMouseClickの通知タイミングをプレス時からリリース時へ
+	変更.
+	* lib/ninix/dll/bln.py: action.referernce3のサポートを追加.
+
+Thu August 7 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py, lib/ninix/sakura.py: ポップアップメニューの作成と管理を
+	移動.
+
+Tue July 29 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: マルチスレッド化のための初期化処理を削除.
+
+Mon July 28 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.2リリース.
+
+Sat July 26 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/kawari.py: SAORIリクエストにCharsetエントリを追加.
+	* lib/ninix/misaka.py: SAORIリクエストにCharsetエントリを追加.
+	* lib/ninix/misaka.py: SHIORIリクエストの文字コード変換を修正.
+	* lib/ninix/aya.py: SHIORIリクエストの文字コード変換を修正.
+
+Fri July 25 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.1.5リリース.
+	* lib/ninix/sakura.py: 最小化/復帰した際のイベントが2重に送られていたのを修正.
+
+Thu July 24 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/sstplib.py, lib/ninix/sstp.yp: アイコン化されている状態の時はSSTPサーバが
+	エラー512(Invisible)を返すように修正.
+	* lib/ninix/communicate.py: 古いghost.dbが残っていた場合のエラー処理を追加.
+	* lib/ninix/sakura.py: cantalkフラグが0の時はスクリプトを破棄するように変更.
+
+Wed July 23 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: マルチスレッド化のための初期化処理を追加.
+
+Mon July 21 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* SHIORIリクエストで文字コードを取得するよう変更. codeselect.pyは削除.
+	* 放置状態だったPython栞のサポートを削除.
+	* lib/ninix/sakura.py: oldtype指定の付いたSHIORIモジュールのサポートを削除.
+	* lib/ninix/dll/kawari.py, lib/ninix/dll/niseshiori.py, libninix/dll/satori.py:
+	Shioriクラスにrequestメソッドを追加し, finalizeメソッドをunloadに改名.
+	oldtype指定を削除.
+	* lib/ninix/dll/niseshiori.py: リクエストの引数の数値を文字列に変換してしまって
+	いたのを修正.
+
+Sun July 20 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 本体のターミナル出力をUTF-8に変更.
+	* SAORIモジュールがcodeselct.pyを使用しないよう変更.
+
+Sat July 19 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.1.4リリース.
+
+Fri July 18 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-install.py, lib/ninix/config.py:
+	インストールディレクトリの文字コードをUTF-8に変換するよう変更.
+	* lib/ninix-install.py, lib/ninix/update.py, lib/ninix/config.py:
+	ファイル名に関して文字コード変換を行なわないよう変更.
+
+Thu July 17 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/zh_TW.poを追加. (Chieh-Nan Wang)
+	* lib/ninix/sakura.py: 旧形式の互換SHIORIへのリクエストで文字コード変換ができて
+	いなかったのを修正.
+	* lib/ninix/dll/niseshiori.py: 送られたSHIORIリクエストの文字コード変換を修正.
+	* lib/ninix/dll/kawari.py: 送られたSHIORIリクエストの文字コード変換を修正.
+
+Wed July 16 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/kawari.py: find()の実行後に文字コードを初期化するよう修正.
+
+Wed July 16 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.1.3リリース.
+
+Tue July 15 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/kawari.py: 文字コードの初期化忘れを修正.
+	* lib/ninix/sakura.py: バルーンに使用するウインドウの種類を変更.
+	* lib/ninix/sakura.py: コミュニケートウインドウの移動に関する処理を変更.
+	* lib/ninix/sakura.py: SHIORIリクエストの文字コード変換を修正.
+	* lib/ninix/dll/hanayu.py: ウインドウの移動に関する処理を変更.
+
+Mon July 14 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: サーフェス・バルーン・コミュニケートウインドウに対しての
+	サイズ変更を拒否するよう設定.
+	* lib/ninix/dll/kawari.py: 文字コードの設定を修正.
+
+Sat July 12 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.1.2リリース.
+
+Fri July 11 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/satori.py: モジュール間のやりとりで使用する文字コードを
+	codeselectを通して指定するように変更.(EUC-JPを使用.)
+	* lib/ninix/dll/kawari.py: 内部文字コードをUnicodeに変更.
+	* lib/ninix/dll/kawari.py: モジュール間のやりとりで使用する文字コードを
+	codeselectを通して指定するように変更.(辞書に合わせて変化.)
+	* lib/ninix/dll/niseshiori.py: 内部文字コードをUnicodeに変更.
+	* lib/ninix/dll/niseshiori.py: モジュール間のやりとりで使用する文字コードを
+	codeselectを通して指定するように変更.(UTF-8を使用.)
+	* lib/ninix/sakura.py: 旧形式互換SHIORIインタフェースの文字コード設定を修正.
+
+Thu July 10 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* ウインドウが最小化された場合と復帰した場合のイベント(OnWindowStateMinimize,
+	OnWindowStateRestore)を生成するようにした.
+
+Wed July 09 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-install.py: pnaファイルもインストールするよう修正.
+
+Wed July 09 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.1.1リリース.
+
+Mon July 07 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 互換SAORI内部で使用する文字コードをEUC-JPからUnicodeに変更.
+	* SSTPサーバ内部で使用する文字コードをEUC-JPからUnicodeに変更.
+	* ninix用プラグインの定義ファイルplugin.txtでEUC-JP以外の文字コードを使用可能に
+	した.(デフォルトはEUC-JPなので既存のプラグインの変更は不要.)
+
+Thu July 03 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* 本体内部で使用する文字コードをEUC-JPからUnicodeに変更.
+	* lib/ninix/dll/misaka.py: Lexerクラスで使用している正規表現を再度修正.
+	* locale/ja.po: lib/ninix/main.pyのメッセージを追加.
+	* lib/ninix/main.py: gettext化により埋め込まれた日本語メッセージを置き替え.
+
+Sun June 29 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: ゴースト起動時にOnDisplayChangeを送信するようにした.
+
+Fri June 27 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* locale/ja.po: lib/ninix/sakura.pyのメッセージを追加.
+	* lib/ninix/sakura.py: gettext化により埋め込まれた日本語メッセージを置き替え.
+
+Thu June 26 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py, lib/ninix/main.py: gtk.Window.set_wmclass()を使用しない
+	ようにした.
+
+Wed June 25 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.1リリース.
+
+Mon June 23 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/home.py: fontrc関連部分を削除.
+	* lib/config/fontrc: 削除.
+	* lib/config/gtkrc: doc/examplesに移動.
+	* lib/ninix-install.py: gtkrc, fontrcファイルのインストールを削除.
+
+Sun June 22 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: ポップアップメニューのゴースト選択で現在起動中のゴーストを
+	選択できないようにした.
+	* lib/ninix/sakura.py: ゴーストのアイコンをサーフェスウインドウのアイコンとして
+	使うようにした.
+	* Makefile: ファイルのインストール先ディレクトリ名を変更.
+
+Fri June 20 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/misaka.py: Lexerクラスで使用している正規表現を再修正.
+	* lib/ninix/main.py: ゴーストのアイコンをポップアップメニューで使うようにした.
+
+Thu June 19 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/misaka.py: Lexerクラスを一部変更.(「フサギコ漫談」対応のため.)
+	* gettext化を開始.
+
+Mon June 16 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: 暗号化PNGをサーフェスに使用できるようにした.
+	* lib/ninix/pix.py: 暗号化PNGの解読機能を追加.
+
+Fri June 13 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/home.py: サーフェス画像として暗号化PNGを使えるようにした.
+	* lib/ninix-install.py: サーフェス画像として暗号化PNGをインストールできるようにした.
+	* lib/ninix/main.py: ポップアップメニューでシェルの名前の文字コードが変換されて
+	いなかったのを修正.
+	* lib/ninix/dll/aya.py: 辞書読み込みのバグ修正.
+
+Sun June 1 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: 着せ替えメニューをポップアップメニューから分離して画面上に
+	置いておけるようにした.
+
+Fri May 30 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン2.0リリース.
+
+Thu May 29 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py, lib/ninix/main.py, lib/ninix/pix.py:
+	着せ替え機能SERIKO/1.3,1.7,1.8(MAYUNA/1.0,1.1,1.2)対応.
+	* lib/ninix/mayuna.py 追加.
+
+Tue May 27 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* READMEを更新.
+	* lib/ninix/main.py: バージョン情報を修正.
+	* lib/ninix/sakura.py: \![*]タグによるSSTPマーカーの表示で位置がずれていたのを
+	修正.
+	* lib/ninix/dll/kawari8.py: SAORI互換モジュールのロード状態を管理するよう修正.
+
+Thu May 22 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.11リリース.
+
+Wed May 21 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: overlayのオフセットが負の値の時に画像合成でエラーが出て
+	いたのを修正.
+
+Tue May 20 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix-update.py, lib/ninix/update.py: 本体のネットワーク更新機能の変更で
+	ninix-updateコマンドが動作しなくなっていたのを修正.
+
+Mon May 19 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/bln.py: 文字の表示がちらつかないよう表示速度を調整.
+	* lib/ninix/dll/bln.py: bln.txtの読み込みでエラーが発生すると, bln.pyのunloadが
+	正しく行なわれなくなるのを修正.
+
+Sun May 18 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: Unicodeへの文字コード変換を行なっている箇所でエラーが
+	出た場合の処理をそれぞれ設定.
+
+Sun May 18 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.10リリース.
+	* lib/ninix/sakura.py: 文字コード変換が1箇所抜けていたのを修正.
+	* lib/ninix/dll/aya.py: 関数の検索方法の変更でシステム関数FUNCTIONEX, SAORIが
+	動かなくなっていたのを修正.
+
+Fri May 16 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.9リリース.
+	* lib/ninix/main.py, lib/ninix/sakura.py: 新しいバルーンフォント設定が機能する
+	よう修正.
+
+Thu May 15 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: このファイル内にあるSakura, Ghost以外のクラスはUnicodeで
+	文字列をやりとりするように変更.
+	* lib/ninix/home.py: バルーンフォントの設定ファイルとしてpango_fontrcを追加.
+	* lib/ninix/sakura.py: バルーンの文字の表示にをPangoを使用するよう変更.
+	* lib/ninix/dll/bln.py: 文字を複数回重ね書きしてしまっていたのを修正.
+	* lib/ninix/dll/bln.py: 画像の描画方法を変更.
+
+Sun May 11 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.8リリース.
+	* lib/ninix/main.py, lib/ninix/dll/bln.py, lib/ninix/dll/hanayu.py:
+	pygtk-1.99.14以前のpango.Layout.set_text()の仕様に対応.
+
+Sat May 10 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/profile.py: 削除.
+	* lib/ninix/home.py, lib/ninix/sakura.py, lib/ninix/main.py:
+	ゴーストの消滅回数と起動時間を各ディレクトリに置かれたHISTORYファイルに記録する
+	ように変更.
+
+Fri May 09 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* modules/_image.cおよび関連コードを削除.
+	* lib/ninix/sakura.py, lib/ninix/dll/bln.py, lib/ninix/dll/hanayu.py:
+	画像ファイルの読み込み全てで_image.soではなくpix.pyを使用するように変更.
+	* ib/ninix/pix.py: 新規追加.
+	画像ファイルを読み込んでgtk.gdk.Pixbuf, gtk.gdk.Pixmapを作成する関数を実装.
+
+Thu May 08 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.7リリース.
+	* lib/ninix-install.py, lib/ninix/sakura.py, lib/ninix/home.py:
+	残っていたxpm形式の画像ファイルサポートのコードを完全に削除.
+	* lib/ninix/sakura.py: _image.soモジュールを使わずにサーフェス画像ファイルを
+	読み込むように変更.(この変更でpygtk-1.99.14でも動作するようになった.)
+
+Wed May 07 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.6リリース.
+	* README, doc/saori.txt, doc/kawari.txt を更新.
+	* lib/ninix/sakura.py: 1.99.16より古いpygtkだとGdkWindow.set_back_pixmap()の
+	バグで動作しない問題を修正.
+	* lib/ninix-install.py: install.txtのnameエントリが一致しない場合に上書きしても
+	良いかどうか確認するよう修正.
+	* lib/ninix/main.py: ゴーストを消滅させる際にディレクトリとHISTORYファイルを
+	残すよう変更.
+
+Mon May 05 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.5リリース.
+
+Sun May 04 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/aya.py: 字句解析/構文解析関連メソッドをリクエスト処理の負荷を
+	できるだけ小さくする方向で再度大幅に変更.
+
+Sat May 03 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: バルーンの文字表示位置を調整.
+
+Thu May 01 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.4リリース.
+	* lib/ninix/sakura.py: \![open,inputbox,,,<初期値>] で入力の初期値を指定できる
+	ように修正.
+
+Mon Apr 28 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/aya.py: システム関数の引数の型チェックを厳しくした.
+	* lib/ninix-install.py: CROW同梱ゴーストのインストール機能を削除.
+
+Sun Apr 27 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/aya.py: DLLの名前が変更されている場合にaya_variable.cfgの名前も
+	それに合わせるようにした.
+	* lib/ninix/dll/aya.py: 字句解析/構文解析を強化.
+	* lib/ninix/sakura.py: CommunicateWindow(およびサブクラス)のkey_pressメソッドで
+	2重にイベントが発生していたのを修正.
+
+Fri Apr 25 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.3リリース.
+	* lib/ninix/sakura.py: バルーンの再配置が正しく行われない場合があったのを修正.
+	* lib/ninix-install.py: install.txtのrefresh, refreshundeletemaskエントリ対応.
+	* lib/ninix/dll/aya.py: SakuraScriptのメタ文字列先頭の%を誤って取ってしまう
+	バグを修正.
+	* lib/ninix/dll/aya.py: AyaFunctionクラスのevaluate_*メソッドを高速化.
+	* lib/ninix/dll/aya.py: AyaFunctionクラスのparseメソッドを改良.
+
+Thu Apr 24 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.2リリース.
+
+Wed Apr 23 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: メニューが画面に入り切らない場合の処理はGTK+に任せる
+	ことにしてメニューのリサイズ処理を削除.
+
+Tue Apr 22 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/dll/aya.py: 重複している処理を省くなどして高速化.
+
+Mon Apr 21 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: マウス移動検出の処理を変更. ボタンが押されていない
+	状態でサーフェス上をマウスカーソルが移動するとOnMouseMoveイベントが発生する
+	ようにした.
+	イベント処理のタイマ割込みとGTK+のイベント生成を連動させることで無駄なイベント
+	の発生を抑えている.
+	* lib/ninix/sakura.py: サーフェスの当り判定領域でマウスカーソルが変わるように
+	変更.
+
+Mon Apr 21 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9.1リリース.
+	* lib/ninix/dll/aya.py: 栞判定を強化. DLLの名前が変更されている場合に対応.
+	* lib/ninix/home.py: 栞判定メソッドにDLLの名前を渡すようにした.
+
+Sun Apr 20 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/main.py: バルーンフォント設定以外の本体設定が機能するよう修正.
+	* lib/ninix/sakura.py: バルーンの描画方法を一部変更.
+	* lib/ninix/sakura.py: サーフェスオーバーレイの座標が負の場合にエラーが出る
+	  のを修正.
+
+Fri Apr 18 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: バルーンの位置計算のバグを修正.
+
+Thu Apr 17 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.9リリース.
+	* lib/ninix/sakura.py: サーフェス・バルーンの位置計算を調整.
+	* lib/ninix/sakura.py: 見切れ・重なり判定を調整.
+	* lib/ninix/sakura.py: サーフェス配置パラメータを SurfaceWindow
+	  クラスに移した.
+
+Wed Apr 16 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: \_b[], \_v[]タグの処理でファイル名を小文字に
+	  変換するのを忘れていたのを修正.
+	* ドキュメントの配置を変更.
+
+Sun Apr 13 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* lib/ninix/sakura.py: バルーンの位置計算を修正.
+	* lib/ninix/sakura.py, lib/ninix/main.py: サーフェス縮小機能を追加.
+	* lib/ninix/sakura.py: バルーンのスクロールボタンをマウスホイールで
+	  操作可能に.
+	* lib/ninix/main.py, lib/ninix/sakura.py: -pオプションを廃止.
+	* lib/utf8.py: 削除.
+	* lib/ninix/dll/niseshiori.py: utf-8の処理にunicode()を使用するよう
+	  変更.
+	* src/: 削除.
+	* lib/ninix-install.py: pngからxpmへの変換(-xpmオプション)を削除.
+	* gtkhack/: 削除.
+	* GTK+2.0ベースに変更.
+
+Sat Apr 12 2003  Shyouzou Sugitani <shy@users.sourceforge.jp>
+	* バージョン1.0リリース.
+	* lib/ninix/dll/hanayu.py: 線の太さのデフォルト値を修正.
+	* lib/ninix/sakura.py: \_b[] タグの処理を修正.
+
+2003/04/08 period 30
+- ネットワーク更新を途中でキャンセル可能にした.(update.py, sakura.py)
+- ネットワーク更新でエラーが発生した場合や途中キャンセルされた場合にはファイル
+  を更新前の状態に戻すようにした.(update.py)
+- AyaFunction.evaluate_statement() にエラー処理を追加.(aya.py)
+- 送信すべきイベントが無い場合にもイベントを本体に送信しようとしてエラーになっ
+  ていたのを修正.(bln.py)
+- 文字の表示位置設定のバグを修正.(hanayu.py)
+- 描画のちらつきを抑えるためのモジュール _gtkhack を追加.
+- Shiori.reload() を追加.(satori.py)
+- 本体による AI トークの頻度調整を削除.(main.py, sakura.py)
+
+2003/03/03 period 29
+- 再生するファイルのパス指定を修正.(mciaudio.py)
+- mciaudior.dll 互換モジュール追加.
+- おるすばんバルーンを出す前に通常バルーンを消去するようにした.(bln.py)
+- おるすばんバルーンが本体にイベント送信しないようにした.(bln.py)
+
+2003/03/01 period 28
+- ゴーストの交代時に自由配置等の設定をリセットするようにした.(sakura.py)
+- SERIKO の interval エントリ yen-e と talk,n に対応.(sakura.py, seriko.py)
+- base メソッドのアニメーションが最後まで動作するようにした.
+  (sakura.py, seriko.py)
+- res_reference* をリクエスト毎に削除するようにした.(aya.py)
+- AyaFunction.get_block() を修正.(aya.py)
+- ループ回数制限撤廃.(aya.py)
+- case 〜 when の候補値として文字列の範囲指定を使用可能にした.(aya.py)
+- セキュリティーログは既存のファイルがあればそれに追加するようにした.(aya.py)
+- セキュリティーログの書き込みの際にファイルロックするようにした.(aya.py)
+- システム関数 TOBINSTR, TOHEXSTR, BINSTRTONUM, HEXSTRTONUM を追加.(aya.py)
+- 数値の2進/16進表記に対応.(aya.py)
+- return ステートメントに対応.(aya.py)
+- セキュリティ設定が正しく行なわれない場合があったのを修正.(aya.py)
+- while ループ内で break, continue を使用可能にした.(aya.py)
+- マルチステートメントの処理方法を変更.(aya.py)
+- for ループに対応.(aya.py)
+- SERIKO の "option,exclusive" に対応.(seriko.py, sakura.py)
+- 本体との間のタイミングを調整.(bln.py)
+- スクリプトの処理が終わるまではネットワーク更新後の再読み込みを実行しないよう
+  に変更.(sakura.py)
+
+2003/02/10 period 27
+- KIS コマンド saoriregist, saorierase, callsaori, callsaorix のサポートを追加.
+  (kawari.py)
+- kawari.ini での SAORI 登録に対応.(kawari.py)
+- \![set,alignmenttodesktop,free] に対応.(sakura.py)
+- 見切れ・重なり判定でY軸方向も考慮するようにした.(sakura.py)
+- \![set,alignmenttodesktop,free], \![set,alignmentondesktop,*] がシンクロ
+  ナイズドセッション中に実行された場合, 両方のサーフェスに作用するようにした.
+  (sakura.py)
+- '\_v[filename]' のサポートを追加.(sakura.py)
+- 互換 SAORI 呼び出しのバグを修正.(kawari.py)
+- ゴーストが8体以上居る状態でゴーストリストの作成でエラーが発生するのを修正.
+  (sakura.py)
+- 旧 API 互換栞のためのゴースト間コミュニケーションのサポートを追加.(sakura.py)
+- ゴースト間コミュニケーション機能を一部実装.(kawari.py)
+- マッチエントリ検索以外のゴースト間コミュニケーション機能を実装.(kawari.py)
+- Saori.timeout_id の初期化処理を追加.(bln.py)
+- マッチエントリ検索の処理を追加.(kawari.py)
+- ゴースト間コミュニケーション機能を実装.(niseshiori.py)
+- case 〜 when 〜 others ステートメントの処理を追加.(aya.py)
+- 領域コメントに対応.(aya.py)
+- システム関数 GETLASTERROR を追加.(aya.py)
+- システム関数 ISINSIDE, IASC を追加.(aya.py)
+- case 〜 when の候補値として範囲指定を使用可能にした.(aya.py)
+- ファイル操作系システム関数で絶対パス指定を可能にした.(aya.py)
+- check_path 関数によるファイル操作のチェックを修正.(aya.py)
+- セキュリティ機能を実装.(aya.py)
+- システム関数 STRSTR を修正.(aya.py)
+- "OnTranslate" イベントを発生させるようにした.(sakura.py)
+- inputbox を再調整.(sakura.py)
+- 複雑な設定がされている場合のセキュリティチェックを高速化.(aya.py)
+- AyaFunction.parse() の処理結果に __TYPE_LITERAL を追加.(aya.py)
+- ローカル以外からの "\!" で始まるタグの実行を拒否するようにした.(sstp.py)
+- KIS コマンド split を修正.(kawari.py)
+
+2003/01/19 period 26
+- ファイル操作システム関数でファイル名を小文字に変換するように修正.(aya.py)
+- システム関数 ROUND を修正.(aya.py)
+- 文字列の連結に string モジュールの join メソッドを使うようにした.(aya.py)
+- aya_variable.cfg の読み込みに成功したかどうかを AyaGlobalNamespace クラスの
+  load_database メソッドの戻り値として返すようにした.(aya.py)
+- 高速化のために辞書の読み込み時点でできるだけ解析を済ませるようにした.(aya.py)
+- 変数・関数を探す際の名前空間のサーチ順序を変更.(aya.py)
+- 効率の悪いループやメソッド呼び出しを修正.(aya.py)
+- AyaFunction クラスの evaluate_string メソッドのヒストリ処理を修正.(aya.py)
+- AyaVariable クラスの put メソッドを修正.(aya.py)
+- play コマンドで再生/一時停止をトグルできるようにした.(mciaudio.py)
+- 出力確定子の処理を修正.(aya.py)
+- 画像にアルファチャンネルが設定されている場合の処理を追加.(_image.c)
+- KIS コマンド array のサポートを追加.(kawari.py)
+- モジュール名の取り出し部分のバグ修正.(dll.py)
+- nooverlap の処理の問題を修正.(bln.py)
+- ファイルチェックを強化.(hanayu.py)
+- 戻り値が無い場合のヘッダを修正.(bln.py, hanayu.py, mciaudio.py, textcopy.py)
+- KIS コマンド split のサポートを追加.(kawari.py)
+
+2002/12/30 period 25
+- フォント関連パラメータの使い方を一部修正.(sakura.py, bln.py, hanayu.py)
+- Python 1.5 の環境でエラーが出ないように fcntl.lockf() の第一引数を修正.
+  (communicate.py)(Thanks to あべさん)
+- 本体でヘルパーに設定されているコマンドをファイルの再生に使うように変更.
+  (lettuce.py, mciaudio.py)
+- みんと(mint.dll)と名前が混ざっていたのを修正.(lettuce.py)
+- string.join() の引数が一箇所間違っていたのを修正.(aya.py)
+
+2002/12/24 period 24
+- line_strip() の使用を控えるようにした.(aya.py)
+- 不要な 'otherghostname' イベントを発生させないようにした.(sakura.py)
+- 'otherghostname' イベントを 'NOTIFY' で送るように修正.(sakura.py)
+
+2002/12/16 period 23
+- ninix-install に CROW 同梱ゴーストのインストール機能を追加.
+  それに合わせてゴースト固有バルーンの検索の際にゴーストの descript.txt の内容も
+  チェックするように変更(main.py)
+- ゴースト間コミュニケーションのための communicate.py を追加.
+- COMMUNICATE/1.1 のサポートを追加.(sstp.py)
+- 起動しているゴーストのデータベース更新機能を実装.(sakura.py)
+- 定期的に 'otherghostname' イベントを発生させるようにした.(sakura.py)
+- ゴースト間コミュニケーション用のメッセージ送信機能を実装.(sakura.py)
+- 'otherghostname' イベント用に Reference の処理を拡張.(sakura.py)
+- misaka.py をゴースト間コミュニケーションに対応させた.
+- リンク対象となるテキストが空の場合の処理を追加.(sakura.py)
+- inputbox を「仕様書通り」に使っているゴーストに対応.(sakura.py)
+- CROW 同梱ゴースト対応の際に入った, 固有バルーンを持たないゴーストへの切り換え
+  の場合にゴースト名の入った変数を上書きしてしまうバグを修正.(main.py)
+
+2002/12/07 period 22
+- 不要になったコードを削除.(ninix-install.py)
+- show_description() の表示内容に Copyright を追加.(aya.py, kawari8.py)
+- 旧 API の互換栞を ninix/dll に移動. API はそのままで Shiori クラスを追加.
+  呼び出しは新 API 互換栞と同様に dll.py 経由で行なう.
+  (niseshiori.py, kawari.py, satori.py, ninix-update.py, home.py, sakura.py)
+- 栞の終了処理を追加.(ninix-update.py)
+- ロードされていない状態で unload() が呼ばれても問題ないよう修正.(hanayu.py)
+- 選択肢がバルーンの表示領域内にあるかどうかの判定条件を修正.(sakura.py)
+- 文字列を囲むダブルクォートが片方抜けている場合の処理を追加.(aya.py)
+- DirectSSTP 機能として UNIX ドメインソケット版の SSTP サーバを追加.
+  (sstplib.py, sstp.py, main.py, sakura.py)
+- bln.py をマルチプロセス化.
+- バルーンクリックイベントが2重に発生していたのを修正.(bln.py)
+- バルーンクリックイベントが発生しない場合があったのを修正.(bln.py)
+- マウス移動イベントが全く発生していなかったのを修正.(bln.py)
+- X 座標方向のバルーンの位置計算を修正.(bln.py)
+- DirectSSTP のレスポンスについては標準エラー出力にメッセージを出さないように
+  した.(sstp.py)
+- ネットワーク更新のファイル数を0オリジンに変更.(update.py)
+- DirectSSTP 用のソケットディレクトリ名を socket に変更.(main.py)
+- SSTP の Sender フィールドに ninix が使われていた箇所を ninix-aya に変更.
+  (ninix-install.py, ninix-update.py, sakura.py)
+- バージョン情報を ninix-aya のものに変更.(main.py)
+- pygtk で GTK+ のバージョンを指定するようにした.(main.py, bln.py)
+  (Thanks to にっしーさん)
+- 以前の変更で Python SHIORI の判定が抜け落ちてしまっていたのを修正.(home.py)
+- サーフェスが充分離れている場合は '\4' が来ても移動しないよう修正.(sakura.py)
+
+2002/11/16 period 21
+- バルーンの設定情報の優先順位を調整.(sakura.py)
+- ロードされていない SAORI へのリクエストに対する応答を修正.(kawari8.py)
+- InputBox が ESC キーでキャンセルされた場合にもイベントを発生させるように変更.
+  (sakura.py)
+- CommunicateBox のモーダル設定を解除.(sakura.py)
+- \![set,alignmentondesktop,top], \![set,alignmentondesktop,bottom] に対応.
+  (sakura.py)
+- 時々サーフェスが出てこないバグを修正.(sakura.py)
+- スクリプトの表示の際にバルーンも前面に出すようにした.(sakura.py)
+- OnKeyPress を新仕様と旧仕様の混成仕様に変更. ただし, キーマップは不完全.
+  (keymap.py, sakura.py)
+- 一行に複数の選択肢とテキストを混在させられるように変更.(sakura.py)
+- サーフェスとバルーンが重なった場合にちらつくのを抑えるために前面に出す動作を
+  調整. 変化があった時だけ前面に出てくるようにした.(sakura.py)
+- 選択肢が複数の行にまたがっても良いように変更.(sakura.py)
+- '\x' の位置に改行を入れるように変更.(sakura.py)
+- \![open,configurationdialog] に対応.(sakura.py)
+- サーフェスのドラッグの際にはサーフェスを前面に出すようにした.
+- バルーンの方向を決定する方法を変更.
+- '\4', '\5' に対応. ただし, alignmentondesktop は考慮していないので Y 座標の
+  方向の移動は無し.(sakura.py)
+- '\![*]' に対応.(sakura.py)
+- バルーン切り換えの後は強制的にサーフェスを出すようにした.(main.py)
+- バルーンの位置を調整.(sakura.py)
+- '\4', '\5' がウインドウを10ピクセルずつ移動させるように変更.(sakura.py)
+- 栞判定を改良.(misaka.py)
+- バルーン内の表示領域に関する情報が更新されている間は選択肢がマウスの移動に
+  反応しないように修正.(sakura.py)
+- '\_a[symbol]' に対応.(sakura.py)
+- '\4' の移動距離を調整.(sakura.py)
+- '\5' の移動先を調整.(sakura.py)
+- 全てのスクリプトがトランスレータを通るように修正.(sakura.py)
+- 選択肢の範囲チェックを修正.
+  選択肢の先頭が表示領域内でも途中から外に出ている場合がある.(sakura.py)
+
+2002/10/27 period 20
+- 花柚(hanayu.dll)互換 SAORI モジュール hanayu.py を追加.
+- れたす(lettuce.dll)互換 SAORI モジュール lettuce.py を追加.
+- タイムクリティカルセクション中もイベントを処理するよう変更.(sakura.py)
+- 多バイト文字列操作関数, 外部汎用 DLL 呼び出し関数, ファイル操作関数のテストを
+  行ない, 見付かったバグを修正.(aya.py)
+- 辞書の暗号化機能を追加.(aya.py)
+- \![(un)lock,reapint] に対応.(sakura.py)
+- hanayu.txt の読み込みのバグを修正.(hanayu.py)
+- スクリプトの表示の際にサーフェスを前面に出すようにした.(sakura.py)
+- \![vanishbymyself] に対応.(sakura.py)
+- \![enter,passivemode], \![leave,passivemode] に対応.(sakura.py)
+- '\x' からの復帰の際に下向き矢印を消去するようにした.(sakura.py)
+- \_b[filename,x,y] に対応.(sakura.py)
+- メニューのネットワーク更新と消滅指示のボタンはメニュー表示の度に更新するよう
+  にした. 消滅指示の表示/非表示の切り換えを反映させるため.(sakura.py)
+- \n[half] に対応.(sakura.py)
+- '_in_', '!_in_' の処理を修正.(aya.py)
+- passive mode でバルーンの消去が機能しないように修正.(sakura.py)
+- draw_last_line() の \n[half] の処理を修正.(sakura.py)
+- passive mode と \![lock,repaint] の動作を調整.(sakura.py)
+
+2002/10/04 period 19
+- misaka.py を dll/ に移動. API を変更し互換 SAORI にも対応.
+- 梶山 API の互換栞の栞判定で互換栞が見つかっても100しか返さないようにした.
+- eval_globals() で sentences の中に関数が出てきた場合にその関数を実行するよう
+  にした.(misaka.py)
+- 互換栞が無かった場合にシェルとして使用できるようにするコードを復活.(home.py)
+- 単体のバルーンの情報(1次情報)とゴースト同梱のバルーンまで含めたバルーン全て
+  の情報(2次情報)を分離.(home.py, main.py)
+- 消滅指示後のゴースト切り換え時に全ファイルを再読み込みしていたのを必要最小限
+  (次に起動するゴースト)の読み込みしか行なわないように変更.(main.py)
+- 消滅指示後に切り換わるゴーストがランダムに選択されなくなっていたのを修正.
+  (main.py)
+- search_ghosts() を特定のゴーストのディレクトリを指定して呼び出せるようにした.
+  (home.py)
+- ゴースト起動・変更時のイベントに反応が無い場合の動作を変更.(sakura.py)
+- タイマ割込みの制御を Sakura から Ghost に移動.(sakura.py)
+- ネットワーク更新の処理を Sakura から Ghost に移動.(sakura.py)
+- Sakura からの Application のメソッドの呼び出しは Ghost に任せるようにした.
+  (sakura.py, main.py)
+- 現在のゴーストの情報を再読み込みするためのメソッドを追加.(main.py)
+- ネットワーク更新が完了したらゴーストの情報を再読み込みするようにした.
+  (sakura.py)
+
+2002/09/22 period 18
+ - DLL 互換モジュールを管理するクラスは main.py でインスタンスを生成するように
+   変更.(main.py, sakura.py, dll.py, aya.py)
+ - 互換 SHIORI で互換 SAORI を使用する場合の処理の一部を dll.py に移して互換
+   SHIORI 側の処理の負担を軽減.(main.py, dll.py, aya.py)
+ - 互換 SAORI から Sakura のインスタンスへのアクセスを可能にした.(dll.py)
+ - easyballoon(bln.dll) 互換 SAORI モジュール bln.py を追加.
+ - unload() の戻り値を修正.(mciaudio.py, bln.py)
+ - 互換 SAORI の状態の管理は SHIORI 毎に微妙に差があるため互換 SHIORI の責任で
+   行なうようにした.(dll.py, main.py, aya.py, ninix-update.py)
+ - kawari8.py を互換 SAORI に対応させた.
+ - ウインドウを構成するウィジットを見直し.(bln.py)
+ - ウインドウの初期座標が負の値の場合にも正しく表示されるよう修正.(bln.py)
+ - タイムアウトの処理を修正.(bln.py)
+ - スクリプトの表示が終わるまでは指定された寿命が来てもウィンドウを破棄しない
+   ようにした.(bln.py)
+ - ウィンドウの移動距離の計算を修正.(bln.py)
+ - 変数名の誤りを修正.(bln.py)
+ - textcopy.dll 互換 SAORI モジュール textcopy.py を追加.
+ - gtk を import する DLL 互換モジュールは環境変数 DISPLAY をチェックするよう
+   に修正.(bln.py, textcopy.py)
+ - ninix-update.py と sakura.py で梶山 API の互換栞について栞判定を再度行なっ
+   ていたのを修正. これで栞判定を行なう場所は home.py 内に限定された.
+ - import したモジュールに目的のクラスが無い場合にはそのモジュールを削除する
+   ようにした.(dll.py)
+ - DLL 互換モジュールのサーチパスは __init__ の際に指定されたものに限定.
+   (dll.py, sakura.py, aya.py, kawari8.py, ninix-update.py)
+ - DLL 互換モジュールのサーチパスの指定を変更.(main.py)
+ - 新しい栞判定を導入開始.(home.py)
+ - 栞判定の変更により不要になった _kawari8.so の import 時のメッセージを削除.
+   _kawari8.so が無ければ栞判定のスコアが 0 になる.(kawari8.py)
+ - 新互換栞のロード後にモジュールの名前等を表示できるようにした.(sakura.py)
+   Shiori クラスの show_description を呼び出すが, このメソッドは必須ではない.
+ - Shiori クラスに show_description メソッドを実装.(aya.py, kawari8.py)
+ - kawari8.py の栞判定の結果の1桁目を変更.(kawari8.py, sakura.py)
+ - サーフェス・バルーンの位置の計算を修正.(sakura.py)
+ - *Actor で無限ループに陥るのを修正.(seriko.py)
+ - OnSurfaceRestore イベントは SHIORI にイベントを送るだけで, 本体側でサー
+   フェスを戻さないよう変更.(sakura.py)
+ - Sakura スクリプトで最初のサーフェス指定が来るまではサーフェスを表示しな
+   いように変更. もし, メッセージ表示が先に来た場合はその時点でデフォルトが
+   出る.(sakura.py)
+ - 毎回ロード時に _kawari8.so をリロードするようにした.(kawari8.py)
+ - ドラッグ中にサーフェスをデフォルトに戻さないようにした.(sakura.py)
+ - 見切れ判定を調整.(sakura.py)
+ - 再読み込みの後で OnGhostChanged を発生させるようにした.(sakura.py)
+ - 再読み込み後に発生させるイベントを OnBoot に変更.(sakura.py)
+ - OnGhostChanged に反応が無い場合には OnBoot を呼ぶようにした.(sakura.py)
+ - '\x' による一時停止時にバルーンに下向き矢印を出させるようにした.(sakura.py)
+
+2002/09/02 period 17
+ - DLL 互換モジュールのデフォルトサーチパスの指定を必須にした.(dll.py)
+ - DLL 互換モジュールを要求する際にサーチパスを追加出来るように変更.(dll.py)
+ - DLL 互換モジュールインタフェースを使用した SHIORI 互換モジュールのサポートを
+   追加.(sakura.py)
+ - aya.py を lib/ninix/dll に移動. DLL 互換モジュールインタフェースに対応.
+ - home.py における「文」ゴースト判定の方法を aya.txt の有無で判定するよう変更.
+   ただし, 一時的な措置.
+ - ninix-install, ninix-update から旧 aya.py 関連のコードを削除.
+ - ninix-update を DLL 互換モジュールインタフェースに対応させた.
+ - ninix-install でゴーストの全ファイルをインストールするように変更.
+ - 新互換栞とのインタフェースを SHIORI/3.0 に変更.(sakura.py)
+ - SHIORI API wrapper を削除し, SHIORI/3.0 のみのサポートに変更.(aya.py)
+ - ninix-update を新互換栞でも利用できるよう SHIORI/3.0 に対応させた.
+ - test() を修正.(aya.py)
+ - SHIORI 判定を刷新. ただし, 各 SHIORI の判定ルーチンは従来のまま.
+   (home.py, ninix-update.py, main.py, sakura.py, dll.py, aya.py)
+ - shiori_name には DLL 名ではなく互換栞の名前を入れるように変更.(dll.py)
+ - 華和梨8の判定を追加.(home.py)
+ - 新形式互換栞 kawari8.py を dll/ に追加.
+ - DLL 互換モジュールのリクエストがディレクトリ名を含んでいる場合に対処.(dll.py)
+ - SHIORI 判定関数のリストを作成.(home.py)
+ - SAORI リクエストは Shift_JIS で送るように修正.(aya.py)
+ - 代入の際に不要な整数から実数への変換をしないようにした.(aya.py)
+ - load() に戻り値を設定するのを忘れていたので修正.(aya.py, kawari8.py)
+ - 新互換栞の load() が失敗の場合には旧互換栞を探すように変更.
+   (sakura.py, ninix-update.py)
+ - システム関数 MSTRLEN, MSTRSTR, MSUBSTR, MERASE, MINSERT を実装.(aya.py)
+
+2002/08/16 period 16
+ - saori.py から SAORI DLL 互換機能の実装を分離.
+ - saori.py を dll.py に変更. SAORI だけでなく SHIORI も扱うようにした.
+ - lib/ninix/dll/mciaudio.py に mciaudio.dll 互換機能を移した.
+ - コミュニケートウインドウは ESC が押された場合のみ消えるよう変更.(sakura.py)
+ - システム変数 systemuptickcount を実装.(aya.py)
+ - システム関数 FWRITE2 を実装.(aya.py)
+ - ファイル名を小文字に変換するよう修正.(mciaudio.py)
+ - 不要な import を削除.(mciaudio.py)
+ - get_actors()のsurface番号ゼロパディングバグ修正.(seriko.py) Thanks: あべさん
+
+2002/08/07 period 15
+ - 右辺の型によらず代入が実行されるように修正.
+ - 変数比較の際の型チェックが実数と整数の比較にまで適用されていたのを修正.
+
+2002/08/06 period 14
+機能追加：
+ - SAORI互換機能 (saory.py) 追加.
+ - ユーザーからゴーストへのコミュニケート対応（aya のみ）.
+ - 「和音」のメニューからの MIDI 演奏に対応.
+デバッグ：
+ - 簡易配列を拡張する処理の条件判定が逆になっていたのを修正.
+ - 変数への代入の際に既に変数が存在するかどうかの判定を忘れていたのを追加.
+ - 変数を操作する場合, 事前に AyaVAriable.reset メソッドが実行されるようにした.
+   これにより文字列の演算による簡易配列としての構造の変化に対応.
+
+2002/07/30 period 13
+ - クラス Aya に SHIORI API の request() を実装.
+ - クラス Aya を Aya と AyaWrapper に分割. AyaWrapper で ninix 本体からの
+   SHIORI/1.x, 2.x のリクエストを SHIORI/3.0 形式にして Aya に送るようにした.
+ - Aya の応答から ninix 本体の要求する値を取り出すためのメソッド get_value を
+   AyaWrapper に実装.
+ - Aya のベースを Ver.4 仕様に変更.
+ - リクエスト値の取得のためのシステム関数(REQ.*)を全て実装.
+ - Ver.4 の OnRequest を使用するようになったので, 不要になったトークチェインを
+   動作させるためのコードは削除.
+ - Ver.3 互換のためのコードを追加.("# Ver.3" のコメントの個所.)
+   ただし, 応答のヘッダ生成は省略. (AyaWrapper の get_value で区別している.)
+ - システム関数 LETTONAME に引数のチェックを追加.
+ - Aya.request() を修正. Ver.4 における応答の内容は栞機能辞書(aya_shiori3.dic)
+   に完全に任せることにして, Aya.request() のリクエストヘッダー解析ではリターン
+   しないようにした.
+ - システム関数 INSERT で挿入バイト位置が負数の場合には先頭に挿入するように修正.
+ - AyaFunction.evaluate_string() が文字列を評価していく際に評価する文字の位置を
+   正しく扱えていなかったのを修正.
+ - 文字列結合出力を実装.
+ - AyaFunction.evaluate() の辞書の評価方法を変更.
+   基本的に AyaFunction.evaluate_statement() を使用して評価するようにした.
+   この変更で四則演算, 文字列結合出力を完全にサポート.
+ - AyaFunction.evaluate_statement() 内で型変換が正しく行なわれない場合が
+   あったのを修正.
+ - 比較演算で両辺の値の型をチェックするようにした.
+ - obsolete なシステム変数 ghostexcount を削除.
+ - コメントの追加など微調整.
+ - AyaNamespace の変更で set_separator メソッドの追加を忘れていたのを修正.
+ - random.randrange() の第2引数を修正.
+   # Deprecated になった random.randint() とは範囲が違っているのを見落としてた.
+ - decrypt() の入力を1文字だけに変更し decrypt_char() にした.
+   さらにこれと対を成す encrypt_char() を作成.
+- os.path.join() の2番目以降の引数に渡されるパス名が相対パスであることが保証
+  されるように修正.
+- システム関数 FOPEN で作成されるファイル辞書のキーをノーマライズされた絶対
+  パスに変更.
+
+2002/07/19 period 12
+ - 関数の内部ブロックの変数が外側のブロックの名前空間にまで伝わってしまって
+   いたのを修正.
+
+2002/07/18 period 11
+ - 「文」Ver.4 対応開始.
+ - ダブルクォーテーションのエスケープ処理を削除. (Ver.4)
+ - マルチステートメントで出力確定子の後にも ';' が必要になった. (Ver.4)
+ - システム関数 CUTSPACE を実装.
+ - 「文」Ver.3 で削除された古いシステム変数についてサポートを終了.
+   ただし ghostexcount はコミュニケートが実装されるまで残す.
+ - システム関数 ISFUNCTION を実装.
+ - ファイルを書き込み可能状態でオープンする際にはパスに親ディレクトリを指す
+   '..' が含まれていないことを確認するようにした.
+   読み取りのみの場合は3つまで許可.(~/.ninix の中に収まる範囲.)
+   ファイル名が固定の場合にはチェックしていない.
+ - システム変数 systemup* を実装.
+   ただし, 中身はシステムではなくゴーストを起動してからの経過時間.
+ - 未実装関数の戻り値も仕様書に記載されている型に合わせた.
+ - 起動時に OnLoad を呼ぶようにした. (Ver.4)
+ - 単項演算子 '+', '-' が正しく評価されない場合があったのを修正.
+ - システム関数 FDELETE, FRENAME, FSIZE, MKDIR, RMDIR, FENUM を実装.
+   これらの関数もパスのチェックをするようになっている.
+ - 関係演算子 !_in_ を実装.
+ - システム関数 FCOPY, FMOVE を実装.
+ - 終了時に OnUnload を呼ぶようにした. (Ver.4)
+ - AyaFunction の evaluate メソッドが常に結果を文字列に変換して返す動作を変更.
+   連結が必要な場合にのみ文字列に変換するようにした.
+ - システム関数リストの LOGGING の引数の数が間違っていたのを修正.
+ - システム関数 LOGGING の出力形式を Ver.4 仕様に変更.
+
+2002/07/07 period 10
+ - AYA 内部イベント On_ID の処理を実装.
+ - SHIORI/1.0 API の処理も AYA 内部イベント On_ID に変換するようにした.
+
+2002/06/31 period 9
+ - システム変数のリストに systemuptime を追加.
+ - aya.txt の処理に logmode を(項目のみ)追加.
+ - テスト用のメソッドを実装.
+ - 文字列型のメソッド find() は python1.5 に無いので string module の find()
+   を使用するようにした.
+
+2002/06/30 period 8
+ - 多項式演算を実装.
+   代入演算子に含まれる演算を通常の演算とは別に処理していたのを一本化.
+   この変更で '/=' で 0除算の場合のエラー処理を忘れていた問題は無くなった.
+ - システム関数の引数の数をチェックしない場合の条件式が間違っていたのを修正.
+ - AyaVariable クラスに合わせてシステム関数 ARRAYSIZE を修正.
+ - こまごまとした見た目の修正を少々.
+ - マルチステートメントの処理でデクリメントを出力確定子と間違えていたのを修正.
+ - is_inc_or_dec() を修正してデクリメントが動作するようにした.
+ - ブロックの評価結果が空の場合にも選択肢のリストに加えられていたのを修正.
+ - if で条件文を羅列せずにリストを活用するように変更.
+ - evaluate_statement() での演算子の検索方法を変更.
+ - evaluate_statement() で型変換が正しく行なわれない場合があったのを修正.
+ - プリプロセッサを強化. '#globaldefine' をサポート.
+ - トークチェインのサポートを追加.
+ - reference[n] に値が設定されない場合があったのを修正.
+ - 'OnSecondChange' が正しく処理されていなかったのを修正.
+ - aya.py を単独のスクリプトとしても呼び出せるようにした.
+ - トークチェインの制御は aya_shiori3.dic に任せるようにした.
+ - トークチェインに使用する変数の初期化とトークチェインの終了処理を追加して
+   動作を本家に合わせた.
+
+2002/06/13 period 7
+ - システム関数 RAND, ASC とシステム変数 random, ascii を修正.
+ - スクリプト中で random, ascii が使えなかったのを修正.
+ - スクリプト中の簡易配列とヒストリーのインデックスに変数が使用できるように修正.
+ - 暗号化辞書対応.
+   暗号化辞書の解読は外部モジュールに頼らずに aya.py 内部で行なうことにした.
+ - aitalkinterval が 0 の時には時間経過による OnAiTalk が発生しないように修正.
+ - 型変換のエラーメッセージに変換結果を代入した変数を使用している個所があった
+ 	  のを修正.
+ - TONUMBER2 の引数にイリーガルな文字列が渡された場合のエラー処理を追加.
+ - エラー処理の分離のため辞書の読み込みは aya.txt の解析の後に行なうようにした.
+ - 文字列と簡易配列の2つの型の変数を統合.
+   string = "a"     : string -> "a",     string[0] -> "a"
+   array  = "a,b,c" : array  -> "a,b,c", array[0]  -> "a"
+ - サイズを越えた要素への代入があると簡易配列が自動的に拡張されるようにした.
+ - 文字列と簡易配列の統合に合わせ aya_variable.cfg のフォーマットを更新(v1.1).
+   v1.0 フォーマットの読み込みも問題無く行なわれる.
+ - システム関数 LOG, LOG10 の引数が 0 の場合には 0 を返すようにした.
+ - nonoverlap / sequential が内側のブロックに間違って適用されていたのを修正.
+ - ゴースト終了時のみ aya_variable.cfg のセーブを行なうようにした.
+ - aya.py の内部で保持する変数を全て AyaVariable クラスにした.
+   AyaStringArray はこのクラスに統合されたので削除.
+ - 文字列終端の '"' の付け忘れの場合を考慮し, 確認してから削るよう変更.
+
+2002/06/09 period 6
+ - 数値を関数の戻り値にできるようにした.
+ - 関数のオプション nonoverlap / sequential を実装.
+ - マルチステートメントに対応.
+ - システム関数 NAMETOVALUE 関連の if 節の位置を修正.
+   システム関数をオーバーロード可能な状態に保つため.(仕様に規定は無い.)
+ - 保存されている変数の値の読み込みを aya.txt を読む前に実行するように変更.
+   これまでのコードだと aya.txt の設定が変更された場合でも保存されていた値で
+   上書きしてしまって変更が反映されなくなっていた.
+   ただし, ユーザーによるしゃべり頻度の設定は aitalkinterval を書換えることで
+   行なわれるので, aitalkinterval のみ保存されている値の方を優先.
+ - aya_variable.cfg が消失した場合に発生する問題の対処で OnGhostChanged の場合
+   を忘れていたので追加.
+ - 暗号化辞書対応. ただし, 外部モジュールは未実装なので実際には機能せず.
+ - 0 除算の結果を強制的に 0 にするようにした.
+ - 剰余演算子 %, %= を追加.
+ - システム関数 RAND とシステム変数 rand の返す値の範囲を修正.
+ - 整数だけでなく実数も使えるように拡張.
+ - 変数の値を名前空間から拾ってくる部分で存在判定にバグがあったのを修正.
+   # フォーラムで書いたバグ(#1)の修正です.
+ - プリプロセスでの置換処理 #define を実装.
+ - システム関数の呼出しで引数の数をチェックをするようにした.
+ - コメント処理のコードが複数箇所に存在したのをメソッドとして実装.
+   この変更で残っていた全角空白の処理忘れが修正された.
+ - メソッド find_not_quoted を追加.
+   マルチステートメントの処理やコメントの削除等の改良に使用.
+ - 有効な要素が存在しない関数は空文字列を返すよう変更.(仕様に規定が追加された.)
+ - 簡易配列の実装を変更. それに合わせてシステム関数 ARRAYSIZE も修正.
+ - aya_variable.cfg のフォーマットを変更.
+   古い形式(バージョン番号が無い)はデータ型の決定で問題があるので,
+   読み込まずに破棄することにした.
+ - 実数の出力フォーマットを調整.
+ - システム関数をスクリプトの中から呼べるようにした.
+ - 引数の無いシステム関数が処理されない問題を修正.
+ - 以下のシステム関数を実装.
+   CALLBYNAME, LOGGING, TOUPPER, TOLOWER, TONUMBER2, TOSTRING2,
+   FLOOR, CEIL, ROUND, SIN, COS, TAN, LOG, LOG10, POW, SQRT,
+   SETSEPARATOR, FOPEN, FCLOSE, FREAD, FWRITE, ISINTEGER, ISREAL
+
+2002/05/28 period 5 (canceled)
+ - 「文」Ver.3 文法に対応
+ - SHIORI/1.0 APIに対応
+
+2002/05/22 period 4
+ - 配列以外で使われている '[]' で問題が起きないように修正.
+
+2002/05/21 period 3
+ - history, 簡易配列の序数が数値以外の場合のエラー処理を追加.
+ - 辞書ファイル名を小文字に変換して読むようにした.
+ - 簡易配列で範囲外の序数を指定した場合に仕様通り空文字列を返すよう
+   にした.
+ - 仕様に従って switch の条件文に文字列が来た場合の処理を switch 0
+   と同じにした.
+ - typo をいくつか修正.
+ - 変数の保存先を aya_variable.cfg に変更.(ファイル形式は独自)
+ - システム関数 RAND, ASC を実装.
+ - ninix-install の再実行で aya_variable.cfg が消失した場合に発生す
+   る問題に対処.
+ - システム関数 ARRAYSIZE を実装.
+ - 「和音」がエラーで固まるのを防ぐために ghostexcount は常に0を返
+   すようにした. （COMMUNICATE実装までの暫定措置）
+
+2002/05/20 period 2
+ - 文 ver.3 一部対応
+ - 全角スペースを空白と見なしていなかった問題の修正
+ - 既定以外のキーの処理が抜けていたため追加
+
+2002/05/10 period 1
+ - first release

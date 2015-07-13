@@ -1,0 +1,79 @@
+--------------------------
+ninix-aya(機能拡張版ninix)
+--------------------------
+
+これは何か
+----------
+ninix-aya(以前は「文」互換モジュール等 for ninixと呼ばれていました)は、
+UNIX系OS対応デスクトップアクセサリninixに拡張機能を追加したパッケージです。
+また、オリジナルninixに収録されていない改良、バグフィックスも併せて
+収録しています。
+現在はUNIX系OSに限らずWindowsでも動作するようになっています。
+バージョン4.500.x以降(5.x系)から使用開発言語がRubyに変更になりました。
+
+必要なもの
+----------
+本ソフトウェアを動作させるには以下のソフトウェアが必要です。
+動作確認済みのバージョンより古いものでは動かない場合があります。
+
+- Ruby (http://www.ruby-lang.org/)
+  本ソフトウェアの開発言語です。
+  バージョン 2.1.5 での動作を確認しています。
+
+- Ruby/GTK3 (http://ruby-gnome2.osdn.jp/)
+  Gtk+3をRubyから利用するための拡張ライブラリです。  
+  バージョン 2.2.0 での動作を確認しています。
+
+- GTK+ (http://www.gtk.org/)
+  クロスプラットフォームの GUI ライブラリです。
+  バージョン 3.16.5 での動作を確認しています。
+  下記GStreamerを使用する場合はRuby/GStreamerもインストールが必要です。
+
+- GStreamer (http://gstreamer.freedesktop.org/)
+  このソフトウェアはninix-ayaを動作させるのに必須ではありません。
+  音声ファイルの再生に使用しています。
+  バージョン 1.4.5 での動作を確認しています。
+
+インストール
+------------
+Rubyバージョンについてはインストーラがまだありません。
+アーカイブを展開して lib/ninix_main.rb を Ruby インタプリタで実行して下さい。
+
+ライセンス
+----------
+Copyright (C) 2001, 2002 by Tamito KAJIYAMA <kajiyama3@geocities.co.jp>
+Copyright (C) 2002-2007 by MATSUMURA Namihiko <nie@counterghost.net>
+Copyright (C) 2002-2015 by Shyouzou Sugitani <shy@users.osdn.me>
+Copyright (C) 2002, 2003 by ABE Hideaki <abe-xx@eos.dricas.com>
+Copyright (C) 2003-2005 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License (version 2) as
+published by the Free Software Foundation.  It is distributed in the
+hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.  See the GNU General Public License for more details.
+
+連絡先
+------
+当ソフトウェアは杉谷とさくらのにえが開発および配布をしております。
+ご連絡は
+
+杉谷 <shy@users.osdn.me>
+さくらのにえ <nie@counterghost.net>
+
+または http://osdn.jp/projects/ninix-aya/ 上のフォーラムへどうぞ。
+（過去の開発記録の一部は http://nie.counterghost.net/ にあります。）
+
+リンク
+------
+あれ以外の何か with "任意" のページ（ninix配布サイト）
+http://www.geocities.co.jp/SiliconValley-Cupertino/7565/
+
+ninix-aya開発プロジェクト
+http://ninix-aya.sourceforge.jp/
+
+ninix-aya配布サイト
+http://osdn.jp/projects/ninix-aya/
+
+以上
