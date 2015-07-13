@@ -16,9 +16,9 @@
 
 require "gtk3"
 
-require "ninix/pix"
-require "ninix/script"
-require "ninix/dll"
+require_relative "../pix"
+require_relative "../script"
+require_relative "../dll"
 
 
 module Bln

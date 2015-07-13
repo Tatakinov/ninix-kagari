@@ -12,10 +12,10 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "ninix/config"
-require "ninix/alias"
-require "ninix/dll"
-require "ninix/logging"
+require_relative "config"
+require_relative "alias"
+require_relative "dll"
+require_relative "logging"
 
 
 module Home

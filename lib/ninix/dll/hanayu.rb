@@ -18,8 +18,8 @@
 
 require "gtk3"
 
-require "ninix/pix"
-require "ninix/dll"
+require_relative "../pix"
+require_relative "../dll"
 
 
 module Hanayu

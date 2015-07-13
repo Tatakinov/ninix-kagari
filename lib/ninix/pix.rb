@@ -13,7 +13,7 @@
 require "digest/md5"
 require "gtk3"
 
-require "ninix/logging"
+require_relative "logging"
 
 module Pix
 

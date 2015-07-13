@@ -17,8 +17,8 @@ require "uri"
 require "fileutils"
 require "digest/md5"
 
-require "ninix/home"
-require "ninix/logging"
+require_relative "home"
+require_relative "logging"
 
 module Update
 

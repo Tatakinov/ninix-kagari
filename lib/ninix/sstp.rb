@@ -14,11 +14,11 @@
 
 require "socket"
 
-require "ninix/entry_db"
-require "ninix/script"
-require "ninix/version"
-require "ninix/sstplib"
-require "ninix/logging"
+require_relative "entry_db"
+require_relative "script"
+require_relative "version"
+require_relative "sstplib"
+require_relative "logging"
 
 
 module SSTP

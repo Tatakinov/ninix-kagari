@@ -49,9 +49,9 @@
 require "gettext"
 require "gtk3"
 
-require "ninix/pix"
-require "ninix/home"
-require "ninix/logging"
+require_relative "pix"
+require_relative "home"
+require_relative "logging"
 
 module Nekodorif
 

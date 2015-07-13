@@ -11,7 +11,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "ninix/logging"
+require_relative "logging"
 
 module NConfig
 

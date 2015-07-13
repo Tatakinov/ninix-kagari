@@ -20,9 +20,9 @@ require "fileutils"
 
 require "gtk3"
 
-require "ninix/home"
-require "ninix/logging"
-require "ninix/version"
+require_relative "home"
+require_relative "logging"
+require_relative "version"
 
 
 module Install

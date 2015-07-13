@@ -16,8 +16,8 @@ require "uri"
 
 require "gst"
 
-require "ninix/home"
-require "ninix/dll"
+require_relative "../home"
+require_relative "../dll"
 
 
 module MCIAudioR

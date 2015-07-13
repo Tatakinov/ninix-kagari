@@ -17,8 +17,8 @@
 
 require "gtk3"
 
-require "ninix/dll"
-require "ninix/pix"
+require_relative "../dll"
+require_relative "../pix"
 
 
 module WMove

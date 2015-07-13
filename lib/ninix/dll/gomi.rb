@@ -15,7 +15,7 @@ require "optparse"
 
 require "gio2"
 
-require "ninix/dll"
+require_relative "../dll"
 
 
 module Gomi

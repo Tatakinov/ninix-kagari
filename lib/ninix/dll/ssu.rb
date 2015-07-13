@@ -14,7 +14,7 @@
 # TODO:
 # - if, switch等の引数計算(calcを使用)
 
-require "ninix/dll"
+require_relative "../dll"
 
 
 module SSU

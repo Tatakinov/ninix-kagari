@@ -18,10 +18,10 @@
 require 'gettext'
 require "gtk3"
 
-require "ninix/config"
-require "ninix/seriko"
-require "ninix/pix"
-require "ninix/logging"
+require_relative "config"
+require_relative "seriko"
+require_relative "pix"
+require_relative "logging"
 
 module Kinoko
 

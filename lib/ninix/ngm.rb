@@ -19,10 +19,10 @@ require "fileutils"
 require 'gettext'
 require "gtk3"
 
-require "ninix/home"
-require "ninix/pix"
-require "ninix/install"
-require "ninix/logging"
+require_relative "home"
+require_relative "pix"
+require_relative "install"
+require_relative "logging"
 
 module NGM
 

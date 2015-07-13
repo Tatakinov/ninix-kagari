@@ -12,9 +12,9 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "ninix/lock"
-require "ninix/home"
-require "ninix/logging"
+require_relative "../lock"
+require_relative "../home"
+require_relative "../logging"
 
 module Aya
 

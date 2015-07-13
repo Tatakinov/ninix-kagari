@@ -15,10 +15,10 @@
 
 require "gtk3"
 
-require "ninix/keymap"
-require "ninix/pix"
-require "ninix/seriko"
-require "ninix/logging"
+require_relative "keymap"
+require_relative "pix"
+require_relative "seriko"
+require_relative "logging"
 
 module Surface
 

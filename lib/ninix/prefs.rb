@@ -16,7 +16,7 @@
 require 'gettext'
 require "gtk3"
 
-require "ninix/home"
+require_relative "home"
 
 module Prefs
 

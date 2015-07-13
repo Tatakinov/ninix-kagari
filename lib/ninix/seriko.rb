@@ -14,7 +14,7 @@
 
 require "gtk3"
 
-require "ninix/logging"
+require_relative "logging"
 
 module Seriko
 

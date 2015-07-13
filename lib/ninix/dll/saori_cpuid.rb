@@ -11,7 +11,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "ninix/dll"
+require_relative "../dll"
 
 
 module SAORI_CPUID

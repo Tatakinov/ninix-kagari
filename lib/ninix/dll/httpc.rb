@@ -16,7 +16,7 @@ require "open-uri"
 
 require "gtk3"
 
-require "ninix/dll"
+require_relative "../dll"
 
 
 module HTTPC

@@ -15,7 +15,7 @@
 
 require "gtk3"
 
-require "ninix/pix"
+require_relative "pix"
 
 
 module Balloon
