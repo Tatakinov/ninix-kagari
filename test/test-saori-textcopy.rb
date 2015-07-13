@@ -5,7 +5,7 @@ module NinixTest
   class TextcopyTest
 
     def initialize
-      saori = Saori.new
+      saori = TextCopy::Saori.new
       saori.setup
       saori.request("") # XXX
       print(saori.execute(nil), "\n")

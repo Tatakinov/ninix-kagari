@@ -6,7 +6,7 @@ module NinixTest
   class SSUTest
 
     def initialize
-      saori = Saori.new
+      saori = SSU::Saori.new
       saori.setup
       saori.request("") # XXX
       print(saori.execute(nil, 'CP932'), "\n")

@@ -17,36 +17,39 @@ require "gtk3"
 require "ninix/dll"
 
 
-class Saori < DLL::SAORI
+module TextCopy
 
-  def initialize
-    super()
-    @clipboard = nil
-  end
+  class Saori < DLL::SAORI
 
-  def setup
-    @clipboard = Gtk::Clipboard.get(Gdk::Selection::PRIMARY)
-    return 1
-  end
-
-  def finalize
-    @clipboard = nil
-    return 1
-  end
-
-  def execute(argument)
-    if not argument or @clipboard == nil
-      return RESPONSE[400]
+    def initialize
+      super()
+      @clipboard = nil
     end
-    text = argument[0]
-    @clipboard.set_text(text)
-    if argument.length >= 2 and argument[1] != 0
-      return ["SAORI/1.0 200 OK\r\n",
-              "Result: ",
-              argument[0].encode(@charset, :invalid => :replace),
-              "\r\n\r\n"].join("")
-    else
-      return RESPONSE[204]
+
+    def setup
+      @clipboard = Gtk::Clipboard.get(Gdk::Selection::PRIMARY)
+      return 1
+    end
+
+    def finalize
+      @clipboard = nil
+      return 1
+    end
+
+    def execute(argument)
+      if not argument or @clipboard == nil
+        return RESPONSE[400]
+      end
+      text = argument[0]
+      @clipboard.set_text(text)
+      if argument.length >= 2 and argument[1] != 0
+        return ["SAORI/1.0 200 OK\r\n",
+                "Result: ",
+                argument[0].encode(@charset, :invalid => :replace),
+                "\r\n\r\n"].join("")
+      else
+        return RESPONSE[204]
+      end
     end
   end
 end

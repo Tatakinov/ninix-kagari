@@ -5,7 +5,7 @@ module NinixTest
   class CpuidTest
 
     def initialize
-      saori = Saori.new
+      saori = SAORI_CPUID::Saori.new
       saori.setup
       saori.request("") # XXX
       print(saori.execute(nil), "\n")

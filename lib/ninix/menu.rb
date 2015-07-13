@@ -255,7 +255,7 @@ module Menu
             @sidebar_width = 0
           end
         rescue
-          @pass
+          #pass
         end
       end
       if @__imagepath['foreground'] == nil

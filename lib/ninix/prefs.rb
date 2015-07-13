@@ -344,7 +344,8 @@ module Prefs
       scrolled.show()
       treeview = Gtk::TreeView.new(nil)
       column = Gtk::TreeViewColumn.new(_('Balloon Name'),
-                                       Gtk::CellRendererText.new())
+                                       Gtk::CellRendererText.new(),
+                                       :text => 0)
       treeview.append_column(column)
       treeview.selection.set_mode(Gtk::SelectionMode::SINGLE)
       @balloon_treeview = treeview

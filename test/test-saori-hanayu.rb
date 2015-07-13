@@ -5,7 +5,7 @@ module NinixTest
   class HanayuTest
 
     def initialize
-      saori = Saori.new
+      saori = Hanayu::Saori.new
       path = "./test/hanayu" ## FIXME
       saori.load(:dir => path)
       saori.setup

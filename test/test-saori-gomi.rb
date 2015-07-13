@@ -5,7 +5,7 @@ module NinixTest
   class GomiTest
 
     def initialize
-      saori = Saori.new
+      saori = Gomi::Saori.new
       saori.setup
       saori.request("") # XXX
       print(saori.execute(nil), "\n")

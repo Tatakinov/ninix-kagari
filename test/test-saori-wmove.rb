@@ -7,7 +7,7 @@ module NinixTest
     def initialize
       @x = [100, 320]
       @y = [200, 400]
-      saori = Saori.new
+      saori = WMove::Saori.new
       saori.setup
       saori.need_ghost_backdoor(self)
       saori.load

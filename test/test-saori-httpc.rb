@@ -6,7 +6,7 @@ module NinixTest
   class HTTPCTest
 
     def initialize
-      saori = Saori.new
+      saori = HTTPC::Saori.new
       saori.setup
       saori.need_ghost_backdoor(self)
       saori.request("") # XXX

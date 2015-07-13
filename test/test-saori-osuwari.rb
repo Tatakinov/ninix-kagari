@@ -5,7 +5,7 @@ module NinixTest
   class OsuwariTest
 
     def initialize
-      saori = Saori.new
+      saori = Osuwari::Saori.new
       saori.setup
       saori.need_ghost_backdoor(self)
       saori.request("") # XXX

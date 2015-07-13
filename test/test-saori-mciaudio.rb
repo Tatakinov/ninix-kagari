@@ -5,7 +5,7 @@ module NinixTest
   class MciaudioTest
 
     def initialize
-      saori = Saori.new
+      saori = MCIAudio::Saori.new
       saori.load(:dir => "") # XXX
       saori.setup
       saori.need_ghost_backdoor(self)

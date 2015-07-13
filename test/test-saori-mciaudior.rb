@@ -5,7 +5,7 @@ module NinixTest
   class MciaudioRTest
 
     def initialize
-      saori = Saori.new
+      saori = MCIAudioR::Saori.new
       saori.load(:dir => "") # XXX
       saori.setup
       saori.request("") # XXX
