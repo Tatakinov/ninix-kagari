@@ -309,11 +309,11 @@ module Bln
       end
       @script = nil
       @darea = @window.darea
-      @darea.set_events(Gdk::Event::EXPOSURE_MASK|
-                        Gdk::Event::BUTTON_PRESS_MASK|
-                        Gdk::Event::BUTTON_RELEASE_MASK|
-                        Gdk::Event::POINTER_MOTION_MASK|
-                        Gdk::Event::LEAVE_NOTIFY_MASK)
+      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
+                        Gdk::EventMask::BUTTON_PRESS_MASK|
+                        Gdk::EventMask::BUTTON_RELEASE_MASK|
+                        Gdk::EventMask::POINTER_MOTION_MASK|
+                        Gdk::EventMask::LEAVE_NOTIFY_MASK)
       @darea.signal_connect('draw') do |w, e|
         redraw(w, e)
       end
@@ -871,7 +871,7 @@ module Bln
     def button_press(widget, event)
       @x_root = event.x_root
       @y_root = event.y_root
-      if event.event_type == Gdk::Event::DOUBLE_BUTTON_PRESS
+      if event.event_type == Gdk::EventType::DOUBLE_BUTTON_PRESS
         x, y = @window.winpos_to_surfacepos(
              event.x.to_i, event.y.to_i, @scale)
         @__sakura.notify_event(
@@ -885,7 +885,7 @@ module Bln
       @y_root = nil
       x, y = @window.winpos_to_surfacepos(
            event.x.to_i, event.y.to_i, @scale)
-      if event.event_type == Gdk::Event::BUTTON_RELEASE
+      if event.event_type == Gdk::EventType::BUTTON_RELEASE
         if event.button == 1
           @__sakura.notify_event(
             'OnEBMouseClick', @name, x, y, @id, 0)
@@ -905,7 +905,7 @@ module Bln
          @y_root != nil
         x_delta = (event.x_root - @x_root).to_i
         y_delta = (event.y_root - @y_root).to_i
-        if event.state & Gdk::Window::ModifierType::BUTTON1_MASK
+        if event.state & Gdk::ModifierType::BUTTON1_MASK
           if @dragmove_horizontal
             @x += x_delta
           end

@@ -496,7 +496,7 @@ module NGM
         close()
       end
       @window.set_window_position(Gtk::Window::Position::CENTER)
-      @window.gravity = Gdk::Window::Gravity::CENTER
+      @window.gravity = Gdk::Gravity::CENTER
       actions = Gtk::ActionGroup.new('Actions')
       actions.add_actions(@entries)
       ui = Gtk::UIManager.new()
@@ -600,7 +600,7 @@ module NGM
       @textview[side] = textview
       darea = Gtk::DrawingArea.new()
       vbox.pack_start(darea, :expand => false, :fill => true, :padding => 0)
-      darea.set_events(Gdk::Event::EXPOSURE_MASK)
+      darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
       darea.signal_connect('draw') do |w, c|
         redraw(w, c, side)
       end

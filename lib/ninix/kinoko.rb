@@ -323,11 +323,11 @@ module Kinoko
       @path = path
       @w, @h = w, h
       @darea = @window.darea
-      @darea.set_events(Gdk::Event::EXPOSURE_MASK|
-                        Gdk::Event::BUTTON_PRESS_MASK|
-                        Gdk::Event::BUTTON_RELEASE_MASK|
-                        Gdk::Event::POINTER_MOTION_MASK|
-                        Gdk::Event::LEAVE_NOTIFY_MASK)
+      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
+                        Gdk::EventMask::BUTTON_PRESS_MASK|
+                        Gdk::EventMask::BUTTON_RELEASE_MASK|
+                        Gdk::EventMask::POINTER_MOTION_MASK|
+                        Gdk::EventMask::LEAVE_NOTIFY_MASK)
       @darea.signal_connect('button_press_event') do |w, e|
         button_press(w, e)
       end
@@ -508,7 +508,7 @@ module Kinoko
     def button_press(widget, event) ## FIXME
       @x_root = event.x_root
       @y_root = event.y_root
-      if event.event_type == Gdk::Event::BUTTON_PRESS
+      if event.event_type == Gdk::EventType::BUTTON_PRESS
         click = 1
       else
         click = 2

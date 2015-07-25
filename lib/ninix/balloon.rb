@@ -511,12 +511,12 @@ module Balloon
       @x_fractions = 0
       @y_fractions = 0
       @darea = @window.darea
-      @darea.set_events(Gdk::Event::EXPOSURE_MASK|
-                        Gdk::Event::BUTTON_PRESS_MASK|
-                        Gdk::Event::BUTTON_RELEASE_MASK|
-                        Gdk::Event::POINTER_MOTION_MASK|
-                        Gdk::Event::POINTER_MOTION_HINT_MASK|
-                        Gdk::Event::SCROLL_MASK)
+      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
+                        Gdk::EventMask::BUTTON_PRESS_MASK|
+                        Gdk::EventMask::BUTTON_RELEASE_MASK|
+                        Gdk::EventMask::POINTER_MOTION_MASK|
+                        Gdk::EventMask::POINTER_MOTION_HINT_MASK|
+                        Gdk::EventMask::SCROLL_MASK)
       @darea.signal_connect('draw') do |w, e|
         redraw(w, e)
       end
@@ -1093,7 +1093,7 @@ module Balloon
         end
         update_line_regions(line + 1, new_y)
         @layout.set_markup(markup, -1)
-        cr.set_source_rgba(*@text_normal_color)
+        cr.set_source_rgba(@text_normal_color)
         cr.move_to(x, y)
         cr.show_pango_layout(@layout)
         if @sstp_surface != nil
@@ -1246,7 +1246,7 @@ module Balloon
     end
 
     def motion_notify(widget, event)
-      if event.hint?
+      if event.is_hint == 1
         _, x, y, state = widget.window.get_device_position(event.device)
       else
         x, y, state = event.x, event.y, event.state
@@ -1258,7 +1258,7 @@ module Balloon
         end
       end
       if not @parent.handle_request('GET', 'busy')
-        if (state & Gdk::Window::ModifierType::BUTTON1_MASK).nonzero?
+        if (state & Gdk::ModifierType::BUTTON1_MASK).nonzero?
           if @x_root != nil and \
             @y_root != nil
             @dragged = true
@@ -1299,7 +1299,7 @@ module Balloon
 
     def button_press(darea, event)
       @parent.handle_request('NOTIFY', 'reset_idle_time')
-      if event.event_type == Gdk::Event::BUTTON_PRESS
+      if event.event_type == Gdk::EventType::BUTTON_PRESS
         click = 1
       else
         click = 2
@@ -1618,9 +1618,9 @@ module Balloon
       # DnD data types
       dnd_targets = [['text/plain', 0, 0]]
       @window.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
-                            Gdk::DragContext::Action::COPY)
+                            Gdk::DragAction::COPY)
       @window.drag_dest_add_text_targets()
-      @window.set_events(Gdk::Event::BUTTON_PRESS_MASK)
+      @window.set_events(Gdk::EventMask::BUTTON_PRESS_MASK)
       @window.set_modal(true)
       @window.set_window_position(Gtk::Window::Position::CENTER)
       @window.realize()
@@ -1649,7 +1649,7 @@ module Balloon
       end
       if surface != nil
         darea = Gtk::DrawingArea.new()
-        darea.set_events(Gdk::Event::EXPOSURE_MASK)
+        darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
         darea.signal_connect('draw') do |w, e|
           redraw(w, e, surface)
         end
@@ -1715,7 +1715,7 @@ module Balloon
     end
 
     def key_press(widget, event)
-      if event.keyval == Gdk::Keyval::GDK_KEY_Escape
+      if event.keyval == Gdk::Keyval::KEY_Escape
         @window.hide()
         cancel()
         return true
@@ -1771,7 +1771,7 @@ module Balloon
     end
 
     def key_press(widget, event)
-      if event.keyval == Gdk::Keyval::GDK_KEY_Escape
+      if event.keyval == Gdk::Keyval::KEY_Escape
         @window.hide()
         cancel()
         @parent.handle_request('NOTIFY', 'reset_user_interaction')

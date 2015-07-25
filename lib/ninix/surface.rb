@@ -81,8 +81,8 @@ module Surface
       window.signal_connect('window_state_event') do |w, e|
         window_state(w, e)
       end
-      window.set_events(Gdk::Event::KEY_PRESS_MASK|
-                        Gdk::Event::KEY_RELEASE_MASK)
+      window.set_events(Gdk::EventMask::KEY_PRESS_MASK|
+                        Gdk::EventMask::KEY_RELEASE_MASK)
       window.realize()
       return window
     end
@@ -106,7 +106,7 @@ module Surface
     def window_iconify(flag)
       gtk_window = @window[0].window
       iconified = (gtk_window.window.state & \
-                   Gdk::EventWindowState::ICONIFIED).nonzero?
+                   Gdk::WindowState::ICONIFIED).nonzero?
       if flag and not iconified
         gtk_window.iconify()
       elsif not flag and iconified
@@ -118,10 +118,10 @@ module Surface
       if not @parent.handle_request('GET', 'is_running')
         return
       end
-      if (event.changed_mask & Gdk::EventWindowState::ICONIFIED).zero?
+      if (event.changed_mask & Gdk::WindowState::ICONIFIED).zero?
         return
       end
-      if (event.new_window_state & Gdk::EventWindowState::ICONIFIED).nonzero?
+      if (event.new_window_state & Gdk::WindowState::ICONIFIED).nonzero?
         if window == @window[0].get_window
           @parent.handle_request('NOTIFY', 'notify_iconified')
         end
@@ -129,7 +129,7 @@ module Surface
           gtk_window = surface_window.get_window
           if gtk_window != window and \
             (gtk_window.window.state & \
-             Gdk::EventWindowState::ICONIFIED).nonzero?
+             Gdk::WindowState::ICONIFIED).nonzero?
             gtk_window.iconify()
           end
         end
@@ -138,7 +138,7 @@ module Surface
           gtk_window = surface_window.get_window
           if gtk_window != window and \
             (gtk_window.window.state & \
-             Gdk::EventWindowState::ICONIFIED).nonzero?
+             Gdk::WindowState::ICONIFIED).nonzero?
             gtk_window.deiconify()
           end
         end
@@ -156,17 +156,17 @@ module Surface
     def key_press(window, event)
       name = Keymap::Keymap_old[event.keyval]
       keycode = Keymap::Keymap_new[event.keyval]
-      if event.event_type == Gdk::Event::KEY_RELEASE
+      if event.event_type == Gdk::EventType::KEY_RELEASE
         @key_press_count = 0
         return true
       end
-      if not (event.event_type == Gdk::Event::KEY_PRESS)
+      if not (event.event_type == Gdk::EventType::KEY_PRESS)
         return false
       end
       @key_press_count += 1
       if (event.state & \
-          (Gdk::Window::ModifierType::CONTROL_MASK | \
-           Gdk::Window::ModifierType::SHIFT_MASK)).nonzero?
+          (Gdk::ModifierType::CONTROL_MASK | \
+           Gdk::ModifierType::SHIFT_MASK)).nonzero?
         if name == 'f12'
           Logging::Logging.info('reset surface position')
           reset_position()
@@ -960,12 +960,12 @@ module Surface
         window_enter_notify(w, e) # XXX
       end
       @darea = @window.darea
-      @darea.set_events(Gdk::Event::EXPOSURE_MASK|
-                        Gdk::Event::BUTTON_PRESS_MASK|
-                        Gdk::Event::BUTTON_RELEASE_MASK|
-                        Gdk::Event::POINTER_MOTION_MASK|
-                        Gdk::Event::POINTER_MOTION_HINT_MASK|
-                        Gdk::Event::SCROLL_MASK)
+      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
+                        Gdk::EventMask::BUTTON_PRESS_MASK|
+                        Gdk::EventMask::BUTTON_RELEASE_MASK|
+                        Gdk::EventMask::POINTER_MOTION_MASK|
+                        Gdk::EventMask::POINTER_MOTION_HINT_MASK|
+                        Gdk::EventMask::SCROLL_MASK)
       @darea.signal_connect('draw') do |w, e|
         redraw(w, e)
       end
@@ -993,7 +993,7 @@ module Surface
       # DnD data types
       dnd_targets = [['text/uri-list', 0, 0]]
       @darea.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
-                           Gdk::DragContext::Action::COPY)
+                           Gdk::DragAction::COPY)
       @darea.drag_dest_add_uri_targets()
     end
 
@@ -1647,7 +1647,7 @@ module Surface
       @y_root = event.y_root
       # automagical raise
       @parent.handle_request('NOTIFY', 'notify_observer', 'raise', :args => [@side])
-      if event.event_type == Gdk::Event::BUTTON2_PRESS
+      if event.event_type == Gdk::EventType::BUTTON2_PRESS
         @click_count = 2
       else # XXX
         @click_count = 1
@@ -1673,7 +1673,7 @@ module Surface
       return true
     end
 
-    CURSOR_HAND1 = Gdk::Cursor.new(Gdk::Cursor::Type::HAND1)
+    CURSOR_HAND1 = Gdk::Cursor.new(Gdk::CursorType::HAND1)
 
     def button_release(window, event)
       x, y = @window.winpos_to_surfacepos(
@@ -1697,7 +1697,7 @@ module Surface
     end
 
     def motion_notify(darea, event)
-      if event.hint?
+      if event.is_hint == 1
         _, x, y, state = @darea.window.get_device_position(event.device)
       else
         x, y, state = event.x, event.y, event.state
@@ -1726,7 +1726,7 @@ module Surface
       end
       @__current_part = part
       if not @parent.handle_request('GET', 'busy')
-        if (state & Gdk::Window::ModifierType::BUTTON1_MASK).nonzero?
+        if (state & Gdk::ModifierType::BUTTON1_MASK).nonzero?
           if @x_root != nil and \
             @y_root != nil
             if not @dragged
@@ -1743,8 +1743,8 @@ module Surface
             @x_root = event.x_root
             @y_root = event.y_root
           end
-        elsif (state & Gdk::Window::ModifierType::BUTTON2_MASK).nonzero? or \
-             (state & Gdk::Window::ModifierType::BUTTON3_MASK).nonzero?
+        elsif (state & Gdk::ModifierType::BUTTON2_MASK).nonzero? or \
+             (state & Gdk::ModifierType::BUTTON3_MASK).nonzero?
           #pass
         else
           @parent.handle_request('NOTIFY', 'notify_surface_mouse_motion',

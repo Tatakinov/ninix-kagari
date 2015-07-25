@@ -27,7 +27,7 @@ module TextCopy
     end
 
     def setup
-      @clipboard = Gtk::Clipboard.get(Gdk::Selection::PRIMARY)
+      @clipboard = Gtk::Clipboard.get('PRIMARY')
       return 1
     end
 

@@ -291,8 +291,8 @@ module Hanayu
       @y = top + (scrn_h / 4).to_i
       @window.move(@x, @y)
       @darea = Gtk::DrawingArea.new
-      @darea.set_events(Gdk::Event::EXPOSURE_MASK|
-                        Gdk::Event::BUTTON_PRESS_MASK)
+      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
+                        Gdk::EventMask::BUTTON_PRESS_MASK)
       @darea.signal_connect('draw') do |w ,e|
         redraw(w, e)
       end
@@ -406,11 +406,11 @@ module Hanayu
     end
 
     def button_press(window, event)
-      if event.event_type == Gdk::Event::BUTTON_PRESS
+      if event.event_type == Gdk::EventType::BUTTON_PRESS
         @window.begin_move_drag(
           event.button, event.x_root.to_i, event.y_root.to_i,
           event.time)
-      elsif event.event_type == Gdk::Event::DOUBLE_BUTTON_PRESS # double click
+      elsif event.event_type == Gdk::EventType::DOUBLE_BUTTON_PRESS # double click
         destroy()
       end
       return true

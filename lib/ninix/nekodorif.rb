@@ -315,12 +315,12 @@ module Nekodorif
       end
       @window.add_accel_group(@accelgroup)
       @darea = @window.darea
-      @darea.set_events(Gdk::Event::EXPOSURE_MASK|
-                        Gdk::Event::BUTTON_PRESS_MASK|
-                        Gdk::Event::BUTTON_RELEASE_MASK|
-                        Gdk::Event::POINTER_MOTION_MASK|
-                        Gdk::Event::POINTER_MOTION_HINT_MASK|
-                        Gdk::Event::LEAVE_NOTIFY_MASK)
+      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
+                        Gdk::EventMask::BUTTON_PRESS_MASK|
+                        Gdk::EventMask::BUTTON_RELEASE_MASK|
+                        Gdk::EventMask::POINTER_MOTION_MASK|
+                        Gdk::EventMask::POINTER_MOTION_HINT_MASK|
+                        Gdk::EventMask::LEAVE_NOTIFY_MASK)
       @darea.signal_connect('draw') do |w, cr|
         redraw(w, cr)
       end
@@ -380,8 +380,8 @@ module Nekodorif
     end
 
     def key_press(window, event)
-      if event.state & (Gdk::Window::ModifierType::CONTROL_MASK | Gdk::Window::ModifierType::SHIFT_MASK)
-        if event.keyval == Gdk::Keyval::GDK_KEY_F12
+      if event.state & (Gdk::ModifierType::CONTROL_MASK | Gdk::ModifierType::SHIFT_MASK)
+        if event.keyval == Gdk::Keyval::KEY_F12
           Logging::Logging.info('reset skin position')
           set_position(:reset => 1)
         end
@@ -397,16 +397,16 @@ module Nekodorif
       @x_root = event.x_root
       @y_root = event.y_root
       if event.button == 1
-        if event.event_type == Gdk::Event::BUTTON_PRESS
+        if event.event_type == Gdk::EventType::BUTTON_PRESS
           #pass
-        elsif event.event_type == Gdk::Event::DOUBLE_BUTTON_PRESS # double click
+        elsif event.event_type == Gdk::EventType::DOUBLE_BUTTON_PRESS # double click
           if @parent.handle_request('GET', 'has_katochan')
             start() ## FIXME
             @parent.handle_request('NOTIFY', 'drop_katochan')
           end
         end
       elsif event.button == 3
-        if event.event_type == Gdk::Event::BUTTON_PRESS
+        if event.event_type == Gdk::EventType::BUTTON_PRESS
           @__menu.popup(event.button)
         end
       end
@@ -492,12 +492,12 @@ module Nekodorif
     end
 
     def motion_notify(widget, event)
-      if event.hint?
+      if event.is_hint == 1
         _, x, y, state = widget.window.get_device_position(event.device)
       else
         x, y, state = event.x, event.y, event.state
       end
-      if state & Gdk::Window::ModifierType::BUTTON1_MASK
+      if state & Gdk::ModifierType::BUTTON1_MASK
         if @x_root != nil and \
           @y_root != nil
           @dragged = true
@@ -763,7 +763,7 @@ module Nekodorif
         delete(w, e)
       end
       @darea = @window.darea
-      @darea.set_events(Gdk::Event::EXPOSURE_MASK)
+      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
       @darea.signal_connect('draw') do |w, cr|
         redraw(w, cr)
       end

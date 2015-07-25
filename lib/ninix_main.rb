@@ -47,7 +47,7 @@ module Ninix_Main
       _("A ninix-aya error has been detected."))
     dialog.set_title(_("Bug Detected"))
     dialog.set_window_position(Gtk::Window::Position::CENTER)
-    dialog.gravity = Gdk::Window::Gravity::CENTER
+    dialog.gravity = Gdk::Gravity::CENTER
     button = dialog.add_button(_("Show Details"), response_id)
     dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
     textview = Gtk::TextView.new
@@ -1429,7 +1429,7 @@ module Ninix_Main
       # DnD data types
       dnd_targets = [['text/uri-list', 0, 0]]
       @tv.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
-                        Gdk::DragContext::Action::COPY)
+                        Gdk::DragAction::COPY)
       @tv.drag_dest_set_target_list(nil) # important
       @tv.drag_dest_add_uri_targets()
       @tv.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
@@ -1611,7 +1611,7 @@ module Ninix_Main
         #return true # XXX
       end
       @darea = Gtk::DrawingArea.new
-      @darea.set_events(Gdk::Event::EXPOSURE_MASK)
+      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
       @size = [550, 330]
       @darea.set_size_request(*@size)
       @darea.signal_connect('configure_event') do |w, e|
