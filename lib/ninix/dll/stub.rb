@@ -6,7 +6,7 @@ module Stub
     end
 
     def find(dir, dll)
-      return 100
+      return 50
     end
 
     def load(dir)
