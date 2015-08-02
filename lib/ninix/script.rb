@@ -377,7 +377,7 @@ module Script
         return []
       end
       begin
-        sbra_id = text[0][1].to_i.to_s
+        sbra_id = Integer(text[0][1]).to_s
       rescue
         # pass
       else

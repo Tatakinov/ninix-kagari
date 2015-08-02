@@ -143,7 +143,7 @@ module Communicate
           if communicate == '__SYSTEM_ALL_GHOST__'
             sakura.enqueue_event('OnCommunicate', selfname, script)
             next
-          elsif communicate.include('\x01')
+          elsif communicate.include?('\x01')
             to = name.split('\x01')
             if to.include?(@ghosts[sakura][0])
               sakura.enqueue_event('OnCommunicate',
