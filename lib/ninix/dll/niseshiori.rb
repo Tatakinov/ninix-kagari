@@ -155,16 +155,17 @@ module Niseshiori
       #pass
     end
 
-    Re_type = Regexp.new('\\\(m[szlchtep?]|[dk])')
-    Re_user = Regexp.new('\\\u[a-z]')
-    Re_category = Regexp.new('\\\(m[szlchtep]|[dk])?\[([^\]]+)\]')
+    Re_type = Regexp.new('^\\\(m[szlchtep?]|[dk])')
+    Re_user = Regexp.new('^\\\u[a-z]')
+    Re_category = Regexp.new('^\\\(m[szlchtep]|[dk])?\[([^\]]+)\]')
 
     def read_dict(path)
       # read dict file and decrypt if necessary
+      buf = []
       open(path, 'rb') do |f|
         basename = File.basename(path, ".*")
         ext = File.extname(path)
-        ext = ext.lower()
+        ext = ext.downcase
         if ext == '.dtx'
           buf = decrypt(f.read())
         else
@@ -173,7 +174,7 @@ module Niseshiori
       end
       # omit empty lines and comments and merge continuous lines
       definitions = []
-      decode = lambda line: str(line, 'CP932', 'replace')
+      decode = lambda {|line| line.force_encoding('CP932').encode('UTF-8', :invalid => :replace, :undef => :replace) }
       in_comment = false
       i, j = 0, buf.length
       while i < j
@@ -182,9 +183,9 @@ module Niseshiori
         if line.empty?
           next
         elsif i == 1 and line.start_with?('#Charset:')
-          charset = str(line[9..-1], 'ascii').strip()
+          charset = line[9..-1].force_encoding('ascii').strip()
           if ['UTF-8', 'EUC-JP', 'EUC-KR'].include?(charset) # XXX
-            decode = lambda line: str(line, charset)
+            decode = lambda {|line| line.force_encoding(charset).encode('UTF-8', :invalid => :replace, :undef => :replace) }
           end
           next
         elsif line.start_with?('/*')
@@ -198,7 +199,7 @@ module Niseshiori
         end
         lines = [line]
         while i < j and buf[i] and \
-             (buf[i].start_with?(' ') or buf[i].start_with?('\t'))
+             (buf[i].start_with?(' ') or buf[i].start_with?("\t"))
           lines << buf[i].strip()
           i += 1
         end
@@ -206,18 +207,18 @@ module Niseshiori
       end
       # parse each line
       for line in definitions
-        line = decode(line)
+        line = decode.call(line)
         # special case: words in a category
         match = Re_category.match(line)
         if match
-          line = line[match.end()..-1].strip()
+          line = line[match.end(0)..-1].strip()
           if line.empty? or not line.start_with?(',')
             syntax_error(path, line)
             next
           end
           words = split(line).map {|s| s.strip if not s.strip.empty? }
           words.delete(nil)
-          cattype, catlist = match.groups()
+          cattype, catlist = match[0], match[1..-1].join('')
           for cat in split(catlist).map {|s| s.strip }
             if cattype == nil
               keylist = [[nil, cat]]
@@ -226,21 +227,21 @@ module Niseshiori
             end
             for key in keylist
               value = @dict.include?(key) ? @dict[key] : []
-              value.extend(words)
+              value.concat(words)
               @dict[key] = value
             end
           end
           if cattype != nil
             key = ['\\', cattype].join('')
             value = @dict.include?(key) ? @dict[key] : []
-            value.extend(words)
+            value.concat(words)
             @dict[key] = value
           end
           next
         end
         # other cases
         begin
-          command, argv = split(line, 2)
+          command, argv = split(line, 1)
           command.strip!
           argv.strip!
         rescue #except ValueError:
@@ -314,7 +315,7 @@ module Niseshiori
           words = split(argv).map {|s| s.strip if not s.strip.empty? }
           words.delete(nil)
           value = @dict.include?(command) ? @dict[command] : []
-          value.extend(words)
+          value.concat(words)
           @dict[command] = value
         elsif ['\dms', '\e'].include?(command)
           value = @dict.include?(command) ? @dict[command] : []
@@ -412,12 +413,12 @@ module Niseshiori
     def parse_condition(condition)
       buf = []
       for expr in condition.split('&').map {|s| s.strip }
-        match = Re_comp_op.search(expr)
+        match = Re_comp_op.match(expr)
         if match
           buf << [COND_COMPARISON, [
-                    expr[0..match.start()-1].strip(),
-                    match.group(),
-                    expr[match.end()..-1].strip()]]
+                    expr[0..match.begin(0)-1].strip(),
+                    match.to_s,
+                    expr[match.end(0)..-1].strip()]]
         else
           buf << [COND_STRING, expr]
         end
@@ -432,15 +433,15 @@ module Niseshiori
       j = data.length
       line = []
       while i < j
-        if data[i] == 64 # == '@'[0]
+        if data[i].ord == 64 # == '@'[0]
           i += 1
-          buf << bytes(line)
+          buf << line.join('')
           line = []
           next
         end
-        y = data[i]
+        y = data[i].ord
         i += 1
-        x = data[i]
+        x = data[i].ord
         i += 1
         x -= a
         a += 9
@@ -449,8 +450,8 @@ module Niseshiori
         if a > 0xdd
           a = 0x61
         end
-        line.append((x & 0x03) | ((y & 0x03) << 2) | \
-                    ((y & 0x0c) << 2) | ((x & 0x0c) << 4))
+        line << ((x & 0x03) | ((y & 0x03) << 2) | \
+                 ((y & 0x0c) << 2) | ((x & 0x0c) << 4)).chr
       end
       return buf
     end
@@ -465,7 +466,7 @@ module Niseshiori
                            ref4=nil, ref5=nil, ref6=nil, ref7=nil)
       ref = [ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7]
       if ['OnSecondChange', 'OnMinuteChange'].include?(event)
-        if ref[1]
+        if ref[1] == 1
           @mikire += 1
           script = get_event_response('OnNSMikireHappen')
           if script != nil
@@ -475,7 +476,7 @@ module Niseshiori
           @mikire = 0
           return get_event_response('OnNSMikireSolve')
         end
-        if ref[2]
+        if ref[2] == 1
           @kasanari += 1
           script = get_event_response('OnNSKasanariHappen')
           if script != nil
@@ -506,14 +507,14 @@ module Niseshiori
                 if not s.empty?
                   s = replace_meta(s)
                   while true
-                    match = Re_ns_tag.search(s)
+                    match = Re_ns_tag.match(s)
                     if not match
                       break
                     end
-                    value = eval_ns_tag(match.group())
-                    s = [s[0..match.start()-1],
+                    value = eval_ns_tag(match.to_s)
+                    s = [s[0..match.begin(0)-1],
                          value.to_s,
-                         s[match.end()..-1]].join('')
+                         s[match.end(0)..-1]].join('')
                   end
                 end
                 return s
@@ -565,14 +566,14 @@ module Niseshiori
         else
           script = replace_meta(script)
           while 1
-            match = Re_ns_tag.search(script)
+            match = Re_ns_tag.match(script)
             if not match
               break
             end
-            value = eval_ns_tag(match.group())
-            script = [script[0..match.start()-1],
+            value = eval_ns_tag(match.to_s)
+            script = [script[0..match.begin(0)-1],
                       value.to_s,
-                      script[match.end()..-1]].join('')
+                      script[match.end(0)..-1]].join('')
           end
         end
         @sender = ''
@@ -586,7 +587,7 @@ module Niseshiori
       for condition in @events.keys
         actions = @events[condition]
         if eval_condition(condition)
-          @dict[key].extend(actions)
+          @dict[key].concat(actions)
         end
       end
       script = get(key, default=nil)
@@ -626,7 +627,7 @@ module Niseshiori
     end
 
     def eval_conditional_expression(cond_type, expr)
-      if cond_type == NiseShiori.COND_COMPARISON
+      if cond_type == COND_COMPARISON
         value1 = expand_meta(expr[0])
         value2 = expr[2]
         begin
@@ -649,7 +650,7 @@ module Niseshiori
         elsif expr[1] == '<>'
           return op1 != op2
         end
-      elsif cond_type == NiseShiori.COND_STRING
+      elsif cond_type == COND_STRING
         if @event.include?(expr)
           return true
         end
@@ -671,12 +672,12 @@ module Niseshiori
       s = expand(key, '', default)
       if s and not s.empty?
         while true
-          match = Re_ns_tag.search(s)
+          match = Re_ns_tag.match(s)
           if not match
             break
           end
-          value = eval_ns_tag(match.group())
-          s = [s[0..match.start()-1], value.to_s, s[match.end()..-1]].join('')
+          value = eval_ns_tag(match.to_s)
+          s = [s[0..match.begin(0)-1], value.to_s, s[match.end(0)..-1]].join('')
         end
       end
       return s
@@ -756,17 +757,19 @@ module Niseshiori
       buf = []
       variables = {}
       variable_chains = []
-      while 1
+      while true
         match = Re_meta.match(s, pos)
         if not match
           buf << s[pos..-1]
           break
         end
-        buf << s[pos..match.offset(0)[0]-1]
-        meta = match.group()
-        if match.group(4) != nil # %ms, %dms, %ua, etc.
+        if match.begin(0) != 0
+          buf << s[pos..match.begin(0)-1]
+        end
+        meta = match.to_s
+        if match[4] != nil # %ms, %dms, %ua, etc.
           if not variables.include?(meta)
-            chained_meta = ['%', match.group(4)].join('')
+            chained_meta = ['%', match[4]].join('')
             break_flag = false
             for chains in variable_chains
               if chains.include?(meta)
@@ -787,7 +790,7 @@ module Niseshiori
               end
             end
             if not break_flag
-              if match.group(4) == 'm?'
+              if match[4] == 'm?'
                 word = expand(
                   ['\\',
                    ['ms', 'mz', 'ml',
@@ -795,7 +798,7 @@ module Niseshiori
                     'me', 'mp'].sample].join(''), s)
               else
                 word = expand(
-                  ['\\', match.group(4)].join(''), s)
+                  ['\\', match[4]].join(''), s)
               end
             end
             chains = find_chains([chained_meta, word], s)
@@ -818,7 +821,7 @@ module Niseshiori
         else
           buf << expand_meta(meta).to_s
         end
-        pos = match.end()
+        pos = match.end(0)
       end
       t = buf.join('')
       return t
@@ -835,7 +838,7 @@ module Niseshiori
       if choices.empty?
         match = Re_category.match(key)
         if match
-          key = match.groups()
+          key = match.to_s ## FIXME
         end
         choices = @dict[key]
       end
@@ -863,7 +866,7 @@ module Niseshiori
     def find_chains(key, context)
       chains = {}
       dic = @word_chains.include?(key) ? @word_chains[key] : {}
-      for chained_meta in dic
+      for chained_meta in dic.keys
         candidates_A = []
         candidates_B = []
         for keyword, chained_word in dic[chained_meta]
@@ -1084,33 +1087,34 @@ module Niseshiori
       end
     end
 
-    Re_token = Regexp.new('[()*/\+-]|\d+|\s+')
+    Re_token_A = Regexp.new('^[()*/\+-]|\d+|\s+')
+    Re_token_B = Regexp.new('[()*/\+-]|\d+|\s+')
 
     def tokenize(data)
       buf = []
       end_ = 0
       while 1
-        match = NiseShiori.re_meta.match(data, end_)
+        match = NiseShiori::Re_meta.match(data, end_)
         if match
-          buf << match.group()
-          end_ = match.end()
+          buf << match.to_s
+          end_ = match.end(0)
           next
         end
-        match = Re_token.match(data, end_)
+        match = Re_token_A.match(data, end_)
         if match
-          if not match.group().strip().empty?
-            buf << match.group()
+          if not match.to_s.strip().empty?
+            buf << match.to_s
           end
-          end_ = match.end()
+          end_ = match.end(0)
           next
         end
-        match = Re_token.search(data, end_)
+        match = Re_token_B.match(data, end_)
         if match
-          buf << data[end_..match.start()-1]
-          if not match.group().strip().empty?
-            buf << match.group()
+          buf << data[end_..match.begin(0)-1]
+          if not match.to_s.strip().empty?
+            buf << match.to_s
           end
-          end_ = match.end()
+          end_ = match.end(0)
         else
           if end_ < data.length
             buf << data[end_..-1]
@@ -1239,8 +1243,8 @@ module Niseshiori
       @dll_name = dll_name
     end
 
-    def load(top_dir)
-      super(top_dir)
+    def load(dir: nil)
+      super(dir)
       return 1
     end
 
@@ -1346,19 +1350,19 @@ module Niseshiori
         end
         to = communicate_to()
       end
-      result = ['SHIORI/3.0 200 OK\r\n',
-                'Sender: Niseshiori\r\n',
-                'Charset: UTF-8\r\n',
-                'Value: ',
+      result = ["SHIORI/3.0 200 OK\r\n",
+                "Sender: Niseshiori\r\n",
+                "Charset: UTF-8\r\n",
+                "Value: ",
                 result,
-                '\r\n'].join('')
+                "\r\n"].join("")
       if to != nil
         result = [result,
-                  'Reference0: ',
+                  "Reference0: ",
                   to,
-                  '\r\n'].join('')
+                  "\r\n"].join("")
       end
-      result = [result, '\r\n'].join('')
+      result = [result, "\r\n"].join("")
       return result.encode('utf-8', :invalid => :replace, :undef => :replace)
     end
   end
