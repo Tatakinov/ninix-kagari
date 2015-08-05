@@ -218,8 +218,9 @@ module Niseshiori
           end
           words = split(line).map {|s| s.strip if not s.strip.empty? }
           words.delete(nil)
-          cattype, catlist = match[0], match[1..-1].join('')
-          for cat in split(catlist).map {|s| s.strip }
+          cattype = match.to_a[1]
+          catlist = match.to_a[2..-1]
+          for cat in catlist.map {|s| s.strip }
             if cattype == nil
               keylist = [[nil, cat]]
             else
@@ -391,8 +392,10 @@ module Niseshiori
         elsif pos > 0 and line[pos - 1] == '\\'
           pos += 1
         else
-          buf << line[end_..pos-1]
-          count += 1
+          if pos != 0
+            buf << line[end_..pos-1]
+            count += 1
+          end
         end
         end_ = pos = pos + 1
       end
@@ -457,7 +460,10 @@ module Niseshiori
     end
 
     def getaistringrandom
-      result = get_event_response('OnNSRandomTalk') or get('\e')
+      result = get_event_response('OnNSRandomTalk')
+      if not result or result.empty?
+        result = get('\e')
+      end
       return result
     end
 
@@ -715,7 +721,10 @@ module Niseshiori
         elsif tag.start_with?('\ns_jp[') and tag.end_with?(']')
           name = tag[7..-2]
           @jump_entry = name
-          value = get_event_response('OnNSJumpEntry') or ''
+          value = get_event_response('OnNSJumpEntry')
+          if not value or value.empty?
+            value = ''
+          end
           @jump_entry = nil
         elsif tag.start_with?('\set[') and tag.end_with?(']')
           statement = tag[5..-2]
@@ -776,13 +785,13 @@ module Niseshiori
                 candidates_A, candidates_B = chains[chained_meta]
                 if not candidates_A.empty?
                   word = candidates_A.sample
-                  candidates_A.remove(word)
+                  candidates_A.delete(word)
                 else
                   word = candidates_B.sample
-                  candidates_B.remove(word)
+                  candidates_B.delete(word)
                 end
                 if candidates_A.empty? and candidates_B.empty?
-                  del chains[chained_meta]
+                  chains.delete(chained_meta)
                 end
                 Logging::Logging.debug('chained: ' + meta.to_s + ' => ' + word.to_s)
                 break_flag = true
@@ -838,7 +847,7 @@ module Niseshiori
       if choices.empty?
         match = Re_category.match(key)
         if match
-          key = match.to_s ## FIXME
+          key = match.to_a[1..2]
         end
         choices = @dict[key]
       end
@@ -852,7 +861,7 @@ module Niseshiori
       s = choices.sample
       t = replace_meta(s)
       if key.is_a?(Array)
-        if key[0].empty?
+        if not key[0]
           key = '\\[' + key[1].to_s + ']'
         else
           key = '\\' + key[0].to_s + '[' + key[1].to_s + ']'
