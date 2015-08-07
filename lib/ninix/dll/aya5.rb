@@ -251,6 +251,7 @@ module Aya5
     end
 
     def find(top_dir, dll_name)
+      return 0 ### FIXME
       result = 0
       version = Aya5.check_version(top_dir, dll_name)
       if version == 5
@@ -1586,7 +1587,7 @@ module Aya5
           local_namespace = AyaNamespace.new(@dic.aya, namespace)
           result_of_inner_func = evaluate(local_namespace,
                                           inner_func, -1, 1) ## FIXME
-          if result_of_inner_func and not result_of_inner_func.empty?
+          if result_of_inner_func
             alternatives << result_of_inner_func
           end
         elsif line[0] == TYPE_SUBSTITUTION
@@ -1650,7 +1651,7 @@ module Aya5
               result_of_inner_block = evaluate(local_namespace,
                                                inner_block,
                                                -1, 1) ## FIXME
-              if result_of_inner_block and not result_of_inner_block.empty?
+              if result_of_inner_block
                 alternatives << result_of_inner_block
               end
               break
@@ -1664,7 +1665,7 @@ module Aya5
             local_namespace = AyaNamespace.new(@dic.aya, namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1) ## FIXME
-            if result_of_inner_block and not result_of_inner_block.empty?
+            if result_of_inner_block
               alternatives << result_of_inner_block
             end
             if @status == CODE_RETURN
@@ -1689,7 +1690,7 @@ module Aya5
             local_namespace = AyaNamespace.new(@dic.aya, namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1) ## FIXME
-            if result_of_inner_block and not result_of_inner_block.empty?
+            if result_of_inner_block
               alternatives << result_of_inner_block
             end
             if @status == CODE_RETURN
@@ -1715,7 +1716,7 @@ module Aya5
           local_namespace = AyaNamespace.new(@dic.aya, namespace)
           result_of_inner_block = evaluate(local_namespace,
                                            inner_block, index, 1) ## FIXME
-          if result_of_inner_block and not result_of_inner_block.empty?
+          if result_of_inner_block
             alternatives << result_of_inner_block
           end
         elsif line[0] == TYPE_CASE
@@ -1735,7 +1736,7 @@ module Aya5
               if value_min <= left and left <= value_max
                 result_of_inner_block = evaluate(
                   local_namespace, inner_block, -1, 1) ## FIXME
-                if result_of_inner_block and not result_of_inner_block.empty?
+                if result_of_inner_block
                   alternatives << result_of_inner_block
                   break_flag = true
                   break
@@ -1747,13 +1748,13 @@ module Aya5
             end
           end
           if not break_flag
-            if default_result and not default_result.empty?
+            if default_result
               alternatives << default_result
             end
           end
         elsif line[0] == TYPE_STATEMENT
           result_of_func = evaluate_statement(namespace, line, 0)
-          if result_of_func and not result_of_func.empty?
+          if result_of_func
             alternatives << result_of_func
           end
         elsif line[0] == TYPE_CONDITION
@@ -1883,7 +1884,7 @@ module Aya5
           end
         else ## FIXME
           result_of_eval = evaluate_token(namespace, line)
-          if result_of_eval and not result_of_eval.empty?
+          if result_of_eval
             alternatives << result_of_eval
           end
         end
