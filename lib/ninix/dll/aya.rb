@@ -11,10 +11,12 @@
 #  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 #  PURPOSE.  See the GNU General Public License for more details.
 #
+#
 
 require_relative "../lock"
 require_relative "../home"
 require_relative "../logging"
+
 
 module Aya
 
@@ -323,7 +325,7 @@ module Aya
             @dic.load(dicfile, encrypted)
           end
         rescue
-          Logging::Logging.debug('cannnot read ' + path.to_s)
+          Logging::Logging.debug('cannot read ' + path.to_s)
           next
         end
       end
@@ -992,7 +994,7 @@ module Aya
       end
       return lines
     end
-    
+
     def preprocess(macro, line)
       for key in macro.keys
         value = macro[key]
@@ -1075,7 +1077,7 @@ module Aya
           if name != nil and block_nest > 0
             function << line
           else
-            Logging::Logging.debug('syntax error in ' + file_name + ': ' +  line)
+            Logging::Logging.debug('syntax error in ' + file_name + ': ' + line)
           end
         end
       end
@@ -1455,7 +1457,7 @@ module Aya
           ope = [TYPE_OPERATOR, statement_tokens[ope_index]]
           if statement_tokens[0..ope_index-1].length == 1
             if statement_tokens[0].start_with?('(')
-              tokens = AyaStatement(statement_tokens[0][1..-2]).tokens
+              tokens = AyaStatement.new(statement_tokens[0][1..-2]).tokens
               left = parse_statement(tokens)
             else
               left = parse_token(
@@ -2340,12 +2342,12 @@ module Aya
     def operation(left, ope, right, type_float)
       begin
         if type_float != 0
-          left = left.to_f
-          right = right.to_f
+          left = Float(left)
+          right = Float(right)
         elsif ope != '+' or \
              (not left.is_a?(String) and not right.is_a?(String))
-          left = left.to_i
-          right = right.to_i
+          left = Integer(left)
+          right = Integer(right)
         else
           left = left.to_s
           right = right.to_s
@@ -2676,81 +2678,81 @@ module Aya
       @errno = 0
       @security = AyaSecurity.new(@aya)
       @functions = {
-        'TONUMBER' => ['TONUMBER', [0], [1], nil],
-        'TOSTRING' => ['TOSTRING', [0], [1], nil],
-        'TONUMBER2' => ['TONUMBER2', [nil], [1], nil],
-        'TOSTRING2' => ['TOSTRING2', [nil], [1], nil],
-        'TOUPPER' => ['TOUPPER', [nil], [1], nil],
-        'TOLOWER' => ['TOLOWER', [nil], [1], nil],
-        'TOBINSTR' => ['TOBINSTR', [nil], [1], nil],
-        'TOHEXSTR' => ['TOHEXSTR', [nil], [1], nil],
-        'BINSTRTONUM' => ['BINSTRTONUM', [nil], [1], nil],
-        'HEXSTRTONUM' => ['HEXSTRTONUM', [nil], [1], nil],
-        'ERASEVARIABLE' => ['ERASEVARIABLE', [nil], [1], nil],
-        'STRLEN' => ['STRLEN', [1], [1, 2], nil],
-        'STRSTR' => ['STRSTR', [3], [3, 4], nil],
-        'SUBSTR' => ['SUBSTR', [nil], [3], nil],
-        'REPLACE' => ['REPLACE', [nil], [3], nil],
-        'ERASE' => ['ERASE', [nil], [3], nil],
-        'INSERT' => ['INSERT', [nil], [3], nil],
-        'CUTSPACE' => ['CUTSPACE', [nil], [1], nil],
-        'MSTRLEN' => ['MSTRLEN', [nil], [1], nil],
-        'MSTRSTR' => ['MSTRSTR', [nil], [3], nil],
-        'MSUBSTR' => ['MSUBSTR', [nil], [3], nil],
-        'MERASE' => ['MERASE', [nil], [3], nil],
-        'MINSERT' => ['MINSERT', [nil], [3], nil],
-        'NAMETOVALUE' => ['NAMETOVALUE', [0], [1, 2], nil],
-        'LETTONAME' => ['LETTONAME', [nil], [2], nil],
         'ARRAYSIZE' => ['ARRAYSIZE', [0, 1], [1, 2], nil],
-        'CALLBYNAME' => ['CALLBYNAME', [nil], [1], nil],
-        ##'FUNCTIONEX' => ['FUNCTIONEX', [nil], [nil], nil], # FIXME # Ver.3
-        ##'SAORI' => ['SAORI', [nil], [nil], nil], # FIXME # Ver.3
-        'RAND' => ['RAND', [nil], [0, 1], nil],
         'ASC' => ['ASC', [nil], [1], nil],
-        'IASC' => ['IASC', [nil], [1], nil],
-        'FLOOR' => ['FLOOR', [nil], [1], nil],
+        'BINSTRTONUM' => ['BINSTRTONUM', [nil], [1], nil],
+        'CALLBYNAME' => ['CALLBYNAME', [nil], [1], nil],
         'CEIL' => ['CEIL', [nil], [1], nil],
-        'ROUND' => ['ROUND', [nil], [1], nil],
+        'COS' => ['COS', [nil], [1], nil],
+        'CUTSPACE' => ['CUTSPACE', [nil], [1], nil],
+        'ERASE' => ['ERASE', [nil], [3], nil],
+        'ERASEVARIABLE' => ['ERASEVARIABLE', [nil], [1], nil],
+        'FCLOSE' => ['FCLOSE', [nil], [1], nil],
+        'FCOPY' => ['FCOPY', [nil], [2], 259],
+        'FDELETE' => ['FDELETE', [nil], [1], 269],
+        'FENUM' => ['FENUM', [nil], [1, 2], 290],
+        'FLOOR' => ['FLOOR', [nil], [1], nil],
+        'FMOVE' => ['FMOVE', [nil], [2], 264],
+        'FOPEN' => ['FOPEN', [nil], [2], 256],
+        'FREAD' => ['FREAD', [nil], [1], nil],
+        'FRENAME' => ['FRENAME', [nil], [2], 273],
+        'FSIZE' => ['FSIZE', [nil], [1], 278],
+        ##'FUNCTIONEX' => ['FUNCTIONEX', [nil], [nil], nil], # FIXME # Ver.3
+        'FWRITE' => ['FWRITE', [nil], [2], nil],
+        'FWRITE2' => ['FWRITE2', [nil], [2], nil],
+        'GETLASTERROR' => ['GETLASTERROR', [nil], [nil], nil],
+        'HEXSTRTONUM' => ['HEXSTRTONUM', [nil], [1], nil],
+        'IASC' => ['IASC', [nil], [1], nil],
+        'INSERT' => ['INSERT', [nil], [3], nil],
+        'ISFUNCTION' => ['ISFUNCTION', [nil], [1], nil],
         'ISINSIDE' => ['ISINSIDE', [nil], [3], nil],
         'ISINTEGER' => ['ISINTEGER', [nil], [1], nil],
         'ISREAL' => ['ISREAL', [nil], [1], nil],
-        'ISFUNCTION' => ['ISFUNCTION', [nil], [1], nil],
-        'SIN' => ['SIN', [nil], [1], nil],
-        'COS' => ['COS', [nil], [1], nil],
-        'TAN' => ['TAN', [nil], [1], nil],
+        'LETTONAME' => ['LETTONAME', [nil], [2], nil],
+        'LIB.HEADER' => ['LIB_HEADER', [nil], [1], nil],
+        'LIB.KEY' => ['LIB_HEADER', [nil], [1], nil], # alias
+        'LIB.PROTOCOL' => ['LIB_PROTOCOL', [nil], [0], nil],
+        'LIB.STATUSCODE' => ['LIB_STATUSCODE', [nil], [0], nil],
+        'LIB.VALUE' => ['LIB_VALUE', [nil], [1], nil],
+        'LOADLIB' => ['LOADLIB', [nil], [1], 16],
         'LOG' => ['LOG', [nil], [1], nil],
         'LOG10' => ['LOG10', [nil], [1], nil],
+        'LOGGING' => ['LOGGING', [nil], [4], nil],
+        'MERASE' => ['MERASE', [nil], [3], nil],
+        'MINSERT' => ['MINSERT', [nil], [3], nil],
+        'MKDIR' => ['MKDIR', [nil], [1], 282],
+        'MSTRLEN' => ['MSTRLEN', [nil], [1], nil],
+        'MSTRSTR' => ['MSTRSTR', [nil], [3], nil],
+        'MSUBSTR' => ['MSUBSTR', [nil], [3], nil],
+        'NAMETOVALUE' => ['NAMETOVALUE', [0], [1, 2], nil],
         'POW' => ['POW', [nil], [2], nil],
-        'SQRT' => ['SQRT', [nil], [1], nil],
-        'SETSEPARATOR' => ['SETSEPARATOR', [0], [2], nil],
+        'RAND' => ['RAND', [nil], [0, 1], nil],
+        'REPLACE' => ['REPLACE', [nil], [3], nil],
         'REQ.COMMAND' => ['REQ_COMMAND', [nil], [0], nil],
         'REQ.HEADER' => ['REQ_HEADER', [nil], [1], nil],
         'REQ.KEY' => ['REQ_HEADER', [nil], [1], nil], # alias
-        'REQ.VALUE' => ['REQ_VALUE', [nil], [1], nil],
         'REQ.PROTOCOL' => ['REQ_PROTOCOL', [nil], [0], nil],
-        'LOADLIB' => ['LOADLIB', [nil], [1], 16],
-        'UNLOADLIB' => ['UNLOADLIB', [nil], [1], nil],
+        'REQ.VALUE' => ['REQ_VALUE', [nil], [1], nil],
         'REQUESTLIB' => ['REQUESTLIB', [nil], [2], nil],
-        'LIB.STATUSCODE' => ['LIB_STATUSCODE', [nil], [0], nil],
-        'LIB.HEADER' => ['LIB_HEADER', [nil], [1], nil],
-        'LIB.KEY' => ['LIB_HEADER', [nil], [1], nil], # alias
-        'LIB.VALUE' => ['LIB_VALUE', [nil], [1], nil],
-        'LIB.PROTOCOL' => ['LIB_PROTOCOL', [nil], [0], nil],
-        'FOPEN' => ['FOPEN', [nil], [2], 256],
-        'FCLOSE' => ['FCLOSE', [nil], [1], nil],
-        'FREAD' => ['FREAD', [nil], [1], nil],
-        'FWRITE' => ['FWRITE', [nil], [2], nil],
-        'FWRITE2' => ['FWRITE2', [nil], [2], nil],
-        'FCOPY' => ['FCOPY', [nil], [2], 259],
-        'FMOVE' => ['FMOVE', [nil], [2], 264],
-        'FDELETE' => ['FDELETE', [nil], [1], 269],
-        'FRENAME' => ['FRENAME', [nil], [2], 273],
-        'FSIZE' => ['FSIZE', [nil], [1], 278],
-        'MKDIR' => ['MKDIR', [nil], [1], 282],
         'RMDIR' => ['RMDIR', [nil], [1], 286],
-        'FENUM' => ['FENUM', [nil], [1, 2], 290],
-        'GETLASTERROR' => ['GETLASTERROR', [nil], [nil], nil],
-        'LOGGING' => ['LOGGING', [nil], [4], nil]
+        'ROUND' => ['ROUND', [nil], [1], nil],
+        ##'SAORI' => ['SAORI', [nil], [nil], nil], # FIXME # Ver.3
+        'SETSEPARATOR' => ['SETSEPARATOR', [0], [2], nil],
+        'SIN' => ['SIN', [nil], [1], nil],
+        'SQRT' => ['SQRT', [nil], [1], nil],
+        'STRLEN' => ['STRLEN', [1], [1, 2], nil],
+        'STRSTR' => ['STRSTR', [3], [3, 4], nil],
+        'SUBSTR' => ['SUBSTR', [nil], [3], nil],
+        'TAN' => ['TAN', [nil], [1], nil],
+        'TOBINSTR' => ['TOBINSTR', [nil], [1], nil],
+        'TOHEXSTR' => ['TOHEXSTR', [nil], [1], nil],
+        'TOLOWER' => ['TOLOWER', [nil], [1], nil],
+        'TONUMBER' => ['TONUMBER', [0], [1], nil],
+        'TONUMBER2' => ['TONUMBER2', [nil], [1], nil],
+        'TOSTRING' => ['TOSTRING', [0], [1], nil],
+        'TOSTRING2' => ['TOSTRING2', [nil], [1], nil],
+        'TOUPPER' => ['TOUPPER', [nil], [1], nil],
+        'UNLOADLIB' => ['UNLOADLIB', [nil], [1], nil]
       }
     end
 
@@ -2779,10 +2781,10 @@ module Aya
     def check_num_args(name, argv)
       list_num = @functions[name][2]
       if list_num == [nil]
-        return 1
+        return true
       else
         if list_num.include?(argv.length)
-          return 1
+          return true
         end
         list_num.sort()
         if argv.length < list_num[0]
@@ -2792,268 +2794,10 @@ module Aya
           end
           Logging::Logging.debug(
             [name.to_s, ': called with too few argument(s)'].join(''))
-          return 0
+          return false
         end
-        return 1
+        return true
       end
-    end
-
-    def TONUMBER(namespace, argv)
-      var = argv[0].to_s
-      target_namespace = select_namespace(namespace, var)
-      token = target_namespace.get(var)
-      begin
-        if token.include?('.')
-          result = token.to_f
-        else
-          result = token.to_i
-        end
-      rescue
-        result = 0
-      end
-      target_namespace.put(var, result)
-      return nil
-    end
-
-    def TOSTRING(namespace, argv)
-      name = argv[0].to_s
-      target_namespace = select_namespace(namespace, name)
-      value = target_namespace.get(name).to_s
-      target_namespace.put(name, value)
-    end
-
-    def TONUMBER2(namespace, argv)
-      token = argv[0].to_s
-      begin
-        if token.include?('.')
-          value = token.to_f
-        else
-          value = token.to_i
-        end
-      rescue
-        return 0
-      else
-        return value
-      end
-    end
-
-    def TOSTRING2(namespace, argv)
-      return argv[0].to_s
-    end
-
-    def TOUPPER(namespace, argv)
-      return argv[0].to_s.upcase
-    end
-
-    def TOLOWER(namespace, argv)
-      return argv[0].to_s.downcase
-    end
-
-    def TOBINSTR(namespace, argv)
-      begin
-        i = argv[0].to_i
-      rescue
-        return ''
-      end
-      if i < 0
-        i = abs(i)
-        numsin = '-'
-      else
-        numsin = ''
-      end
-      line = ''
-      while i != 0
-        mod = i % 2
-        i = (i / 2).to_i
-        line = [mod.to_s, line].join('')
-      end
-      line = [numsin, line].join('')
-      return line
-    end
-
-    def TOHEXSTR(namespace, argv)
-      begin
-        return argv[0].to_i.to_s(16)
-      rescue
-        return ''
-      end
-    end
-
-    def BINSTRTONUM(namespace, argv)
-      begin
-        return argv[0].to_s.to_i(2)
-      rescue
-        return -1
-      end
-    end
-
-    def HEXSTRTONUM(namespace, argv)
-      begin
-        return argv[0].to_s.to_i(16)
-      rescue
-        return -1
-      end
-    end
-
-    def ERASEVARIABLE(namespace, argv)
-      var = argv[0].to_s
-      target_namespace = select_namespace(namespace, var)
-      target_namespace.remove(var)
-    end
-
-    def STRLEN(namespace, argv)
-      line = argv[0].to_s.encode('CP932', 'replace') # XXX
-      if argv.length == 2
-        var = argv[1].to_s
-        target_namespace = select_namespace(namespace, var)
-        target_namespace.put(var, line.length)
-        return nil
-      else
-        return line.length
-      end
-    end
-
-    def STRSTR(namespace, argv)
-      line = argv[0].to_s.encode('CP932', 'replace') # XXX
-      to_find = argv[1].to_s.encode('CP932', 'replace') # XXX
-      begin
-        start = argv[2].to_i
-      rescue
-        return -1
-      end
-      result = line.index(to_find, start)
-      if argv.length == 4
-        var = argv[3].to_s
-        target_namespace = select_namespace(namespace, var)
-        target_namespace.put(var, result)
-        return nil
-      else
-        return result
-      end
-    end
-
-    def SUBSTR(namespace, argv)
-      line = argv[0].to_s.encode('CP932', :invalid => :replace, :undef => :replace) # XXX
-      begin
-        start = argv[1].to_i
-        bytes = argv[2].to_i
-      rescue
-        return ''
-      end
-      return line[start..start + bytes-1].encode("UTF-8", :invalid => :replace, :undef => :replace) # XXX
-    end
-
-    def REPLACE(namespace, argv)
-      line = argv[0].to_s
-      old = argv[1].to_s
-      new = argv[2].to_s
-      return line.gsub(old, new)
-    end
-
-    def ERASE(namespace, argv)
-      line = argv[0].to_s.encode('CP932', :invalid => :replace, :undef => :replace) # XXX
-      begin
-        start = argv[1].to_i
-        bytes = argv[2].to_i
-      rescue
-        return ''
-      end
-      return [line[0..start-1], line[start + bytes..-1]].join('').encode("UTF-8", :invalid => :replace, :undef => :replace) # XXX
-    end
-
-    def INSERT(namespace, argv)
-      line = argv[0].to_s.encode('CP932', 'replace') # XXX
-      begin
-        start = argv[1].to_i
-      rescue
-        return ''
-      end
-      to_insert = argv[2].to_s.encode('CP932', 'replace') # XXX
-      if start < 0
-        start = 0
-      end
-      return [line[0..start-1], to_insert, line[start..-1]].join('').encode("UTF-8", :invalid => :replace, :undef => :replace) # XXX
-    end
-
-    def MSTRLEN(namespace, argv)
-      return argv[0].to_s.length
-    end
-
-    def MSTRSTR(namespace, argv)
-      line = argv[0].to_s
-      to_find = argv[1].to_s
-      begin
-        start = argv[2].to_i
-      rescue
-        return -1
-      end
-      return line.rfind(to_find, start)
-    end
-
-    def MSUBSTR(namespace, argv)
-      line = argv[0].to_s
-      begin
-        start = argv[1].to_i
-        end_ = argv[2].to_i
-      rescue
-        return ''
-      end
-      return line[start..end_-1]
-    end
-
-    def MERASE(namespace, argv)
-      line = argv[0].to_s
-      begin
-        start = argv[1].to_i
-        end_ = argv[2].to_i
-      rescue
-        return ''
-      end
-      return [line[0..start-1], line[end_..-1]].join('')
-    end
-
-    def MINSERT(namespace, argv)
-      line = argv[0].to_s
-      begin
-        start = argv[1].to_i
-      rescue
-        return ''
-      end
-      to_insert = argv[2].to_s
-      return [line[0..start-1], to_insert, line[start..-1]].join('')
-    end
-
-    def CUTSPACE(namespace, argv)
-      return argv[0].to_s.strip()
-    end
-
-    def NAMETOVALUE(namespace, argv)
-      if argv.length == 2
-        var = argv[0].to_s
-        name = argv[1].to_s
-      else
-        name = argv[0].to_s
-      end
-      target_namespace = select_namespace(namespace, name)
-      value = target_namespace.get(name)
-      if argv.length == 2
-        target_namespace = select_namespace(namespace, var)
-        target_namespace.put(var, value)
-        return nil
-      else
-        return value
-      end
-    end
-
-    def LETTONAME(namespace, argv)
-      var = argv[0].to_s
-      value = argv[1]
-      if not var
-        return nil
-      end
-      target_namespace = select_namespace(namespace, var)
-      target_namespace.put(var, value)
-      return nil
     end
 
     def ARRAYSIZE(namespace, argv)
@@ -3080,55 +2824,6 @@ module Aya
       end
     end
 
-    def CALLBYNAME(namespace, argv) # dummy
-      return nil
-    end
-
-    def FUNCTIONEX(namespace, argv) # FIXME # Ver.3
-      return nil
-    end
-
-    def SAORI(namespace, argv) # FIXME # Ver.3
-      return nil
-    end
-
-    def GETLASTERROR(namespace, argv)
-      return @errno
-    end
-
-    def LOGGING(namespace, argv)
-      if argv[0] == nil
-        return nil
-      end
-      logfile = argv[0]
-      line = ['> function ', argv[1].to_s, ' ： ', argv[2].to_s].join('')
-      if argv[3] != nil
-        line = [line, ' = '].join('')
-        if argv[3].is_a?(Fixnum) or argv[3].is_a?(Float)
-          line = [line, argv[3].to_s].join('')
-        else
-          line = [line, '"', argv[3].to_s, '"'].join('')
-        end
-      end
-      line = [line, "\n"].join('')
-      logfile.write(line)
-      logfile.write("\n")
-      return nil
-    end
-
-    def RAND(namespace, argv)
-      if not argv
-        return Random.rand(0..99)
-      else
-        begin
-          argv[0].to_i
-        rescue
-          return -1
-        end
-        return Random.rand(0..argv[0].to_i-1)
-      end
-    end
-
     def ASC(namespace, argv)
       begin
         argv[0].to_i
@@ -3143,24 +2838,16 @@ module Aya
       end
     end
 
-    def IASC(namespace, argv)
-      if not argv[0].is_a?(String)
-        return -1
-      end
+    def BINSTRTONUM(namespace, argv)
       begin
-        code = ord(argv[0][0])
+        return argv[0].to_s.to_i(2)
       rescue
         return -1
       end
-      return code
     end
 
-    def FLOOR(namespace, argv)
-      begin
-        return math.floor(argv[0].to_f).to_i
-      rescue
-        return -1
-      end
+    def CALLBYNAME(namespace, argv) # dummy
+      return nil
     end
 
     def CEIL(namespace, argv)
@@ -3171,60 +2858,6 @@ module Aya
       end
     end
 
-    def ROUND(namespace, argv)
-      begin
-        value = math.floor(argv[0].to_f + 0.5)
-      rescue
-        return -1
-      end
-      return value.to_i
-    end
-
-    def ISINSIDE(namespace, argv)
-      if argv[1] <= argv[0] and argv[0] <= argv[2]
-        return 1
-      else
-        return 0
-      end
-    end
-
-    def ISINTEGER(namespace, argv)
-      if argv[0].is_a?(Fixnum)
-        return 1
-      else
-        return 0
-      end
-    end
-
-    def ISREAL(namespace, argv)
-      if argv[0].is_a?(Fixnum) or argv[0].is_a?(Float)
-        return 1
-      else
-        return 0
-      end
-    end
-
-    def ISFUNCTION(namespace, argv)
-      if not argv[0].is_a?(String)
-        return 0
-      elsif @aya.dic.get_function(argv[0]) != nil
-        return 1
-      elsif @aya.get_system_functions().exists(argv[0])
-        return 2
-      else
-        return 0
-      end
-    end
-
-    def SIN(namespace, argv)
-      begin
-        result = math.sin(argv[0].to_f)
-      rescue
-        return -1
-      end
-      return select_math_type(result)
-    end
- 
     def COS(namespace, argv)
       begin
         result = math.cos(argv[0].to_f)
@@ -3234,222 +2867,25 @@ module Aya
       return select_math_type(result)
     end
 
-    def TAN(namespace, argv)
+    def CUTSPACE(namespace, argv)
+      return argv[0].to_s.strip()
+    end
+
+    def ERASE(namespace, argv)
+      line = argv[0].to_s.encode('CP932', :invalid => :replace, :undef => :replace) # XXX
       begin
-        result = math.tan(argv[0].to_f)
-      rescue
-        return -1
-      end
-      return select_math_type(result)
-    end
-
-    def LOG(namespace, argv)
-      begin
-        argv[0].to_f
-      rescue
-        return -1
-      end
-      if argv[0].to_f == 0
-        return 0
-      end
-      result = math.log(argv[0].to_f)
-      return select_math_type(result)
-    end
-
-    def LOG10(namespace, argv)
-      begin
-        argv[0].to_f
-      rescue
-        return -1
-      end
-      if argv[0].to_f == 0
-        return 0
-      end
-      result = math.log10(argv[0].to_f)
-      return select_math_type(result)
-    end
-
-    def POW(namespace, argv)
-      begin
-        result = math.pow(argv[0].to_f, argv[1].to_f)
-      rescue
-        return -1
-      end
-      return select_math_type(result)
-    end
-
-    def SQRT(namespace, argv)
-      begin
-        argv[0].to_f
-      rescue
-        return -1
-      end
-      if argv[0].to_f < 0.0
-        return -1
-      else
-        result = math.sqrt(argv[0].to_f)
-        return select_math_type(result)
-      end
-    end
-
-    def SETSEPARATOR(namespace, argv)
-      name = argv[0].to_s
-      separator = argv[1].to_s
-      target_namespace = select_namespace(namespace, name)
-      target_namespace.set_separator(name, separator)
-      return nil
-    end
-
-    def REQ_COMMAND(namespace, argv)
-      return @aya.req_command
-    end
-
-    def REQ_HEADER(namespace, argv)
-      begin
-        argv[0].to_i
+        start = argv[1].to_i
+        bytes = argv[2].to_i
       rescue
         return ''
       end
-      if @aya.req_key.length > argv[0].to_i
-        return @aya.req_key[argv[0].to_i]
-      else
-        return ''
-      end
+      return [line[0..start-1], line[start + bytes..-1]].join('').encode("UTF-8", :invalid => :replace, :undef => :replace) # XXX
     end
 
-    def REQ_VALUE(namespace, argv)
-      if argv[0].is_a?(Fixnum)
-        name = REQ_HEADER(namespace, [argv[0]])
-      else
-        name = argv[0].to_s
-      end
-      if @aya.req_header.include?(name)
-        return @aya.req_header[name]
-      else
-        return ''
-      end
-    end
-
-    def REQ_PROTOCOL(namespace, argv)
-      return @aya.req_protocol
-    end
-
-    def LOADLIB(namespace, argv)
-      dll = argv[0].to_s
-      result = 0
-      if not dll.empty?
-        if @security.check_lib(dll)
-          result = @aya.saori_library.load(dll, @aya.aya_dir)
-          if result == 0
-            @errno = 17
-          end
-        else
-          @errno = 18
-        end
-      end
-      return result
-    end
-
-    def UNLOADLIB(namespace, argv)
-      if argv[0].to_s
-        @aya.saori_library.unload(argv[0].to_s)
-      end
-      return nil
-    end
-
-    def REQUESTLIB(namespace, argv)
-      response = @aya.saori_library.request(
-        argv[0].to_s,
-        argv[1].to_s.encode('Shift_JIS', :invalid => :replace, :undef => :replace)) ## FIXME
-      header = response.encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/)
-      @saori_statuscode = ''
-      @saori_header = []
-      @saori_value = {}
-      @saori_protocol = ''
-      if header and not header.empty?
-        line = header.shift
-        line = line.strip()
-        if line.include?(' ')
-          @saori_protocol, @saori_statuscode = line.split(' ', 2)
-          @saori_protocol.strip!
-          @saori_statuscode.strip!
-        end
-        for line in header
-          if not line.include?(':')
-            next
-          end
-          key, value = line.split(':', 2)
-          key.strip!
-          value.strip!
-          if key
-            @saori_header << key
-            @saori_value[key] = value
-          end
-        end
-      end
-      return nil
-    end
-
-    def LIB_STATUSCODE(namespace, argv)
-      return @saori_statuscode
-    end
-
-    def LIB_HEADER(namespace, argv)
-      begin
-        argv[0].to_i
-      rescue
-        return ''
-      end
-      result = ''
-      header_list = @saori_header
-      if header_list and argv[0].to_i < header_list.length
-        result = header_list[argv[0].to_i]
-      end
-      return result
-    end
-
-    def LIB_VALUE(namespace, argv)
-      result = ''
-      if argv[0].is_a?(Fixnum)
-        header_list = @saori_header
-        if header_list and argv[0].to_i < header_list.length
-          key = header_list[argv[0].to_i]
-        end
-      else
-        key = argv[0].to_s
-      end
-      if @saori_value.include?(key)
-        result = @saori_value[key]
-      end
-      return result
-    end
-
-    def LIB_PROTOCOL(namespace, argv)
-      return @aya.saori_protocol
-    end
-
-    def FOPEN(namespace, argv)
-      filename = Home.get_normalized_path(argv[0].to_s)
-      accessmode = argv[1].to_s
-      result = 0
-      path = File.join(@aya.aya_dir, filename)
-      if @security.check_path(path, accessmode[0])
-        norm_path = File.expand_path(path)
-        if @aya.filelist.include?(norm_path)
-          result = 2
-        else
-          begin
-            @aya.filelist[norm_path] = open(path, accessmode[0], encoding='Shift_JIS')
-          rescue
-            @errno = 257
-          else
-            result = 1
-          end
-        end
-      else
-        @errno = 258
-      end
-      return result
+    def ERASEVARIABLE(namespace, argv)
+      var = argv[0].to_s
+      target_namespace = select_namespace(namespace, var)
+      target_namespace.remove(var)
     end
 
     def FCLOSE(namespace, argv)
@@ -3459,49 +2895,6 @@ module Aya
       if @aya.filelist.include?(norm_path)
         @aya.filelist[norm_path].close()
         @aya.filelist.delete(norm_path)
-      end
-      return nil
-    end
-
-    def FREAD(namespace, argv)
-      filename = Home.get_normalized_path(argv[0].to_s)
-      path = File.join(@aya.aya_dir, filename)
-      norm_path = File.expand_path(path)
-      result = -1
-      if @aya.filelist.include?(norm_path)
-        f = @aya.filelist[norm_path]
-        result = f.readline()
-        if not result
-          result = -1
-        elsif result.end_with?("\r\n")
-          result = result[0..-3]
-        elsif result.end_with?("\n")
-          result = result[0..-2]
-        end
-      end
-      return result
-    end
-
-    def FWRITE(namespace, argv)
-      filename = Home.get_normalized_path(argv[0].to_s)
-      path = File.join(@aya.aya_dir, filename)
-      norm_path = File.expand_path(path)
-      data = [argv[1].to_s, "\n"].join('')
-      if @aya.filelist.include?(norm_path)
-        f = @aya.filelist[norm_path]
-        f.write(data)
-      end
-      return nil
-    end
-
-    def FWRITE2(namespace, argv)
-      filename = Home.get_normalized_path(argv[0].to_s)
-      path = File.join(@aya.aya_dir, filename)
-      norm_path = File.expand_path(path)
-      data = argv[1].to_s
-      if @aya.filelist.include?(norm_path)
-        f = @aya.filelist[norm_path]
-        f.write(data)
       end
       return nil
     end
@@ -3532,6 +2925,66 @@ module Aya
       return result
     end
 
+    def FDELETE(namespace, argv)
+      filename = Home.get_normalized_path(argv[0].to_s)
+      path = File.join(@aya.aya_dir, filename)
+      result = 0
+      if not File.file?(path)
+        @errno = 270
+      elsif @security.check_path(path)
+        begin
+          File.delete(path)
+        rescue
+          @errno = 271
+        else
+          result = 1
+        end
+      else
+        @errno = 272
+      end
+      return result
+    end
+
+    def FENUM(namespace, argv)
+      if argv.length >= 2
+        separator = argv[1].to_s
+      else
+        separator = ','
+      end
+      dirname = Home.get_normalized_path(argv[0].to_s)
+      path = File.join(@aya.aya_dir, dirname)
+      filelist = []
+      if @security.check_path(path, 'r')
+        begin
+          filelist = Dir.entries(path).reject{|entry| entry =~ /^\.{1,2}$/}
+        rescue
+          @errno = 291
+        end
+      else
+        @errno = 292
+      end
+      result = ''
+      for index in 0..filelist.length-1
+        path = File.join(@aya.aya_dir, dirname, filelist[index])
+        if File.directory?(path)
+          result = [result, "\\"].join('')
+        end
+        result = [result, filelist[index]].join('')
+        if index != filelist.length - 1
+          result = [result, separator].join('')
+        end
+      end
+      return result
+    end
+
+    def FLOOR(namespace, argv)
+      begin
+        return math.floor(argv[0].to_f).to_i
+      rescue
+        return -1
+      end
+    end
+
     def FMOVE(namespace, argv)
       src = Home.get_normalized_path(argv[0].to_s)
       head, tail = File.split(src)
@@ -3559,22 +3012,45 @@ module Aya
       return result
     end
 
-    def FDELETE(namespace, argv)
+    def FOPEN(namespace, argv)
       filename = Home.get_normalized_path(argv[0].to_s)
-      path = File.join(@aya.aya_dir, filename)
+      accessmode = argv[1].to_s
       result = 0
-      if not File.file?(path)
-        @errno = 270
-      elsif @security.check_path(path)
-        begin
-          File.delete(path)
-        rescue
-          @errno = 271
+      path = File.join(@aya.aya_dir, filename)
+      if @security.check_path(path, accessmode[0])
+        norm_path = File.expand_path(path)
+        if @aya.filelist.include?(norm_path)
+          result = 2
         else
-          result = 1
+          begin
+            @aya.filelist[norm_path] = open(path, accessmode[0], encoding='Shift_JIS')
+          rescue
+            @errno = 257
+          else
+            result = 1
+          end
         end
       else
-        @errno = 272
+        @errno = 258
+      end
+      return result
+    end
+
+    def FREAD(namespace, argv)
+      filename = Home.get_normalized_path(argv[0].to_s)
+      path = File.join(@aya.aya_dir, filename)
+      norm_path = File.expand_path(path)
+      result = -1
+      if @aya.filelist.include?(norm_path)
+        f = @aya.filelist[norm_path]
+        result = f.readline()
+        if not result
+          result = -1
+        elsif result.end_with?("\r\n")
+          result = result[0..-3]
+        elsif result.end_with?("\n")
+          result = result[0..-2]
+        end
       end
       return result
     end
@@ -3622,6 +3098,241 @@ module Aya
       return size
     end
 
+    def FUNCTIONEX(namespace, argv) # FIXME # Ver.3
+      return nil
+    end
+
+    def FWRITE(namespace, argv)
+      filename = Home.get_normalized_path(argv[0].to_s)
+      path = File.join(@aya.aya_dir, filename)
+      norm_path = File.expand_path(path)
+      data = [argv[1].to_s, "\n"].join('')
+      if @aya.filelist.include?(norm_path)
+        f = @aya.filelist[norm_path]
+        f.write(data)
+      end
+      return nil
+    end
+
+    def FWRITE2(namespace, argv)
+      filename = Home.get_normalized_path(argv[0].to_s)
+      path = File.join(@aya.aya_dir, filename)
+      norm_path = File.expand_path(path)
+      data = argv[1].to_s
+      if @aya.filelist.include?(norm_path)
+        f = @aya.filelist[norm_path]
+        f.write(data)
+      end
+      return nil
+    end
+
+    def GETLASTERROR(namespace, argv)
+      return @errno
+    end
+
+    def HEXSTRTONUM(namespace, argv)
+      begin
+        return argv[0].to_s.to_i(16)
+      rescue
+        return -1
+      end
+    end
+
+    def IASC(namespace, argv)
+      if not argv[0].is_a?(String)
+        return -1
+      end
+      begin
+        code = ord(argv[0][0])
+      rescue
+        return -1
+      end
+      return code
+    end
+
+    def INSERT(namespace, argv)
+      line = argv[0].to_s.encode('CP932', 'replace') # XXX
+      begin
+        start = argv[1].to_i
+      rescue
+        return ''
+      end
+      to_insert = argv[2].to_s.encode('CP932', 'replace') # XXX
+      if start < 0
+        start = 0
+      end
+      return [line[0..start-1], to_insert, line[start..-1]].join('').encode("UTF-8", :invalid => :replace, :undef => :replace) # XXX
+    end
+
+    def ISFUNCTION(namespace, argv)
+      if not argv[0].is_a?(String)
+        return 0
+      elsif @aya.dic.get_function(argv[0]) != nil
+        return 1
+      elsif @aya.get_system_functions().exists(argv[0])
+        return 2
+      else
+        return 0
+      end
+    end
+
+    def ISINSIDE(namespace, argv)
+      if argv[1] <= argv[0] and argv[0] <= argv[2]
+        return 1
+      else
+        return 0
+      end
+    end
+
+    def ISINTEGER(namespace, argv)
+      if argv[0].is_a?(Fixnum)
+        return 1
+      else
+        return 0
+      end
+    end
+
+    def ISREAL(namespace, argv)
+      if argv[0].is_a?(Fixnum) or argv[0].is_a?(Float)
+        return 1
+      else
+        return 0
+      end
+    end
+
+    def LETTONAME(namespace, argv)
+      var = argv[0].to_s
+      value = argv[1]
+      if not var
+        return nil
+      end
+      target_namespace = select_namespace(namespace, var)
+      target_namespace.put(var, value)
+      return nil
+    end
+
+    def LIB_HEADER(namespace, argv)
+      begin
+        argv[0].to_i
+      rescue
+        return ''
+      end
+      result = ''
+      header_list = @saori_header
+      if header_list and argv[0].to_i < header_list.length
+        result = header_list[argv[0].to_i]
+      end
+      return result
+    end
+
+    def LIB_PROTOCOL(namespace, argv)
+      return @aya.saori_protocol
+    end
+
+    def LIB_STATUSCODE(namespace, argv)
+      return @saori_statuscode
+    end
+
+    def LIB_VALUE(namespace, argv)
+      result = ''
+      if argv[0].is_a?(Fixnum)
+        header_list = @saori_header
+        if header_list and argv[0].to_i < header_list.length
+          key = header_list[argv[0].to_i]
+        end
+      else
+        key = argv[0].to_s
+      end
+      if @saori_value.include?(key)
+        result = @saori_value[key]
+      end
+      return result
+    end
+
+    def LOADLIB(namespace, argv)
+      dll = argv[0].to_s
+      result = 0
+      if not dll.empty?
+        if @security.check_lib(dll)
+          result = @aya.saori_library.load(dll, @aya.aya_dir)
+          if result == 0
+            @errno = 17
+          end
+        else
+          @errno = 18
+        end
+      end
+      return result
+    end
+
+    def LOG(namespace, argv)
+      begin
+        argv[0].to_f
+      rescue
+        return -1
+      end
+      if argv[0].to_f == 0
+        return 0
+      end
+      result = math.log(argv[0].to_f)
+      return select_math_type(result)
+    end
+
+    def LOG10(namespace, argv)
+      begin
+        argv[0].to_f
+      rescue
+        return -1
+      end
+      if argv[0].to_f == 0
+        return 0
+      end
+      result = math.log10(argv[0].to_f)
+      return select_math_type(result)
+    end
+
+    def LOGGING(namespace, argv)
+      if argv[0] == nil
+        return nil
+      end
+      logfile = argv[0]
+      line = ['> function ', argv[1].to_s, ' ： ', argv[2].to_s].join('')
+      if argv[3] != nil
+        line = [line, ' = '].join('')
+        if argv[3].is_a?(Fixnum) or argv[3].is_a?(Float)
+          line = [line, argv[3].to_s].join('')
+        else
+          line = [line, '"', argv[3].to_s, '"'].join('')
+        end
+      end
+      line = [line, "\n"].join('')
+      logfile.write(line)
+      logfile.write("\n")
+      return nil
+    end
+
+    def MERASE(namespace, argv)
+      line = argv[0].to_s
+      begin
+        start = argv[1].to_i
+        end_ = argv[2].to_i
+      rescue
+        return ''
+      end
+      return [line[0..start-1], line[end_..-1]].join('')
+    end
+
+    def MINSERT(namespace, argv)
+      line = argv[0].to_s
+      begin
+        start = argv[1].to_i
+      rescue
+        return ''
+      end
+      to_insert = argv[2].to_s
+      return [line[0..start-1], to_insert, line[start..-1]].join('')
+    end
+
     def MKDIR(namespace, argv)
       dirname = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, dirname)
@@ -3641,6 +3352,146 @@ module Aya
       @errno = 285
       end
       return result
+    end
+
+    def MSTRLEN(namespace, argv)
+      return argv[0].to_s.length
+    end
+
+    def MSTRSTR(namespace, argv)
+      line = argv[0].to_s
+      to_find = argv[1].to_s
+      begin
+        start = argv[2].to_i
+      rescue
+        return -1
+      end
+      return line.rfind(to_find, start)
+    end
+
+    def MSUBSTR(namespace, argv)
+      line = argv[0].to_s
+      begin
+        start = argv[1].to_i
+        end_ = argv[2].to_i
+      rescue
+        return ''
+      end
+      return line[start..end_-1]
+    end
+
+    def NAMETOVALUE(namespace, argv)
+      if argv.length == 2
+        var = argv[0].to_s
+        name = argv[1].to_s
+      else
+        name = argv[0].to_s
+      end
+      target_namespace = select_namespace(namespace, name)
+      value = target_namespace.get(name)
+      if argv.length == 2
+        target_namespace = select_namespace(namespace, var)
+        target_namespace.put(var, value)
+        return nil
+      else
+        return value
+      end
+    end
+
+    def POW(namespace, argv)
+      begin
+        result = math.pow(argv[0].to_f, argv[1].to_f)
+      rescue
+        return -1
+      end
+      return select_math_type(result)
+    end
+
+    def RAND(namespace, argv)
+      if not argv
+        return Random.rand(0..99)
+      else
+        begin
+          Integer(argv[0])
+        rescue
+          return -1
+        end
+        return Random.rand(0..argv[0].to_i-1)
+      end
+    end
+
+    def REPLACE(namespace, argv)
+      line = argv[0].to_s
+      old = argv[1].to_s
+      new = argv[2].to_s
+      return line.gsub(old, new)
+    end
+
+    def REQ_COMMAND(namespace, argv)
+      return @aya.req_command
+    end
+
+    def REQ_HEADER(namespace, argv)
+      begin
+        argv[0].to_i
+      rescue
+        return ''
+      end
+      if @aya.req_key.length > argv[0].to_i
+        return @aya.req_key[argv[0].to_i]
+      else
+        return ''
+      end
+    end
+
+    def REQ_PROTOCOL(namespace, argv)
+      return @aya.req_protocol
+    end
+
+    def REQ_VALUE(namespace, argv)
+      if argv[0].is_a?(Fixnum)
+        name = REQ_HEADER(namespace, [argv[0]])
+      else
+        name = argv[0].to_s
+      end
+      if @aya.req_header.include?(name)
+        return @aya.req_header[name]
+      else
+        return ''
+      end
+    end
+
+    def REQUESTLIB(namespace, argv)
+      response = @aya.saori_library.request(
+        argv[0].to_s,
+        argv[1].to_s.encode('Shift_JIS', :invalid => :replace, :undef => :replace)) ## FIXME
+      header = response.encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/)
+      @saori_statuscode = ''
+      @saori_header = []
+      @saori_value = {}
+      @saori_protocol = ''
+      if header and not header.empty?
+        line = header.shift
+        line = line.strip()
+        if line.include?(' ')
+          @saori_protocol, @saori_statuscode = line.split(' ', 2)
+          @saori_protocol.strip!
+          @saori_statuscode.strip!
+        end
+        for line in header
+          if not line.include?(':')
+            next
+          end
+          key, value = line.split(':', 2)
+          key.strip!
+          value.strip!
+          if key
+            @saori_header << key
+            @saori_value[key] = value
+          end
+        end
+      end
+      return nil
     end
 
     def RMDIR(namespace, argv)
@@ -3663,36 +3514,187 @@ module Aya
       return result
     end
 
-    def FENUM(namespace, argv)
-      if argv.length >= 2
-        separator = argv[1].to_s
+    def ROUND(namespace, argv)
+      begin
+        value = math.floor(Float(argv[0]) + 0.5)
+      rescue
+        return -1
+      end
+      return value.to_i
+    end
+
+    def SAORI(namespace, argv) # FIXME # Ver.3
+      return nil
+    end
+
+    def SETSEPARATOR(namespace, argv)
+      name = argv[0].to_s
+      separator = argv[1].to_s
+      target_namespace = select_namespace(namespace, name)
+      target_namespace.set_separator(name, separator)
+      return nil
+    end
+
+    def SIN(namespace, argv)
+      begin
+        result = math.sin(Float(argv[0]))
+      rescue
+        return -1
+      end
+      return select_math_type(result)
+    end
+ 
+    def SQRT(namespace, argv)
+      begin
+        arg = Float(argv[0])
+      rescue
+        return -1
+      end
+      if arg < 0.0
+        return -1
       else
-        separator = ','
+        result = math.sqrt(arg)
+        return select_math_type(result)
       end
-      dirname = Home.get_normalized_path(argv[0].to_s)
-      path = File.join(@aya.aya_dir, dirname)
-      filelist = []
-      if @security.check_path(path, 'r')
-        begin
-          filelist = Dir.entries(path).reject{|entry| entry =~ /^\.{1,2}$/}
-        rescue
-          @errno = 291
-        end
+    end
+
+    def STRLEN(namespace, argv)
+      line = argv[0].to_s.encode('CP932', 'replace') # XXX
+      if argv.length == 2
+        var = argv[1].to_s
+        target_namespace = select_namespace(namespace, var)
+        target_namespace.put(var, line.length)
+        return nil
       else
-        @errno = 292
+        return line.length
       end
-      result = ''
-      for index in 0..filelist.length-1
-        path = File.join(@aya.aya_dir, dirname, filelist[index])
-        if File.directory?(path)
-          result = [result, "\\"].join('')
-        end
-        result = [result, filelist[index]].join('')
-        if index != filelist.length - 1
-          result = [result, separator].join('')
-        end
+    end
+
+    def STRSTR(namespace, argv)
+      line = argv[0].to_s.encode('CP932', 'replace') # XXX
+      to_find = argv[1].to_s.encode('CP932', 'replace') # XXX
+      begin
+        start = Integer(argv[2])
+      rescue
+        return -1
       end
-      return result
+      result = line.index(to_find, start)
+      if argv.length == 4
+        var = argv[3].to_s
+        target_namespace = select_namespace(namespace, var)
+        target_namespace.put(var, result)
+        return nil
+      else
+        return result
+      end
+    end
+
+    def SUBSTR(namespace, argv)
+      line = argv[0].to_s.encode('CP932', :invalid => :replace, :undef => :replace) # XXX
+      begin
+        start = Integer(argv[1])
+        num = Integer(argv[2])
+      rescue
+        return ''
+      end
+      return line[start..start + num-1].encode("UTF-8", :invalid => :replace, :undef => :replace) # XXX
+    end
+
+    def TAN(namespace, argv)
+      begin
+        result = math.tan(Float(argv[0]))
+      rescue
+        return -1
+      end
+      return select_math_type(result)
+    end
+
+    def TOBINSTR(namespace, argv)
+      begin
+        i = Integer(argv[0])
+      rescue
+        return ''
+      end
+      if i < 0
+        i = abs(i)
+        numsin = '-'
+      else
+        numsin = ''
+      end
+      line = ''
+      while i != 0
+        mod = i % 2
+        i = (i / 2).to_i
+        line = [mod.to_s, line].join('')
+      end
+      line = [numsin, line].join('')
+      return line
+    end
+
+    def TOHEXSTR(namespace, argv)
+      begin
+        return argv[0].to_i.to_s(16)
+      rescue
+        return ''
+      end
+    end
+
+    def TOLOWER(namespace, argv)
+      return argv[0].to_s.downcase
+    end
+
+    def TONUMBER(namespace, argv)
+      var = argv[0].to_s
+      target_namespace = select_namespace(namespace, var)
+      token = target_namespace.get(var)
+      begin
+        if token.include?('.')
+          result = token.to_f
+        else
+          result = token.to_i
+        end
+      rescue
+        result = 0
+      end
+      target_namespace.put(var, result)
+      return nil
+    end
+
+    def TONUMBER2(namespace, argv)
+      token = argv[0].to_s
+      begin
+        if token.include?('.')
+          value = token.to_f
+        else
+          value = token.to_i
+        end
+      rescue
+        return 0
+      else
+        return value
+      end
+    end
+
+    def TOSTRING(namespace, argv)
+      name = argv[0].to_s
+      target_namespace = select_namespace(namespace, name)
+      value = target_namespace.get(name).to_s
+      target_namespace.put(name, value)
+    end
+
+    def TOSTRING2(namespace, argv)
+      return argv[0].to_s
+    end
+
+    def TOUPPER(namespace, argv)
+      return argv[0].to_s.upcase
+    end
+
+    def UNLOADLIB(namespace, argv)
+      if not argv[0].to_s.empty?
+        @aya.saori_library.unload(argv[0].to_s)
+      end
+      return nil
     end
 
     def select_math_type(value)
