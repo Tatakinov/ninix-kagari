@@ -1085,8 +1085,13 @@ module Balloon
         end
         x, y, w, h = @line_regions[line]
         if @text_buffer[i].end_with?('\n[half]')
-          new_y = (y + (@font_height + @line_space) / 2).to_i
-          markup = set_markup(i, @text_buffer[i][0, @text_buffer.length - 7])
+          temp = @text_buffer[i]
+          new_y = y
+          while temp.end_with?('\n[half]')
+            new_y += ((@font_height + @line_space) / 2).to_i
+            temp = temp[0..-9]
+          end
+          markup = set_markup(i, temp)
         else
           new_y = (y + @font_height + @line_space).to_i
           markup = set_markup(i, @text_buffer[i])
