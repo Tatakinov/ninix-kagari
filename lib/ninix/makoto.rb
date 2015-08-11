@@ -68,7 +68,7 @@ module Makoto
       end
     end
     if validity == 2
-      expanded = segments[1,segments.length].sample
+      expanded = segments[1..segments.length-1].sample
       if repeat_count
         expanded = expanded * rand(repeat_count)
       end
@@ -76,7 +76,7 @@ module Makoto
     elsif validity == 0
       return j, buf.join
     else
-      return j, s[start, s.length]
+      return j, s[start..s.length-1]
     end
   end
 
