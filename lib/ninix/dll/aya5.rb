@@ -231,7 +231,7 @@ module Aya5
 
 
   class Shiori
-    attr_reader :charset
+    attr_reader :charset, :dbpath, :dic
 
     def initialize(dll_name)
       @dll_name = dll_name
@@ -982,7 +982,7 @@ module Aya5
       len_tokens = tokens.length
       new_pos = len_tokens
       if reverse != 0
-        tokens.reverse()
+        tokens.reverse!
       end
       for ope in ope_list
         if tokens[position..-1].include?(ope)
@@ -992,7 +992,7 @@ module Aya5
         end
       end
       if reverse != 0
-        tokens.reverse()
+        tokens.reverse!
       end
       position = new_pos
       if position >= len_tokens
@@ -1195,11 +1195,11 @@ module Aya5
         tokens.delete_at(position)
         temp << get_right_(tokens, position)
         if position > 0
-          temp.insert(-1, get_left_(tokens, position))
+          temp.insert(0, get_left_(tokens, position))
         end
         position = find_position(tokens, [','], 0, reverse=0)
       end
-      if temp
+      if not temp.empty?
         tokens.insert(position, [TYPE_NEW_ARRAY, temp])
       end
       for i in 0..tokens.length-1
@@ -1600,13 +1600,13 @@ module Aya5
           end
           right_result = evaluate(namespace, [right], -1 , 1, 0, 1) ## FIXME
           if not ['=', ':='].include?(ope)
-            left_result = evaluate_token(namespace, left) 
+            left_result = evaluate_token(namespace, left)
             right_result = operation(left_result, ope[0],
                                      right_result, type_float)
             ope = ope[1..-1]
           end
           result_of_substitution = substitute(namespace, left, ope, right_result)
-          if connect ## FIXME
+          if connect != 0 ## FIXME
             alternatives << result_of_substitution
           end
         elsif line[0] == TYPE_INC or \
@@ -2201,11 +2201,11 @@ module Aya5
         end
         result = left_result >= right_result
       elsif ope[1] == '||'
-        result = left_result or right_result
+        result = [1, true].include?(left_result) or [1, true].include?(right_result)
       elsif ope[1] == '&&'
-        result = left_result and right_result
+        result = [1, true].include?(left_result) and [1, true].include?(right_result)
       elsif ope[1] == '!'
-        result = (not right_result)
+        result = (not [1, true].include?(right_result))
       else
         #pass
       end
@@ -2540,7 +2540,7 @@ module Aya5
     def evaluate_argument(namespace, name, argument, is_system_func)
       arguments = []
       for i in 0..argument.length-1
-        if is_system_func != 0 and \
+        if is_system_func and \
           @dic.aya.get_system_functions().not_to_evaluate(name, i)
           arguments << argument[i][1][1]
         else
@@ -2712,6 +2712,9 @@ module Aya5
     end
 
     def not_to_evaluate(name, index)
+      if not @functions.include?(name) # XXX
+        return false
+      end
       if @functions[name][1].include?(index)
         return true
       else
@@ -2722,10 +2725,10 @@ module Aya5
     def check_num_args(name, argv)
       list_num = @functions[name][2]
       if list_num == [nil]
-        return 1
+        return true
       else
         if list_num.include?(argv.length)
-          return 1
+          return true
         end
         list_num.sort()
         if argv.length < list_num[0]
@@ -2735,9 +2738,9 @@ module Aya5
           end
           Logging::Logging.debug(
             [name.to_s, ': called with too few argument(s)'].join(''))
-          return 0
+          return false
         end
-        return 1
+        return true
       end
     end
 
@@ -2817,7 +2820,7 @@ module Aya5
 
     def CHR(namespace, argv)
       begin
-        return chr(argv[0])
+        return Integer(argv[0]).chr
       rescue
         return ''
       end
@@ -2894,11 +2897,12 @@ module Aya5
       var = argv[0].to_s
       target_namespace = select_namespace(namespace, var)
       target_namespace.remove(var)
+      return nil # XXX
     end
 
     def EVAL(namespace, argv)
       script = argv[0]
-      func = AyaFunction(@aya.dic, '', [script], nil)
+      func = AyaFunction.new(@aya.dic, '', [script], nil)
       result = func.call()
       return result
     end
@@ -3208,9 +3212,8 @@ module Aya5
     end
 
     def GETTIME(namespace, argv)
-      year_, month_, day_, hour_, minute_, second_, wday_, yday_, isdst_ = time.localtime()
-      wday_ = (wday_ + 1) % 7
-      return [year_, month_, day_, wday_, hour_, minute_, second_]
+      t = Time.now
+      return [t.year, t.month, t.day, t.wday, t.hour, t.min, t.sec]
     end
 
     def GETTYPE(namespace, argv)
@@ -3893,23 +3896,31 @@ module Aya5
         c = line[i]
         if c == '('
           block_nest_level += 1
-          append_unless_empty(line[token_startpoint..i-1].strip())
+          if i != 0
+            append_unless_empty(line[token_startpoint..i-1].strip())
+          end
           @tokens << '('
           i += 1
           token_startpoint = i
         elsif c == ')'
           block_nest_level -= 1
-          append_unless_empty(line[token_startpoint..i-1].strip())
+          if i != 0
+            append_unless_empty(line[token_startpoint..i-1].strip())
+          end
           @tokens << ')'
           i += 1
           token_startpoint = i
         elsif c == '['
-          append_unless_empty(line[token_startpoint..i-1].strip())
+          if i != 0
+            append_unless_empty(line[token_startpoint..i-1].strip())
+          end
           @tokens << '['
           i += 1
           token_startpoint = i
         elsif c == ']'
-          append_unless_empty(line[token_startpoint..i-1].strip())
+          if i != 0
+            append_unless_empty(line[token_startpoint..i-1].strip())
+          end
           @tokens << ']'
           i += 1
           token_startpoint = i
@@ -3932,7 +3943,9 @@ module Aya5
           token_startpoint = position + 1
           i = position + 1
         elsif c == ' ' or c == '\t' or c == '　'
-          append_unless_empty(line[token_startpoint..i-1].strip())
+          if i != 0
+            append_unless_empty(line[token_startpoint..i-1].strip())
+          end
           i += 1
           token_startpoint = i
         elsif SPECIAL_CHARS.include?(c)
