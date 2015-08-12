@@ -163,7 +163,7 @@ module DLL
       if File.exist?(path)
         require(path)
         begin
-          module_ = Module.module_eval(name[0].upcase + name.downcase[1, name.length])
+          module_ = Module.module_eval(name[0].upcase + name.downcase[1..name.length-1])
         rescue #if not module_
           return nil
         end

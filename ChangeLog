@@ -1,3 +1,6 @@
+Wed August 12 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* 華和梨7互換モジュールを追加した.
+
 Tue August 11 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* 文4互換モジュールを更新した.
 	* バルーンの"\n[half]"タグの処理を修正した.

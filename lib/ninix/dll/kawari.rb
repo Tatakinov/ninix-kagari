@@ -24,10 +24,9 @@ require_relative "../logging"
 module Kawari
 
   ###   READER   ###
-  charset = 'CP932' # default
+  @@charset = 'CP932' # default
 
   def self.read_dict(path)
-    global charset
     open(path, 'rb') do |f|
       lineno = 0
       buf = []
@@ -35,18 +34,18 @@ module Kawari
         lineno = lineno + 1
         position = [lineno, path]
         if line.start_with?('!KAWA0000')
-          line = decrypt(line[9..-1]).force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+          line = Kawari.decrypt(line[9..-1]).force_encoding(@@charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
         else
-          line = line.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+          line = line.force_encoding(@@charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
         end
-        if not line.strip() or \
+        if line.strip.empty? or \
           line.start_with?('#') or \
           line.start_with?(':crypt') or \
           line.start_with?(':endcrypt')
           next
         end
         if not line.include?(':')
-          Logging::Logging.debug('kawari.py: syntax error at line {0:d} in {1}:'.format(*position))
+          Logging::Logging.debug('kawari.py: syntax error at line ' + position[0].to_s + ' in ' + position[1].to_s)
           Logging::Logging.debug(line.strip())
           next
         end
@@ -54,7 +53,7 @@ module Kawari
         entries.strip!
         phrases.strip!
         if entries.empty?
-          Logging::Logging.debug('kawari.py: syntax error at line {0:d} in {1}:'.format(*position))
+          Logging::Logging.debug('kawari.py: syntax error at line ' + position[0].to_s + ' in ' + position[1].to_s)
           Logging::Logging.debug(line.strip())
           next
         end
@@ -65,7 +64,7 @@ module Kawari
           if not Encoding.name_list.include?(phrases)
             Logging::Logging.error('kawari.py: unsupported charset ' + phrases.to_s)
           else
-            charset = phrases
+            @@charset = phrases
           end
         end
         buf << [entries, phrases, position]
@@ -76,7 +75,7 @@ module Kawari
 
   def self.decrypt(data)
     buf = []
-    for c in Base64.decode64(data)
+    for c in Base64.decode64(data).each_char
       buf << (c.ord ^ 0xcc).chr
     end
     return buf.join('')
@@ -199,7 +198,7 @@ module Kawari
     end
     if buf
       if Kawari.is_space(buf[-1])
-        del buf[-1]
+        buf.delete(-1)
       else
         buf[-1] = buf[-1].rstrip()
       end
@@ -260,7 +259,7 @@ module Kawari
       #end
       if data[i] == '"'
         i, text = Kawari.parse_quotes(data, i)
-        buf << '"{0}"'.format(text)
+        buf << '"' + text.to_s + '"'
       elsif data[i..i + 1] == '${'
         i, text = Kawari.parse_reference(data, i)
         buf << text
@@ -313,7 +312,7 @@ module Kawari
   def self.read_local_script(path)
     rdict = {}
     kdict = {}
-    open(path, :encoding => charset) do |f|
+    open(path, :encoding => @@charset) do |f|
       for line in f.readlines()
         if line.start_with?('#')
           rdict[line.strip()] = [f.readline().strip()]
@@ -325,7 +324,7 @@ module Kawari
 
   ###   KAWARI   ###
 
-  class Kawari
+  class Kawari7
 
     MAXDEPTH = 30
 
@@ -590,7 +589,7 @@ module Kawari
         end
         segments, context = selection
       end
-      Logging::Logging.debug([name, '=>', segments.join('')].join(''))
+      Logging::Logging.debug([name, '=>', segments].join(''))
       return expand(segments, context, depth)
     end
 
@@ -676,7 +675,11 @@ module Kawari
       n = 0
       buf = []
       for d in @rdictlist
-        c = d.get(name, [])
+        if d.include?(name)
+          c = [name]
+        else
+          c = []
+        end
         n += c.length
         buf << [c, d]
       end
@@ -797,10 +800,10 @@ module Kawari
       end
       # strip white space before and after each command
       for command in buf
-        if is_space(command[0])
+        if Kawari.is_space(command[0])
           command.delete(0)
         end
-        if is_space(command[-1])
+        if Kawari.is_space(command[-1])
           command.delete(-1)
         end
       end
@@ -810,7 +813,7 @@ module Kawari
     def parse_argument(segments)
       buf = [[]]
       for segment in segments
-        if is_space(segment)
+        if Kawari.is_space(segment)
           buf << []
         else
           buf[-1] << segment
@@ -1061,7 +1064,7 @@ module Kawari
     end
 
     def get_dict_path(path)
-      path = get_normalized_path(path)
+      path = Home.get_normalized_path(path)
       if not path
         raise RuntimeError('invalid argument')
       end
@@ -1077,7 +1080,7 @@ module Kawari
       end
       path = get_dict_path(expand(argv[1]))
       begin
-        rdict, kdict = create_dict(read_dict(path))
+        rdict, kdict = Kawari.create_dict(Kawari.read_dict(path))
       rescue #except IOError:
         raise RuntimeError('cannot read file')
       end
@@ -1110,10 +1113,10 @@ module Kawari
             for segments in enumerate(name)
               buf << segments.join('')
             end
-            line = [name, ' : ', ' , '.join(buf)].join('').encode(charset, :invalid => :replace, :undef => :replace)
-            name = name.encode(charset, :invalid => :replace, :undef => :replace)
+            line = [name, ' : ', ' , '.join(buf)].join('').encode(@@charset, :invalid => :replace, :undef => :replace)
+            name = name.encode(@@charset, :invalid => :replace, :undef => :replace)
             if crypt
-              line = encrypt(line)
+              line = Kawari.encrypt(line)
             end
             f.write(['# Entry ',
                      name, "\r\n",
@@ -1136,7 +1139,7 @@ module Kawari
       end
       path = get_dict_path(expand(argv[1]))
       begin
-        open(path, :encoding => charset) do |f|
+        open(path, :encoding => @@charset) do |f|
           linelist = f.readlines()
         end
       rescue #except IOError:
@@ -1620,9 +1623,11 @@ module Kawari
 
   
   class ExprParser
+    attr_accessor :kawari
 
     def initialize
       #pass
+      @kawari = nil
     end
 
     def show_progress(func, buf)
@@ -1689,7 +1694,7 @@ module Kawari
     end
 
     def match_space
-      if not is_space(pop())
+      if not Kawari.is_space(pop())
         raise ExprError
       end
     end
@@ -1699,7 +1704,7 @@ module Kawari
     end
 
     def check_space(index=0)
-      return is_space(look_ahead(index))
+      return Kawari.is_space(look_ahead(index))
     end
 
     # tree node types
@@ -1933,37 +1938,37 @@ module Kawari
   DICT_FILE, INI_FILE = Array(0..1)
 
   def self.list_dict(kawari_dir, saori_ini={})
-    return scan_ini(kawari_dir, 'kawari.ini', saori_ini)
+    return Kawari.scan_ini(kawari_dir, 'kawari.ini', saori_ini)
   end
 
   def self.scan_ini(kawari_dir, filename, saori_ini)
     buf = []
     ini_path = File.join(kawari_dir, filename)
     begin
-      line_list = read_dict(ini_path)
+      line_list = Kawari.read_dict(ini_path)
     rescue #except IOError:
       line_list = []
     end
-    read_as_dict = 0
+    read_as_dict = false
     for entry, value, position in line_list
       if entry == 'dict'
-        filename = get_normalized_path(value)
+        filename = Home.get_normalized_path(value)
         path = File.join(kawari_dir, filename)
         begin
           open(path, 'rb') do |f|
             f.read(64)
           end
         rescue #except IOError as e:
-          errno, message = e.args
+          ##errno, message = e.args
           Logging::Logging.debug('kawari.py: read error: ' + path.to_s)
           next
         end
         buf << [DICT_FILE, path]
       elsif entry == 'include'
-        filename = get_normalized_path(value)
-        buf.concat(scan_ini(kawari_dir, filename, saori_ini))
+        filename = Home.get_normalized_path(value)
+        buf.concat(Kawari.scan_ini(kawari_dir, filename, saori_ini))
       elsif entry == 'set'
-        read_as_dict = 1
+        read_as_dict = true
       elsif ['randomseed', 'debug', 'security', 'set'].include?(entry)
         #pass
       elsif entry == 'saori'
@@ -1989,7 +1994,7 @@ module Kawari
   def self.read_ini(path)
     buf = []
     begin
-      line_list = read_dict(path)
+      line_list = Kawari.read_dict(path)
     rescue #except IOError:
       line_list = []
     end
@@ -2007,12 +2012,13 @@ module Kawari
   end
 
 
-  class Shiori < Kawari
+  class Shiori < Kawari7
 
     def initialize(dll_name)
       @dll_name = dll_name
       @saori_list = {}
       @saori_ini = {}
+      @kis_commands = {}
       @kis_commands['saoriregist'] = 'exec_saoriregist'
       @kis_commands['saorierase'] = 'exec_saorierase'
       @kis_commands['callsaori'] = 'exec_callsaori'
@@ -2023,25 +2029,25 @@ module Kawari
       @saori = saori
     end
 
-    def load(dir: kawari_dir)
-      @kawari_dir = kawari_dir
+    def load(dir: nil)
+      @kawari_dir = dir
       pathlist = [nil]
       rdictlist = [{}]
       kdictlist = [{}]
       @saori_ini = {}
-      for file_type, path in list_dict(kawari_dir, @saori_ini)
+      for file_type, path in Kawari.list_dict(@kawari_dir, @saori_ini)
         pathlist << path
         if file_type == INI_FILE
-          rdict, kdict = create_dict(read_ini(path))
-        elsif is_local_script(path)
-          rdict, kdict = read_local_script(path)
+          rdict, kdict = Kawari.create_dict(Kawari.read_ini(path))
+        elsif Kawari.is_local_script(path)
+          rdict, kdict = Kawari.read_local_script(path)
         else
-          rdict, kdict = create_dict(read_dict(path))
+          rdict, kdict = Kawari.create_dict(Kawari.read_dict(path))
         end
         rdictlist << rdict
         kdictlist << kdict
       end
-      super(kawari_dir, pathlist, rdictlist, kdictlist)
+      Kawari7.new(@kawari_dir, pathlist, rdictlist, kdictlist)
       for value in @saori_ini.values()
         if value[1] == 'preload'
           head, tail = File.split(value[0].gsub('\\', '/'))
@@ -2052,20 +2058,20 @@ module Kawari
     end
 
     def unload
-      Kawari.finalize(self)
+      finalize
       for name in @saori_list.keys()
         @saori_list[name].unload()
-        del @saori_list[name]
+        @saori_list.delete(name)
       end
-      charset = 'CP932' # reset
+      @@charset = 'CP932' # reset
     end
 
     def find(dir, dll_name)
       result = 0
-      if list_dict(dir)
+      if not Kawari.list_dict(dir).empty?
         result = 200
       end
-      charset = 'CP932' # reset
+      @@charset = 'CP932' # reset
       return result
     end
 
@@ -2079,7 +2085,7 @@ module Kawari
     end
 
     def request(req_string)
-      header = req_string.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace).splitlines()
+      header = req_string.force_encoding(@@charset).encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/)
       req_header = {}
       if header
         line = header.shift
@@ -2158,13 +2164,13 @@ module Kawari
       end
       result = "SHIORI/3.0 200 OK\r\n" \
                "Sender: Kawari\r\n" \
-               "Charset: " + charset.to_s + "\r\n" \
+               "Charset: " + @@charset.to_s + "\r\n" \
                "Value: " + result.to_s + "\r\n"
       if to != nil
         result = [result, "Reference0: " + to.to_s + "\r\n"].join('')
       end
       result = [result, "\r\n"].join('')
-      return result.encode(charset)            
+      return result.encode(@@charset)
     end
 
     def exec_saoriregist(kawari, argv)
@@ -2215,14 +2221,14 @@ module Kawari
       req = "EXECUTE SAORI/1.0\r\n" \
             "Sender: KAWARI\r\n" \
             "SecurityLevel: local\r\n" \
-            "Charset: " + charset.to_s + "\r\n"
+            "Charset: " + @@charset.to_s + "\r\n"
       for i in 2..argv.length-1
         req = [req,
                "Argument" + (i - 2).to_s + ": " + expand(argv[i]).to_s + "\r\n"].join('')
       end
       req = [req, "\r\n"].join('')
       response = saori_request(@saori_ini[alias_][0],
-                               req.encode(charset, :invalid => :replace, :undef => :replace))
+                               req.encode(@@charset, :invalid => :replace, :undef => :replace))
       header = response.splitlines()
       if header
         line = header.shift
@@ -2289,7 +2295,7 @@ module Kawari
       end
       req = [req, "\r\n"].join('')
       response = saori_request(@saori_ini[alias_][0],
-                               req.encode(charset, :invalid => :replace, :undef => :replace))
+                               req.encode(@@charset, :invalid => :replace, :undef => :replace))
       header = response.splitlines()
       if header
         line = header.shift
@@ -2362,29 +2368,30 @@ module Kawari
     end
   end
 
-  def self.kawari_open(kawari_dir)
+  def self.kawari_open(kawari_dir) ## FIXME: move to test-module
     pathlist = [nil]
     rdictlist = [{}]
     kdictlist = [{}]
-    for file_type, path in list_dict(kawari_dir)
+    for file_type, path in Kawari.list_dict(kawari_dir)
       pathlist << path
       if file_type == INI_FILE
-        rdict, kdict = create_dict(read_ini(path))
-      elsif is_local_script(path)
-        rdict, kdict = read_local_script(path)
+        rdict, kdict = Kawari.create_dict(Kawari.read_ini(path))
+      elsif Kawari.is_local_script(path)
+        rdict, kdict = Kawari.read_local_script(path)
       else
-        rdict, kdict = create_dict(read_dict(path))
+        rdict, kdict = Kawari.create_dict(Kawari.read_dict(path))
       end
       rdictlist << rdict
       kdictlist << kdict
-      return Kawari.new(kawari_dir, pathlist, rdictlist, kdictlist)
+      return Kawari7.new(kawari_dir, pathlist, rdictlist, kdictlist)
     end
+  end
 
-    def self.is_local_script(path)
-      open(path, 'rb') do |f|
-        line = f.readline()
-      end
-      return line.start_with?('[SAKURA]')
+  def self.is_local_script(path)
+    line = ''
+    open(path, 'rb') do |f|
+      line = f.readline()
     end
+    return line.start_with?('[SAKURA]')
   end
 end
