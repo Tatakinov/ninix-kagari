@@ -1,3 +1,7 @@
+Thu August 13 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* 非推奨のGtk+シンボルを使用しないようにした.
+	* 華和梨7互換モジュールを更新した.
+
 Wed August 12 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* 華和梨7互換モジュールを追加した.
 

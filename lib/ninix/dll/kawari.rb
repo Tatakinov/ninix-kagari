@@ -24,7 +24,7 @@ require_relative "../logging"
 module Kawari
 
   ###   READER   ###
-  @@charset = 'CP932' # default
+  $charset = 'CP932' # default
 
   def self.read_dict(path)
     open(path, 'rb') do |f|
@@ -34,9 +34,9 @@ module Kawari
         lineno = lineno + 1
         position = [lineno, path]
         if line.start_with?('!KAWA0000')
-          line = Kawari.decrypt(line[9..-1]).force_encoding(@@charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+          line = Kawari.decrypt(line[9..-1]).force_encoding($charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
         else
-          line = line.force_encoding(@@charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+          line = line.force_encoding($charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
         end
         if line.strip.empty? or \
           line.start_with?('#') or \
@@ -45,7 +45,7 @@ module Kawari
           next
         end
         if not line.include?(':')
-          Logging::Logging.debug('kawari.py: syntax error at line ' + position[0].to_s + ' in ' + position[1].to_s)
+          Logging::Logging.debug('kawari.rb: syntax error at line ' + position[0].to_s + ' in ' + position[1].to_s)
           Logging::Logging.debug(line.strip())
           next
         end
@@ -53,7 +53,7 @@ module Kawari
         entries.strip!
         phrases.strip!
         if entries.empty?
-          Logging::Logging.debug('kawari.py: syntax error at line ' + position[0].to_s + ' in ' + position[1].to_s)
+          Logging::Logging.debug('kawari.rb: syntax error at line ' + position[0].to_s + ' in ' + position[1].to_s)
           Logging::Logging.debug(line.strip())
           next
         end
@@ -62,9 +62,9 @@ module Kawari
         end
         if entries == 'locale'
           if not Encoding.name_list.include?(phrases)
-            Logging::Logging.error('kawari.py: unsupported charset ' + phrases.to_s)
+            Logging::Logging.error('kawari.rb: unsupported charset ' + phrases.to_s)
           else
-            @@charset = phrases
+            $charset = phrases
           end
         end
         buf << [entries, phrases, position]
@@ -97,7 +97,7 @@ module Kawari
       parsed_entries = Kawari.parse_entries(entries)
       parsed_phrases = Kawari.parse_phrases(phrases)
       if parsed_phrases == nil
-        Logging::Logging.debug('kawari.py: syntax error at line {0:d} in {1}:'.format(*position))
+        Logging::Logging.debug('kawari.rb: syntax error at line ' + position[0].to_s + ' in ' + position[1].to_s + ':')
         Logging::Logging.debug(phrases.strip())
         next
       end
@@ -167,7 +167,7 @@ module Kawari
     i = start
     j = data.length
     while i < j
-      if stop_pattern and stop_pattern.match(data[i..-1])
+      if stop_pattern and stop_pattern.match(data, i)
         break
       elsif data[i] == '"'
         i, text = Kawari.parse_quotes(data, i)
@@ -189,16 +189,16 @@ module Kawari
         buf << text
       end
     end
-    if buf
+    if not buf.empty?
       if Kawari.is_space(buf[0])
-        buf.delete(0)
+        buf.delete_at(0)
       else
         buf[0] = buf[0].lstrip()
       end
     end
-    if buf
+    if not buf.empty?
       if Kawari.is_space(buf[-1])
-        buf.delete(-1)
+        buf.delete_at(-1)
       else
         buf[-1] = buf[-1].rstrip()
       end
@@ -312,7 +312,7 @@ module Kawari
   def self.read_local_script(path)
     rdict = {}
     kdict = {}
-    open(path, :encoding => @@charset) do |f|
+    open(path, :encoding => $charset) do |f|
       for line in f.readlines()
         if line.start_with?('#')
           rdict[line.strip()] = [f.readline().strip()]
@@ -329,6 +329,10 @@ module Kawari
     MAXDEPTH = 30
 
     def initialize(prefix, pathlist, rdictlist, kdictlist)
+      kawari_init(prefix, pathlist, rdictlist, kdictlist)
+    end
+
+    def kawari_init(prefix, pathlist, rdictlist, kdictlist)
       @prefix = prefix
       @pathlist = pathlist
       @rdictlist = rdictlist
@@ -379,7 +383,7 @@ module Kawari
                            ref0=nil, ref1=nil, ref2=nil, ref3=nil,
                            ref4=nil, ref5=nil, ref6=nil, ref7=nil) ## FIXME
       ref = [ref0, ref1, ref2,ref3, ref4, ref5, ref6, ref7].map {|r| r.to_s if r != nil }
-      for i in range(8)
+      for i in 0..7
         if ref[i] != nil
           value = ref[i]
           @system_entries['system.Reference' + i.to_s] = value
@@ -541,7 +545,7 @@ module Kawari
     def unshift(name, value)
       Logging::Logging.debug('*** unshift("' + name.to_s + '", "' + value.to_s + '")')
       dic = get_internal_dict(name)
-      i, segments = parse(value, 0)
+      i, segments = Kawari.parse(value, 0)
       dic[name].insert(0, segments)
     end
 
@@ -555,7 +559,7 @@ module Kawari
     def push(name, value)
       Logging::Logging.debug('*** push("' + name.to_s + '", "' + value.to_s + '")')
       dic = get_internal_dict(name)
-      i, segments = parse(value, 0)
+      i, segments = Kawari.parse(value, 0)
       dic[name] << segments
     end
 
@@ -594,12 +598,12 @@ module Kawari
     end
 
     def parse_all(data, start=0)
-      i, segments = parse(data, start)
+      i, segments = Kawari.parse(data, start)
       return expand(segments)
     end
 
     def parse_sub(data, start=0, stop_pattern=nil)
-      i, segments = parse(data, start, stop_pattern)
+      i, segments = Kawari.parse(data, start, stop_pattern)
       return i, expand(segments)
     end
 
@@ -624,7 +628,7 @@ module Kawari
             if ['system.OtherGhost', 'system-OtherGhost',
                 'system.OtherGhostEx',
                 'system-OtherGhostEx'].include?(newname)
-              segment_list = @system_entries.get(newname)
+              segment_list = @system_entries[newname]
               if segment_list
                 segment = segment_list.sample
               else
@@ -633,7 +637,7 @@ module Kawari
             elsif newname == 'system.communicate'
               segment = get_system_entry('communicate')
             else
-              segment = @system_entries.get(newname, segment)
+              segment = @system_entries.include?(newname) ? @system_entries[newname] : segment
             end
           else
             segment = get(newname, context, depth + 1)
@@ -642,7 +646,7 @@ module Kawari
         elsif segment.start_with?('$(') and segment.end_with?(')')
           i, segment = eval_inline_script(segments, i)
         elsif segment.start_with?('"') and segment.end_with?('"')
-          segment = segment[1..-2].gsub('\"', '"')
+          segment = segment[1..-2].gsub('\\"', '"')
         end
         buf << segment
         i += 1
@@ -662,9 +666,9 @@ module Kawari
       begin
         Integer(s)
       rescue #except ValueError:
-        return 0
+        return false
       end
-      return 1
+      return true
     end
 
     def is_system_entry(s)
@@ -676,7 +680,7 @@ module Kawari
       buf = []
       for d in @rdictlist
         if d.include?(name)
-          c = [name]
+          c = d[name]
         else
           c = []
         end
@@ -702,7 +706,7 @@ module Kawari
       for name in name.split('&').map {|s| s.strip }
         cp_list = []
         for d in @rdictlist
-          cp_list.concat(d.get(name, []))
+          cp_list.concat(d.include?(name) ? d[name] : [])
         end
         buf << cp_list
       end
@@ -744,7 +748,7 @@ module Kawari
         if i + 1 < segments.length and segments[i + 1] == '$(endif)'
           i += 1
         else
-          Logging::Logging.debug('kawari.py: syntax error: $(endif) expected')
+          Logging::Logging.debug('kawari.rb: syntax error: $(endif) expected')
           return i, '' # syntax error
         end
         return i, exec_old_if(if_block, then_block, else_block)
@@ -759,19 +763,19 @@ module Kawari
             values = []
           else
             Logging::Logging.debug(
-              ['kawari.py: syntax error:', segments[i]].join(''))
+              ['kawari.rb: syntax error:', segments[i]].join(''))
           end
           next
         end
         handler = @kis_commands[argv[0]]
         begin
           if handler == nil
-            raise RuntimeError('invalid command')
+            raise RuntimeError.new('invalid command')
           end
-          values << handler.call(self, argv)
-        rescue #except RuntimeError as message:
+          values << method(handler).call(argv)
+        rescue => message #except RuntimeError as message:
           Logging::Logging.debug(
-            'kawari.py: ' + message.to_s + ': ' + segments[i].to_s)
+            'kawari.rb: ' + message.to_s + ': ' + segments[i].to_s)
         end
       end
       result = values.join('')
@@ -781,13 +785,13 @@ module Kawari
     end
 
     def split_commands(data)
-      i, segments = parse(data, 0)
+      i, segments = Kawari.parse(data, 0)
       # find multiple commands separated by semicolons
       buf = []
       command = []
       for segment in segments
         if segment == ';'
-          if command
+          if not command.empty?
             buf << command
             command = []
           end
@@ -795,16 +799,16 @@ module Kawari
           command << segment
         end
       end
-      if command
+      if not command.empty?
         buf << command
       end
       # strip white space before and after each command
       for command in buf
         if Kawari.is_space(command[0])
-          command.delete(0)
+          command.delete_at(0)
         end
         if Kawari.is_space(command[-1])
-          command.delete(-1)
+          command.delete_at(-1)
         end
       end
       return buf
@@ -828,7 +832,7 @@ module Kawari
       elsif argv.length == 4
         return exec_if(argv[1], argv[2], argv[3])
       else
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
     end
 
@@ -838,10 +842,10 @@ module Kawari
         if_block = ['$(', if_block, ')'].join('')
       end
       # parse arguments
-      i, if_block = parse(if_block, 0)
-      i, then_block = parse(then_block, 0)
+      i, if_block = Kawari.parse(if_block, 0)
+      i, then_block = Kawari.parse(then_block, 0)
       if else_block
-        i, else_block = parse(else_block, 0)
+        i, else_block = Kawari.parse(else_block, 0)
       end
       result = exec_if(if_block, then_block, else_block)
       if else_block
@@ -866,15 +870,17 @@ module Kawari
 
     def exec_foreach(argv)
       if argv.length != 4
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       temp = expand(argv[1])
       name = expand(argv[2])
       buf = []
       for dic in @rdictlist
-        for segments in dic.get(name, [])
-          set(temp, expand(segments))
-          buf << expand(argv[3])
+        if dic.include?(name)
+          for segments in d[name]
+            set(temp, expand(segments))
+            buf << expand(argv[3])
+          end
         end
       end
       clear(temp)
@@ -883,12 +889,12 @@ module Kawari
 
     def exec_loop(argv)
       if argv.length != 3
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       begin
         n = Integer(expand(argv[1]))
       rescue # except ValueError:
-        raise RuntimeError('invalid argument')
+        raise RuntimeError.new('invalid argument')
       end
       buf = []
       for _ in 0..n-1
@@ -899,7 +905,7 @@ module Kawari
 
     def exec_while(argv)
       if argv.length != 3
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       buf = []
       while not ['', '0', 'false', 'False'].include?(expand(argv[1]))
@@ -910,7 +916,7 @@ module Kawari
 
     def exec_until(argv)
       if argv.length != 3
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       buf = []
       while ['', '0', 'false', 'False'].include?(expand(argv[1]))
@@ -921,7 +927,7 @@ module Kawari
 
     def exec_set(argv)
       if argv.length != 3
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       set(expand(argv[1]), expand(argv[2]))
       return ''
@@ -929,7 +935,7 @@ module Kawari
 
     def exec_adddict(argv)
       if argv.length != 3
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       push(expand(argv[1]), expand(argv[2]))
       return ''
@@ -937,23 +943,23 @@ module Kawari
 
     def exec_array(argv) # XXX experimental
       if argv.length != 3
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       n = atoi(expand(argv[2]))
       for d in @rdictlist
-        c = d.get(name, [])
+        c = d.include?(name) ? d[name] : []
         if n < c.length
           return c[n].map {|s| expand(s) }.join('')
         end
         n -= c.length
       end
-      raise RuntimeError('invalid argument')
+      raise RuntimeError.new('invalid argument')
     end
 
     def exec_clear(argv)
       if argv.length != 2
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       clear(expand(argv[1]))
       return ''
@@ -961,7 +967,7 @@ module Kawari
 
     def exec_enumerate(argv)
       if argv.length != 2
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       return enumerate(name).map {|s| expand(s) }.join(' ')
@@ -970,8 +976,10 @@ module Kawari
     def enumerate(name)
       buf = []
       for dic in @rdictlist
-        for segments in dic.get(name, [])
-          buf << segments
+        if dic.include?(name)
+          for segments in dic[name]
+            buf << segments
+          end
         end
       end
       return buf
@@ -979,12 +987,12 @@ module Kawari
 
     def exec_size(argv)
       if argv.length != 2
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       n = 0
       for d in @rdictlist
-        c = d.get(name, [])
+        c = d.include?(name) ? d[name] : []
         n += c.length
       end
       return n.to_s
@@ -992,23 +1000,23 @@ module Kawari
 
     def exec_get(argv) # XXX experimental
       if argv.length != 3
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       n = atoi(expand(argv[2]))
       for d in @rdictlist
-        c = d.get(name, [])
+        c = d.include?(name) ? d[name] : []
         if n < c.length
           return c[n].join('')
         end
         n -= c.length
       end
-      raise RuntimeError('invalid argument')
+      raise RuntimeError.new('invalid argument')
     end
 
     def exec_unshift(argv)
       if argv.length != 3
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       unshift(expand(argv[1]), expand(argv[2]))
       return ''
@@ -1016,14 +1024,14 @@ module Kawari
 
     def exec_shift(argv)
       if argv.length != 2
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       return shift(expand(argv[1]))
     end
 
     def exec_push(argv)
       if argv.length != 3
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       push(expand(argv[1]), expand(argv[2]))
       return ''
@@ -1031,14 +1039,14 @@ module Kawari
 
     def exec_pop(argv)
       if argv.length != 2
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       return pop(expand(argv[1]))
     end
 
     def exec_pirocall(argv)
       if argv.length != 2
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       selection = select_simple_phrase(expand(argv[1]))
       if selection == nil
@@ -1049,7 +1057,7 @@ module Kawari
 
     def exec_split(argv)
       if argv.length != 4
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       word_list = expand(argv[2]).split(expand(argv[3]))
@@ -1066,7 +1074,7 @@ module Kawari
     def get_dict_path(path)
       path = Home.get_normalized_path(path)
       if not path
-        raise RuntimeError('invalid argument')
+        raise RuntimeError.new('invalid argument')
       end
       if path.start_with?('/')
         return path
@@ -1076,13 +1084,13 @@ module Kawari
 
     def exec_load(argv)
       if argv.length != 2
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       path = get_dict_path(expand(argv[1]))
       begin
         rdict, kdict = Kawari.create_dict(Kawari.read_dict(path))
       rescue #except IOError:
-        raise RuntimeError('cannot read file')
+        raise RuntimeError.new('cannot read file')
       end
       if @pathlist.include?(path)
         i = @pathlist.index(path)
@@ -1096,9 +1104,9 @@ module Kawari
       return ''
     end
 
-    def exec_save(argv, crypt=0)
+    def exec_save(argv, crypt=false)
       if argv.length < 2
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       path = get_dict_path(expand(argv[1]))
       begin
@@ -1113,8 +1121,8 @@ module Kawari
             for segments in enumerate(name)
               buf << segments.join('')
             end
-            line = [name, ' : ', ' , '.join(buf)].join('').encode(@@charset, :invalid => :replace, :undef => :replace)
-            name = name.encode(@@charset, :invalid => :replace, :undef => :replace)
+            line = [name, ' : ', buf.join(' , ')].join('').encode($charset, :invalid => :replace, :undef => :replace)
+            name = name.encode($charset, :invalid => :replace, :undef => :replace)
             if crypt
               line = Kawari.encrypt(line)
             end
@@ -1124,35 +1132,35 @@ module Kawari
           end
         end
       rescue #except IOError:
-        raise RuntimeError('cannot write file')
+        raise RuntimeError.new('cannot write file')
       end
       return ''
     end
 
     def exec_savecrypt(argv)
-      return exec_save(argv, 1)
+      return exec_save(argv, true)
     end
 
     def exec_textload(argv)
       if argv.length != 3
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       path = get_dict_path(expand(argv[1]))
       begin
-        open(path, :encoding => @@charset) do |f|
+        open(path, :encoding => $charset) do |f|
           linelist = f.readlines()
         end
       rescue #except IOError:
-        raise RuntimeError('cannot read file')
+        raise RuntimeError.new('cannot read file')
       end
       name = expand(argv[2])
       n = 0
       for line in linelist
         n += 1
         entry = name.to_s + '.' + n.to_s
-        if line.end_with?('\r\n')
+        if line.end_with?("\r\n")
           line = line[0..-3]
-        elsif line.end_with?('\r') or line.end_with?('\n')
+        elsif line.end_with?("\r") or line.end_with?("\n")
           line = line[0..-2]
         end
         if not line
@@ -1199,20 +1207,20 @@ module Kawari
           return expand(argv[2])
         end
       else
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
     end
 
     def exec_null(argv)
       if argv.length != 1
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       return ''
     end
 
     def exec_chr(argv)
       if argv.length != 2
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       num = atoi(expand(argv[1]))
       if num < 256
@@ -1231,7 +1239,7 @@ module Kawari
 
     def exec_rand(argv)
       if argv.length != 2
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       bound = atoi(expand(argv[1]))
       if bound == 0
@@ -1305,32 +1313,32 @@ module Kawari
     end
 
     def exec_inc(argv)
-      def _inc(value, step, bound)
+      _inc = lambda {|value, step, bound| 
         value += step
         if bound != nil and value > bound
           return bound
         end
         return value
-      end
+      }
       apply_counter_op(_inc, argv)
       return ''
     end
 
     def exec_dec(argv)
-      def _dec(value, step, bound)
+      _dec = lambda {|value, step, bound| 
         value -= step
         if bound != nil and value < bound
           return bound
         end
         return value
-      end
+      }
       apply_counter_op(_dec, argv)
       return ''
     end
 
     def apply_counter_op(func, argv)
       if argv.length < 2 or argv.length > 4
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       value = atoi(get(name))
@@ -1344,7 +1352,7 @@ module Kawari
       else
         bound = nil
       end
-      set(name, str(func(value, step, bound)))
+      set(name, func.call(value, step, bound).to_s)
     end
 
     def exec_test(argv)
@@ -1354,7 +1362,7 @@ module Kawari
         op  = expand(argv[2])
         op2 = expand(argv[3])
       else
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       if ['=', '=='].include?(op)
         result = (op1 == op2).to_s
@@ -1381,27 +1389,27 @@ module Kawari
       elsif op == '-gt'
         result = (atoi(op1) > atoi(op2)).to_s
       else
-        raise RuntimeError('unknown operator')
+        raise RuntimeError.new('unknown operator')
       end
       return result
     end
 
     def exec_expr(argv)
-      tree = expr_parser.parse(
+      tree = @expr_parser.parse(
         argv[1..-1].map {|e| e.join('') }.join(' '))
       if tree == nil
-        raise RuntimeError('syntax error')
+        raise RuntimeError.new('syntax error')
       end
       begin
         value = interp_expr(tree)
       rescue #except ExprError:
-        raise RuntimeError('runtime error')
+        raise RuntimeError.new('runtime error')
       end
       return value
     end
 
     def interp_expr(tree)
-      if tree[0] == ExprParser.OR_EXPR
+      if tree[0] == ExprParser::OR_EXPR
         for subtree in tree[1..-1]
           value = interp_expr(subtree)
           if value and not ['0', 'False'].include?(value)
@@ -1409,7 +1417,7 @@ module Kawari
           end
         end
         return value
-      elsif tree[0] == ExprParser.AND_EXPR
+      elsif tree[0] == ExprParser::AND_EXPR
         buf = []
         for subtree in tree[1..-1]
           value = interp_expr(subtree)
@@ -1419,7 +1427,7 @@ module Kawari
           buf << value
         end
         return buf[0]
-      elsif tree[0] == ExprParser.CMP_EXPR
+      elsif tree[0] == ExprParser::CMP_EXPR
         op1 = interp_expr(tree[1])
         op2 = interp_expr(tree[3])
         if is_number(op1) and is_number(op2)
@@ -1439,9 +1447,9 @@ module Kawari
         elsif tree[2] == '>'
           return (op1 > op2).to_s
         else
-          raise RuntimeError('unknown operator')
+          raise RuntimeError.new('unknown operator')
         end
-      elsif tree[0] == ExprParser.ADD_EXPR
+      elsif tree[0] == ExprParser::ADD_EXPR
         for i in 1.step(tree.length-1, 2)
           tree[i] = interp_expr(tree[i])
           if not is_number(tree[i])
@@ -1457,7 +1465,7 @@ module Kawari
           end
         end
         return value.to_s
-      elsif tree[0] == ExprParser.MUL_EXPR
+      elsif tree[0] == ExprParser::MUL_EXPR
         for i in 1.step(tree.length-1, 2)
           tree[i] = interp_expr(tree[i])
           if not is_number(tree[i])
@@ -1484,7 +1492,7 @@ module Kawari
           end
         end
         return value.to_s
-      elsif tree[0] == ExprParser.STR_EXPR
+      elsif tree[0] == ExprParser::STR_EXPR
         if tree[1] == 'length'
           length = get_characters(interp_expr(tree[2])).length
           return length.to_s
@@ -1509,7 +1517,7 @@ module Kawari
             match = nil
           end
           if match
-            length = match.end - match.begin
+            length = match.end(0) - match.begin(0)
           else
             length = 0
           end
@@ -1542,7 +1550,7 @@ module Kawari
           end
           return ''
         end
-      elsif tree[0] == ExprParser.LITERAL
+      elsif tree[0] == ExprParser::LITERAL
         return expand(tree[1..-1])
       end
     end
@@ -1558,62 +1566,6 @@ module Kawari
       return buf
     end
   end
-
-  Kis_commands = {
-    # flow controls
-        'if' =>          'exec_new_if',
-        'foreach' =>     'exec_foreach',
-        'loop' =>        'exec_loop',
-        'while' =>       'exec_while',
-        'until' =>       'exec_until',
-        # dictionary operators
-        'adddict' =>     'exec_adddict',
-        'array' =>       'exec_array',
-        'clear' =>       'exec_clear',
-        'enumerate' =>   'exec_enumerate',
-        'set' =>         'exec_set',
-        'load' =>        'exec_load',
-        'save' =>        'exec_save',
-        'savecrypt' =>   'exec_savecrypt',
-        'textload' =>    'exec_textload',
-        'size' =>        'exec_size',
-        'get' =>         'exec_get',
-        # list operators
-        'unshift' =>     'exec_unshift',
-        'shift' =>       'exec_shift',
-        'push' =>        'exec_push',
-        'pop' =>         'exec_pop',
-        # counter operators
-        'inc' =>         'exec_inc',
-        'dec' =>         'exec_dec',
-        # expression evaluators
-        'expr' =>        'exec_expr',
-        'test' =>        'exec_test',
-        '[' =>           'exec_test',
-        'entry' =>       'exec_entry',
-        'eval' =>        'exec_eval',
-        # utility functions
-        'NULL' =>        'exec_null',
-        '?' =>           'exec_choice',
-        'date' =>        'exec_date',
-        'rand' =>        'exec_rand',
-        'echo' =>        'exec_echo',
-        'escape' =>      'exec_escape',
-        'tolower' =>     'exec_tolower',
-        'toupper' =>     'exec_toupper',
-        'pirocall' =>    'exec_pirocall',
-        'split' =>       'exec_split',
-        'urllist' =>     nil,
-        'chr' =>         'exec_chr',
-        'help' =>        nil,
-        'ver' =>         nil,
-        'searchghost' => nil,
-        'saoriregist' => nil,
-        'saorierase' =>  nil,
-        'callsaori' =>   nil,
-        'callsaorix' =>  nil,
-  }
-
 
   ###   EXPR PARSER   ###
 
@@ -1638,19 +1590,19 @@ module Kawari
       end
     end
 
-    Re_token = Regexp.new('^[():|&*/%+-]|[<>]=?|[!=]?=|match|index|findpos|find|substr|length|quote|(\\s+)')
+    Re_token = Regexp.new('^([():|&*/%+-]|[<>]=?|[!=]?=|match|index|findpos|find|substr|length|quote|(\\s+))')
 
     def tokenize(data)
       buf = []
       i = 0
       j = data.length
       while i < j
-        match = re_token.match(data, i)
+        match = Re_token.match(data, i)
         if match
           buf << match[0]
-          i = match.end()
+          i = match.end(0)
         else
-          i, segments = parse(data, i, re_token)
+          i, segments = Kawari.parse(data, i, Re_token)
           buf.concat(segments)
         end
       end
@@ -1860,7 +1812,7 @@ module Kawari
         buf = [LITERAL]
         pop()
         match_space()
-        if re_token.match(look_ahead())
+        if Re_token.match(look_ahead())
           buf << pop()
         else
           buf.concat(get_str_seq())
@@ -1897,7 +1849,7 @@ module Kawari
     def get_str_seq
       buf = []
       while not done() and \
-           not re_token.match(look_ahead())
+           not Re_token.match(look_ahead())
         buf << pop()
       end
       if not buf
@@ -1960,7 +1912,7 @@ module Kawari
           end
         rescue #except IOError as e:
           ##errno, message = e.args
-          Logging::Logging.debug('kawari.py: read error: ' + path.to_s)
+          Logging::Logging.debug('kawari.rb: read error: ' + path.to_s)
           next
         end
         buf << [DICT_FILE, path]
@@ -1982,7 +1934,7 @@ module Kawari
         end
         saori_ini[alias_] = [path, option]
       else
-        Logging::Logging.debug('kawari.py: unknown entry: ' + entry.to_s)
+        Logging::Logging.debug('kawari.rb: unknown entry: ' + entry.to_s)
       end
     end
     if read_as_dict
@@ -2018,7 +1970,62 @@ module Kawari
       @dll_name = dll_name
       @saori_list = {}
       @saori_ini = {}
-      @kis_commands = {}
+
+      @kis_commands = {
+        # flow controls
+        'if' =>          'exec_new_if',
+        'foreach' =>     'exec_foreach',
+        'loop' =>        'exec_loop',
+        'while' =>       'exec_while',
+        'until' =>       'exec_until',
+        # dictionary operators
+        'adddict' =>     'exec_adddict',
+        'array' =>       'exec_array',
+        'clear' =>       'exec_clear',
+        'enumerate' =>   'exec_enumerate',
+        'set' =>         'exec_set',
+        'load' =>        'exec_load',
+        'save' =>        'exec_save',
+        'savecrypt' =>   'exec_savecrypt',
+        'textload' =>    'exec_textload',
+        'size' =>        'exec_size',
+        'get' =>         'exec_get',
+        # list operators
+        'unshift' =>     'exec_unshift',
+        'shift' =>       'exec_shift',
+        'push' =>        'exec_push',
+        'pop' =>         'exec_pop',
+        # counter operators
+        'inc' =>         'exec_inc',
+        'dec' =>         'exec_dec',
+        # expression evaluators
+        'expr' =>        'exec_expr',
+        'test' =>        'exec_test',
+        '[' =>           'exec_test',
+        'entry' =>       'exec_entry',
+        'eval' =>        'exec_eval',
+        # utility functions
+        'NULL' =>        'exec_null',
+        '?' =>           'exec_choice',
+        'date' =>        'exec_date',
+        'rand' =>        'exec_rand',
+        'echo' =>        'exec_echo',
+        'escape' =>      'exec_escape',
+        'tolower' =>     'exec_tolower',
+        'toupper' =>     'exec_toupper',
+        'pirocall' =>    'exec_pirocall',
+        'split' =>       'exec_split',
+        'urllist' =>     nil,
+        'chr' =>         'exec_chr',
+        'help' =>        nil,
+        'ver' =>         nil,
+        'searchghost' => nil,
+        'saoriregist' => nil,
+        'saorierase' =>  nil,
+        'callsaori' =>   nil,
+        'callsaorix' =>  nil,
+      }
+
       @kis_commands['saoriregist'] = 'exec_saoriregist'
       @kis_commands['saorierase'] = 'exec_saorierase'
       @kis_commands['callsaori'] = 'exec_callsaori'
@@ -2047,7 +2054,7 @@ module Kawari
         rdictlist << rdict
         kdictlist << kdict
       end
-      Kawari7.new(@kawari_dir, pathlist, rdictlist, kdictlist)
+      kawari_init(@kawari_dir, pathlist, rdictlist, kdictlist)
       for value in @saori_ini.values()
         if value[1] == 'preload'
           head, tail = File.split(value[0].gsub('\\', '/'))
@@ -2063,7 +2070,7 @@ module Kawari
         @saori_list[name].unload()
         @saori_list.delete(name)
       end
-      @@charset = 'CP932' # reset
+      $charset = 'CP932' # reset
     end
 
     def find(dir, dll_name)
@@ -2071,7 +2078,7 @@ module Kawari
       if not Kawari.list_dict(dir).empty?
         result = 200
       end
-      @@charset = 'CP932' # reset
+      $charset = 'CP932' # reset
       return result
     end
 
@@ -2085,7 +2092,7 @@ module Kawari
     end
 
     def request(req_string)
-      header = req_string.force_encoding(@@charset).encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/)
+      header = req_string.force_encoding($charset).encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/)
       req_header = {}
       if header
         line = header.shift
@@ -2141,7 +2148,7 @@ module Kawari
           end
         else
           result = getstring(req_header['ID'])
-          if not result
+          if not result or result.empty?
             ref = []
             for n in 0..7
               key = ['Reference', n.to_s].join('')
@@ -2164,13 +2171,13 @@ module Kawari
       end
       result = "SHIORI/3.0 200 OK\r\n" \
                "Sender: Kawari\r\n" \
-               "Charset: " + @@charset.to_s + "\r\n" \
+               "Charset: " + $charset.to_s + "\r\n" \
                "Value: " + result.to_s + "\r\n"
       if to != nil
         result = [result, "Reference0: " + to.to_s + "\r\n"].join('')
       end
       result = [result, "\r\n"].join('')
-      return result.encode(@@charset)
+      return result.encode($charset)
     end
 
     def exec_saoriregist(kawari, argv)
@@ -2221,14 +2228,14 @@ module Kawari
       req = "EXECUTE SAORI/1.0\r\n" \
             "Sender: KAWARI\r\n" \
             "SecurityLevel: local\r\n" \
-            "Charset: " + @@charset.to_s + "\r\n"
+            "Charset: " + $charset.to_s + "\r\n"
       for i in 2..argv.length-1
         req = [req,
                "Argument" + (i - 2).to_s + ": " + expand(argv[i]).to_s + "\r\n"].join('')
       end
       req = [req, "\r\n"].join('')
       response = saori_request(@saori_ini[alias_][0],
-                               req.encode(@@charset, :invalid => :replace, :undef => :replace))
+                               req.encode($charset, :invalid => :replace, :undef => :replace))
       header = response.splitlines()
       if header
         line = header.shift
@@ -2295,7 +2302,7 @@ module Kawari
       end
       req = [req, "\r\n"].join('')
       response = saori_request(@saori_ini[alias_][0],
-                               req.encode(@@charset, :invalid => :replace, :undef => :replace))
+                               req.encode($charset, :invalid => :replace, :undef => :replace))
       header = response.splitlines()
       if header
         line = header.shift
