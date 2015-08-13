@@ -1757,9 +1757,9 @@ module Surface
     def scroll(darea, event)
       x, y = @window.winpos_to_surfacepos(
            event.x.to_i, event.y.to_i, get_scale)
-      if event.direction == Gdk::EventScroll::UP
+      if event.direction == Gdk::ScrollDirection::UP
         count = 1
-      elsif event.direction == Gdk::EventScroll::DOWN
+      elsif event.direction == Gdk::ScrollDirection::DOWN
         count = -1
       else
         count = 0

@@ -1285,13 +1285,13 @@ module Balloon
     def scroll(darea, event)
       px, py = @window.winpos_to_surfacepos(
             event.x.to_i, event.y.to_i, scale)
-      if event.direction == Gdk::EventScroll::UP
+      if event.direction == Gdk::ScrollDirection::UP
         if @lineno > 0
           @lineno = [@lineno - 2, 0].max
           check_link_region(px, py)
           @darea.queue_draw()
         end
-      elsif event.direction == Gdk::EventScroll::DOWN
+      elsif event.direction == Gdk::ScrollDirection::DOWN
         if @lineno + @lines < @text_buffer.length
           @lineno = [@lineno + 2,
                      @text_buffer.length - @lines].min
