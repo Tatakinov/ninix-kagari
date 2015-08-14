@@ -155,7 +155,7 @@ module Kawari
         i += 1
       end
       i, phrase = Kawari.parse(data, i, Re_comma)
-      if phrase
+      if not phrase.empty?
         buf << phrase
       end
     end
@@ -167,7 +167,7 @@ module Kawari
     i = start
     j = data.length
     while i < j
-      if stop_pattern and stop_pattern.match(data, i)
+      if stop_pattern and stop_pattern.match(data[i..-1])
         break
       elsif data[i] == '"'
         i, text = Kawari.parse_quotes(data, i)
@@ -291,7 +291,7 @@ module Kawari
     i = start
     j = data.length
     while i < j
-      if stop_pattern and stop_pattern.match(data, i)
+      if stop_pattern and stop_pattern.match(data[i..-1])
         break
       elsif ['$', '"'].include?(data[i])
         break
@@ -313,7 +313,7 @@ module Kawari
     rdict = {}
     kdict = {}
     open(path, :encoding => $charset) do |f|
-      for line in f.readlines()
+      while line = f.gets
         if line.start_with?('#')
           rdict[line.strip()] = [f.readline().strip()]
         end
@@ -726,7 +726,7 @@ module Kawari
           candidates << item
         end
       end
-      if not candidates
+      if candidates.empty?
         return nil
       end
       return candidates.sample, nil
@@ -877,7 +877,7 @@ module Kawari
       buf = []
       for dic in @rdictlist
         if dic.include?(name)
-          for segments in d[name]
+          for segments in dic[name]
             set(temp, expand(segments))
             buf << expand(argv[3])
           end
@@ -1163,7 +1163,7 @@ module Kawari
         elsif line.end_with?("\r") or line.end_with?("\n")
           line = line[0..-2]
         end
-        if not line
+        if line.empty?
           clear(entry)
         else
           set(entry, line)
@@ -1412,7 +1412,7 @@ module Kawari
       if tree[0] == ExprParser::OR_EXPR
         for subtree in tree[1..-1]
           value = interp_expr(subtree)
-          if value and not ['0', 'False'].include?(value)
+          if value and not ['', '0', 'false', 'False'].include?(value)
             break
           end
         end
@@ -1421,7 +1421,7 @@ module Kawari
         buf = []
         for subtree in tree[1..-1]
           value = interp_expr(subtree)
-          if not value or ['0', 'False'].include?(value)
+          if not value or ['', '0', 'false', 'False'].include?(value)
             return '0'
           end
           buf << value
@@ -1597,10 +1597,10 @@ module Kawari
       i = 0
       j = data.length
       while i < j
-        match = Re_token.match(data, i)
+        match = Re_token.match(data[i..-1])
         if match
           buf << match[0]
-          i = match.end(0)
+          i += match.end(0)
         else
           i, segments = Kawari.parse(data, i, Re_token)
           buf.concat(segments)
@@ -1652,7 +1652,7 @@ module Kawari
     end
 
     def check(s, index=0)
-      return look_ahead(index) == s
+      return (look_ahead(index) == s)
     end
 
     def check_space(index=0)
@@ -1852,7 +1852,7 @@ module Kawari
            not Re_token.match(look_ahead())
         buf << pop()
       end
-      if not buf
+      if buf.empty?
         raise ExprError
       end
       return buf
@@ -2094,7 +2094,7 @@ module Kawari
     def request(req_string)
       header = req_string.force_encoding($charset).encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/)
       req_header = {}
-      if header
+      if not header.empty?
         line = header.shift
         line = line.strip()
         req_list = line.split()
@@ -2237,7 +2237,7 @@ module Kawari
       response = saori_request(@saori_ini[alias_][0],
                                req.encode($charset, :invalid => :replace, :undef => :replace))
       header = response.splitlines()
-      if header
+      if not header.empty?
         line = header.shift
         line = line.strip()
         if line.include?(' ')
@@ -2304,7 +2304,7 @@ module Kawari
       response = saori_request(@saori_ini[alias_][0],
                                req.encode($charset, :invalid => :replace, :undef => :replace))
       header = response.splitlines()
-      if header
+      if not header.empty?
         line = header.shift
         line = line.strip()
         if line.include?(' ')
