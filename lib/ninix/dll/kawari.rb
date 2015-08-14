@@ -2375,25 +2375,6 @@ module Kawari
     end
   end
 
-  def self.kawari_open(kawari_dir) ## FIXME: move to test-module
-    pathlist = [nil]
-    rdictlist = [{}]
-    kdictlist = [{}]
-    for file_type, path in Kawari.list_dict(kawari_dir)
-      pathlist << path
-      if file_type == INI_FILE
-        rdict, kdict = Kawari.create_dict(Kawari.read_ini(path))
-      elsif Kawari.is_local_script(path)
-        rdict, kdict = Kawari.read_local_script(path)
-      else
-        rdict, kdict = Kawari.create_dict(Kawari.read_dict(path))
-      end
-      rdictlist << rdict
-      kdictlist << kdict
-      return Kawari7.new(kawari_dir, pathlist, rdictlist, kdictlist)
-    end
-  end
-
   def self.is_local_script(path)
     line = ''
     open(path, 'rb') do |f|
