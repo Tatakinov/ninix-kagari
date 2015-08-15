@@ -46,7 +46,7 @@ module Misaka
       at = 'line ' + position[0].to_s + ', column ' + position[1].to_s
       error = 'lexical error at ' + at.to_s + ' in ' + path.to_s
     end
-    raise MisakaError(error)
+    raise MisakaError.new(error)
   end
 
   def self.syntax_error(message, path=nil, position=nil)
@@ -61,7 +61,7 @@ module Misaka
       at = 'line ' + position[0].to_s + ', column ' + position[1].to_s
       error = 'syntax error at ' + at.to_s + ' in ' + path.to_s + ' (' + message.to_s + ')'
     end
-    raise MisakaError(error)
+    raise MisakaError.new(error)
   end
 
   def self.list_dict(top_dir)
@@ -79,37 +79,37 @@ module Misaka
 
   def self.read_misaka_ini(top_dir)
     path = File.join(top_dir, 'misaka.ini')
+    filelist = []
+    debug = 0
+    error = 0
     open(path) do |f|
-      filelist = []
-      debug = 0
-      error = 0
       while true
-        line = f.readline()
+        line = f.gets
         if not line
           break
         end
         line = line.strip()
-        if not line or line.start_with?('//')
+        if line.empty? or line.start_with?('//')
           next
         end
         if line == 'dictionaries'
-          line = f.readline()
+          line = f.gets
           if line.strip() != '{'
-            syntax_error('expected an open brace', path)
+            Misaka.syntax_error('expected an open brace', path)
           end
           while true
-            line = f.readline()
+            line = f.gets
             if not line
-              syntax_error('unexpected end of file', path)
+              Misaka.syntax_error('unexpected end of file', path)
             end
             line = line.strip()
             if line == '}'
               break
             end
-            if not line or line.start_with?('//')
+            if line.empty? or line.start_with?('//')
               next
             end
-            filelist.append(Home.get_normalized_path(line))
+            filelist << Home.get_normalized_path(line)
           end
         elsif line == 'debug,0'
           debug = 0
@@ -151,24 +151,24 @@ module Misaka
 
   class Lexer
 
-    Re_comment = Regexp.new('^([ \t]*//[^\r\n]*)')
-    Re_newline = Regexp.new('^(\r\n|\r|\n)')
+    Re_comment = Regexp.new('[ \t]*//[^\r\n]*')
+    Re_newline = Regexp.new('\r\n|\r|\n')
     Patterns = [
         [TOKEN_NEWLINE,       Re_newline],
-        [TOKEN_WHITESPACE,    Regexp.new('^[ \t]+')],
-        [TOKEN_OPEN_BRACE,    Regexp.new('^{')],
-        [TOKEN_CLOSE_BRACE,   Regexp.new('^}')],
-        [TOKEN_OPEN_PAREN,    Regexp.new('^\(')],
-        [TOKEN_CLOSE_PAREN,   Regexp.new('^\)')],
-        [TOKEN_OPEN_BRACKET,  Regexp.new('^\[')],
-        [TOKEN_CLOSE_BRACKET, Regexp.new('^\]')],
-        [TOKEN_DOLLAR,        Regexp.new('^\$')],
-        [TOKEN_COMMA,         Regexp.new('^,')],
-        [TOKEN_SEMICOLON,     Regexp.new('^;')],
-        [TOKEN_OPERATOR,      Regexp.new('^([!=]=|[<>]=?|=[<>]|&&|\|\||\+\+|--|[+\-*/]?=|[+\-*/%\^])')],
-        [TOKEN_DIRECTIVE,     Regexp.new('^#[_A-Za-z][_A-Za-z0-9]*')],
-        #[TOKEN_TEXT,          Regexp.new("^([!&|]|(\\[,\"]|[\x01\x02#'.0-9:?@A-Z\\_`a-z~]|[\x80-\xff].)+)")],
-        [TOKEN_TEXT,          Regexp.new("^((\"[^\"]*\")|[!&|]|(\\[,\"]|[\x01\x02#'.0-9:?@A-Z\\_`a-z~\"]|[" + "\u0080" + "-" + "\uffff" + "]+)+)")],
+        [TOKEN_WHITESPACE,    Regexp.new('[ \t]+')],
+        [TOKEN_OPEN_BRACE,    Regexp.new('{')],
+        [TOKEN_CLOSE_BRACE,   Regexp.new('}')],
+        [TOKEN_OPEN_PAREN,    Regexp.new('\(')],
+        [TOKEN_CLOSE_PAREN,   Regexp.new('\)')],
+        [TOKEN_OPEN_BRACKET,  Regexp.new('\[')],
+        [TOKEN_CLOSE_BRACKET, Regexp.new('\]')],
+        [TOKEN_DOLLAR,        Regexp.new('\$')],
+        [TOKEN_COMMA,         Regexp.new(',')],
+        [TOKEN_SEMICOLON,     Regexp.new(';')],
+        [TOKEN_OPERATOR,      Regexp.new('[!=]=|[<>]=?|=[<>]|&&|\|\||\+\+|--|[+\-*/]?=|[+\-*/%\^]')],
+        [TOKEN_DIRECTIVE,     Regexp.new('#[_A-Za-z][_A-Za-z0-9]*')],
+        #[TOKEN_TEXT,          Regexp.new("[!&|]|(\\[,\"]|[\x01\x02#'.0-9:?@A-Z\\_`a-z~]|[\x80-\xff].)+")],
+        [TOKEN_TEXT,          Regexp.new("(\"[^\"]*\")|[!&|]|(\\\\[,\"]|[\x01\x02#'.0-9:?@A-Z\\\\_`a-z~\"]|[" + "\u0080" + "-" + "\uffff" + "]+)+")],
         ]
     token_names = {
         TOKEN_WHITESPACE =>    'whitespace',
@@ -198,7 +198,7 @@ module Misaka
       while pos < end_
         if column == 0
           match = Re_comment.match(data, pos)
-          if match
+          if match and match.begin(0) == pos
             column = column + match[0].length
             pos = match.end(0)
             next
@@ -207,7 +207,7 @@ module Misaka
         break_flag = false
         for token, pattern in Patterns
           match = pattern.match(data, pos)
-          if match
+          if match and match.begin(0) == pos
             lexeme = match[0]
             if token == TOKEN_TEXT and \
               lexeme.start_with?('"') and lexeme.end_with?('"')
@@ -227,7 +227,7 @@ module Misaka
         end
         if not break_flag
           ###print(data[pos..pos + 100 - 1])
-          lexical_error(path, [line, column])
+          Misaka.lexical_error(path, [line, column])
         end
         if token == TOKEN_NEWLINE
           line = line + 1
@@ -256,7 +256,7 @@ module Misaka
       begin
         token, lexeme, @position = @buffer.shift
       rescue #except IndexError:
-        syntax_error('unexpected end of file', @path)
+        Misaka.syntax_error('unexpected end of file', @path)
       end
       ###print(token, repr(lexeme))
       return token, lexeme
@@ -265,7 +265,7 @@ module Misaka
     def pop_check(expected)
       token, lexeme = pop()
       if token != expected
-        syntax_error(['exptected ', @token_names[expected], ', but returns ', @token_names[token]].join(''),
+        Misaka.syntax_error(['exptected ', @token_names[expected], ', but returns ', @token_names[token]].join(''),
                      @path, get_position())
       end
       return lexeme
@@ -275,7 +275,7 @@ module Misaka
       begin
         token, lexeme, position = @buffer[index]
       rescue #except IndexError:
-        syntax_error('unexpected end of file', @path)
+        Misaka.syntax_error('unexpected end of file', @path)
       end
       return token, lexeme
     end
@@ -289,7 +289,7 @@ module Misaka
         pop()
       end
       if not accept_eof
-        syntax_error('unexpected end of file', @path)
+        Misaka.syntax_error('unexpected end of file', @path)
       end
       return true
     end
@@ -335,7 +335,7 @@ module Misaka
     end
 
     def get_dict
-      common = mil
+      common = nil
       groups = []
       # skip junk tokens at the beginning of the file
       while true
@@ -395,8 +395,8 @@ module Misaka
         end
       end
       if not buf
-        syntax_error('null identifier',
-                     @path, @lexer.get_position())
+        Misaka.syntax_error('null identifier',
+                            @path, @lexer.get_position())
       end
       name = ['$', buf.join('')].join('')
       # get group parameters
@@ -412,8 +412,8 @@ module Misaka
         elsif [TOKEN_COMMA, TOKEN_SEMICOLON].include?(token)
           @lexer.pop()
         else
-          syntax_error('expected a delimiter',
-                       @path, @lexer.get_position())
+          Misaka.syntax_error('expected a delimiter',
+                              @path, @lexer.get_position())
         end
         token, lexeme = @lexer.look_ahead()
         if token == TOKEN_WHITESPACE
@@ -430,8 +430,8 @@ module Misaka
           token, lexeme = @lexer.pop()
           parameters << [NODE_TEXT, unescape(lexeme)]
         else
-          syntax_error('expected a parameter or brace expression',
-                       @path, @lexer.get_position())
+          Misaka.syntax_error('expected a parameter or brace expression',
+                              @path, @lexer.get_position())
         end
       end
       # get sentences
@@ -494,7 +494,7 @@ module Misaka
       else
         begin
           line = get_line()
-        rescue # except MisakaError as error:
+        rescue => error # except MisakaError as error:
           Logging::Logging.debug(error)
           @lexer.skip_line()
           return nil
@@ -537,10 +537,10 @@ module Misaka
       end
       # strip whitespace at the beginning and/or end of line
       if buf and is_whitespace(buf[0])
-        del buf[0]
+        buf.delete_at(0)
       end
       if buf and is_whitespace(buf[-1])
-        del buf[-1]
+        buf.delete_at(-1)
       end
       return buf
     end
@@ -564,15 +564,15 @@ module Misaka
         elsif token == TOKEN_OPEN_BRACE
           buf << get_brace_expr()
         else
-          raise RuntimeError('should not reach here')
+          raise RuntimeError.new('should not reach here')
         end
       end
       # strip whitespace at the beginning and/or end of line
       if buf and is_whitespace(buf[0])
-        del buf[0]
+        buf.delete_at(0)
       end
       if buf and is_whitespace(buf[-1])
-        del buf[-1]
+        buf.delete_at(-1)
       end
       return buf
     end
@@ -587,7 +587,7 @@ module Misaka
       while true
         token, lexeme = @lexer.look_ahead()
         if token == TOKEN_TEXT or \
-          token == TOKEN_OPERATOR and ['+', '-', '*', '/', '%'].include?(lexeme)
+          (token == TOKEN_OPERATOR and ['+', '-', '*', '/', '%'].include?(lexeme))
           token, lexeme = @lexer.pop()
           nodelist << [NODE_TEXT, unescape(lexeme)]
         elsif token == TOKEN_OPEN_BRACE
@@ -597,8 +597,8 @@ module Misaka
         end
       end
       if nodelist.length == 1
-        syntax_error('null identifier',
-                     @path, @lexer.get_position())
+        Misaka.syntax_error('null identifier',
+                            @path, @lexer.get_position())
       end
       @lexer.skip_space()
       token, lexeme = @lexer.look_ahead()
@@ -702,8 +702,8 @@ module Misaka
             operator = '-='
             value = [[NODE_TEXT, '1']]
           else
-            syntax_error(['bad operator ', operator].join(''),
-                         @path, @lexer.get_position())
+            Misaka.syntax_error(['bad operator ', operator].join(''),
+                                @path, @lexer.get_position())
           end
           node = [NODE_ASSIGNMENT, nodelist, operator, value]
         elsif token == TOKEN_OPEN_BRACKET
@@ -749,10 +749,10 @@ module Misaka
       end
       # strip whitespace at the beginning and/or end of line
       if buf and is_whitespace(buf[0])
-        del buf[0]
+        buf.delete_at(0)
       end
       if buf and is_whitespace(buf[-1])
-        del buf[-1]
+        buf.delete_at(-1)
       end
       return buf
     end
@@ -1010,7 +1010,7 @@ module Misaka
         end
       else
         print(node)
-        raise RuntimeError('should not reach here')
+        raise RuntimeError.new('should not reach here')
       end
     end
   end
@@ -1117,7 +1117,7 @@ module Misaka
       if not @list
         return nil
       end
-      if not @indexes
+      if @indexes.empty?
         @indexes = Array(0..@list.length-1)
       end
       i = Array(0..@indexes.length-1).sample
@@ -1139,7 +1139,7 @@ module Misaka
       if not @list
         return nil
       end
-      if not @indexes
+      if @indexes.empty?
         @indexes = Array(0..@list.length-1)
       end
       index = @indexes.shift
@@ -1247,7 +1247,7 @@ module Misaka
       @saori_library = SaoriLibrary.new(@saori, @misaka_dir)
       reset()
       begin
-        filelist, debug, error = read_misaka_ini(@misaka_dir)
+        filelist, debug, error = Misaka.read_misaka_ini(@misaka_dir)
       rescue #except IOError:
         Logging::Logging.debug('cannot read misaka.ini')
         return 0
@@ -1301,7 +1301,7 @@ module Misaka
           if ext == '.__1' # should read lines as bytes
             f = open(path, 'rb')
           else
-            f = open(path, :encoding => @charset)
+            f = open(path, :encoding => @charset + ":utf-8")
           end
         rescue #except IOError:
           Logging::Logging.debug('cannot read ' + filename.to_s)
@@ -1312,7 +1312,7 @@ module Misaka
         end
         begin
           variables, constants = read(f, path)
-        rescue #except MisakaError as error:
+        rescue => error #except MisakaError as error:
           Logging::Logging.debug(error)
           next
         end
@@ -1376,10 +1376,10 @@ module Misaka
             #pass # ignore unknown parameters
           end
         end
-        group = _GroupClass.new(name, sentences)
-        begin
+        group = _GroupClass.new(self, name, sentences)
+        if @dict.include?(name)
           grouplist = @dict[name]
-        rescue #except KeyError:
+        else
           grouplist = @dict[name] = []
         end
         grouplist << [group, conditions]
@@ -1401,7 +1401,7 @@ module Misaka
         open(@dbpath) do |f|
           while true
             begin
-              line = f.readline()
+              line = f.gets
             rescue #except UnicodeError:
               Logging::Logging.debug(
                 'misaka.rb: malformed database (ignored)')
@@ -1413,7 +1413,7 @@ module Misaka
             header = strip_newline(line).split()
             if header[0] == 'SCHOLAR'
               name = header[1]
-              value = strip_newline(f.readline())
+              value = strip_newline(f.gets)
               @variable[name] = [TYPE_SCHOLAR, value]
             elsif header[0] == 'ARRAY'
               begin
@@ -1426,12 +1426,12 @@ module Misaka
               name = header[2]
               array = MisakaArray.new(self, name)
               for _ in 0..size-1
-                value = strip_newline(f.readline())
+                value = strip_newline(f.gets)
                 array << value
               end
               @variable[name] = [TYPE_ARRAY, array]
             else
-              raise RuntimeError('should not reach here')
+              raise RuntimeError.new('should not reach here')
             end
           end
         end
@@ -1456,7 +1456,7 @@ module Misaka
                 f.write(expand(item).to_s + "\n")
               end
             else
-              raise RuntimeError('should not reach here')
+              raise RuntimeError.new('should not reach here')
             end
           end
         end
@@ -1674,7 +1674,7 @@ module Misaka
         result = eval_pow_expr(node[1..-1])
       else
         ##print(node)
-        raise RuntimeError('should not reach here')
+        raise RuntimeError.new('should not reach here')
       end
       return result
     end
@@ -1857,12 +1857,12 @@ module Misaka
         operand1 = value1
         operand2 = value2
       end
-      if operator == '==' and operand1 == operand2 or \
-        operator == '!=' and operand1 != operand2 or \
-        operator == '<'  and operand1 <  operand2 or \
-        operator == '<=' and operand1 <= operand2 or \
-        operator == '>'  and operand1 >  operand2 or \
-        operator == '>=' and operand1 >= operand2
+      if (operator == '==' and operand1 == operand2) or \
+        (operator == '!=' and operand1 != operand2) or \
+        (operator == '<'  and operand1 <  operand2) or \
+        (operator == '<=' and operand1 <= operand2) or \
+        (operator == '>'  and operand1 >  operand2) or \
+        (operator == '>=' and operand1 >= operand2)
         return 'true'
       end
       return 'false'
