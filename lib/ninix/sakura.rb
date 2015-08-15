@@ -376,7 +376,7 @@ module Sakura
           @shiori.show_description()
         end
       else
-        Logging::Logging.error(get_selfnam + ' cannot load SHIORI(' + @shiori_name + ')')
+        Logging::Logging.error(get_selfname + ' cannot load SHIORI(' + @shiori_name + ')')
       end
       @__charset = 'Shift_JIS' # default
       get_event_response('OnInitialize', :event_type => 'NOTIFY')
