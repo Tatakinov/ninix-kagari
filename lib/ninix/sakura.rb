@@ -2890,7 +2890,7 @@ module Sakura
           buf << get_uptime().to_s
         elsif ['%ms', '%mz', '%ml', '%mc', '%mh', \
                '%mt', '%me', '%mp', '%m?'].include?(chunk[1])
-          buf << getword(''.join(["\\", chunk[1][1..-1]]))
+          buf << getword(["\\", chunk[1][1..-1]].join(''))
         elsif chunk[1] == '%dms'
           buf << getdms()
         else # %c, %songname
