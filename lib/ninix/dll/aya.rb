@@ -131,7 +131,7 @@ module Aya
   end
 
   def self.get_aya_version(filelist)
-    if not filelist
+    if filelist.empty?
       return 0
     end
     dic_files = filelist
