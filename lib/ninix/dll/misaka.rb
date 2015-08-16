@@ -151,26 +151,26 @@ module Misaka
 
   class Lexer
 
-    Re_comment = Regexp.new('[ \t]*//[^\r\n]*')
-    Re_newline = Regexp.new('\r\n|\r|\n')
+    Re_comment = Regexp.new('\A[ \t]*//[^\r\n]*')
+    Re_newline = Regexp.new('\A(\r\n|\r|\n)')
     Patterns = [
         [TOKEN_NEWLINE,       Re_newline],
-        [TOKEN_WHITESPACE,    Regexp.new('[ \t]+')],
-        [TOKEN_OPEN_BRACE,    Regexp.new('{')],
-        [TOKEN_CLOSE_BRACE,   Regexp.new('}')],
-        [TOKEN_OPEN_PAREN,    Regexp.new('\(')],
-        [TOKEN_CLOSE_PAREN,   Regexp.new('\)')],
-        [TOKEN_OPEN_BRACKET,  Regexp.new('\[')],
-        [TOKEN_CLOSE_BRACKET, Regexp.new('\]')],
-        [TOKEN_DOLLAR,        Regexp.new('\$')],
-        [TOKEN_COMMA,         Regexp.new(',')],
-        [TOKEN_SEMICOLON,     Regexp.new(';')],
-        [TOKEN_OPERATOR,      Regexp.new('[!=]=|[<>]=?|=[<>]|&&|\|\||\+\+|--|[+\-*/]?=|[+\-*/%\^]')],
-        [TOKEN_DIRECTIVE,     Regexp.new('#[_A-Za-z][_A-Za-z0-9]*')],
+        [TOKEN_WHITESPACE,    Regexp.new('\A[ \t]+')],
+        [TOKEN_OPEN_BRACE,    Regexp.new('\A{')],
+        [TOKEN_CLOSE_BRACE,   Regexp.new('\A}')],
+        [TOKEN_OPEN_PAREN,    Regexp.new('\A\(')],
+        [TOKEN_CLOSE_PAREN,   Regexp.new('\A\)')],
+        [TOKEN_OPEN_BRACKET,  Regexp.new('\A\[')],
+        [TOKEN_CLOSE_BRACKET, Regexp.new('\A\]')],
+        [TOKEN_DOLLAR,        Regexp.new('\A\$')],
+        [TOKEN_COMMA,         Regexp.new('\A,')],
+        [TOKEN_SEMICOLON,     Regexp.new('\A;')],
+        [TOKEN_OPERATOR,      Regexp.new('\A([!=]=|[<>]=?|=[<>]|&&|\|\||\+\+|--|[+\-*/]?=|[+\-*/%\^])')],
+        [TOKEN_DIRECTIVE,     Regexp.new('\A#[_A-Za-z][_A-Za-z0-9]*')],
         #[TOKEN_TEXT,          Regexp.new("[!&|]|(\\[,\"]|[\x01\x02#'.0-9:?@A-Z\\_`a-z~]|[\x80-\xff].)+")],
-        [TOKEN_TEXT,          Regexp.new("(\"[^\"]*\")|[!&|]|(\\\\[,\"]|[\x01\x02#'.0-9:?@A-Z\\\\_`a-z~\"]|[" + "\u0080" + "-" + "\uffff" + "]+)+")],
+        [TOKEN_TEXT,          Regexp.new("\\A((\"[^\"]*\")|[!&|]|(\\\\[,\"]|[\x01\x02#'.0-9:?@A-Z\\\\_`a-z~\"]|[" + "\u0080" + "-" + "\uffff" + "]+)+)")],
         ]
-    token_names = {
+    Token_names = {
         TOKEN_WHITESPACE =>    'whitespace',
         TOKEN_NEWLINE =>       'a newline',
         TOKEN_OPEN_BRACE =>    'an open brace',
@@ -197,17 +197,17 @@ module Misaka
       end_ = data.length
       while pos < end_
         if column == 0
-          match = Re_comment.match(data, pos)
-          if match and match.begin(0) == pos
+          match = Re_comment.match(data[pos..-1])
+          if match
             column = column + match[0].length
-            pos = match.end(0)
+            pos += match.end(0)
             next
           end
         end
         break_flag = false
         for token, pattern in Patterns
-          match = pattern.match(data, pos)
-          if match and match.begin(0) == pos
+          match = pattern.match(data[pos..-1])
+          if match
             lexeme = match[0]
             if token == TOKEN_TEXT and \
               lexeme.start_with?('"') and lexeme.end_with?('"')
@@ -220,7 +220,7 @@ module Misaka
             else
               @buffer << [token, lexeme, [line, column]]
             end
-            pos = match.end(0)
+            pos += match.end(0)
             break_flag = true
             break
           end
@@ -265,8 +265,8 @@ module Misaka
     def pop_check(expected)
       token, lexeme = pop()
       if token != expected
-        Misaka.syntax_error(['exptected ', @token_names[expected], ', but returns ', @token_names[token]].join(''),
-                     @path, get_position())
+        Misaka.syntax_error(['exptected ', Token_names[expected], ', but returns ', Token_names[token]].join(''),
+                            @path, get_position())
       end
       return lexeme
     end
@@ -2651,7 +2651,7 @@ module Misaka
     def load(name, top_dir)
       result = 0
       head, name = File.split(name.gsub('\\', '/')) # XXX: don't encode here
-      top_dir = File.join(top_dir, os.fsencode(head))
+      top_dir = File.join(top_dir, head)
       if not @saori_list.include?(name)
         module_ = @saori.request(name)
           if module_
@@ -2659,7 +2659,7 @@ module Misaka
           end
       end
       if @saori_list.include?(name)
-        result = @saori_list[name].load(top_dir)
+        result = @saori_list[name].load(:dir => top_dir)
       end
       return result
     end
@@ -2688,5 +2688,4 @@ module Misaka
       return result
     end
   end
-end
-                                                   
+end                
