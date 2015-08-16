@@ -2347,12 +2347,12 @@ module Kawari
     def saori_load(saori, path)
       result = 0
       if @saori_list.keys().include?(saori)
-        result = @saori_list[saori].load(path)
+        result = @saori_list[saori].load(:dir => path)
       else
         module_ = @saori.request(saori)
         if module_
           @saori_list[saori] = module_
-          result = @saori_list[saori].load(path)
+          result = @saori_list[saori].load(:dir => path)
         end
       end
       return result
