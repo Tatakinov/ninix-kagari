@@ -1475,11 +1475,11 @@ module Satori
         if value == '実行'
           save_database()
         end
-      elsif Re_reservation.match(name) and Re_reservation.match(name).begin(0) == 0 # FIXME: match -> match
+      elsif Re_reservation.match(name) and Re_reservation.match(name).begin(0) == 0 # FIXME
         if not value
           return nil
         end
-        match = Re_reservation.match(name) # FIXME: match -> match
+        match = Re_reservation.match(name)
         number = to_integer(match[1])
         if match[4] != nil
           number = Array(number..to_integer(match[4])).sample
@@ -1811,8 +1811,8 @@ module Satori
       buf = []
       i = 0
       while true
-        match = Re_tag.match(script, i) # FIXME: match -> match
-        if match and match.begin(0) == 0
+        match = Re_tag.match(script, i)
+        if match and match.begin(0) == 0 # FIXME
           start = match.begin(0)
           end_ = match.end(0)
           buf << @parser.anchor_filter.apply(script[i..start-1])
@@ -1835,7 +1835,7 @@ module Satori
         end
       end
       # remove redundant newline tags
-      match = Re_newline.match(script) # FIXME: search -> match
+      match = Re_newline.match(script)
       if match
         tag = match[3]
         if tag == '\e'
@@ -1848,10 +1848,10 @@ module Satori
       # insert newline
       i = 1
       while true
-        match = Re_0.match(script, i) # FIXME: search -> match
+        match = Re_0.match(script, i)
         if match
           end_ = match.end(0)
-          match = Re_0.match(script, end_) # FIXME: search -> match
+          match = Re_0.match(script, end_)
           if match
             start = match.begin(0)
             if start < @newline.length or \
@@ -1868,10 +1868,10 @@ module Satori
       end
       i = 1
       while true
-        match = Re_1.match(script, i) # FIXME: search -> match
+        match = Re_1.match(script, i)
         if match
           end_ = match.end(0)
-          match = Re_1.match(script, end_) # FIXME: search -> match
+          match = Re_1.match(script, end_)
           if match
             start = match.begin(0)
             if start < @newline.length or \
@@ -1891,16 +1891,16 @@ module Satori
       n = 0
       i, j = 0, script.length
       while i < j
-        match = Re_wait_after.match(script, i) # FIXME: match -> match
-        if match and match.begin(0) == 0
+        match = Re_wait_after.match(script, i)
+        if match and match.begin(0) == 0 # FIXME
           buf << match[0]
           buf.concat(make_wait(n))
           n = 0
           i = match.end(0)
           next
         end
-        match = Re_wait_before.match(script, i) # FIXME: match -> match
-        if match and match.begin(0) == 0
+        match = Re_wait_before.match(script, i)
+        if match and match.begin(0) == 0 # FIXME
           buf.concat(make_wait(n))
           buf << match[0]
           n = 0
@@ -1915,8 +1915,8 @@ module Satori
             next
           end
         end
-        match = Re_tag.match(script, i) # FIXME: match -> match
-        if match and match.begin(0) == 0
+        match = Re_tag.match(script, i)
+        if match and match.begin(0) == 0 # FIXME
           buf << script[i..match.end(0)-1]
           i = match.end(0)
         else
@@ -2276,8 +2276,8 @@ module Satori
         return to_zenkaku(@timer[key])
       elsif is_reserved(key)
         return get_reserved(key)
-      elsif Re_random.match(key) and Re_random.match(key).begin(0) == 0 # FIXME: match -> match
-        match = Re_random.match(key) # FIXME: match -> match
+      elsif Re_random.match(key) and Re_random.match(key).begin(0) == 0 # FIXME
+        match = Re_random.match(key)
         i = to_integer(match[1])
         j = to_integer(match[4])
         if i < j
@@ -2285,8 +2285,8 @@ module Satori
         else
           return to_zenkaku(Array(j..i).sample)
         end
-      elsif Re_n_reserved.match(key) and Re_n_reserved.match(key).begin(0) == 0 # FIXME: match -> match
-        match = Re_n_reserved.match(key) # FIXME: match -> match
+      elsif Re_n_reserved.match(key) and Re_n_reserved.match(key).begin(0) == 0 # FIXME
+        match = Re_n_reserved.match(key)
         number = to_integer(match[1])
         for key in @reserved_talk.keys
           if @reserved_talk[key] == number
@@ -2294,16 +2294,16 @@ module Satori
           end
         end
         return ''
-      elsif Re_is_reserved.match(key) and Re_is_reserved.match(key).begin(0) == 0 # FIXME: match -> match
-        match = Re_is_reserved.match(key) # FIXME: match -> match
+      elsif Re_is_reserved.match(key) and Re_is_reserved.match(key).begin(0) == 0 # FIXME
+        match = Re_is_reserved.match(key)
         name = match[1]
         if @reserved_talk.include?(name)
           return to_zenkaku(1)
         else
           return to_zenkaku(0)
         end
-      elsif Re_is_empty.match(key) and Re_is_empty.match(key).begin(0) == 0 # FIXME: match -> match
-        match = Re_is_empty.match(key) # FIXME: match -> match
+      elsif Re_is_empty.match(key) and Re_is_empty.match(key).begin(0) == 0 # FIXME
+        match = Re_is_empty.match(key)
         type_ = match[1]
         name = match[2]
         if type_ == '変数'
