@@ -1802,8 +1802,8 @@ module Satori
     Re_1 = Regexp.new('\\\\[1u]')
     Re_wait_after = Regexp.new('、|。|，|．')
     Re_wait_before = Regexp.new('\\\\[01hunce]')
-    Re_tag = Regexp.new('\\\\[ehunjcxtqzy*v0123456789fmia!&+---]|' \
-                        '\\[sb][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|' \
+    Re_tag = Regexp.new('\\\\[ehunjcxtqzy*v0123456789fmia!&+\-\-\-]|' \
+                        '\\\\[sb][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|' \
                         '\\__[ct]|\\URL')
 
     def make(script)
@@ -2229,7 +2229,7 @@ module Satori
       return buf.join('').strip()
     end
 
-    Re_random = Regexp.new('乱数((−|＋|[-+])?(０|１|２|３|４|５|６|７|８|９|[0-9])+)〜((−|＋|[-+])?(０|１|２|３|４|５|６|７|８|９|[0-9])+)')
+    Re_random = Regexp.new('乱数((−|＋|[-+])?([[:digit:]])+)～((−|＋|[-+])?([[:digit:]])+)')
     Re_is_empty = Regexp.new('(変数|文|単語群)「(.*)」の存在')
     Re_n_reserved = Regexp.new('次から((０|１|２|３|４|５|６|７|８|９|[0-9])+)回目のトーク')
     Re_is_reserved = Regexp.new('トーク「(.*)」の予約有無')
@@ -2259,7 +2259,7 @@ module Satori
       elsif key and ['Ｈ', 'H'].include?(key[0])
         ##Logging::Logging.debug(['["', history.join('", "'), '"]'].join(''))
         n = to_integer(key[1..-1])
-        if n != nil and 1 <= n and m < history.length + 1 ## FIXME
+        if n != nil and 1 <= n and n < history.length + 1 ## FIXME
           return history[n-1]
         end
       end
