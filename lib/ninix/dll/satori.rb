@@ -827,7 +827,7 @@ module Satori
     def get_add_expr(line)
       line, mul_expr = get_mul_expr(line)
       buf = [NODE_ADD_EXPR, mul_expr]
-      while line and ['+', '＋', '-', '−'].include?(line[0]) ### FIXME: φ
+      while line and ['+', '＋', '-', '−', '－'].include?(line[0]) ### FIXME: φ
         if ['+', '＋'].include?(line[0])
           buf << '+'
         else
@@ -880,7 +880,7 @@ module Satori
     end
 
     def get_unary_expr(line)
-      if line and ['-', '−'].include?(line[0]) ### FIXME: φ
+      if line and ['-', '−', '－'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         line, unary_expr = get_unary_expr(line)
         return line, [[NODE_UNARY_EXPR, '-', unary_expr]]
@@ -905,7 +905,7 @@ module Satori
 
     Operators = [
         '|', '｜', '&', '＆', '<', '＜', '>', '＞', '=', '＝', '!', '！',
-        '+', '＋', '-', '−', '*', '＊', '×', '/', '／', '÷', '%', '％',
+        '+', '＋', '-', '−', '－', '*', '＊', '×', '/', '／', '÷', '%', '％',
         '^', '＾', '(', ')']
 
     def get_factor(line)
@@ -1459,7 +1459,7 @@ module Satori
       return reserved
     end
 
-    Re_reservation = Regexp.new('\A次から((０|１|２|３|４|５|６|７|８|９|[0-9])+)(〜((０|１|２|３|４|５|６|７|８|９|[0-9])+))?回目のトーク')
+    Re_reservation = Regexp.new('\A次から(([[:digit:]])+)(〜(([[:digit:]])+))?回目のトーク')
 
     def assign(name, value)
       if name.end_with?('タイマ')
@@ -2229,9 +2229,9 @@ module Satori
       return buf.join('').strip()
     end
 
-    Re_random = Regexp.new('乱数((−|＋|[-+])?([[:digit:]])+)～((−|＋|[-+])?([[:digit:]])+)')
+    Re_random = Regexp.new('乱数((－|−|＋|[-+])?([[:digit:]])+)～((－|−|＋|[-+])?([[:digit:]])+)')
     Re_is_empty = Regexp.new('(変数|文|単語群)「(.*)」の存在')
-    Re_n_reserved = Regexp.new('次から((０|１|２|３|４|５|６|７|８|９|[0-9])+)回目のトーク')
+    Re_n_reserved = Regexp.new('次から(([[:digit:]])+)回目のトーク')
     Re_is_reserved = Regexp.new('トーク「(.*)」の予約有無')
 
     def get_reference(nodelist, history, side)
@@ -2339,7 +2339,7 @@ module Satori
         line = value ## FIXME
         if expand_only or line.empty?
           buf << value
-        elsif ['-', '−',  '+', '＋'].include?(line[0]) and line.length == 1 # XXX
+        elsif ['－', '-', '−',  '+', '＋'].include?(line[0]) and line.length == 1 # XXX
           buf << value
         elsif NUMBER.include?(line[0])
           begin ## FIXME
@@ -2528,7 +2528,7 @@ module Satori
       '８' => '8', '8' => '8',
       '９' => '9', '9' => '9',
       '＋' => '+', '+' => '+',
-      '−' => '-', '-' => '-',
+      '−' => '-', '-' => '-', '－' => '-',
     }
 
     def to_integer(line, error: 'strict')
