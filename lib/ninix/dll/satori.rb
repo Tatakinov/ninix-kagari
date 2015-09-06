@@ -145,10 +145,10 @@ module Satori
         begin
           old, new = line.split("\t")
         rescue #except ValueError:
-          Logging::Logging.debug('satori.py: invalid line in {0} (line {1:d})'.format(path, lineno))
+          Logging::Logging.debug('satori.py: invalid line in ' + path.to_s + ' (line ' + lineno.to_s + ')')
           next
-          buf << [old, new]
         end
+        buf << [old, new]
       end
     end
     return buf
@@ -168,7 +168,7 @@ module Satori
       @anchor_filter = Filter.new(@anchor_list)
       @is_anchor = false
       @saori = []
-      @separator = ['\1', ',', '，', '、', '､']
+      @separator = ["\1", ',', '，', '、', '､']
       @count = {'Talk' =>        0,
                 'NoNameTalk' =>  0,
                 'EventTalk' =>   0,
@@ -280,7 +280,7 @@ module Satori
             break
           end
         end
-        if not line
+        if not line or line.empty?
           next
         end
         if line.start_with?('＊') and not phi_escape[lineno].include?(0)
@@ -398,7 +398,7 @@ module Satori
           end
         end
       end
-      if buf
+      if not buf.empty?
         if @talk.include?(name)
           talk_list = @talk[name]
         else
@@ -406,7 +406,7 @@ module Satori
         end
         talk_list << buf
         if @is_anchor
-          @anchor_list << [name, '\\_a[{0}]{0}\\_a'.format(name)]
+          @anchor_list << [name, '\\_a[' + name.to_s + ']' + name.to_s + '\\_a']
         end
       end
     end
@@ -438,7 +438,7 @@ module Satori
         end
         line = [prev, linelist[n]].join('')
         prev = ''
-        if not line
+        if not line or line.empty?
           next
         end
         word = parse_word(line)
@@ -446,7 +446,7 @@ module Satori
           buf << word
         end
       end
-      if buf
+      if not buf.empty?
         if @word.include?(name)
           word_list = @word[name]
         else
@@ -460,7 +460,7 @@ module Satori
       #assert line[0] == '＄'
       break_flag = false
       for n in 1..line.length-1
-        if ['\t', ' ', '　', '＝'].include?(line[n]) ### FIXME: φ
+        if ["\t", ' ', '　', '＝'].include?(line[n]) ### FIXME: φ
           break_flag = true
           break
         end
@@ -504,7 +504,7 @@ module Satori
       #assert line[0] == '＞'
       break_flag = false
       for n in 1..line.length-1
-        if line[n] == '\t' ### FIXME: φ
+        if line[n] == "\t" ### FIXME: φ
           break_flag = true
           break
         end
@@ -513,7 +513,7 @@ module Satori
         n = line.length
       end
       target = parse_word(line[1..n-1])
-      while n < line.length and line[n] == '\t' ### FIXME: φ
+      while n < line.length and line[n] == "\t" ### FIXME: φ
         n += 1
       end
       if n < line.length
@@ -532,7 +532,7 @@ module Satori
       #assert line[0] == '＿'
       break_flag = false
       for n in 1..line.length-1
-        if line[n] == '\t' ### FIXME: φ
+        if line[n] == "\t" ### FIXME: φ
           break_flag = true
           break
         end
@@ -541,7 +541,7 @@ module Satori
         n = line.length
       end
       label = parse_word(line[1..n-1])
-      while n < line.length and line[n] == '\t' ### FIXME: φ
+      while n < line.length and line[n] == "\t" ### FIXME: φ
         n += 1
       end
       if n < line.length
@@ -616,7 +616,7 @@ module Satori
           if buf.length > 0
             last = buf.pop()
             buf << [last, ll[0]].join('')
-            if ll[1..-1]
+            if ll[1..-1] != nil
               buf.concat(ll[1..-1])
             end
           else
@@ -631,7 +631,9 @@ module Satori
           if buf.length > 0
             last = buf.pop()
             buf << [last, ll[0]].join('')
-            buf.concat(ll[1..-1])
+            if ll[1..-1] != nil
+              buf.concat(ll[1..-1])
+            end
           else
             buf.concat(ll)
           end
@@ -736,7 +738,7 @@ module Satori
       rescue #except ValueError as e:
         return default
       end
-      if line
+      if line and not line.empty?
         return default
       end
       return buf
@@ -1164,7 +1166,8 @@ module Satori
       end
       begin
         open(@dbpath, 'wb') do |f|
-          for name, value in @variable.items()
+          for name in @variable.keys
+            value = @variable[name]
             if ['前回終了時サーフェス0',
                 '前回終了時サーフェス1',
                 'デフォルトサーフェス0',
@@ -1328,14 +1331,14 @@ module Satori
             @random_talk -= 1
             if @random_talk == 0
               event = get_reserved_talk()
-              if event
+              if event != nil
                 @reference[0] = to_zenkaku(1)
               else
                 @reference[0] = to_zenkaku(0)
               end
               @reference[1] = event
               script = get_script('OnTalk')
-              if script
+              if script != nil
                 @script_history.shift
                 @script_history. << script
                 return script
@@ -1379,14 +1382,14 @@ module Satori
         return get_url_list(event)
       elsif event == 'OnRecommandedSiteChoice'
         script = get_url_script(ref0, ref1)
-        if script
+        if script != nil
           @script_history.shift
           @script_history << script
         end
         return script
       elsif EVENT_MAP.include?(event)
         if ['OnBoot', 'OnGhostChanged'].include?(event)
-          if @boot_script
+          if @boot_script != nil
             script = @boot_script
             @boot_script = nil
             @script_history.shift
@@ -1399,7 +1402,7 @@ module Satori
             tail = '\-\e'
           end
           script = get_script('OnSatoriClose', :tail => tail)
-          if script
+          if script != nil
             @script_history.shift
             @script_history << script
             return script
@@ -1410,7 +1413,7 @@ module Satori
         end
       end
       script = get_script(event, :tail => tail)
-      if script and not script.empty?
+      if script != nil
         @script_history.shift
         @script_history << script
       end
@@ -1476,7 +1479,7 @@ module Satori
           save_database()
         end
       elsif Re_reservation.match(name) and Re_reservation.match(name).begin(0) == 0 # FIXME
-        if not value
+        if not value or value.empty?
           return nil
         end
         match = Re_reservation.match(name)
@@ -1499,7 +1502,7 @@ module Satori
         end
         @reserved_talk[value] = number
       elsif name == '次のトーク'
-        if not value
+        if not value or value.empty?
           return nil
         end
         number = 1
@@ -1525,7 +1528,7 @@ module Satori
         end
       elsif name == '起動回数'
         @runcount = to_integer(value) + 1
-      elsif not value
+      elsif not value or value.empty?
         if @variable.include?(name)
           @variable.delete(name)
         end
@@ -1672,9 +1675,9 @@ module Satori
 
     def get_script(name, head: '\1', tail: '\e')
       if @reset_surface
-        @current_reset_surface = [1, 1]
+        @current_reset_surface = [true, true]
       else
-        @current_reset_surface = [0, 0]
+        @current_reset_surface = [false, false]
       end
       script = get(name, :default => nil)
       if script != nil and not script.empty? and script != '\\n'
@@ -1708,11 +1711,11 @@ module Satori
             #pass
           end
         end
-        if not title
+        if title.empty?
           next
         end
         if title == '-'
-          if url_list
+          if not url_list.empty?
             url_list = [url_list, 2.chr].join('')
           end
           url_list = [url_list, title, 1.chr].join('')
@@ -1732,7 +1735,7 @@ module Satori
             #pass
           end
         end
-        if not url
+        if url.empty?
           next
         end
         bannar = ''
@@ -1755,12 +1758,12 @@ module Satori
           script = nil
         end
         @url_list[name] << [title, url, bannar, script]
-        if url_list
+        if not url_list.empty?
           url_list = [url_list, 2.chr].join('')
         end
         url_list = [url_list, title, 1.chr, url, 1.chr, bannar].join('')
       end
-      if not url_list
+      if url_list.empty?
         url_list = nil
       end
       return url_list
@@ -1769,9 +1772,9 @@ module Satori
     def get_url_script(title, url)
       script = nil
       if @reset_surface
-        @current_reset_surface = [1, 1]
+        @current_reset_surface = [true, true]
       else
-        @current_reset_surface = [0, 0]
+        @current_reset_surface = [false, false]
       end
       for key in @url_list
         for item in @url_list[key]
@@ -1961,7 +1964,7 @@ module Satori
           else
             value = get_reference(node[1], history, side)
           end
-          if value
+          if value and not value.empty?
             talk = true
             buf << value
             history << value
@@ -1976,7 +1979,7 @@ module Satori
             function, args,
             caller_history != nil ? caller_history : history,
             side)
-          if value
+          if value and not value.empty?
             talk = true
             buf << value
             history << value
@@ -2001,7 +2004,7 @@ module Satori
               calc_args(node[2], history, :expand_only => expand_only),
               history, side)
           end
-          if value
+          if value and not value.empty?
             talk = true
             buf << value
             history << value
@@ -2027,7 +2030,7 @@ module Satori
           buf << '\\' + side.to_s
           if @current_reset_surface[side]
             buf << '\s[' + @default_surface[side].to_s + ']'
-            @current_reset_surface[side] = 0
+            @current_reset_surface[side] = false
           end
           if newline[side] != nil
             buf << newline[side].to_s
@@ -2334,7 +2337,7 @@ module Satori
       for i in 0..args.length-1
         value = expand(args[i], :caller_history => history)
         line = value ## FIXME
-        if expand_only or not line
+        if expand_only or line.empty?
           buf << value
         elsif ['-', '−',  '+', '＋'].include?(line[0]) and line.length == 1 # XXX
           buf << value
@@ -2428,8 +2431,8 @@ module Satori
         else
           value = expand(args[1], :caller_history => history)
         end
-        if name
-          if not value
+        if not name.empty?
+          if value.empty?
             if @variable.include?(name)
               @variable.delete(name)
             end
@@ -2452,7 +2455,7 @@ module Satori
             words.concat(word)
           end
         end
-        if words
+        if not words.empty?
           return expand(words.sample)
         end
       elsif name.end_with?('の数')
@@ -2721,7 +2724,7 @@ module Satori
             head, tail = File.split(list_[1])
             saori_dir = File.join(@satori_dir, head)
             result = @saori_library.load(list_[1], saori_dir)
-            if result
+            if result != 0
               @saori_function[list_[0]] = list_[1..-1]
             else
               @saori_function[list_[0]] = nil
@@ -2886,7 +2889,7 @@ module Satori
         @saori_function[name][0],
         req.encode('CP932', :invalid => :replace, :undef => :replace))
       header = response.split(/\r?\n/)
-      if header
+      if not header.empty?
         line = header.shift
         line = line.force_encoding('CP932').encode("UTF-8", :invalid => :replace, :undef => :replace).strip()
         if line.include?(' ')
