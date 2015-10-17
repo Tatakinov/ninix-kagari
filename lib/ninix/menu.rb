@@ -481,9 +481,9 @@ module Menu
       else
         if portal
           menu = Gtk::Menu.new()
-          portal_list = portal.split(2.chr)
+          portal_list = portal.split(2.chr, 0)
           for site in portal_list
-            entry = site.split(1.chr)
+            entry = site.split(1.chr, 0)
             if entry.empty?
               next
             end
@@ -557,9 +557,9 @@ module Menu
     def __set_recommend_menu(recommend)
       if recommend
         menu = Gtk::Menu.new()
-        recommend_list = recommend.split(2.chr)
+        recommend_list = recommend.split(2.chr, 0)
         for site in recommend_list
-          entry = site.split(1.chr)
+          entry = site.split(1.chr, 0)
           if entry.empty?
             next
           end

@@ -415,7 +415,7 @@ module Niseshiori
 
     def parse_condition(condition)
       buf = []
-      for expr in condition.split('&').map {|s| s.strip }
+      for expr in condition.split('&', -1).map {|s| s.strip }
         match = Re_comp_op.match(expr)
         if match
           buf << [COND_COMPARISON, [
@@ -611,7 +611,7 @@ module Niseshiori
     def otherghostname(ghost_list)
       @otherghost = []
       for ghost in ghost_list
-        name, s0, s1 = ghost.split(1.chr)
+        name, s0, s1 = ghost.split(1.chr, 3)
         @otherghost << [name, s0, s1]
       end
       return ''
@@ -1279,12 +1279,12 @@ module Niseshiori
     end
 
     def request(req_string)
-      header = req_string.split(/\r?\n/)
+      header = req_string.split(/\r?\n/, 0)
       req_header = {}
       line = header.shift
       if not line.empty?
         line = line.strip()
-        req_list = line.split()
+        req_list = line.split(nil, -1)
         if req_list.length >= 2
           command = req_list[0].strip()
           protocol = req_list[1].strip()

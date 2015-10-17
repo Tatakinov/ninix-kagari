@@ -306,7 +306,7 @@ module Surface
           if rect == nil
             next
           end
-          values = rect.split(',')
+          values = rect.split(',', 0)
           if values.length != 5
             next
           end
@@ -327,7 +327,7 @@ module Surface
             next
           end
           begin
-            values = rect.split(',')
+            values = rect.split(',', 0)
             x1 = values[0].to_i
             y1 = values[1].to_i
             x2 = values[2].to_i
@@ -454,7 +454,7 @@ module Surface
             #pass
           else
             if bind.include?(key)
-              group = bind[key][0].split(',')
+              group = bind[key][0].split(',', 2)
               @mayuna[name] << [key, group[1], bind[key][1]]
             end
           end
@@ -494,7 +494,7 @@ module Surface
           break
         end
         spec = []
-        for value in config[key].split(',')
+        for value in config[key].split(',', 0)
           spec << value.strip()
         end
         begin
@@ -1776,7 +1776,7 @@ module Surface
       if @bind.include?(bind_id)
         current = @bind[bind_id][1]
         @bind[bind_id][1] = (not current)
-        group = @bind[bind_id][0].split(',')
+        group = @bind[bind_id][0].split(',', 2)
         if @bind[bind_id][1]
           @parent.handle_request('NOTIFY', 'notify_event',
                                  'OnDressupChanged', @side,

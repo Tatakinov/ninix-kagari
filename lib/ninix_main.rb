@@ -186,12 +186,12 @@ module Ninix_Main
     def check_request_queue(sender)
       count = 0
       for request in @__sstp_queue
-        if request[2].split(' / ')[0] == sender.split(' / ')[0]
+        if request[2].split(' / ', 2)[0] == sender.split(' / ', 2)[0]
           count += 1
         end
       end
       if @__sstp_flag and \
-        @__current_sender.split(' / ')[0] == sender.split(' / ')[0]
+        @__current_sender.split(' / ', 2)[0] == sender.split(' / ', 2)[0]
         count += 1
       end
       return count.to_s, @__sstp_queue.length.to_s

@@ -684,7 +684,7 @@ module Home
               tooltips[key] = value
             end
           elsif key.start_with?('surface')
-            keys = key.split(',')
+            keys = key.split(',', 0)
             for key in keys
               if key.empty?
                 next
@@ -732,7 +732,7 @@ module Home
         break
       end
       spec = []
-      for value in config[key].split(',')
+      for value in config[key].split(',', 0)
         spec << value.strip()
       end
       begin

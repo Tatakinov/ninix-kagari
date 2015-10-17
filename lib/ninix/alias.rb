@@ -85,7 +85,7 @@ module Alias
             if !values.empty? and \
               values.start_with?('[') and values.end_with?(']')
               table[key] = []
-              for value in values[1, values.length - 2].split(',')
+              for value in values[1, values.length - 2].split(',', 0)
                 begin
                   value = value.to_i.to_s
                 rescue
@@ -112,7 +112,7 @@ module Alias
         if key == 'makoto'
           if !value.empty? and \
             value.start_with('[') and value.end_with(']')
-            value = value[1, value.length - 2].split(',')
+            value = value[1, value.length - 2].split(',', 0)
           else
             value = [value]
           end

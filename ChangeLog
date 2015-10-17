@@ -1,3 +1,7 @@
+Sat October 17 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* 文字列のsplitメソッドについて引数limitを明示的に渡すようにした。
+	* easyballoon互換モジュールの改行を修正した。
+
 Sun September 6 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* バージョン4.500.4リリース.
 	* 里々互換モジュールを更新した.

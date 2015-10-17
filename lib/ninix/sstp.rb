@@ -381,7 +381,7 @@ module SSTP
     def get_options
       show_sstp_marker = use_translator = true
       if @headers.assoc("Option") != nil
-        options = @headers.reverse.assoc("Option")[1].split(",")
+        options = @headers.reverse.assoc("Option")[1].split(",", 0)
         for option in options
           option = option.strip()
           if option == 'nodescript' and local_request()

@@ -143,7 +143,7 @@ module Satori
           next
         end
         begin
-          old, new = line.split("\t")
+          old, new = line.split("\t", 2)
         rescue #except ValueError:
           Logging::Logging.debug('satori.py: invalid line in ' + path.to_s + ' (line ' + lineno.to_s + ')')
           next
@@ -2769,12 +2769,12 @@ module Satori
         change_folder()
         @folder_change = false
       end
-      header = req_string.encode('UTF-8').split(/\r?\n/)
+      header = req_string.encode('UTF-8').split(/\r?\n/, 0)
       req_header = {}
       line = header.shift
       if line
         line = line.strip()
-        req_list = line.split()
+        req_list = line.split(nil, -1)
         if req_list.length >= 2
           command = req_list[0].strip()
           protocol = req_list[1].strip()
@@ -2888,7 +2888,7 @@ module Satori
       response = @saori_library.request(
         @saori_function[name][0],
         req.encode('CP932', :invalid => :replace, :undef => :replace))
-      header = response.split(/\r?\n/)
+      header = response.split(/\r?\n/, 0)
       if not header.empty?
         line = header.shift
         line = line.force_encoding('CP932').encode("UTF-8", :invalid => :replace, :undef => :replace).strip()

@@ -776,7 +776,7 @@ module Sakura
     def get_value(response) # FIXME: check return code
       result = {}
       to = nil
-      for line in response.force_encoding(@__charset).split(/\r?\n/)
+      for line in response.force_encoding(@__charset).split(/\r?\n/, 0)
         line = line.encode("UTF-8", :invalid => :replace, :undef => :replace).strip()
         if line.empty?
           next
@@ -2090,9 +2090,9 @@ module Sakura
 
     def __yen__b(args)
       begin
-        filename, x, y = expand_meta(args[0]).split(',')
+        filename, x, y = expand_meta(args[0]).split(',', 3)
       rescue ArgumentError
-        filename, param = expand_meta(args[0]).split(',')
+        filename, param = expand_meta(args[0]).split(',', 2)
         #assert param == 'inline'
         x, y = 0, 0 ## FIXME
       end
@@ -2643,7 +2643,7 @@ module Sakura
         end
         bind = @surface.window[@script_side].bind # XXX
         for key in bind.keys
-          group = bind[key][0].split(',')
+          group = bind[key][0].split(',', 2)
           if category != group[0]
             next
           end

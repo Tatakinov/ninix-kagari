@@ -472,7 +472,7 @@ module Install
           # uninstall older versions of the ghost
           if confirm_refresh(prefix, 'ghost')
             mask = []
-            for path in inst.get('refreshundeletemask', :default => '').split(':')
+            for path in inst.get('refreshundeletemask', :default => '').split(':', 0)
               mask << Home.get_normalized_path(path)
             end
             mask << 'HISTORY'
@@ -586,7 +586,7 @@ module Install
           # uninstall older versions of the balloon
           if confirm_refresh(dstdir, 'balloon')
             mask = []
-            for path in inst.get('refreshundeletemask', :default => '').split(':')
+            for path in inst.get('refreshundeletemask', :default => '').split(':', 0)
               mask << Home.get_normalized_path(path)
             end
             remove_files_and_dirs(dstdir, mask)

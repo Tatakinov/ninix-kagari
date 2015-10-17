@@ -364,7 +364,7 @@ module SSU
         end
         value_list = s0.split(s1, num + 1)
       else
-        value_list = s0.split(s1)
+        value_list = s0.split(s1, -1)
       end
       @value = value_list
       return value_list.length

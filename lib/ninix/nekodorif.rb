@@ -694,7 +694,7 @@ module Nekodorif
       @__scale = @target.get_surface_scale()
       set_state('before')
       if @data.include?('category')
-        category = @data['category'].split(',')
+        category = @data['category'].split(',', 0)
         if not category.empty?
           if not CATEGORY_LIST.include?(category[0])
             Logging::Logging.warning('WARNING: unknown major category - ' + category[0])

@@ -466,11 +466,11 @@ module Aya
 
     # SHIORI API
     def request(req_string)
-      header = req_string.force_encoding('CP932').split(/\r?\n/)
+      header = req_string.force_encoding('CP932').split(/\r?\n/, 0)
       if header and not header.empty?
         line = header.shift
         line = line.strip()
-        req_list = line.split()
+        req_list = line.split(nil, -1)
         if req_list.length >= 2
           @req_command = req_list[0].strip()
           @req_protocol = req_list[1].strip()
@@ -3465,7 +3465,7 @@ module Aya
       response = @aya.saori_library.request(
         argv[0].to_s,
         argv[1].to_s.encode('Shift_JIS', :invalid => :replace, :undef => :replace)) ## FIXME
-      header = response.encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/)
+      header = response.encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/, 0)
       @saori_statuscode = ''
       @saori_header = []
       @saori_value = {}

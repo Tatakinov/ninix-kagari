@@ -99,7 +99,7 @@ module Gomi
         return RESPONSE[400]
       end
       args = @parser.getopts(
-        argument[0].split(),
+        argument[0].split(nil, 0),
         'enVafqsvw:',
         'empty', 'number-of-items', 'version', 'asynchronous', 'force',
         'quiet', 'silent', 'verbose', 'hwnd:')

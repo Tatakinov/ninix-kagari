@@ -139,7 +139,7 @@ module Kawari
         end
       end
     else
-      entries = data.split(',').map {|s| s.strip }
+      entries = data.split(',', 0).map {|s| s.strip }
     end
     return entries
   end
@@ -470,7 +470,7 @@ module Kawari
     def otherghostname(ghost_list)
       ghosts = []
       for ghost in ghost_list
-        name, s0, s1 = ghost.split(1.chr)
+        name, s0, s1 = ghost.split(1.chr, 3)
         ghosts << [name, s0, s1]
         @otherghost[name] = [s0, s1]
       end
@@ -703,7 +703,7 @@ module Kawari
 
     def select_compound_phrase(name)
       buf = []
-      for name in name.split('&').map {|s| s.strip }
+      for name in name.split('&', 0).map {|s| s.strip }
         cp_list = []
         for d in @rdictlist
           cp_list.concat(d.include?(name) ? d[name] : [])
@@ -1060,7 +1060,7 @@ module Kawari
         raise RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
-      word_list = expand(argv[2]).split(expand(argv[3]))
+      word_list = expand(argv[2]).split(expand(argv[3]), 0)
       n = 0
       for word in word_list
         n += 1
@@ -1924,7 +1924,7 @@ module Kawari
       elsif ['randomseed', 'debug', 'security', 'set'].include?(entry)
         #pass
       elsif entry == 'saori'
-        saori_list = value.split(',')
+        saori_list = value.split(',', 0)
         path = saori_list[0].strip()
         alias_ = saori_list[1].strip()
         if saori_list.length == 3
@@ -2092,12 +2092,12 @@ module Kawari
     end
 
     def request(req_string)
-      header = req_string.force_encoding($charset).encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/)
+      header = req_string.force_encoding($charset).encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/, 0)
       req_header = {}
       if not header.empty?
         line = header.shift
         line = line.strip()
-        req_list = line.split()
+        req_list = line.split(nil, -1)
         if req_list.length >= 2
           command = req_list[0].strip()
           protocol = req_list[1].strip()

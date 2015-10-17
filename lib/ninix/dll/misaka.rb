@@ -1410,7 +1410,7 @@ module Misaka
             if not line
               break
             end
-            header = strip_newline(line).split()
+            header = strip_newline(line).split(nil, -1)
             if header[0] == 'SCHOLAR'
               name = header[1]
               value = strip_newline(f.gets)
@@ -1480,11 +1480,11 @@ module Misaka
     end
 
     def request(req_string)
-      header = req_string.split(/\r?\n/)
+      header = req_string.split(/\r?\n/, 0)
       line = header.shift
       if line
         line = line.force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace).strip()
-        req_list = line.split()
+        req_list = line.split(nil, -1)
         if req_list.length >= 2
           @req_command = req_list[0].strip()
           @req_protocol = req_list[1].strip()
@@ -1533,7 +1533,7 @@ module Misaka
         end
         @otherghost = []
         for ref in refs
-          name, s0, s1 = ref.split(1.chr)
+          name, s0, s1 = ref.split(1.chr, 3)
           @otherghost << [name, s0, s1]
         end
       end
@@ -2041,7 +2041,7 @@ module Misaka
       if n < 0
         return ''
       end
-      value_list = expand_args(args[0]).split(',')
+      value_list = expand_args(args[0]).split(',', 0)
       begin
         return value_list[n]
       rescue #except IndexError:
@@ -2286,7 +2286,7 @@ module Misaka
             end
             value = array
           end
-          member_list = expand_args(args[1]).split(1.chr)
+          member_list = expand_args(args[1]).split(1.chr, 0)
           for member in member_list
             value.append(member)
           end
@@ -2526,7 +2526,7 @@ module Misaka
       end
       req = [req, "\r\n"].join('')
       response = @saori_library.request(expand_args(args[0]), req)
-      header = response.split(/\r?\n/)
+      header = response.split(/\r?\n/, 0)
       if header
         line = header.shift
         line = line.force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace).strip()

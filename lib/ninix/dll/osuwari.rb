@@ -83,7 +83,7 @@ module Osuwari
           @settings['except'] = ['DESKTOP', 'CENTER']
           if argument.length > 8
             #target, position = argument[8].split() # spec
-            position, target = argument[8].split() # real world
+            position, target = argument[8].split(nil, 2) # real world
             #assert ['DESKTOP', 'WORKAREA'].include?(target)
             #assert ['TOP', 'LEFT', 'RIGHT', 'BOTTOM'].include?(position)
             @settings['except'] = [target, position]

@@ -731,8 +731,8 @@ module Seriko
               raise ('syntax error: ' + pattern)
             end
             t = []
-            for x in args[1, args.length - 2].split('.')
-              for y in x.split(',')
+            for x in args[1, args.length - 2].split('.', 0)
+              for y in x.split(',', 0)
                 t << y
               end
             end

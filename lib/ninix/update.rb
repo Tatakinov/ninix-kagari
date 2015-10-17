@@ -343,7 +343,7 @@ module Update
 
     def parse_updates2_dau
       schedule = []
-      for line in @buffer.split("\n")
+      for line in @buffer.split("\n", 0)
         begin
           filename, checksum, newline = line.split("\001", 4)
         rescue

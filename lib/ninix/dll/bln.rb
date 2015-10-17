@@ -818,7 +818,7 @@ module Bln
       if node[0] == Script::SCRIPT_TAG
         name, args = node[1], node[2..-1]
         if name == '\n'
-          @text = [@text, '\n'].join("")
+          @text = [@text, "\n"].join("")
           draw_text(@text)
         elsif name == '\w'
           if args

@@ -89,7 +89,7 @@ module Communicate
         args = [references[0], selfname, references[1], script,
                 references[2], name, references[7], shell_name]
       elsif on_other_event == 'OnOtherSurfaceChange'
-        side, new_id, new_w, new_h = references[2].split(',')
+        side, new_id, new_w, new_h = references[2].split(',', 4)
         prev_id = references[3]
         args = [name, selfname, side, new_id, prev_id, references[4]]
       elsif on_other_event == 'OnOtherGhostVanished'
@@ -144,7 +144,7 @@ module Communicate
             sakura.enqueue_event('OnCommunicate', selfname, script)
             next
           elsif communicate.include?('\x01')
-            to = name.split('\x01')
+            to = name.split('\x01', 0)
             if to.include?(@ghosts[sakura][0])
               sakura.enqueue_event('OnCommunicate',
                                    selfname, script)

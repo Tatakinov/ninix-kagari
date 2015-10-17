@@ -95,7 +95,7 @@ module Prefs
       begin
         f = open(@filename)
         while(line = f.gets)
-          prefs = line.chomp.split(': ')
+          prefs = line.chomp.split(': ', 2)
           key = prefs[0]
           value = prefs[1]
           @dic[key] = value
