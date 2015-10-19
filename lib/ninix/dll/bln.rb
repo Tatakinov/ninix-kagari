@@ -137,7 +137,7 @@ module Bln
       end
       if argument.length >= 3
         begin
-          offset_x = argument[2].to_i
+          offset_x = Integer(argument[2])
         rescue
           offset_x = 0
         end
@@ -146,7 +146,7 @@ module Bln
       end
       if argument.length >= 4
         begin
-          offset_y = argument[3].to_i
+          offset_y = Integer(argument[3])
         rescue
           offset_y = 0
         end
@@ -423,7 +423,7 @@ module Bln
         @state = 'orusuban'
       else
         begin
-          @life_time = life.to_i
+          @life_time = Integer(life)
         rescue
           #pass
         end
@@ -823,7 +823,7 @@ module Bln
         elsif name == '\w'
           if args
             begin
-              amount = args[0].to_i * 0.05 - 0.01
+              amount = Integer(args[0]) * 0.05 - 0.01
             rescue
               amount = 0
             end
@@ -836,7 +836,7 @@ module Bln
         elsif name == '\b'
           if args
             begin
-              amount = args[0].to_i
+              amount = Integer(args[0])
             rescue
               amount = 0
             end

@@ -227,7 +227,7 @@ module Install
       #Logging::Logging.debug('downloading ' + url)
       begin
         ifile = open(url)
-      rescue IOError
+      rescue # IOError
         return nil
       end
       #Logging::Logging.debug(
@@ -247,7 +247,7 @@ module Install
           end
           ofile.write(data)
         end
-      rescue IOError, SystemCallError
+      rescue # IOError, SystemCallError
         return nil
       end
       ofile.close()
@@ -497,7 +497,7 @@ module Install
           if balloon_dir
             f.write(["balloon_directory, ", balloon_dir, "\n"].join(''))
           end
-        rescue IOError, SystemCallError => e
+        rescue # IOError, SystemCallError => e
           Logging::Logging.error('cannot write ' + path)
         ensure
           f.close()

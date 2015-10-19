@@ -254,7 +254,7 @@ module WMove
             end
           elsif command == 'WAIT'
             begin
-              wait = args[0].to_i # ms
+              wait = Integer(args[0]) # ms
             rescue
               wait = 0
             end

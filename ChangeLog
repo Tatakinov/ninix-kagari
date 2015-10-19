@@ -1,3 +1,13 @@
+Mon October 19 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* バージョン4.500.5リリース.
+	* MasterList.xmlが無いとNGMが落ちる問題を修正した.(同様の修正多数.)
+	  (Thanks to PaulLiuさん)
+	* Ruby移行時にクラスのインスタンス生成をnewメソッドに
+	  置き換え忘れていた箇所を修正.
+	  (Thanks to PaulLiuさん)
+	* to_i, to_fメソッドは例外を起こさないのでbegin～rescueの中では
+	  Integer(), Float()を使うようにした.
+
 Sat October 17 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* 文字列のsplitメソッドについて引数limitを明示的に渡すようにした。
 	* easyballoon互換モジュールの改行を修正した。

@@ -48,8 +48,8 @@ module Update
     end
 
     def enqueue_event(event,
-                      ref0=nil, ref1=nil, ref2=nil, ref3=nil,
-                      ref4=nil, ref5=nil, ref6=nil, ref7=nil)
+                      ref0: nil, ref1: nil, ref2: nil, ref3: nil,
+                      ref4: nil, ref5: nil, ref6: nil, ref7: nil)
       @event_queue << [event, ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7]
     end
 
@@ -73,14 +73,20 @@ module Update
       begin
         url = URI.parse(homeurl)
       rescue
-        enqueue_event('OnUpdateFailure', 'bad home URL', '', '',
-                      'ghost') # XXX
+        enqueue_event('OnUpdateFailure',
+                      ref0 => 'bad home URL',
+                      ref1 => '',
+                      ref2 => '',
+                      ref3 => 'ghost') # XXX
         @state = nil
         return
       end
       if not url.scheme == 'http'
-        enqueue_event('OnUpdateFailure', 'bad home URL', '', '',
-                      'ghost') # XXX
+        enqueue_event('OnUpdateFailure',
+                      ref0 => 'bad home URL',
+                      ref1 => '',
+                      ref2 => '',
+                      ref3 => 'ghost') # XXX
         @state = nil
         return
       end        
@@ -184,11 +190,11 @@ module Update
     end
 
     def start_updates
-      enqueue_event(
-                    'OnUpdateBegin',
-                    @parent.handle_request('GET', 'get_name', :default => ''),
-                    @path, '',
-                    'ghost') # XXX
+      enqueue_event('OnUpdateBegin',
+                    ref0 => @parent.handle_request('GET', 'get_name', :default => ''),
+                    ref1 => @path,
+                    ref2 => '',
+                    ref3 => 'ghost') # XXX
       download(File.join(@path, 'updates2.dau'))
     end
 
@@ -197,9 +203,10 @@ module Update
       @http = Net::HTTP.new(@host, @port)
       if event
         enqueue_event('OnUpdate.OnDownloadBegin',
-                      File.basename(locator),
-                      @file_number, @num_files,
-                      'ghost') # XXX
+                      ref0 => File.basename(locator),
+                      ref1 => @file_number,
+                      ref2 => @num_files,
+                      ref3 => 'ghost') # XXX
       end
       @state += 1
       reset_timeout()
@@ -213,8 +220,11 @@ module Update
 
     def wait_response
       if check_timeout()
-        enqueue_event('OnUpdateFailure', 'timeout', '', '',
-                      'ghost') # XXX
+        enqueue_event('OnUpdateFailure',
+                      ref0 => 'timeout',
+                      ref1 => '',
+                      ref2 => '',
+                      ref3 => 'ghost') # XXX
         @state = nil
         stop(:revert => true)
         return
@@ -226,9 +236,11 @@ module Update
       elsif code == 302 and redirect()
         return
       elsif @state == 2 # updates2.dau
-        enqueue_event(
-                      'OnUpdateFailure', code.to_s, 'updates2.dau', '',
-                      'ghost') # XXX
+        enqueue_event('OnUpdateFailure',
+                      ref0 => code.to_s,
+                      ref1 => 'updates2.dau',
+                      ref2 => '',
+                      ref3 => 'ghost') # XXX
         @state = nil
         return
       else
@@ -277,8 +289,11 @@ module Update
       data = @response.read_body
       if data.empty?
         if check_timeout()
-          enqueue_event('OnUpdateFailure', 'timeout', '', '',
-                        'ghost') # XXX
+          enqueue_event('OnUpdateFailure',
+                        ref0 => 'timeout',
+                        ref1 => '',
+                        ref2 => '',
+                        ref3 => 'ghost') # XXX
           @state = nil
           stop(:revert => true)
           return
@@ -286,9 +301,11 @@ module Update
           return
         end
       elsif @response.code != '200'
-        enqueue_event(
-                      'OnUpdateFailure', 'data retrieval failed', '', '',
-                      'ghost') # XXX
+        enqueue_event('OnUpdateFailure',
+                      ref0 => 'data retrieval failed',
+                      ref1 => '',
+                      ref2 => '',
+                      ref3 => 'ghost') # XXX
         @state = nil
         stop(:revert => true)
         return
@@ -297,8 +314,11 @@ module Update
         @buffer = data
       end
       if @size == nil or data.length < @size
-        enqueue_event('OnUpdateFailure', 'timeout', '', '',
-                      'ghost') # XXX
+        enqueue_event('OnUpdateFailure',
+                      ref0 => 'timeout',
+                      ref1 => '',
+                      ref2 => '',
+                      ref3 => 'ghost') # XXX
         @state = nil
         stop(:revert => true)
         return
@@ -328,9 +348,11 @@ module Update
         end
         update_list = list.join(',')
         if @num_files >= 0
-          enqueue_event(
-                        'OnUpdateReady', @num_files, update_list, '',
-                        'ghost') # XXX
+          enqueue_event('OnUpdateReady',
+                        ref0 => @num_files,
+                        ref1 => update_list,
+                        ref2 => '',
+                        ref3 => 'ghost') # XXX
         end
         @state += 1
       end
@@ -347,9 +369,11 @@ module Update
         begin
           filename, checksum, newline = line.split("\001", 4)
         rescue
-          enqueue_event('OnUpdateFailure', 'broken updates2.dau',
-                        'updates2.dau', '',
-                        'ghost') # XXX
+          enqueue_event('OnUpdateFailure',
+                        ref0 => 'broken updates2.dau',
+                        ref1 => 'updates2.dau',
+                        ref2 => '',
+                        ref3 => 'ghost') # XXX
           @state = nil
           return nil
         end
@@ -362,7 +386,7 @@ module Update
           f = open(path, 'rb')
           data = f.read()
           f.close()
-        rescue IOError # does not exist or broken
+        rescue # IOError # does not exist or broken
           data = nil
         end
         if data != nil
@@ -378,8 +402,10 @@ module Update
 
     def update_file(filename, checksum)
       enqueue_event('OnUpdate.OnMD5CompareBegin',
-                    filename, '', '',
-                    'ghost') # XXX
+                    ref0 => filename,
+                    ref1 => '',
+                    ref2 => '',
+                    ref3 => 'ghost') # XXX
       data = @buffer
       digest = Digest::MD5.hexdigest(data)
       if digest == checksum
@@ -399,11 +425,11 @@ module Update
           begin
             FileUtils.mkdir_p(subdir)
           rescue SystemCallError
-            enqueue_event(
-                          'OnUpdateFailure',
-                          ["can't mkdir ", subdir].join(''),
-                          path, '',
-                          'ghost') # XXX
+            enqueue_event('OnUpdateFailure',
+                          ref0 => ["can't mkdir ", subdir].join(''),
+                          ref1 => path,
+                          ref2 => '',
+                          ref3 => 'ghost') # XXX
             @state = nil
             stop(:revert => true)
             return
@@ -422,22 +448,22 @@ module Update
           f = open(path, 'wb')
           begin
             f.write(data)
-          rescue IOError, SystemCallError
-            enqueue_event(
-                          'OnUpdateFailure',
-                          ["can't write ", File.basename(path)].join(''),
-                          path, '',
-                          'ghost') # XXX
+          rescue # IOError, SystemCallError
+            enqueue_event('OnUpdateFailure',
+                          ref0 => ["can't write ", File.basename(path)].join(''),
+                          ref1 => path,
+                          ref2 => '',
+                          ref3 => 'ghost') # XXX
             @state = nil
             stop(:revert => true)
             return
           end
-        rescue IOError
-          enqueue_event(
-                        'OnUpdateFailure',
-                        ["can't open ", File.basename(path)].join(''),
-                        path, '',
-                        'ghost') # XXX
+        rescue # IOError
+          enqueue_event('OnUpdateFailure',
+                        ref0 => ["can't open ", File.basename(path)].join(''),
+                        ref1 => path,
+                        ref2 => '',
+                        ref3 => 'ghost') # XXX
           @state = nil
           stop(:revert => true)
           return
@@ -446,13 +472,19 @@ module Update
         event = 'OnUpdate.OnMD5CompareComplete'
       else
         event = 'OnUpdate.OnMD5CompareFailure'
-        enqueue_event(event, filename, checksum, digest,
-                      'ghost') # XXX
+        enqueue_event(event,
+                      ref0 => filename,
+                      ref1 => checksum,
+                      ref2 => digest,
+                      ref3 => 'ghost') # XXX
         @state = nil
         stop(:revert => true)
         return
       end
-      enqueue_event(event, filename, checksum, digest)
+      enqueue_event(event,
+                    ref0 => filename,
+                    ref1 => checksum,
+                    ref2 => digest)
       @file_number += 1
       @state += 1
     end
@@ -478,11 +510,17 @@ module Update
       end
       update_list = list.join(',')
       if update_list.empty?
-        enqueue_event('OnUpdateComplete', 'none', '', '',
-                      'ghost') # XXX
+        enqueue_event('OnUpdateComplete',
+                      ref0 => 'none',
+                      ref1 => '',
+                      ref2 => '',
+                      ref3 => 'ghost') # XXX
       else
-        enqueue_event('OnUpdateComplete', 'changed', update_list, '',
-                      'ghost') # XXX
+        enqueue_event('OnUpdateComplete',
+                      ref0 => 'changed',
+                      ref1 => update_list,
+                      ref2 => '',
+                      ref3 => 'ghost') # XXX
       end
       @state = nil
       stop()
@@ -500,7 +538,7 @@ module Update
           filename = line
           filelist << Home.get_normalized_path(filename)
         end
-      rescue IOError
+      rescue # IOError
         return nil
       end
       return filelist

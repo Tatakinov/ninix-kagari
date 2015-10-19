@@ -145,7 +145,7 @@ module Hanayu
             key, value = line.split(',', 2)
             for index_ in 0..6
               if @seven_days[index_][0] == key
-                @seven_days[index_][4] = value.to_f
+                @seven_days[index_][4] = Float(value)
               end
             end
           end
@@ -190,7 +190,7 @@ module Hanayu
             f.write(@seven_days[index_][0].to_s + ", " + @seven_days[index_][4].to_s + "\n")
           end
         end
-      rescue IOError, SystemCallError
+      rescue # IOError, SystemCallError
         logging.error('HANAYU: cannot write database (ignored)')
       end
     end
@@ -599,7 +599,7 @@ module Hanayu
       for index_ in 0..num-1
         begin
           value = @args[index_ * 2 + 1]
-          @args[index_ * 2 + 1] = float(value)
+          @args[index_ * 2 + 1] = Float(value)
         rescue
           @args[index_ * 2 + 1] = 0.0
         end

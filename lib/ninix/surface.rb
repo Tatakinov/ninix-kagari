@@ -228,7 +228,7 @@ module Surface
       surfaces = {}
       elements = {}
       begin
-        maxwidth = @seriko_descript.get('maxwidth', :default => '0').to_i
+        maxwidth = Integer(@seriko_descript.get('maxwidth', :default => '0'))
       rescue
         maxwidth = 0
       end
@@ -311,10 +311,10 @@ module Surface
             next
           end
           begin
-            x1 = values[0].to_i
-            y1 = values[1].to_i
-            x2 = values[2].to_i
-            y2 = values[3].to_i
+            x1 = Integer(values[0])
+            y1 = Integer(values[1])
+            x2 = Integer(values[2])
+            y2 = Integer(values[3])
           rescue
             next
           end
@@ -328,10 +328,10 @@ module Surface
           end
           begin
             values = rect.split(',', 0)
-            x1 = values[0].to_i
-            y1 = values[1].to_i
-            x2 = values[2].to_i
-            y2 = values[3].to_i
+            x1 = Integer(values[0])
+            y1 = Integer(values[1])
+            x2 = Integer(values[2])
+            y2 = Integer(values[3])
           rescue
             #pass
           end
@@ -449,7 +449,7 @@ module Surface
           @mayuna[name] << [key, nil, 0]
         else
           begin
-            key = key.to_i
+            key = Integer(key)
           rescue
             #pass
           else
@@ -499,8 +499,8 @@ module Surface
         end
         begin
           method, filename, x, y = spec
-          x = x.to_i
-          y = y.to_i
+          x = Integer(x)
+          y = Integer(y)
         rescue
           error = 'invalid element spec for ' + key + ': ' + config[key]
           break

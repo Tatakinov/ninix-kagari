@@ -103,7 +103,7 @@ module Niseshiori
           for line in f
             if line.start_with?('# ns_st: ')
               begin
-                @ai_talk_interval = int(line[9..-1])
+                @ai_talk_interval = Integer(line[9..-1])
               rescue #except ValueError:
                 #pass
               end

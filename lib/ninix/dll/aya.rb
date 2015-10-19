@@ -1230,7 +1230,7 @@ module Aya
                 'illegal for statement "' + line.to_s + '"')
             else
               reset = parse([condition[end_ + 1..-1].strip()])
-              condition_tokens = AyaStatement(
+              condition_tokens = AyaStatement.new(
                 condition[0..end_-1].strip()).tokens
               condition = parse_condition(condition_tokens)
               if condition != nil
@@ -1263,11 +1263,11 @@ module Aya
             inner_block = []
             j, inner_block = get_block(block, j + 1)
             if right != nil
-              argument = AyaArgument(right)
+              argument = AyaArgument.new(right)
               while argument.has_more_tokens()
                 entry = []
                 right = argument.next_token()
-                tokens = AyaStatement(right).tokens
+                tokens = AyaStatement.new(right).tokens
                 if ['-', '+'].include?(tokens[0])
                   value_min = parse_statement([tokens.shift,
                                                tokens.shift])
@@ -1468,7 +1468,7 @@ module Aya
           end
           if statement_tokens[ope_index + 1..-1].length == 1
             if statement_tokens[-1].start_with?('(')
-              tokens = AyaStatement(
+              tokens = AyaStatement.new(
                 statement_tokens[ope_index + 1][1..-2]).tokens
               right = parse_statement(tokens)
             else
@@ -2826,7 +2826,7 @@ module Aya
 
     def ASC(namespace, argv)
       begin
-        argv[0].to_i
+        Integer(argv[0])
       rescue
         return ''
       end
@@ -2852,7 +2852,7 @@ module Aya
 
     def CEIL(namespace, argv)
       begin
-        return math.ceil(argv[0].to_f).to_i
+        return math.ceil(Float(argv[0])).to_i
       rescue
         return -1
       end
@@ -2860,7 +2860,7 @@ module Aya
 
     def COS(namespace, argv)
       begin
-        result = math.cos(argv[0].to_f)
+        result = math.cos(Float(argv[0]))
       rescue
         return -1
       end
@@ -2874,8 +2874,8 @@ module Aya
     def ERASE(namespace, argv)
       line = argv[0].to_s.encode('CP932', :invalid => :replace, :undef => :replace) # XXX
       begin
-        start = argv[1].to_i
-        bytes = argv[2].to_i
+        start = Integer(argv[1])
+        bytes = Integer(argv[2])
       rescue
         return ''
       end
@@ -2979,7 +2979,7 @@ module Aya
 
     def FLOOR(namespace, argv)
       begin
-        return math.floor(argv[0].to_f).to_i
+        return math.floor(Float(argv[0])).to_i
       rescue
         return -1
       end
@@ -3153,7 +3153,7 @@ module Aya
     def INSERT(namespace, argv)
       line = argv[0].to_s.encode('CP932', 'replace') # XXX
       begin
-        start = argv[1].to_i
+        start = Integer(argv[1])
       rescue
         return ''
       end
@@ -3213,7 +3213,7 @@ module Aya
 
     def LIB_HEADER(namespace, argv)
       begin
-        argv[0].to_i
+        Integer(argv[0])
       rescue
         return ''
       end
@@ -3267,7 +3267,7 @@ module Aya
 
     def LOG(namespace, argv)
       begin
-        argv[0].to_f
+        Float(argv[0])
       rescue
         return -1
       end
@@ -3280,7 +3280,7 @@ module Aya
 
     def LOG10(namespace, argv)
       begin
-        argv[0].to_f
+        Float(argv[0])
       rescue
         return -1
       end
@@ -3314,8 +3314,8 @@ module Aya
     def MERASE(namespace, argv)
       line = argv[0].to_s
       begin
-        start = argv[1].to_i
-        end_ = argv[2].to_i
+        start = Integer(argv[1])
+        end_ = Integer(argv[2])
       rescue
         return ''
       end
@@ -3325,7 +3325,7 @@ module Aya
     def MINSERT(namespace, argv)
       line = argv[0].to_s
       begin
-        start = argv[1].to_i
+        start = Integer(argv[1])
       rescue
         return ''
       end
@@ -3362,7 +3362,7 @@ module Aya
       line = argv[0].to_s
       to_find = argv[1].to_s
       begin
-        start = argv[2].to_i
+        start = Integer(argv[2])
       rescue
         return -1
       end
@@ -3372,8 +3372,8 @@ module Aya
     def MSUBSTR(namespace, argv)
       line = argv[0].to_s
       begin
-        start = argv[1].to_i
-        end_ = argv[2].to_i
+        start = Integer(argv[1])
+        end_ = Integer(argv[2])
       rescue
         return ''
       end
@@ -3400,7 +3400,7 @@ module Aya
 
     def POW(namespace, argv)
       begin
-        result = math.pow(argv[0].to_f, argv[1].to_f)
+        result = math.pow(Float(argv[0]), Float(argv[1]))
       rescue
         return -1
       end
@@ -3433,7 +3433,7 @@ module Aya
 
     def REQ_HEADER(namespace, argv)
       begin
-        argv[0].to_i
+        Integer(argv[0])
       rescue
         return ''
       end
@@ -3633,7 +3633,7 @@ module Aya
 
     def TOHEXSTR(namespace, argv)
       begin
-        return argv[0].to_i.to_s(16)
+        return Integer(argv[0]).to_s(16)
       rescue
         return ''
       end
@@ -3649,9 +3649,9 @@ module Aya
       token = target_namespace.get(var)
       begin
         if token.include?('.')
-          result = token.to_f
+          result = Float(token)
         else
-          result = token.to_i
+          result = Integer(token)
         end
       rescue
         result = 0
@@ -3664,9 +3664,9 @@ module Aya
       token = argv[0].to_s
       begin
         if token.include?('.')
-          value = token.to_f
+          value = Float(token)
         else
-          value = token.to_i
+          value = Integer(token)
         end
       rescue
         return 0

@@ -230,7 +230,7 @@ module Balloon
     def set_balloon_default
       default_id = @parent.handle_request('GET', 'get_balloon_default_id')
       begin
-        default_id = default_id.to_i
+        default_id = Integer(default_id)
       rescue
         default_id = 0
       end
@@ -1057,7 +1057,7 @@ module Balloon
           x = (bw - w) / 2
         else
           begin
-            x = x.to_i
+            x = Integer(x)
           rescue
             next
           end
@@ -1067,7 +1067,7 @@ module Balloon
           y = (bh - h) / 2
         else
           begin
-            y = y.to_i
+            y = Integer(y)
           rescue
             next
           end
@@ -1847,7 +1847,7 @@ module Balloon
         
     def set_limittime(limittime)
       begin
-        limittime = limittime.to_i
+        limittime = Integer(limittime)
       rescue
         limittime = -1
       end

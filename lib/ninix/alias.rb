@@ -25,7 +25,7 @@ module Alias
     f = File.open(path, 'rb')
     buf = []
     while line = f.gets
-      if line and !line.strip.empty?
+      if !line.strip.empty?
         buf << line.strip
       end
     end
@@ -47,7 +47,7 @@ module Alias
         name = line
         table = {}
         begin
-          while 1
+          while true
             if i < j
               line = buf[i]
               i += 1
@@ -62,7 +62,7 @@ module Alias
             end
             raise ValueError('open brace not found')
           end
-          while 1
+          while true
             if i < j
               line = buf[i]
               i += 1
@@ -87,7 +87,7 @@ module Alias
               table[key] = []
               for value in values[1, values.length - 2].split(',', 0)
                 begin
-                  value = value.to_i.to_s
+                  value = Integer(value).to_s
                 rescue
                   #pass
                 end

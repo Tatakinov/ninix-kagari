@@ -100,7 +100,7 @@ module Prefs
           value = prefs[1]
           @dic[key] = value
         end
-      rescue IOError
+      rescue # IOError
         return
       end
     end

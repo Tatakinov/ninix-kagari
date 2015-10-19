@@ -283,7 +283,7 @@ module Menu
           index = 1
         elsif side.start_with?('char')
           begin
-            index = side[4, side.length].to_i
+            index = Integer(side[4, side.length])
           rescue
             next
           end

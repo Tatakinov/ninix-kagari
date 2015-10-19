@@ -1064,7 +1064,7 @@ module Ninix_Main
     def save_preferences
       begin
         @prefs.save()
-      rescue IOError, SystemCallError
+      rescue # IOError, SystemCallError
         Logging::Logging.error('Cannot write preferences to file (ignored).')
       rescue
         #pass ## FIXME
@@ -1258,7 +1258,7 @@ module Ninix_Main
         if exists
           @balloons[balloon_dir].baseinfo = balloon_conf[balloon_dir]
         else
-          meme = BalloonMeme(balloon_dir)
+          meme = BalloonMeme.new(balloon_dir)
           meme.set_responsible(self)
           @balloons[balloon_dir] = meme
           meme.baseinfo = balloon_conf[balloon_dir]
@@ -1350,7 +1350,7 @@ module Ninix_Main
                 end
               end
             end
-          rescue IOError => e
+          rescue # IOError => e
             Logging::Logging.error('cannot read ' + path)
           end
         end

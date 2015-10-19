@@ -55,7 +55,7 @@ module Osuwari
         if argument.length < 7
           return RESPONSE[400]
         end
-        if true #begin
+        if true #begin ## FIXME
           #assert ['ACTIVE', 'FIX'].include?(argument[2]) or \
           #argument[2].start_with?('@') or \
           #argument[2].start_with?('#')
@@ -159,13 +159,13 @@ module Osuwari
       offset_y = (@settings['offset_y'] * scale / 100).to_i
       if @settings['hwnd'].start_with?('s')
         begin
-          side = @settings['hwnd'][1..-1].to_i
+          side = Integer(@settings['hwnd'][1..-1])
         rescue
           return false
       end
       else
         begin
-          side = @settings['hwnd'].to_i
+          side = Integer(@settings['hwnd'])
         rescue
           return false
         end

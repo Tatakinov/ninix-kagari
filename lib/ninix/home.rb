@@ -74,7 +74,7 @@ module Home
         if ['.rb'].include?(ext)
           name = basename
         end
-        if name and not table.include?(name)
+        if name != nil and not table.include?(name)
           shiori = shiori_lib.request(['', name])
           if shiori
             table[name] = shiori
@@ -88,7 +88,7 @@ module Home
   def self.search_ghosts(target: nil, check_shiori: true)
     home_dir = get_ninix_home()
     ghosts = {}
-    if target
+    if target != nil
       dirlist = []
       dirlist += target
     else
@@ -149,7 +149,7 @@ module Home
     home_dir = get_ninix_home()
     balloons = {}
     balloon_dir = File.join(home_dir, 'balloon')
-    if target
+    if target != nil
       dirlist = []
       dirlist += target
     else
@@ -171,7 +171,7 @@ module Home
         next
       end
       desc = read_descript_txt(path) # REQUIRED
-      if not desc
+      if desc == nil
         next
       end
       balloon_info = read_balloon_info(path) # REQUIRED
@@ -313,7 +313,7 @@ module Home
         elsif ['ontop', 'baseposition', 'baseadjust'].include?(name)
           kinoko[name] = value.to_i
         end
-        if error
+        if error != nil
           Logging::Logging.error('Error: ' + error + "\n" + path +' (skipped)')
           return nil
         end
@@ -332,7 +332,7 @@ module Home
     if File.readable_real?(path)
       f = open(path, 'rb:CP932')
       line = f.readline()
-      if line
+      if line != nil
         name = line.strip.encode("UTF-8", :invalid => :replace)
       end
     end
@@ -400,7 +400,7 @@ module Home
           end
         end
       end
-      if error
+      if error != nil
         Logging::Logging.error('Error: ' + error + "\n" + path + ' (skipped)')
         return nil
       end
@@ -448,14 +448,14 @@ module Home
     desc = read_descript_txt(File.join(top_dir, 'ghost', 'master'))
     default_sakura = desc.get('sakura.seriko.defaultsurface', :default => '0')
     default_kero = desc.get('kero.seriko.defaultsurface', :default => '10')
-    if desc
+    if desc != nil
       shell_name = desc.get('name')
     else
       shell_name = nil
     end
-    if not shell_name or shell_name.empty?
+    if shell_name == nil or shell_name.empty?
       inst = read_install_txt(top_dir)
-      if inst
+      if inst != nil
         shell_name = inst.get('name')
       end
     end
@@ -464,7 +464,7 @@ module Home
     for name, desc, subdir in find_surface_dir(shell_dir)
       surface_dir = File.join(shell_dir, subdir)
       surface_info, alias_, tooltips, seriko_descript = read_surface_info(surface_dir)
-      if surface_info and \
+      if surface_info != nil and \
         surface_info.include?('surface' + default_sakura.to_s) and \
         surface_info.include?('surface' + default_kero.to_s)
         if alias_ == nil
@@ -691,13 +691,13 @@ module Home
               end
               if key.start_with?('surface')
                 begin
-                  key = [key[0, 7], key[7, key.length - 1].to_i.to_s].join('')
+                  key = [key[0, 7], Integer(key[7, key.length - 1]).to_s].join('')
                 rescue
                   #pass
                 end
               else
                 begin
-                  key = ['surface', key.to_i.to_s].join('')
+                  key = ['surface', Integer(key).to_s].join('')
                 rescue
                   #pass
                 end
@@ -737,8 +737,8 @@ module Home
       end
       begin
         method, filename, x, y = spec
-        x = x.to_i
-        y = y.to_i
+        x = Integer(x)
+        y = Integer(y)
       rescue
         Loggin::Logging.error(
           'invalid element spec for ' + key + ': ' + config[key])

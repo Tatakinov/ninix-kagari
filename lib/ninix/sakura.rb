@@ -282,7 +282,7 @@ module Sakura
           file.write("time, " + @ghost_time.to_s + "\n")
           file.write("vanished_count, " + @vanished_count.to_s + "\n")
         end
-      rescue IOError, SystemCallError => e
+      rescue # IOError, SystemCallError => e
         Logging::Logging.error('cannot write ' + path)
       end
     end
@@ -298,7 +298,7 @@ module Sakura
             file.write("shell_directory, " + @shell_directory + "\n")
           end
         end
-      rescue IOError, SystemCallError => e
+      rescue # IOError, SystemCallError => e
         Logging::Logging.error('cannot write ' + path)
       end
     end
@@ -330,7 +330,7 @@ module Sakura
               end
             end
           end
-        rescue IOError => e
+        rescue # IOError => e
           Logging::Logging.error('cannot read ' + path)
           ghost_time = 0
           vanished_count = 0
@@ -359,7 +359,7 @@ module Sakura
               shell_directory = value.strip()
             end
           end
-        rescue IOError => e
+        rescue # IOError => e
           Logging::Logging.error('cannot read ' + path)
         end
         @balloon_directory = balloon_directory
@@ -1368,9 +1368,9 @@ module Sakura
       color_g = getstring('menu.background.font.color.g')
       color_b = getstring('menu.background.font.color.b')
       begin
-        color_r = [0, [255, color_r.to_i].min].max
-        color_g = [0, [255, color_g.to_i].min].max
-        color_b = [0, [255, color_b.to_i].min].max
+        color_r = [0, [255, Integer(color_r)].min].max
+        color_g = [0, [255, Integer(color_g)].min].max
+        color_b = [0, [255, Integer(color_b)].min].max
       rescue
         #pass
       else
@@ -1380,9 +1380,9 @@ module Sakura
       color_g = getstring('menu.foreground.font.color.g')
       color_b = getstring('menu.foreground.font.color.b')
       begin
-        color_r = [0, [255, color_r.to_i].min].max
-        color_g = [0, [255, color_g.to_i].min].max
-        color_b = [0, [255, color_b.to_i].min].max
+        color_r = [0, [255, Integer(color_r)].min].max
+        color_g = [0, [255, Integer(color_g)].min].max
+        color_b = [0, [255, Integer(color_b)].min].max
       rescue
         #pass
       else
@@ -1989,7 +1989,7 @@ module Sakura
 
     def __yen_p(args)
       begin
-        chr_id = args[0].to_i
+        chr_id = Integer(args[0])
       rescue ArgumentError
         return
       end
@@ -2079,7 +2079,7 @@ module Sakura
         @balloon.hide(@script_side)
       else
         begin
-          balloon_id = (args[0].to_i / 2).to_i
+          balloon_id = (Integer(args[0]) / 2).to_i
         rescue ArgumentError
           balloon_id = 0
         else
@@ -2122,7 +2122,7 @@ module Sakura
 
     def __set_weight(value, unit)
       begin
-        amount = value.to_i * unit - 0.01
+        amount = Integer(value) * unit - 0.01
       rescue ArgumentError
         amount = 0
       end
@@ -2227,7 +2227,7 @@ module Sakura
 
     def __yen_i(args)
       begin
-        actor_id = args[0].to_i
+        actor_id = Integer(args[0])
       rescue ArgumentError
         #pass
       else
@@ -2351,7 +2351,7 @@ module Sakura
       if args[0] == 'raise' and argc >= 2
         notify_event(*args[1, 9])
       elsif args[0, 2] == ['open', 'readme']
-        ReadmeDialog().show(get_name(), get_prefix())
+        ReadmeDialog.new.show(get_name(), get_prefix())
       elsif args[0, 2] == ['open', 'browser'] and argc > 2
         browser_open(args[2])
       elsif args[0, 2] == ['open', 'communicatebox']

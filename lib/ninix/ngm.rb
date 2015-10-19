@@ -106,7 +106,7 @@ module NGM
           #pass
         end
         f.close()
-      rescue IOError
+      rescue # IOError
         return
       end
     end
