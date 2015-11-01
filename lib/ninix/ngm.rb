@@ -155,18 +155,18 @@ module NGM
         end
         line = line.force_encoding(encoding).encode("UTF-8", :invalid => :replace, :undef => :replace)
         m = re_list.match(line)
-        if m
+        if m != nil
           nest += 1
           next
         end
         m = re_setid.match(line)
-        if m
+        if m != nil
           nest += 1
           set_id = m[1].to_i
           next
         end
         m = re_set.match(line)
-        if m
+        if m != nil
           nest -= 1
           new_entry[set_id] = create_entry(node)
           node = []
@@ -185,7 +185,7 @@ module NGM
           next
         end
         m = re_misc.match(line)
-        if m
+        if m != nil
           g = m
           if set_id != nil
             key = g[1]
@@ -558,7 +558,7 @@ module NGM
     end
 
     def search(word)
-      if word
+      if word != nil and not word.empty?
         @search_word = word
         if @parent.handle_request('GET', 'search', word)
           update()
@@ -842,7 +842,7 @@ module NGM
           for element in ['Name', 'SakuraName', 'KeroName',
                           'Author', 'HPTitle']
             text = @catalog.get(entry, element)
-            if not text
+            if text == nil or text.empty?
               next
             end
             if text.include?(word)

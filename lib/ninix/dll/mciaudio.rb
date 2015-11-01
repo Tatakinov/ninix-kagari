@@ -57,7 +57,7 @@ module MCIAudio
     end
 
     def execute(argv)
-      if not argv
+      if argv == nil
         return RESPONSE[400]
       end
       argc = argv.length

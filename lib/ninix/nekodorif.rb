@@ -257,7 +257,7 @@ module Nekodorif
     end
 
     def launch_katochan(katochan)
-      if @katochan
+      if @katochan != nil
         delete_katochan
       end
       @katochan = Katochan.new(@target)

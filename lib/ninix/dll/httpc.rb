@@ -52,7 +52,7 @@ module HTTPC
       url = URI.parse(url)
       if not (url.scheme == 'http' and
               #url.params == nil and
-              url.query ==nil and
+              url.query == nil and
               url.fragment == nil)
         return RESPONSE[400]
       end
@@ -86,7 +86,7 @@ module HTTPC
     end
 
     def execute(argument)
-      if not argument
+      if argument == nil
         return RESPONSE[400]
       end
       bg = nil
@@ -106,10 +106,10 @@ module HTTPC
         if ['sjis', 'utf-8', 'utf-16be', 'utf-16le'].include?(argument[0])
           @charset = argument[0]
           argument = argument[1..-1]
-        elsif argument[0] =='euc'
+        elsif argument[0] == 'euc'
           @charset = 'EUC-JP'
           argument = argument[1..-1]
-        elsif argument[0] =='jis'
+        elsif argument[0] == 'jis'
           @charset = 'ISO-2022-JP '
           argument = argument[1..-1]
         end
@@ -129,13 +129,13 @@ module HTTPC
       elsif argument.length == 2 # FIXME: not supported yet
         return "SAORI/1.0 200 OK\r\nResult: 0\r\n\r\n"
       else
-        if bg # needs multi-threading?
+        if bg != nil # needs multi-threading?
           timeout_id = GLib::Timeout.add(1000) { notify(bg, argument, process_tag) } # XXX
           @__bg[timeout_id] = bg
           return nil # "SAORI/1.0 204 No Content\r\n\r\n"
         else
           data = get(*argument)
-          if not data
+          if data.empty?
             return nil # "SAORI/1.0 204 No Content\r\n\r\n"
           end
           result = "SAORI/1.0 200 OK\r\n" + "Result: " + data[0].to_s + "\r\n"

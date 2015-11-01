@@ -44,7 +44,7 @@ module NConfig
     end
     buf = []
     while line = f.gets
-      if !line.strip.empty?
+      if not line.strip.empty?
         buf << line.strip
       end
     end
@@ -54,7 +54,7 @@ module NConfig
   def self.create_from_buffer(buf, charset: 'CP932')
     dic = Config.new
     for line in buf
-      line = line.force_encoding(charset).encode("UTF-8", :invalid => :replace)
+      line = line.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
       key, value = line.split(",", 2)
       if key == nil or value == nil
         next

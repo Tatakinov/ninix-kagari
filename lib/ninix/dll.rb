@@ -75,7 +75,7 @@ module DLL
 
     def request(req)
       req_type, argument = evaluate_request(req)
-      if not req_type
+      if req_type == nil
         return RESPONSE[400]
       elsif req_type == 'GET Version'
         return RESPONSE[204]
@@ -100,7 +100,7 @@ module DLL
       argument = []
       @charset = 'CP932' # default
       for line in req.split("\n", 0)
-        line = line.force_encoding(@charset).strip.encode("UTF-8", :invalid => :replace)
+        line = line.force_encoding(@charset).strip.encode("UTF-8", :invalid => :replace, :undef => :replace)
         if line.empty?
           next
         end

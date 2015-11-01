@@ -934,7 +934,7 @@ module Satori
       for node in node_list
         indent = '  ' * depth
         if node[0] == NODE_TEXT
-          temp = node[1].map {|x| x.encode('utf-8') }.join('')
+          temp = node[1].map {|x| x.encode('utf-8', :invalid => :replace, :undef => :replace) }.join('')
           print([indent, 'NODE_TEXT "' + temp + '"'].join(''))
         elsif node[0] == NODE_REF
           print([indent, 'NODE_REF'].join(''))
@@ -1175,7 +1175,7 @@ module Satori
               next
             end
             line = name.to_s + "\t" + value.to_s
-            line = line.encode('CP932')
+            line = line.encode('CP932', :invalid => :replace, :undef => :replace)
             if encrypted
               line = Satori.encrypt(Satori.encrypt(line)).join('')
             end
@@ -1186,7 +1186,7 @@ module Satori
             name = 'デフォルトサーフェス' + side.to_s
             value = to_zenkaku(@default_surface[side].to_s)
             line = name.to_s + "\t" + value.to_s
-            line = line.encode('CP932')
+            line = line.encode('CP932', :invalid => :replace, :undef => :replace)
             if encrypted
               line = Satori.encrypt(Satori.encrypt(line)).join('')
             end
@@ -1197,7 +1197,7 @@ module Satori
             name = '前回終了時サーフェス' + side.to_s
             value = to_zenkaku(@current_surface[side].to_s)
             line = name.to_s + "\t" + value.to_s
-            line = line.encode('CP932')
+            line = line.encode('CP932', :invalid => :replace, :undef => :replace)
             if encrypted
               line = Satori.encrypt(Satori.encrypt(line)).join('')
             end
@@ -1207,7 +1207,7 @@ module Satori
           name = '起動回数'
           value = to_zenkaku(@runcount.to_s)
           line = name.to_s + "\t" + value.to_s
-          line = line.encode('CP932')
+          line = line.encode('CP932', :invalid => :replace, :undef => :replace)
           if encrypted
             line = Satori.encrypt(Satori.encrypt(line)).join('')
           end
@@ -1216,7 +1216,7 @@ module Satori
           for name in self.timer
             value = to_zenkaku(@timer[name])
             line = name.to_s + "\t" + value.to_s
-            line = line.encode('CP932')
+            line = line.encode('CP932', :invalid => :replace, :undef => :replace)
             if encrypted
               line = Satori.encrypt(Satori.encrypt(line)).join('')
             end
@@ -1226,7 +1226,7 @@ module Satori
           for name in self.reserved_talk
             value = to_zenkaku(@reserved_talk[name])
             line = ['次から', value, '回目のトーク'].join('') + "\t" + name.to_s
-            line = line.encode('CP932')
+            line = line.encode('CP932', :invalid => :replace, :undef => :replace)
             if encrypted
               line = Satori.encrypt(Satori.encrypt(line)).join('')
             end
@@ -1681,7 +1681,7 @@ module Satori
       end
       script = get(name, :default => nil)
       if script != nil and not script.empty? and script != '\\n'
-        ##Logging::Logging.debug('make("' + script.encode('utf-8') + '")')
+        ##Logging::Logging.debug('make("' + script.encode('utf-8', :invalid => :replace, :undef => :replace) + '")')
         return make([head, script, tail].join(''))
       end
       return nil
@@ -2685,7 +2685,7 @@ module Satori
       elsif s.start_with?('count')
         return to_zenkaku(@parser.get_count(s[5..-1]))
       end
-      return '？'.encode('utf-8')
+      return '？'.encode('utf-8', :invalid => :replace, :undef => :replace)
     end
   end
 
@@ -2769,7 +2769,7 @@ module Satori
         change_folder()
         @folder_change = false
       end
-      header = req_string.encode('UTF-8').split(/\r?\n/, 0)
+      header = req_string.encode('UTF-8', :invalid => :replace, :undef => :replace).split(/\r?\n/, 0)
       req_header = {}
       line = header.shift
       if line
@@ -2856,7 +2856,7 @@ module Satori
         result = [result, "Reference0: " + to.to_s + "\r\n"].join('')
       end
       result = [result, "\r\n"].join('')
-      return result.encode('UTF-8')
+      return result.encode('UTF-8', :invalid => :replace, :undef => :replace)
     end
 
     def call_saori(name, args, history, side)

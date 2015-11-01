@@ -139,7 +139,7 @@ module Install
       errno = 0
       # check the file type
       inst = Home.read_install_txt(tmpdir)
-      if not inst
+      if inst == nil
         if File.exists?(File.join(tmpdir, 'kinoko.ini'))
           filetype = 'kinoko'
         else
@@ -240,9 +240,9 @@ module Install
       filename = File.join(basedir, File.basename(url))
       begin
         ofile = open(filename, 'wb')
-        while 1
+        while true
           data = ifile.read(4096)
-          if not data
+          if data == nil # EOF
             break
           end
           ofile.write(data)
@@ -327,7 +327,7 @@ module Install
 
     def lower_files(top_dir)
       if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|cygwin|bccwin/ # XXX
-        return    
+        return
       end
       n = 0
       Dir.foreach(top_dir) { |filename|
@@ -430,17 +430,13 @@ module Install
                      File.join(shell_dst, path)]
       end
       # find balloon
-      if inst
-        balloon_dir = inst.get('balloon.directory')
-      end
+      balloon_dir = inst.get('balloon.directory')
       balloon_name = nil
-      if balloon_dir
+      if balloon_dir != nil
         balloon_dir = Home.get_normalized_path(balloon_dir)
         balloon_dst = File.join(homedir, 'balloon', balloon_dir)
-        if inst
-          balloon_src = inst.get('balloon.source.directory')
-        end
-        if balloon_src
+        balloon_src = inst.get('balloon.source.directory')
+        if balloon_src != nil
           balloon_src = Home.get_normalized_path(balloon_src)
         else
           balloon_src = balloon_dir
@@ -494,7 +490,7 @@ module Install
       if not File.exists?(path)
         begin
           f = open(path, 'w')
-          if balloon_dir
+          if balloon_dir != nil
             f.write(["balloon_directory, ", balloon_dir, "\n"].join(''))
           end
         rescue # IOError, SystemCallError => e
@@ -511,7 +507,7 @@ module Install
 
     def install_supplement(archive, tmpdir, homedir)
       inst = Home.read_install_txt(tmpdir)
-      if inst and inst.include?('accept')
+      if inst != nil and inst.include?('accept')
         Logging::Logging.info('searching supplement target ...')
         candidates = []
         begin
@@ -526,7 +522,7 @@ module Install
           end
           desc = Home.read_descript_txt(
                                         File.join(path, 'ghost', 'master'))
-          if desc and desc.get('sakura.name') == inst.get('accept')
+          if desc != nil and desc.get('sakura.name') == inst.get('accept')
             candidates << dirname
           end
         end
@@ -582,7 +578,7 @@ module Install
       ##             File.join(dstdir, 'install.txt')]
       if Dir.exists?(dstdir)
         inst_dst = Home.read_install_txt(dstdir)
-        if inst.get('refresh', :default => 0).to_i
+        if inst.get('refresh', :default => 0).to_i != 0
           # uninstall older versions of the balloon
           if confirm_refresh(dstdir, 'balloon')
             mask = []

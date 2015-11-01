@@ -242,7 +242,7 @@ module Niseshiori
         end
         # other cases
         begin
-          command, argv = split(line, 1)
+          command, argv = split(line, :maxcount => 1)
           command.strip!
           argv.strip!
         rescue #except ValueError:
@@ -323,7 +323,7 @@ module Niseshiori
           value << argv
           @dict[command] = value
         elsif command == '\ft'
-          argv = split(argv, 2).map {|s| s.strip }
+          argv = split(argv, :maxcount => 2).map {|s| s.strip }
           if argv.length != 3
             syntax_error(path, line)
             next
@@ -335,7 +335,7 @@ module Niseshiori
           end
           @keywords[[w, t]] = s
         elsif command == '\re'
-          argv = split(argv, 1).map {|s| s.strip }
+          argv = split(argv, :maxcount => 1).map {|s| s.strip }
           if argv.length == 2
             cond = parse_condition(argv[0])
             re_list = @responses.include?(cond) ? @responses[cond] : []
@@ -343,14 +343,14 @@ module Niseshiori
             @responses[cond] = re_list
           end
         elsif command == '\hl'
-          argv = split(argv, 1).map {|s| s.strip }
+          argv = split(argv, :maxcount => 1).map {|s| s.strip }
           if argv.length == 2
             hl_list = @greetings.include?(argv[0]) ? @greetings[argv[0]] : []
             hl_list << argv[1]
             @greetings[argv[0]] = hl_list
           end
         elsif command == '\ev'
-          argv = split(argv, 1).map {|s| s.strip }
+          argv = split(argv, :maxcount => 1).map {|s| s.strip }
           if argv.length == 2
             cond = parse_condition(argv[0])
             ev_list = @events.include?(cond) ? @events[cond] : []
@@ -358,7 +358,7 @@ module Niseshiori
             @events[cond] = ev_list
           end
         elsif command == '\id'
-          argv = split(argv, 1).map {|s| s.strip }
+          argv = split(argv, :maxcount => 1).map {|s| s.strip }
           if argv.length == 2
             if ['sakura.recommendsites',
                 'kero.recommendsites',
@@ -381,7 +381,7 @@ module Niseshiori
       end
     end
 
-    def split(line, maxcount=nil)
+    def split(line, maxcount: nil)
       buf = []
       count = 0
       end_ = pos = 0
@@ -596,7 +596,7 @@ module Niseshiori
           @dict[key].concat(actions)
         end
       end
-      script = get(key, default=nil)
+      script = get(key, :default => nil)
       if script != nil
         @ai_talk_count = 0
       end
@@ -673,9 +673,9 @@ module Niseshiori
 
     Re_ns_tag = Regexp.new('\\\(ns_(st(\[[0-9]+\])?|cr|hl|rf\[[^\]]+\]|ce|tc\[[^\]]+\]|tn(\[[^\]]+\])?|jp\[[^\]]+\]|rt)|set\[[^\]]+\])')
 
-    def get(key, default='')
+    def get(key, default: '')
       @current_time = Time.now
-      s = expand(key, '', default)
+      s = expand(key, '', :default => default)
       if s and not s.empty?
         while true
           match = Re_ns_tag.match(s)
@@ -732,7 +732,7 @@ module Niseshiori
             Logging::Logging.debug('niseshiori.py: syntax error')
             Logging::Logging.debug(tag)
           else
-            name, expr = statement.split('=', 2)
+            name, expr = statement.split('=', :maxcount => 2)
             name.strip!
             expr .strip!
             value = eval_expression(expr)
@@ -836,7 +836,7 @@ module Niseshiori
       return t
     end
 
-    def expand(key, context, default='')
+    def expand(key, context, default: '')
       choices = []
       for keyword, word in (@type_chains.include?(key) ? @type_chains[key] : [])
         if context.include?(keyword)
@@ -1156,7 +1156,7 @@ module Niseshiori
       end
     end
 
-    def look_ahead(index=0)
+    def look_ahead(index: 0)
       begin
         return @tokens[index]
       rescue #except IndexError:

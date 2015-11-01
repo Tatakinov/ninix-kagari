@@ -296,7 +296,7 @@ module Home
         if line.strip.empty?
           next
         end
-        line = line.encode('UTF-8', :invalid => :replace)
+        line = line.encode('UTF-8', :invalid => :replace, :undef => :replace)
         if not line.include?('=')
           error = 'line ' + lineno.to_s + ': syntax error'
           break
@@ -333,7 +333,7 @@ module Home
       f = open(path, 'rb:CP932')
       line = f.readline()
       if line != nil
-        name = line.strip.encode("UTF-8", :invalid => :replace)
+        name = line.strip.encode("UTF-8", :invalid => :replace, :undef => :replace)
       end
     end
     if not name.empty?
@@ -364,7 +364,7 @@ module Home
           error = 'line ' + lineno.to_s + ': syntax error'
           break
         else
-          value = line.strip.encode("UTF-8", :invalid => :replace)
+          value = line.strip.encode("UTF-8", :invalid => :replace, :undef => :replace)
           if ['name', 'category'].include?(name)
             katochan[name] = value
           end
@@ -547,7 +547,7 @@ module Home
       else
         match = re_surface.match(filename)
       end
-      if not match
+      if match == nil
         next
       end
       img = File.join(surface_dir, filename)
@@ -647,10 +647,10 @@ module Home
         end
         if key == nil
           if temp.end_with?('{')
-            key = temp[0, temp.length - 1].force_encoding(charset).encode("UTF-8", :invalid => :replace)
+            key = temp[0, temp.length - 1].force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
             opened = true
           else
-            key = temp.force_encoding(charset).encode("UTF-8", :invalid => :replace)
+            key = temp.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
           end
         elsif temp == '{'
           opened = true
@@ -662,11 +662,11 @@ module Home
             Logging::Logging.error('syntax error: unbalnced "}" in surfaces.txt.')
           end
           match = re_alias.match(key)
-          if match
+          if match != nil
             alias_buffer << key
             alias_buffer << '{'
             for line in buf
-              alias_buffer << line.force_encoding(charset).encode("UTF-8", :invalid => :replace)
+              alias_buffer << line.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
             end
             alias_buffer << '}'
           elsif key.end_with?('.tooltips')
@@ -678,8 +678,8 @@ module Home
             value = {}
             for line in buf
               s = line.split(',', 2)
-              region = s[0].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace)
-              text = s[1].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace)
+              region = s[0].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+              text = s[1].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
               value[region] = text
               tooltips[key] = value
             end
@@ -766,7 +766,7 @@ module Home
     end
     for filename in filelist
       match = re_balloon.match(filename)
-      if not match
+      if match == nil
         next
       end
       img = File.join(balloon_dir, filename)
@@ -788,7 +788,7 @@ module Home
     end
     for filename in filelist
       match = re_annex.match(filename)
-      if not match
+      if match == nil
         next
       end
       img = File.join(balloon_dir, filename)

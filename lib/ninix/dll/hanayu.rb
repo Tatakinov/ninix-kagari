@@ -38,7 +38,7 @@ module Hanayu
       @dbpath = File.join(@dir, DBNAME)
       @graphs = {}
       @data = read_hanayu_txt(@dir)
-      if @data and not @data.empty?
+      if @data != nil and not @data.empty?
         read_db()
         return 1
       else
@@ -86,7 +86,7 @@ module Hanayu
               tmp_name = line
             end
           end
-          if data
+          if not data.empty?
             graphs[name] = data
           end
           return graphs
@@ -130,7 +130,7 @@ module Hanayu
           ver = nil
           for line in f
             line = line.strip()
-            if not line
+            if line.empty?
               next
             end
             if ver == nil
@@ -196,7 +196,7 @@ module Hanayu
     end
 
     def execute(argument)
-      if not argument
+      if argument == nil or argument.empty?
         return RESPONSE[400]
       end
       command = argument[0]
@@ -384,7 +384,7 @@ module Hanayu
       cr.save()
       cr.set_source_rgb(*get_color('background'))
       cr.paint()
-      if @surface
+      if @surface != nil
         width = @surface.width
         height = @surface.height
         xoffset = ((WIDTH - width) / 2).to_i
@@ -421,7 +421,7 @@ module Hanayu
     end
 
     def destroy
-      if @window
+      if @window != nil
         @window.destroy()
         @window = nil
         @timeout_id = nil
@@ -528,7 +528,7 @@ module Hanayu
             end
           end
         end
-        if surface
+        if surface != nil
           w = surface.width
           h = surface.height
           x = 60 + index_ * step + (step / 2).to_i - (w / 2).to_i

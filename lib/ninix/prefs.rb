@@ -94,7 +94,7 @@ module Prefs
       @dic = {}
       begin
         f = open(@filename)
-        while(line = f.gets)
+        while line = f.gets
           prefs = line.chomp.split(': ', 2)
           key = prefs[0]
           value = prefs[1]
@@ -239,9 +239,9 @@ module Prefs
       @__prefs.set('allowembryo', (@allowembryo_button.active? ? 1 : 0).to_s)
       @__prefs.set('balloon_fonts', @fontchooser.font_name)
       selected = @balloon_treeview.selection.selected
-      if selected
+      if selected != nil
         model, listiter = selected
-        if listiter # XXX
+        if listiter != nil # XXX
           directory = model.get_value(listiter, 1)
           @__prefs.set('default_balloon', directory)
         end

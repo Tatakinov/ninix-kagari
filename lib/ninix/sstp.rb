@@ -70,7 +70,7 @@ module SSTP
 
     def send_answer(value)
       charset = @request_handler.get_charset
-      answer = [value.encode(charset, :invalid => :replace), "\r\n\r\n"].join("")
+      answer = [value.encode(charset, :invalid => :replace, :undef => :replace), "\r\n\r\n"].join("")
       send_response(200, :data => answer) # OK
     end
 
@@ -451,13 +451,13 @@ module SSTP
       elsif command == 'getname'
         send_response(200)
         name = @server.handle_request('GET', 'get_ghost_name')
-        @fp.write([name.encode(charset, :invalid => :replace),
+        @fp.write([name.encode(charset, :invalid => :replace, :undef => :replace),
                    "\r\n"].join(""))
         @fp.write("\r\n")
       elsif command == 'getversion'
         send_response(200)
         @fp.write(["ninix-aya ",
-                   Version.VERSION.encode(charset),
+                   Version.VERSION.encode(charset, :invalid => :replace, :undef => :replace),
                    "\r\n"].join(""))
         @fp.write("\r\n")
       elsif command == 'quiet'
@@ -470,15 +470,15 @@ module SSTP
         send_response(200)
         for name in @server.handle_request('GET', 'get_ghost_names')
           @fp.write(
-            [name.encode(charset, :invalid => :replace), "\r\n"].join(""))
+            [name.encode(charset, :invalid => :replace, :undef => :replace), "\r\n"].join(""))
         end
         @fp.write("\r\n")
       elsif command == 'checkqueue'
         send_response(200)
         count, total = @server.handle_request(
                  'GET', 'check_request_queue', sender)
-        @fp.write([count.to_s.encode(charset), "\r\n"].join(""))
-        @fp.write([total.to_s.encode(charset), "\r\n"].join(""))
+        @fp.write([count.to_s.encode(charset, :invalid => :replace, :undef => :replace), "\r\n"].join(""))
+        @fp.write([total.to_s.encode(charset, :invalid => :replace, :undef => :replace), "\r\n"].join(""))
         @fp.write("\r\n")
       else
         send_response(501) # Not Implemented

@@ -141,7 +141,7 @@ module Script
             break
           end
         end
-        if not match
+        if match == nil
           raise RuntimeError('should not reach here')
         end
         tokens << [token, match.to_s]

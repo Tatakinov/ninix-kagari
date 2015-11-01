@@ -43,7 +43,7 @@ module Alias
         next
       end
       match = re_alias.match(line)
-      if match
+      if match != nil
         name = line
         table = {}
         begin

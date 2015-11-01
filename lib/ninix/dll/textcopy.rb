@@ -37,7 +37,7 @@ module TextCopy
     end
 
     def execute(argument)
-      if not argument or @clipboard == nil
+      if argument == nil or argument.empty? or @clipboard == nil
         return RESPONSE[400]
       end
       text = argument[0]
@@ -45,7 +45,7 @@ module TextCopy
       if argument.length >= 2 and argument[1] != 0
         return ["SAORI/1.0 200 OK\r\n",
                 "Result: ",
-                argument[0].encode(@charset, :invalid => :replace),
+                argument[0].encode(@charset, :invalid => :replace, :undef => :replace),
                 "\r\n\r\n"].join("")
       else
         return RESPONSE[204]

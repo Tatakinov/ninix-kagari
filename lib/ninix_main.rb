@@ -1344,7 +1344,7 @@ module Ninix_Main
               key = key.strip()
               if key == 'time'
                 begin
-                  ghost_time = value.strip().to_i
+                  ghost_time = Integer(value.strip())
                 rescue
                   #pass
                 end

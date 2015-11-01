@@ -69,7 +69,7 @@ module Makoto
     end
     if validity == 2
       expanded = segments[1..segments.length-1].sample
-      if repeat_count
+      if repeat_count != nil
         expanded = expanded * rand(repeat_count)
       end
       return i, segments[0] + expanded

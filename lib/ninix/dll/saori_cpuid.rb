@@ -43,7 +43,7 @@ module SAORI_CPUID
             }
 
     def execute(argument)
-      if not argument
+      if argument == nil or argument.empty?
         return RESPONSE[400]
       end
       if argument.length > 1 and argument[1] == 0
@@ -61,8 +61,8 @@ module SAORI_CPUID
       elsif ENTRY.keys.include?(argument[0]) ## FIXME
         value = ENTRY[argument[0]].sample
       end
-      if value
-        return ("SAORI/1.0 200 OK\r\nResult: " + value.to_s + "\r\n\r\n").encode(@charset, :invalid => :replace)
+      if not value.empty?
+        return ("SAORI/1.0 200 OK\r\nResult: " + value.to_s + "\r\n\r\n").encode(@charset, :invalid => :replace, :undef => :replace)
       else
         return RESPONSE[204]
       end

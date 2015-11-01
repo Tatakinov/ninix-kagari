@@ -1,3 +1,10 @@
+Sun November 1 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* Ruby移行以降の修正で漏れがあったもの対応。
+
+Tue October 20 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* to_i, to_fメソッドは例外を起こさないのでbegin～rescueの中では
+	  Integer(), Float()を使うようにした.(追加修正)
+
 Mon October 19 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* バージョン4.500.5リリース.
 	* MasterList.xmlが無いとNGMが落ちる問題を修正した.(同様の修正多数.)

@@ -36,7 +36,7 @@ module Osuwari
     end
 
     def check_import
-      if @__sakura
+      if @__sakura != nil
         return 1
       else
         return 0
@@ -48,14 +48,14 @@ module Osuwari
     end
 
     def execute(argument)
-      if not argument
+      if argument == nil or argument.empty?
         return RESPONSE[400]
       end
       if argument[0] == 'START'
         if argument.length < 7
           return RESPONSE[400]
         end
-        if true #begin ## FIXME
+        begin ## FIXME
           #assert ['ACTIVE', 'FIX'].include?(argument[2]) or \
           #argument[2].start_with?('@') or \
           #argument[2].start_with?('#')
@@ -63,9 +63,9 @@ module Osuwari
           @settings['hwnd'] = argument[1]
           @settings['target'] = argument[2]
           @settings['position'] = argument[3]
-          @settings['offset_x'] = argument[4].to_i
-          @settings['offset_y'] = argument[5].to_i
-          @settings['timeout'] = argument[6].to_i
+          @settings['offset_x'] = Integer(argument[4])
+          @settings['offset_y'] = Integer(argument[5])
+          @settings['timeout'] = Integer(argument[6])
           @settings['xmove'] = 0
           @settings['ymove'] = 0
           @settings['noclip'] = 0
@@ -88,7 +88,7 @@ module Osuwari
             #assert ['TOP', 'LEFT', 'RIGHT', 'BOTTOM'].include?(position)
             @settings['except'] = [target, position]
           end
-        else #rescue
+        rescue
           return RESPONSE[400]
         end
         #@timeout_id = GLib::Timeout.add(@settings['timeout']) { do_idle_tasks }
@@ -115,7 +115,7 @@ module Osuwari
       target_flag = [false, false]
       if target == 'ACTIVE'
         active_window = get_active_window()
-        if active_window
+        if active_window != nil
           if @__sakura.identify_window(active_window)
             target_flag[1] = true
           else

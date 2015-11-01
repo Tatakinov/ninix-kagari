@@ -39,7 +39,7 @@ module WMove
       @timeout_id = nil
       @dir = dir
       result = 0
-      if not @__sakura
+      if @__sakura == nil
         #pass
       elsif @loaded == 1
         result = 2
@@ -53,7 +53,7 @@ module WMove
     end
 
     def finalize
-      if @timeout_id
+      if @timeout_id != nil
         GLib::Source.remove(@timeout_id)
         @timeout_id = nil
       end
@@ -100,7 +100,7 @@ module WMove
 
     def request(req)
       req_type, argument = evaluate_request(req)
-      if not req_type
+      if req_type == nil
         result = RESPONSE[400]
       elsif req_type == 'GET Version'
         result = RESPONSE[204]
@@ -113,7 +113,7 @@ module WMove
     end
 
     def execute(args)
-      if not args
+      if args == nil or args.empty?
         result = RESPONSE[400]
       elsif not __check_argument(args)
         result = RESPONSE[400]
@@ -135,7 +135,7 @@ module WMove
                      + "Value0: " + x.to_s + "\r\n" \
                      + "Value1: " + (x + (w / 2).to_i).to_s + "\r\n" \
                      + "Value2: " + (x + w).to_s + "\r\n\r\n"
-            result = result.encode('ascii')
+            result = result.encode('ascii', :invalid => :replace, :undef => :replace)
           rescue
             result = RESPONSE[500]
           end
@@ -146,7 +146,7 @@ module WMove
                      + "Result: " + scrn_w.to_s + "\r\n" \
                      + "Value0: " + scrn_w.to_s + "\r\n" \
                      + "Value1: " + scrn_h.to_s + "\r\n\r\n"
-            result = result.encode('ascii')
+            result = result.encode('ascii', :invalid => :replace, :undef => :replace)
           rescue
             result = RESPONSE[500]
           end
@@ -186,7 +186,7 @@ module WMove
 
     def do_idle_tasks
       for side in [0, 1]
-        if @commands[side]
+        if not @commands[side].empty?
           command, args = @commands[side].shift
           if ['MOVE', 'MOVE_INSIDE'].include?(command)
             x, y = @__sakura.get_surface_position(side)
@@ -267,7 +267,7 @@ module WMove
             @__sakura.notify_event(*args)
           end
         end
-        if not @commands[0] and not @commands[1]
+        if @commands[0].empty? and @commands[1].empty?
           if @timeout_id != nil
             GLib::Source.remove(@timeout_id)
             @timeout_id = nil

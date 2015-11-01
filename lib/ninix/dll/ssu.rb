@@ -53,7 +53,7 @@ module SSU
 
     def request(req)
       req_type, argument, charset = evaluate_request(req)
-      if not req_type
+      if req_type == nil
         result = RESPONSE[400]
       elsif req_type == 'GET Version'
         result = RESPONSE[204]
@@ -66,7 +66,7 @@ module SSU
     end
 
     def execute(args, charset)
-      if not args
+      if args == nil or args.empty?
         return RESPONSE[400]
       end
       if not @function.include?(args[0])
@@ -83,14 +83,14 @@ module SSU
       result = method(@function[name][0]).call(args)
       if result != nil and not result.to_s.empty?
         s = "SAORI/1.0 200 OK\r\nResult: " + result.to_s + "\r\n"
-        if @value
+        if not @value.empty?
           for i in 0..@value.length-1
             s = [s, "Value" + i.to_s + ": " + @value[i].to_s + "\r\n"].join("")
           end
         end
         s = [s, "Charset: " + charset.to_s + "\r\n"].join("")
         s = [s, "\r\n"].join("")
-        return s.encode(charset)
+        return s.encode(charset, :invalid => :replace, :undef => :replac)
       else
         return RESPONSE[204]
       end
@@ -135,7 +135,7 @@ module SSU
 
     def ssu_substr(args)
       s = args[0]
-      if ssu_is_digit([args[1]])
+      if ssu_is_digit([args[1]]) == 1
         start = ssu_zen2han([args[1]]).to_i
         if start > s.length
           return ''
@@ -145,7 +145,7 @@ module SSU
       end
       if args.length == 2
         end_ = s.length
-      elsif args.length == 3 and ssu_is_digit([args[2]])
+      elsif args.length == 3 and ssu_is_digit([args[2]]) == 1
         end_ = start + ssu_zen2han([args[2]]).to_i
       else
         return ''
@@ -195,8 +195,8 @@ module SSU
     RE_CONDITION = Regexp.new('(>=|<=|>|<|==|!=|＞＝|＜＝|＞|＜|！＝|＝＝)')
 
     def eval_condition(left, ope, right)
-      if ssu_is_digit([left]) and \
-        ssu_is_digit([right])
+      if ssu_is_digit([left]) == 1 and \
+        ssu_is_digit([right]) == 1
         left = ssu_zen2han([left]).to_f
         right = ssu_zen2han([right]).to_f
       elsif ['>', '＞', '>=', '＞＝', '<', '＜', '<=', '＜＝'].include?(ope)
@@ -287,7 +287,7 @@ module SSU
 
     def ssu_nswitch(args)
       num = args[0]
-      if ssu_is_digit([num])
+      if ssu_is_digit([num]) == 1
         num = ssu_zen2han([num]).to_i
         if 0 < num and num < args.length
           return args[num]
@@ -359,7 +359,7 @@ module SSU
       end
       if args.length == 3
         num = args[2]
-        if ssu_is_digit([num])
+        if ssu_is_digit([num]) == 1
           num = ssu_zen2han([num]).to_i
         end
         value_list = s0.split(s1, num + 1)
@@ -408,11 +408,11 @@ module SSU
       charset = 'CP932' # default
       header = req.lines
       line = header.shift
-      if not line
+      if line == nil
         return req_type, argument, charset
       end
       line = line.force_encoding(charset).strip()
-      if not line
+      if line.empty?
         return req_type, argument, charset
       end
       for request in ['EXECUTE', 'GET Version']
@@ -423,7 +423,7 @@ module SSU
       end
       for line in header
         line = line.force_encoding(charset).strip()
-        if not line
+        if line.empty?
           next
         end
         if not line.include?(':')

@@ -71,14 +71,14 @@ module SSTPLib
       new_list = []
       for item in message
         key, value = item
-        new_list << [key, value.force_encoding(charset).encode("UTF-8", :invalid => :replace)] ## FIXME
+        new_list << [key, value.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)] ## FIXME
       end
       message = new_list
       return message
     end
 
     def parse_request(requestline)
-      requestline = requestline.encode('Shift_JIS')
+      requestline = requestline.encode('Shift_JIS', :invalid => :replace, :undef => :replace)
       if requestline.end_with?("\r\n")
         requestline = requestline[0..-3]
       elsif requestline.end_with?("\n")
@@ -87,7 +87,7 @@ module SSTPLib
       @requestline = requestline
       re_requestsyntax = Regexp.new('^([A-Z]+) SSTP/([0-9]\\.[0-9])$')
       match = re_requestsyntax.match(requestline)
-      if not match
+      if match == nil
         @equestline = '-'
         send_error(400, :message => 'Bad Request ' + requestline.to_s)
         return false

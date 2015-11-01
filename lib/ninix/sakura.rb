@@ -1341,7 +1341,7 @@ module Sakura
       if not ['lefttop', 'righttop', 'centertop'].include?(align_background)
         align_background = 'lefttop'
       end
-      align_background = align_background[0..-4].encode('ascii') # XXX
+      align_background = align_background[0..-4].encode('ascii', :invalid => :replace, :undef => :replace) # XXX
       align = getstring('menu.sidebar.alignment')
       if not align.empty?
         align_sidebar = align
@@ -1349,7 +1349,7 @@ module Sakura
       if not ['top', 'bottom'].include?(align_sidebar)
         align_sidebar = 'bottom'
       end
-      align_sidebar = align_sidebar.encode('ascii') # XXX
+      align_sidebar = align_sidebar.encode('ascii', :invalid => replace, :undef => :replace) # XXX
       align = getstring('menu.foreground.alignment')
       if not align.empty?
         align_foreground = align
@@ -1357,7 +1357,7 @@ module Sakura
       if not ['lefttop', 'righttop', 'centertop'].include?(align_foreground)
         align_foreground = 'lefttop'
       end
-      align_foreground = align_foreground[0..-4].encode('ascii') # XXX
+      align_foreground = align_foreground[0..-4].encode('ascii', :invalid => replace, :undef => :replace) # XXX
       return path_background, path_sidebar, path_foreground, \
              align_background, align_sidebar, align_foreground
     end
@@ -2274,7 +2274,7 @@ module Sakura
 
     def __yen__m(args)
       begin
-        num = args[0].to_i(16)
+        num = Integer(args[0], 16)
       rescue ArgumentError
         num = 0
       end
@@ -2555,8 +2555,8 @@ module Sakura
         end
       elsif args[0, 2] == ['set', 'balloonoffset'] and argc > 3
         begin
-          x = args[2].to_i
-          y = args[3].to_i
+          x = Integer(args[2])
+          y = Integer(args[3])
         rescue ArgumentError
           #pass
         else
@@ -2585,7 +2585,7 @@ module Sakura
         elsif command == 'cdplay' and argc > 2
           @audio_player.set_state(Gst::State::NULL)
           begin
-            track = args[2].to_i
+            track = Integer(args[2])
           rescue ArgumentError
             return
           end

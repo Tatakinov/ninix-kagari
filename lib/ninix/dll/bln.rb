@@ -126,7 +126,7 @@ module Bln
     end
 
     def execute(argument)
-      if not argument or argument.empty?
+      if argument == nil or argument.empty?
         return RESPONSE[400]
       end
       name = argument[0]
@@ -456,7 +456,7 @@ module Bln
         @processed_script = []
         logging.error('-' * 50)
         logging.error(e.format)
-        logging.error(@script.encode('utf-8'))
+        logging.error(@script.encode('utf-8', :invalid => :replace, :undef => :replace))
       end
       @timeout_id = GLib::Timeout.add(10) { do_idle_tasks }
     end
@@ -594,7 +594,7 @@ module Bln
         @processed_script = []
         logging.error('-' * 50)
         logging.error(e.format)
-        logging.error(@script.encode('utf-8'))
+        logging.error(@script.encode('utf-8', :invalid => :replace, :undef => :replace))
       end
     end
 

@@ -342,7 +342,7 @@ module Aya
               "ID: OnLoad\r\n" \
               "Sender: AYA\r\n" \
               "SecurityLevel: local\r\n" \
-              "Path: " + @aya_dir.gsub('/', "\\") + "\r\n\r\n".encode('CP932'))
+              "Path: " + @aya_dir.gsub('/', "\\") + "\r\n\r\n".encode('CP932', :invalid => :replace, :undef => :replace))
       return 1
     end
 
@@ -453,7 +453,7 @@ module Aya
       request(["NOTIFY SHIORI/3.0\r\n",
                "ID: OnUnload\r\n",
                "Sender: AYA\r\n",
-               "SecurityLevel: local\r\n\r\n"].join("").encode('CP932'))
+               "SecurityLevel: local\r\n\r\n"].join("").encode('CP932', :invalid => :replace, :undef => :replace))
       @global_namespace.save_database()
       @saori_library.unload()
       if @logfile != nil
@@ -506,7 +506,7 @@ module Aya
                   "ID: OnFirstBoot\r\n" \
                   "Sender: ninix\r\n" \
                   "SecurityLevel: local\r\n" \
-                  "Reference0: 0\r\n\r\n".encode('CP932'))
+                  "Reference0: 0\r\n\r\n".encode('CP932', :invalid => :replace, :undef => :replace))
         elsif @req_header['ID'] == 'OnFirstBoot'
           @first_boot = 0
         end
@@ -545,7 +545,7 @@ module Aya
             result = request("GET SHIORI/3.0\r\n" \
                              "ID: OnAiTalk\r\n" \
                              "Sender: ninix\r\n" \
-                             "SecurityLevel: local\r\n\r\n".encode('CP932'))
+                             "SecurityLevel: local\r\n\r\n".encode('CP932', :invalid => :replace, :undef => :replace))
             reset_request()
             return result
           end
@@ -555,10 +555,10 @@ module Aya
       if @ver_3 # Ver.3
         result = "SHIORI/3.0 200 OK\r\n" \
                  "Sender: AYA\r\n" \
-                 "Value: " + result.to_s + "\r\n\r\n".encode('CP932')
+                 "Value: " + result.to_s + "\r\n\r\n".encode('CP932', :invalid => :replace, :undef => :replace)
         return result
       else
-        return result.encode('CP932')
+        return result.encode('CP932', :invalid => :replace, :undef => :replac)
       end
     end
   end
@@ -2840,7 +2840,7 @@ module Aya
 
     def BINSTRTONUM(namespace, argv)
       begin
-        return argv[0].to_s.to_i(2)
+        return Integer(argv[0].to_s, 2)
       rescue
         return -1
       end
@@ -3132,7 +3132,7 @@ module Aya
 
     def HEXSTRTONUM(namespace, argv)
       begin
-        return argv[0].to_s.to_i(16)
+        return Integer(argv[0].to_s, 16)
       rescue
         return -1
       end
@@ -3151,13 +3151,13 @@ module Aya
     end
 
     def INSERT(namespace, argv)
-      line = argv[0].to_s.encode('CP932', 'replace') # XXX
+      line = argv[0].to_s.encode('CP932', :invalid => :replace, :undef => :replace) # XXX
       begin
         start = Integer(argv[1])
       rescue
         return ''
       end
-      to_insert = argv[2].to_s.encode('CP932', 'replace') # XXX
+      to_insert = argv[2].to_s.encode('CP932', :invalid => :replace, :undef => :replace) # XXX
       if start < 0
         start = 0
       end
@@ -3559,7 +3559,7 @@ module Aya
     end
 
     def STRLEN(namespace, argv)
-      line = argv[0].to_s.encode('CP932', 'replace') # XXX
+      line = argv[0].to_s.encode('CP932', :invalid => :replace, :undef => :replace) # XXX
       if argv.length == 2
         var = argv[1].to_s
         target_namespace = select_namespace(namespace, var)
@@ -3571,8 +3571,8 @@ module Aya
     end
 
     def STRSTR(namespace, argv)
-      line = argv[0].to_s.encode('CP932', 'replace') # XXX
-      to_find = argv[1].to_s.encode('CP932', 'replace') # XXX
+      line = argv[0].to_s.encode('CP932', :invalid => :replace, :undef => :replace) # XXX
+      to_find = argv[1].to_s.encode('CP932', :invalid => :replace, :undef => :replace) # XXX
       begin
         start = Integer(argv[2])
       rescue

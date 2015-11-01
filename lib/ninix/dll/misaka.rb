@@ -2516,11 +2516,11 @@ module Misaka
              "Sender: MISAKA\r\n",
              "SecurityLevel: local\r\n",
              "Charset: ",
-             @charset.encode(@charset),
+             @charset.encode(@charset, :invalid => :replace, :undef => :replace),
              "\r\n"].join('')
       for i in 1..args.length-1
         req = [req,
-               'Argument', i.to_s.encode(@charset), ': ', 
+               'Argument', i.to_s.encode(@charset, :invalid => :replace, :undef => :replace), ': ', 
                expand_args(args[i]).encode(@charset, :invalid => :replace, :undef => :replace),
                "\r\n"].join('')
       end

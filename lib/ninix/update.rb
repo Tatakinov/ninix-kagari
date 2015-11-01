@@ -380,7 +380,7 @@ module Update
         if filename == ""
           next
         end
-        checksum = checksum.encode('ascii') # XXX
+        checksum = checksum.encode('ascii', :invalid => :replace, :undef => :replace) # XXX
         path = File.join(@ghostdir, adjust_path(filename))
         begin
           f = open(path, 'rb')

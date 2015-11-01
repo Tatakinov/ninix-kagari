@@ -2177,7 +2177,7 @@ module Kawari
         result = [result, "Reference0: " + to.to_s + "\r\n"].join('')
       end
       result = [result, "\r\n"].join('')
-      return result.encode($charset)
+      return result.encode($charset, :invalid => :replace, :undef => :replace)
     end
 
     def exec_saoriregist(kawari, argv)

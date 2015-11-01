@@ -95,7 +95,7 @@ module Gomi
     end
 
     def execute(argument)
-      if not argument
+      if argument == nil or argument.empty?
         return RESPONSE[400]
       end
       args = @parser.getopts(
@@ -115,10 +115,10 @@ module Gomi
         end
         return ["SAORI/1.0 200 OK\r\n",
                 "Result: ",
-                file_count.to_s.encode('ascii'),
+                file_count.to_s.encode('ascii', :invalid => :replace, :undef => :replace),
                 "\r\n",
                 "Reference0: ",
-                dir_size.to_s.encode('ascii'),
+                dir_size.to_s.encode('ascii', :invalid => :replace, :undef => :replace),
                 "\r\n\r\n"].join("")
       elsif args['empty'] or args['e']
         if args['force'] or args['f']
