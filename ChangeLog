@@ -1,5 +1,6 @@
 Sun November 1 2015   Shyouzou Sugitani <shy@users.osdn.me>
-	* Ruby移行以降の修正で漏れがあったもの対応。
+	* Ruby移行以降の修正で漏れがあったもの対応.
+	* 一部の互換SAORIが動作しない問題を修正した.
 
 Tue October 20 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* to_i, to_fメソッドは例外を起こさないのでbegin～rescueの中では

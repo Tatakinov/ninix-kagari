@@ -2527,7 +2527,7 @@ module Misaka
       req = [req, "\r\n"].join('')
       response = @saori_library.request(expand_args(args[0]), req)
       header = response.split(/\r?\n/, 0)
-      if header
+      if not header.empty?
         line = header.shift
         line = line.force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace).strip()
         if line.include?(' ')
@@ -2654,9 +2654,9 @@ module Misaka
       top_dir = File.join(top_dir, head)
       if not @saori_list.include?(name)
         module_ = @saori.request(name)
-          if module_
-            @saori_list[name] = module_
-          end
+        if module_
+          @saori_list[name] = module_
+        end
       end
       if @saori_list.include?(name)
         result = @saori_list[name].load(:dir => top_dir)

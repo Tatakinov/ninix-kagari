@@ -177,8 +177,6 @@ module DLL
           saori = saori_.new()
           if saori_.method_defined?('need_ghost_backdoor')
             saori.need_ghost_backdoor(@sakura)
-          else
-            saori = nil
           end
         rescue
           saori = nil

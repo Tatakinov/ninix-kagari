@@ -230,19 +230,19 @@ module Hanayu
             new_args << hours
           end
           @graphs[name] = Line.new(
-            @dir, @data[name], new_args, 0, 24)
+            @dir, @data[name], :args => new_args, :limit_min => 0, :limit_max => 24)
         elsif graph_type == 'line'
           @graphs[name] = Line.new(
-            @dir, @data[name], argument[2..-1])
+            @dir, @data[name], :args => argument[2..-1])
         elsif graph_type == 'bar'
           @graphs[name] = Bar.new(
-            @dir, @data[name], argument[2..-1])
+            @dir, @data[name], :args => argument[2..-1])
         elsif graph_type == 'radar'
           @graphs[name] = Radar.new(
-            @dir, @data[name], argument[2..-1])
+            @dir, @data[name], :args => argument[2..-1])
         elsif graph_type == 'radar2'
           @graphs[name] = Radar2.new(
-            @dir, @data[name], argument[2..-1])
+            @dir, @data[name], :args => argument[2..-1])
         end
       elsif command == 'hide'
         if argument.length >= 2
@@ -268,7 +268,7 @@ module Hanayu
     WIDTH = 450
     HEIGHT = 340
 
-    def initialize(dir, data, args=[], limit_min=nil, limit_max=nil)
+    def initialize(dir, data, args: [], limit_min: nil, limit_max: nil)
       @dir = dir
       @data = data
       @args = args
@@ -573,7 +573,7 @@ module Hanayu
     WIDTH = 288
     HEIGHT = 288
 
-    def initialize(dir, data, args=[])
+    def initialize(dir, data, args: [])
       super(dir, data, args)
     end
 
@@ -679,7 +679,7 @@ module Hanayu
     WIDTH = 288
     HEIGHT = 288
 
-    def initialize(dir, data, args=[])
+    def initialize(dir, data, args: [])
       super(dir, data, args)
     end
   end
