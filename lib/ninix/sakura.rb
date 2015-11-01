@@ -1349,7 +1349,7 @@ module Sakura
       if not ['top', 'bottom'].include?(align_sidebar)
         align_sidebar = 'bottom'
       end
-      align_sidebar = align_sidebar.encode('ascii', :invalid => replace, :undef => :replace) # XXX
+      align_sidebar = align_sidebar.encode('ascii', :invalid => :replace, :undef => :replace) # XXX
       align = getstring('menu.foreground.alignment')
       if not align.empty?
         align_foreground = align
@@ -1357,7 +1357,7 @@ module Sakura
       if not ['lefttop', 'righttop', 'centertop'].include?(align_foreground)
         align_foreground = 'lefttop'
       end
-      align_foreground = align_foreground[0..-4].encode('ascii', :invalid => replace, :undef => :replace) # XXX
+      align_foreground = align_foreground[0..-4].encode('ascii', :invalid => :replace, :undef => :replace) # XXX
       return path_background, path_sidebar, path_foreground, \
              align_background, align_sidebar, align_foreground
     end
