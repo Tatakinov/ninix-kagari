@@ -2951,7 +2951,7 @@ module Satori
         end
       end
       if @saori_list.include?(name)
-        result = @saori_list[name].load(top_dir)
+        result = @saori_list[name].load(:dir => top_dir)
       end
       return result
     end

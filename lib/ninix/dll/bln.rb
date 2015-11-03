@@ -36,7 +36,7 @@ module Bln
     end
 
     def check_import
-      if @__sakura
+      if @__sakura != nil
         return 1
       else
         return 0
@@ -74,7 +74,7 @@ module Bln
               data = {}
               start = line.index('[')
               end_ = line.index(']')
-              if end_ < 0
+              if end_ == nil
                 end_ = line.length
               end
               name = line[start + 1..end_-1]

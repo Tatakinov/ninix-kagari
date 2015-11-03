@@ -165,7 +165,7 @@ module Script
     end
 
     def parse(s)
-      if not s or s.empty?
+      if s == nil or s.empty?
         return []
       end
       # tokenize the script
@@ -179,10 +179,10 @@ module Script
       string_chunks = []
       scope = 0
       anchor = nil
-      while !@tokens.empty?
+      while not @tokens.empty?
         token, lexeme = next_token()
         if token == TOKEN_STRING and lexeme == '\\'
-          if string_chunks
+          if not string_chunks.empty?
             text << [TEXT_STRING, string_chunks.join('')]
           end
           if not text.empty?
@@ -285,7 +285,7 @@ module Script
               raise perror(:skip => 'length'), 'wrong number of arguments'
               return []
             end
-            if args[1].length != 1 or not args[1][0][1]
+            if args[1].length != 1 or args[1][0][1].empty?
               raise perror(:skip => 'length'), 'syntax error (expected an ID)'
               return []
             end

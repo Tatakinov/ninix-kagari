@@ -300,7 +300,7 @@ module Pix
     f = File.open(path, 'rb')
     while true
       c = f.read(1)
-      if c == ''
+      if c == nil # EOF
         break
       end
       loader.write((c[0].ord ^ key[key_pos].ord).chr)

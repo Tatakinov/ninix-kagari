@@ -51,7 +51,7 @@ module Balloon
       handlers = {
         'reset_user_interaction' => 'reset_user_interaction',
       }
-      if !handlers.include?(event)
+      if not handlers.include?(event)
         result = @parent.handle_request(
           event_type, event, *arglist)
       else
@@ -931,7 +931,7 @@ module Balloon
       if message_width > w
         @sstp_message = '... (' + sender + ')'
         i = 0
-        while 1
+        while true
           i += 1
           s = message[0, i] + '... (' + sender + ')'
           @sstp_layout.set_text(s)
@@ -1005,19 +1005,20 @@ module Balloon
           markup_list << [sn, tag]
         end
       end
-      if not markup_list
-        return GLib.markup_escape_text(text)
+      if markup_list.empty?
+        return text ## FIXME: GLib.markup_escape_text(text)
       end
       markup_list.sort()
       markup_list.reverse()
       pn = text.length
       for sn, tag in markup_list
         text = [text[0, sn], tag,
-                GLib.markup_escape_text(text[sn, pn]), text[pn, text.length]].join('')
+                text[sn, pn], ## FIXME: GLib.markup_escape_text(text[sn, pn]),
+                text[pn, text.length]].join('')
         pn = sn
         if tag[1] == '/'
           tag_ = tag[2, tag.length - 1]
-          assert tags_.include?(tag_)
+          #assert tags_.include?(tag_)
           count_[tag_] -= 1
           if count_[tag_] < 0
             text = ['<', tag_, '>', text].join('')
@@ -1025,7 +1026,7 @@ module Balloon
           end
         else
           tag_ = tag[1, tag.length - 1]
-          assert tags_.include?(tag_)
+          #assert tags_.include?(tag_)
           count_[tag_] += 1
           if count_[tag_] > 0
             text = [text, '</', tag_, '>'].join('')
@@ -1119,7 +1120,7 @@ module Balloon
         i += 1
         line += 1
       end
-      if @side == 0 and @sstp_message
+      if @side == 0 and @sstp_message != nil
         redraw_sstp_message(widget, cr)
       end
       if @selection != nil
@@ -1471,7 +1472,7 @@ module Balloon
       w = @sstp_surface.width
       h = @sstp_surface.height
       i = 1
-      while 1
+      while true
         space = '\u3000' * i ## FIXME
         @layout.set_text(space)
         text_w, text_h = @layout.pixel_size
@@ -1520,7 +1521,7 @@ module Balloon
     end
 
     def append_meta(tag)
-      if not tag
+      if tag == nil
         return
       end
       if @text_buffer.empty?
@@ -1643,7 +1644,7 @@ module Balloon
       @entry.set_size_request(w, h)
       @entry.show()
       surface = nil
-      if balloon
+      if balloon != nil
         path, config = balloon
         # load pixbuf
         begin
@@ -1707,7 +1708,7 @@ module Balloon
     end
 
     def destroy
-      if @window
+      if @window != nil
         @window.destroy()
         @window = nil
       end
@@ -1909,15 +1910,15 @@ module Balloon
                                'OnUserInputCancel', '', 'cancel')
       elsif timeout and \
         @parent.handle_request('GET', 'notify_event',
-                               'OnUserInputCancel', '', 'timeout')
+                               'OnUserInputCancel', '', 'timeout') != nil
         # pass
       elsif @symbol == 'OnUserInput' and \
-           @parent.handle_request('GET', 'notify_event', 'OnUserInput', data)
+           @parent.handle_request('GET', 'notify_event', 'OnUserInput', data) != nil
         # pass
       elsif @parent.handle_request('GET', 'notify_event',
-                                   'OnUserInput', @symbol, data)
+                                   'OnUserInput', @symbol, data) != nil
         # pass
-      elsif @parent.handle_request('GET', 'notify_event', @symbol, data)
+      elsif @parent.handle_request('GET', 'notify_event', @symbol, data) != nil
         # pass
       end
       @symbol = nil

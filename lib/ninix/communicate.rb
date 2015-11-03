@@ -40,7 +40,7 @@ module Communicate
           temp << value
         end
       end
-      return temp.join('\x01')
+      return temp.join(1.chr)
     end
 
     def notify_all(event, references)
@@ -122,7 +122,7 @@ module Communicate
         for value in references
           refs << value.to_s
         end
-        refs = refs.join('\x01')
+        refs = refs.join(1.chr)
         Logging::Logging.debug("NOTIFY OTHER: " \
                                + on_other_event.to_s + ", " \
                                + name.to_s + ", " \
@@ -143,8 +143,8 @@ module Communicate
           if communicate == '__SYSTEM_ALL_GHOST__'
             sakura.enqueue_event('OnCommunicate', selfname, script)
             next
-          elsif communicate.include?('\x01')
-            to = name.split('\x01', 0)
+          elsif communicate.include?(1.chr)
+            to = name.split(1.chr, 0)
             if to.include?(@ghosts[sakura][0])
               sakura.enqueue_event('OnCommunicate',
                                    selfname, script)
