@@ -626,7 +626,7 @@ module Seriko
       else
         return [] ## should not reach here
       end
-      if not match
+      if match == nil
         next
       end
       if version == 1 and not re_seriko_interval_value.match(value)
@@ -691,7 +691,7 @@ module Seriko
           else
             match = re_seriko2_pattern.match(pattern)
           end
-          if not match
+          if match == nil
             raise ('unsupported pattern: ' + pattern)
           end
           if version == 1
@@ -700,12 +700,12 @@ module Seriko
             method = match[3]
           else
             method = match[1]
-            if not match[2]
+            if match[2] == nil
               surface = 0
             else
               surface = match[2].to_i.to_s
             end
-            if not match[3]
+            if match[3] == nil
               interval = 0
             else
               interval = match[3].to_i.abs
@@ -745,12 +745,12 @@ module Seriko
               x = 0
               y = 0
             else
-              if not match[4]
+              if match[4] == nil
                 x = 0
               else
                 x = match[4].to_i
               end
-              if not match[5]
+              if match[5] == nil
                 y = 0
               else
                 y = match[5].to_i
@@ -802,17 +802,17 @@ module Seriko
       else
         match1 = re_mayuna_interval.match(key)
         match2 = re_mayuna2_interval.match(key)
-        if match1
+        if match1 != nil
           version = 1
           match = match1
-        elsif match2
+        elsif match2 != nil
           version = 2
           match = match2
         else
           next
         end
       end
-      if not match
+      if match == nil
         next
       end
       if version == 1 and not re_mayuna_interval_value.match(value)
@@ -846,7 +846,7 @@ module Seriko
           else
             match = re_mayuna2_pattern.match(pattern)
           end
-          if not match
+          if match == nil
             raise ('unsupported pattern: ' + pattern)
           end
           if version == 1
@@ -865,12 +865,12 @@ module Seriko
               x = 0
               y = 0
             else
-              if not match[4]
+              if match[4] == nil
                 x = 0
               else
                 x = match[4].to_i
               end
-              if not match[5]
+              if match[5] == nil
                 y = 0
               else
                 y = match[5].to_i

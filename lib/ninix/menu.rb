@@ -183,7 +183,7 @@ module Menu
           set_stylecontext(i, *a)
         end
         submenu = item.submenu
-        if submenu
+        if submenu != nil
           submenu.signal_connect('realize') do |i, *a|
             set_stylecontext(i, *a)
           end
@@ -293,7 +293,7 @@ module Menu
         for _ in @__mayuna_menu.length..index 
           @__mayuna_menu << nil
         end
-        if mayuna_menu[side]
+        if mayuna_menu[side] != nil
           @__mayuna_menu[index] = Gtk::Menu.new()
           item = Gtk::TearoffMenuItem.new()
           item.show()
@@ -363,14 +363,14 @@ module Menu
           else
             name_list = @__ui[key][0][side]
           end
-          if name_list # caption
+          if not name_list.empty? # caption
             for name in name_list
               caption = @parent.handle_request('GET', 'getstring', name)
-              if caption
+              if caption != nil and not caption.empty?
                 break
               end
             end
-            if caption
+            if caption != nil and not caption.empty?
               caption = __modify_shortcut(caption)
               if caption == __cut_mnemonic(caption)
                 caption = [caption, @__ui[key][1]].join('')
@@ -384,7 +384,7 @@ module Menu
         else
           name_list = @__ui[key][2][side]
         end
-        if name_list and !name_list.empty? # visible
+        if name_list != nil and not name_list.empty? # visible
           for name in name_list
             visible = @parent.handle_request('GET', 'getstring', name)
             if visible != nil
@@ -407,7 +407,7 @@ module Menu
       for key in @__menu_list.keys
         item = @ui_manager.get_widget(['/popup/', key].join(''))
         submenu = item.submenu
-        if submenu
+        if submenu != nil
           submenu.unrealize()
         end
       end
@@ -447,7 +447,7 @@ module Menu
       for key in @__menu_list.keys
         item = @ui_manager.get_widget(['/popup/', key].join(''))
         visible = @__menu_list[key]['visible']
-        if item
+        if item != nil
           if visible
             item.show()
           else
@@ -463,7 +463,7 @@ module Menu
       #assert @__menu_list.include?(name)
       #assert isinstance(caption, str)
       item = @ui_manager.get_widget(['/popup/', name].join(''))
-      if item
+      if item != nil
         label = item.get_children()[0]
         label.set_text_with_mnemonic(caption)
       end
@@ -479,7 +479,7 @@ module Menu
       if side >= 1
         __set_visible('Portal', false)
       else
-        if portal
+        if portal != nil and not portal.empty?
           menu = Gtk::Menu.new()
           portal_list = portal.split(2.chr, 0)
           for site in portal_list
@@ -503,7 +503,7 @@ module Menu
                   'GET', 'get_prefix')
                 filename = entry[2].downcase
                 tail = File.extname(filename)
-                if not tail
+                if tail.empty?
                   for ext in ['.png', '.jpg', '.gif']
                     filename = [filename, ext].join('')
                     banner = File.join(
@@ -555,7 +555,7 @@ module Menu
     end
 
     def __set_recommend_menu(recommend)
-      if recommend
+      if recommend != nil and not recommend.empty?
         menu = Gtk::Menu.new()
         recommend_list = recommend.split(2.chr, 0)
         for site in recommend_list
@@ -578,7 +578,7 @@ module Menu
               base_path = @parent.handle_request('GET', 'get_prefix')
               filename = entry[2].downcase
               tail = File.extname(filename)
-              if not tail
+              if tail.empty?
                 for ext in ['.png', '.jpg', '.gif']
                   filename = [filename, ext].join('')
                   banner = File.join(
@@ -760,7 +760,7 @@ module Menu
         ghost_menu = Gtk::Menu.new()
         for items in @parent.handle_request('GET', 'get_ghost_menus')
           item = items[path]
-          if item.parent
+          if item.parent != nil
             item.reparent(ghost_menu)
           else
             ghost_menu << item
@@ -789,7 +789,7 @@ module Menu
     def create_meme_menu(menuitem)
       menu = Gtk::Menu.new()
       for item in menuitem.values()
-        if item.parent
+        if item.parent != nil
           item.reparent(menu)
         else
           menu << item

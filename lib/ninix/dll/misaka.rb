@@ -85,7 +85,7 @@ module Misaka
     open(path) do |f|
       while true
         line = f.gets
-        if not line
+        if line == nil
           break
         end
         line = line.strip()
@@ -99,7 +99,7 @@ module Misaka
           end
           while true
             line = f.gets
-            if not line
+            if line == nil
               Misaka.syntax_error('unexpected end of file', path)
             end
             line = line.strip()
@@ -198,7 +198,7 @@ module Misaka
       while pos < end_
         if column == 0
           match = Re_comment.match(data[pos..-1])
-          if match
+          if match != nil
             column = column + match[0].length
             pos += match.end(0)
             next
@@ -207,7 +207,7 @@ module Misaka
         break_flag = false
         for token, pattern in Patterns
           match = pattern.match(data[pos..-1])
-          if match
+          if match != nil
             lexeme = match[0]
             if token == TOKEN_TEXT and \
               lexeme.start_with?('"') and lexeme.end_with?('"')
@@ -295,7 +295,7 @@ module Misaka
     end
 
     def skip_line
-      while @buffer
+      while not @buffer.empty?
         token, lexeme = pop()
         if token == TOKEN_NEWLINE
           break
@@ -394,7 +394,7 @@ module Misaka
           break
         end
       end
-      if not buf
+      if buf.empty?
         Misaka.syntax_error('null identifier',
                             @path, @lexer.get_position())
       end
@@ -446,7 +446,7 @@ module Misaka
           break
         end
         sentence = get_sentence()
-        if not sentence
+        if sentence == nil
           next
         end
         sentences << sentence
@@ -536,10 +536,10 @@ module Misaka
         end
       end
       # strip whitespace at the beginning and/or end of line
-      if buf and is_whitespace(buf[0])
+      if not buf.empty? and is_whitespace(buf[0])
         buf.delete_at(0)
       end
-      if buf and is_whitespace(buf[-1])
+      if not buf.empty? and is_whitespace(buf[-1])
         buf.delete_at(-1)
       end
       return buf
@@ -568,10 +568,10 @@ module Misaka
         end
       end
       # strip whitespace at the beginning and/or end of line
-      if buf and is_whitespace(buf[0])
+      if not buf.empty? and is_whitespace(buf[0])
         buf.delete_at(0)
       end
-      if buf and is_whitespace(buf[-1])
+      if not buf.empty? and is_whitespace(buf[-1])
         buf.delete_at(-1)
       end
       return buf
@@ -748,10 +748,10 @@ module Misaka
         end
       end
       # strip whitespace at the beginning and/or end of line
-      if buf and is_whitespace(buf[0])
+      if not buf.empty? and is_whitespace(buf[0])
         buf.delete_at(0)
       end
-      if buf and is_whitespace(buf[-1])
+      if not buf.empty? and is_whitespace(buf[-1])
         buf.delete_at(-1)
       end
       return buf
@@ -1094,7 +1094,7 @@ module Misaka
     end
 
     def get
-      if not @list
+      if @list.empty?
         return nil
       end
       return @list.sample
@@ -1114,7 +1114,7 @@ module Misaka
     end
 
     def get
-      if not @list
+      if @list.empty?
         return nil
       end
       if @indexes.empty?
@@ -1136,7 +1136,7 @@ module Misaka
     end
 
     def get
-      if not @list
+      if @list.empty?
         return nil
       end
       if @indexes.empty?
@@ -1164,7 +1164,7 @@ module Misaka
     end
 
     def pop
-      if not @list
+      if @list.empty?
         return nil
       end
       i = Array(0..@list.length-1).sample
@@ -1181,7 +1181,7 @@ module Misaka
           buf << i
         end
       end
-      if not buf
+      if buf.empty?
         return nil
       end
       i = buf.sample
@@ -1351,7 +1351,7 @@ module Misaka
       variables = []
       constants = []
       for name, parameters, sentences in dic
-        if not sentences
+        if sentences == nil
           next
         elsif name == '$_Variable'
           variables |= sentences
@@ -1407,7 +1407,7 @@ module Misaka
                 'misaka.rb: malformed database (ignored)')
               break
             end
-            if not line
+            if line == nil
               break
             end
             header = strip_newline(line).split(nil, -1)
@@ -1482,7 +1482,7 @@ module Misaka
     def request(req_string)
       header = req_string.split(/\r?\n/, 0)
       line = header.shift
-      if line
+      if line != nil
         line = line.force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace).strip()
         req_list = line.split(nil, -1)
         if req_list.length >= 2
@@ -1524,7 +1524,7 @@ module Misaka
         refs = []
         while true
           ref = get_ref(n)
-          if ref
+          if ref != nil
             refs << ref
           else
             break
@@ -1580,7 +1580,7 @@ module Misaka
                   script.encode(@charset, :invalid => :replace, :undef => :replace),
                   "\r\n"].join('')
       to = eval_variable([[NODE_TEXT, '$to']])
-      if to
+      if to != nil
         @variable.delete('$to')
         response = [response,
                     "Reference0: ",
@@ -1730,7 +1730,7 @@ module Misaka
       elsif name == '$lastsentence'
         result = @communicate[1]
       elsif name == '$otherghostlist'
-        if @otherghost
+        if not @otherghost.empty?
           ghost = @otherghost.sample
           result = ghost[0]
         else
@@ -2023,7 +2023,7 @@ module Misaka
     end
 
     def exec_choice(args)
-      if not args
+      if args.empty?
         return ''
       end
       return expand_args(args.sample)
@@ -2057,7 +2057,7 @@ module Misaka
           namelist << name
         end
       end
-      if not namelist
+      if namelist.empty?
         return ''
       end
       keylist = []
@@ -2073,7 +2073,7 @@ module Misaka
           keylist << key
         end
       end
-      if not keylist
+      if keylist.empty?
         return ''
       end
       return eval_variable([[NODE_TEXT, keylist.sample]])
@@ -2087,7 +2087,7 @@ module Misaka
     end
 
     def exec_backup(args)
-      if not args
+      if args.empty?
         save_database()
       end
       return ''
@@ -2192,7 +2192,7 @@ module Misaka
         return ''
       end
       buf = expand_args(args[0])
-      if not buf
+      if buf.empty?
         return ''
       else
         return buf[0]
@@ -2204,7 +2204,7 @@ module Misaka
         return ''
       end
       buf = expand_args(args[0])
-      if not buf
+      if buf.empty?
         return ''
       else
         return buf[-1]
@@ -2262,7 +2262,7 @@ module Misaka
       end
       buf0 = expand_args(args[0])
       buf1 = expand_args(args[1])
-      if buf0 and buf1 and buf0[-1] == buf1[0]
+      if not buf0.empty? and not buf1.empty? and buf0[-1] == buf1[0]
         return 'true'
       else
         return 'false'
@@ -2272,7 +2272,7 @@ module Misaka
     def exec_append(args)
       if args.length == 2
         name = expand_args(args[0])
-        if name and name.start_with?('$')
+        if not name.empty? and name.start_with?('$')
           if @variable.include?(name)
             value_type, value = @variable[name]
           else
@@ -2321,11 +2321,11 @@ module Misaka
         return ''
       end
       src_name = expand_args(args[0])
-      if not (src_name and src_name.start_with?('$'))
+      if not (not src_name.empty? and src_name.start_with?('$'))
         return ''
       end
       new_name = expand_args(args[1])
-      if not (new_name and new_name.start_with?('$'))
+      if not (not new_name.empty? and new_name.start_with?('$'))
         return ''
       end
       source = nil
@@ -2390,7 +2390,7 @@ module Misaka
     end
 
     def exec_insentence(args)
-      if not args
+      if args.empty?
         return ''
       end
       s = expand_args(args[0])
@@ -2495,7 +2495,7 @@ module Misaka
     end
 
     def exec_inlastsentence(args)
-      if not args
+      if args.empty?
         return ''
       end
       s = @communicate[1]
@@ -2537,7 +2537,7 @@ module Misaka
         end
         for line in header
           line = line.force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace).strip()
-          if not line
+          if line.empty?
             next
           end
           if not line.include?(':')
@@ -2546,7 +2546,7 @@ module Misaka
           key, value = line.split(':', 2)
           key.strip!
           value.strip!
-          if key
+          if not key.empty?
             saori_header << key
             saori_value[key] = value
           end
@@ -2560,12 +2560,12 @@ module Misaka
     end
 
     def load_saori(args)
-      if not args
+      if args.empty?
         return ''
       end
       result = @saori_library.load(expand_args(args[0]),
                                    @misaka_dir)
-      if not result
+      if result == 0
         return ''
       else
         result.to_s
@@ -2573,11 +2573,11 @@ module Misaka
     end
 
     def unload_saori(args)
-      if not args
+      if args.empty?
         return ''
       end
       result = @saori_library.unload(expand_args(args[0]))
-      if not result
+      if result == 0
         return ''
       else
         return result.to_s
@@ -2587,7 +2587,7 @@ module Misaka
     def exec_isghostexists(args)
       result = 'false'
       if args.length != 1
-        if @otherghost.length
+        if @otherghost.length > 0
           result = 'true'
           @variable['$to'] = [TYPE_SCHOLAR,
                               @otherghost.sample[0]]
@@ -2654,7 +2654,7 @@ module Misaka
       top_dir = File.join(top_dir, head)
       if not @saori_list.include?(name)
         module_ = @saori.request(name)
-        if module_
+        if module_ != nil
           @saori_list[name] = module_
         end
       end
@@ -2665,7 +2665,7 @@ module Misaka
     end
 
     def unload(name=nil)
-      if name
+      if name != nil
         name = File.split(name.gsub('\\', '/'))[-1] # XXX: don't encode here
         if @saori_list.include?(name)
           @saori_list[name].unload()
@@ -2682,7 +2682,7 @@ module Misaka
     def request(name, req)
       result = '' # FIXME
       name = File.split(name.gsub('\\', '/'))[-1] # XXX: don't encode here
-      if name and @saori_list.include?(name)
+      if not name.empty? and @saori_list.include?(name)
         result = @saori_list[name].request(req)
       end
       return result

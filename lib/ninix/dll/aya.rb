@@ -558,7 +558,7 @@ module Aya
                  "Value: " + result.to_s + "\r\n\r\n".encode('CP932', :invalid => :replace, :undef => :replace)
         return result
       else
-        return result.encode('CP932', :invalid => :replace, :undef => :replac)
+        return result.encode('CP932', :invalid => :replace, :undef => :replace)
       end
     end
   end

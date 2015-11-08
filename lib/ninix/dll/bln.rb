@@ -101,7 +101,7 @@ module Bln
       for name in @blns.keys
         data, bln = @blns[name]
         for bln_id in bln.keys
-          if bln[bln_id]
+          if bln[bln_id] != nil
             bln[bln_id].destroy()
             bln.delete(bln_id)
           end
@@ -117,7 +117,7 @@ module Bln
         for name in @blns.keys
           data, bln = @blns[name]
           for bln_id in bln.keys
-            if bln[bln_id]
+            if bln[bln_id] != nil
               bln[bln_id].reset_scale()
             end
           end
@@ -448,7 +448,7 @@ module Bln
       @processed_text = ''
       @text = ''
       @script_wait = nil
-      @quick_session = 0
+      @quick_session = false
       @script_parser = Script::Parser.new(:error => 'loose')
       begin
         @processed_script = @script_parser.parse(@script)
@@ -548,14 +548,14 @@ module Bln
         x = left + ((scrn_w - w) / 2).to_i
         y = top + scrn_h - h
       elsif @position == 'sakura'
-        if @direction # right
+        if @direction == 1 # right
           x = s0_x + s0_w
         else
           x = s0_x - w
         end
         y = s0_y
       elsif @position == 'kero'
-        if @direction # right
+        if @direction == 1 # right
           x = s1_x + s1_w
         else
           x = s1_x - w
@@ -587,7 +587,7 @@ module Bln
       @processed_text = ''
       @text = ''
       @script_wait = nil
-      @quick_session = 0
+      @quick_session = false
       begin
         @processed_script = @script_parser.parse(@script)
       rescue Script::ParserError => e
@@ -682,7 +682,7 @@ module Bln
     end
 
     def do_idle_tasks
-      if not @window
+      if @window == nil
         return nil
       end
       s0_shown = get_sakura_status('SurfaceSakura_Shown')
@@ -710,7 +710,7 @@ module Bln
             (@position == 'kero' and not s1_shown) or \
             (@position == 'sakurab' and not b0_shown) or \
             (@position == 'kerob' and not b1_shown) or \
-            (@nooverlap and not @talking and sakura_talking)
+            (@nooverlap == 1 and not @talking and sakura_talking)
             destroy()
             return nil
           end
@@ -723,21 +723,21 @@ module Bln
         end
       end
       if @visible
-        if @life_time
+        if @life_time != nil
           if Time.now - @start_time >= @life_time * 0.001 and \
             not (not @processed_script.empty? or not @processed_text.empty?)
             destroy()
             return nil
           end
         end
-        if @action
+        if @action != nil
           if  @action['method'] == 'sinwave'
             offset = @action['ref1'] \
                      * Math.sin(2.0 * Math::PI \
                                 * (((Time.now - \
                                      @start_time) * 1000).to_i \
                                    % @action['ref2']).to_f / @action['ref2'])
-            if @action['ref0']
+            if @action['ref0'] == 1
               @action_y = offset.to_i
             else
               @action_x = offset.to_i
@@ -783,7 +783,7 @@ module Bln
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.paint()
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
-      if @layout
+      if @layout != nil
         cr.set_source_rgb(*@fontcolor)
         cr.move_to(@left.to_i, @top.to_i)
         cr.show_pango_layout(@layout)
@@ -821,7 +821,7 @@ module Bln
           @text = [@text, "\n"].join("")
           draw_text(@text)
         elsif name == '\w'
-          if args
+          if args != nil
             begin
               amount = Integer(args[0]) * 0.05 - 0.01
             rescue
@@ -834,7 +834,7 @@ module Bln
             @script_wait = Time.now + amount
           end
         elsif name == '\b'
-          if args
+          if args != nil
             begin
               amount = Integer(args[0])
             rescue
@@ -905,7 +905,7 @@ module Bln
          @y_root != nil
         x_delta = (event.x_root - @x_root).to_i
         y_delta = (event.y_root - @y_root).to_i
-        if event.state & Gdk::ModifierType::BUTTON1_MASK
+        if event.state & Gdk::ModifierType::BUTTON1_MASK != 0
           if @dragmove_horizontal
             @x += x_delta
           end
@@ -938,11 +938,11 @@ module Bln
 
     def destroy
       @visible = false
-      if @window
+      if @window != nil
         @window.destroy()
         @window = nil
       end
-      if @timeout_id
+      if @timeout_id != nil
         GLib::Source.remove(@timeout_id)
         @timeout_id = nil
       end
