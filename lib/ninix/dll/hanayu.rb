@@ -318,7 +318,7 @@ module Hanayu
     end
 
     def get_color(target)
-      #assert ['font', 'line', 'frame', 'bar', 'background'].include?(target)
+      raise "assert" unless ['font', 'line', 'frame', 'bar', 'background'].include?(target)
       if target == 'background'
         r = g = b = 255 # white
       else

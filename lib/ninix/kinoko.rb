@@ -168,7 +168,7 @@ module Kinoko
     end
 
     def handle_request(event_type, event, *arglist)
-      #assert ['GET', 'NOTIFY'].include?(event_type)
+      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'get_target_window' =>  lambda { return @target.get_target_window }, # XXX
         'get_kinoko_position' => lambda {|a| return @target.get_kinoko_position(a) }
@@ -267,7 +267,7 @@ module Kinoko
     end
 
     def handle_request(event_type, event, *arglist)
-      #assert ['GET', 'NOTIFY'].include?(event_type)
+      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
       }
       if handlers.include?(event)
@@ -435,7 +435,7 @@ module Kinoko
 
     def update_frame_buffer()
       new_surface = create_image_surface(@seriko.get_base_id)
-      #assert new_surface != nil
+      rasie "assert" unless new_surface != nil
       # draw overlays
       for surface_id, x, y, method in @seriko.iter_overlays()
         begin

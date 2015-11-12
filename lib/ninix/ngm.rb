@@ -125,7 +125,7 @@ module NGM
     def create_entry(node)
       entry = {}
       for key, text in node
-        #assert key in ELEMENTS
+        raise "assert" unless ELEMENTS.include?(key)
         entry[key] = text
       end
       return entry

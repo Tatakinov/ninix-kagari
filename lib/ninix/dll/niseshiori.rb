@@ -42,7 +42,7 @@ module Niseshiori
     end
     re_dict_filename = Regexp.new('^ai.*\.(dtx|txt)$')
     for filename in filelist
-      if re_dict_filename.match(filename)
+      if re_dict_filename.match(filename) != nil
         buf << File.join(top_dir, filename)
       end
     end
@@ -198,7 +198,7 @@ module Niseshiori
           next
         end
         lines = [line]
-        while i < j and buf[i] and \
+        while i < j and buf[i] != nil and \
              (buf[i].start_with?(' ') or buf[i].start_with?("\t"))
           lines << buf[i].strip()
           i += 1
@@ -210,7 +210,7 @@ module Niseshiori
         line = decode.call(line)
         # special case: words in a category
         match = Re_category.match(line)
-        if match
+        if match != nil
           line = line[match.end(0)..-1].strip()
           if line.empty? or not line.start_with?(',')
             syntax_error(path, line)
@@ -263,7 +263,7 @@ module Niseshiori
             syntax_error(path, line)
             next
           end
-          if not Re_type.match(t1) and not Re_user.match(t1)
+          if Re_type.match(t1) == nil and Re_user.match(t1) == nil
             syntax_error(path, line)
             next
           end
@@ -275,7 +275,7 @@ module Niseshiori
           if t2 == nil
             next
           end
-          if not Re_type.match(t2) and not Re_user.match(t2)
+          if Re_type.match(t2) == nil and Re_user.match(t2) == nil
             syntax_error(path, line)
             next
           end
@@ -312,7 +312,7 @@ module Niseshiori
             ch_list << w2
             @dict[t2] = ch_list
           end
-        elsif Re_type.match(command) or Re_user.match(command)
+        elsif Re_type.match(command) != nil or Re_user.match(command) != nil
           words = split(argv).map {|s| s.strip if not s.strip.empty? }
           words.delete(nil)
           value = @dict.include?(command) ? @dict[command] : []
@@ -329,7 +329,7 @@ module Niseshiori
             next
           end
           w, t, s = argv
-          if not Re_type.match(t)
+          if Re_type.match(t) == nil
             syntax_error(path, line)
             next
           end
@@ -387,7 +387,7 @@ module Niseshiori
       end_ = pos = 0
       while maxcount == nil or count < maxcount
         pos = line.index(',', pos)
-        if not pos or pos < 0
+        if pos == nil or pos < 0
           break
         elsif pos > 0 and line[pos - 1] == '\\'
           pos += 1
@@ -417,7 +417,7 @@ module Niseshiori
       buf = []
       for expr in condition.split('&', -1).map {|s| s.strip }
         match = Re_comp_op.match(expr)
-        if match
+        if match != nil
           buf << [COND_COMPARISON, [
                     expr[0..match.begin(0)-1].strip(),
                     match.to_s,
@@ -461,7 +461,7 @@ module Niseshiori
 
     def getaistringrandom
       result = get_event_response('OnNSRandomTalk')
-      if not result or result.empty?
+      if result == nil or result.empty?
         result = get('\e')
       end
       return result
@@ -514,7 +514,7 @@ module Niseshiori
                   s = replace_meta(s)
                   while true
                     match = Re_ns_tag.match(s)
-                    if not match
+                    if match == nil
                       break
                     end
                     value = eval_ns_tag(match.to_s)
@@ -564,16 +564,16 @@ module Niseshiori
           cond = candidate.sample
           script = @responses[cond].sample
         end
-        if (not script or script.empty?) and @responses.include?('nohit')
+        if (script == nil or script.empty?) and @responses.include?('nohit')
           script = @responses['nohit'].sample
         end
-        if not script or script.empty?
+        if script == nil or script.empty?
           @to = ''
         else
           script = replace_meta(script)
-          while 1
+          while true
             match = Re_ns_tag.match(script)
-            if not match
+            if match == nil
               break
             end
             value = eval_ns_tag(match.to_s)
@@ -676,10 +676,10 @@ module Niseshiori
     def get(key, default: '')
       @current_time = Time.now
       s = expand(key, '', :default => default)
-      if s and not s.empty?
+      if s != nil and not s.empty?
         while true
           match = Re_ns_tag.match(s)
-          if not match
+          if match == nil
             break
           end
           value = eval_ns_tag(match.to_s)
@@ -722,7 +722,7 @@ module Niseshiori
           name = tag[7..-2]
           @jump_entry = name
           value = get_event_response('OnNSJumpEntry')
-          if not value or value.empty?
+          if value == nil or value.empty?
             value = ''
           end
           @jump_entry = nil
@@ -768,7 +768,7 @@ module Niseshiori
       variable_chains = []
       while true
         match = Re_meta.match(s, pos)
-        if not match
+        if match == nil
           buf << s[pos..-1]
           break
         end
@@ -846,12 +846,12 @@ module Niseshiori
       end
       if choices.empty?
         match = Re_category.match(key)
-        if match
+        if match != nil
           key = match.to_a[1..2]
         end
         choices = @dict[key]
       end
-      if not choices or choices.empty?
+      if choices == nil or choices.empty?
         if key.is_a?(Array)
           key = '(' + key[0].to_s + ', ' + key[1..-1].to_s + ')'
         end
@@ -861,7 +861,7 @@ module Niseshiori
       s = choices.sample
       t = replace_meta(s)
       if key.is_a?(Array)
-        if not key[0]
+        if key[0] == nil
           key = '\\[' + key[1].to_s + ']'
         else
           key = '\\' + key[0].to_s + '[' + key[1].to_s + ']'
@@ -879,7 +879,7 @@ module Niseshiori
         candidates_A = []
         candidates_B = []
         for keyword, chained_word in dic[chained_meta]
-          if keyword and context.include?(keyword)
+          if keyword != nil and context.include?(keyword)
             candidates_A << chained_word
           else
             candidates_B << chained_word
@@ -1072,7 +1072,7 @@ module Niseshiori
     end
 
     def is_number(s)
-      return (s and s.chars.map.all? {|c| '0123456789'.include?(c) })
+      return (s != nil and not s.empty? and s.chars.map.all? {|c| '0123456789'.include?(c) })
     end
   end
 
@@ -1102,15 +1102,15 @@ module Niseshiori
     def tokenize(data)
       buf = []
       end_ = 0
-      while 1
+      while true
         match = NiseShiori::Re_meta.match(data, end_)
-        if match
+        if match != nil
           buf << match.to_s
           end_ = match.end(0)
           next
         end
         match = Re_token_A.match(data, end_)
-        if match
+        if match != nil
           if not match.to_s.strip().empty?
             buf << match.to_s
           end
@@ -1118,7 +1118,7 @@ module Niseshiori
           next
         end
         match = Re_token_B.match(data, end_)
-        if match
+        if match != nil
           buf << data[end_..match.begin(0)-1]
           if not match.to_s.strip().empty?
             buf << match.to_s
@@ -1181,7 +1181,7 @@ module Niseshiori
 
     def get_add_expr
       buf = [ADD_EXPR]
-      while 1
+      while true
         buf << get_mul_expr()
         if done() or not ['+', '-'].include?(look_ahead())
           break
@@ -1197,7 +1197,7 @@ module Niseshiori
 
     def get_mul_expr
       buf = [MUL_EXPR]
-      while 1
+      while true
         buf << get_unary_expr()
         if done() or not ['*', '/', '\\'].include?(look_ahead())
           break

@@ -34,7 +34,7 @@ module Misaka
     # pass
   end
 
-  def self.lexical_error(path=nil, position=nil)
+  def self.lexical_error(path: nil, position: nil)
     if path == nil and position == nil
       error = 'lexical error'
     elsif path == nil
@@ -49,7 +49,7 @@ module Misaka
     raise MisakaError.new(error)
   end
 
-  def self.syntax_error(message, path=nil, position=nil)
+  def self.syntax_error(message, path: nil, position: nil)
     if path == nil and position == nil
       error = 'syntax error (' + message.to_s + ')'
     elsif path == nil
@@ -95,12 +95,12 @@ module Misaka
         if line == 'dictionaries'
           line = f.gets
           if line.strip() != '{'
-            Misaka.syntax_error('expected an open brace', path)
+            Misaka.syntax_error('expected an open brace', :path => path)
           end
           while true
             line = f.gets
             if line == nil
-              Misaka.syntax_error('unexpected end of file', path)
+              Misaka.syntax_error('unexpected end of file', :path => path)
             end
             line = line.strip()
             if line == '}'
@@ -227,7 +227,7 @@ module Misaka
         end
         if not break_flag
           ###print(data[pos..pos + 100 - 1])
-          Misaka.lexical_error(path, [line, column])
+          Misaka.lexical_error(:path => path, :position => [line, column])
         end
         if token == TOKEN_NEWLINE
           line = line + 1
@@ -256,7 +256,7 @@ module Misaka
       begin
         token, lexeme, @position = @buffer.shift
       rescue #except IndexError:
-        Misaka.syntax_error('unexpected end of file', @path)
+        Misaka.syntax_error('unexpected end of file', :path => @path)
       end
       ###print(token, repr(lexeme))
       return token, lexeme
@@ -266,7 +266,7 @@ module Misaka
       token, lexeme = pop()
       if token != expected
         Misaka.syntax_error(['exptected ', Token_names[expected], ', but returns ', Token_names[token]].join(''),
-                            @path, get_position())
+                            :path => @path, :position => get_position())
       end
       return lexeme
     end
@@ -275,7 +275,7 @@ module Misaka
       begin
         token, lexeme, position = @buffer[index]
       rescue #except IndexError:
-        Misaka.syntax_error('unexpected end of file', @path)
+        Misaka.syntax_error('unexpected end of file', :path => @path)
       end
       return token, lexeme
     end
@@ -289,7 +289,7 @@ module Misaka
         pop()
       end
       if not accept_eof
-        Misaka.syntax_error('unexpected end of file', @path)
+        Misaka.syntax_error('unexpected end of file', :path => @path)
       end
       return true
     end
@@ -396,7 +396,8 @@ module Misaka
       end
       if buf.empty?
         Misaka.syntax_error('null identifier',
-                            @path, @lexer.get_position())
+                            :path => @path,
+                            :position => @lexer.get_position())
       end
       name = ['$', buf.join('')].join('')
       # get group parameters
@@ -413,7 +414,8 @@ module Misaka
           @lexer.pop()
         else
           Misaka.syntax_error('expected a delimiter',
-                              @path, @lexer.get_position())
+                              :path => @path,
+                              :position => @lexer.get_position())
         end
         token, lexeme = @lexer.look_ahead()
         if token == TOKEN_WHITESPACE
@@ -431,7 +433,8 @@ module Misaka
           parameters << [NODE_TEXT, unescape(lexeme)]
         else
           Misaka.syntax_error('expected a parameter or brace expression',
-                              @path, @lexer.get_position())
+                              :path => @path,
+                              :position => @lexer.get_position())
         end
       end
       # get sentences
@@ -598,7 +601,8 @@ module Misaka
       end
       if nodelist.length == 1
         Misaka.syntax_error('null identifier',
-                            @path, @lexer.get_position())
+                            :path => @path,
+                            :position => @lexer.get_position())
       end
       @lexer.skip_space()
       token, lexeme = @lexer.look_ahead()
@@ -624,7 +628,7 @@ module Misaka
               if token == TOKEN_CLOSE_BRACE
                 break
               end
-              ##assert (token == TOKEN_NEWLINE)
+              raise "assert" unless token == TOKEN_NEWLINE
             end
             @lexer.skip_space()
             token, lexeme = @lexer.look_ahead()
@@ -643,7 +647,7 @@ module Misaka
                 if token == TOKEN_CLOSE_BRACE
                   break
                 end
-                ##assert (token == TOKEN_NEWLINE)
+                raise "assert" unless token == TOKEN_NEWLINE
               end
             elsif token == TOKEN_OPEN_BRACE ## XXX
               @lexer.pop_check(TOKEN_OPEN_BRACE)
@@ -658,7 +662,7 @@ module Misaka
                 if token == TOKEN_CLOSE_BRACE
                   break
                 end
-                ##assert (token == TOKEN_NEWLINE)
+                raise "assert" unless token == TOKEN_NEWLINE
               end
             else
               else_clause = [[NODE_TEXT, '']]
@@ -703,7 +707,8 @@ module Misaka
             value = [[NODE_TEXT, '1']]
           else
             Misaka.syntax_error(['bad operator ', operator].join(''),
-                                @path, @lexer.get_position())
+                                :path => @path,
+                                :position => @lexer.get_position())
           end
           node = [NODE_ASSIGNMENT, nodelist, operator, value]
         elsif token == TOKEN_OPEN_BRACKET

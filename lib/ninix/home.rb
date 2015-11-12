@@ -629,8 +629,8 @@ module Home
           next
         end
         if charset == 'CP932'
-          # '\x81\x40': full-width space in CP932(Shift_JIS)
-          temp = line.gsub('\x81\x40', '').strip()
+          # "\x81\x40": full-width space in CP932(Shift_JIS)
+          temp = line.gsub(0x81.chr + 0x40.chr, "").strip()
         else
           temp = line.strip()
         end

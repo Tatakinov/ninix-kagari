@@ -160,7 +160,7 @@ module Sakura
     end
 
     def handle_request(event_type, event, *arglist)
-      #assert ['GET', 'NOTIFY'].include?(event_type)
+      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'lock_repaint' => "get_lock_repaint"
       }
@@ -205,7 +205,7 @@ module Sakura
     end
 
     def delete_shell(key)
-      #assert @shells.include?(key)
+      raise "assert" unless @shells.include?(key)
       @shells.delete(key)
     end
 
@@ -429,7 +429,7 @@ module Sakura
       if t == Gst::MessageType::EOS
         @audio_player.set_state(Gst::State::NULL)
         if @script_mode == WAIT_MODE
-          ##assert not @audio_loop
+          raise "assert" unless not @audio_loop
           @script_mode = BROWSE_MODE
         end
         if @audio_loop
@@ -1420,7 +1420,7 @@ module Sakura
     end
 
     def select_shell(shell_key)
-      #assert @shells and @shells.include?(shell_key)
+      raise "assert" unless @shells != nil and @shells.include?(shell_key)
       @shell_directory = shell_key # save user's choice
       surface_name, surface_dir, surface_desc, surface_alias, surface, surface_tooltips, seriko_descript = \
                                                                                          @shells[shell_key].baseinfo
@@ -1442,7 +1442,7 @@ module Sakura
       if item == get_current_balloon_directory() # no change
         return # need reloadning?
       end
-      #assert item == balloon['balloon_dir'][0]
+      raise "assert" unless item == balloon['balloon_dir'][0]
       path = File.join(Home.get_ninix_home(), 'balloon', item)
       @balloon.hide_all()
       set_balloon(desc, balloon)
@@ -1639,7 +1639,7 @@ module Sakura
       load_settings()
       shell_key = get_default_shell()
       @shell_directory = shell_key # XXX
-      #assert @shells and @shells.include?(shell_key)
+      raise "assert" unless @shells != nil and @shells.include?(shell_key)
       surface_name, surface_dir, surface_desc, surface_alias, surface, surface_tooltips, seriko_descript = \
                                                                                          @shells[shell_key].baseinfo
       if ghost_changed
@@ -2093,7 +2093,7 @@ module Sakura
         filename, x, y = expand_meta(args[0]).split(',', 3)
       rescue ArgumentError
         filename, param = expand_meta(args[0]).split(',', 2)
-        #assert param == 'inline'
+        raise "assert" unless param == 'inline'
         x, y = 0, 0 ## FIXME
       end
       filename = get_normalized_path(filename)

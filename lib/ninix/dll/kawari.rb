@@ -117,7 +117,7 @@ module Kawari
       dic[entry] = []
     end
     for phrase in phrases
-      if phrase
+      if not phrase.empty?
         phrase[0]  = phrase[0].lstrip()
         phrase[-1] = phrase[-1].rstrip()
       end
@@ -167,7 +167,7 @@ module Kawari
     i = start
     j = data.length
     while i < j
-      if stop_pattern and stop_pattern.match(data[i..-1])
+      if stop_pattern != nil and stop_pattern.match(data[i..-1])
         break
       elsif data[i] == '"'
         i, text = Kawari.parse_quotes(data, i)
@@ -291,7 +291,7 @@ module Kawari
     i = start
     j = data.length
     while i < j
-      if stop_pattern and stop_pattern.match(data[i..-1])
+      if stop_pattern != nil and stop_pattern.match(data[i..-1])
         break
       elsif ['$', '"'].include?(data[i])
         break
@@ -410,7 +410,7 @@ module Kawari
                                                s1.to_s].join(',')
         end
         script = get_system_entry('OnResponse')
-        if not script
+        if script == nil
           for dic in @kdictlist
             for entry in dic
               break_flag = false
@@ -427,7 +427,7 @@ module Kawari
             end
           end
         end
-        if not script
+        if script == nil
           script = get_system_entry('OnResponseUnknown')
         end
         if script != nil
@@ -494,7 +494,7 @@ module Kawari
 
     def communicate_to
       communicate = get_system_entry('communicate')
-      if communicate
+      if communicate != nil
         if communicate == 'stop'
           @system_entries['system.Age'] = '0'
           @system_entries['system-Age'] = '0'
@@ -579,7 +579,7 @@ module Kawari
       if depth == MAXDEPTH
         return ''
       end
-      if name and name.start_with?('@')
+      if not name.empty? and name.start_with?('@')
         segments = context[name].sample
       else
         if not name.include?('&')
@@ -614,7 +614,7 @@ module Kawari
       j = segments.length
       while i < j
         segment = segments[i]
-        if not segment
+        if segment.empty?
           #pass
         elsif segment.start_with?('${') and segment.end_with?('}')
           newname = segment[2..-2]
@@ -629,7 +629,7 @@ module Kawari
                 'system.OtherGhostEx',
                 'system-OtherGhostEx'].include?(newname)
               segment_list = @system_entries[newname]
-              if segment_list
+              if not segment_list.empty?
                 segment = segment_list.sample
               else
                 segment = ''
@@ -838,17 +838,17 @@ module Kawari
 
     def exec_old_if(if_block, then_block, else_block)
       # convert [...] into $([...])
-      if if_block and if_block.start_with?('[') and if_block.end_with?(']')
+      if not if_block.empty? and if_block.start_with?('[') and if_block.end_with?(']')
         if_block = ['$(', if_block, ')'].join('')
       end
       # parse arguments
       i, if_block = Kawari.parse(if_block, 0)
       i, then_block = Kawari.parse(then_block, 0)
-      if else_block
+      if not else_block.empty?
         i, else_block = Kawari.parse(else_block, 0)
       end
       result = exec_if(if_block, then_block, else_block)
-      if else_block
+      if not else_block.empty?
         Logging::Logging.debug(
           '>>> $(if ' + if_block.join('') + ')$(then ' + then_block.join('') + ')$(else ' + else_block.join('') + ')$(endif)')
       else
@@ -862,7 +862,7 @@ module Kawari
     def exec_if(if_block, then_block, else_block)
       if not ['', '0', 'false', 'False'].include?(expand(if_block))
         return expand(then_block)
-      elsif else_block
+      elsif not else_block.empty?
         return expand(else_block)
       end
       return ''
@@ -1073,7 +1073,7 @@ module Kawari
 
     def get_dict_path(path)
       path = Home.get_normalized_path(path)
-      if not path
+      if path == nil
         raise RuntimeError.new('invalid argument')
       end
       if path.start_with?('/')
@@ -1201,7 +1201,7 @@ module Kawari
         return get(expand(argv[1]))
       elsif argv.length == 3
         result = get(expand(argv[1]))
-        if result
+        if not result.empty?
           return result
         else
           return expand(argv[2])
@@ -1412,7 +1412,7 @@ module Kawari
       if tree[0] == ExprParser::OR_EXPR
         for subtree in tree[1..-1]
           value = interp_expr(subtree)
-          if value and not ['', '0', 'false', 'False'].include?(value)
+          if not value.empty? and not ['', '0', 'false', 'False'].include?(value)
             break
           end
         end
@@ -1421,7 +1421,7 @@ module Kawari
         buf = []
         for subtree in tree[1..-1]
           value = interp_expr(subtree)
-          if not value or ['', '0', 'false', 'False'].include?(value)
+          if value.empty? or ['', '0', 'false', 'False'].include?(value)
             return '0'
           end
           buf << value
@@ -1516,7 +1516,7 @@ module Kawari
           rescue #except re.error:
             match = nil
           end
-          if match
+          if match != nil 
             length = match.end(0) - match.begin(0)
           else
             length = 0
@@ -1525,14 +1525,14 @@ module Kawari
         elsif tree[1] == 'find'
           s = interp_expr(tree[3])
           pos = nterp_expr(tree[2]).index(s)
-          if not pos or pos < 0
+          if pos == nil or pos < 0
             return ''
           end
           return s
         elsif tree[1] == 'findpos'
           s = interp_expr(tree[3])
           pos = interp_expr(tree[2]).find(s);
-          if not pos or pos < 0
+          if pos == nil or pos < 0
             return ''
           end
           return (pos + 1).to_s
@@ -1598,7 +1598,7 @@ module Kawari
       j = data.length
       while i < j
         match = Re_token.match(data[i..-1])
-        if match
+        if match != nil
           buf << match[0]
           i += match.end(0)
         else
@@ -1849,7 +1849,7 @@ module Kawari
     def get_str_seq
       buf = []
       while not done() and \
-           not Re_token.match(look_ahead())
+           Re_token.match(look_ahead()) == nil
         buf << pop()
       end
       if buf.empty?
@@ -2148,7 +2148,7 @@ module Kawari
           end
         else
           result = getstring(req_header['ID'])
-          if not result or result.empty?
+          if result.empty?
             ref = []
             for n in 0..7
               key = ['Reference', n.to_s].join('')
@@ -2350,7 +2350,7 @@ module Kawari
         result = @saori_list[saori].load(:dir => path)
       else
         module_ = @saori.request(saori)
-        if module_
+        if module_ != nil
           @saori_list[saori] = module_
           result = @saori_list[saori].load(:dir => path)
         end

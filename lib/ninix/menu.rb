@@ -352,7 +352,7 @@ module Menu
                          ['kero.recommendbuttoncaption']], '(_R)', [[], []]],
       }
       for key in @__ui.keys
-        #assert @__menu_list.include?(key)
+        rasie "assert" unless @__menu_list.include?(key)
         if side > 1
           if ['Options/Update', 'Options/Vanish'].include?(key)
             name_list = @__ui[key][0][1] # same as 'kero'
@@ -414,7 +414,7 @@ module Menu
       if side > 1
         string = 'char' + side.to_s
       else
-        #assert [0, 1].include?(side) ## FIXME
+        raise "assert" unless [0, 1].include?(side) ## FIXME
         string = ['sakura', 'kero'][side]
       end
       string = [string, '.popupmenu.visible'].join('')
@@ -432,7 +432,7 @@ module Menu
       if side > 1
         string = 'char' + side.to_s
       else
-        #assert [0, 1].include?(side) ## FIXME
+        raise "assert" unless [0, 1].include?(side) ## FIXME
         string = ['sakura', 'kero'][side]
       end
       string = [string, '.recommendsites'].join('')
@@ -460,8 +460,8 @@ module Menu
     end
 
     def __set_caption(name, caption)
-      #assert @__menu_list.include?(name)
-      #assert isinstance(caption, str)
+      raise "assert" unless @__menu_list.include?(name)
+      raise "assert" unless caption.is_a?(String)
       item = @ui_manager.get_widget(['/popup/', name].join(''))
       if item != nil
         label = item.get_children()[0]
@@ -470,8 +470,8 @@ module Menu
     end
 
     def __set_visible(name, visible)
-      #assert @__menu_list.include?(name)
-      #assert [0, 1].include?(visible)
+      raise "assert" unless @__menu_list.include?(name)
+      raise "assert" unless [false, true].include?(visible)
       @__menu_list[name]['visible'] = visible
     end
 

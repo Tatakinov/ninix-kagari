@@ -757,7 +757,7 @@ module Aya
       return line
     end
 
-    def check_path(path, flag='w')
+    def check_path(path, flag: 'w')
       result = 0
       abspath = File.absolute_path(path)
       head, tail = File.split(abspath)
@@ -1242,14 +1242,14 @@ module Aya
           end
         elsif Re_switch.match(line)
           index = parse_token(line[6..-1].strip())
-          ##assert index[0] in [] # FIXME
+          ##raise "assert" unless [].include?(index[0]) # FIXME
           inner_block = []
           i, inner_block = get_block(lines, i + 1)
           result << [TYPE_SWITCH,
                      [index, parse(inner_block)]]
         elsif Re_case.match(line)
           left = parse_token(line[4..-1].strip())
-          ## assert left[0] in [] # FIXME
+          ##raise "assert" unless [].include?(left[0]) # FIXME
           i, block = get_block(lines, i + 1)
           inner_blocks = []
           j = 0
@@ -1767,15 +1767,15 @@ module Aya
           end
         elsif line[0] == TYPE_SUBSTITUTION
           left, ope, right = line[1]
-          ##assert [TYPE_ARRAY, TYPE_VARIABLE].include?(left[0])
-          ##assert ope[0] == TYPE_OPERATOR
+          ##raise "assert" unless [TYPE_ARRAY, TYPE_VARIABLE].include?(left[0])
+          ##raise "assert" unless ope[0] == TYPE_OPERATOR
           ope = ope[1]
           if [':=', '+:=', '-:=', '*:=', '/:=', '%:='].include?(ope)
             type_float = 1
           else
             type_float = 0
           end
-          ##assert right[0] == TYPE_STATEMENT
+          ##raise "assert" unless right[0] == TYPE_STATEMENT
           right_result = evaluate_statement(namespace, right,
                                             type_float)
           if not ['=', ':='].include?(ope)
@@ -1795,7 +1795,7 @@ module Aya
             return nil # should not reach here
           end
           var = line[1]
-          ## assert [TYPE_ARRAY, TYPE_VARIABLE].include?(var[0])
+          ##raise "assert" unless [TYPE_ARRAY, TYPE_VARIABLE].include?(var[0])
           var_name = var[1][0]
           if var_name.start_with?('_')
             target_namespace = namespace
@@ -1834,7 +1834,7 @@ module Aya
             entry = inner_blocks[j]
             condition = entry[0]
             inner_block = entry[1]
-            ##assert condition[0] == TYPE_CONDITION
+            raise "assert" unless condition[0] == TYPE_CONDITION
             if condition == nil or \
               evaluate_condition(namespace, condition)
               local_namespace = AyaNamespace.new(@dic.aya, namespace)
@@ -1850,7 +1850,7 @@ module Aya
         elsif line[0] == TYPE_WHILE
           condition = line[1][0]
           inner_block = line[1][1]
-          ##assert condition[0] == TYPE_CONDITION
+          raise "assert" unless condition[0] == TYPE_CONDITION
           while evaluate_condition(namespace, condition)
             local_namespace = AyaNamespace.new(@dic.aya, namespace)
             result_of_inner_block = evaluate(local_namespace,
@@ -1875,7 +1875,7 @@ module Aya
           reset = line[1][0][2]
           inner_block = line[1][1]
           evaluate(namespace, init, -1, 1)
-          ##assert condition[0] == TYPE_CONDITION
+          raise "assert" unless condition[0] == TYPE_CONDITION
           while evaluate_condition(namespace, condition)
             local_namespace = AyaNamespace.new(@dic.aya, namespace)
             result_of_inner_block = evaluate(local_namespace,
@@ -2099,8 +2099,7 @@ module Aya
       elsif token[0] == TYPE_SYSTEM_FUNCTION
         system_functions = @dic.aya.get_system_functions()
         func_name = token[1][0]
-        ##assert system_functions.exists(func_name)
-        ##raise Exception(['function ', func_name, ' not found.'].join(''))
+        ##raise ["assert: ", 'function ', func_name, ' not found.'].join('') unless system_functions.exists(func_name)
         arguments = evaluate_argument(namespace, func_name,
                                       token[1][1], 1)
         if func_name == 'CALLBYNAME'
@@ -2122,8 +2121,7 @@ module Aya
       elsif token[0] == TYPE_FUNCTION
         func_name = token[1][0]
         func = @dic.get_function(func_name)
-        ##assert func != nil
-        ##raise Exception(['function ', func_name, ' not found.'].join(''))
+        ##raise ["assert: ", 'function ', func_name, ' not found.'].join('') unless func != nil
         arguments = evaluate_argument(namespace, func_name,
                                       token[1][1], 0)
         result = func.call(arguments)
@@ -2219,7 +2217,7 @@ module Aya
       left = condition[1][0]
       ope = condition[1][1]
       right = condition[1][2]
-      ##assert ope[0] == TYPE_OPERATOR
+      raise "assert" unless ope[0] == TYPE_OPERATOR
       if left[0] == TYPE_CONDITION
         left_result = evaluate_condition(namespace, left)
       elsif left[0] == TYPE_STATEMENT
@@ -2309,7 +2307,7 @@ module Aya
       ##  return ''
       ##end
       if num == 3
-        ##assert statement[2][0] == TYPE_OPERATOR
+        ##raise "assert" unless statement[2][0] == TYPE_OPERATOR
         ope = statement[2][1]
         type_ = statement[3][0]
         if type_ == TYPE_INT
@@ -2622,7 +2620,7 @@ module Aya
       for i in 0..argument.length-1
         if is_system_func != 0 and \
           @dic.aya.get_system_functions().not_to_evaluate(name, i)
-          ## assert argument[i] in [] ## FIXME
+          ##raise "assert" unless [].include?(argument[i]) ## FIXME
           arguments << argument[i][1][1]
         else
           arguments << evaluate_statement(namespace,
@@ -2910,7 +2908,7 @@ module Aya
         @errno = 260
       elsif not File.directory?(dst_path)
         @errno = 261
-      elsif @security.check_path(src_path, 'r') and \
+      elsif @security.check_path(src_path, :flag => 'r') and \
             @security.check_path(dst_path)
         begin
           shutil.copyfile(src_path, dst_path)
@@ -2954,7 +2952,7 @@ module Aya
       dirname = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, dirname)
       filelist = []
-      if @security.check_path(path, 'r')
+      if @security.check_path(path, :flag => 'r')
         begin
           filelist = Dir.entries(path).reject{|entry| entry =~ /^\.{1,2}$/}
         rescue
@@ -3017,7 +3015,7 @@ module Aya
       accessmode = argv[1].to_s
       result = 0
       path = File.join(@aya.aya_dir, filename)
-      if @security.check_path(path, accessmode[0])
+      if @security.check_path(path, :flag => accessmode[0])
         norm_path = File.expand_path(path)
         if @aya.filelist.include?(norm_path)
           result = 2
@@ -3086,7 +3084,7 @@ module Aya
       size = -1
       if not File.exist?(path)
         @errno = 279
-      elsif @security.check_path(path, 'r')
+      elsif @security.check_path(path, :flag => 'r')
         begin
           size = File.size(path)
         rescue

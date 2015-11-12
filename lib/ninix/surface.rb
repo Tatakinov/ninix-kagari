@@ -38,7 +38,7 @@ module Surface
     end
 
     def handle_request(event_type, event, *arglist)
-      ##assert ['GET', 'NOTIFY'].include?(event_type)
+      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'stick_window' => 'window_stick',
       }
@@ -413,7 +413,7 @@ module Surface
     end
 
     def add_window(side, default_id, config_alias, mayuna: {})
-      ##assert @window.length == side
+      raise "assert" unless @window.length == side
       if side == 0
         name = 'sakura'
         title = @parent.handle_request('GET', 'get_selfname') or \
@@ -1024,7 +1024,7 @@ module Surface
     end
 
     def handle_request(event_type, event, *arglist)
-      ##assert ['GET', 'NOTIFY'].include?(event_type)
+      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
             }
       if handlers.include?(event)
@@ -1236,7 +1236,7 @@ module Surface
     end
     
     def create_surface_from_file(surface_id, is_asis: false)
-      ##assert @surfaces.include?(surface_id)
+      raise "assert" unless @surfaces.include?(surface_id)
       if is_asis
         use_pna = false
         is_pnr = false
@@ -1370,7 +1370,7 @@ module Surface
         return
       end
       new_surface = create_image_surface(@seriko.get_base_id)
-      ##assert new_surface != nil
+      raise "assert" unless new_surface != nil
       # update collision areas
       @collisions = @region[@seriko.get_base_id]
       # draw overlays

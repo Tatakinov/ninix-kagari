@@ -344,7 +344,7 @@ module Satori
       lineno = linelist[0]
       buf = []
       line = linelist[1]
-      #assert line.start_with?('＊')
+      raise "assert" unless line.start_with?('＊')
       name = line[1..-1]
       while linelist.length > 3 and not linelist[-1]
         linelist.delete_at(-1)
@@ -415,7 +415,7 @@ module Satori
       lineno = linelist[0]
       buf = []
       line = linelist[1]
-      #assert line.start_with?('＠')
+      raise "assert" unless line.start_with?('＠')
       name = line[1..-1]
       prev = ''
       num_open = 0
@@ -457,7 +457,7 @@ module Satori
     end
 
     def parse_assignment(line)
-      #assert line[0] == '＄'
+      raise "assert" unless line[0] == '＄'
       break_flag = false
       for n in 1..line.length-1
         if ["\t", ' ', '　', '＝'].include?(line[n]) ### FIXME: φ
@@ -501,7 +501,7 @@ module Satori
     end
 
     def parse_jump(line)
-      #assert line[0] == '＞'
+      raise "assert" unless line[0] == '＞'
       break_flag = false
       for n in 1..line.length-1
         if line[n] == "\t" ### FIXME: φ
@@ -529,7 +529,7 @@ module Satori
     end
 
     def parse_choice(line)
-      #assert line[0] == '＿'
+      raise "assert" unless line[0] == '＿'
       break_flag = false
       for n in 1..line.length-1
         if line[n] == "\t" ### FIXME: φ
@@ -645,7 +645,7 @@ module Satori
 
     def parse_parenthesis(line, buf)
       text_ = []
-      #assert line[0] == '（'
+      raise "assert" unless line[0] == '（'
       line = line[1..-1] ## FIXME
       depth = 1
       count = 1
@@ -930,7 +930,7 @@ module Satori
       return line, buf
     end
 
-    def print_nodelist(node_list, depth=0)
+    def print_nodelist(node_list, depth: 0)
       for node in node_list
         indent = '  ' * depth
         if node[0] == NODE_TEXT
@@ -938,87 +938,87 @@ module Satori
           print([indent, 'NODE_TEXT "' + temp + '"'].join(''))
         elsif node[0] == NODE_REF
           print([indent, 'NODE_REF'].join(''))
-          print_nodelist(node[1], depth + 1)
+          print_nodelist(node[1], :depth => depth + 1)
         elsif node[0] == NODE_CALL
           print([indent, 'NODE_CALL'].join(''))
           for i in 0..node[2].length-1
-            print_nodelist(node[2][i], depth + 1)
+            print_nodelist(node[2][i], :depth => depth + 1)
           end
         elsif node[0] == NODE_SAORI
           print([indent, 'NODE_SAORI'].join(''))
           for i in 0..node[2].length-1
-            print_nodelist(node[2][i], depth + 1)
+            print_nodelist(node[2][i], :depth => depth + 1)
           end
         elsif node[0] == NODE_SIDE
           print([indent, 'NODE_SIDE'].join(''))
         elsif node[0] == NODE_ASSIGNMENT
           print([indent, 'NODE_ASSIGNMENT'].join(''))
           print([indent, 'variable'].join(''))
-          print_nodelist(node[1], depth + 1)
+          print_nodelist(node[1], :depth => depth + 1)
           print([indent, 'value'].join(''))
-          print_nodelist(node[2], depth + 1)
+          print_nodelist(node[2], :depth => depth + 1)
         elsif node[0] == NODE_JUMP
           print([indent, 'NODE_JUMP'].join(''))
           print([indent, 'name'].join(''))
-          print_nodelist(node[1], depth + 1)
+          print_nodelist(node[1], :depth => depth + 1)
           if node[2] != nil
             print([indent, 'condition'].join(''))
-            print_nodelist(node[2], depth + 1)
+            print_nodelist(node[2], :depth => depth + 1)
           end
         elsif node[0] == NODE_SEARCH
           print([indent, 'NODE_SEARCH'].join(''))
         elsif node[0] == NODE_CHOICE
           print([indent, 'NODE_CHOICE'].join(''))
           print([indent, 'label'].join(''))
-          print_nodelist(node[1], depth + 1)
+          print_nodelist(node[1], :depth => depth + 1)
           if node[2] != nil
             print([indent, 'id'].join(''))
-            print_nodelist(node[2], depth + 1)
+            print_nodelist(node[2], :depth => depth + 1)
           end
         elsif node[0] == NODE_OR_EXPR
           print([indent, 'NODE_OR_EXPR'].join(''))
-          print_nodelist(node[1], depth + 1)
+          print_nodelist(node[1], :depth => depth + 1)
           for i in 2..node.length-1
             print([indent, 'op ||'].join(''))
-            print_nodelist(node[i], depth + 1)
+            print_nodelist(node[i], :depth => depth + 1)
           end
         elsif node[0] == NODE_AND_EXPR
           print([indent, 'NODE_ADD_EXPR'].join(''))
-          print_nodelist(node[1], depth + 1)
+          print_nodelist(node[1], :depth => depth + 1)
           for i in 2..node.length-1
             print([indent, 'op &&'].join(''))
-            print_nodelist(node[i], depth + 1)
+            print_nodelist(node[i], :depth => depth + 1)
           end
         elsif node[0] == NODE_COMP_EXPR
           print([indent, 'NODE_COMP_EXPR'].join(''))
-          print_nodelist(node[1], depth + 1)
+          print_nodelist(node[1], :depth => depth + 1)
           print([indent, 'op'].join(''), node[2])
-          print_nodelist(node[3], depth + 1)
+          print_nodelist(node[3], :depth => depth + 1)
         elsif node[0] == NODE_ADD_EXPR
           print([indent, 'NODE_ADD_EXPR'].join(''))
-          print_nodelist(node[1], depth + 1)
+          print_nodelist(node[1], :depth => depth + 1)
           for i in 2.step(node.length-1, 2)
             print([indent, 'op'].join(''), node[i])
-            print_nodelist(node[i + 1], depth + 1)
+            print_nodelist(node[i + 1], :depth => depth + 1)
           end
         elsif node[0] == NODE_MUL_EXPR
           print([indent, 'NODE_MUL_EXPR'].join(''))
-          print_nodelist(node[1], depth + 1)
+          print_nodelist(node[1], :depth => depth + 1)
           for i in 2.step(node.length-1, 2)
             print([indent, 'op'].join(''), node[i])
-            print_nodelist(node[i + 1], depth + 1)
+            print_nodelist(node[i + 1], :depth => depth + 1)
           end
         elsif node[0] == NODE_POW_EXPR
           print([indent, 'NODE_POW_EXPR'].join(''))
-          print_nodelist(node[1], depth + 1)
+          print_nodelist(node[1], :depth => depth + 1)
           for i in 2..node.length-1
             print([indent, 'op ^'].join(''))
-            print_nodelist(node[i], depth + 1)
+            print_nodelist(node[i], :depth => depth + 1)
           end
         elsif node[0] == NODE_UNARY_EXPR
           print([indent, 'NODE_UNARY_EXPR'].join(''))
           print([indent, 'op'].join(''), node[1])
-          print_nodelist(node[2], depth + 1)
+          print_nodelist(node[2], :depth => depth + 1)
         else
           raise RuntimeError('should not reach here')
         end
@@ -1278,8 +1278,8 @@ module Satori
         }
 
     def get_event_response(event,
-                           ref0=nil, ref1=nil, ref2=nil, ref3=nil,
-                           ref4=nil, ref5=nil, ref6=nil, ref7=nil)
+                           ref0: nil, ref1: nil, ref2: nil, ref3: nil,
+                           ref4: nil, ref5: nil, ref6: nil, ref7: nil)
       @event = event
       @reference = [ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7]
       tail = '\e'
@@ -2474,7 +2474,7 @@ module Satori
           #pass
         end
       elsif name == 'when'
-        #assert args.length > 1
+        raise "assert" unless args.length > 1
         condition = expand(args[0], :caller_history => history)
         if ['０', '0'].include?(condition)
           if args.length > 2
@@ -2836,8 +2836,9 @@ module Satori
             end
             ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7 = ref
             result = get_event_response(
-              req_header['ID'], ref0, ref1, ref2, ref3, ref4,
-              ref5, ref6, ref7)
+              req_header['ID'],
+              :ref0 => ref0, :ref1 => ref1, :ref2 => ref2, :ref3 => ref3,
+              :ref4 => ref4, :ref5 => ref5, :ref6 => ref6, :ref7 => ref7)
           end
         end
         if result == nil

@@ -388,7 +388,7 @@ module Aya5
       elsif key == 'msglang'
         #pass ## FIXME
       elsif key == 'log'
-        #assert value.is_a?(String)
+        raise "assert" unless value.is_a?(String)
         filename = value
         path = File.join(@aya_dir, filename)
         begin
@@ -1660,7 +1660,7 @@ module Aya5
         elsif line[0] == TYPE_WHILE
           condition = line[1][0]
           inner_block = line[1][1]
-          ##assert condition[0] == TYPE_CONDITION or condition[0] == TYPE_INT
+          raise "assert" unless condition[0] == TYPE_CONDITION or condition[0] == TYPE_INT
           while evaluate_condition(namespace, condition)
             local_namespace = AyaNamespace.new(@dic.aya, namespace)
             result_of_inner_block = evaluate(local_namespace,
@@ -1685,7 +1685,7 @@ module Aya5
           reset = line[1][0][2]
           inner_block = line[1][1]
           evaluate(namespace, init, -1, 1, 0) ## FIXME
-          ##assert condition[0] == TYPE_CONDITION or condition[0] == TYPE_INT
+          raise "assert" unless condition[0] == TYPE_CONDITION or condition[0] == TYPE_INT
           while evaluate_condition(namespace, condition)
             local_namespace = AyaNamespace.new(@dic.aya, namespace)
             result_of_inner_block = evaluate(local_namespace,
@@ -1789,19 +1789,19 @@ module Aya5
             if array.is_a?(String)
               temp = evaluate(namespace, [line[1][1]], -1, 1, 0) ## FIXME
               if temp.is_a?(Array)
-                #assert temp.length == 2
+                raise "assert" unless temp.length == 2
                 index, delimiter = temp
               else
                 index = temp
                 delimiter = ','
               end
-              ##assert index.is_a?(Fixnum)
-              ##assert delimiter.is_a?(String)
+              raise "assert" unless index.is_a?(Fixnum)
+              raise "assert" unless delimiter.is_a?(String)
               result_of_array = array.split(delimiter)[index]
               alternatives << result_of_array
             elsif array.is_a?(Array)
               index = evaluate(namespace, [line[1][1]], -1, 1, 0) ## FIXME
-              ##assert index.is_a?(Fixnum)
+              raise "assert" unless index.is_a?(Fixnum)
               result_of_array = array[index]
               alternatives << result_of_array
             else
@@ -1817,14 +1817,14 @@ module Aya5
             end
             temp = evaluate(namespace, [line[1][1]], -1, 1, 0) ## FIXME
             if temp.is_a?(Array) and temp.length > 1
-              ##assert temp.length == 2
+              raise "assert" unless temp.length == 2
               index, delimiter = temp
-              ##assert delimiter.is_a?(String)
+              raise "assert" unless delimiter.is_a?(String)
             else
               index = temp
               delimiter = nil
             end
-            ##assert index.is_a?(Fixnum)
+            ##raise "assert" unless index.is_a?(Fixnum)
             if index.is_a?(Fixnum) and \
               target_namespace.exists(var_name)
               if delimiter != nil
@@ -2040,8 +2040,7 @@ module Aya5
       elsif token[0] == TYPE_SYSTEM_FUNCTION
         system_functions = @dic.aya.get_system_functions()
         func_name = token[1][0]
-        ##assert system_functions.exists(func_name)
-        ##raise Exception(['function ', func_name, ' not found.'].join(''))
+        ##raise ["assert: ", 'function ', func_name, ' not found.'].join('') unless  system_functions.exists(func_name)
         arguments = evaluate(namespace, token[1][1], -1, 1, 0, 1) ## FIXME
         if not arguments.is_a?(Array) ## FIXME
           arguments = [arguments]
@@ -2057,8 +2056,7 @@ module Aya5
       elsif token[0] == TYPE_FUNCTION
         func_name = token[1][0]
         func = @dic.get_function(func_name)
-        ##assert func != nil
-        ##raise Exception(['function ', func_name, ' not found.'].join(''))
+        ##raise ["assert: ", 'function ', func_name, ' not found.'].join('') unless func != nil
         arguments = evaluate_argument(namespace, func_name,
                                       token[1][1], 0)
         result = func.call(arguments)
@@ -2129,7 +2127,7 @@ module Aya5
       left = condition[1][0]
       ope = condition[1][1]
       right = condition[1][2]
-      ##assert ope[0] == TYPE_OPERATOR
+      raise "assert" unless ope[0] == TYPE_OPERATOR
       if left == nil # '!'
         left_result = true
       else
@@ -2293,7 +2291,7 @@ module Aya5
         elsif ope == '%'
           return left % right
         elsif ope == ','
-          ##assert left.is_a?(Array)
+          raise "assert" unless left.is_a?(Array)
           result = []
           result.concat(left)
           if right.is_a?(Array)
@@ -4266,7 +4264,7 @@ module Aya5
     end
 
     def set_charset(charset)
-      ##assert ['CP932', 'Shift_JIS', 'UTF-8'].include?(charset)
+      raise "assert" unless ['CP932', 'Shift_JIS', 'UTF-8'].include?(charset)
       @current_charset = charset
     end
 

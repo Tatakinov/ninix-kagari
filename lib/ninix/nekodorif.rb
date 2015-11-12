@@ -186,7 +186,7 @@ module Nekodorif
     end
 
     def handle_request(event_type, event, *arglist)
-      ##assert ['GET', 'NOTIFY'].include?(event_type)
+      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'get_katochan_list' =>  lambda { return @katochan_list },
         'get_mode' =>  lambda { return @mode },
@@ -347,7 +347,7 @@ module Nekodorif
     end
 
     def handle_request(event_type, event, *arglist)
-      ##assert ['GET', 'NOTIFY'].include?(event_type)
+      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
       }
       if not handlers.include?(event)

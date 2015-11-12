@@ -202,7 +202,6 @@ module Prefs
     end
 
     def get(name, default: nil)
-      #assert name in self.PREFS_TYPE
       if ['sakura_name', # XXX: backward compat
           'sakura_dir', 'default_balloon', 'balloon_fonts'].include?(name)
         value = @__prefs.get(name, default)
@@ -495,7 +494,7 @@ module Prefs
       end
       if not selected
         listiter = model.iter_first
-        #assert listiter != nil
+        raise "assert" unless listiter != nil
         @balloon_treeview.selection.select_iter(listiter)
       end
     end

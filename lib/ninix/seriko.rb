@@ -116,7 +116,7 @@ module Seriko
     end
 
     def lock_exclusive(window, actor)
-      #assert @exclusive_actor is nil
+      raise "assert" unless @exclusive_actor == nil
       terminate(window)
       @exclusive_actor = actor
       actor.set_post_proc(
@@ -126,7 +126,7 @@ module Seriko
     end
 
     def unlock_exclusive(window, actor)
-      #assert @exclusive_actor == actor
+      raise "assert" unless @exclusive_actor == actor
       @exclusive_actor = nil
     end
 
@@ -365,7 +365,7 @@ module Seriko
     end
 
     def set_post_proc(post_proc, args)
-      #assert @post_proc == nil
+      raise "assert" unless @post_proc == nil
       @post_proc = [post_proc, args]
     end
 
@@ -825,7 +825,7 @@ module Seriko
     end
     mayuna = []
     for mayuna_id, interval in buf
-      ##assert interval == 'bind'
+      ##raise "assert" unless interval == 'bind'
       actor = Seriko::Mayuna.new(mayuna_id, interval)
       begin
         for n in 0..127 # up to 128 patterns (0 - 127)

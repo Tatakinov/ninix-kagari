@@ -58,7 +58,7 @@ module MCIAudioR
       end
       argc = argv.length
       if argc == 1
-        #assert @player != nil
+        rasie "assert" unless @player != nil
         if argv[0] == 'stop'
           @player.set_state(Gst::State::NULL)
         elsif ['play', 'loop'].include?(argv[0])

@@ -157,7 +157,7 @@ module Ninix_Main
     end
 
     def handle_request(event_type, event, *arglist)
-      #assert ['GET', 'NOTIFY'].include?(event_type)
+      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
       }
       if not handlers.include?(event)
@@ -458,7 +458,7 @@ module Ninix_Main
     end
 
     def handle_request(event_type, event, *arglist)
-      #assert ['GET', 'NOTIFY'].include?(event_type)
+      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'close_all' => 'close_all_ghosts',
         'edit_preferences' => 'edit_preferences',
@@ -826,7 +826,7 @@ module Ninix_Main
     end
 
     def delete_ghost(key)
-      #assert @ghosts.include?(key)
+      raise "assert" unless @ghosts.include?(key)
       del @ghosts[key]
     end
 
@@ -1129,15 +1129,15 @@ module Ninix_Main
 
     def start_sakura(key, prev: nil, vanished: false, init: false, temp: 0, abend: nil)
       sakura = @ghosts[key].instance
-      #assert sakura != nil
+      raise "assert" unless sakura != nil
       if prev != nil
-        #assert @ghosts.include?(prev) ## FIXME: vanish case?
-        #assert @ghosts[prev].instance != nil
+        raise "assert" unless @ghosts.include?(prev) ## FIXME: vanish case?
+        raise "assert" unless @ghosts[prev].instance != nil
       end
       if init
         ghost_changed = false
       else
-        #assert prev != nil ## FIXME
+        raise "assert" unless prev != nil ## FIXME
         if prev == key
           ghost_changed = false
         else
@@ -1647,7 +1647,7 @@ module Ninix_Main
       ai_list = @items[0][2]
       if not ai_list.empty?
         path = ai_list.sample
-        #assert File.exists?(path)
+        raise "assert" unless File.exists?(path)
         @pixbuf = Pix.create_pixbuf_from_file(path, :is_pnr => false)
         @pixbuf.saturate_and_pixelate(@pixbuf, 1.0, true)
       else

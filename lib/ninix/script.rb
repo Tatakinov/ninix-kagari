@@ -65,9 +65,9 @@ module Script
         column = @column
         if not @src.empty?
           dump = [@src[0..@column-1],
-                  '\x1b[7m',
+                  "\x1b[7m",
                   (@src[column, @length] or ' '),
-                  '\x1b[m',
+                  "\x1b[m",
                   @src[column+@length..@src.length-1]].join('')
         else
           dump = ''
@@ -449,7 +449,7 @@ module Script
             buf = []
             i = match.end(0)
             if i < j
-              #assert lexeme[i] == ','
+              raise "assert" unless lexeme[i] == ','
               i += 1
             end
           end
