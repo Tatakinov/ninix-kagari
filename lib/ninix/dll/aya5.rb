@@ -83,14 +83,14 @@ module Aya5
     position = 0
     while true
       pos_new = line.index(token, position)
-      if not pos_new
+      if pos_new == nil
         pos_new = -1
         break
       elsif pos_new == 0
         break
       end
       position = line.index('"', position)
-      if position and 0 <= position and position < pos_new
+      if position != nil and 0 <= position and position < pos_new
         position += 1
         while position < line.length - 1
           if line[position] == '"'
@@ -147,9 +147,9 @@ module Aya5
               line = line.encode("UTF-8", :invalid => :replace, :undef => :replace)
               v4 = line.index('for 文 version 4')
               v5 = line.index('for AYA5')
-              if v4 and v4 > 0
+              if v4 != nil and v4 > 0
                 return 4
-              elsif v5 and v5 > 0
+              elsif v5 != nil and v5 > 0
                 return 5
               end
             rescue
@@ -323,7 +323,7 @@ module Aya5
         end
       end    
       func = @dic.get_function('load')
-      if func
+      if func != nil
         func.call([@aya_dir.gsub('/', "\\")])
       end
       return 1
@@ -396,7 +396,7 @@ module Aya5
         rescue
           Logging::Logging.debug('cannnot open ' + path)
         else
-          if @logfile
+          if @logfile != nil
             @logfile.close()
           end
           @logfile = f
@@ -431,7 +431,7 @@ module Aya5
 
     def unload
       func = @dic.get_function('unload')
-      if func
+      if func != nil
         func.call([])
       end
       @global_namespace.save_database()
@@ -448,7 +448,7 @@ module Aya5
     def request(req_string)
       result = ''
       func = @dic.get_function('request')
-      if func
+      if func != nil
         req = req_string.force_encoding(@charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
         result = func.call([req])
       end
@@ -488,7 +488,7 @@ module Aya5
         else
           line = f.gets
         end
-        if not line
+        if line == nil
           break # EOF
         end
         line = line.force_encoding(@aya.charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
@@ -526,7 +526,7 @@ module Aya5
             logical_line = [logical_line[0..start-1], ' ', logical_line[end_..-1]].join('')
           end
           logical_line = logical_line.strip()
-          if not logical_line
+          if logical_line.empty?
             next
           end
           buf = logical_line
@@ -570,7 +570,7 @@ module Aya5
     def split_line(line)
       lines = []
       while true
-        if not line or line.empty?
+        if line == nil or line.empty?
           break
         end
         pos = line.length # not line.length - 1
@@ -777,13 +777,13 @@ module Aya5
           inner_func = []
           i, inner_func = get_block(lines, i)
           result << [TYPE_BLOCK, parse(inner_func)]
-        elsif Re_if.match(line)
+        elsif Re_if.match(line) != nil
           inner_blocks = []
           while true
             current_line = lines[i]
-            if Re_if.match(current_line)
+            if Re_if.match(current_line) != nil
               condition = parse_(current_line[2..-1].strip())
-            elsif Re_elseif.match(current_line)
+            elsif Re_elseif.match(current_line) != nil
               condition = parse_(current_line[6..-1].strip())
             else
               condition = [TYPE_CONDITION, nil]
@@ -802,7 +802,7 @@ module Aya5
               break
             end
             next_line = lines[i + 1]
-            if not Re_elseif.match(next_line) and \
+            if Re_elseif.match(next_line) == nil and \
               next_line != 'else'
               break
             end
@@ -811,13 +811,13 @@ module Aya5
           if not inner_blocks.empty?
             result << [TYPE_IF, inner_blocks]
           end
-        elsif Re_while.match(line)
+        elsif Re_while.match(line) != nil
           condition = parse_(line[5..-1].strip())
           inner_block = []
           i, inner_block = get_block(lines, i + 1)
           result << [TYPE_WHILE,
                      [condition, parse(inner_block)]]
-        elsif Re_for.match(line)
+        elsif Re_for.match(line) != nil
           init = parse([line[3..-1].strip()]) ## FIXME(?)
           condition = parse_(lines[i + 1])
           reset = parse([lines[i + 2]]) ## FIXME(?)
@@ -828,26 +828,26 @@ module Aya5
                            [[init, condition, reset],
                             parse(inner_block)]]
           end
-        elsif Re_foreach.match(line)
+        elsif Re_foreach.match(line) != nil
           name = line[7..-1].strip()
           var = lines[i + 1]
           i, inner_block = get_block(lines, i + 2)
           result << [TYPE_FOREACH,
                          [[name, var], parse(inner_block)]]
-        elsif Re_switch.match(line)
+        elsif Re_switch.match(line) != nil
           index = parse_(line[6..-1].strip())
           inner_block = []
           i, inner_block = get_block(lines, i + 1)
           result << [TYPE_SWITCH,
                      [index, parse(inner_block)]]
-        elsif Re_case.match(line)
+        elsif Re_case.match(line) != nil
           left = parse_(line[4..-1].strip())
           i, block = get_block(lines, i + 1)
           inner_blocks = []
           j = 0
           while true
             current_line = block[j]
-            if Re_when.match(current_line)
+            if Re_when.match(current_line) != nil
               right = current_line[4..-1].strip()
             else # 'others'
               right = nil
@@ -901,14 +901,14 @@ module Aya5
               break
             end
             next_line = block[j + 1]
-            if not Re_when.match(next_line) and \
+            if Re_when.match(next_line) == nil and \
               next_line != 'others'
               break
             end
             j += 1
           end
           result << [TYPE_CASE, [left, inner_blocks]]
-        elsif Re_parallel.match(line) ## FIXME
+        elsif Re_parallel.match(line) != nil ## FIXME
           #pass
         else
           result << [TYPE_FORMULA, parse_(line)] ## FIXME
@@ -1387,9 +1387,9 @@ module Aya5
 
     def parse_token(token)
       result = []
-      if Re_f.match(token)
+      if Re_f.match(token) != nil
         result = [TYPE_FLOAT, token]
-      elsif Re_d.match(token)
+      elsif Re_d.match(token) != nil
         result = [TYPE_INT, token]
       elsif token.start_with?('"')
         text = token[1..-1]
@@ -1420,10 +1420,10 @@ module Aya5
       else
         pos_parenthesis_open = token.index('(')
         pos_block_open = token.index('[')
-        if not pos_parenthesis_open # XXX
+        if pos_parenthesis_open == nil # XXX
           pos_parenthesis_open = -1
         end
-        if not pos_block_open # XXX
+        if pos_block_open == nil # XXX
           pos_block_open = -1
         end
         if pos_parenthesis_open == 0 and Aya5.find_not_quoted(token, ',') != -1 ## FIXME: Array
@@ -1515,7 +1515,7 @@ module Aya5
     def call(argv=nil)
       namespace = AyaNamespace.new(@dic.aya)
       _argv = []
-      if not argv
+      if argv == nil
         namespace.put('_argc', 0)
       else
         namespace.put('_argc', argv.length)
@@ -1530,7 +1530,7 @@ module Aya5
       namespace.put('_argv', _argv)
       @status = CODE_NONE
       result = evaluate(namespace, @lines, -1, 0) ## FIXME
-      if argv
+      if argv != nil
         for i in 0..argv.length-1
           if argv[i].is_a?(Hash)
             value = _argv[i]
@@ -1548,7 +1548,7 @@ module Aya5
       result = []
       alternatives = []
       for line in lines
-        if not line or line.empty?
+        if line == nil or line.empty?
           next
         end
         if [TYPE_DECISION, TYPE_RETURN,
@@ -1587,7 +1587,7 @@ module Aya5
           local_namespace = AyaNamespace.new(@dic.aya, namespace)
           result_of_inner_func = evaluate(local_namespace,
                                           inner_func, -1, 1) ## FIXME
-          if result_of_inner_func
+          if result_of_inner_func != nil
             alternatives << result_of_inner_func
           end
         elsif line[0] == TYPE_SUBSTITUTION
@@ -1646,12 +1646,12 @@ module Aya5
             entry = inner_blocks[j]
             condition = entry[0]
             inner_block = entry[1]
-            if evaluate(namespace, [condition], -1, 1, 0) ## FIXME
+            if evaluate(namespace, [condition], -1, 1, 0) != nil ## FIXME
               local_namespace = AyaNamespace.new(@dic.aya, namespace)
               result_of_inner_block = evaluate(local_namespace,
                                                inner_block,
                                                -1, 1) ## FIXME
-              if result_of_inner_block
+              if result_of_inner_block != nil
                 alternatives << result_of_inner_block
               end
               break
@@ -1661,11 +1661,11 @@ module Aya5
           condition = line[1][0]
           inner_block = line[1][1]
           raise "assert" unless condition[0] == TYPE_CONDITION or condition[0] == TYPE_INT
-          while evaluate_condition(namespace, condition)
+          while evaluate_condition(namespace, condition) != nil
             local_namespace = AyaNamespace.new(@dic.aya, namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1) ## FIXME
-            if result_of_inner_block
+            if result_of_inner_block != nil
               alternatives << result_of_inner_block
             end
             if @status == CODE_RETURN
@@ -1686,11 +1686,11 @@ module Aya5
           inner_block = line[1][1]
           evaluate(namespace, init, -1, 1, 0) ## FIXME
           raise "assert" unless condition[0] == TYPE_CONDITION or condition[0] == TYPE_INT
-          while evaluate_condition(namespace, condition)
+          while evaluate_condition(namespace, condition) != nil
             local_namespace = AyaNamespace.new(@dic.aya, namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1) ## FIXME
-            if result_of_inner_block
+            if result_of_inner_block != nil
               alternatives << result_of_inner_block
             end
             if @status == CODE_RETURN
@@ -1716,7 +1716,7 @@ module Aya5
           local_namespace = AyaNamespace.new(@dic.aya, namespace)
           result_of_inner_block = evaluate(local_namespace,
                                            inner_block, index, 1) ## FIXME
-          if result_of_inner_block
+          if result_of_inner_block != nil
             alternatives << result_of_inner_block
           end
         elsif line[0] == TYPE_CASE
@@ -1736,7 +1736,7 @@ module Aya5
               if value_min <= left and left <= value_max
                 result_of_inner_block = evaluate(
                   local_namespace, inner_block, -1, 1) ## FIXME
-                if result_of_inner_block
+                if result_of_inner_block != nil
                   alternatives << result_of_inner_block
                   break_flag = true
                   break
@@ -1748,13 +1748,13 @@ module Aya5
             end
           end
           if not break_flag
-            if default_result
+            if default_result != nil
               alternatives << default_result
             end
           end
         elsif line[0] == TYPE_STATEMENT
           result_of_func = evaluate_statement(namespace, line, 0)
-          if result_of_func
+          if result_of_func != nil
             alternatives << result_of_func
           end
         elsif line[0] == TYPE_CONDITION
@@ -1767,7 +1767,7 @@ module Aya5
           end
         elsif line[0] == TYPE_FORMULA
           result_of_formula = evaluate(namespace, [line[1]], -1, 1, 0, connect=connect) ## FIXME
-          if result_of_formula
+          if result_of_formula != nil
             alternatives << result_of_formula
           end
         elsif line[0] == TYPE_NEW_ARRAY
@@ -1852,7 +1852,7 @@ module Aya5
                TYPE_ARRAY_POINTER,
                TYPE_VARIABLE_POINTER].include?(line[0])
           result_of_eval = evaluate_token(namespace, line)
-          if result_of_eval
+          if result_of_eval != nil
             alternatives << result_of_eval
           end
         elsif line[0] == TYPE_FOREACH
@@ -1884,7 +1884,7 @@ module Aya5
           end
         else ## FIXME
           result_of_eval = evaluate_token(namespace, line)
-          if result_of_eval
+          if result_of_eval != nil
             alternatives << result_of_eval
           end
         end
@@ -1954,7 +1954,7 @@ module Aya5
           end
         end
       end
-      if not result or result.empty?
+      if result == nil or result.empty?
         if not is_block != 0 and not alternatives.empty? ## FIXME
           return alternatives[-1] ## FIXME
         end
@@ -2006,15 +2006,15 @@ module Aya5
     def evaluate_token(namespace, token)
       result = '' # default
       if token[0] == TYPE_TOKEN
-        if Re_b.match(token[1])
+        if Re_b.match(token[1]) != nil
           pos = Re_d.search(token[1]).start()
           result = token[1][pos..-1].to_i(2)
-        elsif Re_x.match(token[1])
+        elsif Re_x.match(token[1]) != nil
           result = token[1].to_i(16)
         else
           func = @dic.get_function(token[1])
           system_functions = @dic.aya.get_system_functions()
-          if func
+          if func != nil
             result = func.call()
           elsif system_functions.exists(token[1])
             result = system_functions.call(namespace, token[1], [])
@@ -2341,7 +2341,7 @@ module Aya5
       system_functions = @dic.aya.get_system_functions()
       while startpoint < line.length
         pos = line.index('%', startpoint)
-        if not pos or pos < 0
+        if pos == nil or pos < 0
           buf = [buf, line[startpoint..-1]].join('')
           startpoint = line.length
           next
@@ -2380,7 +2380,7 @@ module Aya5
         endpoint = line.length
         for char in SPECIAL_CHARS
           pos = line[0..endpoint-1].index(char, startpoint + 2)
-          if pos and 0 < pos and pos < endpoint
+          if pos != nil and 0 < pos and pos < endpoint
             endpoint = pos
           end
         end
@@ -2416,7 +2416,7 @@ module Aya5
             if endpoint < line.length and \
               line[endpoint] == '('
               end_of_parenthesis = line.index(')', endpoint + 1)
-              if not end_of_parenthesis or end_of_parenthesis < 0
+              if end_of_parenthesis == nil or end_of_parenthesis < 0
                 Logging::Logging.debug(
                   'unbalanced "(" in the string(' + line + ')')
                 startpoint = line.length
@@ -2481,7 +2481,7 @@ module Aya5
               index = nil
               if endpoint < line.length and line[endpoint] == '['
                 end_of_block = line.index(']', endpoint + 1)
-                if not end_of_block or end_of_block < 0
+                if end_of_block == nil or end_of_block < 0
                   Logging::Logging.debug(
                     'unbalanced "[" or ' \
                     'illegal index in the string(' + line + ')')
@@ -2826,7 +2826,7 @@ module Aya5
 
     def CHRCODE(namespace, argv)
       line = argv[0].to_s
-      if line
+      if not line.empty?
         return line[0].encode('utf-16', 'ignore') # UCS-2
       else
         return ''
@@ -3069,7 +3069,7 @@ module Aya5
       if @aya.filelist.include?(norm_path)
         f = @aya.filelist[norm_path]
         result = f.readline().force_encoding(@fcharset[norm_path])
-        if not result
+        if result == nil
           result = -1
         elsif result.end_with?("\r\n")
           result = result[0..-3]
@@ -3305,7 +3305,7 @@ module Aya5
     def LETTONAME(namespace, argv)
       var = argv[0].to_s
       value = argv[1]
-      if not var
+      if v.empty?ar
         return nil
       end
       target_namespace = select_namespace(namespace, var)
@@ -3388,7 +3388,7 @@ module Aya5
     end
 
     def RAND(namespace, argv)
-      if not argv
+      if argv.empty?
         return Random.rand(0..99)
       else
         begin
@@ -3466,7 +3466,7 @@ module Aya5
       @saori_header = []
       @saori_value = {}
       @saori_protocol = ''
-      if header and not header.empty?
+      if header != nil and not header.empty?
         line = header.shift
         line = line.strip()
         if line.include?(' ')
@@ -3481,7 +3481,7 @@ module Aya5
           key, value = line.split(':', 2)
           key.strip!
           value.strip!
-          if key
+          if not key.empty?
             @saori_header << key
             @saori_value[key] = value
           end
@@ -3933,7 +3933,7 @@ module Aya5
           i = position + 1
         elsif c == "'"
           position = line.index("'", i + 1)
-          if not position or position < 0 ## FIXME
+          if position == nil or position < 0 ## FIXME
             raise SystemExit ## FIXME
           end
           i = position
@@ -3978,7 +3978,7 @@ module Aya5
     end
 
     def append_unless_empty(token)
-      if token and not token.empty?
+      if token != nil and not token.empty?
         @tokens << token
       end
     end
@@ -4047,7 +4047,7 @@ module Aya5
       @array = []
       while not @is_empty
         separator_position = @line.index(@separator, @position)
-        if not separator_position
+        if separator_position == nil
           token = @line[@position..-1]
           @is_empty = true
         else
@@ -4272,9 +4272,9 @@ module Aya5
       result = 0
       head, name = File.split(name.gsub("\\", '/')) # XXX: don't encode here
       top_dir = File.join(top_dir, head)
-      if @saori and not @saori_list.include?(name)
+      if @saori != nil and not @saori_list.include?(name)
         module_ = @saori.request(name)
-        if module_
+        if module_ != nil
           @saori_list[name] = module_
         end
       end
@@ -4286,7 +4286,7 @@ module Aya5
     end
 
     def unload(name=nil)
-      if name
+      if name != nil
         name = File.split(name.gsub("\\", '/'))[-1] # XXX: don't encode here
         if @saori_list.include?(name)
           @saori_list[name].unload()
@@ -4304,7 +4304,7 @@ module Aya5
     def request(name, req)
       result = '' # FIXME
       name = File.split(name.gsub("\\", '/'))[-1] # XXX: don't encode here
-      if name and @saori_list.include?(name)
+      if not name.empty? and @saori_list.include?(name)
         result = @saori_list[name].request(
           req.encode(@current_charset))
       end

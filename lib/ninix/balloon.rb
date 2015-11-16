@@ -1675,7 +1675,7 @@ module Balloon
         h = surface.height
         darea.set_size_request(w, h)
       else
-        box = Gtk::HBox.new(spacing=10)
+        box = Gtk::Box.new(orientation=Gtk::Orientation::HORIZONTAL, spacing=10)
         box.set_border_width(10)
         if not ENTRY.empty?
           label = Gtk::Label.new(label=ENTRY)

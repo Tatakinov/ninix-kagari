@@ -84,7 +84,7 @@ module Ninix_Main
   
   def self.main(option)
     # parse command line arguments
-    if option[:logfile]
+    if option[:logfile] != nil
       Logging::Logging.add_logger(Logger.new(option[:logfile]))
     end
     # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
@@ -95,14 +95,14 @@ module Ninix_Main
     # TCP 11000：伺か（廃止） (IANA Registered Port for IRISA)
     sstp_port = [9801]
     # parse command line arguments
-    if option[:sstp_port]
+    if option[:sstp_port] != nil
       if option[:sstp_port].to_i < 1024
         Logging::Logging.warning("Invalid --sstp-port number (ignored)")
       else
         sstp_port << option[:sstp_port].to_i
       end
     end
-    if option[:debug]
+    if option[:debug] != nil
       Logging::Logging.set_level(Logger::DEBUG)
     end
     home_dir = Home.get_ninix_home()
@@ -117,9 +117,6 @@ module Ninix_Main
     if File.exists?(lockfile_path)
       f = open(lockfile_path, 'r')
       abend = f.gets
-      if not abend
-        abend = nil
-      end
     else
       abend = nil
     end
@@ -227,7 +224,7 @@ module Ninix_Main
       if not break_flag
         if @parent.handle_request('GET', 'get_preference', 'allowembryo') == 0
           if event == nil
-            if request_handler
+            if request_handler != nil
               request_handler.send_response(420) # Refuse
             end
             return
@@ -247,11 +244,11 @@ module Ninix_Main
       else
         script = nil
       end
-      if not script
+      if script == nil
         script = default_script
       end
       if script == nil
-        if request_handler
+        if request_handler != nil
           request_handler.send_response(204) # No Content
         end
         return
@@ -288,7 +285,7 @@ module Ninix_Main
     end
 
     def get_sstp_port
-      if not @sstp_servers
+      if @sstp_servers.empty?
         return nil
       end
       return @sstp_servers[0].server_address[1]
@@ -517,7 +514,7 @@ module Ninix_Main
         ##@communicate.notify_all('OnInstallCompleteEx', []) # FIXME
         if filetype != 'kinoko'
           if filetype == 'ghost'
-            if target_dirs[1]
+            if target_dirs[1] != nil
               id = 'ghost with balloon'
               name2 = names[1]
             else
@@ -533,14 +530,14 @@ module Ninix_Main
           @communicate.notify_all('OnInstallComplete', [id, name, name2])
         end
       end
-      if target_dirs
+      if not target_dirs.empty?
         if filetype == 'ghost'
           add_sakura(target_dirs[0])
           Sakura::ReadmeDialog.new.show(
             target_dirs[0],
             File.join(Home.get_ninix_home(),
                       'ghost', target_dirs[0]))
-          if target_dirs[1]
+          if target_dirs[1] != nil
             add_balloon(target_dirs[1])
             Sakura::ReadmeDialog.new.show(
               target_dirs[1],
@@ -845,7 +842,7 @@ module Ninix_Main
       nekodorif_list = []
       nekoninni = @nekoninni
       for nekoninni_name, nekoninni_dir in nekoninni
-        if not nekoninni_name
+        if nekoninni_name == nil or nekoninni_name.empty?
           next
         end
         item = {}
@@ -867,10 +864,10 @@ module Ninix_Main
       directory = @prefs.get('sakura_dir')
       name = @prefs.get('sakura_name') # XXX: backward compat
       default_sakura = find_ghost_by_dir(directory)
-      if not default_sakura
+      if default_sakura == nil
         default_sakura = find_ghost_by_name(name)
       end
-      if not default_sakura
+      if default_sakura == nil
         default_sakura = choose_default_sakura()
       end
       # load ghost
@@ -1107,7 +1104,7 @@ module Ninix_Main
         sakura.finalize()
         start_sakura(key, :prev => sakura.key, :vanished => vanished)
         close_ghost(sakura)
-      elsif not event
+      elsif event == 0
         proc_obj.call()
       else
         sakura_name = @ghosts[key].instance.get_selfname(:default => '')
@@ -1195,7 +1192,7 @@ module Ninix_Main
       key = sakura.key
       ghost_dir = File.split(sakura.get_prefix())[1] # XXX
       ghost_conf = Home.search_ghosts(:target => [ghost_dir])
-      if ghost_conf
+      if ghost_conf != nil
         @ghosts[key].baseinfo = ghost_conf[key]
       else
         close_ghost(sakura) ## FIXME
@@ -1694,7 +1691,7 @@ module Ninix_Main
       cr.set_source_rgb(1.0, 1.0, 1.0) # white
       cr.paint()
       # ai.png
-      if @pixbuf
+      if @pixbuf != nil
         cr.set_source_pixbuf(@pixbuf, 16, 32) # XXX
         cr.paint()
       end

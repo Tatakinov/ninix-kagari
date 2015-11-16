@@ -148,7 +148,9 @@ module Satori
           Logging::Logging.debug('satori.py: invalid line in ' + path.to_s + ' (line ' + lineno.to_s + ')')
           next
         end
-        buf << [old, new]
+        if old != nil and new != nil
+          buf << [old, new]
+        end
       end
     end
     return buf
@@ -280,7 +282,7 @@ module Satori
             break
           end
         end
-        if not line or line.empty?
+        if line == nil or line.empty?
           next
         end
         if line.start_with?('＊') and not phi_escape[lineno].include?(0)
@@ -371,22 +373,22 @@ module Satori
         line = [prev, linelist[n]].join('')
         prev = ''
         current_lineno = lineno + n - 2
-        if line and line[0] == '＄' and not phi_escape[current_lineno].include?(0)
+        if not line.empty? and line[0] == '＄' and not phi_escape[current_lineno].include?(0)
           node = parse_assignment(line)
           if node != nil
             buf << node
           end
-        elsif line and line[0] == '＞' and not phi_escape[current_lineno].include?(0)
+        elsif not line.empty? and line[0] == '＞' and not phi_escape[current_lineno].include?(0)
           node = parse_jump(line)
           if node != nil
             buf << node
           end
-        elsif line and line[0] == '≫' and not phi_escape[current_lineno].include?(0)
+        elsif not line.empty? and line[0] == '≫' and not phi_escape[current_lineno].include?(0)
           node = parse_search(line)
           if node != nil
             buf << node
           end
-        elsif line and line[0] == '＿' and not phi_escape[current_lineno].include?(0)
+        elsif not line.empty? and line[0] == '＿' and not phi_escape[current_lineno].include?(0)
           node = parse_choice(line)
           if node != nil
             buf << node
@@ -438,11 +440,11 @@ module Satori
         end
         line = [prev, linelist[n]].join('')
         prev = ''
-        if not line or line.empty?
+        if line.empty?
           next
         end
         word = parse_word(line)
-        if word
+        if word != nil
           buf << word
         end
       end
@@ -561,7 +563,7 @@ module Satori
     def parse_word(line)
       buffer_ = []
       text = []
-      while line
+      while line != nil and not line.empty?
         if line[0] == '：' ### FIXME: φ
           if not text.empty?
             buffer_. << [NODE_TEXT, text]
@@ -611,7 +613,7 @@ module Satori
       pos_end = -1
       while true
         position = text.index('（', pos_end + 1)
-        if not position or position == -1
+        if position == nil or position == -1
           ll = text[pos_end + 1..-1].split(sep, -1)
           if buf.length > 0
             last = buf.pop()
@@ -649,7 +651,7 @@ module Satori
       line = line[1..-1] ## FIXME
       depth = 1
       count = 1
-      while line
+      while line != nil and not line.empty?
         if line[0] == '）' ### FIXME: φ
           depth -= 1
           if text_.length != count # （）
@@ -738,7 +740,7 @@ module Satori
       rescue #except ValueError as e:
         return default
       end
-      if line and not line.empty?
+      if line != nil and not line.empty?
         return default
       end
       return buf
@@ -747,9 +749,9 @@ module Satori
     def get_or_expr(line)
       line, and_expr = get_and_expr(line)
       buf = [NODE_OR_EXPR, and_expr]
-      while line and ['|', '｜'].include?(line[0]) ### FIXME: φ
+      while line != nil and ['|', '｜'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
-        if line and ['|', '｜'].include?(line[0]) ### FIXME: φ
+        if line != nil and ['|', '｜'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
           raise ValueError('broken OR operator')
@@ -766,9 +768,9 @@ module Satori
     def get_and_expr(line)
       line, comp_expr = get_comp_expr(line)
       buf = [NODE_AND_EXPR, comp_expr]
-      while line and ['&', '＆'].include?(line[0]) ### FIXME: φ
+      while line != nil and ['&', '＆'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
-        if line and ['&', '＆'].include?(line[0]) ### FIXME: φ
+        if line != nil and ['&', '＆'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
           raise ValueError('broken AND operator')
@@ -784,36 +786,36 @@ module Satori
 
     def get_comp_expr(line)
       line, buf = get_add_expr(line)
-      if line and ['<', '＜'].include?(line[0]) ### FIXME: φ
+      if line != nil and ['<', '＜'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         op = '<'
-        if line and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if line != nil and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
           op = '<='
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, op, add_expr]]
-      elsif line and ['>', '＞'].include?(line[0]) ### FIXME: φ
+      elsif line != nil and ['>', '＞'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         op = '>'
-        if line and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if line != nil and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
           op = '>='
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, op, add_expr]]
-      elsif line and ['=', '＝'].include?(line[0]) ### FIXME: φ
+      elsif line != nil and ['=', '＝'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
-        if line and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if line != nil and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
           raise ValueError('broken EQUAL operator')
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, '==', add_expr]]
-      elsif line and ['!', '！'].include?(line[0]) ### FIXME: φ
+      elsif line != nil and ['!', '！'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
-        if line and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if line != nil and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
           raise ValueError('broken NOT EQUAL operator')
@@ -827,7 +829,7 @@ module Satori
     def get_add_expr(line)
       line, mul_expr = get_mul_expr(line)
       buf = [NODE_ADD_EXPR, mul_expr]
-      while line and ['+', '＋', '-', '−', '－'].include?(line[0]) ### FIXME: φ
+      while line != nil and ['+', '＋', '-', '−', '－'].include?(line[0]) ### FIXME: φ
         if ['+', '＋'].include?(line[0])
           buf << '+'
         else
@@ -846,7 +848,7 @@ module Satori
     def get_mul_expr(line)
       line, pow_expr = get_pow_expr(line)
       buf = [NODE_MUL_EXPR, pow_expr]
-      while line and \
+      while line != nil and \
            ['*', '＊', '×', '/', '／', '÷', '%', '％'].include?(line[0]) ### FIXME: φ
         if ['*', '＊', '×'].include?(line[0])
           buf << '*'
@@ -868,7 +870,7 @@ module Satori
     def get_pow_expr(line)
       line, unary_expr = get_unary_expr(line)
       buf = [NODE_POW_EXPR, unary_expr]
-      while line and ['^', '＾'].include?(line[0]) ### FIXME: φ
+      while line != nil and ['^', '＾'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         line, unary_expr = get_unary_expr(line)
         buf << unary_expr
@@ -880,20 +882,20 @@ module Satori
     end
 
     def get_unary_expr(line)
-      if line and ['-', '−', '－'].include?(line[0]) ### FIXME: φ
+      if line != nil and ['-', '−', '－'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         line, unary_expr = get_unary_expr(line)
         return line, [[NODE_UNARY_EXPR, '-', unary_expr]]
       end
-      if line and ['!', '！'].include?(line[0]) ### FIXME: φ
+      if line != nil and ['!', '！'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         line, unary_expr = get_unary_expr(line)
         return line, [[NODE_UNARY_EXPR, '!', unary_expr]]
       end
-      if line and line[0] == '(' ### FIXME: φ
+      if line != nil and line[0] == '(' ### FIXME: φ
         line = line[1..-1]
         line, buf = get_or_expr(line)
-        if line and line[0] == ')' ### FIXME: φ
+        if line != nil and line[0] == ')' ### FIXME: φ
           line = line[1..-1]
         else
           raise ValueError('expected a close paren')
@@ -910,13 +912,13 @@ module Satori
 
     def get_factor(line)
       buf = []
-      while line and not Operators.include?(line[0])
-        if line and line[0] == '（' ### FIXME: φ
+      while line != nil and not Operators.include?(line[0])
+        if line != nil and line[0] == '（' ### FIXME: φ
           line = parse_parenthesis(line, buf)
           next
         end
         text = []
-        while line and not Operators.include?(line[0]) and line[0] != '（' ### FIXME: φ
+        while line != nil and not Operators.include?(line[0]) and line[0] != '（' ### FIXME: φ
           text << line[0]
           line = line[1..-1]
         end
@@ -1305,7 +1307,7 @@ module Satori
       elsif event == 'OnMouseWheel'
         key = [ref3, ref4] # side, part
         count, timestamp = (@mouse_wheel_count.include?(key) ? @mouse_wheel_count[key] : [0, 0])
-        if (Time.now - timestamp).to-i > 2
+        if (Time.now - timestamp).to_i > 2
           count = 0
         end
         count += 1
@@ -1479,7 +1481,7 @@ module Satori
           save_database()
         end
       elsif Re_reservation.match(name) and Re_reservation.match(name).begin(0) == 0 # FIXME
-        if not value or value.empty?
+        if value == nil or value.empty?
           return nil
         end
         match = Re_reservation.match(name)
@@ -1502,7 +1504,7 @@ module Satori
         end
         @reserved_talk[value] = number
       elsif name == '次のトーク'
-        if not value or value.empty?
+        if value == nil or value.empty?
           return nil
         end
         number = 1
@@ -1528,7 +1530,7 @@ module Satori
         end
       elsif name == '起動回数'
         @runcount = to_integer(value) + 1
-      elsif not value or value.empty?
+      elsif value == nil or value.empty?
         if @variable.include?(name)
           @variable.delete(name)
         end
@@ -1680,7 +1682,7 @@ module Satori
         @current_reset_surface = [false, false]
       end
       script = get(name, :default => nil)
-      if script != nil and not script.empty? and script != '\\n'
+      if script != nil and not script.empty? and script != "\\n"
         ##Logging::Logging.debug('make("' + script.encode('utf-8', :invalid => :replace, :undef => :replace) + '")')
         return make([head, script, tail].join(''))
       end
@@ -1702,7 +1704,7 @@ module Satori
           node = nodelist[j]
           j += 1
           if node[0] == NODE_TEXT
-            if node[1] == ['\\n']
+            if node[1] == ["\\n"]
               break
             else
               title = [title, node[1].join('')].join('')
@@ -1726,7 +1728,7 @@ module Satori
           node = nodelist[j]
           j += 1
           if node[0] == NODE_TEXT
-            if node[1] == ['\\n']
+            if node[1] == ["\\n"]
               break
             else
               url = [url, node[1].join('')].join('')
@@ -1743,7 +1745,7 @@ module Satori
           node = nodelist[j]
           j += 1
           if node[0] == NODE_TEXT
-            if node[1] == ['\\n']
+            if node[1] == ["\\n"]
               break
             else
               bannar = [bannar, node[1].join('')].join('')
@@ -1781,7 +1783,7 @@ module Satori
           if item[0] == title and item[1] == url
             if item[3] != nil
               script = expand(item[3])
-              if script != nil and not script.empty? and script != '\\n'
+              if script != nil and not script.empty? and script != "\\n"
                 script = make(['\1', script, '\e'].join(''))
                 break
               end
@@ -1815,7 +1817,7 @@ module Satori
       i = 0
       while true
         match = Re_tag.match(script, i)
-        if match and match.begin(0) == 0 # FIXME
+        if match != nil and match.begin(0) == 0 # FIXME
           start = match.begin(0)
           end_ = match.end(0)
           buf << @parser.anchor_filter.apply(script[i..start-1])
@@ -1833,13 +1835,13 @@ module Satori
       for pattern, replace in Redundant_tags
         #script, count = pattern.subn(replace, script)
         match = pattern.match(script)
-        if match
+        if match != nil
           script = script.sub(pattern, match[replace])
         end
       end
       # remove redundant newline tags
       match = Re_newline.match(script)
-      if match
+      if match != nil
         tag = match[3]
         if tag == '\e'
           script = [script[0..match.begin(0)-1],
@@ -1852,10 +1854,10 @@ module Satori
       i = 1
       while true
         match = Re_0.match(script, i)
-        if match
+        if match != nil
           end_ = match.end(0)
           match = Re_0.match(script, end_)
-          if match
+          if match != nil
             start = match.begin(0)
             if start < @newline.length or \
               script[start - @newline.length..start-1] != @newline
@@ -1872,10 +1874,10 @@ module Satori
       i = 1
       while true
         match = Re_1.match(script, i)
-        if match
+        if match != nil
           end_ = match.end(0)
           match = Re_1.match(script, end_)
-          if match
+          if match != nil
             start = match.begin(0)
             if start < @newline.length or \
               script[start - @newline.length..start-1] != @newline
@@ -1895,7 +1897,7 @@ module Satori
       i, j = 0, script.length
       while i < j
         match = Re_wait_after.match(script, i)
-        if match and match.begin(0) == 0 # FIXME
+        if match != nil and match.begin(0) == 0 # FIXME
           buf << match[0]
           buf.concat(make_wait(n))
           n = 0
@@ -1903,7 +1905,7 @@ module Satori
           next
         end
         match = Re_wait_before.match(script, i)
-        if match and match.begin(0) == 0 # FIXME
+        if match != nil and match.begin(0) == 0 # FIXME
           buf.concat(make_wait(n))
           buf << match[0]
           n = 0
@@ -1919,7 +1921,7 @@ module Satori
           end
         end
         match = Re_tag.match(script, i)
-        if match and match.begin(0) == 0 # FIXME
+        if match != nil and match.begin(0) == 0 # FIXME
           buf << script[i..match.end(0)-1]
           i = match.end(0)
         else
@@ -1964,7 +1966,7 @@ module Satori
           else
             value = get_reference(node[1], history, side)
           end
-          if value and not value.empty?
+          if value != nil and not value.empty?
             talk = true
             buf << value
             history << value
@@ -1979,7 +1981,7 @@ module Satori
             function, args,
             caller_history != nil ? caller_history : history,
             side)
-          if value and not value.empty?
+          if value != nil and not value.empty?
             talk = true
             buf << value
             history << value
@@ -2004,7 +2006,7 @@ module Satori
               calc_args(node[2], history, :expand_only => expand_only),
               history, side)
           end
-          if value and not value.empty?
+          if value != nil and not value.empty?
             talk = true
             buf << value
             history << value
@@ -2054,7 +2056,7 @@ module Satori
               end
             end
             script = get(target, :default => nil)
-            if script != nil and not script.empty? and script != '\\n'
+            if script != nil and not script.empty? and script != "\\n"
               buf << ['\1', script].join('')
               break
             end
@@ -2236,7 +2238,7 @@ module Satori
 
     def get_reference(nodelist, history, side)
       key = expand(nodelist[1..-2], :caller_history => history)
-      if key and ['Ｒ', 'R'].include?(key[0])
+      if key != nil and ['Ｒ', 'R'].include?(key[0])
         n = to_integer(key[1..-1])
         if n != nil and 0 <= n and n < @reference.length ## FIXME
           if @reference[n] == nil
@@ -2256,7 +2258,7 @@ module Satori
             return ''
           end
         end
-      elsif key and ['Ｈ', 'H'].include?(key[0])
+      elsif key != nil and ['Ｈ', 'H'].include?(key[0])
         ##Logging::Logging.debug(['["', history.join('", "'), '"]'].join(''))
         n = to_integer(key[1..-1])
         if n != nil and 1 <= n and n < history.length + 1 ## FIXME
@@ -2421,7 +2423,7 @@ module Satori
       elsif name == 'sync' ## FIXME
         #pass
       elsif name == 'set'
-        if not args
+        if args == nil
           name = ''
         else
           name = expand(args[0], :caller_history => history)
@@ -2720,7 +2722,7 @@ module Satori
       for nodelist in (word.include?('SAORI') ? word['SAORI'] : [])
         if nodelist[0][0] == NODE_TEXT
           list_ = nodelist[0][1].join('').split(',', -1)
-          if list_.length >= 2 and list_[0] and list_[1]
+          if list_.length >= 2 and list_[0] != nil and list_[1] != nil
             head, tail = File.split(list_[1])
             saori_dir = File.join(@satori_dir, head)
             result = @saori_library.load(list_[1], saori_dir)
@@ -2772,7 +2774,7 @@ module Satori
       header = req_string.encode('UTF-8', :invalid => :replace, :undef => :replace).split(/\r?\n/, 0)
       req_header = {}
       line = header.shift
-      if line
+      if line != nil
         line = line.strip()
         req_list = line.split(nil, -1)
         if req_list.length >= 2
@@ -2846,7 +2848,7 @@ module Satori
         end
         to = nil ##communicate_to() ## FIXME
       end
-      if result != ''
+      if not result.empty?
         @silent_time = 0
       end
       result = "SHIORI/3.0 200 OK\r\n" \
@@ -2880,7 +2882,7 @@ module Satori
       end
       for i in 0..args.length-1
         argument = args[i]
-        if argument
+        if argument != nil
           req = [req,
                  "Argument" + (i + n).to_s + ": " + argument.to_s + "\r\n"].join('')
         end
@@ -2947,7 +2949,7 @@ module Satori
       result = 0
       if @saori and not @saori_list.include?(name)
         module_ = @saori.request(name)
-        if module_
+        if module_ != nil
           @saori_list[name] = module_
         end
       end
@@ -2966,7 +2968,7 @@ module Satori
 
     def request(name, req)
       result = '' # FIXME
-      if name and @saori_list.include?(name)
+      if name != nil and @saori_list.include?(name)
         result = @saori_list[name].request(req)
       end
       return result

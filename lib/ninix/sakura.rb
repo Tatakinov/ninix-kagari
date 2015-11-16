@@ -190,7 +190,7 @@ module Sakura
     end
 
     def notify_observer(event, args: nil)
-      if not args
+      if args == nil
         args = []
       end
       for observer in @__observers.keys
@@ -371,7 +371,7 @@ module Sakura
     end
 
     def load_shiori()
-      if @shiori and @shiori.load(:dir => @shiori_dir) != 0
+      if @shiori != nil and @shiori.load(:dir => @shiori_dir) != 0
         if @shiori.respond_to?("show_description")
           @shiori.show_description()
         end
@@ -498,7 +498,7 @@ module Sakura
                        db: nil, request_handler: nil)
       if @script_queue.empty? and \
         not @time_critical_session and not @passivemode
-        if @sstp_request_handler
+        if @sstp_request_handler != nil
           @sstp_request_handler.send_sstp_break()
           @sstp_request_handler = nil
         end
@@ -715,29 +715,46 @@ module Sakura
     end
 
     def get_username()
-      return (getstring('username') or \
-              @surface.get_username() or \
-              @desc.get('user.defaultname', :default => _('User')))
+      username = getstring('username')
+      if username == nil
+        username = @surface.get_username()
+      end
+      if username == nil
+        username = @desc.get('user.defaultname', :default => _('User'))
+      end
+      return username
     end
 
     def get_selfname(default: _('Sakura'))
-      return (@surface.get_selfname() or \
-              @desc.get('sakura.name', :default => default))
+      selfname = @surface.get_selfname()
+      if selfname == nil
+        selfname = @desc.get('sakura.name', :default => default)
+      end
+      return selfname
     end
 
     def get_selfname2()
-      return (@surface.get_selfname2() or \
-              @desc.get('sakura.name2', :default => _('Sakura')))
+      selfname2 = @surface.get_selfname2()
+      if selfname2 == nil
+        selfname2 = @desc.get('sakura.name2', :default => _('Sakura'))
+      end
+      return selfname2
     end
 
     def get_keroname()
-      return (@surface.get_keroname() or \
-              @desc.get('kero.name', :default => _('Unyuu')))
+      keroname = @surface.get_keroname()
+      if keroname == nil
+        keroname = @desc.get('kero.name', :default => _('Unyuu'))
+      end
+      return keroname
     end
 
     def get_friendname()
-      return (@surface.get_friendname() or \
-              @desc.get('sakura.friend.name', :default => _('Tomoyo')))
+      friendname = @surface.get_friendname()
+      if friendname == nil
+        friendname = @desc.get('sakura.friend.name', :default => _('Tomoyo'))
+      end
+      return friendname
     end
 
     def getaistringrandom() # obsolete
@@ -846,7 +863,7 @@ module Sakura
       if result == nil
         result = ''
       end
-      if to and not result.empty?
+      if to != nil and not result.empty?
         communication = to
       else
         communication = nil
@@ -993,7 +1010,7 @@ module Sakura
         browser_open(link_id)
         reset_script(:reset_all => true)
         stand_by(false)
-      elsif @sstp_entry_db
+      elsif @sstp_entry_db != nil
         # leave the previous sstp message as it is
         start_script(@sstp_entry_db.get(link_id, :default => '\e'))
         @sstp_entry_db = nil
@@ -1027,7 +1044,7 @@ module Sakura
       end
       if @vanished
         if side == 0 and button == 1
-          if @sstp_request_handler
+          if @sstp_request_handler != nil
             @sstp_request_handler.send_sstp_break()
             @sstp_request_handler = nil
           end
@@ -1138,7 +1155,7 @@ module Sakura
       elsif @passivemode
         return
       elsif button == 1 and click == 2
-        if @sstp_request_handler
+        if @sstp_request_handler != nil
           @sstp_request_handler.send_sstp_break()
           @sstp_request_handler = nil
           reset_script(:reset_all => true)
@@ -1763,7 +1780,7 @@ module Sakura
           #pass
         elsif idle > SELECT_TIMEOUT
           @script_mode = BROWSE_MODE
-          if @sstp_request_handler
+          if @sstp_request_handler != nil
             @sstp_request_handler.send_timeout()
             @sstp_request_handler = nil
           end
@@ -1876,7 +1893,7 @@ module Sakura
           return true
         end
       end
-      if @reload_event and not busy() and \
+      if @reload_event != nil and not busy() and \
         not (not @processed_script.empty? or not @processed_text.empty?)
         hide_all()
         Logging::Logging.info('reloading....')
@@ -1898,7 +1915,7 @@ module Sakura
         @updateman.run()
         while true
           event = @updateman.get_event()
-          if not event
+          if event == nil
             break
           end
           if event[0] == 'OnUpdateComplete' and event[1] == 'changed'
@@ -1922,7 +1939,7 @@ module Sakura
         return
       end
       @last_script = script
-      if not origin
+      if origin == nil
         @script_origin = FROM_GHOST
       else
         @script_origin = origin
@@ -2199,7 +2216,7 @@ module Sakura
     end
 
     def __yen__a(args)
-      if @anchor
+      if @anchor != nil
         anchor_id = @anchor[0]
         text = @anchor[1]
         @balloon.append_link_out(@script_side, anchor_id, text)
@@ -2239,7 +2256,7 @@ module Sakura
       jump_id = args[0]
       if is_URL(jump_id)
         browser_open(jump_id)
-      elsif @sstp_entry_db
+      elsif @sstp_entry_db != nil
         start_script(@sstp_entry_db.get(jump_id, :default => '\e'))
       end
     end
@@ -2286,8 +2303,8 @@ module Sakura
       @balloon.append_text(@script_side, text)
     end
 
-    def __yen__u(args)
-      if re.match('0x[a-fA-F0-9]{4}', args[0])
+    def __yen__u(args) # FIXME
+      if re.match('0x[a-fA-F0-9]{4}', args[0]) != nil
         text = eval(['"\\u', args[0][2..-1], '"'].join(''))
         @balloon.append_text(@script_side, text)
       else
@@ -2799,7 +2816,7 @@ module Sakura
         end
       elsif node[0] == Script::SCRIPT_TEXT
         text = expand_meta(node[1])
-        if @anchor
+        if @anchor != nil
           @anchor[1] = [@anchor[1], text].join('')
         end
         script_speed = @parent.handle_request(
@@ -2902,8 +2919,7 @@ module Sakura
 
     ###   SEND SSTP/1.3   ###
     def _send_sstp_handle(data)
-      r, w, e = IO.select([], [@sstp_handle], [], 0)
-      if not w
+      if IO.select([], [@sstp_handle], [], 0) == nil
         return
       end
       begin

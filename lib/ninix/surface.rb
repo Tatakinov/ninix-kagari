@@ -178,7 +178,7 @@ module Surface
           end
         end
       end
-      if name or keycode
+      if name != nil or keycode != nil
         @parent.handle_request(
           'NOTIFY', 'notify_event', 'OnKeyPress', name, keycode,
           @key_press_count)
@@ -203,7 +203,7 @@ module Surface
       for basename in surface.keys
         path, config = surface[basename]
         match = RE_SURFACE_ID.match(basename)
-        if not match
+        if match == nil
           next
         end
         key = match[1]
@@ -260,7 +260,7 @@ module Surface
         maxwidth = [maxwidth, w].max
         maxheight = [maxheight, h].max
         match = RE_SURFACE_ID.match(basename)
-        if not match
+        if match == nil
           next
         end
         key = match[1]
@@ -271,7 +271,7 @@ module Surface
       for basename in surface.keys
         path, config = surface[basename]
         match = RE_SURFACE_ID.match(basename)
-        if not match
+        if match == nil
           next
         end
         key = match[1]
@@ -294,7 +294,7 @@ module Surface
       for basename in surface.keys
         path, config = surface[basename]
         match = RE_SURFACE_ID.match(basename)
-        if not match
+        if match == nil
           next
         end
         key = match[1]
@@ -323,7 +323,7 @@ module Surface
         for part in ['head', 'face', 'bust']
           # "inverse" syntax
           rect = config.get(['collision.', part].join(''))
-          if not rect
+          if rect == nil
             next
           end
           begin
@@ -345,7 +345,7 @@ module Surface
       for basename in surface.keys
         path, config = surface[basename]
         match = RE_SURFACE_ID.match(basename)
-        if not match
+        if match == nil
           next
         end
         key = match[1]
@@ -367,21 +367,21 @@ module Surface
     def get_menu_pixmap
       top_dir = @prefix
       name = @desc.get('menu.background.bitmap.filename')
-      if name
+      if name != nil
         name = name.gsub('\\', '/')
         path_background = File.join(top_dir, name)
       else
         path_background = nil
       end
       name = @desc.get('menu.sidebar.bitmap.filename')
-      if name
+      if name != nil
         name = name.gsub('\\', '/')
         path_sidebar = File.join(top_dir, name)
       else
         path_sidebar = nil
       end
       name = @desc.get('menu.foreground.bitmap.filename')
-      if name
+      if name != nil
         name = name.gsub('\\', '/')
         path_foreground = File.join(top_dir, name)
       else
@@ -1144,7 +1144,7 @@ module Surface
       prev_id = @surface_id
       if @alias != nil and @alias.include?(surface_id)
         aliases = @alias[surface_id]
-        if aliases
+        if not aliases.empty?
           surface_id = aliases.sample
         end
       end
@@ -1508,10 +1508,10 @@ module Surface
     def get_center
       centerx = __get_with_scaling('point.centerx')
       centery = __get_with_scaling('point.centery')
-      if centerx
+      if centerx != nil
         centerx = centerx.to_i
       end
-      if centery
+      if centery != nil
         centery = centery.to_i
       end
       return centerx, centery
@@ -1520,10 +1520,10 @@ module Surface
     def get_kinoko_center
       centerx = __get_with_scaling('point.kinoko.centerx')
       centery = __get_with_scaling('point.kinoko.centery')
-      if centerx
+      if centerx != nil
         centerx = centerx.to_i
       end
-      if centery
+      if centery != nil
         centery = centery.to_i
       end
       return centerx, centery
