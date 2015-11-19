@@ -85,7 +85,7 @@ module SSTPLib
         requestline = requestline[0..-2]
       end
       @requestline = requestline
-      re_requestsyntax = Regexp.new('^([A-Z]+) SSTP/([0-9]\\.[0-9])$')
+      re_requestsyntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
       match = re_requestsyntax.match(requestline)
       if match == nil
         @equestline = '-'

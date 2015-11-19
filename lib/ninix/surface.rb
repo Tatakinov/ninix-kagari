@@ -196,7 +196,7 @@ module Surface
       end
     end
 
-    RE_SURFACE_ID = Regexp.new('^surface([0-9]+)$')
+    RE_SURFACE_ID = Regexp.new('\Asurface([0-9]+)\z')
 
     def get_seriko(surface)
       seriko = {}

@@ -40,7 +40,7 @@ module Niseshiori
     rescue #except OSError:
       filelist = []
     end
-    re_dict_filename = Regexp.new('^ai.*\.(dtx|txt)$')
+    re_dict_filename = Regexp.new('\Aai.*\.(dtx|txt)\z')
     for filename in filelist
       if re_dict_filename.match(filename) != nil
         buf << File.join(top_dir, filename)
@@ -155,9 +155,9 @@ module Niseshiori
       #pass
     end
 
-    Re_type = Regexp.new('^\\\(m[szlchtep?]|[dk])')
-    Re_user = Regexp.new('^\\\u[a-z]')
-    Re_category = Regexp.new('^\\\(m[szlchtep]|[dk])?\[([^\]]+)\]')
+    Re_type = Regexp.new('\A\\\(m[szlchtep?]|[dk])')
+    Re_user = Regexp.new('\A\\\u[a-z]')
+    Re_category = Regexp.new('\A\\\(m[szlchtep]|[dk])?\[([^\]]+)\]')
 
     def read_dict(path)
       # read dict file and decrypt if necessary
@@ -1096,7 +1096,7 @@ module Niseshiori
       end
     end
 
-    Re_token_A = Regexp.new('^[()*/\+-]|\d+|\s+')
+    Re_token_A = Regexp.new('\A[()*/\+-]|\d+|\s+')
     Re_token_B = Regexp.new('[()*/\+-]|\d+|\s+')
 
     def tokenize(data)

@@ -1273,7 +1273,7 @@ module Ninix_Main
       # remove ghost
       prefix = sakura.get_prefix()
       Dir.foreach(prefix) { |filename|
-        next if /^\.+$/ =~ filename
+        next if /\A\.+\z/ =~ filename
         if File.file?(File.join(prefix, filename))
           if filename != 'HISTORY'
             begin
@@ -1353,7 +1353,7 @@ module Ninix_Main
         end
         ai_list = []
         Dir.foreach(File.join(prefix, 'shell')) { |subdir|
-          next if /^\.+$/ =~ subdir
+          next if /\A\.+\z/ =~ subdir
           path = File.join(prefix, 'shell', subdir, 'ai.png')
           if File.exists?(path)
             ai_list << path

@@ -144,7 +144,7 @@ module Kawari
     return entries
   end
 
-  Re_comma = Regexp.new('^,')
+  Re_comma = Regexp.new('\A,')
 
   def self.parse_phrases(data)
     buf = []
@@ -167,7 +167,7 @@ module Kawari
     i = start
     j = data.length
     while i < j
-      if stop_pattern != nil and stop_pattern.match(data[i..-1])
+      if stop_pattern != nil and stop_pattern.match(data[i..-1]) != nil
         break
       elsif data[i] == '"'
         i, text = Kawari.parse_quotes(data, i)
@@ -291,7 +291,7 @@ module Kawari
     i = start
     j = data.length
     while i < j
-      if stop_pattern != nil and stop_pattern.match(data[i..-1])
+      if stop_pattern != nil and stop_pattern.match(data[i..-1]) != nil
         break
       elsif ['$', '"'].include?(data[i])
         break
@@ -1590,7 +1590,7 @@ module Kawari
       end
     end
 
-    Re_token = Regexp.new('^([():|&*/%+-]|[<>]=?|[!=]?=|match|index|findpos|find|substr|length|quote|(\\s+))')
+    Re_token = Regexp.new('\A([():|&*/%+-]|[<>]=?|[!=]?=|match|index|findpos|find|substr|length|quote|(\\s+))')
 
     def tokenize(data)
       buf = []

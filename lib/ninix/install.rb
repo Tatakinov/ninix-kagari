@@ -269,7 +269,7 @@ module Install
         return
       end
       Dir.foreach(basedir) { |filename|
-        next if /^\.+$/ =~ filename
+        next if /\A\.+\z/ =~ filename
         filename2 = filename.downcase
         path = File.join(basedir, filename2)
         if filename != filename2
@@ -284,7 +284,7 @@ module Install
     def list_all_directories(top, basedir)
       dirlist = []
       Dir.foreach(File.join(top, basedir)) { |path|
-        next if /^\.+$/ =~ path
+        next if /\A\.+\z/ =~ path
         if File.directory?(File.join(top, basedir, path))
           dirlist += list_all_directories(top, File.join(basedir, path))
           dirlist << File.join(basedir, path)
@@ -299,7 +299,7 @@ module Install
         return
       end
       Dir.foreach(path) { |filename|
-        next if /^\.+$/ =~ filename
+        next if /\A\.+\z/ =~ filename
         remove_files(mask, path, filename)
       }
       dirlist = list_all_directories(path, '')
@@ -309,7 +309,7 @@ module Install
         current_path = File.join(path, name)
         if File.directory?(current_path)
           head, tail = File.split(current_path)
-          if not mask.include?(tail) and Dir.entries(current_path).reject{|entry| entry =~ /^\.{1,2}$/}.empty?
+          if not mask.include?(tail) and Dir.entries(current_path).reject{|entry| entry =~ /\A\.{1,2}\z/}.empty?
             FileUtils.remove_entry_secure(current_path)
           end
         end
@@ -331,7 +331,7 @@ module Install
       end
       n = 0
       Dir.foreach(top_dir) { |filename|
-        next if /^\.+$/ =~ filename
+        next if /\A\.+\z/ =~ filename
         filename2 = filename.downcase
         path = File.join(top_dir, filename2)
         if filename != filename2
@@ -511,7 +511,7 @@ module Install
         Logging::Logging.info('searching supplement target ...')
         candidates = []
         begin
-          dirlist = Dir.entries(File.join(homedir, 'ghost')).reject{|entry| entry =~ /^\.{1,2}$/}
+          dirlist = Dir.entries(File.join(homedir, 'ghost')).reject{|entry| entry =~ /\A\.{1,2}\z/}
         rescue SystemCallError
           dirlist = []
         end
@@ -603,7 +603,7 @@ module Install
 
     def uninstall_kinoko(homedir, name)
       begin
-        dirlist = Dir.entries(File.join(homedir, 'kinoko')).reject{|entry| entry =~ /^\.{1,2}$/}
+        dirlist = Dir.entries(File.join(homedir, 'kinoko')).reject{|entry| entry =~ /\A\.{1,2}\z/}
       rescue SystemCallError
         return
       end
@@ -638,7 +638,7 @@ module Install
       # find files
       filelist = []
       Dir.foreach(srcdir) { |filename|
-        next if /^\.+$/ =~ filename
+        next if /\A\.+\z/ =~ filename
         path = File.join(srcdir, filename)
         if File.file?(path)
           filelist << [path, File.join(dstdir, filename)]
@@ -676,7 +676,7 @@ module Install
       # find files
       filelist = []
       Dir.foreach(srcdir) { |filename|
-        next if /^\.+$/ =~ filename
+        next if /\A\.+\z/ =~ filename
         path = File.join(srcdir, filename)
         if File.file?(path)
           filelist << [path, File.join(dstdir, filename)]
@@ -714,7 +714,7 @@ module Install
       # find files
       filelist = []
       Dir.foreach(srcdir) { |filename|
-        next if /^\.+$/ =~ filename
+        next if /\A\.+\z/ =~ filename
         path = File.join(srcdir, filename)
         if File.file?(path)
           filelist << [path, File.join(dstdir, filename)]
@@ -731,7 +731,7 @@ module Install
     def list_all_files(top, target_dir)
       filelist = []
       Dir.foreach(File.join(top, target_dir)) { |path|
-        next if /^\.+$/ =~ path
+        next if /\A\.+\z/ =~ path
         if File.directory?(File.join(top, target_dir, path))
           filelist += list_all_files(
                                      top, File.join(target_dir, path))

@@ -424,8 +424,8 @@ module Script
     end
 
     def split_params(text)
-      re_param = Regexp.new(/("[^"]*"|[^,])*/)
-      re_quote = Regexp.new(/([^"]*)/)
+      re_param = Regexp.new(/\A("[^"]*"|[^,])*/)
+      re_quote = Regexp.new(/\A([^"]*)/)
 
       params = []
       buf = []

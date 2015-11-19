@@ -1480,7 +1480,7 @@ module Satori
         if value == '実行'
           save_database()
         end
-      elsif Re_reservation.match(name) and Re_reservation.match(name).begin(0) == 0 # FIXME
+      elsif Re_reservation.match(name) != nil
         if value == nil or value.empty?
           return nil
         end
@@ -1613,7 +1613,7 @@ module Satori
       end
       buf = []
       for dir_ in dir_list
-        dir_ = get_normalized_path(dir_)
+        dir_ = Home.get_normalized_path(dir_)
         dict_dir = File.join(@satori_dir, dir_)
         if not File.directory?(dict_dir)
           Logging::Logging.debug('satori.py: cannot read ' + dict_dir.to_s)
@@ -1802,9 +1802,9 @@ module Satori
     Re_newline = Regexp.new('((\\n)*)(\\e)')
     Re_0 = Regexp.new('\\\\[0h]')
     Re_1 = Regexp.new('\\\\[1u]')
-    Re_wait_after = Regexp.new('、|。|，|．')
-    Re_wait_before = Regexp.new('\\\\[01hunce]')
-    Re_tag = Regexp.new('\\\\[ehunjcxtqzy*v0123456789fmia!&+\-\-\-]|' \
+    Re_wait_after = Regexp.new('\A、|。|，|．')
+    Re_wait_before = Regexp.new('\A\\\\[01hunce]')
+    Re_tag = Regexp.new('\A\\\\[ehunjcxtqzy*v0123456789fmia!&+\-\-\-]|' \
                         '\\\\[sb][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|' \
                         '\\__[ct]|\\URL')
 
@@ -2231,10 +2231,10 @@ module Satori
       return buf.join('').strip()
     end
 
-    Re_random = Regexp.new('乱数((－|−|＋|[-+])?([[:digit:]])+)～((－|−|＋|[-+])?([[:digit:]])+)')
-    Re_is_empty = Regexp.new('(変数|文|単語群)「(.*)」の存在')
-    Re_n_reserved = Regexp.new('次から(([[:digit:]])+)回目のトーク')
-    Re_is_reserved = Regexp.new('トーク「(.*)」の予約有無')
+    Re_random = Regexp.new('\A乱数((－|−|＋|[-+])?([[:digit:]])+)～((－|−|＋|[-+])?([[:digit:]])+)')
+    Re_is_empty = Regexp.new('\A(変数|文|単語群)「(.*)」の存在')
+    Re_n_reserved = Regexp.new('\A次から(([[:digit:]])+)回目のトーク')
+    Re_is_reserved = Regexp.new('\Aトーク「(.*)」の予約有無')
 
     def get_reference(nodelist, history, side)
       key = expand(nodelist[1..-2], :caller_history => history)
@@ -2281,7 +2281,7 @@ module Satori
         return to_zenkaku(@timer[key])
       elsif is_reserved(key)
         return get_reserved(key)
-      elsif Re_random.match(key) and Re_random.match(key).begin(0) == 0 # FIXME
+      elsif Re_random.match(key) != nil
         match = Re_random.match(key)
         i = to_integer(match[1])
         j = to_integer(match[4])
@@ -2290,7 +2290,7 @@ module Satori
         else
           return to_zenkaku(Array(j..i).sample)
         end
-      elsif Re_n_reserved.match(key) and Re_n_reserved.match(key).begin(0) == 0 # FIXME
+      elsif Re_n_reserved.match(key) != nil
         match = Re_n_reserved.match(key)
         number = to_integer(match[1])
         for key in @reserved_talk.keys
@@ -2299,7 +2299,7 @@ module Satori
           end
         end
         return ''
-      elsif Re_is_reserved.match(key) and Re_is_reserved.match(key).begin(0) == 0 # FIXME
+      elsif Re_is_reserved.match(key) != nil
         match = Re_is_reserved.match(key)
         name = match[1]
         if @reserved_talk.include?(name)
@@ -2307,7 +2307,7 @@ module Satori
         else
           return to_zenkaku(0)
         end
-      elsif Re_is_empty.match(key) and Re_is_empty.match(key).begin(0) == 0 # FIXME
+      elsif Re_is_empty.match(key) != nil
         match = Re_is_empty.match(key)
         type_ = match[1]
         name = match[2]

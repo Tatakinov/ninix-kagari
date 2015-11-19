@@ -33,7 +33,7 @@ module Alias
   end
 
   def self.create_from_buffer(buf)
-    re_alias = Regexp.new("^(sakura|kero|char[0-9]+)\.surface\.alias$")
+    re_alias = Regexp.new('\A(sakura|kero|char[0-9]+)\.surface\.alias\z')
     dic = NConfig::Config.new
     i, j = 0, buf.length
     while i < j

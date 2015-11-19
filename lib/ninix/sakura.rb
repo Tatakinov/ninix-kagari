@@ -2113,7 +2113,7 @@ module Sakura
         raise "assert" unless param == 'inline'
         x, y = 0, 0 ## FIXME
       end
-      filename = get_normalized_path(filename)
+      filename = Home.get_normalized_path(filename)
       path = File.join(get_prefix(), 'ghost/master', filename)
       if File.file?(path)
         @balloon.append_image(@script_side, path, x, y)
@@ -2304,7 +2304,7 @@ module Sakura
     end
 
     def __yen__u(args) # FIXME
-      if re.match('0x[a-fA-F0-9]{4}', args[0]) != nil
+      if Regexp.new('\A0x[a-fA-F0-9]{4}').match(args[0]) != nil
         text = eval(['"\\u', args[0][2..-1], '"'].join(''))
         @balloon.append_text(@script_side, text)
       else
@@ -2317,7 +2317,7 @@ module Sakura
         return
       end
       filename = expand_meta(args[0])
-      filename = get_normalized_path(filename)
+      filename = Home.get_normalized_path(filename)
       path = File.join(get_prefix(), 'ghost/master', filename)
       if File.file?(path)
         @audio_player.set_state(Gst::State::NULL)
@@ -2333,7 +2333,7 @@ module Sakura
         return
       end
       filename = expand_meta(args[0])
-      filename = get_normalized_path(filename)
+      filename = Home.get_normalized_path(filename)
       basename = File.basename(filename)
       ext = File.extname(filename)
       ext = ext.lower()
@@ -2589,7 +2589,7 @@ module Sakura
           @audio_loop = false
         elsif command == 'play' and argc > 2
           filename = args[2]
-          filename = get_normalized_path(filename)
+          filename = Home.get_normalized_path(filename)
           path = File.join(get_prefix(),
                            'ghost/master', filename)
           if File.file?(path)
@@ -2612,7 +2612,7 @@ module Sakura
           @audio_player.set_state(Gst::State::PLAYING)
         elsif command == 'loop' and argc > 2
           filename = args[2]
-          filename = get_normalized_path(filename)
+          filename = Home.get_normalized_path(filename)
           path = File.join(get_prefix(),
                            'ghost/master', filename)
           if File.file?(path)

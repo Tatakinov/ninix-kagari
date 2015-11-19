@@ -1118,17 +1118,18 @@ module Aya
     CODE_RETURN = 41
     CODE_BREAK = 42
     CODE_CONTINUE = 43
-    Re_f = Regexp.new('^[-+]?\d+(\.\d*)$')
-    Re_d = Regexp.new('^[-+]?\d+$')
-    Re_b = Regexp.new('^[-+]?0[bB][01]+$')
-    Re_x = Regexp.new('^[-+]?0[xX][\dA-Fa-f]+$')
-    Re_if = Regexp.new('^if\s')
-    Re_elseif = Regexp.new('^elseif\s')
-    Re_while = Regexp.new('^while\s')
-    Re_for = Regexp.new('^for\s')
-    Re_switch = Regexp.new('^switch\s')
-    Re_case = Regexp.new('^case\s')
-    Re_when = Regexp.new('^when\s')
+    Re_f = Regexp.new('\A[-+]?\d+(\.\d*)\z')
+    Re_d = Regexp.new('\A[-+]?\d+\z')
+    Re_d_ = Regexp.new('[-+]?\d+\z')
+    Re_b = Regexp.new('\A[-+]?0[bB][01]+\z')
+    Re_x = Regexp.new('\A[-+]?0[xX][\dA-Fa-f]+\z')
+    Re_if = Regexp.new('\Aif\s')
+    Re_elseif = Regexp.new('\Aelseif\s')
+    Re_while = Regexp.new('\Awhile\s')
+    Re_for = Regexp.new('\Afor\s')
+    Re_switch = Regexp.new('\Aswitch\s')
+    Re_case = Regexp.new('\Acase\s')
+    Re_when = Regexp.new('\Awhen\s')
     SPECIAL_CHARS = [']', '(', ')', '[', '+', '-', '*', '/', '=',
                      ':', ';', '!', '{', '}', '%', '&', '#', '"',
                      '<', '>', ',', '?']
@@ -2064,7 +2065,7 @@ module Aya
       result = '' # default
       if token[0] == TYPE_TOKEN
         if Re_b.match(token[1])
-          pos = Re_d.search(token[1]).start()
+          pos = Re_d_.match(token[1]).start(0)
           result = token[1][pos..-1].to_i(2)
         elsif Re_x.match(token[1])
           result = token[1].to_i(16)
@@ -3791,7 +3792,7 @@ module Aya
                      'memorytotalvirtual', 'memoryavailvirtual',
                      'random', 'ascii' # Ver.3
                     ] # except for 'aitalkinterval', etc.
-    Re_res = Regexp.new('res_reference\d+$')
+    Re_res = Regexp.new('\Ares_reference\d+z')
 
     def reset_res_reference
       for key in @table.keys

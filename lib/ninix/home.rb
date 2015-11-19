@@ -515,7 +515,7 @@ module Home
   end
 
   def self.read_surface_info(surface_dir)
-    re_surface = Regexp.new('surface([0-9]+)\.(png|dgp|ddp)')
+    re_surface = Regexp.new('\Asurface([0-9]+)\.(png|dgp|ddp)')
     surface = {}
     begin
       filelist = []
@@ -606,7 +606,7 @@ module Home
   end
 
   def self.read_surfaces_txt(surface_dir)
-    re_alias = Regexp.new('^(sakura|kero|char[0-9]+)\.surface\.alias$')
+    re_alias = Regexp.new('\A(sakura|kero|char[0-9]+)\.surface\.alias\z')
     config_list = []
     path = File.join(surface_dir, 'surfaces.txt')
     begin
@@ -750,8 +750,8 @@ module Home
   end
 
   def self.read_balloon_info(balloon_dir)
-    re_balloon = Regexp.new('balloon([skc][0-9]+)\.(png)')
-    re_annex   = Regexp.new('(arrow[01]|sstp)\.(png)')
+    re_balloon = Regexp.new('\Aballoon([skc][0-9]+)\.(png)')
+    re_annex   = Regexp.new('\A(arrow[01]|sstp)\.(png)')
     balloon = {}
     begin
       filelist = []

@@ -724,20 +724,21 @@ module Aya5
     CODE_RETURN = 51
     CODE_BREAK = 52
     CODE_CONTINUE = 53
-    Re_f = Regexp.new('^[-+]?\d+(\.\d*)$')
-    Re_d = Regexp.new('^[-+]?\d+$')
-    Re_b = Regexp.new('^[-+]?0[bB][01]+$')
-    Re_x = Regexp.new('^[-+]?0[xX][\dA-Fa-f]+$')
-    Re_if = Regexp.new('^if\s')
-    Re_others = Regexp.new('^others\s')
-    Re_elseif = Regexp.new('^elseif\s')
-    Re_while = Regexp.new('^while\s')
-    Re_for = Regexp.new('^for\s')
-    Re_foreach = Regexp.new('^foreach\s')
-    Re_switch = Regexp.new('^switch\s')
-    Re_case = Regexp.new('^case\s')
-    Re_when = Regexp.new('^when\s')
-    Re_parallel = Regexp.new('^parallel\s')
+    Re_f = Regexp.new('\A^[-+]?\d+(\.\d*)\z')
+    Re_d = Regexp.new('\A[-+]?\d+\z')
+    Re_d_ = Regexp.new('[-+]?\d+\z')
+    Re_b = Regexp.new('\A[-+]?0[bB][01]+\z')
+    Re_x = Regexp.new('\A[-+]?0[xX][\dA-Fa-f]+\z')
+    Re_if = Regexp.new('\Aif\s')
+    Re_others = Regexp.new('\Aothers\s')
+    Re_elseif = Regexp.new('\Aelseif\s')
+    Re_while = Regexp.new('\Awhile\s')
+    Re_for = Regexp.new('\Afor\s')
+    Re_foreach = Regexp.new('\Aforeach\s')
+    Re_switch = Regexp.new('\Aswitch\s')
+    Re_case = Regexp.new('\Acase\s')
+    Re_when = Regexp.new('\Awhen\s')
+    Re_parallel = Regexp.new('\Aparallel\s')
     SPECIAL_CHARS = [']', '(', ')', '[', '+', '-', '*', '/', '=',
                      ':', ';', '!', '{', '}', '%', '&', '#', '"',
                      '<', '>', ',', '?']
@@ -2007,7 +2008,7 @@ module Aya5
       result = '' # default
       if token[0] == TYPE_TOKEN
         if Re_b.match(token[1]) != nil
-          pos = Re_d.search(token[1]).start()
+          pos = Re_d_.match(token[1]).begin(0)
           result = token[1][pos..-1].to_i(2)
         elsif Re_x.match(token[1]) != nil
           result = token[1].to_i(16)
@@ -3433,19 +3434,19 @@ module Aya5
 
     def RE_SPLIT(namespace, argv)
       line = argv[0].to_s
-      re_split = re.compile(argv[1].to_s)
-      if argv.length > 2
-        begin
-          max = argv[2]
-        rescue
-          return []
-        else
-          result = re_split.split(line, max)
-        end
-      else
+      re_split = Regexp.new(argv[1].to_s)
+#      if argv.length > 2
+#        begin
+#          max = argv[2]
+#        rescue
+#          return []
+#        else
+#          result = re_split.split(line, max)
+#        end
+#      else
         result = re_split.split(line)
-      end
-      @re_result = re_split.findall(line)
+#      end
+      @re_result = re_split.scan(line)
       #result_array = AyaVariable.new('', new_array=1)
       #result_array.put(result)
       #return result_array

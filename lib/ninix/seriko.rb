@@ -330,9 +330,11 @@ module Seriko
       result = []
       for actor in actors
         surface_id, x, y, method = @overlays[actor]
-        ##logging.debug(
-        ##    'actor={0:d}, id={1}, x={2:d}, y={3:d}'.format(
-        ##        actor.get_id(), surface_id, x, y))
+        ##Logging::Logging.debug(
+        ##  'actor=' + actor.get_id().to_s +
+        ##  ', id=' + surface_id.to_s +
+        ##  ', x=' + x.to_s +
+        ##  ', y=' + y.to_s)
         result << [surface_id, x, y, method]
       end
       return result
@@ -611,12 +613,12 @@ module Seriko
 
 
   def self.get_actors(config, version: 1)
-    re_seriko_interval = Regexp.new('^([0-9]+)interval$')
-    re_seriko_interval_value = Regexp.new('^(sometimes|rarely|random,[0-9]+|always|runonce|yesn-e|talk,[0-9]+|never)$')
-    re_seriko_pattern = Regexp.new('^([0-9]+|-[12])\s*,\s*([+-]?[0-9]+)\s*,\s*(overlay|overlayfast|base|move|start|alternativestart|)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?$')
-    re_seriko2_interval = Regexp.new('^animation([0-9]+)\.interval$')
-    re_seriko2_interval_value = Regexp.new('^(sometimes|rarely|random,[0-9]+|periodic,[0-9]+|always|runonce|yesn-e|talk,[0-9]+|never)$')
-    re_seriko2_pattern = Regexp.new('^(overlay|overlayfast|interpolate|reduce|replace|asis|base|move|start|alternativestart|stop|alternativestop)\s*,\s*([0-9]+|-[12])?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+([\.\,][0-9]+)*\))?$')
+    re_seriko_interval = Regexp.new('\A([0-9]+)interval\z')
+    re_seriko_interval_value = Regexp.new('\A(sometimes|rarely|random,[0-9]+|always|runonce|yesn-e|talk,[0-9]+|never)\z')
+    re_seriko_pattern = Regexp.new('\A([0-9]+|-[12])\s*,\s*([+-]?[0-9]+)\s*,\s*(overlay|overlayfast|base|move|start|alternativestart|)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?\z')
+    re_seriko2_interval = Regexp.new('\Aanimation([0-9]+)\.interval\z')
+    re_seriko2_interval_value = Regexp.new('\A(sometimes|rarely|random,[0-9]+|periodic,[0-9]+|always|runonce|yesn-e|talk,[0-9]+|never)\z')
+    re_seriko2_pattern = Regexp.new('\A(overlay|overlayfast|interpolate|reduce|replace|asis|base|move|start|alternativestart|stop|alternativestop)\s*,\s*([0-9]+|-[12])?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+([\.\,][0-9]+)*\))?\z')
     buf = []
     for key, value in config.each_entry
       if version == 1
@@ -786,12 +788,12 @@ module Seriko
   end
 
   def self.get_mayuna(config)
-    re_mayuna_interval = Regexp.new('^([0-9]+)interval$')
-    re_mayuna_interval_value = Regexp.new('^(bind)$')
-    re_mayuna_pattern = Regexp.new('^([0-9]+|-[12])\s*,\s*([0-9]+)\s*,\s*(bind|add|reduce|insert)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?$')
-    re_mayuna2_interval = Regexp.new('^animation([0-9]+)\.interval$')
-    re_mayuna2_interval_value = Regexp.new('^(bind)$')
-    re_mayuna2_pattern = Regexp.new('^(bind|add|reduce|insert)\s*,\s*([0-9]+|-[12])\s*,\s*([0-9]+)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+(\.[0-9]+)*\))?$')
+    re_mayuna_interval = Regexp.new('\A([0-9]+)interval\z')
+    re_mayuna_interval_value = Regexp.new('\A(bind)\z')
+    re_mayuna_pattern = Regexp.new('\A([0-9]+|-[12])\s*,\s*([0-9]+)\s*,\s*(bind|add|reduce|insert)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?\z')
+    re_mayuna2_interval = Regexp.new('\Aanimation([0-9]+)\.interval\z')
+    re_mayuna2_interval_value = Regexp.new('\A(bind)\z')
+    re_mayuna2_pattern = Regexp.new('\A(bind|add|reduce|insert)\s*,\s*([0-9]+|-[12])\s*,\s*([0-9]+)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+(\.[0-9]+)*\))?\z')
     version = nil
     buf = []
     for key, value in config.each_entry
