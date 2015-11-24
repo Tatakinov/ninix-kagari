@@ -965,7 +965,7 @@ module Balloon
       # draw sstp message
       x, y, w, h = @sstp_region
       @sstp_layout.set_text(@sstp_message)
-      cr.set_source_rgba(*@sstp_message_color)
+      cr.set_source_rgb(@sstp_message_color)
       cr.move_to(x, y)
       cr.show_pango_layout(@sstp_layout)
       cr.restore()
@@ -1099,7 +1099,7 @@ module Balloon
         end
         update_line_regions(line + 1, new_y)
         @layout.set_markup(markup, -1)
-        cr.set_source_rgba(@text_normal_color)
+        cr.set_source_rgb(@text_normal_color)
         cr.move_to(x, y)
         cr.show_pango_layout(@layout)
         if @sstp_surface != nil
@@ -1142,53 +1142,53 @@ module Balloon
         for n in sl..el
           if n - @lineno >= @line_regions.length
             break
-            x, y, w, h = @line_regions[n - @lineno]
-            if sl == el
-              markup = set_markup(n, @text_buffer[n][0, sn])
-              @layout.set_markup(markup, -1)
-              text_w, text_h =  @layout.pixel_size
-              x += text_w
-              markup = set_markup(n, @text_buffer[n][sn, en])
-              @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.pixel_size
-              w = text_w
-              start = sn
-              end_ = en
-            elsif n == sl
-              markup = set_markup(n, @text_buffer[n][0, sn])
-              @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.pixel_size
-              x += text_w
-              markup = set_markup(n, @text_buffer[n][sn, @text_buffer.length])
-              @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.pixel_size
-              w = text_w
-              start = sn
-              end_ = @text_buffer[n].length
-            elsif n == el
-              markup = set_markup(n, @text_buffer[n][0, en])
-              @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.pixel_size
-              w = text_w
-              start = 0
-              end_ = en
-            else
-              markup = set_markup(n, @text_buffer[n])
-              @layout.set_markup(markup, -1)
-              text_w, text_h = @layout.pixel_size
-              w = text_w
-              start = 0
-              end_ = @text_buffer[n].length
-            end
-            markup = set_markup(n, @text_buffer[n][start, end_])
-            @layout.set_markup(markup, -1)
-            cr.set_source_rgba(*@cursor_color)
-            cr.rectangle(x, y, w, h)
-            cr.fill()
-            cr.move_to(x, y)
-            cr.set_source_rgba(*@text_active_color)
-            cr.show_pango_layout(@layout)
           end
+          x, y, w, h = @line_regions[n - @lineno]
+          if sl == el
+            markup = set_markup(n, @text_buffer[n][0, sn])
+            @layout.set_markup(markup, -1)
+            text_w, text_h =  @layout.pixel_size
+            x += text_w
+            markup = set_markup(n, @text_buffer[n][sn, en])
+            @layout.set_markup(markup, -1)
+            text_w, text_h = @layout.pixel_size
+            w = text_w
+            start = sn
+            end_ = en
+          elsif n == sl
+            markup = set_markup(n, @text_buffer[n][0, sn])
+            @layout.set_markup(markup, -1)
+            text_w, text_h = @layout.pixel_size
+            x += text_w
+            markup = set_markup(n, @text_buffer[n][sn, @text_buffer.length])
+            @layout.set_markup(markup, -1)
+            text_w, text_h = @layout.pixel_size
+            w = text_w
+            start = sn
+            end_ = @text_buffer[n].length
+          elsif n == el
+            markup = set_markup(n, @text_buffer[n][0, en])
+            @layout.set_markup(markup, -1)
+            text_w, text_h = @layout.pixel_size
+            w = text_w
+            start = 0
+            end_ = en
+          else
+            markup = set_markup(n, @text_buffer[n])
+            @layout.set_markup(markup, -1)
+            text_w, text_h = @layout.pixel_size
+            w = text_w
+            start = 0
+            end_ = @text_buffer[n].length
+          end
+          markup = set_markup(n, @text_buffer[n][start, end_])
+          @layout.set_markup(markup, -1)
+          cr.set_source_rgb(@cursor_color)
+          cr.rectangle(x, y, w, h)
+          cr.fill()
+          cr.move_to(x, y)
+          cr.set_source_rgb(@text_active_color)
+          cr.show_pango_layout(@layout)
         end
       end
       cr.restore()
