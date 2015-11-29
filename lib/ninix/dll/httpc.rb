@@ -48,13 +48,13 @@ module HTTPC
       end
     end
 
-    def get(url, start=nil, end_=nil)
+    def get(url, start: nil, end_: nil)
       url = URI.parse(url)
-      if not (url.scheme == 'http' and
+      if not ((url.scheme == 'http' or url.scheme == 'https') and
               #url.params == nil and
               url.query == nil and
               url.fragment == nil)
-        return RESPONSE[400]
+        return RESPONSE[400] # XXX
       end
       data = open(url) do |f|
         @charset = f.charset
@@ -134,9 +134,12 @@ module HTTPC
           @__bg[timeout_id] = bg
           return nil # "SAORI/1.0 204 No Content\r\n\r\n"
         else
-          data = get(*argument)
+          data = get(argument[0], :start => argument[1], :end_ => argument[2])
           if data.empty?
             return nil # "SAORI/1.0 204 No Content\r\n\r\n"
+          end
+          if data == RESPONSE[400] # XXX
+            return data
           end
           result = "SAORI/1.0 200 OK\r\n" + "Result: " + data[0].to_s + "\r\n"
           for n in 0..data.length-1
@@ -150,7 +153,7 @@ module HTTPC
     end
 
     def notify(id, argument, process_tag)
-      result = get(*argument)
+      result = get(argument[0], :start => argument[1], :end_ => argument[2])
       if process_tag != nil
         #pass ## FIXME
       end

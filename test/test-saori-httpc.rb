@@ -13,8 +13,8 @@ module NinixTest
       print(saori.execute(nil), "\n")
       print(saori.execute([]), "\n")
       print(saori.execute(['bg']), "\n")
-      print(saori.execute(["http://osdn.jp/projects/ninix-aya/"]), "\n")
-      print(saori.execute(['bg', "100", "http://osdn.jp/projects/ninix-aya/", "活動", "見る"]), "\n")
+      print(saori.execute(["https://osdn.jp/projects/ninix-aya/"]), "\n")
+      print(saori.execute(['bg', "100", "https://osdn.jp/projects/ninix-aya/", "活動", "見る"]), "\n")
       Gtk.main # XXX
       saori.finalize
     end

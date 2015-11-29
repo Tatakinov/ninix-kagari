@@ -1,3 +1,7 @@
+Sun November 29 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* Ruby移行以降の修正で漏れがあったもの対応.
+	* httpc互換モジュールを修正.
+
 Tue November 24 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* バルーンの選択肢処理を修正.
 	* バルーンのフォントカラー処理を修正.
