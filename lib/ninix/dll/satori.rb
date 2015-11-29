@@ -408,7 +408,7 @@ module Satori
         end
         talk_list << buf
         if @is_anchor
-          @anchor_list << [name, '\\_a[' + name.to_s + ']' + name.to_s + '\\_a']
+          @anchor_list << [name, "\\_a[" + name.to_s + ']' + name.to_s + "\\_a"]
         end
       end
     end
@@ -1078,7 +1078,7 @@ module Satori
       @current_surface = [0, 10]
       @default_surface = [0, 10]
       @add_to_surface = [0, 0]
-      @newline = '\\n[half]'
+      @newline = "\\n[half]"
       @newline_script = ''
       @save_interval = 0
       @save_timer = 0
@@ -2029,7 +2029,7 @@ module Satori
           else
             side = 0
           end
-          buf << '\\' + side.to_s
+          buf << "\\" + side.to_s
           if @current_reset_surface[side]
             buf << '\s[' + @default_surface[side].to_s + ']'
             @current_reset_surface[side] = false
@@ -2807,8 +2807,8 @@ module Satori
           result = getdms()
         elsif req_header['ID'] == 'OnAITalk'
           result = getaistringrandom()
-        elsif ['\\ms', '\\mz', '\\ml', '\\mc', '\\mh', \
-               '\\mt', '\\me', '\\mp', '\\m?'].include?(req_header['ID'])
+        elsif ["\\ms", "\\mz", "\\ml", "\\mc", "\\mh", \
+               "\\mt", "\\me", "\\mp", "\\m?"].include?(req_header['ID'])
           result = getword(req_header['ID'])
         elsif req_header['ID'] == 'otherghostname' ## FIXME
           ##otherghost = []

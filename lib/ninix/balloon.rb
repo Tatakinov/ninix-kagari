@@ -993,6 +993,18 @@ module Balloon
       cr.restore()
     end
 
+    def markup_escape_text(markup_string) ## FIXME: GLib::Markup.escape_text
+      escaped_string = markup_string.dup
+      {
+        '<' => '&lt;',
+        '>' => '&gt;',
+        '&' => '&amp;'
+      }.each do |pattern, replace|
+        escaped_string.gsub!(pattern, replace)
+      end
+      return escaped_string
+    end
+
     def set_markup(index, text)
       tags_ = ['sup', 'sub', 's', 'u']
       count_ = {}
@@ -1006,14 +1018,14 @@ module Balloon
         end
       end
       if markup_list.empty?
-        return text ## FIXME: GLib.markup_escape_text(text)
+        return markup_escape_text(text)
       end
       markup_list.sort()
       markup_list.reverse()
       pn = text.length
       for sn, tag in markup_list
         text = [text[0, sn], tag,
-                text[sn, pn], ## FIXME: GLib.markup_escape_text(text[sn, pn]),
+                markup_escape_text(text[sn, pn]),
                 text[pn, text.length]].join('')
         pn = sn
         if tag[1] == '/'
