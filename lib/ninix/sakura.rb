@@ -2303,9 +2303,13 @@ module Sakura
       @balloon.append_text(@script_side, text)
     end
 
-    def __yen__u(args) # FIXME
-      if Regexp.new('\A0x[a-fA-F0-9]{4}').match(args[0]) != nil
-        text = eval(['"\\u', args[0][2..-1], '"'].join(''))
+    def __yen__u(args)
+      re__u = Regexp.new('\A(0x[a-fA-F0-9]{4}|[0-9]{4})\z')
+      if re__u.match(args[0]) != nil
+        temp = Integer(re__u.match(args[0])[0])
+        temp1 = (temp & 0xFF00) >> 8
+        temp2 = (temp & 0x00FF)
+        text = [temp2, temp1].pack("C*").force_encoding("UTF-16LE").encode("UTF-8", :invalid => :replace, :undef => :replace)
         @balloon.append_text(@script_side, text)
       else
         @balloon.append_text(@script_side, '?')

@@ -938,17 +938,13 @@ module Ninix_Main
       return nil
     end
 
-    def exit_handler(sig_no, frame=nil)
-      close_all_ghosts(:reason => 'shutdown')
-    end
-
     def run(abend)
       @abend = abend
       if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
         # The SIGTERM signal is not generated under Windows NT.
-        #win32api.SetConsoleCtrlHandler(exit_handler, true)
+        # Win32::Console::API.SetConsoleCtrlHandler will probably not be implemented.
       else
-        Signal.trap(:TERM) {|signo| exit_handler(signo) }
+        Signal.trap(:TERM) {|signo| close_all_ghosts(:reason => 'shutdown') }
       end
       @timeout_id = GLib::Timeout.add(100) { do_idle_tasks } # 100[ms]
       Gtk.main()
