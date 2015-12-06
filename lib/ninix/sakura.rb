@@ -2370,7 +2370,7 @@ module Sakura
       argc = args.length
       args = args.map {|s| expand_meta(s)}
       if args[0] == 'raise' and argc >= 2
-        notify_event(*args[1, 9])
+        notify_event(*args[1..9])
       elsif args[0, 2] == ['open', 'readme']
         ReadmeDialog.new.show(get_name(), get_prefix())
       elsif args[0, 2] == ['open', 'browser'] and argc > 2

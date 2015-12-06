@@ -1,3 +1,7 @@
+Sun December 6 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* Ruby移行以降の修正で漏れがあったもの対応.
+	  (さくらスクリプト処理, 美坂互換モジュールの動作改善)
+
 Sun November 29 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* Ruby移行以降の修正で漏れがあったもの対応.
 	* httpc互換モジュールを修正.

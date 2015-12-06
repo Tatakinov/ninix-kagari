@@ -188,7 +188,7 @@ module Misaka
         TOKEN_TEXT =>          'text',
         }
 
-    def initialize(charset='CP932')
+    def initialize(charset: 'CP932')
       @buffer = []
       @charset = charset
     end
@@ -240,7 +240,7 @@ module Misaka
       return line, column
     end
 
-    def read(f, path=nil)
+    def read(f, path: nil)
       line = 1
       column = 0
       data = f.read()
@@ -272,7 +272,7 @@ module Misaka
       return lexeme
     end
 
-    def look_ahead(index=0)
+    def look_ahead(index: 0)
       begin
         token, lexeme, position = @buffer[index]
       rescue #except IndexError:
@@ -281,7 +281,7 @@ module Misaka
       return token, lexeme
     end
 
-    def skip_space(accept_eof=false)
+    def skip_space(accept_eof: false)
       while not @buffer.empty?
         token, lexeme = look_ahead()
         if not [TOKEN_NEWLINE, TOKEN_WHITESPACE].include?(token)
@@ -326,12 +326,12 @@ module Misaka
   class Parser
 
     def initialize(charset)
-      @lexer = Lexer.new(charset=charset)
+      @lexer = Lexer.new(:charset => charset)
       @charset = charset
     end
 
-    def read(f, path=nil)
-      @lexer.read(f, path)
+    def read(f, path: nil)
+      @lexer.read(f, :path => path)
       @path = path
     end
 
@@ -340,7 +340,7 @@ module Misaka
       groups = []
       # skip junk tokens at the beginning of the file
       while true
-        if @lexer.skip_space(true)
+        if @lexer.skip_space(:accept_eof => true)
           return common, groups
         end
         token, lexeme = @lexer.look_ahead()
@@ -353,13 +353,13 @@ module Misaka
       token, lexeme = @lexer.look_ahead()
       if token == TOKEN_DIRECTIVE and lexeme == '#_Common'
         common = get_common()
-        if @lexer.skip_space(true)
+        if @lexer.skip_space(:accept_eof => true)
           return common, groups
         end
       end
       while true
         groups << get_group()
-        if @lexer.skip_space(true)
+        if @lexer.skip_space(:accept_eof => true)
           return common, groups
         end
       end
@@ -442,7 +442,7 @@ module Misaka
       @lexer.pop_check(TOKEN_NEWLINE)
       sentences = []
       while true
-        if @lexer.skip_space(true)
+        if @lexer.skip_space(:accept_eof => true)
           break
         end
         token, lexeme = @lexer.look_ahead()
@@ -461,7 +461,7 @@ module Misaka
     def get_sentence
       token, lexeme = @lexer.look_ahead()
       if token == TOKEN_OPEN_BRACE
-        token, lexeme = @lexer.look_ahead(1)
+        token, lexeme = @lexer.look_ahead(:index => 1)
         if token == TOKEN_NEWLINE
           @lexer.pop_check(TOKEN_OPEN_BRACE)
           token, lexeme = @lexer.look_ahead()
@@ -935,7 +935,7 @@ module Misaka
     end
 
     # for debug
-    def dump_list(nodelist, depth=0)
+    def dump_list(nodelist, depth: 0)
       for node in nodelist
         dump_node(node, depth)
       end
@@ -951,33 +951,33 @@ module Misaka
               ['"', node[1], '"'].join(''))
       elsif node[0] == NODE_VARIABLE
         print([indent, 'VARIABLE'].join(''))
-        dump_list(node[1], depth + 1)
+        dump_list(node[1], :depth => depth + 1)
       elsif node[0] == NODE_INDEXED
         print([indent, 'INDEXED'].join(''))
-        dump_list(node[1], depth + 1)
+        dump_list(node[1], :depth => depth + 1)
         print([indent, 'index'].join(''))
-        dump_list(node[2], depth + 1)
+        dump_list(node[2], :depth => depth + 1)
       elsif node[0] == NODE_ASSIGNMENT
         print([indent, 'ASSIGNMENT'].join(''))
-        dump_list(node[1], depth + 1)
+        dump_list(node[1], :depth => depth + 1)
         print([indent, 'op'].join(''), node[2])
-        dump_list(node[3], depth + 1)
+        dump_list(node[3], :depth => depth + 1)
       elsif node[0] == NODE_FUNCTION
         print([indent, 'FUNCTION'].join(''), node[1])
         for i in range(node[2].length)
           print([indent, 'args[' + i.to_s + ']'].join(''))
-          dump_list(node[2][i], depth + 1)
+          dump_list(node[2][i], :depth => depth + 1)
         end
       elsif node[0] == NODE_IF
         print([indent, 'IF'].join(''))
         dump_node(node[1], depth + 1)
         print([indent, 'then'].join(''))
-        dump_list(node[2], depth + 1)
+        dump_list(node[2], :depth => depth + 1)
         print([indent, 'else'].join(''))
-        dump_list(node[3], depth + 1)
+        dump_list(node[3], :depth => depth + 1)
       elsif node[0] == NODE_CALC
         print([indent, 'CALC'].join(''))
-        dump_list(node[1], depth + 1)
+        dump_list(node[1], :depth => depth + 1)
       elsif node[0] == NODE_AND_EXPR
         print([indent, 'AND_EXPR'].join(''))
         for i in 1..node.length-1
@@ -990,29 +990,29 @@ module Misaka
         end
       elsif node[0] == NODE_COMP_EXPR
         print([indent, 'COMP_EXPR'].join(''))
-        dump_list(node[1], depth + 1)
+        dump_list(node[1], :depth => depth + 1)
         print([indent, 'op'].join(''), node[2])
-        dump_list(node[3], depth + 1)
+        dump_list(node[3], :depth => depth + 1)
       elsif node[0] == NODE_ADD_EXPR
         print([indent, 'ADD_EXPR'].join(''))
-        dump_list(node[1], depth + 1)
+        dump_list(node[1], :depth => depth + 1)
         for i in 2.step(node.length-1, 2)
           print([indent, 'op'].join(''), node[i])
-          dump_list(node[i + 1], depth + 1)
+          dump_list(node[i + 1], :depth => depth + 1)
         end
       elsif node[0] == NODE_MUL_EXPR
         print([indent, 'MUL_EXPR'].join(''))
-        dump_list(node[1], depth + 1)
+        dump_list(node[1], :depth => depth + 1)
         for i in 2.step(node.length-1, 2)
           print([indent, 'op'].join(''), node[i])
-          dump_list(node[i + 1], depth + 1)
+          dump_list(node[i + 1], :depth => depth + 1)
         end
       elsif node[0] == NODE_POW_EXPR
         print([indent, 'POW_EXPR'].join(''))
-        dump_list(node[1], depth + 1)
+        dump_list(node[1], :depth => depth + 1)
         for i in 2..node.length-1
           print([indent, 'op ^'].join(''))
-          dump_list(node[i], depth + 1)
+          dump_list(node[i], :depth => depth + 1)
         end
       else
         print(node)
@@ -1081,7 +1081,7 @@ module Misaka
 
   class Group
 
-    def initialize(misaka, name, item_list=nil)
+    def initialize(misaka, name, item_list: nil)
       @misaka = misaka
       @name = name
       if item_list == nil ## FIXME
@@ -1114,8 +1114,8 @@ module Misaka
 
   class NonOverlapGroup < Group
 
-    def initialize(misaka, name, item_list=nil)
-      super(misaka, name, item_list)
+    def initialize(misaka, name, item_list: nil)
+      super(misaka, name, :item_list => item_list)
       @indexes = []
     end
 
@@ -1134,10 +1134,10 @@ module Misaka
   end
 
 
-  class SequentialGroup< Group
+  class SequentialGroup < Group
 
-    def initialize(misaka, name, item_list=nil)
-      super(misaka, name, item_list)
+    def initialize(misaka, name, item_list: nil)
+      super(misaka, name, :item_list => item_list)
       @indexes = []
     end
 
@@ -1318,7 +1318,7 @@ module Misaka
           f = StringIO.new(crypt(f.read()))
         end
         begin
-          variables, constants = read(f, path)
+          variables, constants = read(f, :path => path)
         rescue => error #except MisakaError as error:
           Logging::Logging.debug(error)
           next
@@ -1343,7 +1343,7 @@ module Misaka
       for sentence in sentences
         for node in sentence
           if node[0] == NODE_ASSIGNMENT
-            eval_assignment(node[1], node[2], node[3], constant)
+            eval_assignment(node[1], node[2], node[3], :constant => constant)
           elsif node[0] == NODE_FUNCTION
             eval_function(node[1], node[2])
           end
@@ -1351,9 +1351,9 @@ module Misaka
       end
     end
 
-    def read(f, path=nil)
+    def read(f, path: nil)
       parser = Parser.new(@charset)
-      parser.read(f, path)
+      parser.read(f, :path => path)
       common, dic = parser.get_dict()
       variables = []
       constants = []
@@ -1383,7 +1383,7 @@ module Misaka
             #pass # ignore unknown parameters
           end
         end
-        group = _GroupClass.new(self, name, sentences)
+        group = _GroupClass.new(self, name, :item_list => sentences)
         if @dict.include?(name)
           grouplist = @dict[name]
         else
@@ -1395,12 +1395,7 @@ module Misaka
     end
 
     def strip_newline(line)
-      if line.end_with?('\r\n')
-        return line[0..-3]
-      elsif line.end_with?('\r') or line.end_with?('\n')
-        return line[0..-2]
-      end
-      return line
+      return line.chomp
     end
 
     def load_database
@@ -1450,7 +1445,7 @@ module Misaka
     def save_database
       begin
         open(@dbpath, 'w') do |f|
-          for name in @variable
+          for name in @variable.keys
             value_type, value = @variable[name]
             if value_type == TYPE_SCHOLAR
               if value == ''
@@ -1555,12 +1550,12 @@ module Misaka
       end
       if event == 'OnCommunicate'
         @communicate = [ref0, ref1]
-        script = get('$_OnGhostCommunicateReceive', default=nil)
+        script = get('$_OnGhostCommunicateReceive', :default => nil)
       elsif event == 'charset'
         script = @charset
       else
         @reference = [ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7]
-        script = get(['$', event].join(''), default=nil)
+        script = get(['$', event].join(''), :default => nil)
       end
       if event == 'OnSecondChange'
         if @random_talk == 0
@@ -1568,7 +1563,7 @@ module Misaka
         elsif @random_talk > 0
           @random_talk -= 1
           if @random_talk == 0
-            script = get('$_OnRandomTalk', default=nil)
+            script = get('$_OnRandomTalk', :default => nil)
           end
         end
       end
@@ -1617,7 +1612,7 @@ module Misaka
       @random_talk = (interval * Array(5..15).sample / 10.0).to_i
     end
 
-    def get(name, default='')
+    def get(name, default: '')
       grouplist = @dict[name]
       if grouplist == nil
         return default
@@ -1803,7 +1798,7 @@ module Misaka
       return expand(group[index])
     end
 
-    def eval_assignment(name, operator, value, constant=false)
+    def eval_assignment(name, operator, value, constant: false)
       name = expand(name)
       value = expand(value)
       if ['+=', '-=', '*=', '/='].include?(operator)
@@ -2583,7 +2578,7 @@ module Misaka
       if args.empty?
         return ''
       end
-      result = @saori_library.unload(expand_args(args[0]))
+      result = @saori_library.unload(:name => expand_args(args[0]))
       if result == 0
         return ''
       else
@@ -2671,7 +2666,7 @@ module Misaka
       return result
     end
 
-    def unload(name=nil)
+    def unload(name: nil)
       if name != nil
         name = File.split(name.gsub('\\', '/'))[-1] # XXX: don't encode here
         if @saori_list.include?(name)

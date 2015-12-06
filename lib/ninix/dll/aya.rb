@@ -596,7 +596,7 @@ module Aya
         head, tail = File.split(current)
         current = head
       end
-      if not break_flag
+      if not break_flag ## FIXME
         path << current
       end
       current_dir = ''
@@ -1685,10 +1685,10 @@ module Aya
       return result
     end
 
-    def call(argv=nil)
+    def call(argv: nil)
       namespace = AyaNamespace.new(@dic.aya)
       _argv = []
-      if not argv
+      if argv == nil
         namespace.put('_argc', 0)
       else
         namespace.put('_argc', argv.length)
@@ -1713,7 +1713,7 @@ module Aya
             name = argv[i]['name']
             namespace = argv[i]['namespace']
             index = argv[i]['index']
-            namespace.put(name, value, index)
+            namespace.put(name, value, :index => index)
           end
         end
       end
@@ -1760,7 +1760,7 @@ module Aya
           end
         elsif line[0] == TYPE_BLOCK
           inner_func = line[1]
-          local_namespace = AyaNamespace.new(@dic.aya, namespace)
+          local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
           result_of_inner_func = evaluate(local_namespace,
                                           inner_func, -1, 1)
           if result_of_inner_func and not result_of_inner_func.empty?
@@ -1817,9 +1817,9 @@ module Aya
           end
           if value.is_a?(Fixnum) or value.is_a?(Float)
             if ope == '++'
-              target_namespace.put(var_name, value.to_i + 1, index)
+              target_namespace.put(var_name, value.to_i + 1, :index => index)
             elsif ope == '--'
-              target_namespace.put(var_name, value.to_i - 1, index)
+              target_namespace.put(var_name, value.to_i - 1, :index => index)
             else
               return nil # should not reach here
             end
@@ -1838,7 +1838,7 @@ module Aya
             raise "assert" unless condition[0] == TYPE_CONDITION
             if condition == nil or \
               evaluate_condition(namespace, condition)
-              local_namespace = AyaNamespace.new(@dic.aya, namespace)
+              local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
               result_of_inner_block = evaluate(local_namespace,
                                                inner_block,
                                                -1, 1)
@@ -1853,7 +1853,7 @@ module Aya
           inner_block = line[1][1]
           raise "assert" unless condition[0] == TYPE_CONDITION
           while evaluate_condition(namespace, condition)
-            local_namespace = AyaNamespace.new(@dic.aya, namespace)
+            local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1)
             if result_of_inner_block and not result_of_inner_block.empty?
@@ -1878,7 +1878,7 @@ module Aya
           evaluate(namespace, init, -1, 1)
           raise "assert" unless condition[0] == TYPE_CONDITION
           while evaluate_condition(namespace, condition)
-            local_namespace = AyaNamespace.new(@dic.aya, namespace)
+            local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1)
             if result_of_inner_block and not result_of_inner_block.empty?
@@ -1904,7 +1904,7 @@ module Aya
           rescue
             index = 0
           end
-          local_namespace = AyaNamespace.new(@dic.aya, namespace)
+          local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
           result_of_inner_block = evaluate(local_namespace,
                                            inner_block, index, 1)
           if result_of_inner_block and not result_of_inner_block.empty?
@@ -1919,7 +1919,7 @@ module Aya
           for j in 0..n_blocks-1
             entry = inner_blocks[j]
             inner_block = entry[1]
-            local_namespace = AyaNamespace.new(@dic.aya, namespace)
+            local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             if entry[0] != nil
               value_min, value_max = entry[0]
               value_min = evaluate_statement(namespace, value_min, 1)
@@ -2056,7 +2056,7 @@ module Aya
           else
             return nil # should not reach here
           end
-          target_namespace.put(var_name, elem, index)
+          target_namespace.put(var_name, elem, :index => index)
         end
       end
     end
@@ -2125,7 +2125,7 @@ module Aya
         ##raise ["assert: ", 'function ', func_name, ' not found.'].join('') unless func != nil
         arguments = evaluate_argument(namespace, func_name,
                                       token[1][1], 0)
-        result = func.call(arguments)
+        result = func.call(:argv => arguments)
       elsif token[0] == TYPE_ARRAY
         var_name = token[1][0]
         if var_name.start_with?('_')
@@ -2149,7 +2149,7 @@ module Aya
               result = ' '
             end
           elsif target_namespace.exists(var_name)
-            result = target_namespace.get(var_name, index)
+            result = target_namespace.get(var_name, :index => index)
           end
         end
       elsif token[0] == TYPE_VARIABLE
@@ -2185,7 +2185,7 @@ module Aya
               result = ' '
             end
           else
-            value = target_namespace.get(var_name, index)
+            value = target_namespace.get(var_name, :index => index)
             result = {'name' => var_name,
                       'index' => index,
                       'namespace' => target_namespace,
@@ -2522,7 +2522,7 @@ module Aya
                     namespace, func_name, arguments)
                 end
               else
-                result_of_func = func.call(arguments)
+                result_of_func = func.call(:argv => arguments)
               end
               if result_of_func == nil
                 result_of_func = ''
@@ -2581,7 +2581,7 @@ module Aya
                   index = nil
                 end
               end
-              value = target_namespace.get(token, index)
+              value = target_namespace.get(token, :index => index)
               if value != nil
                 content_of_var = value
                 history << content_of_var
@@ -3691,7 +3691,7 @@ module Aya
 
     def UNLOADLIB(namespace, argv)
       if not argv[0].to_s.empty?
-        @aya.saori_library.unload(argv[0].to_s)
+        @aya.saori_library.unload(:name => argv[0].to_s)
       end
       return nil
     end
@@ -3716,32 +3716,32 @@ module Aya
 
   class AyaNamespace
 
-    def initialize(aya, parent=nil)
+    def initialize(aya, parent: nil)
       @aya = aya
       @parent = parent
       @table = {}
     end
 
-    def put(name, content, index=nil)
+    def put(name, content, index: nil)
       if @parent != nil and @parent.exists(name)
-        @parent.put(name, content, index)
+        @parent.put(name, content, :index => index)
       elsif index == nil
         if not exists(name)
           @table[name] = AyaVariable.new(name)
         end
         @table[name].put(content)
       elsif exists(name) and index >=0
-        @table[name].put(content, index)
+        @table[name].put(content, :index => index)
       else
         #pass # ERROR
       end
     end
 
-    def get(name, index=nil)
+    def get(name, index: nil)
       if @table.include?(name)
-        return @table[name].get(index)
+        return @table[name].get(:index => index)
       elsif @parent != nil and @parent.exists(name)
-        return @parent.get(name, index)
+        return @parent.get(name, :index => index)
       else
         return nil
       end
@@ -3802,7 +3802,7 @@ module Aya
       end
     end
 
-    def get(name, index=nil)
+    def get(name, index: nil)
       t = Time.now
       past = t - @aya.get_boot_time()
       if name == 'year'
@@ -4088,7 +4088,7 @@ module Aya
       return @array.length
     end
 
-    def get(index=nil)
+    def get(index: nil)
       if index == nil
         if @type == TYPE_STRING
           return @line.to_s
@@ -4117,7 +4117,7 @@ module Aya
       end
     end
 
-    def put(value, index=nil)
+    def put(value, index: nil)
       if index == nil
         @line = value.to_s
         if value.is_a?(String)
@@ -4268,7 +4268,7 @@ module Aya
       return result
     end
 
-    def unload(name=nil)
+    def unload(name: nil)
       if name
         name = File.split(name.gsub("\\", '/'))[-1] # XXX: don't encode here
         if @saori_list.include?(name)

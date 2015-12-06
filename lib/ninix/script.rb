@@ -424,8 +424,8 @@ module Script
     end
 
     def split_params(text)
-      re_param = Regexp.new(/\A("[^"]*"|[^,])*/)
-      re_quote = Regexp.new(/\A([^"]*)/)
+      re_param = Regexp.new(/("[^"]*"|[^,])*/)
+      re_quote = Regexp.new(/"([^"]*)"/)
 
       params = []
       buf = []
@@ -435,12 +435,14 @@ module Script
         if token == TEXT_STRING
           while i < j
             match = re_param.match(lexeme, i)
-            if match == nil
+            if match == nil or match.begin(0) != i
               break
             end
             param = re_quote.match(match[0])
             if param != nil
-              param = param[1]
+              param = param.pre_match + param[1] + param.post_match
+            else
+              param = match[0]
             end
             if param != nil or not buf.empty?
               buf << [token, param]

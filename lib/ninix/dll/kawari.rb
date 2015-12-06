@@ -154,7 +154,7 @@ module Kawari
       if data[i] == ','
         i += 1
       end
-      i, phrase = Kawari.parse(data, i, Re_comma)
+      i, phrase = Kawari.parse(data, i, :stop_pattern => Re_comma)
       if not phrase.empty?
         buf << phrase
       end
@@ -162,7 +162,7 @@ module Kawari
     return buf
   end
 
-  def self.parse(data, start, stop_pattern=nil)
+  def self.parse(data, start, stop_pattern: nil)
     buf = []
     i = start
     j = data.length
@@ -185,7 +185,7 @@ module Kawari
         buf << data[i]
         i += 1
       else
-        i, text = Kawari.parse_text(data, i, stop_pattern)
+        i, text = Kawari.parse_text(data, i, :stop_pattern => stop_pattern)
         buf << text
       end
     end
@@ -286,7 +286,7 @@ module Kawari
     return s.strip.empty?
   end
 
-  def self.parse_text(data, start, stop_pattern=nil)
+  def self.parse_text(data, start, stop_pattern: nil)
     condition = Kawari.is_space(data[start])
     i = start
     j = data.length
@@ -366,7 +366,7 @@ module Kawari
     def getword(word_type)
       for delimiter in ['.', '-']
         name = ['compatible', delimiter, word_type].join('')
-        script = get(name, default=nil)
+        script = get(name, :default => nil)
         if script != nil
           return script.strip()
         end
@@ -380,8 +380,8 @@ module Kawari
 
     # SHIORI/2.2 API
     def get_event_response(event,
-                           ref0=nil, ref1=nil, ref2=nil, ref3=nil,
-                           ref4=nil, ref5=nil, ref6=nil, ref7=nil) ## FIXME
+                           ref0: nil, ref1: nil, ref2: nil, ref3: nil,
+                           ref4: nil, ref5: nil, ref6: nil, ref7: nil) ## FIXME
       ref = [ref0, ref1, ref2,ref3, ref4, ref5, ref6, ref7].map {|r| r.to_s if r != nil }
       for i in 0..7
         if ref[i] != nil
@@ -436,7 +436,7 @@ module Kawari
       else
         for delimiter in ['.', '-']
           name = ['event', delimiter, event].join('')
-          script = get(name, default=nil)
+          script = get(name, :default => nil)
           if script != nil
             script = script.strip()
             break
@@ -459,7 +459,7 @@ module Kawari
     def get_system_entry(entry)
       for delimiter in ['.', '-']
         name = ['system', delimiter, entry].join('')
-        script = get(name, default=nil)
+        script = get(name, :default => nil)
         if script != nil
           return script.strip()
         end
@@ -575,7 +575,7 @@ module Kawari
       push(name, value)
     end
 
-    def get(name, context=nil, depth=0, default='')
+    def get(name, context: nil, depth: 0, default: '')
       if depth == MAXDEPTH
         return ''
       end
@@ -594,20 +594,20 @@ module Kawari
         segments, context = selection
       end
       Logging::Logging.debug([name, '=>', segments].join(''))
-      return expand(segments, context, depth)
+      return expand(segments, :context => context, :depth => depth)
     end
 
-    def parse_all(data, start=0)
+    def parse_all(data, start: 0)
       i, segments = Kawari.parse(data, start)
       return expand(segments)
     end
 
-    def parse_sub(data, start=0, stop_pattern=nil)
-      i, segments = Kawari.parse(data, start, stop_pattern)
+    def parse_sub(data, start: 0, stop_pattern: nil)
+      i, segments = Kawari.parse(data, start, :stop_pattern => stop_pattern)
       return i, expand(segments)
     end
 
-    def expand(segments, context=nil, depth=0)
+    def expand(segments, context: nil, depth: 0)
       buf = []
       references = []
       i = 0
@@ -640,7 +640,7 @@ module Kawari
               segment = @system_entries.include?(newname) ? @system_entries[newname] : segment
             end
           else
-            segment = get(newname, context, depth + 1)
+            segment = get(newname, :context => context, :depth => depth + 1)
           end
           references << segment
         elsif segment.start_with?('$(') and segment.end_with?(')')
@@ -1104,7 +1104,7 @@ module Kawari
       return ''
     end
 
-    def exec_save(argv, crypt=false)
+    def exec_save(argv, crypt: false)
       if argv.length < 2
         raise RuntimeError.new('syntax error')
       end
@@ -1138,7 +1138,7 @@ module Kawari
     end
 
     def exec_savecrypt(argv)
-      return exec_save(argv, true)
+      return exec_save(argv, :crypt => true)
     end
 
     def exec_textload(argv)
@@ -1602,7 +1602,7 @@ module Kawari
           buf << match[0]
           i += match.end(0)
         else
-          i, segments = Kawari.parse(data, i, Re_token)
+          i, segments = Kawari.parse(data, i, :stop_pattern => Re_token)
           buf.concat(segments)
         end
       end
@@ -1631,7 +1631,7 @@ module Kawari
       end
     end
 
-    def look_ahead(index=0)
+    def look_ahead(index: 0)
       begin
         return @tokens[index]
       rescue #except IndexError:
@@ -1651,12 +1651,12 @@ module Kawari
       end
     end
 
-    def check(s, index=0)
-      return (look_ahead(index) == s)
+    def check(s, index: 0)
+      return (look_ahead(:index => index) == s)
     end
 
-    def check_space(index=0)
-      return Kawari.is_space(look_ahead(index))
+    def check_space(index: 0)
+      return Kawari.is_space(look_ahead(:index => index))
     end
 
     # tree node types
@@ -1682,7 +1682,7 @@ module Kawari
       while true
         buf << get_and_expr()
         if not done() and \
-          check_space() and check('|', 1)
+          check_space() and check('|', :index => 1)
           pop() # space
           pop() # operator
           match_space()
@@ -1702,7 +1702,7 @@ module Kawari
       while true
         buf << get_cmp_expr()
         if not done() and \
-          check_space() and check('&', 1)
+          check_space() and check('&', :index => 1)
           pop() # space
           pop() # operator
           match_space()
@@ -1722,7 +1722,7 @@ module Kawari
       buf << get_add_expr()
       if not done() and \
         check_space() and \
-        ['<=', '>=', '<', '>', '=', '==', '!='].include?(look_ahead(1))
+        ['<=', '>=', '<', '>', '=', '==', '!='].include?(look_ahead(:index => 1))
         pop() # space
         buf << pop() # operator
         match_space()
@@ -1740,7 +1740,7 @@ module Kawari
       while true
         buf << get_mul_expr()
         if not done() and \
-          check_space() and ['+', '-'].include?(look_ahead(1))
+          check_space() and ['+', '-'].include?(look_ahead(:index => 1))
           pop() # space
           buf << pop() # operator
           match_space()
@@ -1760,7 +1760,7 @@ module Kawari
       while true
         buf << get_mat_expr()
         if not done() and \
-          check_space() and ['*', '/', '%'].include?(look_ahead(1))
+          check_space() and ['*', '/', '%'].include?(look_ahead(:index => 1))
           pop() # space
           buf << pop() # operator
           match_space()
@@ -1779,7 +1779,7 @@ module Kawari
       buf = [STR_EXPR]
       buf << get_str_expr()
       if not done() and \
-        check_space() and check(':', 1)
+        check_space() and check(':', :index => 1)
         buf.insert(1, 'match')
         pop() # space
         pop() # ':'
@@ -1889,7 +1889,7 @@ module Kawari
 
   DICT_FILE, INI_FILE = Array(0..1)
 
-  def self.list_dict(kawari_dir, saori_ini={})
+  def self.list_dict(kawari_dir, saori_ini: {})
     return Kawari.scan_ini(kawari_dir, 'kawari.ini', saori_ini)
   end
 
@@ -2042,7 +2042,7 @@ module Kawari
       rdictlist = [{}]
       kdictlist = [{}]
       @saori_ini = {}
-      for file_type, path in Kawari.list_dict(@kawari_dir, @saori_ini)
+      for file_type, path in Kawari.list_dict(@kawari_dir, :saori_ini => @saori_ini)
         pathlist << path
         if file_type == INI_FILE
           rdict, kdict = Kawari.create_dict(Kawari.read_ini(path))
@@ -2160,8 +2160,9 @@ module Kawari
             end
             ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7 = ref
             result = get_event_response(
-              req_header['ID'], ref0, ref1, ref2, ref3, ref4,
-              ref5, ref6, ref7)
+              req_header['ID'],
+              :ref0 => ref0, :ref1 => ref1, :ref2 => ref2, :ref3 => ref3,
+              :ref4 => ref4, :ref5 => ref5, :ref6 => ref6, :ref7 => ref7)
           end
         end
         if result == nil
