@@ -138,7 +138,7 @@ module Niseshiori
         open(@dbpath, 'w') do |f|
           f.write('# ns_st: ' + @ai_talk_interval.to_i.to_s + "\n")
           f.write('# ns_tn: ' + @username.to_s + "\n")
-          for name in @variableskeys
+          for name in @variables.keys
             value = @variables[name]
             if not name.start_with?('_')
               f.write(name.to_s + '=' + value.to_s + "\n")
@@ -553,7 +553,7 @@ module Niseshiori
           @sender = ref[0]
         end
         candidate = []
-        for cond in @responses
+        for cond in @responses.keys
           if eval_condition(cond)
             candidate << cond
           end

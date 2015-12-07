@@ -412,7 +412,7 @@ module Kawari
         script = get_system_entry('OnResponse')
         if script == nil
           for dic in @kdictlist
-            for entry in dic
+            for entry in dic.keys
               break_flag = false
               for word in entry
                 if not ref[1].include?(word)
@@ -2331,12 +2331,12 @@ module Kawari
         end
       end
       result = {}
-      for key, value in saori_value.items()
+      for key, value in saori_value
         if key.start_with?('Value')
           result[key] = value
         end
       end
-      for key, value in result.items()
+      for key, value in result
         set([entry, '.', key].join(''), value)
       end
       if @saori_ini[alias_][1] == 'noresident'

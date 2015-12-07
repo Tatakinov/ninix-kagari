@@ -1215,7 +1215,7 @@ module Satori
           end
           f.write(line)
           f.write("\r\n")
-          for name in self.timer
+          for name in @timer.keys
             value = to_zenkaku(@timer[name])
             line = name.to_s + "\t" + value.to_s
             line = line.encode('CP932', :invalid => :replace, :undef => :replace)
@@ -1225,7 +1225,7 @@ module Satori
             f.write(line)
             f.write("\r\n")
           end
-          for name in self.reserved_talk
+          for name in @reserved_talk.keys
             value = to_zenkaku(@reserved_talk[name])
             line = ['次から', value, '回目のトーク'].join('') + "\t" + name.to_s
             line = line.encode('CP932', :invalid => :replace, :undef => :replace)
@@ -1447,7 +1447,7 @@ module Satori
     # internal
     def get_reserved_talk
       reserved = nil
-      for key in @reserved_talk
+      for key in @reserved_talk.keys
         @reserved_talk[key] -= 1
         if @reserved_talk[key] <= 0
           reserved = key
@@ -1491,7 +1491,7 @@ module Satori
         end
         while true
           break_flag = false
-          for key in @reserved_talk
+          for key in @reserved_talk.keys
             if self.reserved_talk[key] == number
               number += 1
               break_flag = true
@@ -1510,7 +1510,7 @@ module Satori
         number = 1
         while true
           break_flag = false
-          for key in @reserved_talk
+          for key in @reserved_talk.keys
             if self.reserved_talk[key] == number
               number += 1
               break_flag = true
@@ -1778,7 +1778,7 @@ module Satori
       else
         @current_reset_surface = [false, false]
       end
-      for key in @url_list
+      for key in @url_list.keys
         for item in @url_list[key]
           if item[0] == title and item[1] == url
             if item[3] != nil
@@ -2916,7 +2916,7 @@ module Satori
           end
         end
       end
-      for key in saori_value
+      for key in saori_value.keys
         if not key.start_with?('Value')
           next
         end

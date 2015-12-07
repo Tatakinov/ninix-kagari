@@ -3841,7 +3841,7 @@ module Aya
              'memorytotalvirtual', 'memoryavailvirtual'].include?(name)
         result = 0 # FIXME
       else
-        result = super(name, index)
+        result = super(name, :index => index)
       end
       return result
     end
