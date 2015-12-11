@@ -23,11 +23,11 @@ require "stringio"
 require_relative "../home"
 require_relative "../logging"
 
-## FIXME
-##try:
-##    import chardet.universaldetector
-##except:
-##    chardet = nil
+begin
+  require 'charlock_holmes'
+rescue LoadError
+  CharlockHolmes = nil
+end
 
 module Misaka
 
@@ -1265,41 +1265,35 @@ module Misaka
       @misaka_error = error
       global_variables = []
       global_constants = []
-      ## FIXME
-      ### charset auto-detection
-      ##if chardet != nil
-      ##  detector = chardet.universaldetector.UniversalDetector()
-      ##  for filename in filelist
-      ##    path = File.join(@misaka_dir, filename)
-      ##    begin
-      ##      f = open(path, 'rb')
-      ##    rescue #except IOError:
-      ##      Logging::Logging.debug('cannot read ' + filename.to_s)
-      ##      next
-      ##    end
-      ##    ext = File.extname(filename)
-      ##    if ext == '.__1'
-      ##      f = io.StringIO(crypt(f.read()))
-      ##    end
-      ##    detector.reset()
-      ##    for line in f
-      ##      detector.feed(line)
-      ##      if detector.done
-      ##        break
-      ##      end
-      ##    end
-      ##    detector.close()
-      ##    f.close()
-      ##    if detector.result['confidence'] > 0.98 and \
-      ##      detector.result['encoding'] != 'ascii' # XXX
-      ##      @charset = detector.result['encoding']
-      ##      if @charset == 'SHIFT_JIS'
-      ##        @charset = 'CP932' # XXX
-      ##      end
-      ##      break
-      ##    end
-      ##  end
-      ##end
+      # charset auto-detection
+      if CharlockHolmes != nil
+        detector = CharlockHolmes::EncodingDetector.new
+        for filename in filelist
+          path = File.join(@misaka_dir, filename)
+          begin
+            f = open(path, 'rb')
+          rescue #except IOError:
+            Logging::Logging.debug('cannot read ' + filename.to_s)
+            next
+          end
+          ext = File.extname(filename)
+          if ext == '.__1'
+            result = detector.detect(crypt(f.read()))
+          else
+            result = detector.detect(f.read())
+          end
+          f.close()
+          if result[:confidence] > 98 and \
+            result[:encoding] != 'ISO-8859-1' # XXX
+            @charset = result[:encoding]
+            if @charset == 'Shift_JIS'
+              @charset = 'CP932' # XXX
+            end
+            print("CharlockHolmes:, ", @charset, "\n")
+            break
+          end
+        end
+      end
       for filename in filelist
         path = File.join(@misaka_dir, filename)
         basename = File.basename(filename, ".*")

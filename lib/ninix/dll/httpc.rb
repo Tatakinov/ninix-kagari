@@ -41,7 +41,7 @@ module HTTPC
     end
 
     def check_import
-      if @__sakura != nil and chardet != nil
+      if @__sakura != nil
         return 1
       else
         return 0
