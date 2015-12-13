@@ -529,9 +529,13 @@ module Menu
                   @parent.handle_request(
                     'NOTIFY', 'notify_site_selection', title, url)
                 end
-                item.set_has_tooltip(true)
-                item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
-                  on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
+                if banner != nil
+                  item.set_has_tooltip(true)
+                  item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
+                    on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
+                  end
+                else
+                  item.set_has_tooltip(false)
                 end
               end
             end
@@ -603,9 +607,13 @@ module Menu
               item.signal_connect('activate', title, url) do |a, title, url|
                 @parent.handle_request('NOTIFY', 'notify_site_selection', title, url)
               end
-              item.set_has_tooltip(true)
-              item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
-                on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
+              if banner != nil
+                item.set_has_tooltip(true)
+                item.signal_connect('query-tooltip') do |widget, x, y, keyboardmode, tooltip|
+                  on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
+                end
+              else
+                item.set_has_tooltip(false)
               end
             end
           end
@@ -648,9 +656,13 @@ module Menu
       item.signal_connect('activate') do |a, v|
         handler.call(key)
       end
-      item.set_has_tooltip(true)
-      item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
+      if thumbnail != nil
+        item.set_has_tooltip(true)
+        item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
           on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
+        end
+      else
+        item.set_has_tooltip(false)
       end
       item.signal_connect('draw') do |i, *a|
         set_stylecontext(i, *a)
@@ -808,9 +820,13 @@ module Menu
       item.signal_connect('activate') do |a, v|
         handler.call(value)
       end
-      item.set_has_tooltip(true)
-      item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
-        on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
+      if thumbnail != nil
+        item.set_has_tooltip(true)
+        item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
+          on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
+        end
+      else
+        item.set_has_tooltip(false)
       end
       item.signal_connect('draw') do |i, *a|
         set_stylecontext(i, *a)

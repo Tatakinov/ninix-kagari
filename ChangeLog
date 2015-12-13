@@ -1,4 +1,6 @@
 Sun December 13 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* メニューのツールチップ表示のコードを修正.
+	  (メニューを開いていると落ちる場合があったのを修正.)
 	* 5.0リリースに向けてのコード整理を開始.
 
 Fri December 11 2015   Shyouzou Sugitani <shy@users.osdn.me>
