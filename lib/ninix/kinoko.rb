@@ -79,7 +79,7 @@ module Kinoko
       @__popup_menu.popup(nil, nil, button, Gtk.current_event_time())
     end
 
-    def set_skin_menu(list) ## FIXME
+    def set_skin_menu(list)
       key = 'skin'
       if not list.empty?
         menu = Gtk::Menu.new
@@ -153,7 +153,7 @@ module Kinoko
       elsif event == 'raise'
         side = args
         if side == 0 # sakura side
-          @skin.set_position() ## FIXME
+          @skin.set_position()
         end
       else
         Logging::Logging.debug('OBSERVER(kinoko): ignore - ' + event)
@@ -295,7 +295,7 @@ module Kinoko
       @window.signal_connect('delete_event') do |w, e|
         delete(w, e)
       end
-      @window.add_accel_group(@accelgroup) ## FIXME
+      @window.add_accel_group(@accelgroup)
       if @data['animation'] != nil
         path = File.join(@data['dir'], @data['animation'])
         actors = {'' => Seriko.get_actors(NConfig.create_from_file(path))}
@@ -310,7 +310,7 @@ module Kinoko
         end
       end
       @seriko = Seriko::Controller.new(actors)
-      @seriko.set_responsible(self) ## FIXME
+      @seriko.set_responsible(self)
       path = File.join(@data['dir'], @data['base'])
       begin
         @image_surface = Pix.create_surface_from_file(path)
@@ -357,7 +357,7 @@ module Kinoko
       @seriko.invoke_kinoko(self)
     end
 
-    def get_surface_id ## FIXME
+    def get_surface_id
       return @surface_id
     end
 
@@ -469,7 +469,7 @@ module Kinoko
       @window.move(@x + xoffset, @y + yoffset)
     end
 
-    def reset_surface() ## FIXME
+    def reset_surface()
       @seriko.reset(self, '') # XXX
       path = File.join(@data['dir'], @data['base'])
       w, h = Pix.get_png_size(path)
@@ -482,12 +482,12 @@ module Kinoko
       @seriko.invoke_kinoko(self)
     end
 
-    def set_surface(surface_id, restart: 1) ## FIXME
+    def set_surface(surface_id, restart: 1)
       path = File.join(@data['dir'], 'surface' + surface_id.to_s + '.png')
       if File.exists?(path)
         @path = path
       else
-        #path = nil
+        #@path = nil
         @path = File.join(@data['dir'], @data['base'])
       end
     end
@@ -505,7 +505,7 @@ module Kinoko
       @window.destroy()
     end
 
-    def button_press(widget, event) ## FIXME
+    def button_press(widget, event)
       @x_root = event.x_root
       @y_root = event.y_root
       if event.event_type == Gdk::EventType::BUTTON_PRESS

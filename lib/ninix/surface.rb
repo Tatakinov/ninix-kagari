@@ -540,7 +540,7 @@ module Surface
 
     def get_window(side)
       if @window.length > side
-        return @window[side].get_window # FIXME
+        return @window[side].get_window
       else 
         return nil
       end
@@ -801,11 +801,11 @@ module Surface
       end
     end
 
-    def get_mikire ## FIXME
+    def get_mikire
       return @mikire
     end
 
-    def get_kasanari ## FIXME
+    def get_kasanari
       return @kasanari
     end
 
@@ -930,7 +930,7 @@ module Surface
       @alias = surface_alias
       @tooltips = tooltips
       @align = 0
-      @__current_part = '' ## FIXME
+      @__current_part = ''
       if @alias != nil and @alias[default_id] != nil
         default_id = @alias[default_id][0]
       end
@@ -1437,7 +1437,7 @@ module Surface
     end
 
     def get_collision_area(part)
-      for p, x1, y1, x2, y2 in @collisions ## FIXME
+      for p, x1, y1, x2, y2 in @collisions
         if p == part
           scale = get_scale
           x1 = (x1 * scale / 100).to_i

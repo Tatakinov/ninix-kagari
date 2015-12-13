@@ -101,7 +101,7 @@ module Sakura
       @__balloon_life = 0
       @__surface_life = 0
       @__boot = [false, false]
-      @surface_mouse_motion = nil ## FIXME
+      @surface_mouse_motion = nil
       @time_critical_session = false
       @lock_repaint = false
       @passivemode = false
@@ -111,7 +111,7 @@ module Sakura
       @synchronized_session = []
       @force_quit = false
       ##
-      @old_otherghostname = nil ## FIXME
+      @old_otherghostname = nil
       # create vanish dialog
       @__vanish_dialog = VanishDialog.new
       @__vanish_dialog.set_responsible(self)
@@ -227,7 +227,7 @@ module Sakura
     end
 
     def new_(desc, shiori_dir, use_makoto, surface_set, prefix,
-             shiori_dll, shiori_name) ## FIXME
+             shiori_dll, shiori_name)
       @shiori = nil
       @desc = desc
       @shiori_dir = shiori_dir
@@ -515,7 +515,7 @@ module Sakura
       return (not @event_queue.empty?)
     end
 
-    def enqueue_event(event, *arglist, proc_obj: nil) ## FIXME
+    def enqueue_event(event, *arglist, proc_obj: nil)
       if RESET_ENQUEUE_EVENT.include?(event)
         reset_script(:reset_all => true)
       end
@@ -537,7 +537,7 @@ module Sakura
          '\e'].join(''),
         }
 
-    def handle_event() ## FIXME
+    def handle_event()
       while not @event_queue.empty?
         event, arglist, proc_obj = @event_queue.shift
         if EVENT_SCRIPTS.include?(event)
@@ -606,10 +606,10 @@ module Sakura
       @idle_start = Time.new.to_f
     end
 
-    def notify_preference_changed() ## FIXME
-      @balloon.reset_fonts() ## FIXME
+    def notify_preference_changed()
+      @balloon.reset_fonts()
       @surface.reset_surface()
-      notify_observer('set scale') ## FIXME
+      notify_observer('set scale')
       @balloon.reset_balloon()
     end
 
@@ -969,7 +969,7 @@ module Sakura
         }
       }
       enqueue_event('OnVanishSelected', :proc_obj => proc_obj)
-      @vanished = true ## FIXME
+      @vanished = true
     end
 
     def notify_vanish_canceled()
@@ -1204,7 +1204,7 @@ module Sakura
                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     BOOT_EVENT = ['OnBoot', 'OnFirstBoot', 'OnGhostChanged', 'OnShellChanged',
                   'OnUpdateComplete']
-    RESET_NOTIFY_EVENT = ['OnVanishSelecting', 'OnVanishCancel'] ## FIXME
+    RESET_NOTIFY_EVENT = ['OnVanishSelecting', 'OnVanishCancel']
 
     def notify_event(event, *arglist, event_type: 'GET', default: nil)
       if @time_critical_session and event.start_with?('OnMouse')
@@ -1705,7 +1705,7 @@ module Sakura
       load_history()
       @vanished = false
       @__boot = [false, false]
-      @old_otherghostname = nil ## FIXME
+      @old_otherghostname = nil
       reset_script(:reset_all => true)
       @surface.reset_alignment()
       stand_by(true)
@@ -1737,7 +1737,7 @@ module Sakura
       now = Time.new
       idle = get_idle_time()
       second, minute = now.localtime.to_a[0, 2]
-      if @clock[0] != second ## FIXME
+      if @clock[0] != second
         if @__temp_mode == 0
           @ghost_time += 1
         end
@@ -1905,7 +1905,7 @@ module Sakura
             @parent.handle_request('NOTIFY', 'reload_current_sakura', a) },
           [self])
         load_settings()
-        restart() ## FIXME
+        restart()
         Logging::Logging.info('done.')
         enqueue_event(*@reload_event)
         @reload_event = nil
@@ -2363,7 +2363,7 @@ module Sakura
       end
     end
 
-    def __yen_exclamation(args) ## FIXME
+    def __yen_exclamation(args)
       if args.empty?
         return
       end
@@ -2431,7 +2431,7 @@ module Sakura
           __update()
         end
       elsif args[0, 1] == ['vanishbymyself']
-        @vanished = true ## FIXME
+        @vanished = true
         if argc > 1
           next_ghost = args[1]
         else

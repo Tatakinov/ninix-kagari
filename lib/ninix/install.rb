@@ -57,13 +57,13 @@ module Install
       sw.add(tv)
       sw.show_all() # XXX
       @treeview = tv
-      label = Gtk::Label.new(label='Multiple candidates found.\nSelect the path name of the supplement target.') ## FIXME
+      label = Gtk::Label.new(label='Multiple candidates found.\nSelect the path name of the supplement target.') ## FIXME: gettext
       ##label.set_use_markup(True)
       content_area = @select_dialog.content_area
       content_area.add(label)
       label.show()
       content_area.add(sw)
-      @select_dialog.set_title('Select the target') ## FIXME
+      @select_dialog.set_title('Select the target') ## FIXME: gettext
       @select_dialog.set_default_size(-1, 200)
     end
 
@@ -253,7 +253,7 @@ module Install
       ofile.close()
       ifile.close()
       # check the format of the downloaded file
-      check_archive(filename) ## FIXME
+      check_archive(filename)
       begin
         zf = Zip::File.new(filename)
       rescue

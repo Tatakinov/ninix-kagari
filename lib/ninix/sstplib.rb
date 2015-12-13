@@ -71,7 +71,7 @@ module SSTPLib
       new_list = []
       for item in message
         key, value = item
-        new_list << [key, value.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)] ## FIXME
+        new_list << [key, value.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)]
       end
       message = new_list
       return message

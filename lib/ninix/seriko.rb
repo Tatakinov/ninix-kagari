@@ -428,19 +428,19 @@ module Seriko
         window.remove_overlay(self)
       end
       if method == 'move'
-        window.get_seriko.move_surface(args[0], args[1]) ## FIXME
+        window.get_seriko.move_surface(args[0], args[1])
       elsif OVERLAY_SET.include?(method)
         window.add_overlay(self, surface, args[0], args[1], method)
       elsif method == 'base'
-        window.get_seriko.set_base_id(window, surface) ## FIXME
+        window.get_seriko.set_base_id(window, surface)
       elsif method == 'start'
         window.invoke(args[0], :update => 1)
       elsif method == 'alternativestart'
         window.invoke(args.sample, :update => 1)
       elsif method == 'stop'
-        window.get_seriko.stop_actor(args[0]) ## FIXME
+        window.get_seriko.stop_actor(args[0])
       elsif method == 'alternativestop'
-        window.get_seriko.stop_actor(args.sample) ## FIXME
+        window.get_seriko.stop_actor(args.sample)
       else
         raise RuntimeError('should not reach here')
       end

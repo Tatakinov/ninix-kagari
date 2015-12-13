@@ -626,7 +626,7 @@ module Ninix_Main
       current_sakura_instance.keep_silence(quiet)
     end
 
-    def get_ghost_name ## FIXME
+    def get_ghost_name
       sakura = current_sakura_instance
       return sakura.get_ifghost()
     end
@@ -691,7 +691,7 @@ module Ninix_Main
       @__menu_owner.select_balloon(key, desc, balloon)
     end
 
-    def get_current_balloon_directory ## FIXME
+    def get_current_balloon_directory
       return @__menu_owner.get_current_balloon_directory()
     end
 
@@ -824,10 +824,10 @@ module Ninix_Main
 
     def delete_ghost(key)
       raise "assert" unless @ghosts.include?(key)
-      del @ghosts[key]
+      @ghosts.delete(key)
     end
 
-    def get_balloon_list ## FIXME
+    def get_balloon_list
       balloon_list = []
       for key in @balloons.keys
         desc, balloon = @balloons[key].baseinfo
@@ -838,7 +838,7 @@ module Ninix_Main
       return balloon_list
     end
 
-    def get_nekodorif_list ## FIXME
+    def get_nekodorif_list
       nekodorif_list = []
       nekoninni = @nekoninni
       for nekoninni_name, nekoninni_dir in nekoninni
@@ -853,7 +853,7 @@ module Ninix_Main
       return nekodorif_list
     end
 
-    def get_kinoko_list ## FIXME
+    def get_kinoko_list
       return @kinoko
     end
 
@@ -1002,7 +1002,7 @@ module Ninix_Main
           if sakura.ifghost(ifghost)
             if not sakura.is_running()
               @current_sakura = value.key
-              start_sakura(@current_sakura, :init => true, :temp => 1) ## FIXME
+              start_sakura(@current_sakura, :init => true, :temp => 1)
             else
               @current_sakura = sakura.key
             end
@@ -1019,7 +1019,7 @@ module Ninix_Main
         if not working_list.empty?
           @current_sakura = working_list.sample.key
         else
-          return ## FIXME
+          return
         end
       end
     end
@@ -1170,7 +1170,7 @@ module Ninix_Main
       end
     end
 
-    def get_balloon_description(subdir) ## FIXME
+    def get_balloon_description(subdir)
       key = find_balloon_by_subdir(subdir)
       if key == nil
         ##Logging::Logging.warning('Balloon ' + subdir + ' not found.')
@@ -1192,7 +1192,7 @@ module Ninix_Main
         @ghosts[key].baseinfo = ghost_conf[key]
       else
         close_ghost(sakura) ## FIXME
-        del @ghosts[key]
+        @ghosts.delete(key)
         return ## FIXME
       end
       start_sakura(key, :prev => key, :init => true) 
@@ -1232,7 +1232,7 @@ module Ninix_Main
           if sakura.is_running() # stop if working
             stop_sakura(sakura)
           end
-          del @ghosts[ghost_dir]
+          @ghosts.delete(ghost_dir)
         end
       end
       notify_installedghostname()
@@ -1258,7 +1258,7 @@ module Ninix_Main
         end
       else
         if exists
-          del @balloons[balloon_dir]
+          @balloons.delete(balloon_dir)
         end
       end
       @balloon_menu = create_balloon_menu()
@@ -1364,9 +1364,9 @@ module Ninix_Main
       return @confirmed
     end
 
-    def search_ghosts ## FIXME
-      balloons = @balloons ## FIXME
-      ghosts = @ghosts ## FIXME
+    def search_ghosts
+      balloons = @balloons
+      ghosts = @ghosts
       if ghosts.length > 0 and balloons.length > 0
         @confirmed = true
       end
@@ -1548,7 +1548,7 @@ module Ninix_Main
     def close
       @dialog.hide()
       @opened = false
-      if not @app.confirmed ## FIXME
+      if not @app.confirmed
         @app.quit()
       end
       return true

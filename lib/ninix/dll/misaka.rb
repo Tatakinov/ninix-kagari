@@ -1289,7 +1289,7 @@ module Misaka
             if @charset == 'Shift_JIS'
               @charset = 'CP932' # XXX
             end
-            print("CharlockHolmes:, ", @charset, "\n")
+            Logging::Logging.debug("CharlockHolmes(misaka.rb): '" + @charset.to_s + "'")
             break
           end
         end

@@ -337,7 +337,7 @@ module Home
       end
     end
     if not name.empty?
-      return [name, top_dir] ## FIXME
+      return [name, top_dir]
     else
       return nil
     end

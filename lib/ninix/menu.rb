@@ -414,7 +414,7 @@ module Menu
       if side > 1
         string = 'char' + side.to_s
       else
-        raise "assert" unless [0, 1].include?(side) ## FIXME
+        raise "assert" unless [0, 1].include?(side)
         string = ['sakura', 'kero'][side]
       end
       string = [string, '.popupmenu.visible'].join('')
@@ -432,7 +432,7 @@ module Menu
       if side > 1
         string = 'char' + side.to_s
       else
-        raise "assert" unless [0, 1].include?(side) ## FIXME
+        raise "assert" unless [0, 1].include?(side)
         string = ['sakura', 'kero'][side]
       end
       string = [string, '.recommendsites'].join('')

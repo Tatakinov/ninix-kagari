@@ -928,7 +928,7 @@ module NGM
       end
     end
 
-    def update_current ## FIXME
+    def update_current
       @parent.handle_request('NOTIFY', 'update_sakura', get('Name'), 'NGM')
     end
   end

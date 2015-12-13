@@ -110,7 +110,7 @@ module Nekodorif
       @__popup_menu.popup(nil, nil, button, Gtk.current_event_time)
     end
 
-    def __set_katochan_menu(list) ## FIXME
+    def __set_katochan_menu(list)
       key = 'katochan'
       if not list.empty?
         menu = Gtk::Menu.new()
@@ -389,7 +389,7 @@ module Nekodorif
       return true
     end
 
-    def destroy ## FIXME
+    def destroy
       @window.destroy()
     end
 
@@ -401,7 +401,7 @@ module Nekodorif
           #pass
         elsif event.event_type == Gdk::EventType::DOUBLE_BUTTON_PRESS # double click
           if @parent.handle_request('GET', 'has_katochan')
-            start() ## FIXME
+            start()
             @parent.handle_request('NOTIFY', 'drop_katochan')
           end
         end
@@ -471,12 +471,12 @@ module Nekodorif
       set_surface()
     end
 
-    def start ## FIXME
+    def start
       @id[0] = 1
       set_surface()
     end
 
-    def reset ## FIXME
+    def reset
       @id[0] = 0
       set_surface()
     end
@@ -574,7 +574,7 @@ module Nekodorif
       return 0 # 0/1 = きのこに当たっていない(ない場合を含む)／当たった
     end
 
-    def get_target ## FIXME
+    def get_target
       if @side == 0
         return @target.get_selfname()
       else
@@ -774,7 +774,7 @@ module Nekodorif
       @loaded = true
     end
 
-    def drop ## FIXME
+    def drop
       set_state('fall')
     end
 
@@ -837,7 +837,7 @@ module Nekodorif
       end
     end
 
-    def update ## FIXME
+    def update
       if @settings['state'] == 'fall'
         update_surface()
         update_position()

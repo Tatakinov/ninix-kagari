@@ -76,7 +76,7 @@ module Balloon
 
     def get_window(side)
       if @window.length > side
-        return @window[side].get_window ## FIXME
+        return @window[side].get_window
       else
         return nil
       end
@@ -849,7 +849,7 @@ module Balloon
     end
 
     def set_position(base_x, base_y)
-      if @balloon_id == nil ## FIXME
+      if @balloon_id == nil
         return
       end
       px, py = get_balloon_windowposition()
@@ -1485,7 +1485,7 @@ module Balloon
       h = @sstp_surface.height
       i = 1
       while true
-        space = '\u3000' * i ## FIXME
+        space = "\u3000" * i # XXX
         @layout.set_text(space)
         text_w, text_h = @layout.pixel_size
         if text_w > w
@@ -1584,7 +1584,6 @@ module Balloon
               cr = @darea.get_window().cairo_create()
               cr.set_source(@sstp_surface, mx, my)
               cr.paint()
-              del cr
             end
           end
         end

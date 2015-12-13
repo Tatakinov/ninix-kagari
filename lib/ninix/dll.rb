@@ -105,7 +105,7 @@ module DLL
           next
         end
         if req_type == nil
-          for request in ['EXECUTE', 'GET Version'] ## FIXME
+          for request in ['EXECUTE', 'GET Version']
             if line.start_with?(request)
               req_type = request
             end
@@ -119,12 +119,12 @@ module DLL
         key = key.strip()
         if key == 'Charset'
           charset = value.strip()
-          if not Encoding.name_list.include?(charset) ##FIXME
+          if not Encoding.name_list.include?(charset)
             Logging::Logging.warning('DLL: Unsupported charset ' + charset)
           end
           @charset = charset
         end
-        if key.start_with?('Argument') ## FIXME
+        if key.start_with?('Argument')
           argument << value.strip
         else
           next
@@ -193,11 +193,6 @@ module DLL
           shiori = nil
         end
         instance = shiori
-      end
-      if instance == nil
-        #del module_
-        ## this is NOT proper: infects the working ghost(s).
-        ##del sys.modules[name]
       end
       return instance
     end
