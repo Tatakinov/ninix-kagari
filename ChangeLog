@@ -1,3 +1,6 @@
+Mon December 14 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* バージョン4.500.7リリース.
+
 Sun December 13 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* メニューのツールチップ表示のコードを修正.
 	  (メニューを開いていると落ちる場合があったのを修正.)
