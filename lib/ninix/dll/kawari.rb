@@ -325,10 +325,65 @@ module Kawari
   ###   KAWARI   ###
 
   class Kawari7
+    attr_reader :rdictlist, :kdictlist
 
     MAXDEPTH = 30
 
     def initialize(prefix, pathlist, rdictlist, kdictlist)
+      @kis_commands = {
+        # flow controls
+        'if' =>          'exec_new_if',
+        'foreach' =>     'exec_foreach',
+        'loop' =>        'exec_loop',
+        'while' =>       'exec_while',
+        'until' =>       'exec_until',
+        # dictionary operators
+        'adddict' =>     'exec_adddict',
+        'array' =>       'exec_array',
+        'clear' =>       'exec_clear',
+        'enumerate' =>   'exec_enumerate',
+        'set' =>         'exec_set',
+        'load' =>        'exec_load',
+        'save' =>        'exec_save',
+        'savecrypt' =>   'exec_savecrypt',
+        'textload' =>    'exec_textload',
+        'size' =>        'exec_size',
+        'get' =>         'exec_get',
+        # list operators
+        'unshift' =>     'exec_unshift',
+        'shift' =>       'exec_shift',
+        'push' =>        'exec_push',
+        'pop' =>         'exec_pop',
+        # counter operators
+        'inc' =>         'exec_inc',
+        'dec' =>         'exec_dec',
+        # expression evaluators
+        'expr' =>        'exec_expr',
+        'test' =>        'exec_test',
+        '[' =>           'exec_test',
+        'entry' =>       'exec_entry',
+        'eval' =>        'exec_eval',
+        # utility functions
+        'NULL' =>        'exec_null',
+        '?' =>           'exec_choice',
+        'date' =>        'exec_date',
+        'rand' =>        'exec_rand',
+        'echo' =>        'exec_echo',
+        'escape' =>      'exec_escape',
+        'tolower' =>     'exec_tolower',
+        'toupper' =>     'exec_toupper',
+        'pirocall' =>    'exec_pirocall',
+        'split' =>       'exec_split',
+        'urllist' =>     nil,
+        'chr' =>         'exec_chr',
+        'help' =>        nil,
+        'ver' =>         nil,
+        'searchghost' => nil,
+        'saoriregist' => nil,
+        'saorierase' =>  nil,
+        'callsaori' =>   nil,
+        'callsaorix' =>  nil,
+      }
       kawari_init(prefix, pathlist, rdictlist, kdictlist)
     end
 
@@ -381,7 +436,7 @@ module Kawari
     # SHIORI/2.2 API
     def get_event_response(event,
                            ref0: nil, ref1: nil, ref2: nil, ref3: nil,
-                           ref4: nil, ref5: nil, ref6: nil, ref7: nil) ## FIXME
+                           ref4: nil, ref5: nil, ref6: nil, ref7: nil)
       ref = [ref0, ref1, ref2,ref3, ref4, ref5, ref6, ref7].map {|r| r.to_s if r != nil }
       for i in 0..7
         if ref[i] != nil
@@ -1970,62 +2025,6 @@ module Kawari
       @dll_name = dll_name
       @saori_list = {}
       @saori_ini = {}
-
-      @kis_commands = {
-        # flow controls
-        'if' =>          'exec_new_if',
-        'foreach' =>     'exec_foreach',
-        'loop' =>        'exec_loop',
-        'while' =>       'exec_while',
-        'until' =>       'exec_until',
-        # dictionary operators
-        'adddict' =>     'exec_adddict',
-        'array' =>       'exec_array',
-        'clear' =>       'exec_clear',
-        'enumerate' =>   'exec_enumerate',
-        'set' =>         'exec_set',
-        'load' =>        'exec_load',
-        'save' =>        'exec_save',
-        'savecrypt' =>   'exec_savecrypt',
-        'textload' =>    'exec_textload',
-        'size' =>        'exec_size',
-        'get' =>         'exec_get',
-        # list operators
-        'unshift' =>     'exec_unshift',
-        'shift' =>       'exec_shift',
-        'push' =>        'exec_push',
-        'pop' =>         'exec_pop',
-        # counter operators
-        'inc' =>         'exec_inc',
-        'dec' =>         'exec_dec',
-        # expression evaluators
-        'expr' =>        'exec_expr',
-        'test' =>        'exec_test',
-        '[' =>           'exec_test',
-        'entry' =>       'exec_entry',
-        'eval' =>        'exec_eval',
-        # utility functions
-        'NULL' =>        'exec_null',
-        '?' =>           'exec_choice',
-        'date' =>        'exec_date',
-        'rand' =>        'exec_rand',
-        'echo' =>        'exec_echo',
-        'escape' =>      'exec_escape',
-        'tolower' =>     'exec_tolower',
-        'toupper' =>     'exec_toupper',
-        'pirocall' =>    'exec_pirocall',
-        'split' =>       'exec_split',
-        'urllist' =>     nil,
-        'chr' =>         'exec_chr',
-        'help' =>        nil,
-        'ver' =>         nil,
-        'searchghost' => nil,
-        'saoriregist' => nil,
-        'saorierase' =>  nil,
-        'callsaori' =>   nil,
-        'callsaorix' =>  nil,
-      }
-
       @kis_commands['saoriregist'] = 'exec_saoriregist'
       @kis_commands['saorierase'] = 'exec_saorierase'
       @kis_commands['callsaori'] = 'exec_callsaori'
