@@ -1246,6 +1246,7 @@ module Niseshiori
 
 
   class Shiori < NiseShiori
+    attr_reader :dict, :type_chains, :word_chains, :keywords, :responses, :greetings, :events
 
     def initialize(dll_name)
       super()
