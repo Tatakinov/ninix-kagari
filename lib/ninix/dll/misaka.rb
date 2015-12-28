@@ -151,6 +151,7 @@ module Misaka
 
 
   class Lexer
+    attr_reader :buffer
 
     Re_comment = Regexp.new('\A[ \t]*//[^\r\n]*')
     Re_newline = Regexp.new('\A(\r\n|\r|\n)')
@@ -944,78 +945,78 @@ module Misaka
     def dump_node(node, depth)
       indent = '  ' * depth
       if node[0] == NODE_TEXT
-        print([indent, 'TEXT'].join(''), \
-              ['"', node[1], '"'].join(''))
+        print([indent, 'TEXT'].join(''), " ", \
+              ['"', node[1], '"'].join(''), "\n")
       elsif node[0] == NODE_STRING
-        print([indent, 'STRING'].join(''), \
-              ['"', node[1], '"'].join(''))
+        print([indent, 'STRING'].join(''), " ", \
+              ['"', node[1], '"'].join(''), "\n")
       elsif node[0] == NODE_VARIABLE
-        print([indent, 'VARIABLE'].join(''))
+        print([indent, 'VARIABLE'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
       elsif node[0] == NODE_INDEXED
-        print([indent, 'INDEXED'].join(''))
+        print([indent, 'INDEXED'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
-        print([indent, 'index'].join(''))
+        print([indent, 'index'].join(''), "\n")
         dump_list(node[2], :depth => depth + 1)
       elsif node[0] == NODE_ASSIGNMENT
-        print([indent, 'ASSIGNMENT'].join(''))
+        print([indent, 'ASSIGNMENT'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
-        print([indent, 'op'].join(''), node[2])
+        print([indent, 'op'].join(''), " ", node[2], "\n")
         dump_list(node[3], :depth => depth + 1)
       elsif node[0] == NODE_FUNCTION
-        print([indent, 'FUNCTION'].join(''), node[1])
-        for i in range(node[2].length)
-          print([indent, 'args[' + i.to_s + ']'].join(''))
+        print([indent, 'FUNCTION'].join(''), " ", node[1], "\n")
+        for i in 0..node[2].length-1
+          print([indent, 'args[' + i.to_s + ']'].join(''), "\n")
           dump_list(node[2][i], :depth => depth + 1)
         end
       elsif node[0] == NODE_IF
-        print([indent, 'IF'].join(''))
+        print([indent, 'IF'].join(''), "\n")
         dump_node(node[1], depth + 1)
-        print([indent, 'then'].join(''))
+        print([indent, 'then'].join(''), "\n")
         dump_list(node[2], :depth => depth + 1)
-        print([indent, 'else'].join(''))
+        print([indent, 'else'].join(''), "\n")
         dump_list(node[3], :depth => depth + 1)
       elsif node[0] == NODE_CALC
-        print([indent, 'CALC'].join(''))
+        print([indent, 'CALC'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
       elsif node[0] == NODE_AND_EXPR
-        print([indent, 'AND_EXPR'].join(''))
+        print([indent, 'AND_EXPR'].join(''), "\n")
         for i in 1..node.length-1
           dump_node(node[i], depth + 1)
         end
       elsif node[0] == NODE_OR_EXPR
-        print([indent, 'OR_EXPR'].join(''))
+        print([indent, 'OR_EXPR'].join(''), "\n")
         for i in 1..node.length-1
           dump_node(node[i], depth + 1)
         end
       elsif node[0] == NODE_COMP_EXPR
-        print([indent, 'COMP_EXPR'].join(''))
+        print([indent, 'COMP_EXPR'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
-        print([indent, 'op'].join(''), node[2])
+        print([indent, 'op'].join(''), " ", node[2], "\n")
         dump_list(node[3], :depth => depth + 1)
       elsif node[0] == NODE_ADD_EXPR
-        print([indent, 'ADD_EXPR'].join(''))
+        print([indent, 'ADD_EXPR'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
         for i in 2.step(node.length-1, 2)
-          print([indent, 'op'].join(''), node[i])
+          print([indent, 'op'].join(''), " ", node[i], "\n")
           dump_list(node[i + 1], :depth => depth + 1)
         end
       elsif node[0] == NODE_MUL_EXPR
-        print([indent, 'MUL_EXPR'].join(''))
+        print([indent, 'MUL_EXPR'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
         for i in 2.step(node.length-1, 2)
-          print([indent, 'op'].join(''), node[i])
+          print([indent, 'op'].join(''), " ", node[i], "\n")
           dump_list(node[i + 1], :depth => depth + 1)
         end
       elsif node[0] == NODE_POW_EXPR
-        print([indent, 'POW_EXPR'].join(''))
+        print([indent, 'POW_EXPR'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
         for i in 2..node.length-1
-          print([indent, 'op ^'].join(''))
+          print([indent, 'op ^'].join(''), "\n")
           dump_list(node[i], :depth => depth + 1)
         end
       else
-        print(node)
+        print(node, "\n")
         raise RuntimeError.new('should not reach here')
       end
     end
@@ -1247,7 +1248,7 @@ module Misaka
       reset_request()
     end
 
-    def load(dir: nil)
+    def load(dir: Dir::getwd)
       @misaka_dir = dir
       @dbpath = File.join(@misaka_dir, DBNAME)
       @saori_library = SaoriLibrary.new(@saori, @misaka_dir)
@@ -2648,7 +2649,7 @@ module Misaka
       result = 0
       head, name = File.split(name.gsub('\\', '/')) # XXX: don't encode here
       top_dir = File.join(top_dir, head)
-      if not @saori_list.include?(name)
+      if @saori != nil and not @saori_list.include?(name)
         module_ = @saori.request(name)
         if module_ != nil
           @saori_list[name] = module_
