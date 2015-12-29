@@ -13,7 +13,7 @@ module NinixTest
         for k, v in rdict
           print(k, "\n")
           for p in v
-            print(['\t', p].join(''), "\n")
+            print(["\t", p].join(''), "\n")
           end
         end
       end
@@ -21,7 +21,7 @@ module NinixTest
         for k, v in kdict
           print(['[ "', k.join('", "'), '" ]'].join(''), "\n")
           for p in v
-            print(['\t', p].join(''), "\n")
+            print(["\t", p].join(''), "\n")
           end
         end
       end
