@@ -158,7 +158,7 @@ module Satori
 
 
   class Parser
-    attr_reader :anchor_filter
+    attr_reader :anchor_filter, :talk, :word
 
     def initialize
       @talk = {}
@@ -267,8 +267,12 @@ module Satori
             line_buffer = line[0..-2]
             break
           else
-            phi_escape[lineno] << pos ## FIXME
-            line = [line[0..pos-1], line[pos + 1..-1]].join('')
+            phi_escape[lineno] << pos
+            if pos == 0
+              line = line[1..-1]
+            else
+              line = [line[0..pos-1], line[pos + 1..-1]].join('')
+            end
           end
         end
         if line_buffer != nil
@@ -278,7 +282,11 @@ module Satori
         while line[pos..-1].count('＃') > 0
           pos = line.index('＃', pos)
           if not phi_escape[lineno].include?(pos) ## FIXME
-            line = line[0..pos-1]
+            if pos == 0
+              line = ""
+            else
+              line = line[0..pos-1]
+            end
             break
           end
         end
@@ -626,7 +634,11 @@ module Satori
           end
           break
         else
-          ll = text[pos_end + 1..position-1].split(sep, -1)
+          if position == 0
+            ll = [""]
+          else
+            ll = text[pos_end + 1..position-1].split(sep, -1)
+          end
           pos_end = find_close(text, position + 1)
           last = ll.pop()
           ll << [last, text[position..pos_end]].join('')
@@ -749,9 +761,9 @@ module Satori
     def get_or_expr(line)
       line, and_expr = get_and_expr(line)
       buf = [NODE_OR_EXPR, and_expr]
-      while line != nil and ['|', '｜'].include?(line[0]) ### FIXME: φ
+      while line != nil and not line.empty? and ['|', '｜'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
-        if line != nil and ['|', '｜'].include?(line[0]) ### FIXME: φ
+        if line != nil and not line.empty? and ['|', '｜'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
           raise ValueError('broken OR operator')
@@ -768,9 +780,9 @@ module Satori
     def get_and_expr(line)
       line, comp_expr = get_comp_expr(line)
       buf = [NODE_AND_EXPR, comp_expr]
-      while line != nil and ['&', '＆'].include?(line[0]) ### FIXME: φ
+      while line != nil and not line.empty? and ['&', '＆'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
-        if line != nil and ['&', '＆'].include?(line[0]) ### FIXME: φ
+        if line != nil and not line.empty? and ['&', '＆'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
           raise ValueError('broken AND operator')
@@ -786,36 +798,36 @@ module Satori
 
     def get_comp_expr(line)
       line, buf = get_add_expr(line)
-      if line != nil and ['<', '＜'].include?(line[0]) ### FIXME: φ
+      if line != nil and not line.empty? and ['<', '＜'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         op = '<'
-        if line != nil and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if line != nil and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
           op = '<='
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, op, add_expr]]
-      elsif line != nil and ['>', '＞'].include?(line[0]) ### FIXME: φ
+      elsif line != nil and not line.empty? and ['>', '＞'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         op = '>'
-        if line != nil and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if line != nil and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
           op = '>='
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, op, add_expr]]
-      elsif line != nil and ['=', '＝'].include?(line[0]) ### FIXME: φ
+      elsif line != nil and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
-        if line != nil and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if line != nil and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
           raise ValueError('broken EQUAL operator')
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, '==', add_expr]]
-      elsif line != nil and ['!', '！'].include?(line[0]) ### FIXME: φ
+      elsif line != nil and not line.empty? and ['!', '！'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
-        if line != nil and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if line != nil and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
           raise ValueError('broken NOT EQUAL operator')
@@ -829,7 +841,7 @@ module Satori
     def get_add_expr(line)
       line, mul_expr = get_mul_expr(line)
       buf = [NODE_ADD_EXPR, mul_expr]
-      while line != nil and ['+', '＋', '-', '−', '－'].include?(line[0]) ### FIXME: φ
+      while line != nil and not line.empty? and ['+', '＋', '-', '−', '－'].include?(line[0]) ### FIXME: φ
         if ['+', '＋'].include?(line[0])
           buf << '+'
         else
@@ -848,7 +860,7 @@ module Satori
     def get_mul_expr(line)
       line, pow_expr = get_pow_expr(line)
       buf = [NODE_MUL_EXPR, pow_expr]
-      while line != nil and \
+      while line != nil and not line.empty? and \
            ['*', '＊', '×', '/', '／', '÷', '%', '％'].include?(line[0]) ### FIXME: φ
         if ['*', '＊', '×'].include?(line[0])
           buf << '*'
@@ -870,7 +882,7 @@ module Satori
     def get_pow_expr(line)
       line, unary_expr = get_unary_expr(line)
       buf = [NODE_POW_EXPR, unary_expr]
-      while line != nil and ['^', '＾'].include?(line[0]) ### FIXME: φ
+      while line != nil and not line.empty? and ['^', '＾'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         line, unary_expr = get_unary_expr(line)
         buf << unary_expr
@@ -882,20 +894,20 @@ module Satori
     end
 
     def get_unary_expr(line)
-      if line != nil and ['-', '−', '－'].include?(line[0]) ### FIXME: φ
+      if line != nil and not line.empty? and ['-', '−', '－'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         line, unary_expr = get_unary_expr(line)
         return line, [[NODE_UNARY_EXPR, '-', unary_expr]]
       end
-      if line != nil and ['!', '！'].include?(line[0]) ### FIXME: φ
+      if line != nil and not line.empty? and ['!', '！'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         line, unary_expr = get_unary_expr(line)
         return line, [[NODE_UNARY_EXPR, '!', unary_expr]]
       end
-      if line != nil and line[0] == '(' ### FIXME: φ
+      if line != nil and not line.empty? and line[0] == '(' ### FIXME: φ
         line = line[1..-1]
         line, buf = get_or_expr(line)
-        if line != nil and line[0] == ')' ### FIXME: φ
+        if line != nil and not line.empty? and line[0] == ')' ### FIXME: φ
           line = line[1..-1]
         else
           raise ValueError('expected a close paren')
@@ -912,13 +924,13 @@ module Satori
 
     def get_factor(line)
       buf = []
-      while line != nil and not Operators.include?(line[0])
-        if line != nil and line[0] == '（' ### FIXME: φ
+      while line != nil and not line.empty? and not Operators.include?(line[0])
+        if line != nil and not line.empty? and line[0] == '（' ### FIXME: φ
           line = parse_parenthesis(line, buf)
           next
         end
         text = []
-        while line != nil and not Operators.include?(line[0]) and line[0] != '（' ### FIXME: φ
+        while line != nil and not line.empty? and not Operators.include?(line[0]) and line[0] != '（' ### FIXME: φ
           text << line[0]
           line = line[1..-1]
         end
@@ -937,89 +949,89 @@ module Satori
         indent = '  ' * depth
         if node[0] == NODE_TEXT
           temp = node[1].map {|x| x.encode('utf-8', :invalid => :replace, :undef => :replace) }.join('')
-          print([indent, 'NODE_TEXT "' + temp + '"'].join(''))
+          print([indent, 'NODE_TEXT "' + temp + '"'].join(''), "\n")
         elsif node[0] == NODE_REF
-          print([indent, 'NODE_REF'].join(''))
+          print([indent, 'NODE_REF'].join(''), "\n")
           print_nodelist(node[1], :depth => depth + 1)
         elsif node[0] == NODE_CALL
-          print([indent, 'NODE_CALL'].join(''))
+          print([indent, 'NODE_CALL'].join(''), "\n")
           for i in 0..node[2].length-1
             print_nodelist(node[2][i], :depth => depth + 1)
           end
         elsif node[0] == NODE_SAORI
-          print([indent, 'NODE_SAORI'].join(''))
+          print([indent, 'NODE_SAORI'].join(''), "\n")
           for i in 0..node[2].length-1
             print_nodelist(node[2][i], :depth => depth + 1)
           end
         elsif node[0] == NODE_SIDE
-          print([indent, 'NODE_SIDE'].join(''))
+          print([indent, 'NODE_SIDE'].join(''), "\n")
         elsif node[0] == NODE_ASSIGNMENT
-          print([indent, 'NODE_ASSIGNMENT'].join(''))
-          print([indent, 'variable'].join(''))
+          print([indent, 'NODE_ASSIGNMENT'].join(''), "\n")
+          print([indent, 'variable'].join(''), "\n")
           print_nodelist(node[1], :depth => depth + 1)
-          print([indent, 'value'].join(''))
+          print([indent, 'value'].join(''), "\n")
           print_nodelist(node[2], :depth => depth + 1)
         elsif node[0] == NODE_JUMP
-          print([indent, 'NODE_JUMP'].join(''))
-          print([indent, 'name'].join(''))
+          print([indent, 'NODE_JUMP'].join(''), "\n")
+          print([indent, 'name'].join(''), "\n")
           print_nodelist(node[1], :depth => depth + 1)
           if node[2] != nil
-            print([indent, 'condition'].join(''))
+            print([indent, 'condition'].join(''), "\n")
             print_nodelist(node[2], :depth => depth + 1)
           end
         elsif node[0] == NODE_SEARCH
-          print([indent, 'NODE_SEARCH'].join(''))
+          print([indent, 'NODE_SEARCH'].join(''), "\n")
         elsif node[0] == NODE_CHOICE
-          print([indent, 'NODE_CHOICE'].join(''))
-          print([indent, 'label'].join(''))
+          print([indent, 'NODE_CHOICE'].join(''), "\n")
+          print([indent, 'label'].join(''), "\n")
           print_nodelist(node[1], :depth => depth + 1)
           if node[2] != nil
-            print([indent, 'id'].join(''))
+            print([indent, 'id'].join(''), "\n")
             print_nodelist(node[2], :depth => depth + 1)
           end
         elsif node[0] == NODE_OR_EXPR
-          print([indent, 'NODE_OR_EXPR'].join(''))
+          print([indent, 'NODE_OR_EXPR'].join(''), "\n")
           print_nodelist(node[1], :depth => depth + 1)
           for i in 2..node.length-1
-            print([indent, 'op ||'].join(''))
+            print([indent, 'op ||'].join(''), "\n")
             print_nodelist(node[i], :depth => depth + 1)
           end
         elsif node[0] == NODE_AND_EXPR
-          print([indent, 'NODE_ADD_EXPR'].join(''))
+          print([indent, 'NODE_ADD_EXPR'].join(''), "\n")
           print_nodelist(node[1], :depth => depth + 1)
           for i in 2..node.length-1
-            print([indent, 'op &&'].join(''))
+            print([indent, 'op &&'].join(''), "\n")
             print_nodelist(node[i], :depth => depth + 1)
           end
         elsif node[0] == NODE_COMP_EXPR
-          print([indent, 'NODE_COMP_EXPR'].join(''))
+          print([indent, 'NODE_COMP_EXPR'].join(''), "\n")
           print_nodelist(node[1], :depth => depth + 1)
-          print([indent, 'op'].join(''), node[2])
+          print([indent, 'op'].join(''), node[2], "\n")
           print_nodelist(node[3], :depth => depth + 1)
         elsif node[0] == NODE_ADD_EXPR
-          print([indent, 'NODE_ADD_EXPR'].join(''))
+          print([indent, 'NODE_ADD_EXPR'].join(''), "\n")
           print_nodelist(node[1], :depth => depth + 1)
           for i in 2.step(node.length-1, 2)
-            print([indent, 'op'].join(''), node[i])
+            print([indent, 'op'].join(''), node[i], "\n")
             print_nodelist(node[i + 1], :depth => depth + 1)
           end
         elsif node[0] == NODE_MUL_EXPR
-          print([indent, 'NODE_MUL_EXPR'].join(''))
+          print([indent, 'NODE_MUL_EXPR'].join(''), "\n")
           print_nodelist(node[1], :depth => depth + 1)
           for i in 2.step(node.length-1, 2)
-            print([indent, 'op'].join(''), node[i])
+            print([indent, 'op'].join(''), node[i], "\n")
             print_nodelist(node[i + 1], :depth => depth + 1)
           end
         elsif node[0] == NODE_POW_EXPR
-          print([indent, 'NODE_POW_EXPR'].join(''))
+          print([indent, 'NODE_POW_EXPR'].join(''), "\n")
           print_nodelist(node[1], :depth => depth + 1)
           for i in 2..node.length-1
-            print([indent, 'op ^'].join(''))
+            print([indent, 'op ^'].join(''), "\n")
             print_nodelist(node[i], :depth => depth + 1)
           end
         elsif node[0] == NODE_UNARY_EXPR
-          print([indent, 'NODE_UNARY_EXPR'].join(''))
-          print([indent, 'op'].join(''), node[1])
+          print([indent, 'NODE_UNARY_EXPR'].join(''), "\n")
+          print([indent, 'op'].join(''), node[1], "\n")
           print_nodelist(node[2], :depth => depth + 1)
         else
           raise RuntimeError('should not reach here')
@@ -1054,7 +1066,7 @@ module Satori
     EDBNAME = 'satori_savedata.sat'
 
     def initialize(satori_dir: nil)
-      satori_init(satori_dir)
+      satori_init(:satori_dir => satori_dir)
     end
 
     def satori_init(satori_dir: nil)
@@ -1817,10 +1829,12 @@ module Satori
       i = 0
       while true
         match = Re_tag.match(script, i)
-        if match != nil and match.begin(0) == 0 # FIXME
+        if match != nil and match.begin(0) == i
           start = match.begin(0)
           end_ = match.end(0)
-          buf << @parser.anchor_filter.apply(script[i..start-1])
+          if start > 0
+            buf << @parser.anchor_filter.apply(script[i..start-1])
+          end
           buf << script[start..end_-1]
           i = end_
         else
@@ -1844,8 +1858,12 @@ module Satori
       if match != nil
         tag = match[3]
         if tag == '\e'
-          script = [script[0..match.begin(0)-1],
-                    tag, script[match.end(0)..-1]].join('')
+          if match.begin(0) == 0
+            script = script[match.end(0)..-1]
+          else
+            script = [script[0..match.begin(0)-1],
+                      tag, script[match.end(0)..-1]].join('')
+          end
         else
           raise RuntimeError('should not reach here')
         end
@@ -2015,7 +2033,7 @@ module Satori
             end
           end
         elsif node[0] == NODE_TEXT
-          buf.concat(node[1])
+          buf.concat([node[1]])
           talk = true
         elsif node[0] == NODE_SIDE
           if talk
