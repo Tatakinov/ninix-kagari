@@ -153,7 +153,7 @@ module SSU
       return s[start..end_-1]
     end
 
-    def ssu_sprintf(args) ## FIXME
+    def ssu_sprintf(args)
       return sprintf(args[0], *args[1..-1])
     end
 
@@ -386,19 +386,19 @@ module SSU
       return ''
     end
 
-    def ssu_kata2hira(args) ## FIXME
+    def ssu_kata2hira(args) ## FIXME: not supported yet
       return ''
     end
 
-    def ssu_hira2kata(args) ## FIXME
+    def ssu_hira2kata(args) ## FIXME: not supported yet
       return ''
     end
 
-    def ssu_calc(args) ## FIXME
+    def ssu_calc(args) ## FIXME: not supported yet
       return 0
     end
 
-    def ssu_calc_float(args) ## FIXME
+    def ssu_calc_float(args) ## FIXME: not supported yet
       return 0
     end
 

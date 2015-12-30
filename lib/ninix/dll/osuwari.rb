@@ -43,7 +43,7 @@ module Osuwari
       end
     end
 
-    def setup ## FIXME
+    def setup
       return 1
     end
 
@@ -189,15 +189,15 @@ module Osuwari
         if x < left or x > left+ scrn_w or \
           y < top or y > top + scrn_h
           if @settings['except'][1] == 'BOTTOM'
-            #pass ## FIXME
+            #pass ## FIXME: not supported yet
           elsif @settings['except'][1] == 'TOP'
-            #pass ## FIXME
+            #pass ## FIXME: not supported yet
           elsif @settings['except'][1] == 'LEFT'
-            #pass ## FIXME
+            #pass ## FIXME: not supported yet
           elsif @settings['except'][1] == 'RIGTH'
-            #pass ## FIXME
+            #pass ## FIXME: not supported yet
           elsif @settings['except'][1] == 'CENTER'
-            #pass ## FIXME
+            #pass ## FIXME: not supported yet
           else
             #pass # should not reach here
           end
@@ -208,7 +208,7 @@ module Osuwari
       return true
     end
 
-    def get_window_by_name(name) ## FIXME
+    def get_window_by_name(name) ## FIXME: not supported yet
       return nil
     end
 

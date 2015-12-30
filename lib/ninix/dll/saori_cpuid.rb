@@ -55,10 +55,10 @@ module SAORI_CPUID
       elsif argument[0] == 'os.name'
         value = RbConfig::CONFIG['host_os']
       elsif argument[0] == 'os.version'
-        value = "" ## FIXME
+        value = "" ## FIXME: not supported yet
       elsif argument[0] == 'os.build'
-        value = "" ##FIXME
-      elsif ENTRY.keys.include?(argument[0]) ## FIXME
+        value = "" ##FIXME: not supported yet
+      elsif ENTRY.keys.include?(argument[0]) ## FIXME: dummy
         value = ENTRY[argument[0]].sample
       end
       if not value.empty?

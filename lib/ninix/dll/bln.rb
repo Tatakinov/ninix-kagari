@@ -112,7 +112,7 @@ module Bln
       return 1
     end
 
-    def observer_update(event, args) ## FIXME
+    def observer_update(event, args)
       if event == 'set scale'
         for name in @blns.keys
           data, bln = @blns[name]
@@ -351,7 +351,7 @@ module Bln
         end
         @layout = Pango::Layout.new(@darea.pango_context)
         @font_desc = Pango::FontDescription.new
-        @font_desc.set_family('Sans') # FIXME
+        @font_desc.set_family('Sans')
         if data.include?('font.bold') and data['font.bold'] == 'on'
           @font_desc.set_weight(Pango::WEIGHT_BOLD)
         end
@@ -474,7 +474,7 @@ module Bln
       if @window == nil
         return
       end
-      @scale = get_sakura_status('SurfaceScale') ## FIXME
+      @scale = get_sakura_status('SurfaceScale')
       w = @balloon_surface.width
       h = @balloon_surface.height
       w = [8, (w * @scale / 100).to_i].max

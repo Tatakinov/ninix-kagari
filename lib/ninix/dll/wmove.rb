@@ -243,7 +243,7 @@ module WMove
               @__sakura.set_surface_position(side, to, y)
             end
           elsif ['STANDBY', 'STANDBY_INSIDE'].include?(command)
-            #pass ## FIXME
+            #pass ## FIXME: not supported yet
           elsif command == 'ZMOVE'
             if args[0] == '1'
               @__sakura.raise_surface(side)

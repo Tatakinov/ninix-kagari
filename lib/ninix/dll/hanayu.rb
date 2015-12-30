@@ -352,7 +352,7 @@ module Hanayu
       end
       font_size = 12 # pixel
       @font_desc = Pango::FontDescription.new
-      @font_desc.set_family('Sans') # FIXME
+      @font_desc.set_family('Sans')
       @font_desc.set_size(font_size * Pango::SCALE)
       cr.set_source_rgb(*get_color('font'))
       w = widget.allocated_width

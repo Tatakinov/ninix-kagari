@@ -155,7 +155,7 @@ module HTTPC
     def notify(id, argument, process_tag)
       result = get(argument[0], :start => argument[1], :end_ => argument[2])
       if process_tag != nil
-        #pass ## FIXME
+        #pass ## FIXME: not supported yet
       end
       @__sakura.notify_event('OnHttpcNotify', id, nil, *result)
     end
