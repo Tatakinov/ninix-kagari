@@ -79,14 +79,14 @@ module Aya
     position = 0
     while true
       pos_new = line.index(token, position)
-      if not pos_new
+      if pos_new == nil
         pos_new = -1
         break
       elsif pos_new == 0
         break
       end
       position = line.index('"', position)
-      if position and 0 <= position and position < pos_new
+      if position != nil and 0 <= position and position < pos_new
         position += 1
         while position < line.length - 1
           if line[position] == '"'
@@ -143,9 +143,9 @@ module Aya
               line = line.encode("UTF-8", :invalid => :replace, :undef => :replace)
               v4 = line.index('for 文 version 4')
               v5 = line.index('for AYA5')
-              if v4 and v4 > 0
+              if v4 != nil and v4 > 0
                 return 4
-              elsif v5 and v5 > 0
+              elsif v5 != nil and v5 > 0
                 return 5
               end
             rescue
@@ -467,7 +467,7 @@ module Aya
     # SHIORI API
     def request(req_string)
       header = req_string.force_encoding('CP932').split(/\r?\n/, 0)
-      if header and not header.empty?
+      if header != nil and not header.empty?
         line = header.shift
         line = line.strip()
         req_list = line.split(nil, -1)
@@ -513,7 +513,7 @@ module Aya
       end
       result = ''
       func = @dic.get_function('OnRequest')
-      if not func and @req_header.include?('ID') # Ver.3
+      if func == nil and @req_header.include?('ID') # Ver.3
         for i in 0..8
           @global_namespace.remove(['reference', i.to_s].join(''))
         end
@@ -532,7 +532,7 @@ module Aya
         func = @dic.get_function(
           [prefix, @req_header['ID']].join(''))
       end
-      if func
+      if func != nil
         result = func.call()
       end
       if @ver_3 and @req_header.include?('ID') and \
@@ -586,19 +586,13 @@ module Aya
     def load_cfg
       path = []
       head, tail = File.split(@__aya_dir)
-#    print("HEAD: ", head, "\n")
-#    print("TAIL: ", tail, "\n")
       current = head
-      break_flag = false
       while not tail.empty? and tail != "/"
-#      print("TAIL: ", tail, "\n")
         path << tail
         head, tail = File.split(current)
         current = head
       end
-      if not break_flag ## FIXME
-        path << current
-      end
+      path << current
       current_dir = ''
       break_flag = false
       while not path.empty?
@@ -635,11 +629,11 @@ module Aya
               end
               data = {}
               start = line.index('[')
-              if not start
+              if start == nil
                 start = -1
               end
               end_ = line.index(']')
-              if not end_
+              if end_ == nil
                 end_ = -1
               end
               if end_ < 0
@@ -834,7 +828,7 @@ module Aya
             line = ['*WARNING : ', message.to_s, "\n"].join('')
             line = [line, 'AYA  : ', aya_dll, "\n"].join('')
             line = [line, 'date : ',
-                    time.strftime('%Y/%m/%d(%a) %H:%M:%S'),
+                    Time.now.strftime('%Y/%m/%d(%a) %H:%M:%S'),
                     "\n"].join('')
             line = [line, target_type.to_s,
                     ' : ', target.to_s, "\n"].join('')
@@ -880,7 +874,7 @@ module Aya
         else
           line = f.gets
         end
-        if not line
+        if line == nil
           break # EOF
         end
         line = line.force_encoding('CP932').encode("UTF-8", :invalid => :replace, :undef => :replace)
@@ -967,7 +961,7 @@ module Aya
     def split_line(line)
       lines = []
       while true
-        if not line or line.empty?
+        if line == nil or line.empty?
           break
         end
         pos = line.length # not line.length - 1
@@ -1168,15 +1162,15 @@ module Aya
           inner_func = []
           i, inner_func = get_block(lines, i)
           result << [TYPE_BLOCK, parse(inner_func)]
-        elsif Re_if.match(line)
+        elsif Re_if.match(line) != nil
           inner_blocks = []
           while true
             current_line = lines[i]
-            if Re_if.match(current_line)
+            if Re_if.match(current_line) != nil
               condition_tokens = AyaStatement.new(
                 current_line[2..-1].strip()).tokens
               condition = parse_condition(condition_tokens)
-            elsif Re_elseif.match(current_line)
+            elsif Re_elseif.match(current_line) != nil
               condition_tokens = AyaStatement.new(
                 current_line[6..-1].strip()).tokens
               condition = parse_condition(condition_tokens)
@@ -1197,7 +1191,7 @@ module Aya
               break
             end
             next_line = lines[i + 1]
-            if not Re_elseif.match(next_line) and \
+            if Re_elseif.match(next_line) == nil and \
               next_line != 'else'
               break
             end
@@ -1206,14 +1200,14 @@ module Aya
           if not inner_blocks.empty?
             result << [TYPE_IF, inner_blocks]
           end
-        elsif Re_while.match(line)
+        elsif Re_while.match(line) != nil
           condition_tokens = AyaStatement.new(line[5..-1].strip()).tokens
           condition = parse_condition(condition_tokens)
           inner_block = []
           i, inner_block = get_block(lines, i + 1)
           result << [TYPE_WHILE,
                      [condition, parse(inner_block)]]
-        elsif Re_for.match(line)
+        elsif Re_for.match(line) != nil
           inner_block = []
           i, inner_block = get_block(lines, i + 1)
           end_ = Aya.find_not_quoted(line, ';')
@@ -1241,14 +1235,14 @@ module Aya
               end
             end
           end
-        elsif Re_switch.match(line)
+        elsif Re_switch.match(line) != nil
           index = parse_token(line[6..-1].strip())
           ##raise "assert" unless [].include?(index[0]) # FIXME
           inner_block = []
           i, inner_block = get_block(lines, i + 1)
           result << [TYPE_SWITCH,
                      [index, parse(inner_block)]]
-        elsif Re_case.match(line)
+        elsif Re_case.match(line) != nil
           left = parse_token(line[4..-1].strip())
           ##raise "assert" unless [].include?(left[0]) # FIXME
           i, block = get_block(lines, i + 1)
@@ -1256,7 +1250,7 @@ module Aya
           j = 0
           while true
             current_line = block[j]
-            if Re_when.match(current_line)
+            if Re_when.match(current_line) != nil
               right = current_line[4..-1].strip()
             else # 'others'
               right = nil
@@ -1310,7 +1304,7 @@ module Aya
               break
             end
             next_line = block[j + 1]
-            if not Re_when.match(next_line) and \
+            if Re_when.match(next_line) == nil and \
               next_line != 'others'
               break
             end
@@ -1379,7 +1373,7 @@ module Aya
               'syntax error in function "' + @name.to_s + '": ' \
                                                           'unbalanced \'"\' or \'"\' in string ' + tokens.join(''))
             token = tokens[0..-2].join('')
-            if token and token[0] == '"'
+            if token != nil and token[0] == '"'
               token = token[1..-1]
             end
             if not token.empty?
@@ -1585,9 +1579,9 @@ module Aya
 
     def parse_token(token)
       result = []
-      if Re_f.match(token)
+      if Re_f.match(token) != nil
         result = [TYPE_FLOAT, token]
-      elsif Re_d.match(token)
+      elsif Re_d.match(token) != nil
         result = [TYPE_INT, token]
       elsif token.start_with?('"')
         text = token[1..-1]
@@ -1607,8 +1601,8 @@ module Aya
       else
         pos_parenthesis_open = token.index('(')
         pos_block_open = token.index('[')
-        if pos_parenthesis_open and \
-          (not pos_block_open or \
+        if pos_parenthesis_open != nil and \
+          (pos_block_open == nil or \
            pos_parenthesis_open < pos_block_open) # function
           if not token.end_with?(')')
             Logging::Logging.debug(
@@ -1706,7 +1700,7 @@ module Aya
       if result == nil
         result = ''
       end
-      if argv
+      if argv != nil
         for i in 0..argv.length-1
           if argv[i].is_a?(Hash)
             value = _argv[i]
@@ -1724,7 +1718,7 @@ module Aya
       result = []
       alternatives = []
       for line in lines
-        if not line or line.empty?
+        if line == nil or line.empty?
           next
         end
         if [TYPE_DECISION, TYPE_RETURN,
@@ -1763,7 +1757,7 @@ module Aya
           local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
           result_of_inner_func = evaluate(local_namespace,
                                           inner_func, -1, 1)
-          if result_of_inner_func and not result_of_inner_func.empty?
+          if result_of_inner_func != nil and not result_of_inner_func.empty?
             alternatives << result_of_inner_func
           end
         elsif line[0] == TYPE_SUBSTITUTION
@@ -1842,7 +1836,7 @@ module Aya
               result_of_inner_block = evaluate(local_namespace,
                                                inner_block,
                                                -1, 1)
-              if result_of_inner_block and not result_of_inner_block.empty?
+              if result_of_inner_block != nil and not result_of_inner_block.empty?
                 alternatives << result_of_inner_block
               end
               break
@@ -1856,7 +1850,7 @@ module Aya
             local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1)
-            if result_of_inner_block and not result_of_inner_block.empty?
+            if result_of_inner_block != nil and not result_of_inner_block.empty?
               alternatives << result_of_inner_block
             end
             if @status == CODE_RETURN
@@ -1881,7 +1875,7 @@ module Aya
             local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1)
-            if result_of_inner_block and not result_of_inner_block.empty?
+            if result_of_inner_block != nil and not result_of_inner_block.empty?
               alternatives << result_of_inner_block
             end
             if @status == CODE_RETURN
@@ -1907,7 +1901,7 @@ module Aya
           local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
           result_of_inner_block = evaluate(local_namespace,
                                            inner_block, index, 1)
-          if result_of_inner_block and not result_of_inner_block.empty?
+          if result_of_inner_block != nil and not result_of_inner_block.empty?
             alternatives << result_of_inner_block
           end
         elsif line[0] == TYPE_CASE
@@ -1927,7 +1921,7 @@ module Aya
               if value_min <= left and left <= value_max
                 result_of_inner_block = evaluate(
                   local_namespace, inner_block, -1, 1)
-                if result_of_inner_block and not result_of_inner_block.empty?
+                if result_of_inner_block != nil and not result_of_inner_block.empty?
                   alternatives << result_of_inner_block
                   break_flag = true
                   break
@@ -1939,18 +1933,18 @@ module Aya
             end
           end
           if not break_flag
-            if default_result and not default_result.empty?
+            if default_result != nil and not default_result.empty?
               alternatives << default_result
             end
           end
         elsif line[0] == TYPE_STATEMENT
           result_of_func = evaluate_statement(namespace, line, 0)
-          if result_of_func and not result_of_func.empty?
+          if result_of_func != nil and not result_of_func.empty?
             alternatives << result_of_func
           end
         else
           result_of_eval = evaluate_token(namespace, line)
-          if result_of_eval and not result_of_eval.empty?
+          if result_of_eval != nil and not result_of_eval.empty?
             alternatives << result_of_eval
           end
         end
@@ -2020,7 +2014,7 @@ module Aya
           end
         end
       end
-      if not result or result.empty?
+      if result == nil or result.empty?
         return nil
       elsif result.length == 1
         return result[0]
@@ -2064,15 +2058,15 @@ module Aya
     def evaluate_token(namespace, token)
       result = '' # default
       if token[0] == TYPE_TOKEN
-        if Re_b.match(token[1])
+        if Re_b.match(token[1]) != nil
           pos = Re_d_.match(token[1]).start(0)
           result = token[1][pos..-1].to_i(2)
-        elsif Re_x.match(token[1])
+        elsif Re_x.match(token[1]) != nil
           result = token[1].to_i(16)
         else
           func = @dic.get_function(token[1])
           system_functions = @dic.aya.get_system_functions()
-          if func
+          if func != nil
             result = func.call()
           elsif system_functions.exists(token[1])
             result = system_functions.call(namespace, token[1], [])
@@ -2102,11 +2096,11 @@ module Aya
         func_name = token[1][0]
         ##raise ["assert: ", 'function ', func_name, ' not found.'].join('') unless system_functions.exists(func_name)
         arguments = evaluate_argument(namespace, func_name,
-                                      token[1][1], 1)
+                                      token[1][1], true)
         if func_name == 'CALLBYNAME'
           func = @dic.get_function(arguments[0])
           system_functions = @dic.aya.get_system_functions()
-          if func
+          if func != nil
             result = func.call()
           elsif system_functions.exists(arguments[0])
             result = system_functions.call(namespace, arguments[0], [])
@@ -2124,7 +2118,7 @@ module Aya
         func = @dic.get_function(func_name)
         ##raise ["assert: ", 'function ', func_name, ' not found.'].join('') unless func != nil
         arguments = evaluate_argument(namespace, func_name,
-                                      token[1][1], 0)
+                                      token[1][1], false)
         result = func.call(:argv => arguments)
       elsif token[0] == TYPE_ARRAY
         var_name = token[1][0]
@@ -2415,7 +2409,7 @@ module Aya
       system_functions = @dic.aya.get_system_functions()
       while startpoint < line.length
         pos = line.index('%', startpoint)
-        if not pos or pos < 0
+        if pos == nil or pos < 0
           buf = [buf, line[startpoint..-1]].join('')
           startpoint = line.length
           next
@@ -2428,7 +2422,7 @@ module Aya
         endpoint = line.length
         for char in SPECIAL_CHARS
           pos = line[0..endpoint-1].index(char, startpoint + 2)
-          if pos and 0 < pos and pos < endpoint
+          if pos != nil and 0 < pos and pos < endpoint
             endpoint = pos
           end
         end
@@ -2462,7 +2456,7 @@ module Aya
             if endpoint < line.length and \
               line[endpoint] == '['
               end_of_block = line.index(']', endpoint + 1)
-              if not end_of_block or end_of_block < 0
+              if end_of_block == nil or end_of_block < 0
                 Logging::Logging.debug(
                   'unbalanced "[" or illegal index in ' \
                   'the string(' + line + ')')
@@ -2489,7 +2483,7 @@ module Aya
             if endpoint < line.length and \
               line[endpoint] == '('
               end_of_parenthesis = line.index(')', endpoint + 1)
-              if not end_of_parenthesis or end_of_parenthesis < 0
+              if end_of_parenthesis == nil or end_of_parenthesis < 0
                 Logging::Logging.debug(
                   'unbalanced "(" in the string(' + line + ')')
                 startpoint = line.length
@@ -2504,7 +2498,7 @@ module Aya
               if is_system_func
                 if func_name == 'CALLBYNAME'
                   func = @dic.get_function(arguments[0])
-                  if func
+                  if func != nil
                     result_of_func = func.call()
                   elsif system_functions.exists(arguments[0])
                     result_of_func = system_functions.call(
@@ -2562,7 +2556,7 @@ module Aya
               index = nil
               if endpoint < line.length and line[endpoint] == '['
                 end_of_block = line.index(']', endpoint + 1)
-                if not end_of_block or end_of_block < 0
+                if end_of_block == nil or end_of_block < 0
                   Logging::Logging.debug(
                     'unbalanced "[" or ' \
                     'illegal index in the string(' + line + ')')
@@ -2609,7 +2603,7 @@ module Aya
 
     def format(input_num)
       if input_num.is_a?(Float)
-        result = round(input_num, 6).to_s
+        result = input_num.round(6).to_s
       else
         result = input_num.to_s
       end
@@ -2619,7 +2613,7 @@ module Aya
     def evaluate_argument(namespace, name, argument, is_system_func)
       arguments = []
       for i in 0..argument.length-1
-        if is_system_func != 0 and \
+        if is_system_func and \
           @dic.aya.get_system_functions().not_to_evaluate(name, i)
           ##raise "assert" unless [].include?(argument[i]) ## FIXME
           arguments << argument[i][1][1]
@@ -2802,7 +2796,7 @@ module Aya
     def ARRAYSIZE(namespace, argv)
       if argv[0].is_a?(String)
         line = argv[0]
-        if not line or line == ''
+        if line == nil or line == ''
           value = 0
         elsif line.start_with?('"') and line.end_with?('"')
           value = line.count(',') + 1
@@ -2909,8 +2903,8 @@ module Aya
         @errno = 260
       elsif not File.directory?(dst_path)
         @errno = 261
-      elsif @security.check_path(src_path, :flag => 'r') and \
-            @security.check_path(dst_path)
+      elsif @security.check_path(src_path, :flag => 'r') == 1 and \
+            @security.check_path(dst_path) == 1
         begin
           shutil.copyfile(src_path, dst_path)
         rescue
@@ -2930,7 +2924,7 @@ module Aya
       result = 0
       if not File.file?(path)
         @errno = 270
-      elsif @security.check_path(path)
+      elsif @security.check_path(path) == 1
         begin
           File.delete(path)
         rescue
@@ -2953,7 +2947,7 @@ module Aya
       dirname = Home.get_normalized_path(argv[0].to_s)
       path = File.join(@aya.aya_dir, dirname)
       filelist = []
-      if @security.check_path(path, :flag => 'r')
+      if @security.check_path(path, :flag => 'r') == 1
         begin
           filelist = Dir.entries(path).reject{|entry| entry =~ /^\.{1,2}$/}
         rescue
@@ -2996,8 +2990,8 @@ module Aya
         @errno = 265
       elsif not File.directory?(head)
         @errno = 266
-      elsif @security.check_path(src_path) and \
-            @security.check_path(dst_path)
+      elsif @security.check_path(src_path) == 1 and \
+            @security.check_path(dst_path) == 1
         begin
           File.rename(src_path, dst_path)
         rescue
@@ -3016,7 +3010,7 @@ module Aya
       accessmode = argv[1].to_s
       result = 0
       path = File.join(@aya.aya_dir, filename)
-      if @security.check_path(path, :flag => accessmode[0])
+      if @security.check_path(path, :flag => accessmode[0]) == 1
         norm_path = File.expand_path(path)
         if @aya.filelist.include?(norm_path)
           result = 2
@@ -3043,7 +3037,7 @@ module Aya
       if @aya.filelist.include?(norm_path)
         f = @aya.filelist[norm_path]
         result = f.readline()
-        if not result
+        if result == nil
           result = -1
         elsif result.end_with?("\r\n")
           result = result[0..-3]
@@ -3065,7 +3059,7 @@ module Aya
         @errno = 274
       elsif not File.directory?(head)
         @errno = 275
-      elsif @security.check_path(dst_path)
+      elsif @security.check_path(dst_path) == 1
         begin
           File.rename(src_path, dst_path)
         rescue
@@ -3085,7 +3079,7 @@ module Aya
       size = -1
       if not File.exist?(path)
         @errno = 279
-      elsif @security.check_path(path, :flag => 'r')
+      elsif @security.check_path(path, :flag => 'r') == 1
         begin
           size = File.size(path)
         rescue
@@ -3142,7 +3136,7 @@ module Aya
         return -1
       end
       begin
-        code = ord(argv[0][0])
+        code = argv[0][0].ord
       rescue
         return -1
       end
@@ -3202,7 +3196,7 @@ module Aya
     def LETTONAME(namespace, argv)
       var = argv[0].to_s
       value = argv[1]
-      if not var
+      if var == nil or var.empty?
         return nil
       end
       target_namespace = select_namespace(namespace, var)
@@ -3218,7 +3212,7 @@ module Aya
       end
       result = ''
       header_list = @saori_header
-      if header_list and argv[0].to_i < header_list.length
+      if header_list != nil and argv[0].to_i < header_list.length
         result = header_list[argv[0].to_i]
       end
       return result
@@ -3236,7 +3230,7 @@ module Aya
       result = ''
       if argv[0].is_a?(Fixnum)
         header_list = @saori_header
-        if header_list and argv[0].to_i < header_list.length
+        if header_list != nil and argv[0].to_i < header_list.length
           key = header_list[argv[0].to_i]
         end
       else
@@ -3252,7 +3246,7 @@ module Aya
       dll = argv[0].to_s
       result = 0
       if not dll.empty?
-        if @security.check_lib(dll)
+        if @security.check_lib(dll) == 1
           result = @aya.saori_library.load(dll, @aya.aya_dir)
           if result == 0
             @errno = 17
@@ -3339,7 +3333,7 @@ module Aya
       head, tail = File.split(path)
       if not File.directory?(head)
         @errno = 283
-      elsif @security.check_path(path)
+      elsif @security.check_path(path) == 1
         begin
           Dir.mkdir(path, 0o755)
         rescue
@@ -3469,7 +3463,7 @@ module Aya
       @saori_header = []
       @saori_value = {}
       @saori_protocol = ''
-      if header and not header.empty?
+      if header != nil and not header.empty?
         line = header.shift
         line = line.strip()
         if line.include?(' ')
@@ -3484,7 +3478,7 @@ module Aya
           key, value = line.split(':', 2)
           key.strip!
           value.strip!
-          if key
+          if not key.empty?
             @saori_header << key
             @saori_value[key] = value
           end
@@ -3499,7 +3493,7 @@ module Aya
       result = 0
       if not File.directory?(path)
         @errno = 287
-      elsif @security.check_path(path)
+      elsif @security.check_path(path) == 1
         begin
           Dir.rmdir(path)
         rescue
@@ -3796,7 +3790,7 @@ module Aya
 
     def reset_res_reference
       for key in @table.keys
-        if Re_res.match(key)
+        if Re_res.match(key) != nil
           @table.delete(key)
         end
       end
@@ -3848,7 +3842,7 @@ module Aya
 
     def exists(name)
       if SYS_VARIABLES.include?(name)
-        return 1
+        return true
       else
         return super(name)
       end
@@ -3872,14 +3866,14 @@ module Aya
           for line in f
             line = line.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
             comma = line.index(',')
-            if comma and comma >= 0
+            if comma != nil and comma >= 0
               key = line[0..comma-1]
             else
               next
             end
             value = line[comma + 1..-1].strip()
             comma = Aya.find_not_quoted(value, ',')
-            if comma and comma >= 0
+            if comma != nil and comma >= 0
               separator = value[comma + 1..-1].strip()
               separator = separator[1..-2]
               value = value[0..comma-1].strip()
@@ -4017,7 +4011,7 @@ module Aya
     end
 
     def append_unless_empty(token)
-      if token and not token.empty?
+      if token != nil and not token.empty?
         @tokens << token
       end
     end
@@ -4073,7 +4067,7 @@ module Aya
       @array = []
       while not @is_empty
         separator_position = @line.index(@separator, @position)
-        if not separator_position
+        if separator_position == nil
           token = @line[@position..-1]
           @is_empty = true
         else
@@ -4256,9 +4250,9 @@ module Aya
       result = 0
       head, name = File.split(name.gsub("\\", '/')) # XXX: don't encode here
       top_dir = File.join(top_dir, head)
-      if @saori and not @saori_list.include?(name)
+      if @saori != nil and not @saori_list.include?(name)
         module_ = @saori.request(name)
-        if module_
+        if module_ != nil
           @saori_list[name] = module_
         end
       end
@@ -4269,7 +4263,7 @@ module Aya
     end
 
     def unload(name: nil)
-      if name
+      if name != nil
         name = File.split(name.gsub("\\", '/'))[-1] # XXX: don't encode here
         if @saori_list.include?(name)
           @saori_list[name].unload()
@@ -4286,7 +4280,7 @@ module Aya
     def request(name, req)
       result = '' # FIXME
       name = File.split(name.gsub("\\", '/'))[-1] # XXX: don't encode here
-      if name and @saori_list.include?(name)
+      if name != nil and @saori_list.include?(name)
         result = @saori_list[name].request(req)
       end
       return result
