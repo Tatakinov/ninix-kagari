@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2005-2015 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2005-2016 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -18,7 +18,7 @@ module Version
   bindtextdomain("ninix-aya")
 
   def self.NUMBER
-    return '4.500.7'
+    return '4.500.8'
   end
 
   def self.CODENAME
@@ -35,7 +35,7 @@ module Version
       '\_q' +
       'Copyright (c) 2001, 2002 Tamito KAJIYAMA\n' +
       'Copyright (c) 2002-2006 MATSUMURA Namihiko\n' +
-      'Copyright (c) 2002-2015 Shyouzou Sugitani\n' +
+      'Copyright (c) 2002-2016 Shyouzou Sugitani\n' +
       'Copyright (c) 2002, 2003 ABE Hideaki\n' +
       'Copyright (c) 2003-2005 Shun-ichi TAHARA\e'
   end

@@ -3,7 +3,7 @@
 #  satori.rb - a "里々" compatible Shiori module for ninix
 #  Copyright (C) 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2015 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2016 by Shyouzou Sugitani <shy@users.osdn.me>
 #  Copyright (C) 2003, 2004 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -2780,7 +2780,7 @@ module Satori
         "Shiori: SATORI compatible module for ninix\n" \
         "        Copyright (C) 2002 by Tamito KAJIYAMA\n" \
         "        Copyright (C) 2002, 2003 by MATSUMURA Namihiko\n" \
-        "        Copyright (C) 2002-2015 by Shyouzou Sugitani\n" \
+        "        Copyright (C) 2002-2016 by Shyouzou Sugitani\n" \
         "        Copyright (C) 2003, 2004 by Shun-ichi TAHARA")
     end
 
