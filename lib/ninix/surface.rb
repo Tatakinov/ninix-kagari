@@ -71,15 +71,19 @@ module Surface
       end
       window.signal_connect('delete_event') do |w, e|
         delete(w, e)
+        next true
       end
       window.signal_connect('key_press_event') do |w, e|
         key_press(w, e)
+        next true
       end
       window.signal_connect('key_release_event') do |w, e|
         key_press(w, e)
+        next true
       end
       window.signal_connect('window_state_event') do |w, e|
         window_state(w, e)
+        next true
       end
       window.set_events(Gdk::EventMask::KEY_PRESS_MASK|
                         Gdk::EventMask::KEY_RELEASE_MASK)
@@ -955,9 +959,11 @@ module Surface
       @__balloon_offset = nil
       @window.signal_connect('leave_notify_event') do |w, e|
         window_leave_notify(w, e) # XXX
+        next true
       end
       @window.signal_connect('enter_notify_event') do |w, e|
         window_enter_notify(w, e) # XXX
+        next true
       end
       @darea = @window.darea
       @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
@@ -968,26 +974,33 @@ module Surface
                         Gdk::EventMask::SCROLL_MASK)
       @darea.signal_connect('draw') do |w, e|
         redraw(w, e)
+        next true
       end
       @darea.signal_connect('button_press_event') do |w, e|
         button_press(w, e)
+        next true
       end
       @darea.signal_connect('button_release_event') do |w, e|
         button_release(w, e)
+        next true
       end
       @darea.signal_connect('motion_notify_event') do |w, e|
         motion_notify(w, e)
+        next true
       end
       @darea.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
         drag_data_received(widget, context, x, y, data, info, time)
+        next true
       end
       @darea.signal_connect('scroll_event') do |w, e|
         scroll(w, e)
+        next true
       end
       if @side == 0
         screen = @window.screen
         screen.signal_connect('size-changed') do |scr|
           display_changed(scr)
+          next true
         end
       end
       # DnD data types

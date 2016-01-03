@@ -101,6 +101,7 @@ module Balloon
       window.set_skip_taskbar_hint(true)
       window.signal_connect('delete_event') do |w, e|
         delete(w, e)
+        next true
       end
       window.realize()
       return window
@@ -519,18 +520,23 @@ module Balloon
                         Gdk::EventMask::SCROLL_MASK)
       @darea.signal_connect('draw') do |w, e|
         redraw(w, e)
+        next true
       end
       @darea.signal_connect('button_press_event') do |w, e|
         button_press(w, e)
+        next true
       end
       @darea.signal_connect('button_release_event') do |w, e|
         button_release(w, e)
+        next true
       end
       @darea.signal_connect('motion_notify_event') do |w, e|
         motion_notify(w, e)
+        next true
       end
       @darea.signal_connect('scroll_event') do |w, e|
         scroll(w, e)
+        next true
       end
       @layout = Pango::Layout.new(@darea.pango_context)
       @sstp_layout = Pango::Layout.new(@darea.pango_context())
@@ -1622,15 +1628,19 @@ module Balloon
       @window.set_title('communicate')
       @window.signal_connect('delete_event') do |w ,e|
         delete(w, e)
+        next true
       end
       @window.signal_connect('key_press_event') do |w, e|
         key_press(w, e)
+        next true
       end
       @window.signal_connect('button_press_event') do |w, e|
         button_press(w, e)
+        next true
       end
       @window.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
         drag_data_received(widget, context, x, y, data, info, time)
+        next true
       end
       # DnD data types
       dnd_targets = [['text/plain', 0, 0]]
@@ -1646,6 +1656,7 @@ module Balloon
       @entry = Gtk::Entry.new
       @entry.signal_connect('activate') do |w|
         activate(w)
+        next true
       end
       @entry.set_inner_border(nil)
       @entry.set_has_frame(false)
@@ -1669,6 +1680,7 @@ module Balloon
         darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
         darea.signal_connect('draw') do |w, e|
           redraw(w, e, surface)
+          next true
         end
         darea.show()
         x = desc.get('communicatebox.x', :default => 10).to_i

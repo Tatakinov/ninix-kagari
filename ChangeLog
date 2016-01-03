@@ -1,3 +1,11 @@
+Sun January 3 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* シグナル処理のコールバックブロックの戻り値を明示的に与えるようにした.
+	* otherghostnameイベントの引数が間違っていたのを修正した.
+	* アルファチャンネル付きpngに対するpnrの処理を修正した.
+	* 文4互換モジュールを修正した.
+	* 華和梨7互換モジュールを修正した.
+	* 美坂互換モジュールを修正した.
+
 Fri January 1 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* バージョン4.500.8リリース.
 	* Copyrightを2016年に更新した.

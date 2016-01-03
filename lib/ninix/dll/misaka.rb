@@ -170,7 +170,7 @@ module Misaka
         [TOKEN_OPERATOR,      Regexp.new('\A([!=]=|[<>]=?|=[<>]|&&|\|\||\+\+|--|[+\-*/]?=|[+\-*/%\^])')],
         [TOKEN_DIRECTIVE,     Regexp.new('\A#[_A-Za-z][_A-Za-z0-9]*')],
         #[TOKEN_TEXT,          Regexp.new("[!&|]|(\\[,\"]|[\x01\x02#'.0-9:?@A-Z\\_`a-z~]|[\x80-\xff].)+")],
-        [TOKEN_TEXT,          Regexp.new("\\A((\"[^\"]*\")|[!&|]|(\\\\[,\"]|[\x01\x02#'.0-9:?@A-Z\\\\_`a-z~\"]|[" + "\u0080" + "-" + "\uffff" + "]+)+)")],
+        [TOKEN_TEXT,          Regexp.new("\\A((\"[^\"]*\")|[!&|]|(\\\\[,\"]|[\x01\x02#'.0-9:?@A-Z\\\\_`a-z~\"]|[\\u0080-\\uffff]+)+)")],
         ]
     Token_names = {
         TOKEN_WHITESPACE =>    'whitespace',
@@ -1596,7 +1596,11 @@ module Misaka
     # internal
     def reset_random_talk_interval
       interval = 0
-      value_type, value = @variable.get('$_talkinterval', [TYPE_SCHOLAR, ''])
+      if @variable.include?('$_talkinterval')
+        value_type, value = @variable['$_talkinterval']
+      else
+        value_type, value = TYPE_SCHOLAR, ''
+      end
       if value_type == TYPE_SCHOLAR
         begin
           interval = [Integer(value), 0].max

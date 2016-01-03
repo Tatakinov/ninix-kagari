@@ -330,6 +330,10 @@ module Kawari
     MAXDEPTH = 30
 
     def initialize(prefix, pathlist, rdictlist, kdictlist)
+      kawari_init(prefix, pathlist, rdictlist, kdictlist)
+    end
+
+    def kawari_init(prefix, pathlist, rdictlist, kdictlist)
       @kis_commands = {
         # flow controls
         'if' =>          'exec_new_if',
@@ -384,10 +388,6 @@ module Kawari
         'callsaori' =>   nil,
         'callsaorix' =>  nil,
       }
-      kawari_init(prefix, pathlist, rdictlist, kdictlist)
-    end
-
-    def kawari_init(prefix, pathlist, rdictlist, kdictlist)
       @prefix = prefix
       @pathlist = pathlist
       @rdictlist = rdictlist
@@ -2025,10 +2025,6 @@ module Kawari
       @dll_name = dll_name
       @saori_list = {}
       @saori_ini = {}
-      @kis_commands['saoriregist'] = 'exec_saoriregist'
-      @kis_commands['saorierase'] = 'exec_saorierase'
-      @kis_commands['callsaori'] = 'exec_callsaori'
-      @kis_commands['callsaorix'] = 'exec_callsaorix'
     end
 
     def use_saori(saori)
@@ -2060,6 +2056,10 @@ module Kawari
           saori_load(value[0], File.join(@kawari_dir, head))
         end
       end
+      @kis_commands['saoriregist'] = 'exec_saoriregist'
+      @kis_commands['saorierase'] = 'exec_saorierase'
+      @kis_commands['callsaori'] = 'exec_callsaori'
+      @kis_commands['callsaorix'] = 'exec_callsaorix'
       return 1
     end
 

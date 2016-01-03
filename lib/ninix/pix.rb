@@ -56,6 +56,7 @@ module Pix
       set_resizable(false)
       signal_connect("screen-changed") do |widget, old_screen|
         screen_changed(widget, :old_screen => old_screen)
+        next true
       end
       screen_changed(self)
     end
@@ -86,6 +87,7 @@ module Pix
       @__surface_position = [0, 0]
       signal_connect_after('size_allocate') do |a|
         size_allocate(a)
+        next false
       end
       # create drawing area
       @darea = Gtk::DrawingArea.new
@@ -365,9 +367,10 @@ module Pix
         rgba = pixels[0, 4]
         for x in 0..(pixels.size / 4 - 1)
           if pixels[x * 4, 4] == rgba
-            pixels[x * 4, 4] = rgba
+            pixels[x * 4 + 3] = 0.chr
           end
         end
+        pixbuf.pixels = pixels
       end
     end
     if use_pna

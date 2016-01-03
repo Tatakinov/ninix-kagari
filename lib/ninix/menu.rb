@@ -175,17 +175,20 @@ module Menu
       @ui_manager.add_ui(ui_info)
       @__popup_menu = @ui_manager.get_widget('/popup')
       @__popup_menu.signal_connect('realize') do |i, *a|
-          set_stylecontext_with_sidebar(i, *a)
+        set_stylecontext_with_sidebar(i, *a)
+        next false
       end
       for key in @__menu_list.keys
         item = @ui_manager.get_widget(['/popup/', key].join(''))
         item.signal_connect('draw') do |i, *a|
           set_stylecontext(i, *a)
+          next false
         end
         submenu = item.submenu
         if submenu != nil
           submenu.signal_connect('realize') do |i, *a|
             set_stylecontext(i, *a)
+            next false
           end
         end
       end
@@ -306,9 +309,11 @@ module Menu
               item.set_active(state)
               item.signal_connect('activate', [index, key]) do |a, ik|
                 @parent.handle_request('NOTIFY', 'toggle_bind', ik)
+                next true
               end
               item.signal_connect('draw') do |i, *a|
-                  set_stylecontext(i, *a)
+                set_stylecontext(i, *a)
+                next false
               end
             else
               item = Gtk::SeparatorMenuItem.new()
@@ -318,6 +323,7 @@ module Menu
           end
           @__mayuna_menu[index].signal_connect('realize') do |i, *a|
             set_stylecontext(i, *a)
+            next false
           end
         end
       end
@@ -528,11 +534,13 @@ module Menu
                 item.signal_connect('activate', title, url) do |a, title, url|
                   @parent.handle_request(
                     'NOTIFY', 'notify_site_selection', title, url)
+                  next true
                 end
                 if banner != nil
                   item.set_has_tooltip(true)
                   item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
                     on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
+                    next true
                   end
                 else
                   item.set_has_tooltip(false)
@@ -541,6 +549,7 @@ module Menu
             end
             item.signal_connect('draw') do |i, *a|
               set_stylecontext(i, *a)
+              next false
             end
             menu.add(item)
             item.show()
@@ -549,6 +558,7 @@ module Menu
           menuitem.set_submenu(menu)
           menu.signal_connect('realize') do |i, *a|
             set_stylecontext(i, *a)
+            next false
           end
           menu.show()
           __set_visible('Portal', true)
@@ -606,11 +616,13 @@ module Menu
             if entry.length > 1
               item.signal_connect('activate', title, url) do |a, title, url|
                 @parent.handle_request('NOTIFY', 'notify_site_selection', title, url)
+                next true
               end
               if banner != nil
                 item.set_has_tooltip(true)
                 item.signal_connect('query-tooltip') do |widget, x, y, keyboardmode, tooltip|
                   on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
+                  next true
                 end
               else
                 item.set_has_tooltip(false)
@@ -619,6 +631,7 @@ module Menu
           end
           item.signal_connect('draw') do |i, *a|
             set_stylecontext(i, *a)
+            next false
           end
           menu.add(item)
           item.show()
@@ -627,6 +640,7 @@ module Menu
         menuitem.set_submenu(menu)
         menu.signal_connect('realize') do |i, *a|
           set_stylecontext(i, *a)
+          next false
         end
         menu.show()
         __set_visible('Recommend', true)
@@ -655,17 +669,20 @@ module Menu
       item.show()
       item.signal_connect('activate') do |a, v|
         handler.call(key)
+        next true
       end
       if thumbnail != nil
         item.set_has_tooltip(true)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
           on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
+          next true
         end
       else
         item.set_has_tooltip(false)
       end
       item.signal_connect('draw') do |i, *a|
         set_stylecontext(i, *a)
+        next false
       end
       return item
     end
@@ -781,7 +798,8 @@ module Menu
         menuitem = @ui_manager.get_widget(['/popup/', path].join(''))
         menuitem.set_submenu(ghost_menu)
         ghost_menu.signal_connect('realize') do |i, *a|
-            set_stylecontext(i, *a)
+          set_stylecontext(i, *a)
+          next false
         end
       end
     end
@@ -809,6 +827,7 @@ module Menu
       end
       menu.signal_connect('realize') do |i, *a|
         set_stylecontext(i, *a)
+        next false
       end
       return menu
     end
@@ -819,17 +838,20 @@ module Menu
       item.show()
       item.signal_connect('activate') do |a, v|
         handler.call(value)
+        next true
       end
       if thumbnail != nil
         item.set_has_tooltip(true)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
           on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
+          next true
         end
       else
         item.set_has_tooltip(false)
       end
       item.signal_connect('draw') do |i, *a|
         set_stylecontext(i, *a)
+        next false
       end
       return item
     end
@@ -845,9 +867,11 @@ module Menu
         nekodorif_menu << item
         item.signal_connect('activate') do |a, n|
           @parent.handle_request('NOTIFY', 'select_nekodorif', nekodorif_list[i]['dir'])
+          next true
         end
         item.signal_connect('draw') do |i, *a|
           set_stylecontext(i, *a)
+          next false
         end
         ##if working
         ##  item.set_sensitive(false)
@@ -856,6 +880,7 @@ module Menu
       menuitem.set_submenu(nekodorif_menu)
       nekodorif_menu.signal_connect('realize') do |i, *a|
         set_stylecontext(i, *a)
+        next false
       end
     end
 
@@ -870,9 +895,11 @@ module Menu
         kinoko_menu << item
         item.signal_connect('activate', kinoko_list[i]) do |a, k|
           @parent.handle_request('NOTIFY', 'select_kinoko', k)
+          next true
         end
         item.signal_connect('draw') do |i, *a|
           set_stylecontext(i, *a)
+          next false
         end
         ##if working
         ##  item.set_sensitive(false)
@@ -881,6 +908,7 @@ module Menu
       menuitem.set_submenu(kinoko_menu)
       kinoko_menu.signal_connect('realize') do |i, *a|
         set_stylecontext(i, *a)
+        next false
       end
     end
 

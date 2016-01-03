@@ -134,7 +134,7 @@ module Prefs
       @parent = nil
       @dialog = Gtk::Dialog.new()
       @dialog.signal_connect('delete_event') do |i, *a|
-        return true
+        next true
       end
       @dialog.set_title('Preferences')
       @dialog.set_default_size(-1, 600)
@@ -154,6 +154,7 @@ module Prefs
       @dialog.add_button("_Cancel", Gtk::ResponseType::CANCEL)
       @dialog.signal_connect('response') do |i, *a|
         response(i, *a)
+        next true
       end
     end
 

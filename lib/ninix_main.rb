@@ -1399,7 +1399,7 @@ module Ninix_Main
       @app = app
       @dialog = Gtk::Dialog.new
       @dialog.signal_connect('delete_event') do |w, e|
-        #return true # XXX
+        next true # XXX
       end
       @level = Logger::WARN # XXX
       Logging::Logging.add_logger(self)
@@ -1427,6 +1427,7 @@ module Ninix_Main
       @tv.drag_dest_add_uri_targets()
       @tv.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
         drag_data_received(widget, context, x, y, data, info, time)
+        next true
       end
       @tv.show()
       @sw.add(@tv)
@@ -1438,6 +1439,7 @@ module Ninix_Main
       @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
         response(w, e)
+        next true
       end
       @file_chooser = Gtk::FileChooserDialog.new(
         :title => "Install..",
@@ -1601,7 +1603,7 @@ module Ninix_Main
       @dialog = Gtk::Dialog.new
       @dialog.set_title('Usage')
       @dialog.signal_connect('delete_event') do |w, e|
-        #return true # XXX
+        next true # XXX
       end
       @darea = Gtk::DrawingArea.new
       @darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
@@ -1609,9 +1611,11 @@ module Ninix_Main
       @darea.set_size_request(*@size)
       @darea.signal_connect('configure_event') do |w, e|
         configure(w, e)
+        next true
       end
       @darea.signal_connect('draw') do |w, e|
         redraw(w, e)
+        next true
       end
       content_area = @dialog.content_area
       content_area.pack_start(@darea, :expand => true, :fill => true, :padding => 0)
@@ -1619,6 +1623,7 @@ module Ninix_Main
       @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
         response(w, e)
+        next true
       end
       @opened = false
     end

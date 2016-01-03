@@ -285,6 +285,7 @@ module Hanayu
       @window.set_resizable(false)
       @window.signal_connect('delete_event') do |w ,e|
         delete(w, e)
+        next true
       end
       left, top, scrn_w, scrn_h = Pix.get_workarea()
       @x = left + (scrn_w / 2).to_i
@@ -295,9 +296,11 @@ module Hanayu
                         Gdk::EventMask::BUTTON_PRESS_MASK)
       @darea.signal_connect('draw') do |w ,e|
         redraw(w, e)
+        next true
       end
       @darea.signal_connect('button_press_event') do |w ,e |
         button_press(w, e)
+        next true
       end
       @darea.set_size_request(WIDTH, HEIGHT)
       @darea.show()

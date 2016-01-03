@@ -147,6 +147,7 @@ module Sakura
         bus.add_signal_watch()
         bus.signal_connect('message') do |bus, message|
           on_audio_message(bus, message)
+          next true
         end
       else
         @audio_player = nil
@@ -1750,7 +1751,7 @@ module Sakura
         otherghostname = @parent.handle_request(
           'GET', 'get_otherghostname', get_selfname())
         if otherghostname != @old_otherghostname
-          notify_event('otherghostname', [otherghostname],
+          notify_event('otherghostname', otherghostname,
                        :event_type => 'NOTIFY')
         end
         @old_otherghostname = otherghostname
@@ -3017,7 +3018,7 @@ module Sakura
       @parent = nil # dummy
       @dialog = Gtk::Dialog.new
       @dialog.signal_connect('delete_event') do |a|
-        return true # XXX
+        next true # XXX
       end
       @dialog.set_title('Vanish')
       @dialog.set_modal(true)
@@ -3031,6 +3032,7 @@ module Sakura
       @dialog.add_button("_No", Gtk::ResponseType::NO)
       @dialog.signal_connect('response') do |w, e|
         response(w, e)
+        next true
       end
     end
 
@@ -3074,7 +3076,7 @@ module Sakura
       @parent = nil # dummy
       @dialog = Gtk::Dialog.new
       @dialog.signal_connect('delete_event') do |a|
-        return true # XXX
+        next true # XXX
       end
       @dialog.set_title('Readme.txt')
       @dialog.set_modal(false)
@@ -3100,6 +3102,7 @@ module Sakura
       @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
         response(w, e)
+        next true
       end
     end
 

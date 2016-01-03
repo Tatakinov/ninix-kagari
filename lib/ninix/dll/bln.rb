@@ -213,6 +213,7 @@ module Bln
       @window.set_skip_taskbar_hint(true)
       @window.signal_connect('delete_event') do |w, e|
         delete(w, e)
+        next true
       end
       if data.include?('position')
         @position = data['position']
@@ -316,18 +317,23 @@ module Bln
                         Gdk::EventMask::LEAVE_NOTIFY_MASK)
       @darea.signal_connect('draw') do |w, e|
         redraw(w, e)
+        next true
       end
       @darea.signal_connect('button_press_event') do |w, e|
         button_press(w, e)
+        next true
       end
       @darea.signal_connect('button_release_event') do |w, e|
         button_release(w, e)
+        next true
       end
       @darea.signal_connect('motion_notify_event') do |w, e|
         motion_notify(w, e)
+        next true
       end
       @darea.signal_connect('leave_notify_event') do |w, e|
         leave_notify(w, e)
+        next true
       end
       set_skin()
       set_position()

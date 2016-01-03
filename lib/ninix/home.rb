@@ -76,7 +76,7 @@ module Home
         end
         if name != nil and not table.include?(name)
           shiori = shiori_lib.request(['', name])
-          if shiori
+          if shiori != nil
             table[name] = shiori
           end
         end

@@ -315,7 +315,7 @@ module NGM
       @parent = nil
       @dialog = Gtk::Dialog.new
       @dialog.signal_connect('delete_event') do |a|
-        return true # XXX
+        next true # XXX
       end
       @dialog.set_modal(true)
       @dialog.set_window_position(Gtk::Window::Position::CENTER)
@@ -330,6 +330,7 @@ module NGM
       @dialog.add_button("_Cancel", Gtk::ResponseType::CANCEL)
       @dialog.signal_connect('response') do |w, r|
         response(w, r)
+        next true
       end
     end
 
@@ -494,6 +495,7 @@ module NGM
       @window.set_resizable(false)
       @window.signal_connect('delete_event') do |a|
         close()
+        next true
       end
       @window.set_window_position(Gtk::Window::Position::CENTER)
       @window.gravity = Gdk::Gravity::CENTER
@@ -530,6 +532,7 @@ module NGM
       button = Gtk::Button.new(:label => _('Previous'))
       button.signal_connect('clicked') do |b, w=self|
         w.show_previous()
+        next true
       end
       box.add(button)
       button.show()
@@ -537,6 +540,7 @@ module NGM
       button = Gtk::Button.new(:label => _('Next'))
       button.signal_connect('clicked') do |b, w=self|
         w.show_next()
+        next true
       end
       box.add(button)
       button.show()
@@ -603,6 +607,7 @@ module NGM
       darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
       darea.signal_connect('draw') do |w, c|
         redraw(w, c, side)
+        next true
       end
       darea.show()
       @darea[side] = darea
@@ -661,6 +666,7 @@ module NGM
       button.signal_connect(
                      'clicked') do |b, w=self|
         w.handle_request('NOTIFY', 'install_current')
+        next true
       end
       box.add(button)
       button.show()
@@ -669,6 +675,7 @@ module NGM
       button.signal_connect(
                      'clicked') do |b, w=self|
         w.handle_request('NOTIFY', 'update_current')
+        next true
       end
       box.add(button)
       button.show()
@@ -684,6 +691,7 @@ module NGM
       button.signal_connect(
                      'clicked') do |b|
         webbrowser.open(@url['HP'][0])
+        next true
       end
       button.show()
       button = Gtk::Button.new(:label => '')
@@ -694,6 +702,7 @@ module NGM
       button.signal_connect(
                      'clicked') do |b|
         webbrowser.open(@url['Public'][0])
+        next true
       end
       button.show()
       vbox.pack_start(hbox, :expand => false, :fill => true, :padding => 0)

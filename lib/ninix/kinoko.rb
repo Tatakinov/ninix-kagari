@@ -87,6 +87,7 @@ module Kinoko
           item = Gtk::MenuItem.new(skin['title'])
           item.signal_connect('activate', skin) do |a, k|
             @parent.handle_request('NOTIFY', 'select_skin', k)
+            next true
           end
           menu.add(item)
           item.show()
@@ -294,6 +295,7 @@ module Kinoko
       @window.set_skip_taskbar_hint(true)
       @window.signal_connect('delete_event') do |w, e|
         delete(w, e)
+        next true
       end
       @window.add_accel_group(@accelgroup)
       if @data['animation'] != nil
@@ -330,18 +332,23 @@ module Kinoko
                         Gdk::EventMask::LEAVE_NOTIFY_MASK)
       @darea.signal_connect('button_press_event') do |w, e|
         button_press(w, e)
+        next true
       end
       @darea.signal_connect('button_release_event') do |w, e|
         button_release(w, e)
+        next true
       end
       @darea.signal_connect('motion_notify_event') do |w, e|
-          motion_notify(w, e)
+        motion_notify(w, e)
+        next true
       end
       @darea.signal_connect('leave_notify_event') do |w, e|
         leave_notify(w, e)
+        next true
       end
       @darea.signal_connect('draw') do |w, cr|
         redraw(w, cr)
+        next true
       end
       @window.update_size(@w, @h)
       set_position()

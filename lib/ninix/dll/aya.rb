@@ -400,7 +400,7 @@ module Aya
         rescue
           Logging::Logging.debug('cannnot open ' + path)
         else
-          if @logfile
+          if @logfile != nil
             @logfile.close()
           end
           @logfile = f
@@ -902,7 +902,7 @@ module Aya
           end
           line = [line[0..start-1], ' ', line[end_..-1]].join('')
         end
-        line = line.strip()
+        line = line.gsub(/^[\s　]+|[\s　]+$/, "") # 全角空白も除去
         if line.empty?
           next
         end
@@ -948,7 +948,9 @@ module Aya
       for line in all_lines
         while true
           pos = Aya.find_not_quoted(line, '　')
-          if pos >= 0
+          if pos == 0
+            line = line[1..-1]
+          elsif pos > 0
             line = [line[0..pos-1], ' ', line[pos + 1..-1]].join('')
           else
             break

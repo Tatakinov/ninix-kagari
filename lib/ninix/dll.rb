@@ -153,7 +153,7 @@ module DLL
       name = name.gsub('\\', '/')
       head, tail = File.split(name)
       name = tail
-      if not name or name.empty?
+      if name == nil or name.empty?
         return nil
       end
       if name.downcase.end_with?('.dll') # XXX

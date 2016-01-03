@@ -118,6 +118,7 @@ module Nekodorif
           item = Gtk::MenuItem.new(katochan['name'])
           item.signal_connect('activate', katochan) do |a, k|
             @parent.handle_request('NOTIFY', 'select_katochan', k)
+            next true
           end
           menu.add(item)
           item.show()
@@ -309,9 +310,11 @@ module Nekodorif
       @window.set_title(name)
       @window.signal_connect('delete_event') do |w, e|
         delete(w, e)
+        next true
       end
       @window.signal_connect('key_press_event') do |w, e|
         key_press(w, e)
+        next true
       end
       @window.add_accel_group(@accelgroup)
       @darea = @window.darea
@@ -323,18 +326,23 @@ module Nekodorif
                         Gdk::EventMask::LEAVE_NOTIFY_MASK)
       @darea.signal_connect('draw') do |w, cr|
         redraw(w, cr)
+        next true
       end
       @darea.signal_connect('button_press_event') do |w, e|
         button_press(w, e)
+        next true
       end
       @darea.signal_connect('button_release_event') do |w, e|
         button_release(w, e)
+        next true
       end
       @darea.signal_connect('motion_notify_event') do |w, e|
         motion_notify(w, e)
+        next true
       end
       @darea.signal_connect('leave_notify_event') do |w, e|
         leave_notify(w, e)
+        next true
       end
       @id = [0, nil]
       set_surface()
@@ -761,11 +769,13 @@ module Nekodorif
       @window.set_skip_taskbar_hint(true) # XXX
       @window.signal_connect('delete_event') do |w, e|
         delete(w, e)
+        next true
       end
       @darea = @window.darea
       @darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
       @darea.signal_connect('draw') do |w, cr|
         redraw(w, cr)
+        next true
       end
       @window.show()
       @id = 0
