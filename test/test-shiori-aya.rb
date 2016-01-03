@@ -8,7 +8,7 @@ module NinixTest
       aya = Aya::Shiori.new('aya.dll')
       aya.show_description
       aya.load(:dir => top_dir)
-      result = aya.dic.get_function(function).call(argv)
+      result = aya.dic.get_function(function).call(:argv => argv)
       print(result.to_s, "\n")
     end
   end
