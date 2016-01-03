@@ -195,20 +195,19 @@ module Misaka
     end
 
     def _match(data, line, column, path)
-      pos = 0
-      end_ = data.length
-      while pos < end_
+      temp = data.clone
+      while temp.length > 0
         if column == 0
-          match = Re_comment.match(data[pos..-1])
+          match = Re_comment.match(temp)
           if match != nil
             column = column + match[0].length
-            pos += match.end(0)
+            temp = match.post_match
             next
           end
         end
         break_flag = false
         for token, pattern in Patterns
-          match = pattern.match(data[pos..-1])
+          match = pattern.match(temp)
           if match != nil
             lexeme = match[0]
             if token == TOKEN_TEXT and \
@@ -222,13 +221,13 @@ module Misaka
             else
               @buffer << [token, lexeme, [line, column]]
             end
-            pos += match.end(0)
+            temp = match.post_match
             break_flag = true
             break
           end
         end
         if not break_flag
-          ###print(data[pos..pos + 100 - 1])
+          ###print(temp[0..100 - 1])
           Misaka.lexical_error(:path => path, :position => [line, column])
         end
         if token == TOKEN_NEWLINE
