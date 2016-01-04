@@ -574,7 +574,7 @@ module Satori
       while line != nil and not line.empty?
         if line[0] == '：' ### FIXME: φ
           if not text.empty?
-            buffer_. << [NODE_TEXT, text]
+            buffer_ << [NODE_TEXT, text]
             text = []
           end
           buffer_ << [NODE_SIDE, [line[0]]]
