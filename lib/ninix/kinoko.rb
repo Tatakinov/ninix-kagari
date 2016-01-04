@@ -331,8 +331,7 @@ module Kinoko
                         Gdk::EventMask::POINTER_MOTION_MASK|
                         Gdk::EventMask::LEAVE_NOTIFY_MASK)
       @darea.signal_connect('button_press_event') do |w, e|
-        button_press(w, e)
-        next true
+        next button_press(w, e)
       end
       @darea.signal_connect('button_release_event') do |w, e|
         button_release(w, e)

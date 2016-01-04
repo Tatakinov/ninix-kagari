@@ -153,8 +153,7 @@ module Prefs
       @dialog.add_button("_Apply", Gtk::ResponseType::APPLY)
       @dialog.add_button("_Cancel", Gtk::ResponseType::CANCEL)
       @dialog.signal_connect('response') do |i, *a|
-        response(i, *a)
-        next true
+        next response(i, *a)
       end
     end
 

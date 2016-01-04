@@ -212,8 +212,7 @@ module Bln
       @window.set_title(name)
       @window.set_skip_taskbar_hint(true)
       @window.signal_connect('delete_event') do |w, e|
-        delete(w, e)
-        next true
+        next delete(w, e)
       end
       if data.include?('position')
         @position = data['position']
@@ -320,16 +319,13 @@ module Bln
         next true
       end
       @darea.signal_connect('button_press_event') do |w, e|
-        button_press(w, e)
-        next true
+        next button_press(w, e)
       end
       @darea.signal_connect('button_release_event') do |w, e|
-        button_release(w, e)
-        next true
+        next button_release(w, e)
       end
       @darea.signal_connect('motion_notify_event') do |w, e|
-        motion_notify(w, e)
-        next true
+        next motion_notify(w, e)
       end
       @darea.signal_connect('leave_notify_event') do |w, e|
         leave_notify(w, e)

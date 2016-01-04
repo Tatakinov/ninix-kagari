@@ -2058,7 +2058,8 @@ module Sakura
       w, h = get_surface_size(@script_side)
       x, y = get_surface_position(@script_side)
       left, top, scrn_w, scrn_h = Pix.get_workarea()
-      if x < sx + (sw / 2).to_i < x + w or sx < x + (w / 2).to_i < sx + sw
+      if (x < sx + (sw / 2).to_i and sx + (sw / 2).to_i < x + w) or
+        (sx < x + (w / 2).to_i and x + (w / 2).to_i < sx + sw)
         return
       end
       if sx + (sw / 2).to_i > x + (w / 2).to_i
@@ -3031,8 +3032,7 @@ module Sakura
       @dialog.add_button("_Yes", Gtk::ResponseType::YES)
       @dialog.add_button("_No", Gtk::ResponseType::NO)
       @dialog.signal_connect('response') do |w, e|
-        response(w, e)
-        next true
+        next response(w, e)
       end
     end
 
@@ -3101,8 +3101,7 @@ module Sakura
       content_area.add(vbox)
       @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
-        response(w, e)
-        next true
+        next response(w, e)
       end
     end
 

@@ -70,16 +70,13 @@ module Surface
         window.set_skip_taskbar_hint(true)
       end
       window.signal_connect('delete_event') do |w, e|
-        delete(w, e)
-        next true
+        next delete(w, e)
       end
       window.signal_connect('key_press_event') do |w, e|
-        key_press(w, e)
-        next true
+        next key_press(w, e)
       end
       window.signal_connect('key_release_event') do |w, e|
-        key_press(w, e)
-        next true
+        next key_press(w, e)
       end
       window.signal_connect('window_state_event') do |w, e|
         window_state(w, e)
@@ -958,8 +955,7 @@ module Surface
       @click_count = 0
       @__balloon_offset = nil
       @window.signal_connect('leave_notify_event') do |w, e|
-        window_leave_notify(w, e) # XXX
-        next true
+        next window_leave_notify(w, e) # XXX
       end
       @window.signal_connect('enter_notify_event') do |w, e|
         window_enter_notify(w, e) # XXX
@@ -977,24 +973,20 @@ module Surface
         next true
       end
       @darea.signal_connect('button_press_event') do |w, e|
-        button_press(w, e)
-        next true
+        next button_press(w, e)
       end
       @darea.signal_connect('button_release_event') do |w, e|
-        button_release(w, e)
-        next true
+        next button_release(w, e)
       end
       @darea.signal_connect('motion_notify_event') do |w, e|
-        motion_notify(w, e)
-        next true
+        next motion_notify(w, e)
       end
       @darea.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
         drag_data_received(widget, context, x, y, data, info, time)
         next true
       end
       @darea.signal_connect('scroll_event') do |w, e|
-        scroll(w, e)
-        next true
+        next scroll(w, e)
       end
       if @side == 0
         screen = @window.screen

@@ -1312,7 +1312,7 @@ module Satori
         end
         count += 1
         if count >= @touch_threshold
-          event = reg3.to_s + ref4.to_s + 'なでられ'
+          event = ref3.to_s + ref4.to_s + 'なでられ'
           count = 0
         end
         @mouse_move_count[key] = [count, Time.now]

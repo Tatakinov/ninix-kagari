@@ -100,8 +100,7 @@ module Balloon
       window.set_skip_pager_hint(false)
       window.set_skip_taskbar_hint(true)
       window.signal_connect('delete_event') do |w, e|
-        delete(w, e)
-        next true
+        next delete(w, e)
       end
       window.realize()
       return window
@@ -523,20 +522,17 @@ module Balloon
         next true
       end
       @darea.signal_connect('button_press_event') do |w, e|
-        button_press(w, e)
-        next true
+        next button_press(w, e)
       end
       @darea.signal_connect('button_release_event') do |w, e|
-        button_release(w, e)
+        #button_release(w, e)
         next true
       end
       @darea.signal_connect('motion_notify_event') do |w, e|
-        motion_notify(w, e)
-        next true
+        next motion_notify(w, e)
       end
       @darea.signal_connect('scroll_event') do |w, e|
-        scroll(w, e)
-        next true
+        next scroll(w, e)
       end
       @layout = Pango::Layout.new(@darea.pango_context)
       @sstp_layout = Pango::Layout.new(@darea.pango_context())
@@ -1627,16 +1623,13 @@ module Balloon
       @window = Pix::BaseTransparentWindow.new()
       @window.set_title('communicate')
       @window.signal_connect('delete_event') do |w ,e|
-        delete(w, e)
-        next true
+        next delete(w, e)
       end
       @window.signal_connect('key_press_event') do |w, e|
-        key_press(w, e)
-        next true
+        next key_press(w, e)
       end
       @window.signal_connect('button_press_event') do |w, e|
-        button_press(w, e)
-        next true
+        next button_press(w, e)
       end
       @window.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
         drag_data_received(widget, context, x, y, data, info, time)
@@ -1655,8 +1648,7 @@ module Balloon
       h = desc.get('communicatebox.height', :default => -1).to_i
       @entry = Gtk::Entry.new
       @entry.signal_connect('activate') do |w|
-        activate(w)
-        next true
+        next activate(w)
       end
       @entry.set_inner_border(nil)
       @entry.set_has_frame(false)

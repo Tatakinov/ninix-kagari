@@ -1438,8 +1438,7 @@ module Ninix_Main
       @dialog.add_button('Install', 1)
       @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
-        response(w, e)
-        next true
+        next response(w, e)
       end
       @file_chooser = Gtk::FileChooserDialog.new(
         :title => "Install..",
@@ -1622,8 +1621,7 @@ module Ninix_Main
       @darea.show()
       @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
-        response(w, e)
-        next true
+        next response(w, e)
       end
       @opened = false
     end

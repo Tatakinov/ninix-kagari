@@ -284,8 +284,7 @@ module Hanayu
       @window.set_decorated(false)
       @window.set_resizable(false)
       @window.signal_connect('delete_event') do |w ,e|
-        delete(w, e)
-        next true
+        next delete(w, e)
       end
       left, top, scrn_w, scrn_h = Pix.get_workarea()
       @x = left + (scrn_w / 2).to_i
@@ -299,8 +298,7 @@ module Hanayu
         next true
       end
       @darea.signal_connect('button_press_event') do |w ,e |
-        button_press(w, e)
-        next true
+        next button_press(w, e)
       end
       @darea.set_size_request(WIDTH, HEIGHT)
       @darea.show()

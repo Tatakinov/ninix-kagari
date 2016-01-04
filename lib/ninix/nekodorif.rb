@@ -313,8 +313,7 @@ module Nekodorif
         next true
       end
       @window.signal_connect('key_press_event') do |w, e|
-        key_press(w, e)
-        next true
+        next key_press(w, e)
       end
       @window.add_accel_group(@accelgroup)
       @darea = @window.darea
@@ -329,16 +328,13 @@ module Nekodorif
         next true
       end
       @darea.signal_connect('button_press_event') do |w, e|
-        button_press(w, e)
-        next true
+        next button_press(w, e)
       end
       @darea.signal_connect('button_release_event') do |w, e|
-        button_release(w, e)
-        next true
+        next button_release(w, e)
       end
       @darea.signal_connect('motion_notify_event') do |w, e|
-        motion_notify(w, e)
-        next true
+        next motion_notify(w, e)
       end
       @darea.signal_connect('leave_notify_event') do |w, e|
         leave_notify(w, e)
@@ -383,7 +379,7 @@ module Nekodorif
       @window.set_shape(cr)
     end
 
-    def delete()#widget, event)
+    def delete(widget, event)
       @parent.handle_request('NOTIFY', 'finalize')
     end
 
@@ -602,7 +598,7 @@ module Nekodorif
       @window.destroy()
     end
 
-    def delete()#widget, event)
+    def delete(widget, event)
       destroy()
     end
 

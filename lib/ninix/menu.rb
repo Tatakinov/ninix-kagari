@@ -175,20 +175,17 @@ module Menu
       @ui_manager.add_ui(ui_info)
       @__popup_menu = @ui_manager.get_widget('/popup')
       @__popup_menu.signal_connect('realize') do |i, *a|
-        set_stylecontext_with_sidebar(i, *a)
-        next false
+        next set_stylecontext_with_sidebar(i, *a)
       end
       for key in @__menu_list.keys
         item = @ui_manager.get_widget(['/popup/', key].join(''))
         item.signal_connect('draw') do |i, *a|
-          set_stylecontext(i, *a)
-          next false
+          next set_stylecontext(i, *a)
         end
         submenu = item.submenu
         if submenu != nil
           submenu.signal_connect('realize') do |i, *a|
-            set_stylecontext(i, *a)
-            next false
+            next set_stylecontext(i, *a)
           end
         end
       end
@@ -312,8 +309,7 @@ module Menu
                 next true
               end
               item.signal_connect('draw') do |i, *a|
-                set_stylecontext(i, *a)
-                next false
+                next set_stylecontext(i, *a)
               end
             else
               item = Gtk::SeparatorMenuItem.new()
@@ -322,8 +318,7 @@ module Menu
             @__mayuna_menu[index] << item
           end
           @__mayuna_menu[index].signal_connect('realize') do |i, *a|
-            set_stylecontext(i, *a)
-            next false
+            next set_stylecontext(i, *a)
           end
         end
       end
@@ -539,8 +534,7 @@ module Menu
                 if banner != nil
                   item.set_has_tooltip(true)
                   item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
-                    on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
-                    next true
+                    next on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
                   end
                 else
                   item.set_has_tooltip(false)
@@ -548,8 +542,7 @@ module Menu
               end
             end
             item.signal_connect('draw') do |i, *a|
-              set_stylecontext(i, *a)
-              next false
+              next set_stylecontext(i, *a)
             end
             menu.add(item)
             item.show()
@@ -557,8 +550,7 @@ module Menu
           menuitem = @ui_manager.get_widget(['/popup/', 'Portal'].join(''))
           menuitem.set_submenu(menu)
           menu.signal_connect('realize') do |i, *a|
-            set_stylecontext(i, *a)
-            next false
+            next set_stylecontext(i, *a)
           end
           menu.show()
           __set_visible('Portal', true)
@@ -621,8 +613,7 @@ module Menu
               if banner != nil
                 item.set_has_tooltip(true)
                 item.signal_connect('query-tooltip') do |widget, x, y, keyboardmode, tooltip|
-                  on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
-                  next true
+                  next on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
                 end
               else
                 item.set_has_tooltip(false)
@@ -630,8 +621,7 @@ module Menu
             end
           end
           item.signal_connect('draw') do |i, *a|
-            set_stylecontext(i, *a)
-            next false
+            next set_stylecontext(i, *a)
           end
           menu.add(item)
           item.show()
@@ -639,8 +629,7 @@ module Menu
         menuitem =  @ui_manager.get_widget(['/popup/', 'Recommend'].join(''))
         menuitem.set_submenu(menu)
         menu.signal_connect('realize') do |i, *a|
-          set_stylecontext(i, *a)
-          next false
+          next set_stylecontext(i, *a)
         end
         menu.show()
         __set_visible('Recommend', true)
@@ -674,15 +663,13 @@ module Menu
       if thumbnail != nil
         item.set_has_tooltip(true)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
-          on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
-          next true
+          next on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
         end
       else
         item.set_has_tooltip(false)
       end
       item.signal_connect('draw') do |i, *a|
-        set_stylecontext(i, *a)
-        next false
+        next set_stylecontext(i, *a)
       end
       return item
     end
@@ -798,8 +785,7 @@ module Menu
         menuitem = @ui_manager.get_widget(['/popup/', path].join(''))
         menuitem.set_submenu(ghost_menu)
         ghost_menu.signal_connect('realize') do |i, *a|
-          set_stylecontext(i, *a)
-          next false
+          next set_stylecontext(i, *a)
         end
       end
     end
@@ -826,8 +812,7 @@ module Menu
         end
       end
       menu.signal_connect('realize') do |i, *a|
-        set_stylecontext(i, *a)
-        next false
+        next set_stylecontext(i, *a)
       end
       return menu
     end
@@ -843,15 +828,13 @@ module Menu
       if thumbnail != nil
         item.set_has_tooltip(true)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
-          on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
-          next true
+          next on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
         end
       else
         item.set_has_tooltip(false)
       end
       item.signal_connect('draw') do |i, *a|
-        set_stylecontext(i, *a)
-        next false
+        next set_stylecontext(i, *a)
       end
       return item
     end
@@ -865,13 +848,12 @@ module Menu
         item.set_name('popup menu item')
         item.show()
         nekodorif_menu << item
-        item.signal_connect('activate') do |a, n|
-          @parent.handle_request('NOTIFY', 'select_nekodorif', nekodorif_list[i]['dir'])
+        item.signal_connect('activate', nekodorif_list[i]['dir']) do |a, dir|
+          @parent.handle_request('NOTIFY', 'select_nekodorif', dir)
           next true
         end
         item.signal_connect('draw') do |i, *a|
-          set_stylecontext(i, *a)
-          next false
+          next set_stylecontext(i, *a)
         end
         ##if working
         ##  item.set_sensitive(false)
@@ -879,8 +861,7 @@ module Menu
       menuitem = @ui_manager.get_widget(['/popup/', 'Nekodorif'].join(''))
       menuitem.set_submenu(nekodorif_menu)
       nekodorif_menu.signal_connect('realize') do |i, *a|
-        set_stylecontext(i, *a)
-        next false
+        next set_stylecontext(i, *a)
       end
     end
 
@@ -898,8 +879,7 @@ module Menu
           next true
         end
         item.signal_connect('draw') do |i, *a|
-          set_stylecontext(i, *a)
-          next false
+          next set_stylecontext(i, *a)
         end
         ##if working
         ##  item.set_sensitive(false)
@@ -907,8 +887,7 @@ module Menu
       menuitem = @ui_manager.get_widget(['/popup/', 'Kinoko'].join(''))
       menuitem.set_submenu(kinoko_menu)
       kinoko_menu.signal_connect('realize') do |i, *a|
-        set_stylecontext(i, *a)
-        next false
+        next set_stylecontext(i, *a)
       end
     end
 

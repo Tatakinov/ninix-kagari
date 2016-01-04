@@ -1,5 +1,9 @@
 Mon January 4 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* 美坂互換モジュールのLexerクラスの動作速度を改善した.
+	* シグナル処理のコールバックブロックの戻り値を一部修正した.
+	* メニューの「きのこ」呼び出し部分を修正した.
+	* スクリプト'\5'の処理を修正した.
+	* 里々互換モジュールを修正した.
 
 Sun January 3 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* シグナル処理のコールバックブロックの戻り値を明示的に与えるようにした.

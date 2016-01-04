@@ -329,8 +329,7 @@ module NGM
       @dialog.add_button("_OK", Gtk::ResponseType::OK)
       @dialog.add_button("_Cancel", Gtk::ResponseType::CANCEL)
       @dialog.signal_connect('response') do |w, r|
-        response(w, r)
-        next true
+        next response(w, r)
       end
     end
 
@@ -494,8 +493,7 @@ module NGM
       @window.set_title(_('Ghost Manager'))
       @window.set_resizable(false)
       @window.signal_connect('delete_event') do |a|
-        close()
-        next true
+        next close()
       end
       @window.set_window_position(Gtk::Window::Position::CENTER)
       @window.gravity = Gdk::Gravity::CENTER
