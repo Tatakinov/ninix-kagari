@@ -1460,10 +1460,11 @@ module Surface
     end
 
     def get_max_size
+      left, top, scrn_w, scrn_h = Pix.get_workarea()
       w, h = @maxsize
       scale = get_scale
-      w = [8, (w * scale / 100).to_i].max
-      h = [8, (h * scale / 100).to_i].max
+      w = [scrn_w, [8, (w * scale / 100).to_i].max].min
+      h = [scrn_h, [8, (h * scale / 100).to_i].max].min
       return w, h
     end
 

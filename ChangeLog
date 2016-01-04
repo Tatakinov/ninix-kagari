@@ -4,6 +4,8 @@ Mon January 4 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* メニューの「きのこ」呼び出し部分を修正した.
 	* スクリプト'\5'の処理を修正した.
 	* 里々互換モジュールを修正した.
+	* Surfaceクラスの最大サーフェスサイズ取得メソッドが返す値を
+	  画面サイズで制限するようにした.
 
 Sun January 3 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* シグナル処理のコールバックブロックの戻り値を明示的に与えるようにした.
