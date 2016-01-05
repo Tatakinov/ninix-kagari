@@ -1645,7 +1645,7 @@ module Ninix_Main
         path = ai_list.sample
         raise "assert" unless File.exists?(path)
         @pixbuf = Pix.create_pixbuf_from_file(path, :is_pnr => false)
-        @pixbuf.saturate_and_pixelate(@pixbuf, 1.0, true)
+        @pixbuf.saturate_and_pixelate(1.0, true)
       else
         @pixbuf = nil
       end

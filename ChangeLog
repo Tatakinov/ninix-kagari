@@ -1,3 +1,6 @@
+Tue January 5 2015   Shyouzou Sugitani <shy@users.osdn.me>
+	* 使用率グラフ表示で落ちる場合がある問題を修正した.
+
 Mon January 4 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* 美坂互換モジュールのLexerクラスの動作速度を改善した.
 	* シグナル処理のコールバックブロックの戻り値を一部修正した.
