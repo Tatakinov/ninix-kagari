@@ -174,21 +174,31 @@ module Menu
       @ui_manager.insert_action_group(actions, 0)
       @ui_manager.add_ui(ui_info)
       @__popup_menu = @ui_manager.get_widget('/popup')
-      @__popup_menu.signal_connect('realize') do |i, *a|
-        next set_stylecontext_with_sidebar(i, *a)
+      provider = create_css_provider_for(@__popup_menu)
+      @__popup_menu.signal_connect('realize', provider) do |i, *a, provider|
+        next set_stylecontext_with_sidebar(i, *a, :provider => provider)
       end
       for key in @__menu_list.keys
         item = @ui_manager.get_widget(['/popup/', key].join(''))
-        item.signal_connect('draw') do |i, *a|
-          next set_stylecontext(i, *a)
+        provider = create_css_provider_for(item)
+        item.signal_connect('draw', provider) do |i, *a, provider|
+          next set_stylecontext(i, *a, :provider => provider)
         end
         submenu = item.submenu
         if submenu != nil
-          submenu.signal_connect('realize') do |i, *a|
-            next set_stylecontext(i, *a)
+          provider = create_css_provider_for(submenu)
+          submenu.signal_connect('realize', provider) do |i, *a, provider|
+            next set_stylecontext(i, *a, :provider => provider)
           end
         end
       end
+    end
+
+    def create_css_provider_for(item)
+      provider = Gtk::CssProvider.new()
+      style_context = item.style_context
+      style_context.add_provider(provider, 800) # XXX: 800 == Gtk::StyleProvider::PRIORITY_USER
+      return provider
     end
 
     def set_responsible(parent)
@@ -308,8 +318,9 @@ module Menu
                 @parent.handle_request('NOTIFY', 'toggle_bind', ik)
                 next true
               end
-              item.signal_connect('draw') do |i, *a|
-                next set_stylecontext(i, *a)
+              provider = create_css_provider_for(item)
+              item.signal_connect('draw', provider) do |i, *a, provider|
+                next set_stylecontext(i, *a, :provider => provider)
               end
             else
               item = Gtk::SeparatorMenuItem.new()
@@ -317,8 +328,9 @@ module Menu
             item.show()
             @__mayuna_menu[index] << item
           end
-          @__mayuna_menu[index].signal_connect('realize') do |i, *a|
-            next set_stylecontext(i, *a)
+          provider = create_css_provider_for(@__mayuna_menu[index])
+          @__mayuna_menu[index].signal_connect('realize', provider) do |i, *a, provider|
+            next set_stylecontext(i, *a, :provider => provider)
           end
         end
       end
@@ -541,16 +553,18 @@ module Menu
                 end
               end
             end
-            item.signal_connect('draw') do |i, *a|
-              next set_stylecontext(i, *a)
+            provider = create_css_provider_for(item)
+            item.signal_connect('draw', provider) do |i, *a, provider|
+              next set_stylecontext(i, *a, :provider => provider)
             end
             menu.add(item)
             item.show()
           end
           menuitem = @ui_manager.get_widget(['/popup/', 'Portal'].join(''))
           menuitem.set_submenu(menu)
-          menu.signal_connect('realize') do |i, *a|
-            next set_stylecontext(i, *a)
+          provider = create_css_provider_for(menu)
+          menu.signal_connect('realize', provider) do |i, *a, provider|
+            next set_stylecontext(i, *a, :provider => provider)
           end
           menu.show()
           __set_visible('Portal', true)
@@ -620,16 +634,18 @@ module Menu
               end
             end
           end
-          item.signal_connect('draw') do |i, *a|
-            next set_stylecontext(i, *a)
+          provider = create_css_provider_for(item)
+          item.signal_connect('draw', provider) do |i, *a, provider|
+            next set_stylecontext(i, *a, :provider => provider)
           end
           menu.add(item)
           item.show()
         end
         menuitem =  @ui_manager.get_widget(['/popup/', 'Recommend'].join(''))
         menuitem.set_submenu(menu)
-        menu.signal_connect('realize') do |i, *a|
-          next set_stylecontext(i, *a)
+        provider = create_css_provider_for(menu)
+        menu.signal_connect('realize', provider) do |i, *a, provider|
+          next set_stylecontext(i, *a, :provider => provider)
         end
         menu.show()
         __set_visible('Recommend', true)
@@ -668,16 +684,15 @@ module Menu
       else
         item.set_has_tooltip(false)
       end
-      item.signal_connect('draw') do |i, *a|
-        next set_stylecontext(i, *a)
+      provider = create_css_provider_for(item)
+      item.signal_connect('draw', provider) do |i, *a, provider|
+        next set_stylecontext(i, *a, :provider => provider)
       end
       return item
     end
 
-    def set_stylecontext(item, *args)
+    def set_stylecontext(item, *args, provider: nil)
       _, offset_y = item.translate_coordinates(item.parent, 0, 0)
-      style_context = item.style_context
-      provider = Gtk::CssProvider.new()
       provider.load(data: ["GtkMenu {\n",
                            @__imagepath['background'],
                            "background-repeat: repeat-y;\n",
@@ -708,20 +723,17 @@ module Menu
                            ["background-position: ", @__align['foreground'], " ", (-offset_y).to_s, "px;\n"].join(''),
                            "}"
                           ].join(""))
-      style_context.add_provider(provider, 800) # STYLE_PROVIDER_PRIORITY_USER
       return false
     end
 
-    def set_stylecontext_with_sidebar(item, *args)
+    def set_stylecontext_with_sidebar(item, *args, provider: nil)
       if @__imagepath['background_with_sidebar'] == nil or \
         @__imagepath['foreground_with_sidebar'] == nil or \
         @sidebar_width <= 0
-        set_stylecontext(item, *args)
+        set_stylecontext(item, *args, :provider => provider)
         return false
       end
       _, offset_y = item.translate_coordinates(item.parent, 0, 0)
-      style_context = item.style_context
-      provider = Gtk::CssProvider.new()
       provider.load(data: ["GtkMenu {\n",
                            @__imagepath['background_with_sidebar'],
                            "background-repeat: repeat-y;\n",
@@ -758,7 +770,6 @@ module Menu
                            ["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
                            "}"
                           ].join(''))
-      style_context.add_provider(provider, 800) # STYLE_PROVIDER_PRIORITY_USER
       return false
     end
 
@@ -784,8 +795,9 @@ module Menu
         end
         menuitem = @ui_manager.get_widget(['/popup/', path].join(''))
         menuitem.set_submenu(ghost_menu)
-        ghost_menu.signal_connect('realize') do |i, *a|
-          next set_stylecontext(i, *a)
+        provider = create_css_provider_for(ghost_menu)
+        ghost_menu.signal_connect('realize', provider) do |i, *a, provider|
+          next set_stylecontext(i, *a, :provider => provider)
         end
       end
     end
@@ -811,8 +823,9 @@ module Menu
           menu << item
         end
       end
-      menu.signal_connect('realize') do |i, *a|
-        next set_stylecontext(i, *a)
+      provider = create_css_provider_for(menu)
+      menu.signal_connect('realize', provider) do |i, *a, provider|
+        next set_stylecontext(i, *a, :provider => provider)
       end
       return menu
     end
@@ -833,8 +846,9 @@ module Menu
       else
         item.set_has_tooltip(false)
       end
-      item.signal_connect('draw') do |i, *a|
-        next set_stylecontext(i, *a)
+      provider = create_css_provider_for(item)
+      item.signal_connect('draw', provider) do |i, *a, provider|
+        next set_stylecontext(i, *a, :provider => provider)
       end
       return item
     end
@@ -852,16 +866,18 @@ module Menu
           @parent.handle_request('NOTIFY', 'select_nekodorif', dir)
           next true
         end
-        item.signal_connect('draw') do |i, *a|
-          next set_stylecontext(i, *a)
+        provider = create_css_provider_for(item)
+        item.signal_connect('draw', provider) do |i, *a, provider|
+          next set_stylecontext(i, *a, :provider => provider)
         end
         ##if working
         ##  item.set_sensitive(false)
       end
       menuitem = @ui_manager.get_widget(['/popup/', 'Nekodorif'].join(''))
       menuitem.set_submenu(nekodorif_menu)
-      nekodorif_menu.signal_connect('realize') do |i, *a|
-        next set_stylecontext(i, *a)
+      provider = create_css_provider_for(nekodorif_menu)
+      nekodorif_menu.signal_connect('realize', provider) do |i, *a, provider|
+        next set_stylecontext(i, *a, :provider => provider)
       end
     end
 
@@ -878,16 +894,18 @@ module Menu
           @parent.handle_request('NOTIFY', 'select_kinoko', k)
           next true
         end
-        item.signal_connect('draw') do |i, *a|
-          next set_stylecontext(i, *a)
+        provider = create_css_provider_for(item)
+        item.signal_connect('draw', provider) do |i, *a, provider|
+          next set_stylecontext(i, *a, :provider => provider)
         end
         ##if working
         ##  item.set_sensitive(false)
       end
       menuitem = @ui_manager.get_widget(['/popup/', 'Kinoko'].join(''))
       menuitem.set_submenu(kinoko_menu)
-      kinoko_menu.signal_connect('realize') do |i, *a|
-        next set_stylecontext(i, *a)
+      provider = create_css_provider_for(kinoko_menu)
+      kinoko_menu.signal_connect('realize', provider) do |i, *a, provider|
+        next set_stylecontext(i, *a, :provider => provider)
       end
     end
 
