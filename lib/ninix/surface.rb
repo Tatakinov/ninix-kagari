@@ -645,7 +645,7 @@ module Surface
     end
 
     def reset_position
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      left, top, scrn_w, scrn_h = get_workarea(0) # XXX
       s0x, s0y, s0w, s0h = 0, 0, 0, 0 # XXX
       for side in 0..@window.length-1
         align = get_alignment(side)
@@ -675,6 +675,14 @@ module Surface
         end
         set_position(side, x, y)
         s0x, s0y, s0w, s0h = x, y, w, h # for next loop
+      end
+    end
+
+    def get_workarea(side)
+      if @window.length > side
+        return @window[side].get_window.workarea
+      else
+        return [0, 0, 0, 0]
       end
     end
 
@@ -888,7 +896,7 @@ module Surface
         @mikire = @kasanari = 0
         return
       end
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      left, top, scrn_w, scrn_h = get_workarea(0)
       x0, y0 = get_position(0)
       s0w, s0h = get_surface_size(0)
       if x0 + s0w / 3 < left or x0 + s0w * 2 / 3 > left + scrn_w or \
@@ -1017,7 +1025,7 @@ module Surface
     def display_changed(screen)
       if @side == 0
         @parent.handle_request('NOTIFY', 'reset_position') # XXX
-        left, top, scrn_w, scrn_h = Pix.get_workarea()
+        left, top, scrn_w, scrn_h = @window.workarea
         @parent.handle_request(
           'NOTIFY', 'notify_event', 'OnDisplayChange',
           Gdk.Visual.get_best_depth(), scrn_w, scrn_h)
@@ -1173,7 +1181,7 @@ module Surface
       xoffset = (dw - w) / 2
       if get_alignment() == 0
         yoffset = dh - h
-        left, top, scrn_w, scrn_h = Pix.get_workarea()
+        left, top, scrn_w, scrn_h = @window.workarea
         y = top + scrn_h - dh
       elsif get_alignment() == 1
         yoffset = 0
@@ -1460,7 +1468,7 @@ module Surface
     end
 
     def get_max_size
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      left, top, scrn_w, scrn_h = @window.workarea
       w, h = @maxsize
       scale = get_scale
       w = [scrn_w, [8, (w * scale / 100).to_i].max].min
@@ -1542,7 +1550,7 @@ module Surface
       @position = [x, y]
       new_x, new_y = get_position()
       @window.move(new_x, new_y)
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      left, top, scrn_w, scrn_h = @window.workarea
       if x > left + scrn_w / 2
         new_direction = 0
       else
@@ -1583,13 +1591,13 @@ module Surface
         return
       end
       if align == 0
-        left, top, scrn_w, scrn_h = Pix.get_workarea()
+        left, top, scrn_w, scrn_h = @window.workarea
         sw, sh = get_max_size()
         sx, sy = @position # XXX: without window_offset
         sy = top + scrn_h - sh
         set_position(sx, sy)
       elsif align == 1
-        left, top, scrn_w, scrn_h = Pix.get_workarea()
+        left, top, scrn_w, scrn_h = @window.workarea
         sx, sy = @position # XXX: without window_offset
         sy = top
         set_position(sx, sy)
@@ -1703,11 +1711,7 @@ module Surface
     end
 
     def motion_notify(darea, event)
-      if event.is_hint == 1
-        _, x, y, state = @darea.window.get_device_position(event.device)
-      else
-        x, y, state = event.x, event.y, event.state
-      end
+      x, y, state = event.x, event.y, event.state
       x, y = @window.winpos_to_surfacepos(x, y, get_scale)
       part = get_touched_region(x, y)
       if part != @__current_part
@@ -1756,6 +1760,9 @@ module Surface
           @parent.handle_request('NOTIFY', 'notify_surface_mouse_motion',
                                  @side, x, y, part)
         end
+      end
+      if event.is_hint == 1
+        Gdk::Event.request_motions(event)
       end
       return true
     end

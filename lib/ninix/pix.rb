@@ -10,6 +10,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
+require "narray"
 require "digest/md5"
 require "gtk3"
 
@@ -20,35 +21,37 @@ module Pix
   def self.surface_to_region(surface)
     region = Cairo::Region.new()
     data = surface.data
-    flag_t = false
+    width = surface.width
+    pix_na = NArray.to_na(data, NArray::BYTE)
+    pix_na.reshape!(4, pix_na.size / 4)
+    alpha = pix_na[3, true]
+    curr_y = -1
     start_x = -1
-    for y in 0..(data.size / 4 / surface.width - 1)
-      for x in 0..surface.width-1
-        index = (y * surface.width + x) * 4
-        if (data[index + 3].ord) == 0
-          if flag_t
-            region.union!(start_x, y, x - start_x, 1)
-          end
-          flag_t = false
-          start_x = -1
-        else
-          if not flag_t
-            start_x = x
-            flag_t = true
-          end
+    end_x = -1
+    (alpha.ne 0).where.each {|i|
+      y = i / width
+      x = i % width
+      if start_x != -1
+        if y != curr_y or x != end_x + 1
+          region.union!(start_x, curr_y, end_x - start_x + 1, 1)
+          curr_y = y
+          start_x = x
         end
+      else
+        curr_y = y
+        start_x = x
       end
-      if flag_t
-        region.union!(start_x, y, surface.width - 1 - start_x, 1)
-      end
-      flag_t = false
-      start_x = -1
+      end_x = x
+    }
+    if start_x != -1
+      region.union!(start_x, curr_y, end_x - start_x + 1, 1)
     end
     return region
   end
 
   class BaseTransparentWindow < Gtk::Window
     alias :base_move :move
+    attr_reader :workarea
 
     def initialize(type: Gtk::Window::Type::TOPLEVEL)
       super(type)
@@ -71,6 +74,10 @@ module Pix
         @supports_alpha = false
       end
       raise "assert" unless visual != nil
+      left, top = 0, 0 # XXX
+      width = screen.width - left
+      height = screen.height - top
+      @workarea = [left, top, width, height]
     end
   end
 
@@ -106,7 +113,7 @@ module Pix
     end
 
     def move(x, y)
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      left, top, scrn_w, scrn_h = @workarea
       w, h = @darea.get_size_request() # XXX
       new_x = [[left, x].max, scrn_w - w].min
       new_y = [[top, y].max, scrn_h - h].min
@@ -359,42 +366,30 @@ module Pix
     if is_pnr
       pixels = pixbuf.pixels
       if not pixbuf.has_alpha?
-        r = pixels[0].ord
-        g = pixels[1].ord
-        b = pixels[2].ord
+        r, g, b = pixels[0, 3].bytes
         pixbuf = pixbuf.add_alpha(true, r, g, b)
       else
-        rgba = pixels[0, 4]
-        for x in 0..(pixels.size / 4 - 1)
-          if pixels[x * 4, 4] == rgba
-            pixels[x * 4 + 3] = 0.chr
-          end
-        end
-        pixbuf.pixels = pixels
+        pix_na = NArray.to_na(pixels, NArray::INT)
+        rgba = pix_na[0]
+        pix_na[pix_na.eq rgba] = 0
+        pixbuf.pixels = pix_na.to_s
       end
     end
     if use_pna
       path = File.join(head, basename + '.pna')
       if File.exists?(path)
         pna_pixbuf = pixbuf_new_from_file(path)
-        pixels = pixbuf.pixels
+        pix_na = NArray.to_na(pixbuf.pixels, NArray::BYTE)
+        pix_na.reshape!(4, pix_na.size / 4)
         if not pna_pixbuf.has_alpha?
           pna_pixbuf = pna_pixbuf.add_alpha(false, 0, 0, 0)
         end
-        pna_pixels = pna_pixbuf.pixels
-        for x in 0..(pixels.size / 4 - 1)
-          pixels[x * 4 + 3] = pna_pixels[x * 4]
-        end
-        pixbuf.pixels = pixels
+        pna_na = NArray.to_na(pna_pixbuf.pixels, NArray::BYTE)
+        pna_na.reshape!(4, pna_na.size / 4)
+        pix_na[3, true] = pna_na[0, true]
+        pixbuf.pixels = pix_na.to_s
       end
     end
     return pixbuf
-  end
-
-  def self.get_workarea()
-    scrn = Gdk::Screen.default
-    root = scrn.root_window
-    left, top, width, height = root.geometry
-    return left, top, width, height
   end
 end

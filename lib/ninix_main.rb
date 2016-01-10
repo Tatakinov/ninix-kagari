@@ -52,9 +52,9 @@ module Ninix_Main
     dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
     textview = Gtk::TextView.new
     textview.set_editable(false)
-    left, top, scrn_w, scrn_h = Pix.get_workarea()
-    width = (scrn_w / 2).to_i
-    height = (scrn_h / 4).to_i
+    scrn = Gdk::Screen.default
+    width = (scrn.width / 2).to_i
+    height = (scrn.height / 4).to_i
     textview.set_size_request(width, height)
     textview.show()
     sw = Gtk::ScrolledWindow.new
@@ -530,7 +530,7 @@ module Ninix_Main
           @communicate.notify_all('OnInstallComplete', [id, name, name2])
         end
       end
-      if not target_dirs.empty?
+      if target_dirs != nil and not target_dirs.empty?
         if filetype == 'ghost'
           add_sakura(target_dirs[0])
           Sakura::ReadmeDialog.new.show(

@@ -862,7 +862,7 @@ module Balloon
         x = base_x + px
       end
       y = base_y + py
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      left, top, scrn_w, scrn_h = @window.workarea
       if y + h > scrn_h # XXX
         y = scrn_h - h
       end
@@ -1266,11 +1266,7 @@ module Balloon
     end
 
     def motion_notify(widget, event)
-      if event.is_hint == 1
-        _, x, y, state = widget.window.get_device_position(event.device)
-      else
-        x, y, state = event.x, event.y, event.state
-      end
+      x, y, state = event.x, event.y, event.state
       px, py = @window.winpos_to_surfacepos(x, y, scale)
       if not @link_buffer.empty?
         if check_link_region(px, py)
@@ -1293,6 +1289,9 @@ module Balloon
             @y_root = event.y_root
           end
         end
+      end
+      if event.is_hint == 1
+        Gdk::Event.request_motions(event)
       end
       return true
     end

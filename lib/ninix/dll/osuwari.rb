@@ -111,7 +111,7 @@ module Osuwari
         return false
       end
       target = @settings['target']
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      left, top, scrn_w, scrn_h = @__sakura.get_workarea(0) # XXX
       target_flag = [false, false]
       if target == 'ACTIVE'
         active_window = get_active_window()

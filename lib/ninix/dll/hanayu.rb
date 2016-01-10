@@ -286,7 +286,10 @@ module Hanayu
       @window.signal_connect('delete_event') do |w ,e|
         next delete(w, e)
       end
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      scrn = Gdk::Screen.default
+      left, top = 0, 0 # XXX
+      scrn_w = scrn.width - left
+      scrn_h = scrn.height - top
       @x = left + (scrn_w / 2).to_i
       @y = top + (scrn_h / 4).to_i
       @window.move(@x, @y)

@@ -443,7 +443,7 @@ module Nekodorif
     end
 
     def set_position(reset: 0)
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      left, top, scrn_w, scrn_h = @window.workarea
       if reset != 0
         @x = left
         @y = top + scrn_h - @h
@@ -496,11 +496,7 @@ module Nekodorif
     end
 
     def motion_notify(widget, event)
-      if event.is_hint == 1
-        _, x, y, state = widget.window.get_device_position(event.device)
-      else
-        x, y, state = event.x, event.y, event.state
-      end
+      x, y, state = event.x, event.y, event.state
       if state & Gdk::ModifierType::BUTTON1_MASK
         if @x_root != nil and \
           @y_root != nil
@@ -511,6 +507,9 @@ module Nekodorif
           @x_root = event.x_root
           @y_root = event.y_root
         end
+      end
+      if event.is_hint == 1
+        Gdk::Event.request_motions(event)
       end
       return true
     end
@@ -671,7 +670,7 @@ module Nekodorif
       end
       target_x, target_y = @target.get_surface_position(@side)
       target_w, target_h = @target.get_surface_size(@side)
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      left, top, scrn_w, scrn_h = @window.workarea
       @x = target_x + target_w / 2 - @w / 2 + (@offset_x * @__scale / 100).to_i
       @y = top + (@offset_y * @__scale / 100).to_i
       @window.move(@x, @y)
@@ -832,7 +831,7 @@ module Nekodorif
     end
 
     def check_mikire
-      left, top, scrn_w, scrn_h = Pix.get_workarea()
+      left, top, scrn_w, scrn_h = @window.workarea
       if @x + @w - @w / 3 > left + scrn_w or \
         @x + @w / 3 < left or \
         @y + @h - @h / 3 > top + scrn_h or \
