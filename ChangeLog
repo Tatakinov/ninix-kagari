@@ -1,3 +1,6 @@
+Mon January 11 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* バージョン4.999.0(shotgun debugging)リリース.
+
 Sun January 10 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* Pixモジュールのget_workareaメソッドを削除した.
 	  代替としてBaseTransparentWindowクラスにインスタンス変数workareaを、
@@ -181,7 +184,7 @@ Sat July 25 2015   Shyouzou Sugitani <shy@users.osdn.me>
 	* 非推奨のGtk+シンボルを使用しないようにした.
 
 Tue July 14 2015   Shyouzou Sugitani <shy@users.osdn.me>
-	* バージョン4.500.0リリース.
+	* バージョン4.500.0(recompile the world)リリース.
 	* Ruby 2.x & Gtk+3 に移行した.
 	  (互換栞はAYA Ver.4のみ移行完了. 他は5.0リリースまでに移行予定.)
 
