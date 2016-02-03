@@ -1,3 +1,7 @@
+Wed February 3 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* Ruby版の華和梨8ローダーを追加した.
+	  (複数の華和梨8ゴースト同時起動には未対応.)
+
 Mon January 11 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* バージョン4.999.0(shotgun debugging)リリース.
 
