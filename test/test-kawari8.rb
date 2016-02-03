@@ -3,7 +3,7 @@ require "fiddle/import"
 
 module Test
   extend Fiddle::Importer
-  dlload "/usr/lib/games/ninix-aya/_kawari8.so"
+  dlload "libshiori.so" #"_kawari8.so"
   extern "int load(const char *, long)"
   extern "char *request(const char *, long *)"
   extern "int unload()"
