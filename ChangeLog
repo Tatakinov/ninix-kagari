@@ -1,5 +1,10 @@
+Thu February 4 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* 華和梨8ローダーを複数の華和梨8ゴースト同時起動に対応させた.
+
 Wed February 3 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* Ruby版の華和梨8ローダーを追加した.
+	  動作させるには libshiori.so のある場所を環境変数
+	  LD_LIBRARY_PATH で指定する必要がある.
 	  (複数の華和梨8ゴースト同時起動には未対応.)
 
 Mon January 11 2016   Shyouzou Sugitani <shy@users.osdn.me>
