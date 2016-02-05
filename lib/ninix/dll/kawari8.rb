@@ -17,6 +17,8 @@ require "fiddle/import"
 
 require_relative "../logging"
 
+$_kawari8 = nil
+
 module Kawari8
   extend Fiddle::Importer
   begin
@@ -29,20 +31,12 @@ module Kawari8
     extern "void so_free(unsigned int, const char *)"
     result = so_library_init()
     if result != 0
-      @@_kawari8 = self
+      $_kawari8 = self
     else
-      @@_kawari8 = nil
+      $_kawari8 = nil
     end
   rescue
-    @@_kawari8 = nil
-  end
-
-  def self.exist?
-    if @@_kawari8 != nil
-      return true
-    else
-      return false
-    end
+    $_kawari8 = nil
   end
 
   class Shiori
@@ -61,7 +55,7 @@ module Kawari8
 
     def find(topdir, dll_name)
       result = 0
-      if Kawari8.exist? and File.file?(File.join(topdir, 'kawarirc.kis'))
+      if $_kawari8 != nil and File.file?(File.join(topdir, 'kawarirc.kis'))
         result = 205
       end
       return result
@@ -77,7 +71,7 @@ module Kawari8
 
     def load(dir: nil)
       @dir = dir
-      if Kawari8.exist?
+      if $_kawari8 != nil
         if not @dir.end_with?(File::SEPARATOR)
           @dir = [@dir, File::SEPARATOR].join()
         end
@@ -85,7 +79,7 @@ module Kawari8
         ##                     Shiori.saori_load,
         ##                     Shiori.saori_unload,
         ##                     Shiori.saori_request)
-        @handle = Kawari8.so_create(@dir, @dir.bytesize)
+        @handle = $_kawari8.so_create(@dir, @dir.bytesize)
         if @handle != 0
           return 1
         else
@@ -97,8 +91,8 @@ module Kawari8
     end
 
     def unload
-      if Kawari8.exist?
-        Kawari8.so_dispose(@handle)
+      if $_kawari8 != nil
+        $_kawari8.so_dispose(@handle)
         ##for name in list(Shiori.saori_list.keys())
         ##  if not name.startswith(os.fsdecode(self.dir))
         ##    continue
@@ -117,12 +111,12 @@ module Kawari8
     end
 
     def request(req_string)
-      if Kawari8.exist?
+      if $_kawari8 != nil
         req_len = [req_string.bytesize].pack("l!")
-        result = Kawari8.so_request(@handle, req_string, req_len)
+        result = $_kawari8.so_request(@handle, req_string, req_len)
         req_len, = req_len.unpack("l!")
         return_val = result[0, req_len].to_s
-        Kawari8.so_free(@handle, result)
+        $_kawari8.so_free(@handle, result)
         return return_val
       else
         return '' # FIXME
