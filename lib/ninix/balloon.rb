@@ -1022,8 +1022,8 @@ module Balloon
       if markup_list.empty?
         return markup_escape_text(text)
       end
-      markup_list.sort()
-      markup_list.reverse()
+      markup_list.sort!
+      markup_list.reverse!
       pn = text.length
       for sn, tag in markup_list
         text = [text[0, sn], tag,

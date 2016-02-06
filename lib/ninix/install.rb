@@ -303,8 +303,8 @@ module Install
         remove_files(mask, path, filename)
       }
       dirlist = list_all_directories(path, '')
-      dirlist.sort()
-      dirlist.reverse()
+      dirlist.sort!
+      dirlist.reverse!
       for name in dirlist
         current_path = File.join(path, name)
         if File.directory?(current_path)

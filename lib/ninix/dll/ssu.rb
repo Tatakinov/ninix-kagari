@@ -15,6 +15,7 @@
 # - if, switch等の引数計算(calcを使用)
 
 require_relative "../dll"
+require_relative "../logging"
 
 
 module SSU
@@ -437,7 +438,7 @@ module SSU
           begin
             codecs.lookup(charset)
           rescue
-            logging.warning('Unsupported charset ' + charset.to_s)
+            Logging::Logging.warning('Unsupported charset ' + charset.to_s)
           end
         end
         if key.start_with?('Argument') ## FIXME

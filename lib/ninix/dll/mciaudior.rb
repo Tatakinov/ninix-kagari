@@ -18,6 +18,7 @@ require "gst"
 
 require_relative "../home"
 require_relative "../dll"
+require_relative "../logging"
 
 
 module MCIAudioR
@@ -101,7 +102,7 @@ module MCIAudioR
       elsif t == Gst::MessageType::ERROR
         @player.set_state(Gst::State::NULL)
         err, debug = message.parse_error()
-        logging.error('Error: ' + err.to_s + ', ' + debug.to_s)
+        Logging::Logging.error('Error: ' + err.to_s + ', ' + debug.to_s)
         @loop = false
       end
     end

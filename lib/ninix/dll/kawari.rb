@@ -766,7 +766,7 @@ module Kawari
         buf << cp_list
       end
       buf = buf.map {|x| [x.length, x] }
-      buf.sort()
+      buf.sort!
       buf = buf.map {|x| x[1] }
       candidates = []
       for item in buf.shift

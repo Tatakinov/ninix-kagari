@@ -135,7 +135,7 @@ module Aya5
   end
 
   def self.get_aya_version(filelist)
-    if not filelist
+    if filelist.empty?
       return 0
     end
     dic_files = filelist
@@ -251,8 +251,8 @@ module Aya5
     end
 
     def find(top_dir, dll_name)
-      return 0 ### FIXME
       result = 0
+      return result # FIXME
       version = Aya5.check_version(top_dir, dll_name)
       if version == 5
         result = 200
@@ -952,7 +952,7 @@ module Aya5
       while true
         new_pos = len_tokens
         if reverse != 0
-          tokens.reverse()
+          tokens.reverse!
         end
         for ope in ope_list
           if tokens[position..-1].include?(ope)
@@ -962,14 +962,14 @@ module Aya5
           end
         end
         if reverse != 0
-          tokens.reverse()
+          tokens.reverse!
         end
         position = new_pos
         if position >= len_tokens
           break
         else
           if reverse != 0
-            result <<  (len_tokens - position)
+            result << (len_tokens - position)
           else
             result << position
           end
@@ -1241,7 +1241,7 @@ module Aya5
           end
         end
         if ope_index == nil
-          statement_tokens.reverse()
+          statement_tokens.reverse!
           begin
             for ope in ['*', '/', '%']
               if statement_tokens.include?(ope)
@@ -1255,7 +1255,7 @@ module Aya5
               ope_index = -1 - ope_index
             end
           ensure
-            statement_tokens.reverse()
+            statement_tokens.reverse!
           end
         end
         if [nil, -1, 0, n_tokens - 1].include?(ope_index)
@@ -1296,7 +1296,7 @@ module Aya5
       n_tokens = condition_tokens.length
       condition = nil
       ope_index = nil
-      condition_tokens.reverse()
+      condition_tokens.reverse!
       begin
         for ope in ['&&', '||']
           if condition_tokens.include?(ope)
@@ -1310,7 +1310,7 @@ module Aya5
           ope_index = -1 - ope_index
         end
       ensure
-        condition_tokens.reverse()
+        condition_tokens.reverse!
       end
       if ope_index == nil
         for ope in ['==', '!=', '>', '<', '>=', '<=', '_in_', '!_in_']
@@ -2059,7 +2059,7 @@ module Aya5
         func = @dic.get_function(func_name)
         ##raise ["assert: ", 'function ', func_name, ' not found.'].join('') unless func != nil
         arguments = evaluate_argument(namespace, func_name,
-                                      token[1][1], 0)
+                                      token[1][1], false)
         result = func.call(:argv => arguments)
       elsif token[0] == TYPE_ARRAY
         result = evaluate(namespace, [token], -1, 1, :is_block => 0) ## FIXME
@@ -2729,7 +2729,7 @@ module Aya5
         if list_num.include?(argv.length)
           return true
         end
-        list_num.sort()
+        list_num.sort!
         if argv.length < list_num[0]
           errno = @functions[name][3]
           if errno != nil
@@ -4305,7 +4305,7 @@ module Aya5
     def request(name, req)
       result = '' # FIXME
       name = File.split(name.gsub("\\", '/'))[-1] # XXX: don't encode here
-      if not name.empty? and @saori_list.include?(name)
+      if name != nil and not name.empty? and @saori_list.include?(name)
         result = @saori_list[name].request(
           req.encode(@current_charset))
       end

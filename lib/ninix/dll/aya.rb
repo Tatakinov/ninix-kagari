@@ -579,8 +579,8 @@ module Aya
       @__loadlib = [[ACCEPT, '*']]
       @__logfile = nil
       load_cfg()
-      @__fwrite.reverse()
-      @__fread.reverse()
+      @__fwrite.reverse!
+      @__fread.reverse!
     end
 
     def load_cfg
@@ -1418,7 +1418,7 @@ module Aya
           end
         end
         if ope_index == nil
-          statement_tokens.reverse()
+          statement_tokens.reverse!
           begin
             for ope in ['*', '/', '%']
               if statement_tokens.include?(ope)
@@ -1432,7 +1432,7 @@ module Aya
               ope_index = -1 - ope_index
             end
           ensure
-            statement_tokens.reverse()
+            statement_tokens.reverse!
           end
         end
         if [nil, -1, 0, n_tokens - 1].include?(ope_index)
@@ -1486,7 +1486,7 @@ module Aya
       n_tokens = condition_tokens.length
       condition = nil
       ope_index = nil
-      condition_tokens.reverse()
+      condition_tokens.reverse!
       begin
         for ope in ['&&', '||']
           if condition_tokens.include?(ope)
@@ -1503,7 +1503,7 @@ module Aya
           ope_index = -1 - ope_index
         end
       ensure
-        condition_tokens.reverse()
+        condition_tokens.reverse!
       end
       if ope_index == nil
         for ope in ['==', '!=', '>', '<', '>=', '<=', '_in_', '!_in_']
@@ -2781,7 +2781,7 @@ module Aya
         if list_num.include?(argv.length)
           return true
         end
-        list_num.sort()
+        list_num.sort!
         if argv.length < list_num[0]
           errno = @functions[name][3]
           if errno != nil

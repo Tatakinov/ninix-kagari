@@ -285,8 +285,7 @@ module Surface
       # check if necessary surfaces have been loaded
       for key in [default_sakura, default_kero]
         if not surfaces.include?(key.to_s)
-          raise SystemExit(
-                  'cannot load default surface #' + key.to_s + ' (abort)\n')
+          fail RuntimeError, "cannot load default surface ##{key} (abort)\n"
         end
       end
       @__surfaces = surfaces

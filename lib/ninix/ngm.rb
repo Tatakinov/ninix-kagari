@@ -252,7 +252,7 @@ module NGM
       end
       fileobj.write(["<NGMVersion>", @version, "</NGMVersion>\n"].join(""))
       key_list = @cgi.keys.sort
-      key_list.reverse()
+      key_list.reverse!
       for priority in key_list
         for url in @cgi[priority]
           fileobj.write(

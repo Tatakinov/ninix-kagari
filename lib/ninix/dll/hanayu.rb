@@ -20,6 +20,7 @@ require "gtk3"
 
 require_relative "../pix"
 require_relative "../dll"
+require_relative "../logging"
 
 
 module Hanayu
@@ -191,7 +192,7 @@ module Hanayu
           end
         end
       rescue # IOError, SystemCallError
-        logging.error('HANAYU: cannot write database (ignored)')
+        Logging::Logging.error('HANAYU: cannot write database (ignored)')
       end
     end
 

@@ -19,6 +19,7 @@ require "gtk3"
 require_relative "../pix"
 require_relative "../script"
 require_relative "../dll"
+require_relative "../logging"
 
 
 module Bln
@@ -456,9 +457,9 @@ module Bln
         @processed_script = @script_parser.parse(@script)
       rescue Script::ParserError => e
         @processed_script = []
-        logging.error('-' * 50)
-        logging.error(e.format)
-        logging.error(@script.encode('utf-8', :invalid => :replace, :undef => :replace))
+        Logging::Logging.error('-' * 50)
+        Logging::Logging.error(e.format)
+        Logging::Logging.error(@script.encode('utf-8', :invalid => :replace, :undef => :replace))
       end
       @timeout_id = GLib::Timeout.add(10) { do_idle_tasks }
     end
@@ -594,9 +595,9 @@ module Bln
         @processed_script = @script_parser.parse(@script)
       rescue Script::ParserError => e
         @processed_script = []
-        logging.error('-' * 50)
-        logging.error(e.format)
-        logging.error(@script.encode('utf-8', :invalid => :replace, :undef => :replace))
+        Logging::Logging.error('-' * 50)
+        Logging::Logging.error(e.format)
+        Logging::Logging.error(@script.encode('utf-8', :invalid => :replace, :undef => :replace))
       end
     end
 

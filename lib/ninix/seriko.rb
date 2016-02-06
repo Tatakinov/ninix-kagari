@@ -82,7 +82,7 @@ module Seriko
 
     def get_actor_next(window)
       if not @active.empty?
-        @active.sort {|x| x[0]} # (key=lambda {|x| return x[0]})
+        @active.sort! {|x| x[0]} # (key=lambda {|x| return x[0]})
         if @active[0][0] <= @next_tick
           return @active.shift
         end
@@ -321,7 +321,7 @@ module Seriko
         temp << [actor.get_id(), actor]
       end
       actors = temp
-      actors.sort()
+      actors.sort!
       temp = []
       for actor_id, actor in actors
         temp << actor
@@ -778,7 +778,7 @@ module Seriko
       temp << [actor.get_id(), actor]
     end
     actors = temp
-    actors.sort()
+    actors.sort!
     temp = []
     for actor_id, actor in actors
       temp << actor
@@ -897,7 +897,7 @@ module Seriko
       temp << [actor.get_id(), actor]
     end
     mayuna = temp
-    mayuna.sort()
+    mayuna.sort!
     temp = []
     for actor_id, actor in mayuna
       temp << actor
