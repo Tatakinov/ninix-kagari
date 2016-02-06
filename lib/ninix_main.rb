@@ -1419,10 +1419,10 @@ module Ninix_Main
       @tag_info = @tb.create_tag(nil, 'foreground' => 'green')
       @tag_debug = @tb.create_tag(nil, 'foreground' => 'yellow')
       @tag_notset = @tb.create_tag(nil, 'foreground' => 'blue')
-      # DnD data types
-      dnd_targets = [['text/uri-list', 0, 0]]
-      @tv.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
-                        Gdk::DragAction::COPY)
+      ### DnD data types
+      ##dnd_targets = [['text/uri-list', 0, 0]]
+      ##@tv.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+      ##                  Gdk::DragAction::COPY)
       @tv.drag_dest_set_target_list(nil) # important
       @tv.drag_dest_add_uri_targets()
       @tv.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|

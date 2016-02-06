@@ -1,7 +1,11 @@
+Sun February 7 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* Ruby移行以降の修正で漏れがあったもの対応.
+	  (コンソールへのドラッグ&ドロップの動作改善)
+
 Sat February 6 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* Ruby移行以降の修正で漏れがあったもの対応.
 	  (アニメーション処理, バルーン, インストーラ, NGM,
-	   文互換モジュール, 華和梨7互換モジュールの動作改善)
+	   文4互換モジュール, 華和梨7互換モジュールの動作改善)
 
 Fri February 5 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* 華和梨8ローダーを更新した.
