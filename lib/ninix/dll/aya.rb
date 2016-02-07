@@ -1317,7 +1317,11 @@ module Aya
           end_ = Aya.find_not_quoted(line, ';')
           new_line = line[end_ + 1..-1].strip()
           line = line[0..end_-1].strip()
-          new_lines = lines[0..i-1]
+          if i > 0
+            new_lines = lines[0..i-1]
+          else
+            new_lines = []
+          end
           if not line.empty?
             new_lines << line
           end

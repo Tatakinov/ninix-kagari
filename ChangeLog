@@ -1,6 +1,6 @@
 Sun February 7 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* Ruby移行以降の修正で漏れがあったもの対応.
-	  (コンソールへのドラッグ&ドロップの動作改善)
+	  (コンソールへのドラッグ&ドロップ, 文4互換モジュールの動作改善)
 
 Sat February 6 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* Ruby移行以降の修正で漏れがあったもの対応.
