@@ -1239,14 +1239,14 @@ module Aya
           end
         elsif Re_switch.match(line) != nil
           index = parse_token(line[6..-1].strip())
-          ##raise "assert" unless [].include?(index[0]) # FIXME
+          ##fail "assert" unless [].include?(index[0]) # FIXME
           inner_block = []
           i, inner_block = get_block(lines, i + 1)
           result << [TYPE_SWITCH,
                      [index, parse(inner_block)]]
         elsif Re_case.match(line) != nil
           left = parse_token(line[4..-1].strip())
-          ##raise "assert" unless [].include?(left[0]) # FIXME
+          ##fail "assert" unless [].include?(left[0]) # FIXME
           i, block = get_block(lines, i + 1)
           inner_blocks = []
           j = 0
@@ -1768,15 +1768,15 @@ module Aya
           end
         elsif line[0] == TYPE_SUBSTITUTION
           left, ope, right = line[1]
-          ##raise "assert" unless [TYPE_ARRAY, TYPE_VARIABLE].include?(left[0])
-          ##raise "assert" unless ope[0] == TYPE_OPERATOR
+          ##fail "assert" unless [TYPE_ARRAY, TYPE_VARIABLE].include?(left[0])
+          ##fail "assert" unless ope[0] == TYPE_OPERATOR
           ope = ope[1]
           if [':=', '+:=', '-:=', '*:=', '/:=', '%:='].include?(ope)
             type_float = 1
           else
             type_float = 0
           end
-          ##raise "assert" unless right[0] == TYPE_STATEMENT
+          ##fail "assert" unless right[0] == TYPE_STATEMENT
           right_result = evaluate_statement(namespace, right,
                                             type_float)
           if not ['=', ':='].include?(ope)
@@ -1796,7 +1796,7 @@ module Aya
             return nil # should not reach here
           end
           var = line[1]
-          ##raise "assert" unless [TYPE_ARRAY, TYPE_VARIABLE].include?(var[0])
+          ##fail "assert" unless [TYPE_ARRAY, TYPE_VARIABLE].include?(var[0])
           var_name = var[1][0]
           if var_name.start_with?('_')
             target_namespace = namespace
@@ -1835,7 +1835,7 @@ module Aya
             entry = inner_blocks[j]
             condition = entry[0]
             inner_block = entry[1]
-            raise "assert" unless condition[0] == TYPE_CONDITION
+            fail "assert" unless condition[0] == TYPE_CONDITION
             if condition == nil or \
               evaluate_condition(namespace, condition)
               local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
@@ -1851,7 +1851,7 @@ module Aya
         elsif line[0] == TYPE_WHILE
           condition = line[1][0]
           inner_block = line[1][1]
-          raise "assert" unless condition[0] == TYPE_CONDITION
+          fail "assert" unless condition[0] == TYPE_CONDITION
           while evaluate_condition(namespace, condition)
             local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             result_of_inner_block = evaluate(local_namespace,
@@ -1876,7 +1876,7 @@ module Aya
           reset = line[1][0][2]
           inner_block = line[1][1]
           evaluate(namespace, init, -1, 1)
-          raise "assert" unless condition[0] == TYPE_CONDITION
+          fail "assert" unless condition[0] == TYPE_CONDITION
           while evaluate_condition(namespace, condition)
             local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             result_of_inner_block = evaluate(local_namespace,
@@ -2100,7 +2100,7 @@ module Aya
       elsif token[0] == TYPE_SYSTEM_FUNCTION
         system_functions = @dic.aya.get_system_functions()
         func_name = token[1][0]
-        ##raise ["assert: ", 'function ', func_name, ' not found.'].join('') unless system_functions.exists(func_name)
+        ##fail ["assert: ", 'function ', func_name, ' not found.'].join('') unless system_functions.exists(func_name)
         arguments = evaluate_argument(namespace, func_name,
                                       token[1][1], true)
         if func_name == 'CALLBYNAME'
@@ -2122,7 +2122,7 @@ module Aya
       elsif token[0] == TYPE_FUNCTION
         func_name = token[1][0]
         func = @dic.get_function(func_name)
-        ##raise ["assert: ", 'function ', func_name, ' not found.'].join('') unless func != nil
+        ##fail ["assert: ", 'function ', func_name, ' not found.'].join('') unless func != nil
         arguments = evaluate_argument(namespace, func_name,
                                       token[1][1], false)
         result = func.call(:argv => arguments)
@@ -2218,7 +2218,7 @@ module Aya
       left = condition[1][0]
       ope = condition[1][1]
       right = condition[1][2]
-      raise "assert" unless ope[0] == TYPE_OPERATOR
+      fail "assert" unless ope[0] == TYPE_OPERATOR
       if left[0] == TYPE_CONDITION
         left_result = evaluate_condition(namespace, left)
       elsif left[0] == TYPE_STATEMENT
@@ -2308,7 +2308,7 @@ module Aya
       ##  return ''
       ##end
       if num == 3
-        ##raise "assert" unless statement[2][0] == TYPE_OPERATOR
+        ##fail "assert" unless statement[2][0] == TYPE_OPERATOR
         ope = statement[2][1]
         type_ = statement[3][0]
         if type_ == TYPE_INT
@@ -2621,7 +2621,7 @@ module Aya
       for i in 0..argument.length-1
         if is_system_func and \
           @dic.aya.get_system_functions().not_to_evaluate(name, i)
-          ##raise "assert" unless [].include?(argument[i]) ## FIXME
+          ##fail "assert" unless [].include?(argument[i]) ## FIXME
           arguments << argument[i][1][1]
         else
           arguments << evaluate_statement(namespace,

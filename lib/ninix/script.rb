@@ -36,7 +36,7 @@ module Script
           script: nil, src: nil, column: nil, length: nil, skip: nil)
       super()
       if not ['strict', 'loose'].include?(error)
-        raise ValueError('unknown error scheme: ' + error.to_s)
+        fail ValueError('unknown error scheme: ' + error.to_s)
       end
       @error = error
       @script = script or []
@@ -84,17 +84,17 @@ module Script
 
     def initialize(error: 'strict')
       if not ['strict', 'loose'].include?(error)
-        raise ArgumentError('unknown error scheme: ' + error.to_s)
+        fail ArgumentError('unknown error scheme: ' + error.to_s)
       end
       @error = error
     end
 
     def perror(position: 'column', skip: nil)
       if not ['column', 'eol'].include?(position)
-        raise ArgumentError('unknown position scheme: ', position.to_s)
+        fail ArgumentError('unknown position scheme: ', position.to_s)
       end
       if not ['length', 'rest', nil].include?(skip)
-        raise ArgumentError('unknown skip scheme: ', skip.to_s)
+        fail ArgumentError('unknown skip scheme: ', skip.to_s)
       end
       if position == 'column'
         column = @column
@@ -142,7 +142,7 @@ module Script
           end
         end
         if match == nil
-          raise RuntimeError('should not reach here')
+          fail RuntimeError('should not reach here')
         end
         tokens << [token, match.to_s]
         pos += match.to_s.length
@@ -188,12 +188,12 @@ module Script
           if not text.empty?
             @script << [SCRIPT_TEXT, text, @column]
           end
-          raise perror(:skip => 'length'), 'unknown tag'
+          fail perror(:skip => 'length'), 'unknown tag'
         elsif token == TOKEN_STRING and lexeme == '%'
           string_chunks << lexeme
           text << [TEXT_STRING, string_chunks.join('')]
           @script << [SCRIPT_TEXT, text, @column]
-          raise perror(:skip => 'length'), 'unknown meta string'
+          fail perror(:skip => 'length'), 'unknown meta string'
           return []
         end
         if [TOKEN_NUMBER, TOKEN_OPENED_SBRA,
@@ -282,11 +282,11 @@ module Script
           if not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
             args = split_params(read_sbra_text())
             if args.length != 2
-              raise perror(:skip => 'length'), 'wrong number of arguments'
+              fail perror(:skip => 'length'), 'wrong number of arguments'
               return []
             end
             if args[1].length != 1 or args[1][0][1].empty?
-              raise perror(:skip => 'length'), 'syntax error (expected an ID)'
+              fail perror(:skip => 'length'), 'syntax error (expected an ID)'
               return []
             end
             arg1 = args[0]
@@ -323,7 +323,7 @@ module Script
           end
           @script << [SCRIPT_TAG, lexeme] + args + [@column, ]
         else
-          raise perror(:skip => 'length'), 'unknown tag (' + lexeme + ')'
+          fail perror(:skip => 'length'), 'unknown tag (' + lexeme + ')'
           return []
         end
       end
@@ -335,7 +335,7 @@ module Script
           @script << [SCRIPT_TAG, '\_a', @column]
         end
         anchor.script = @script
-        raise anchor, 'syntax error (unbalanced \_a tag)'
+        fail anchor, 'syntax error (unbalanced \_a tag)'
       end
       if not string_chunks.empty?
         text << [TEXT_STRING, string_chunks.join('')]
@@ -349,7 +349,7 @@ module Script
     def read_number
       token, number = next_token()
       if token != TOKEN_NUMBER
-        raise perror, 'syntax error (expected a number)'
+        fail perror, 'syntax error (expected a number)'
       end
       return number
     end
@@ -357,15 +357,15 @@ module Script
     def read_sbra_number
       token, lexeme = next_token()
       if token != TOKEN_OPENED_SBRA
-        raise perror, 'syntax error (expected a square bracket)'
+        fail perror, 'syntax error (expected a square bracket)'
       end
       token, number = next_token()
       if token != TOKEN_NUMBER
-        raise perror(:skip => 'length'), 'syntax error (expected a number)'
+        fail perror(:skip => 'length'), 'syntax error (expected a number)'
       end
       token, lexeme = next_token()
       if token != TOKEN_CLOSED_SBRA
-        raise perror(:skip => 'length'), 'syntax error (expected a square bracket)'
+        fail perror(:skip => 'length'), 'syntax error (expected a square bracket)'
       end
       return number
     end
@@ -373,7 +373,7 @@ module Script
     def read_sbra_id
       text = read_sbra_text()
       if text.length != 1
-        raise perror(:skip => 'length'), 'syntax error (expected a single ID)'
+        fail perror(:skip => 'length'), 'syntax error (expected a single ID)'
         return []
       end
       begin
@@ -389,7 +389,7 @@ module Script
     def read_sbra_text
       token, lexeme = next_token()
       if token != TOKEN_OPENED_SBRA
-        raise perror, 'syntax error (expected a square bracket)'
+        fail perror, 'syntax error (expected a square bracket)'
       end
       text = []
       string_chunks = []
@@ -413,12 +413,12 @@ module Script
         elsif token == TOKEN_META
           text << [TEXT_META, lexeme]
         else
-          raise perror(:skip => 'length'), 'syntax error (wrong type of argument)'
+          fail perror(:skip => 'length'), 'syntax error (wrong type of argument)'
           return []
         end
       end
       if not close_flag
-        raise perror(:position => 'eol'), 'unexpected end of script'
+        fail perror(:position => 'eol'), 'unexpected end of script'
       end
       return text
     end
@@ -451,7 +451,7 @@ module Script
             buf = []
             i = match.end(0)
             if i < j
-              raise "assert" unless lexeme[i] == ','
+              fail "assert" unless lexeme[i] == ','
               i += 1
             end
           end

@@ -61,7 +61,7 @@ module HTTPC
         f.read()
       end
       if start != nil
-        raise "assert" unless end_ != nil
+        fail "assert" unless end_ != nil
         nc = 0
         ls = start.length
         le = end_.length
@@ -122,7 +122,7 @@ module HTTPC
         end
       end
       if argument.empty?
-        ##raise "assert" unless bg == nil and process_tag == nil
+        ##fail "assert" unless bg == nil and process_tag == nil
         return "SAORI/1.0 200 OK\r\nResult: " + @loaded.to_s + " \r\n\r\n"
       elsif argument.length > 3
         return RESPONSE[400]

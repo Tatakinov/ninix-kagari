@@ -38,7 +38,7 @@ module Surface
     end
 
     def handle_request(event_type, event, *arglist)
-      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'stick_window' => 'window_stick',
       }
@@ -413,7 +413,7 @@ module Surface
     end
 
     def add_window(side, default_id, config_alias, mayuna: {})
-      raise "assert" unless @window.length == side
+      fail "assert" unless @window.length == side
       if side == 0
         name = 'sakura'
         title = @parent.handle_request('GET', 'get_selfname') or \
@@ -1036,7 +1036,7 @@ module Surface
     end
 
     def handle_request(event_type, event, *arglist)
-      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
             }
       if handlers.include?(event)
@@ -1241,14 +1241,14 @@ module Surface
             end
           end
         else
-          raise RuntimeError('should not reach here')
+          fail RuntimeError('should not reach here')
         end
       end
       return mayuna_list
     end
     
     def create_surface_from_file(surface_id, is_asis: false)
-      raise "assert" unless @surfaces.include?(surface_id)
+      fail "assert" unless @surfaces.include?(surface_id)
       if is_asis
         use_pna = false
         is_pnr = false
@@ -1366,7 +1366,7 @@ module Surface
                 cr.set_source(mayuna_surface, dest_x, dest_y)
                 cr.paint()
               else
-                raise RuntimeError('should not reach here')
+                fail RuntimeError('should not reach here')
               end
             end
           end
@@ -1382,7 +1382,7 @@ module Surface
         return
       end
       new_surface = create_image_surface(@seriko.get_base_id)
-      raise "assert" unless new_surface != nil
+      fail "assert" unless new_surface != nil
       # update collision areas
       @collisions = @region[@seriko.get_base_id]
       # draw overlays

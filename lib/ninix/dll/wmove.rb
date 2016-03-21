@@ -162,10 +162,10 @@ module WMove
     end
 
     def enqueue_commands(command, args)
-      #raise "assert" unless ['MOVE', 'MOVE_INSIDE', 'MOVETO', 'MOVETO_INSIDE',
-      #                       'ZMOVE', 'WAIT', 'NOTIFY',
-      #                       'STANDBY', 'STANDBY_INSIDE',
-      #                       'CLEAR'].include?(command)
+      #fail "assert" unless ['MOVE', 'MOVE_INSIDE', 'MOVETO', 'MOVETO_INSIDE',
+      #                      'ZMOVE', 'WAIT', 'NOTIFY',
+      #                      'STANDBY', 'STANDBY_INSIDE',
+      #                      'CLEAR'].include?(command)
       if args[0] == @sakura_name ## FIXME: HWND support
         side = 0
       elsif args[0] == @kero_name ## FIXME: HWND support

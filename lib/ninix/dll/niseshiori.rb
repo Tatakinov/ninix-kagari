@@ -1067,7 +1067,7 @@ module Niseshiori
       if @__expr.include?(key)
         return method(@__expr[key]).call(self, tree[1..-1])
       else
-        raise RuntimeError('should not reach here')
+        fail RuntimeError('should not reach here')
       end
     end
 
@@ -1166,14 +1166,14 @@ module Niseshiori
 
     def match(s)
       if pop() != s
-        raise ExprError
+        fail ExprError
       end
     end
 
     def get_expr
       buf = get_add_expr()
       if not done()
-        raise ExprError
+        fail ExprError
       end
       show_progress('get_expr', buf)
       return buf

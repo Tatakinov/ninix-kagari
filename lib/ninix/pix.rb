@@ -73,7 +73,7 @@ module Pix
         Logging::Logging.debug("screen does NOT support alpha.\n")
         @supports_alpha = false
       end
-      raise "assert" unless visual != nil
+      fail "assert" unless visual != nil
       left, top = 0, 0 # XXX
       width = screen.width - left
       height = screen.height - top
@@ -175,9 +175,9 @@ module Pix
     else
       buf = get_png_IHDR(path)
     end
-    raise "assert" unless buf[0] == 137.chr # png format # XXX != "\x89"
-    raise "assert" unless buf[1..7] == "PNG\r\n\x1a\n" # png format
-    raise "assert" unless buf[12..15] == "IHDR" # name of the first chunk in a PNG datastream
+    fail "assert" unless buf[0] == 137.chr # png format # XXX != "\x89"
+    fail "assert" unless buf[1..7] == "PNG\r\n\x1a\n" # png format
+    fail "assert" unless buf[12..15] == "IHDR" # name of the first chunk in a PNG datastream
     w = buf[16, 4]
     h = buf[20, 4]
     width = (w[0].ord << 24) + (w[1].ord << 16) + (w[2].ord << 8) + w[3].ord
@@ -190,8 +190,8 @@ module Pix
       return nil
     end
     pixbuf = pixbuf_new_from_file(path)
-    raise "assert" unless [3, 4].include?(pixbuf.n_channels)
-    raise "assert" unless pixbuf.bits_per_sample == 8
+    fail "assert" unless [3, 4].include?(pixbuf.n_channels)
+    fail "assert" unless pixbuf.bits_per_sample == 8
     color = '#%02x%02x%02x' % [pixbuf.pixels[-3].ord,
                                pixbuf.pixels[-2].ord,
                                pixbuf.pixels[-1].ord]

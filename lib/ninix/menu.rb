@@ -427,7 +427,7 @@ module Menu
       if side > 1
         string = 'char' + side.to_s
       else
-        raise "assert" unless [0, 1].include?(side)
+        fail "assert" unless [0, 1].include?(side)
         string = ['sakura', 'kero'][side]
       end
       string = [string, '.popupmenu.visible'].join('')
@@ -445,7 +445,7 @@ module Menu
       if side > 1
         string = 'char' + side.to_s
       else
-        raise "assert" unless [0, 1].include?(side)
+        fail "assert" unless [0, 1].include?(side)
         string = ['sakura', 'kero'][side]
       end
       string = [string, '.recommendsites'].join('')
@@ -473,8 +473,8 @@ module Menu
     end
 
     def __set_caption(name, caption)
-      raise "assert" unless @__menu_list.include?(name)
-      raise "assert" unless caption.is_a?(String)
+      fail "assert" unless @__menu_list.include?(name)
+      fail "assert" unless caption.is_a?(String)
       item = @ui_manager.get_widget(['/popup/', name].join(''))
       if item != nil
         label = item.get_children()[0]
@@ -483,8 +483,8 @@ module Menu
     end
 
     def __set_visible(name, visible)
-      raise "assert" unless @__menu_list.include?(name)
-      raise "assert" unless [false, true].include?(visible)
+      fail "assert" unless @__menu_list.include?(name)
+      fail "assert" unless [false, true].include?(visible)
       @__menu_list[name]['visible'] = visible
     end
 

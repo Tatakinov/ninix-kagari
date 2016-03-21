@@ -1,3 +1,7 @@
+Mon March 21 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* コーディングスタイル修正.
+	  再度例外を起こす場合以外はraiseではなくfailを使うようにした.
+
 Sun February 7 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* バージョン4.999.1リリース.
 	* Ruby移行以降の修正で漏れがあったもの対応.

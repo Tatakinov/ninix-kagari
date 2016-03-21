@@ -63,7 +63,7 @@ module MCIAudio
       end
       argc = argv.length
       if argc == 1
-        raise "assert" unless @player != nil
+        fail "assert" unless @player != nil
         if argv[0] == 'stop'
           @player.set_state(Gst::State::NULL)
         elsif argv[0] == 'play'

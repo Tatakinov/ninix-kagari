@@ -109,9 +109,9 @@ module Makoto
       end
       begin
         if expected == nil
-          raise "assert" unless result == test
+          fail "assert" unless result == test
         else
-          raise "assert" unless expected.include?(result)
+          fail "assert" unless expected.include?(result)
         end
         if verbose != 0
           print("OK\n")

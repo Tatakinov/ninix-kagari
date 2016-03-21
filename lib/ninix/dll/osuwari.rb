@@ -56,10 +56,10 @@ module Osuwari
           return RESPONSE[400]
         end
         begin ## FIXME
-          raise "assert" unless ['ACTIVE', 'FIX'].include?(argument[2]) or 
+          fail "assert" unless ['ACTIVE', 'FIX'].include?(argument[2]) or 
             argument[2].start_with?('@') or 
             argument[2].start_with?('#')
-          raise "assert" unless ['TL', 'TR', 'BL', 'BR'].include?(argument[3])
+          fail "assert" unless ['TL', 'TR', 'BL', 'BR'].include?(argument[3])
           @settings['hwnd'] = argument[1]
           @settings['target'] = argument[2]
           @settings['position'] = argument[3]
@@ -84,8 +84,8 @@ module Osuwari
           if argument.length > 8
             #target, position = argument[8].split() # spec
             position, target = argument[8].split(nil, 2) # real world
-            raise "assert" unless ['DESKTOP', 'WORKAREA'].include?(target)
-            raise "assert" unless ['TOP', 'LEFT', 'RIGHT', 'BOTTOM'].include?(position)
+            fail "assert" unless ['DESKTOP', 'WORKAREA'].include?(target)
+            fail "assert" unless ['TOP', 'LEFT', 'RIGHT', 'BOTTOM'].include?(position)
             @settings['except'] = [target, position]
           end
         rescue

@@ -116,7 +116,7 @@ module Seriko
     end
 
     def lock_exclusive(window, actor)
-      raise "assert" unless @exclusive_actor == nil
+      fail "assert" unless @exclusive_actor == nil
       terminate(window)
       @exclusive_actor = actor
       actor.set_post_proc(
@@ -126,7 +126,7 @@ module Seriko
     end
 
     def unlock_exclusive(window, actor)
-      raise "assert" unless @exclusive_actor == actor
+      fail "assert" unless @exclusive_actor == actor
       @exclusive_actor = nil
     end
 
@@ -367,7 +367,7 @@ module Seriko
     end
 
     def set_post_proc(post_proc, args)
-      raise "assert" unless @post_proc == nil
+      fail "assert" unless @post_proc == nil
       @post_proc = [post_proc, args]
     end
 
@@ -442,7 +442,7 @@ module Seriko
       elsif method == 'alternativestop'
         window.get_seriko.stop_actor(args.sample)
       else
-        raise RuntimeError('should not reach here')
+        fail RuntimeError('should not reach here')
       end
       @last_method = method
     end
@@ -694,7 +694,7 @@ module Seriko
             match = re_seriko2_pattern.match(pattern)
           end
           if match == nil
-            raise ('unsupported pattern: ' + pattern)
+            fail ('unsupported pattern: ' + pattern)
           end
           if version == 1
             surface = match[1].to_i.to_s
@@ -724,13 +724,13 @@ module Seriko
               group = match[4]
             end
             if group == nil
-              raise ('syntax error: ' + pattern)
+              fail ('syntax error: ' + pattern)
             end
             args = [group.to_i]
           elsif ['alternativestart', 'alternativestop'].include?(method)
             args = match[6]
             if args == nil
-              raise ('syntax error: ' + pattern)
+              fail ('syntax error: ' + pattern)
             end
             t = []
             for x in args[1, args.length - 2].split('.', 0)
@@ -827,7 +827,7 @@ module Seriko
     end
     mayuna = []
     for mayuna_id, interval in buf
-      ##raise "assert" unless interval == 'bind'
+      ##fail "assert" unless interval == 'bind'
       actor = Seriko::Mayuna.new(mayuna_id, interval)
       begin
         for n in 0..127 # up to 128 patterns (0 - 127)
@@ -849,7 +849,7 @@ module Seriko
             match = re_mayuna2_pattern.match(pattern)
           end
           if match == nil
-            raise ('unsupported pattern: ' + pattern)
+            fail ('unsupported pattern: ' + pattern)
           end
           if version == 1
             surface = match[1].to_i.to_s

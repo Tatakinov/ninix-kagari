@@ -47,7 +47,7 @@ module Balloon
     end
 
     def handle_request(event_type, event, *arglist)
-      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'reset_user_interaction' => 'reset_user_interaction',
       }
@@ -180,7 +180,7 @@ module Balloon
     end
 
     def add_window(side)
-      raise "assert" unless @window.length == side
+      fail "assert" unless @window.length == side
       if side == 0
         name = 'balloon.sakura'
         id_format = 's'
@@ -656,7 +656,7 @@ module Balloon
 
     def reset_sstp_marker
       if @side == 0
-        raise "assert" unless @balloon_surface != nil
+        fail "assert" unless @balloon_surface != nil
         w = @balloon_surface.width
         h = @balloon_surface.height
         # sstp marker position
@@ -675,7 +675,7 @@ module Balloon
     def reset_arrow
       # arrow positions
       @arrow = []
-      raise "assert" unless @balloon_surface != nil
+      fail "assert" unless @balloon_surface != nil
       w = @balloon_surface.width
       h = @balloon_surface.height
       x = config_adjust('arrow0.x', w, -10)
@@ -784,7 +784,7 @@ module Balloon
         balloon_id = @id_format + (0 + @__direction).to_i.to_s
         @balloon_surface = get_image_surface(balloon_id)
       end
-      raise "assert" unless @balloon_surface != nil
+      fail "assert" unless @balloon_surface != nil
       @balloon_id = balloon_id
       # change surface and window position
       x, y = @position
@@ -1032,7 +1032,7 @@ module Balloon
         pn = sn
         if tag[1] == '/'
           tag_ = tag[2, tag.length - 1]
-          raise "assert" unless tags_.include?(tag_)
+          fail "assert" unless tags_.include?(tag_)
           count_[tag_] -= 1
           if count_[tag_] < 0
             text = ['<', tag_, '>', text].join('')
@@ -1040,7 +1040,7 @@ module Balloon
           end
         else
           tag_ = tag[1, tag.length - 1]
-          raise "assert" unless tags_.include?(tag_)
+          fail "assert" unless tags_.include?(tag_)
           count_[tag_] += 1
           if count_[tag_] > 0
             text = [text, '</', tag_, '>'].join('')
@@ -1058,7 +1058,7 @@ module Balloon
       if not @__shown
         return true
       end
-      raise "assert" unless @balloon_surface != nil
+      fail "assert" unless @balloon_surface != nil
       @window.set_surface(cr, @balloon_surface, scale)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX

@@ -169,7 +169,7 @@ module Kinoko
     end
 
     def handle_request(event_type, event, *arglist)
-      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'get_target_window' =>  lambda { return @target.get_target_window }, # XXX
         'get_kinoko_position' => lambda {|a| return @target.get_kinoko_position(a) }
@@ -268,7 +268,7 @@ module Kinoko
     end
 
     def handle_request(event_type, event, *arglist)
-      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
       }
       if handlers.include?(event)

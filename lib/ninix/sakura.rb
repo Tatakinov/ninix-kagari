@@ -161,7 +161,7 @@ module Sakura
     end
 
     def handle_request(event_type, event, *arglist)
-      raise "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'lock_repaint' => "get_lock_repaint"
       }
@@ -206,7 +206,7 @@ module Sakura
     end
 
     def delete_shell(key)
-      raise "assert" unless @shells.include?(key)
+      fail "assert" unless @shells.include?(key)
       @shells.delete(key)
     end
 
@@ -430,7 +430,7 @@ module Sakura
       if t == Gst::MessageType::EOS
         @audio_player.set_state(Gst::State::NULL)
         if @script_mode == WAIT_MODE
-          raise "assert" unless not @audio_loop
+          fail "assert" unless not @audio_loop
           @script_mode = BROWSE_MODE
         end
         if @audio_loop
@@ -1442,7 +1442,7 @@ module Sakura
     end
 
     def select_shell(shell_key)
-      raise "assert" unless @shells != nil and @shells.include?(shell_key)
+      fail "assert" unless @shells != nil and @shells.include?(shell_key)
       @shell_directory = shell_key # save user's choice
       surface_name, surface_dir, surface_desc, surface_alias, surface, surface_tooltips, seriko_descript = \
                                                                                          @shells[shell_key].baseinfo
@@ -1464,7 +1464,7 @@ module Sakura
       if item == get_current_balloon_directory() # no change
         return # need reloadning?
       end
-      raise "assert" unless item == balloon['balloon_dir'][0]
+      fail "assert" unless item == balloon['balloon_dir'][0]
       path = File.join(Home.get_ninix_home(), 'balloon', item)
       @balloon.hide_all()
       set_balloon(desc, balloon)
@@ -1661,7 +1661,7 @@ module Sakura
       load_settings()
       shell_key = get_default_shell()
       @shell_directory = shell_key # XXX
-      raise "assert" unless @shells != nil and @shells.include?(shell_key)
+      fail "assert" unless @shells != nil and @shells.include?(shell_key)
       surface_name, surface_dir, surface_desc, surface_alias, surface, surface_tooltips, seriko_descript = \
                                                                                          @shells[shell_key].baseinfo
       if ghost_changed

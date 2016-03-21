@@ -354,7 +354,7 @@ module Satori
       lineno = linelist[0]
       buf = []
       line = linelist[1]
-      raise "assert" unless line.start_with?('＊')
+      fail "assert" unless line.start_with?('＊')
       name = line[1..-1]
       while linelist.length > 3 and not linelist[-1]
         linelist.delete_at(-1)
@@ -425,7 +425,7 @@ module Satori
       lineno = linelist[0]
       buf = []
       line = linelist[1]
-      raise "assert" unless line.start_with?('＠')
+      fail "assert" unless line.start_with?('＠')
       name = line[1..-1]
       prev = ''
       num_open = 0
@@ -467,7 +467,7 @@ module Satori
     end
 
     def parse_assignment(line)
-      raise "assert" unless line[0] == '＄'
+      fail "assert" unless line[0] == '＄'
       break_flag = false
       for n in 1..line.length-1
         if ["\t", ' ', '　', '＝'].include?(line[n]) ### FIXME: φ
@@ -511,7 +511,7 @@ module Satori
     end
 
     def parse_jump(line)
-      raise "assert" unless line[0] == '＞'
+      fail "assert" unless line[0] == '＞'
       break_flag = false
       for n in 1..line.length-1
         if line[n] == "\t" ### FIXME: φ
@@ -539,7 +539,7 @@ module Satori
     end
 
     def parse_choice(line)
-      raise "assert" unless line[0] == '＿'
+      fail "assert" unless line[0] == '＿'
       break_flag = false
       for n in 1..line.length-1
         if line[n] == "\t" ### FIXME: φ
@@ -659,7 +659,7 @@ module Satori
 
     def parse_parenthesis(line, buf)
       text_ = []
-      raise "assert" unless line[0] == '（'
+      fail "assert" unless line[0] == '（'
       line = line[1..-1] ## FIXME
       depth = 1
       count = 1
@@ -766,7 +766,7 @@ module Satori
         if line != nil and not line.empty? and ['|', '｜'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
-          raise ValueError('broken OR operator')
+          fail ValueError('broken OR operator')
         end
         line, and_expr = get_and_expr(line)
         buf << and_expr
@@ -785,7 +785,7 @@ module Satori
         if line != nil and not line.empty? and ['&', '＆'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
-          raise ValueError('broken AND operator')
+          fail ValueError('broken AND operator')
         end
         line, comp_expr = get_comp_expr(line)
         buf << comp_expr
@@ -821,7 +821,7 @@ module Satori
         if line != nil and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
-          raise ValueError('broken EQUAL operator')
+          fail ValueError('broken EQUAL operator')
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, '==', add_expr]]
@@ -830,7 +830,7 @@ module Satori
         if line != nil and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
-          raise ValueError('broken NOT EQUAL operator')
+          fail ValueError('broken NOT EQUAL operator')
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, '!=', add_expr]]
@@ -910,7 +910,7 @@ module Satori
         if line != nil and not line.empty? and line[0] == ')' ### FIXME: φ
           line = line[1..-1]
         else
-          raise ValueError('expected a close paren')
+          fail ValueError('expected a close paren')
         end
         return line, buf
       end
@@ -939,7 +939,7 @@ module Satori
         end
       end
       if buf.empty?
-        raise ValueError('expected a constant')
+        fail ValueError('expected a constant')
       end
       return line, buf
     end
@@ -1034,7 +1034,7 @@ module Satori
           print([indent, 'op'].join(''), node[1], "\n")
           print_nodelist(node[2], :depth => depth + 1)
         else
-          raise RuntimeError('should not reach here')
+          fail RuntimeError('should not reach here')
         end
       end
     end
@@ -1865,7 +1865,7 @@ module Satori
                       tag, script[match.end(0)..-1]].join('')
           end
         else
-          raise RuntimeError('should not reach here')
+          fail RuntimeError('should not reach here')
         end
       end
       # insert newline
@@ -2140,7 +2140,7 @@ module Satori
           elsif node[2] == '>='
             buf << to_zenkaku(operand1 >= operand2 ? 1 : 0)
           else
-            raise RuntimeError('should not reach here')
+            fail RuntimeError('should not reach here')
           end
         elsif node[0] == NODE_ADD_EXPR
           value_str = expand(node[1])
@@ -2167,7 +2167,7 @@ module Satori
             if node[i] == '+'
               value += operand
             else
-              raise RuntimeError('should not reach here')
+              fail RuntimeError('should not reach here')
             end
           end
           if value == nil
@@ -2207,7 +2207,7 @@ module Satori
             elsif node[i] == '%'
               value = value % operand
             else
-              raise RuntimeError('should not reach here')
+              fail RuntimeError('should not reach here')
             end
           end
           if value == nil
@@ -2239,11 +2239,11 @@ module Satori
           elsif node[1] == '!'
             value = ['０', '0'].include?(value) ? 1 : 0
           else
-            raise RuntimeError('should not reach here')
+            fail RuntimeError('should not reach here')
           end
           buf << to_zenkaku(value)
         else
-          raise RuntimeError('should not reach here')
+          fail RuntimeError('should not reach here')
         end
       end
       return buf.join('').strip()
@@ -2494,7 +2494,7 @@ module Satori
           #pass
         end
       elsif name == 'when'
-        raise "assert" unless args.length > 1
+        fail "assert" unless args.length > 1
         condition = expand(args[0], :caller_history => history)
         if ['０', '0'].include?(condition)
           if args.length > 2
@@ -2515,7 +2515,7 @@ module Satori
         print('FOR :', args.length, " ", args)
         #pass
       else
-        raise RuntimeError('should not reach here')
+        fail RuntimeError('should not reach here')
       end
       return ''
     end

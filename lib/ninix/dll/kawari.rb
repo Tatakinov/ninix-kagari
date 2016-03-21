@@ -825,7 +825,7 @@ module Kawari
         handler = @kis_commands[argv[0]]
         begin
           if handler == nil
-            raise RuntimeError.new('invalid command')
+            fail RuntimeError.new('invalid command')
           end
           values << method(handler).call(argv)
         rescue => message #except RuntimeError as message:
@@ -887,7 +887,7 @@ module Kawari
       elsif argv.length == 4
         return exec_if(argv[1], argv[2], argv[3])
       else
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
     end
 
@@ -925,7 +925,7 @@ module Kawari
 
     def exec_foreach(argv)
       if argv.length != 4
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       temp = expand(argv[1])
       name = expand(argv[2])
@@ -944,7 +944,7 @@ module Kawari
 
     def exec_loop(argv)
       if argv.length != 3
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       begin
         n = Integer(expand(argv[1]))
@@ -960,7 +960,7 @@ module Kawari
 
     def exec_while(argv)
       if argv.length != 3
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       buf = []
       while not ['', '0', 'false', 'False'].include?(expand(argv[1]))
@@ -971,7 +971,7 @@ module Kawari
 
     def exec_until(argv)
       if argv.length != 3
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       buf = []
       while ['', '0', 'false', 'False'].include?(expand(argv[1]))
@@ -982,7 +982,7 @@ module Kawari
 
     def exec_set(argv)
       if argv.length != 3
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       set(expand(argv[1]), expand(argv[2]))
       return ''
@@ -990,7 +990,7 @@ module Kawari
 
     def exec_adddict(argv)
       if argv.length != 3
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       push(expand(argv[1]), expand(argv[2]))
       return ''
@@ -998,7 +998,7 @@ module Kawari
 
     def exec_array(argv) # XXX experimental
       if argv.length != 3
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       n = atoi(expand(argv[2]))
@@ -1009,12 +1009,12 @@ module Kawari
         end
         n -= c.length
       end
-      raise RuntimeError.new('invalid argument')
+      fail RuntimeError.new('invalid argument')
     end
 
     def exec_clear(argv)
       if argv.length != 2
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       clear(expand(argv[1]))
       return ''
@@ -1022,7 +1022,7 @@ module Kawari
 
     def exec_enumerate(argv)
       if argv.length != 2
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       return enumerate(name).map {|s| expand(s) }.join(' ')
@@ -1042,7 +1042,7 @@ module Kawari
 
     def exec_size(argv)
       if argv.length != 2
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       n = 0
@@ -1055,7 +1055,7 @@ module Kawari
 
     def exec_get(argv) # XXX experimental
       if argv.length != 3
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       n = atoi(expand(argv[2]))
@@ -1066,12 +1066,12 @@ module Kawari
         end
         n -= c.length
       end
-      raise RuntimeError.new('invalid argument')
+      fail RuntimeError.new('invalid argument')
     end
 
     def exec_unshift(argv)
       if argv.length != 3
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       unshift(expand(argv[1]), expand(argv[2]))
       return ''
@@ -1079,14 +1079,14 @@ module Kawari
 
     def exec_shift(argv)
       if argv.length != 2
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       return shift(expand(argv[1]))
     end
 
     def exec_push(argv)
       if argv.length != 3
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       push(expand(argv[1]), expand(argv[2]))
       return ''
@@ -1094,14 +1094,14 @@ module Kawari
 
     def exec_pop(argv)
       if argv.length != 2
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       return pop(expand(argv[1]))
     end
 
     def exec_pirocall(argv)
       if argv.length != 2
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       selection = select_simple_phrase(expand(argv[1]))
       if selection == nil
@@ -1112,7 +1112,7 @@ module Kawari
 
     def exec_split(argv)
       if argv.length != 4
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       word_list = expand(argv[2]).split(expand(argv[3]), 0)
@@ -1129,7 +1129,7 @@ module Kawari
     def get_dict_path(path)
       path = Home.get_normalized_path(path)
       if path == nil
-        raise RuntimeError.new('invalid argument')
+        fail RuntimeError.new('invalid argument')
       end
       if path.start_with?('/')
         return path
@@ -1139,7 +1139,7 @@ module Kawari
 
     def exec_load(argv)
       if argv.length != 2
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       path = get_dict_path(expand(argv[1]))
       begin
@@ -1161,7 +1161,7 @@ module Kawari
 
     def exec_save(argv, crypt: false)
       if argv.length < 2
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       path = get_dict_path(expand(argv[1]))
       begin
@@ -1198,7 +1198,7 @@ module Kawari
 
     def exec_textload(argv)
       if argv.length != 3
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       path = get_dict_path(expand(argv[1]))
       begin
@@ -1262,20 +1262,20 @@ module Kawari
           return expand(argv[2])
         end
       else
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
     end
 
     def exec_null(argv)
       if argv.length != 1
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       return ''
     end
 
     def exec_chr(argv)
       if argv.length != 2
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       num = atoi(expand(argv[1]))
       if num < 256
@@ -1294,7 +1294,7 @@ module Kawari
 
     def exec_rand(argv)
       if argv.length != 2
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       bound = atoi(expand(argv[1]))
       if bound == 0
@@ -1393,7 +1393,7 @@ module Kawari
 
     def apply_counter_op(func, argv)
       if argv.length < 2 or argv.length > 4
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       name = expand(argv[1])
       value = atoi(get(name))
@@ -1417,7 +1417,7 @@ module Kawari
         op  = expand(argv[2])
         op2 = expand(argv[3])
       else
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       if ['=', '=='].include?(op)
         result = (op1 == op2).to_s
@@ -1444,7 +1444,7 @@ module Kawari
       elsif op == '-gt'
         result = (atoi(op1) > atoi(op2)).to_s
       else
-        raise RuntimeError.new('unknown operator')
+        fail RuntimeError.new('unknown operator')
       end
       return result
     end
@@ -1453,7 +1453,7 @@ module Kawari
       tree = @expr_parser.parse(
         argv[1..-1].map {|e| e.join('') }.join(' '))
       if tree == nil
-        raise RuntimeError.new('syntax error')
+        fail RuntimeError.new('syntax error')
       end
       begin
         value = interp_expr(tree)
@@ -1502,13 +1502,13 @@ module Kawari
         elsif tree[2] == '>'
           return (op1 > op2).to_s
         else
-          raise RuntimeError.new('unknown operator')
+          fail RuntimeError.new('unknown operator')
         end
       elsif tree[0] == ExprParser::ADD_EXPR
         for i in 1.step(tree.length-1, 2)
           tree[i] = interp_expr(tree[i])
           if not is_number(tree[i])
-            raise ExprError
+            fail ExprError
           end
         end
         value = Integer(tree[1])
@@ -1524,7 +1524,7 @@ module Kawari
         for i in 1.step(tree.length-1, 2)
           tree[i] = interp_expr(tree[i])
           if not is_number(tree[i])
-            raise ExprError
+            fail ExprError
           end
         end
         value = Integer(tree[1])
@@ -1696,13 +1696,13 @@ module Kawari
 
     def match(s)
       if pop() != s
-        raise ExprError
+        fail ExprError
       end
     end
 
     def match_space
       if not Kawari.is_space(pop())
-        raise ExprError
+        fail ExprError
       end
     end
 
@@ -1726,7 +1726,7 @@ module Kawari
     def get_expr
       buf = get_or_expr()
       if not done()
-        raise ExprError
+        fail ExprError
       end
       show_progress('get_expr', buf)
       return buf
@@ -1908,7 +1908,7 @@ module Kawari
         buf << pop()
       end
       if buf.empty?
-        raise ExprError
+        fail ExprError
       end
       return buf
     end

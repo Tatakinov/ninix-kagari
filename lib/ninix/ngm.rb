@@ -125,7 +125,7 @@ module NGM
     def create_entry(node)
       entry = {}
       for key, text in node
-        raise "assert" unless ELEMENTS.include?(key)
+        fail "assert" unless ELEMENTS.include?(key)
         entry[key] = text
       end
       return entry
@@ -135,7 +135,7 @@ module NGM
       line0 = fileobj.readline()
       encoding = get_encoding(line0)
       if not Encoding.name_list.include?(encoding)
-        raise SystemExit('Unsupported encoding {0}'.format(repr(encoding)))
+        fail SystemExit('Unsupported encoding {0}'.format(repr(encoding)))
       end
       nest = 0
       new_entry = {}

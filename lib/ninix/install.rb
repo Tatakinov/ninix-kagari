@@ -33,7 +33,7 @@ module Install
 
   def self.fatal(error)
     Logging::Logging.error(error) # XXX
-    raise InstallError.new(error)
+    fail InstallError.new(error)
   end
 
   class Installer
@@ -367,7 +367,7 @@ module Install
     end
 
     def select(candidates)
-      raise "assert" unless candidates.length >= 1
+      fail "assert" unless candidates.length >= 1
       if candidates.length == 1
         return candidates[0]
       end

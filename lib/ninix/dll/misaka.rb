@@ -47,7 +47,7 @@ module Misaka
       at = 'line ' + position[0].to_s + ', column ' + position[1].to_s
       error = 'lexical error at ' + at.to_s + ' in ' + path.to_s
     end
-    raise MisakaError.new(error)
+    fail MisakaError.new(error)
   end
 
   def self.syntax_error(message, path: nil, position: nil)
@@ -62,7 +62,7 @@ module Misaka
       at = 'line ' + position[0].to_s + ', column ' + position[1].to_s
       error = 'syntax error at ' + at.to_s + ' in ' + path.to_s + ' (' + message.to_s + ')'
     end
-    raise MisakaError.new(error)
+    fail MisakaError.new(error)
   end
 
   def self.list_dict(top_dir)
@@ -568,7 +568,7 @@ module Misaka
         elsif token == TOKEN_OPEN_BRACE
           buf << get_brace_expr()
         else
-          raise RuntimeError.new('should not reach here')
+          fail RuntimeError.new('should not reach here')
         end
       end
       # strip whitespace at the beginning and/or end of line
@@ -629,7 +629,7 @@ module Misaka
               if token == TOKEN_CLOSE_BRACE
                 break
               end
-              raise "assert" unless token == TOKEN_NEWLINE
+              fail "assert" unless token == TOKEN_NEWLINE
             end
             @lexer.skip_space()
             token, lexeme = @lexer.look_ahead()
@@ -648,7 +648,7 @@ module Misaka
                 if token == TOKEN_CLOSE_BRACE
                   break
                 end
-                raise "assert" unless token == TOKEN_NEWLINE
+                fail "assert" unless token == TOKEN_NEWLINE
               end
             elsif token == TOKEN_OPEN_BRACE ## XXX
               @lexer.pop_check(TOKEN_OPEN_BRACE)
@@ -663,7 +663,7 @@ module Misaka
                 if token == TOKEN_CLOSE_BRACE
                   break
                 end
-                raise "assert" unless token == TOKEN_NEWLINE
+                fail "assert" unless token == TOKEN_NEWLINE
               end
             else
               else_clause = [[NODE_TEXT, '']]
@@ -1016,7 +1016,7 @@ module Misaka
         end
       else
         print(node, "\n")
-        raise RuntimeError.new('should not reach here')
+        fail RuntimeError.new('should not reach here')
       end
     end
   end
@@ -1427,7 +1427,7 @@ module Misaka
               end
               @variable[name] = [TYPE_ARRAY, array]
             else
-              raise RuntimeError.new('should not reach here')
+              fail RuntimeError.new('should not reach here')
             end
           end
         end
@@ -1452,7 +1452,7 @@ module Misaka
                 f.write(expand(item).to_s + "\n")
               end
             else
-              raise RuntimeError.new('should not reach here')
+              fail RuntimeError.new('should not reach here')
             end
           end
         end
@@ -1674,7 +1674,7 @@ module Misaka
         result = eval_pow_expr(node[1..-1])
       else
         ##print(node)
-        raise RuntimeError.new('should not reach here')
+        fail RuntimeError.new('should not reach here')
       end
       return result
     end

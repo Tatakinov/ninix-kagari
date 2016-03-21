@@ -52,7 +52,7 @@ module Alias
               line = buf[i]
               i += 1
             else
-              raise ValueError('unexpedted end of file')
+              fail ValueError('unexpedted end of file')
             end
             line = line.gsub(0x81.chr + 0x40.chr, "").strip()
             if line.length == 0
@@ -60,14 +60,14 @@ module Alias
             elsif line == '{'
               break
             end
-            raise ValueError('open brace not found')
+            fail ValueError('open brace not found')
           end
           while true
             if i < j
               line = buf[i]
               i += 1
             else
-              raise ValueError('unexpected end of file')
+              fail ValueError('unexpected end of file')
             end
             line = line.gsub(0x81.chr + 0x40.chr, "").strip()
             if line.length == 0
@@ -80,7 +80,7 @@ module Alias
               key = line[0].strip
               values = line[1].strip
             else
-              raise 'malformed line found'
+              fail 'malformed line found'
             end
             if !values.empty? and \
               values.start_with?('[') and values.end_with?(']')
@@ -94,7 +94,7 @@ module Alias
                 table[key] << value
               end
             else
-              raise 'malformed line found'
+              fail 'malformed line found'
             end
           end
         rescue => e

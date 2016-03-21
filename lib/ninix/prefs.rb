@@ -494,7 +494,7 @@ module Prefs
       end
       if not selected
         listiter = model.iter_first
-        raise "assert" unless listiter != nil
+        fail "assert" unless listiter != nil
         @balloon_treeview.selection.select_iter(listiter)
       end
     end
