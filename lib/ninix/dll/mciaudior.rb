@@ -14,7 +14,11 @@
 
 require "uri"
 
-require "gst"
+begin
+  require "gst"
+rescue LoadError
+  Gst = nil
+end
 
 require_relative "../home"
 require_relative "../dll"

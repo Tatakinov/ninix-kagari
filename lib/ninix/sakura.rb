@@ -14,7 +14,11 @@
 #
 
 require "gtk3"
-require "gst"
+begin
+  require "gst"
+rescue LoadError
+  Gst = nil
+end
 require "cgi"
 require "uri"
 
