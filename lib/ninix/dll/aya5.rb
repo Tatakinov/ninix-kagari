@@ -1009,8 +1009,7 @@ module Aya5
 
     def get_left_(tokens, position)
       position -= 1
-      left = tokens[position]
-      tokens.delete_at(position)
+      left = tokens.delete_at(position)
       if left.is_a?(String) # not processed
         left = new_parse([left])
       end
@@ -1018,12 +1017,10 @@ module Aya5
     end
 
     def get_right_(tokens, position)
-      right = tokens[position]
-      tokens.delete_at(position)
+      right = tokens.delete_at(position)
       if right.is_a?(String) # not processed
         if ['-', '+'].include?(right)
-          tmp_token = tokens[position]
-          tokens.delete_at(position)
+          tmp_token = tokens.delete_at(position)
           right = new_parse([right, tmp_token])
         else
           right = new_parse([right])
@@ -1040,16 +1037,13 @@ module Aya5
       while position >= 0
         pos_end = find_close_(tokens[position], tokens, position + 1)
         temp = []
-        token_open = tokens[position] # open
-        tokens.delete_at(position)
+        token_open = tokens.delete_at(position) # open
         for i in 0..pos_end - position - 2
-          temp << tokens[position]
-          tokens.delete_at(position)
+          temp << tokens.delete_at(position)
         end
         tokens.delete_at(position) # close
         if token_open == '[' # array
-          name = tokens[position - 1]
-          tokens.delete_at(position - 1)
+          name = tokens.delete_at(position - 1)
           tokens.insert(position - 1, [TYPE_ARRAY,
                                        [name, [TYPE_FORMULA, new_parse(temp)]]])
         else
@@ -1063,8 +1057,7 @@ module Aya5
             tokens.insert(position, [TYPE_FORMULA,
                                      new_parse(temp)])
           else # should be function
-            name = tokens[position - 1]
-            tokens.delete_at(position - 1)
+            name = tokens.delete_at(position - 1)
             if @dic.aya.get_system_functions().exists(name)
               tokens.insert(position - 1, [TYPE_SYSTEM_FUNCTION,
                                            [name,
@@ -1091,8 +1084,7 @@ module Aya5
           type_ = TYPE_DEC
         end
         tokens.delete_at(position)
-        var = tokens[position - 1]
-        tokens.delete_at(position - 1)
+        var = tokens.delete_at(position - 1)
         if var.is_a?(String) # not processed
           right = new_parse([var]) ## FIXME
         end
@@ -1100,8 +1092,7 @@ module Aya5
       end
       position = find_position(tokens, ['*', '/', '%'], 0, :reverse => 1)
       while position >= 0
-        ope = [TYPE_OPERATOR, tokens[position]]
-        tokens.delete_at(position)
+        ope = [TYPE_OPERATOR, tokens.delete_at(position)]
         right = get_right_(tokens, position)
         left = get_left_(tokens, position)
         tokens.insert(position - 1, [TYPE_STATEMENT, left, ope, right])
@@ -1110,8 +1101,7 @@ module Aya5
       position = 0
       position = find_position(tokens, ['+', '-'], position)
       while position >= 0
-        ope = [TYPE_OPERATOR, tokens[position]]
-        tokens.delete_at(position)
+        ope = [TYPE_OPERATOR, tokens.delete_at(position)]
         right = get_right_(tokens, position)
         ope_list = ['!_in_', '_in_',
                     '+:=', '-:=', '*:=', '/:=', '%:=',
@@ -1147,8 +1137,7 @@ module Aya5
       end
       position = find_position(tokens, ['==', '!=', '>=', '<=', '>', '<', '_in_', '!_in_'], 0, :reverse => 1)
       while position >= 0
-        ope = [TYPE_OPERATOR, tokens[position]]
-        tokens.delete_at(position)
+        ope = [TYPE_OPERATOR, tokens.delete_at(position)]
         right = get_right_(tokens, position)
         left = get_left_(tokens, position)
         tokens.insert(position - 1, [TYPE_CONDITION, [left, ope, right]])
@@ -1156,8 +1145,7 @@ module Aya5
       end
       position = find_position(tokens, ['&&'], 0, :reverse => 1)
       while position >= 0
-        ope = [TYPE_OPERATOR, tokens[position]]
-        tokens.delete_at(position)
+        ope = [TYPE_OPERATOR, tokens.delete_at(position)]
         right = get_right_(tokens, position)
         left = get_left_(tokens, position)
         tokens.insert(position - 1, [TYPE_CONDITION, [left, ope, right]])
@@ -1165,8 +1153,7 @@ module Aya5
       end
       position = find_position(tokens, ['||'], 0, :reverse => 1)
       while position >= 0
-        ope = [TYPE_OPERATOR, tokens[position]]
-        tokens.delete_at(position)
+        ope = [TYPE_OPERATOR, tokens.delete_at(position)]
         right = get_right_(tokens, position)
         left = get_left_(tokens, position)
         tokens.insert(position - 1, [TYPE_CONDITION, [left, ope, right]])
@@ -1174,8 +1161,7 @@ module Aya5
       end
       position = find_position(tokens, ['=', ':='], 0, :reverse => 1)
       while position >= 0
-        ope = [TYPE_OPERATOR, tokens[position]]
-        tokens.delete_at(position)
+        ope = [TYPE_OPERATOR, tokens.delete_at(position)]
         right = get_right_(tokens, position)
         left = get_left_(tokens, position)
         tokens.insert(position - 1, [TYPE_SUBSTITUTION, [left, ope, right]])
@@ -1183,8 +1169,7 @@ module Aya5
       end
       position = find_position(tokens, ['+=', '-=', '*=', '/=', '%=', '+:=', '-:=', '*:=', '/:=', '%:=', ',='], 0, :reverse => 1)
       while position >= 0
-        ope = [TYPE_OPERATOR, tokens[position]]
-        tokens.delete_at(position)
+        ope = [TYPE_OPERATOR, tokens.delete_at(position)]
         right = get_right_(tokens, position)
         left = get_left_(tokens, position)
         tokens.insert(position - 1, [TYPE_SUBSTITUTION, [left, ope, right]])
@@ -1205,8 +1190,7 @@ module Aya5
       end
       for i in 0..tokens.length-1
         if tokens[i].is_a?(String)
-          token = tokens[i]
-          tokens.delete_at(i)
+          token = tokens.delete_at(i)
           tokens.insert(i, parse_token(token))
         end
       end

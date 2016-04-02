@@ -1,6 +1,11 @@
+Sat April 2 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* Gstreamerが動作に必須になってしまっていたのを修正した.
+	* コーディングスタイル修正.
+	  (delete_atの使い方を修正した.)
+
 Mon March 21 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* コーディングスタイル修正.
-	  再度例外を起こす場合以外はraiseではなくfailを使うようにした.
+	  (再度例外を起こす場合以外はraiseではなくfailを使うようにした.)
 
 Sun February 7 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* バージョン4.999.1リリース.

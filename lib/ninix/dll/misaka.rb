@@ -1127,8 +1127,7 @@ module Misaka
         @indexes = Array(0..@list.length-1)
       end
       i = Array(0..@indexes.length-1).sample
-      index = @indexes[i]
-      @indexes.delete_at(i)
+      index = @indexes.delete_at(i)
       return @list[index]
     end
   end
@@ -1174,8 +1173,7 @@ module Misaka
         return nil
       end
       i = Array(0..@list.length-1).sample
-      item = @list[i]
-      @list.delete_at(i)
+      item = @list.delete_at(i)
       return item
     end
 
@@ -1191,8 +1189,7 @@ module Misaka
         return nil
       end
       i = buf.sample
-      item = @list[i]
-      @list.delete_at(i)
+      item = @list.delete_at(i)
       return item
     end
   end
