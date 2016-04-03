@@ -156,7 +156,13 @@ module Pix
 
     def set_shape(cr)
       region = Pix.surface_to_region(cr.target.map_to_image)
-      input_shape_combine_region(region)
+      if @supports_alpha
+        input_shape_combine_region(nil)
+        input_shape_combine_region(region)
+      else
+        shape_combine_region(nil)
+        shape_combine_region(region)
+      end
     end
   end
 
