@@ -690,19 +690,22 @@ module Home
                 next
               end
               if key.start_with?('surface')
-                begin
-                  key = [key[0, 7], Integer(key[7, key.length - 1]).to_s].join('')
-                rescue
-                  #pass
-                end
+                key_range = key[7, key.length - 1]
               else
-                begin
-                  key = ['surface', Integer(key).to_s].join('')
-                rescue
-                  #pass
-                end
+                key_range = key
               end
-              config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
+              s, e = key_range.split("-", 2)
+              e = s if e == nil
+              begin
+                s = Integer(s)
+                e = Integer(e)
+              rescue
+                next
+              end
+              for x in Range.new(s, e)
+                key = ['surface', x].join('')
+                config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
+              end
             end
           elsif key == 'descript'
             config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
