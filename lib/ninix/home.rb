@@ -608,122 +608,140 @@ module Home
   def self.read_surfaces_txt(surface_dir)
     re_alias = Regexp.new('\A(sakura|kero|char[0-9]+)\.surface\.alias\z')
     config_list = []
-    path = File.join(surface_dir, 'surfaces.txt')
-    begin
-      f = open(path, 'rb')
-      alias_buffer = []
-      tooltips = {}
-      charset = 'CP932'
-      buf = []
-      key = nil
-      opened = false
-      if f.read(3).bytes == [239, 187, 191] # "\xEF\xBB\xBF"
-        f.close
-        f = File.open(path, 'rb:BOM|UTF-8')
-        charset = 'UTF-8'
-      else
-        f.seek(0) # rewind
-      end
-      for line in f
-        if line.start_with?('#') or line.start_with?('//')
-          next
-        end
-        if charset == 'CP932'
-          # "\x81\x40": full-width space in CP932(Shift_JIS)
-          temp = line.gsub(0x81.chr + 0x40.chr, "").strip()
-        else
-          temp = line.strip()
-        end
-        if temp.empty?
-          next
-        end
-        if temp.start_with?('charset')
-          begin
-            charset = temp.split(',', 2)[1].strip().force_encoding('ascii')
-          rescue
-            #pass
-          end
-          next
-        end
-        if key == nil
-          if temp.end_with?('{')
-            key = temp[0, temp.length - 1].force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
-            opened = true
-          else
-            key = temp.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
-          end
-        elsif temp == '{'
-          opened = true
-        elsif temp.end_with?('}')
-          if temp[0, temp.length - 2]
-            buf << temp[0, temp.length - 2]
-          end
-          if not opened
-            Logging::Logging.error('syntax error: unbalnced "}" in surfaces.txt.')
-          end
-          match = re_alias.match(key)
-          if match != nil
-            alias_buffer << key
-            alias_buffer << '{'
-            for line in buf
-              alias_buffer << line.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
-            end
-            alias_buffer << '}'
-          elsif key.end_with?('.tooltips')
-            begin
-              key = key[0, -10]
-            rescue
-              #pass
-            end
-            value = {}
-            for line in buf
-              s = line.split(',', 2)
-              region = s[0].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
-              text = s[1].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
-              value[region] = text
-              tooltips[key] = value
-            end
-          elsif key.start_with?('surface')
-            keys = key.split(',', 0)
-            for key in keys
-              if key.empty?
-                next
-              end
-              if key.start_with?('surface')
-                key_range = key[7, key.length - 1]
-              else
-                key_range = key
-              end
-              s, e = key_range.split("-", 2)
-              e = s if e == nil
-              begin
-                s = Integer(s)
-                e = Integer(e)
-              rescue
-                next
-              end
-              for x in Range.new(s, e)
-                key = ['surface', x].join('')
-                config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
-              end
-            end
-          elsif key == 'descript'
-            config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
-          end
+    if not File.directory?(surface_dir)
+      return config_list
+    end
+    Dir.foreach(surface_dir) do |file|
+      next if /^\.+$/ =~ file
+      if file.start_with?("surfaces") and file.end_with?(".txt")
+        path = File.join(surface_dir, file)
+        begin
+          f = open(path, 'rb')
+          alias_buffer = []
+          tooltips = {}
+          charset = 'CP932'
           buf = []
           key = nil
           opened = false
-        else
-          buf << temp
+          if f.read(3).bytes == [239, 187, 191] # "\xEF\xBB\xBF"
+            f.close
+            f = File.open(path, 'rb:BOM|UTF-8')
+            charset = 'UTF-8'
+          else
+            f.seek(0) # rewind
+          end
+          for line in f
+            if line.start_with?('#') or line.start_with?('//')
+              next
+            end
+            if charset == 'CP932'
+              # "\x81\x40": full-width space in CP932(Shift_JIS)
+              temp = line.gsub(0x81.chr + 0x40.chr, "").strip()
+            else
+              temp = line.strip()
+            end
+            if temp.empty?
+              next
+            end
+            if temp.start_with?('charset')
+              begin
+                charset = temp.split(',', 2)[1].strip().force_encoding('ascii')
+              rescue
+                #pass
+              end
+              next
+            end
+            if key == nil
+              if temp.end_with?('{')
+                key = temp[0, temp.length - 1].force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+                opened = true
+              else
+                key = temp.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+              end
+            elsif temp == '{'
+              opened = true
+            elsif temp.end_with?('}')
+              if temp[0, temp.length - 2]
+                buf << temp[0, temp.length - 2]
+              end
+              if not opened
+                Logging::Logging.error('syntax error: unbalnced "}" in surfaces.txt.')
+              end
+              match = re_alias.match(key)
+              if match != nil
+                alias_buffer << key
+                alias_buffer << '{'
+                for line in buf
+                  alias_buffer << line.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+                end
+                alias_buffer << '}'
+              elsif key.end_with?('.tooltips')
+                begin
+                  key = key[0, -10]
+                rescue
+                  #pass
+                end
+                value = {}
+                for line in buf
+                  s = line.split(',', 2)
+                  region = s[0].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+                  text = s[1].strip().force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+                  value[region] = text
+                  tooltips[key] = value
+                end
+              elsif key.start_with?('surface')
+                keys = key.split(',', 0)
+                for key in keys
+                  if key.empty?
+                    next
+                  end
+                  flg_append = false
+                  if key.start_with?('surface.append')
+                    flg_append = true
+                    key_range = key[14, key.length - 1]
+                  elsif key.start_with?('surface')
+                    key_range = key[7, key.length - 1]
+                  else
+                    key_range = key
+                  end
+                  s, e = key_range.split("-", 2)
+                  e = s if e == nil
+                  begin
+                    s = Integer(s)
+                    e = Integer(e)
+                  rescue
+                    next
+                  end
+                  for x in Range.new(s, e)
+                    key = ['surface', x].join('')
+                    if flg_append
+                      config_list.reverse_each {|x|
+                        break x[1].update(NConfig.create_from_buffer(buf, :charset => charset)) if x[0] == key
+                      }
+                    else
+                      config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
+                    end
+                  end
+                end
+              elsif key == 'descript'
+                config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
+              end
+              buf = []
+              key = nil
+              opened = false
+            else
+              buf << temp
+            end
+          end
+        rescue SystemCallError
+          return config_list
         end
+        if not alias_buffer.empty?
+          config_list << ['__alias__', Alias.create_from_buffer(alias_buffer)]
+        end
+        config_list << ['__tooltips__', tooltips]
       end
-    rescue SystemCallError
-      return config_list
     end
-    if not alias_buffer.empty?
-      config_list << ['__alias__', Alias.create_from_buffer(alias_buffer)]
-    end
-    config_list << ['__tooltips__', tooltips]
     return config_list
   end
 
