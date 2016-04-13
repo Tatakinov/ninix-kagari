@@ -691,16 +691,39 @@ module Home
                 end
               elsif key.start_with?('surface')
                 keys = key.split(',', 0)
+                include_list = []
+                exclude_list = []
+                flg_append = false
                 for key in keys
+                  flg_delete = false
                   if key.empty?
                     next
                   end
-                  flg_append = false
+                  if key.start_with?('surface')
+                    if not include_list.empty?
+                      for num in (include_list - exclude_list)
+                        key = ['surface', num].join('')
+                        if flg_append
+                          config_list.reverse_each {|x|
+                            break x[1].update(NConfig.create_from_buffer(buf, :charset => charset)) if x[0] == key
+                          }
+                        else
+                          config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
+                        end
+                      end
+                    end
+                    include_list = []
+                    exclude_list = []
+                    flg_append = false
+                  end
                   if key.start_with?('surface.append')
                     flg_append = true
                     key_range = key[14, key.length - 1]
                   elsif key.start_with?('surface')
                     key_range = key[7, key.length - 1]
+                  elsif key.start_with?("!")
+                    flg_delete = true
+                    key_range = key[1, key.length - 1]
                   else
                     key_range = key
                   end
@@ -713,13 +736,10 @@ module Home
                     next
                   end
                   for x in Range.new(s, e)
-                    key = ['surface', x].join('')
-                    if flg_append
-                      config_list.reverse_each {|x|
-                        break x[1].update(NConfig.create_from_buffer(buf, :charset => charset)) if x[0] == key
-                      }
+                    if flg_delete
+                      exclude_list << x
                     else
-                      config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
+                      include_list << x
                     end
                   end
                 end

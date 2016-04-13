@@ -1,3 +1,6 @@
+Wed April 13 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* surface定義の例外指定"!"に対応した.
+
 Tue April 12 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* 複数のsurfaces***.txt(***は任意の文字列)の読み込みに対応した.
 	* 追加定義用surface定義に対応した.
