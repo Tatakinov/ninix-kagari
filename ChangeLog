@@ -1,3 +1,10 @@
+Sat April 16 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* ポップアップメニューのツールチップが表示される度に
+	  イベントハンドラ内でGdkPixbufを生成して使用していたのを、
+	  あらかじめ生成してイベントハンドラに結びつけておいたものを
+	  使用するように修正した.
+	* 文5互換モジュールを更新した.
+
 Wed April 13 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* surface定義の例外指定"!"に対応した.
 

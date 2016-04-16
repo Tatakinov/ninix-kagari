@@ -1646,7 +1646,7 @@ module Aya5
           condition = line[1][0]
           inner_block = line[1][1]
           fail "assert" unless condition[0] == TYPE_CONDITION or condition[0] == TYPE_INT
-          while evaluate_condition(namespace, condition) != nil
+          while evaluate_condition(namespace, condition)
             local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1) ## FIXME
@@ -1671,7 +1671,7 @@ module Aya5
           inner_block = line[1][1]
           evaluate(namespace, init, -1, 1, :is_block => 0) ## FIXME
           fail "assert" unless condition[0] == TYPE_CONDITION or condition[0] == TYPE_INT
-          while evaluate_condition(namespace, condition) != nil
+          while evaluate_condition(namespace, condition)
             local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1) ## FIXME

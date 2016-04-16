@@ -545,8 +545,9 @@ module Menu
                 end
                 if banner != nil
                   item.set_has_tooltip(true)
+                  pixbuf = Pix.create_pixbuf_from_file(banner, :is_pnr => false)
                   item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
-                    next on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
+                    next on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
                   end
                 else
                   item.set_has_tooltip(false)
@@ -626,8 +627,9 @@ module Menu
               end
               if banner != nil
                 item.set_has_tooltip(true)
+                pixbuf = Pix.create_pixbuf_from_file(banner, :is_pnr => false)
                 item.signal_connect('query-tooltip') do |widget, x, y, keyboardmode, tooltip|
-                  next on_tooltip(widget, x, y, keyboard_mode, tooltip, banner)
+                  next on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
                 end
               else
                 item.set_has_tooltip(false)
@@ -678,8 +680,9 @@ module Menu
       end
       if thumbnail != nil
         item.set_has_tooltip(true)
+        pixbuf = Pix.create_pixbuf_from_file(thumbnail, :is_pnr => false)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
-          next on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
+          next on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
         end
       else
         item.set_has_tooltip(false)
@@ -773,11 +776,10 @@ module Menu
       return false
     end
 
-    def on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
-      if thumbnail == nil
+    def on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
+      if pixbuf == nil
         return false
       end
-      pixbuf = Pix.create_pixbuf_from_file(thumbnail, :is_pnr => false)
       tooltip.set_icon(pixbuf)
       return true
     end
@@ -840,8 +842,9 @@ module Menu
       end
       if thumbnail != nil
         item.set_has_tooltip(true)
+        pixbuf = Pix.create_pixbuf_from_file(thumbnail, :is_pnr => false)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
-          next on_tooltip(widget, x, y, keyboard_mode, tooltip, thumbnail)
+          next on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
         end
       else
         item.set_has_tooltip(false)
