@@ -17,7 +17,7 @@ require "gtk3"
 require_relative "../dll"
 
 
-module TextCopy
+module Textcopy
 
   class Saori < DLL::SAORI
 

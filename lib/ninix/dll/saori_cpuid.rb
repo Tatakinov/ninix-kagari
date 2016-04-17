@@ -14,7 +14,7 @@
 require_relative "../dll"
 
 
-module SAORI_CPUID
+module Saori_cpuid
 
   class Saori < DLL::SAORI
 

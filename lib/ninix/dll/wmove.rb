@@ -21,7 +21,7 @@ require_relative "../dll"
 require_relative "../pix"
 
 
-module WMove
+module Wmove
 
   class Saori < DLL::SAORI
 

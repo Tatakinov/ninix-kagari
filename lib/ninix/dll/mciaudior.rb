@@ -13,6 +13,7 @@
 #
 
 require "uri"
+require "pathname"
 
 begin
   require "gst"
@@ -25,7 +26,7 @@ require_relative "../dll"
 require_relative "../logging"
 
 
-module MCIAudioR
+module Mciaudior
 
   class Saori < DLL::SAORI
 
@@ -87,7 +88,11 @@ module MCIAudioR
         if argv[0] == 'load'
           @player.set_state(Gst::State::NULL)
           filename = Home.get_normalized_path(argv[1])
-          @filepath = File.join(@dir, filename)
+          if not Pathname(filename).absolute?
+            @filepath = File.join(@dir, filename)
+          else
+            @filepath  = filename
+          end
         end
       end
       return RESPONSE[204]

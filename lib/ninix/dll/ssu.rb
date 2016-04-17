@@ -18,7 +18,7 @@ require_relative "../dll"
 require_relative "../logging"
 
 
-module SSU
+module Ssu
 
   class Saori < DLL::SAORI
 

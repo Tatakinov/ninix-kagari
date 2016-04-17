@@ -25,7 +25,7 @@ require_relative "../dll"
 require_relative "../logging"
 
 
-module MCIAudio
+module Mciaudio
 
   class Saori < DLL::SAORI
 

@@ -19,7 +19,7 @@ require "gtk3"
 require_relative "../dll"
 
 
-module HTTPC
+module Httpc
 
   class Saori < DLL::SAORI
 
