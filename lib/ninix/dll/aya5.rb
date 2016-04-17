@@ -1631,7 +1631,7 @@ module Aya5
             entry = inner_blocks[j]
             condition = entry[0]
             inner_block = entry[1]
-            if evaluate(namespace, [condition], -1, 1, :is_block => 0) != nil ## FIXME
+            if evaluate(namespace, [condition], -1, 1, :is_block => 0) ## FIXME
               local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
               result_of_inner_block = evaluate(local_namespace,
                                                inner_block,
@@ -2152,7 +2152,7 @@ module Aya5
             return false # XXX
           end
         end
-        result = left_result < right_result
+        result = (left_result < right_result)
       elsif ope[1] == '>'
         if right_result.is_a?(String) != left_result.is_a?(String)
           begin
@@ -2162,7 +2162,7 @@ module Aya5
             return false # XXX
           end
         end
-        result = left_result > right_result
+        result = (left_result > right_result)
       elsif ope[1] == '<='
         if right_result.is_a?(String) != left_result.is_a?(String)
           begin
@@ -2172,7 +2172,7 @@ module Aya5
             return false # XXX
           end
         end
-        result = left_result <= right_result
+        result = (left_result <= right_result)
       elsif ope[1] == '>='
         if right_result.is_a?(String) != left_result.is_a?(String)
           begin
@@ -2182,11 +2182,11 @@ module Aya5
             return false # XXX
           end
         end
-        result = left_result >= right_result
+        result = (left_result >= right_result)
       elsif ope[1] == '||'
-        result = [1, true].include?(left_result) or [1, true].include?(right_result)
+        result = ([1, true].include?(left_result) or [1, true].include?(right_result))
       elsif ope[1] == '&&'
-        result = [1, true].include?(left_result) and [1, true].include?(right_result)
+        result = ([1, true].include?(left_result) and [1, true].include?(right_result))
       elsif ope[1] == '!'
         result = (not [1, true].include?(right_result))
       else
@@ -3290,7 +3290,7 @@ module Aya5
     def LETTONAME(namespace, argv)
       var = argv[0].to_s
       value = argv[1]
-      if v.empty?ar
+      if var.empty?
         return nil
       end
       target_namespace = select_namespace(namespace, var)
