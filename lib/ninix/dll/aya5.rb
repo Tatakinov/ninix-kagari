@@ -231,7 +231,7 @@ module Aya5
 
 
   class Shiori
-    attr_reader :charset, :dbpath, :dic, :aya_dir
+    attr_reader :charset, :dbpath, :dic, :aya_dir, :saori_library
 
     def initialize(dll_name)
       @dll_name = dll_name
@@ -252,7 +252,6 @@ module Aya5
 
     def find(top_dir, dll_name)
       result = 0
-      return result # FIXME
       version = Aya5.check_version(top_dir, dll_name)
       if version == 5
         result = 200
@@ -1631,7 +1630,7 @@ module Aya5
             entry = inner_blocks[j]
             condition = entry[0]
             inner_block = entry[1]
-            if evaluate(namespace, [condition], -1, 1, :is_block => 0) ## FIXME
+            if not [0, false, nil].include?(evaluate(namespace, [condition], -1, 1, :is_block => 0)) ## FIXME
               local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
               result_of_inner_block = evaluate(local_namespace,
                                                inner_block,
@@ -2184,11 +2183,11 @@ module Aya5
         end
         result = (left_result >= right_result)
       elsif ope[1] == '||'
-        result = ([1, true].include?(left_result) or [1, true].include?(right_result))
+        result = (not [0, false, nil].include?(left_result) or not [0, false, nil].include?(right_result))
       elsif ope[1] == '&&'
-        result = ([1, true].include?(left_result) and [1, true].include?(right_result))
+        result = (not [0, false ,nil].include?(left_result) and not [0, false, nil].include?(right_result))
       elsif ope[1] == '!'
-        result = (not [1, true].include?(right_result))
+        result = ([0, false, nil].include?(right_result))
       else
         #pass
       end
@@ -3428,9 +3427,9 @@ module Aya5
 #          result = re_split.split(line, max)
 #        end
 #      else
-        result = re_split.split(line)
+        result = line.split(re_split)
 #      end
-      @re_result = re_split.scan(line)
+      @re_result = line.scan(re_split)
       #result_array = AyaVariable.new('', :new_array => true)
       #result_array.put(result)
       #return result_array
@@ -3446,7 +3445,7 @@ module Aya5
 
     def REQUESTLIB(namespace, argv)
       response = @aya.saori_library.request(argv[0], argv[1])
-      header = response.splitlines()
+      header = response.split(/\r?\n/, 0)
       @saori_statuscode = ''
       @saori_header = []
       @saori_value = {}
@@ -3540,9 +3539,10 @@ module Aya5
 
     def SPLITPATH(namespace, argv)
       line = argv[0].to_s
-      drive, path = os.path.splitdrive(line)
-      dirname, filename = os.path.split(path)
-      basename, ext = os.path.splitext(filename)
+      drive, path = "", line # XXX
+      dirname, filename = File.split(path)
+      basename = File.basename(filename, ".*")
+      ext = File.extname(filename)
       return [drive, dirname, basename, ext]
     end
 
@@ -4293,7 +4293,7 @@ module Aya5
         result = @saori_list[name].request(
           req.encode(@current_charset))
       end
-      return str(result, @current_charset)
+      return result.encode(@current_charset)
     end
   end
 end
