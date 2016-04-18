@@ -1,3 +1,6 @@
+Mon April 18 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* メニューのテーマにおいて非推奨のシンボルを使用しないようにした.
+
 Sun April 17 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* 文5互換モジュールを更新した.(栞として動作するようにした.)
 	* 一部の互換SAORIについてモジュール名を修正した.

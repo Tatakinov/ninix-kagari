@@ -147,7 +147,7 @@ module Menu
             }
       @__fontcolor = {
         'normal' => [0, 0, 0],
-        'prelight' => [255, 255, 255]
+        'hover' => [255, 255, 255]
       }
       @__imagepath = {
         'background' => nil,
@@ -207,7 +207,7 @@ module Menu
 
     def set_fontcolor(background, foreground)
       @__fontcolor['normal'] = background
-      @__fontcolor['prelight'] = foreground
+      @__fontcolor['hover'] = foreground
     end
 
     def set_pixmap(path_background, path_sidebar, path_foreground,
@@ -708,20 +708,20 @@ module Menu
                            ["background-position: ", @__align['background'], " ", (-offset_y).to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "GtkMenu :insensitive {\n",
+                           "GtkMenu :disabled {\n",
                            @__imagepath['background'],
                            "background-repeat: repeat-y;\n",
                            ["background-position: ", @__align['background'], " ", (-offset_y).to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "GtkMenu :prelight {\n",
+                           "GtkMenu :hover {\n",
                            @__imagepath['foreground'],
                            "background-repeat: repeat-y;\n",
                            "color: ",
                            "\#",
-                           sprintf("%02x", @__fontcolor['prelight'][0]),
-                           sprintf("%02x", @__fontcolor['prelight'][1]),
-                           sprintf("%02x", @__fontcolor['prelight'][2]),
+                           sprintf("%02x", @__fontcolor['hover'][0]),
+                           sprintf("%02x", @__fontcolor['hover'][1]),
+                           sprintf("%02x", @__fontcolor['hover'][2]),
                            ";\n",
                            ["background-position: ", @__align['foreground'], " ", (-offset_y).to_s, "px;\n"].join(''),
                            "}"
@@ -751,7 +751,7 @@ module Menu
                            ["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "GtkMenu :insensitive {\n",
+                           "GtkMenu :disabled {\n",
                            @__imagepath['background_with_sidebar'],
                            "background-repeat: repeat-y;\n",
                            ["background-position: ", "0px ", (-offset_y).to_s, "px", ", ",
@@ -759,14 +759,14 @@ module Menu
                            ["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "GtkMenu :prelight {\n",
+                           "GtkMenu :hover {\n",
                            @__imagepath['foreground_with_sidebar'],
                            "background-repeat: repeat-y;\n",
                            "color: ",
                            "\#",
-                           sprintf("%02x", @__fontcolor['prelight'][0]),
-                           sprintf("%02x", @__fontcolor['prelight'][1]),
-                           sprintf("%02x", @__fontcolor['prelight'][2]),
+                           sprintf("%02x", @__fontcolor['hover'][0]),
+                           sprintf("%02x", @__fontcolor['hover'][1]),
+                           sprintf("%02x", @__fontcolor['hover'][2]),
                            ";\n",
                            ["background-position: ", "0px ", (-offset_y).to_s, "px", ", ",
                             @sidebar_width.to_s, "px", " ", (-offset_y).to_s, "px;\n"].join(''),
