@@ -1,5 +1,6 @@
 Tue April 19 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* surfaces*.txtの読み込みを修正した.
+	* sakura.rbのループ処理を一部修正した.
 
 Mon April 18 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* メニューのテーマにおいて非推奨のシンボルを使用しないようにした.

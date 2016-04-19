@@ -2047,7 +2047,7 @@ module Sakura
       else
         step = 10
       end
-      for current_x in (x..new_x-1).step(step)
+      for current_x in x.step(new_x-1, step)
         set_surface_position(@script_side, current_x, y)
       end
       set_surface_position(@script_side, new_x, y)
@@ -2082,7 +2082,7 @@ module Sakura
       else
         step = 10
       end
-      for current_x in (x..new_x-1).step(step)
+      for current_x in x.step(new_x-1, step)
         set_surface_position(@script_side, current_x, y)
       end
       set_surface_position(@script_side, new_x, y)
@@ -2217,7 +2217,7 @@ module Sakura
         link = '#cancel'
       end
       @balloon.append_link(@script_side, link, text)
-      for i in (1..args.length-1).step(2)
+      for i in 1.step(args.length-1, 2)
         link = expand_meta(args[i])
         text = expand_meta(args[i + 1])
         @balloon.append_link(@script_side, link, text)
