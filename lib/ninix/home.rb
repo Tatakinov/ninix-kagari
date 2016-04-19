@@ -735,11 +735,21 @@ module Home
                   rescue
                     next
                   end
-                  for x in Range.new(s, e)
-                    if flg_delete
-                      exclude_list << x
+                  if flg_delete
+                    exclude_list.concat(Range.new(s, e).to_a)
+                  else
+                    include_list.concat(Range.new(s, e).to_a)
+                  end
+                end
+                if not include_list.empty?
+                  for num in (include_list - exclude_list)
+                    key = ['surface', num].join('')
+                    if flg_append
+                      config_list.reverse_each {|x|
+                        break x[1].update(NConfig.create_from_buffer(buf, :charset => charset)) if x[0] == key
+                      }
                     else
-                      include_list << x
+                      config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
                     end
                   end
                 end
