@@ -696,7 +696,7 @@ module Menu
 
     def set_stylecontext(item, *args, provider: nil)
       _, offset_y = item.translate_coordinates(item.parent, 0, 0)
-      provider.load(data: ["GtkMenu {\n",
+      provider.load(data: ["menu {\n",
                            @__imagepath['background'],
                            "background-repeat: repeat-y;\n",
                            "color: ",
@@ -708,13 +708,13 @@ module Menu
                            ["background-position: ", @__align['background'], " ", (-offset_y).to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "GtkMenu :disabled {\n",
+                           "menu :disabled {\n",
                            @__imagepath['background'],
                            "background-repeat: repeat-y;\n",
                            ["background-position: ", @__align['background'], " ", (-offset_y).to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "GtkMenu :hover {\n",
+                           "menu :hover {\n",
                            @__imagepath['foreground'],
                            "background-repeat: repeat-y;\n",
                            "color: ",
@@ -737,7 +737,7 @@ module Menu
         return false
       end
       _, offset_y = item.translate_coordinates(item.parent, 0, 0)
-      provider.load(data: ["GtkMenu {\n",
+      provider.load(data: ["menu {\n",
                            @__imagepath['background_with_sidebar'],
                            "background-repeat: repeat-y;\n",
                            "color: ",
@@ -751,7 +751,7 @@ module Menu
                            ["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "GtkMenu :disabled {\n",
+                           "menu :disabled {\n",
                            @__imagepath['background_with_sidebar'],
                            "background-repeat: repeat-y;\n",
                            ["background-position: ", "0px ", (-offset_y).to_s, "px", ", ",
@@ -759,7 +759,7 @@ module Menu
                            ["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "GtkMenu :hover {\n",
+                           "menu :hover {\n",
                            @__imagepath['foreground_with_sidebar'],
                            "background-repeat: repeat-y;\n",
                            "color: ",

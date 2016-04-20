@@ -1,3 +1,6 @@
+Wed April 20 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* メニューのCSS設定をCSS nodes(Gtk+3.20以降の形式)に変更した.
+
 Tue April 19 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* surfaces*.txtの読み込みを修正した.
 	* sakura.rbのループ処理を一部修正した.
