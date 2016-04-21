@@ -1,4 +1,4 @@
-require "ninix/alias"
+require_relative "../lib/ninix/alias"
 
 module NinixTest
 

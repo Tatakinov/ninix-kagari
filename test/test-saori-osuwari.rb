@@ -1,4 +1,4 @@
-require "ninix/dll/osuwari"
+require_relative "../lib/ninix/dll/osuwari"
 
 module NinixTest
 
@@ -38,6 +38,10 @@ module NinixTest
 
     def raise_surface(side)
       print("RAISE: ", side, "\n")
+    end
+
+    def get_workarea(side)
+      return 0, 0, 640, 480
     end
   end
 end

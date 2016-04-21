@@ -1,6 +1,6 @@
 # coding: utf-8
 
-require "ninix/entry_db"
+require_relative "../lib/ninix/entry_db"
 
 module NinixTest
 

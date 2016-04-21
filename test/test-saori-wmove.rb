@@ -1,4 +1,4 @@
-require "ninix/dll/wmove"
+require_relative "../lib/ninix/dll/wmove"
 
 module NinixTest
 
@@ -7,7 +7,7 @@ module NinixTest
     def initialize
       @x = [100, 320]
       @y = [200, 400]
-      saori = WMove::Saori.new
+      saori = Wmove::Saori.new
       saori.setup
       saori.need_ghost_backdoor(self)
       saori.load
@@ -101,6 +101,10 @@ module NinixTest
 
     def notify_event(*args)
       print("NOTIFY: ", args, "\n")
+    end
+
+    def get_workarea(side)
+      return 0, 0, 640, 480
     end
   end
 end

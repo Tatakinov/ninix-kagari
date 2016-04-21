@@ -1,4 +1,4 @@
-require "ninix/sakura"
+require_relative "../lib/ninix/sakura"
 
 module NinixTest
 

@@ -1,12 +1,12 @@
 # coding: utf-8
-require "ninix/dll/httpc"
+require_relative "../lib/ninix/dll/httpc"
 
 module NinixTest
 
   class HTTPCTest
 
     def initialize
-      saori = HTTPC::Saori.new
+      saori = Httpc::Saori.new
       saori.setup
       saori.need_ghost_backdoor(self)
       saori.request("") # XXX

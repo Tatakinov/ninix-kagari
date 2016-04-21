@@ -1,4 +1,4 @@
-require "ninix/dll/hanayu"
+require_relative "../lib/ninix/dll/hanayu"
 
 module NinixTest
 

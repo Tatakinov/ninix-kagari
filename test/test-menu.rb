@@ -1,4 +1,4 @@
-require "ninix/menu"
+require_relative "../lib/ninix/menu"
 
 module NinixTest
 
@@ -7,7 +7,7 @@ module NinixTest
     def initialize(path)
       @test_menu = Menu::Menu.new
       @test_menu.set_responsible(self)
-      @test_menu.create_mayuna_menu([]) # XXX
+      @test_menu.create_mayuna_menu({}) # XXX
       @test_menu.set_pixmap(nil, nil, nil, "left", "left", "left") # XXX
       @window = Pix::TransparentWindow.new()
       @image_surface = Pix.create_surface_from_file(path)
@@ -16,12 +16,12 @@ module NinixTest
         Gtk.main_quit
       end
       @darea = @window.darea # @window.get_child()
-      @darea.set_events(Gdk::Event::EXPOSURE_MASK|
-                        Gdk::Event::BUTTON_PRESS_MASK|
-                        Gdk::Event::BUTTON_RELEASE_MASK|
-                        Gdk::Event::POINTER_MOTION_MASK|
-                        Gdk::Event::POINTER_MOTION_HINT_MASK|
-                        Gdk::Event::LEAVE_NOTIFY_MASK)
+      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
+                        Gdk::EventMask::BUTTON_PRESS_MASK|
+                        Gdk::EventMask::BUTTON_RELEASE_MASK|
+                        Gdk::EventMask::POINTER_MOTION_MASK|
+                        Gdk::EventMask::POINTER_MOTION_HINT_MASK|
+                        Gdk::EventMask::LEAVE_NOTIFY_MASK)
       @darea.signal_connect('button_press_event') do |w, e|
         button_press(w, e)
       end
@@ -44,11 +44,11 @@ module NinixTest
 
     def button_press(widget, event)
       if event.button == 1
-        if event.event_type == Gdk::Event::BUTTON_PRESS
+        if event.event_type == Gdk::EventType::BUTTON_PRESS
           @test_menu.popup(event.button, 0)
         end
       elsif event.button == 3
-        if event.event_type == Gdk::Event::BUTTON_PRESS
+        if event.event_type == Gdk::EventType::BUTTON_PRESS
           @test_menu.popup(event.button, 1)
         end
       end

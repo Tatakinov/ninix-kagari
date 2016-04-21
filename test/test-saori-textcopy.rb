@@ -1,11 +1,11 @@
-require "ninix/dll/textcopy"
+require_relative "../lib/ninix/dll/textcopy"
 
 module NinixTest
 
   class TextcopyTest
 
     def initialize
-      saori = TextCopy::Saori.new
+      saori = Textcopy::Saori.new
       saori.setup
       saori.request("") # XXX
       print(saori.execute(nil), "\n")

@@ -1,4 +1,4 @@
-require "ninix/lock"
+require_relative "../lib/ninix/lock"
 
 module NinixTest
 

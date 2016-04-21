@@ -1,11 +1,11 @@
-require "ninix/dll/saori_cpuid"
+require_relative "../lib/ninix/dll/saori_cpuid"
 
 module NinixTest
 
   class CpuidTest
 
     def initialize
-      saori = SAORI_CPUID::Saori.new
+      saori = Saori_cpuid::Saori.new
       saori.setup
       saori.request("") # XXX
       print(saori.execute(nil), "\n")

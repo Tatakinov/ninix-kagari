@@ -1,5 +1,5 @@
-require "ninix/home"
-require "ninix/nekodorif"
+require_relative "../lib/ninix/home"
+require_relative "../lib/ninix/nekodorif"
 
 module NinixTest
 
