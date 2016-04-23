@@ -1,12 +1,12 @@
 # coding: utf-8
-require "ninix/dll/ssu"
+require_relative "../lib/ninix/dll/ssu"
 
 module NinixTest
 
   class SSUTest
 
     def initialize
-      saori = SSU::Saori.new
+      saori = Ssu::Saori.new
       saori.setup
       saori.request("") # XXX
       print(saori.execute(nil, 'CP932'), "\n")

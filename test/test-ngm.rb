@@ -1,4 +1,4 @@
-require "ninix/ngm"
+require_relative "../lib/ninix/ngm"
 
 module NinixTest
 

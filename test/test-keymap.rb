@@ -1,4 +1,4 @@
-require "ninix/keymap"
+require_relative "../lib/ninix/keymap"
 
 module NinixTest
 
@@ -17,7 +17,7 @@ module NinixTest
 
     def initialize
       @win = Gtk::Window.new
-      @win.set_events(Gdk::Event::KEY_PRESS_MASK)
+      @win.set_events(Gdk::EventMask::KEY_PRESS_MASK)
       @win.signal_connect('destroy') do
         Gtk.main_quit
       end

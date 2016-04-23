@@ -1,4 +1,4 @@
-require "ninix/communicate"
+require_relative "../lib/ninix/communicate"
 
 module NinixTest
 
@@ -33,20 +33,20 @@ module NinixTest
       communicate = Communicate::Communicate.new
       for ghost in TEST_DATA
         sakura = DUMMY_SAKURA.new(ghost[0])
-        ghosts << [sakura, ghost]
-        communicate.rebuild_ghostdb(sakura, *ghost)
+        communicate.rebuild_ghostdb(
+          sakura, :name => ghost[0], :s0 => ghost[1], :s1 => ghost[2])
       end
       print("COMMUNICATE:",
-            communicate.get_otherghostname(ghosts.sample[1][0]), "\n")
+            communicate.get_otherghostname(TEST_DATA.sample[0]), "\n")
       communicate.notify_all('TEST', [1, 'a', {22 => 'test'}])
-      from = ghosts.sample
-      to = ghosts.sample ## FIXME
-      communicate.notify_other(from[1][0],
-                               'OnOtherTest', to[1][0], from[1][0], '',
+      from = TEST_DATA.sample
+      to = TEST_DATA.sample ## FIXME
+      communicate.notify_other(from[0],
+                               'OnOtherTest', to[0], from[0], '',
                                false, nil,
                                nil, false, '\h\s[10]test\e', [1, 2, 3, 'a'])
-      communicate.notify_other(from[1][0],
-                               'OnOtherTest', to[1][0], from[1][0], '',
+      communicate.notify_other(from[0],
+                               'OnOtherTest', to[0], from[0], '',
                                false, '__SYSTEM_ALL_GHOST__',
                                nil, false, '\h\s[10]test\e', [1, 2, 3, 'a'])
     end

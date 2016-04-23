@@ -1,12 +1,12 @@
-require "ninix/home"
-require "ninix/sakura"
+require_relative "../lib/ninix/home"
+require_relative "../lib/ninix/sakura"
 
 module NinixTest
 
   class ReadmeTest
 
     def initialize
-      ghosts = Home.search_ghosts(target=nil, check_shiori=false)
+      ghosts = Home.search_ghosts(:target => nil, :check_shiori => false)
       key = ghosts.keys.sample
       prefix = ghosts[key][4]
       dialog = Sakura::ReadmeDialog.new

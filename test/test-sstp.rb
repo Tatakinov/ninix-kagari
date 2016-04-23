@@ -1,5 +1,5 @@
 # coding: utf-8
-require "ninix/sstp"
+require_relative "../lib/ninix/sstp"
 
 module NinixTest
 

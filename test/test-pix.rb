@@ -1,4 +1,4 @@
-require "ninix/pix"
+require_relative "../lib/ninix/pix"
 
 module NinixTest
 
@@ -40,7 +40,7 @@ module NinixTest
         cr.set_operator(Cairo::OPERATOR_SOURCE)
         cr.paint()
       else
-        @surface = Pix.create_surface_from_file(path, true, true)
+        @surface = Pix.create_surface_from_file(path, :is_pnr => true, :use_pna => true)
       end
       @win.set_default_size(@surface.width, @surface.height)
       @win.show_all

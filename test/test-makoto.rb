@@ -1,4 +1,4 @@
-require "ninix/makoto"
+require_relative "../lib/ninix/makoto"
 
 module NinixTest
 

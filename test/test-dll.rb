@@ -1,4 +1,4 @@
-require "ninix/dll"
+require_relative "../lib/ninix/dll"
 
 module NinixTest
 

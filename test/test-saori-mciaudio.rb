@@ -1,11 +1,11 @@
-require "ninix/dll/mciaudio"
+require_relative "../lib/ninix/dll/mciaudio"
 
 module NinixTest
 
   class MciaudioTest
 
     def initialize
-      saori = MCIAudio::Saori.new
+      saori = Mciaudio::Saori.new
       saori.load(:dir => "") # XXX
       saori.setup
       saori.need_ghost_backdoor(self)

@@ -1,5 +1,5 @@
-require "ninix/config"
-require "ninix/seriko"
+require_relative "../lib/ninix/config"
+require_relative "../lib/ninix/seriko"
 
 module NinixTest
 
