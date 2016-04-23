@@ -91,7 +91,7 @@ module Ssu
         end
         s = [s, "Charset: " + charset.to_s + "\r\n"].join("")
         s = [s, "\r\n"].join("")
-        return s.encode(charset, :invalid => :replace, :undef => :replac)
+        return s.encode(charset, :invalid => :replace, :undef => :replace)
       else
         return RESPONSE[204]
       end

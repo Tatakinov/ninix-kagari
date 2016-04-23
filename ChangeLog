@@ -1,3 +1,6 @@
+Sat April 23 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* ssu.dll互換モジュールのtypoを修正した.
+
 Wed April 20 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* メニューのCSS設定をCSS nodes(Gtk+3.20以降の形式)に変更した.
 
