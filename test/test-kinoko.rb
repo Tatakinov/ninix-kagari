@@ -1,5 +1,5 @@
-require "ninix/home"
-require "ninix/kinoko"
+require_relative "../lib/ninix/home"
+require_relative "../lib/ninix/kinoko"
 
 module NinixTest
 
@@ -13,7 +13,7 @@ module NinixTest
       @win.darea.signal_connect('draw') do |w, cr|
         expose_cb(w, cr)
       end
-      @surface = Pix.create_surface_from_file(path, true, true)
+      @surface = Pix.create_surface_from_file(path, :is_pnr => true, :use_pna => true)
       @win.set_default_size(@surface.width, @surface.height)
       @win.show_all
       kinoko_list = Home.search_kinoko()
@@ -31,7 +31,7 @@ module NinixTest
       return @win
     end
 
-    def get_kinoko_position # dummy
+    def get_kinoko_position(baseposition) # dummy
       return 100, 200
     end
 
@@ -39,6 +39,10 @@ module NinixTest
       if event == 'get_preference' and a[0] == 'animation_quality'
         return 1
       end
+    end
+
+    def get_target_window
+      return @win
     end
 
     def attach_observer(arg) # dummy

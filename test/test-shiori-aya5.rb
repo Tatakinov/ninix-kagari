@@ -1,4 +1,4 @@
-require "ninix/dll/aya5"
+require_relative "../lib/ninix/dll/aya5"
 
 module NinixTest
 
@@ -17,7 +17,7 @@ module NinixTest
                            "SecurityLevel: local\r\n\r\n".encode(aya.charset))
       #result = aya.dic.get_function(function).call(argv)
       #print(str(result, aya.charset))
-      print(result.to_s, "\n")
+      print(result.to_s.force_encoding(aya.charset).encode("UTF-8", :invalid => :replace, :undef => :replace), "\n")
     end
   end
 end

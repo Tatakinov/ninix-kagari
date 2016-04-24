@@ -1,4 +1,4 @@
-require "ninix/metamagic.rb"
+require_relative "../lib/ninix/metamagic.rb"
 
 module NinixTest
 
@@ -9,6 +9,13 @@ module NinixTest
     end
   end
 
+  class DummyGhost
+
+    def new_(*data)
+      print "NEW: ", data.to_s, "\n"
+    end
+  end
+
   class TEST_Holon < MetaMagic::Holon
 
     def create_menuitem(data)
@@ -16,7 +23,7 @@ module NinixTest
     end
 
     def create_instance(data)
-      return Hash
+      return DummyGhost.new
     end
   end
 
@@ -49,7 +56,7 @@ module NinixTest
       print("\n")
       print("  BASE INFO: ")
       print(holon.baseinfo)
-      print("\n")
+      print("(should be nil)\n")
       print("  MENU ITEM: ")
       print(holon.menuitem)
       print("\n")

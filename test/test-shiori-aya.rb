@@ -1,4 +1,4 @@
-require "ninix/dll/aya"
+require_relative "../lib/ninix/dll/aya"
 
 module NinixTest
 

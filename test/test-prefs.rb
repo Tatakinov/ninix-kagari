@@ -1,4 +1,4 @@
-require "ninix/prefs"
+require_relative "../lib/ninix/prefs"
 
 module NinixTest
 
@@ -14,6 +14,9 @@ module NinixTest
     end
 
     def handle_request(type, event, *a) # dummy
+      if event == 'get_balloon_list'
+        return [["test name", "test dir"]]
+      end
       return []
     end
   end
