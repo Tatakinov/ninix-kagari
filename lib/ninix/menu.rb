@@ -400,7 +400,7 @@ module Menu
         if name_list != nil and not name_list.empty? # visible
           for name in name_list
             visible = @parent.handle_request('GET', 'getstring', name)
-            if visible != nil
+            if visible != nil and not visible.empty?
               break
             end
           end
@@ -409,7 +409,7 @@ module Menu
           else
             __set_visible(key, true)
           end
-        else
+        elsif name_list == nil
           __set_visible(key, false)
         end
       end

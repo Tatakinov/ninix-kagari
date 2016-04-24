@@ -1,3 +1,8 @@
+Sun April 24 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* ネットワーク更新のイベント処理が動作しなくなっていたのを修正した.
+	* メニューの項目表示/非表示の切り替えが正しく動作していなかったのを
+	  修正した.(ネットワーク更新など)
+
 Sat April 23 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* ssu.dll互換モジュールのtypoを修正した.
 
