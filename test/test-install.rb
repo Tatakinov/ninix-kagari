@@ -1,4 +1,4 @@
-require "ninix/install"
+require_relative "../lib/ninix/install"
 
 module NinixTest
 

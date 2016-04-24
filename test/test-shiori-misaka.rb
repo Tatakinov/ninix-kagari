@@ -1,5 +1,5 @@
-require "ninix/logging"
-require "ninix/dll/misaka"
+require_relative "../lib/ninix/logging"
+require_relative "../lib/ninix/dll/misaka"
 
 module NinixTest
 

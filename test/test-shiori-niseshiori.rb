@@ -1,5 +1,5 @@
-require "ninix/logging"
-require "ninix/dll/niseshiori"
+require_relative "../lib/ninix/logging"
+require_relative "../lib/ninix/dll/niseshiori"
 
 module NinixTest
 

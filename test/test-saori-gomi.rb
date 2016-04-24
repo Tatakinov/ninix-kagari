@@ -1,4 +1,4 @@
-require "ninix/dll/gomi"
+require_relative "../lib/ninix/dll/gomi"
 
 module NinixTest
 

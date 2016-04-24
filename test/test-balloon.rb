@@ -1,5 +1,5 @@
-require "ninix/home"
-require "ninix/balloon"
+require_relative "../lib/ninix/home"
+require_relative "../lib/ninix/balloon"
 
 module NinixTest
 

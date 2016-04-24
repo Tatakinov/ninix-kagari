@@ -1,6 +1,6 @@
 # coding: utf-8
-require "ninix/logging"
-require "ninix/dll/satori"
+require_relative "../lib/ninix/logging"
+require_relative "../lib/ninix/dll/satori"
 
 module NinixTest
 

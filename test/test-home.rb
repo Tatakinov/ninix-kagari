@@ -1,4 +1,4 @@
-require "ninix/home"
+require_relative "../lib/ninix/home"
 
 module NinixTest
 
@@ -11,7 +11,7 @@ module NinixTest
         raise SystemExit('Home directory not found.\n')
       end
       ghosts, balloons, nekoninni, katochan, kinoko = config
-      ghosts = Home.search_ghosts(target=nil, check_shiori=false) # over write
+      ghosts = Home.search_ghosts(:target => nil, :check_shiori => false) # over write
       # ghosts
       for key in ghosts.keys
         desc, shiori_dir, use_makoto, surface_set, prefix, shiori_dll, shiori_name = ghosts[key]

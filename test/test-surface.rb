@@ -1,12 +1,12 @@
-require "ninix/home"
-require "ninix/surface"
+require_relative "../lib/ninix/home"
+require_relative "../lib/ninix/surface"
 
 module NinixTest
 
   class SurfaceTest
 
     def initialize
-      ghosts = Home.search_ghosts(target=nil, check_shiori=false)
+      ghosts = Home.search_ghosts(:target => nil, :check_shiori => false)
       if ghosts.empty?
         raise SystemExit('Ghosts not found.\n') ## FIXME
       end

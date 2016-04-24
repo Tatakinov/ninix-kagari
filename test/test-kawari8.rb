@@ -3,7 +3,7 @@ require "fiddle/import"
 
 module Test
   extend Fiddle::Importer
-  dlload "libshiori.so" #"_kawari8.so"
+  dlload "/usr/lib/games/kawari8/libshiori.so" #"_kawari8.so"
   extern "int so_library_init()"
   extern "int so_library_cleanup()"
   extern "unsigned int so_create(const char *, long)"
