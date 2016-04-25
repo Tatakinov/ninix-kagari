@@ -1,3 +1,7 @@
+Mon April 25 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* バルーンのSSTPメッセージ表示位置が正しく読み込まれていなかったのを
+	  修正した.
+
 Sun April 24 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* ネットワーク更新のイベント処理が動作しなくなっていたのを修正した.
 	* メニューの項目表示/非表示の切り替えが正しく動作していなかったのを

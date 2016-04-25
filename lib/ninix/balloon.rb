@@ -808,13 +808,14 @@ module Balloon
 
     def config_adjust(name, base, default_value)
       path, config = @balloon[@balloon_id]
-      value = config.get(name).to_i
+      value = config.get(name)
       if value == nil
-        value = @desc.get(name).to_i
+        value = @desc.get(name)
       end
       if value == nil
         value = default_value
       end
+      value = value.to_i
       if value < 0
         value = base + value
       end
