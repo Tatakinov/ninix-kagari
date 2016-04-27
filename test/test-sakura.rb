@@ -1,14 +1,49 @@
-require "ninix/home"
-require "ninix/sakura"
+require_relative "../lib/ninix/home"
+require_relative "../lib/ninix/metamagic"
+require_relative "../lib/ninix/sakura"
 
 module NinixTest
+
+  class BalloonMeme < MetaMagic::Meme
+
+    def initialize(key)
+      super(key)
+      @parent = nil
+    end
+
+    def set_responsible(parent)
+      @parent = parent
+    end
+
+    def handle_request(event_type, event, *arglist)
+      return @parent.handle_request(event_type, event, *arglist)
+    end
+
+    def create_menuitem(data)
+      desc, balloon = data
+      subdir = balloon['balloon_dir'][0]
+      name = desc.get('name', :default => subdir)
+      home_dir = Home.get_ninix_home()
+      thumbnail_path = File.join(home_dir, 'balloon',
+                                 subdir, 'thumbnail.png')
+      if not File.exists?(thumbnail_path)
+        thumbnail_path = nil
+      end
+      return handle_request(
+               'GET', 'create_balloon_menuitem', name, @key, thumbnail_path)
+    end
+
+    def delete_by_myself
+      handle_request('NOTIFY', 'delete_balloon', @key)
+    end
+  end
 
   class SakuraTest
 
     def initialize
       @sakura = Sakura::Sakura.new
       @sakura.set_responsible(self)
-      @ghosts = Home.search_ghosts(target=nil, check_shiori=false)
+      @ghosts = Home.search_ghosts(:target => nil, :check_shiori => false)
       key = @ghosts.keys.sample
       @baseinfo = @ghosts[key]
       @sakura.new_(*@baseinfo)
@@ -44,10 +79,11 @@ module NinixTest
       key = surface_set.keys.sample
       name, surface_dir, desc, surface_alias, surface_info, tooltips, seriko_descript = surface_set[key]
       @sakura.set_surface(desc, surface_alias, surface_info, name, surface_dir, tooltips, seriko_descript)
-      balloons = Home.search_balloons()
-      key = balloons.keys.sample
+#      balloons = Home.search_balloons()
+#      key = balloons.keys.sample
 #      print("BALLOON: ", key, " ", balloons[key], "\n")
-      @sakura.set_balloon(*balloons[key])
+#      @sakura.set_balloon(*balloons[key])
+      @sakura.start("TEST", false, 0, false, false, nil, nil, nil, nil, nil)
       @sakura.set_surface_default
       @sakura.position_balloons()
 #      @sakura.align_top(0)
@@ -228,9 +264,23 @@ module NinixTest
             return 100
           elsif arglist[0] == "animation_quality"
             return 1
+          elsif arglist[0] == "script_speed"
+            return 3
           end
         elsif event == "lock_repaint"
           return false
+        elsif event == "get_balloon_description"
+          balloons = {} # Ordered Hash
+          odict_baseinfo = Home.search_balloons()
+          for key, value in odict_baseinfo
+            meme = BalloonMeme.new(key)
+            meme.set_responsible(self)
+            balloons[key] = meme
+            meme.baseinfo = value
+          end
+          key = balloons.keys.sample
+#      print("BALLOON: ", key, " ", balloons[key], "\n")
+          return balloons[key].baseinfo
         end
         return "" # XXX
 v      end
