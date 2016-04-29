@@ -1,6 +1,6 @@
 # coding: utf-8
 
-require "ninix/script"
+require_relative "../lib/ninix/script"
 
 module NinixTest
 
@@ -11,7 +11,7 @@ module NinixTest
         # legal cases
         '\s[4]ちゃんと選んでよう〜っ。\w8\uまあ、ユーザさんも忙しいんやろ‥‥\e',
         '%selfnameと%keroname\e',
-        'エスケープのテスト \\, \%, [, ], \] どーかな?\e',
+        'エスケープのテスト \\\\, \%, [, ], \] どーかな?\e',
         '\j[http://www.asahi.com]\e',
         '\j[http://www.asahi.com/[escape\]/\%7Etest]\e',
         '\j[http://www.asahi.com/%7Etest/]\e',
@@ -69,33 +69,34 @@ module NinixTest
     def test_tokenizer()
       parser = Script::Parser.new
       for test in @testcases
-#        begin
+        begin
           print(parser.tokenize(test), "\n")
-#        rescue # except ParserError as e:
-#          print(e)
-#        end
+        rescue Script::ParserError => e
+          print(e)
+        end
       end
     end
 
     def test_parser(error='strict')
-      parser = Script::Parser.new(error)
+      parser = Script::Parser.new(:error => error)
       for test in @testcases
         print('*' * 60, "\n")
         print(test, "\n")
         script = []
         while true
-#          begin
-#            script.extend(parser.parse(test))
-          script.concat(parser.parse(test))
-#          rescue # except ParserError as e:
-#            print('-' * 60, "\n")
-##            print(e)
-##            done, test = e
-##            script.extend(done)
-#            break # XXX
-#          else
+          begin
+            script.concat(parser.parse(test))
+          rescue Script::ParserError => e
+            print('-' * 60, "\n")
+            print(e, "\n")
+            done, test = e.get_item
+            if done.empty?
+              break
+            end
+            script.concat(done)
+          else
             break
-#          end
+          end
         end
         print('-' * 60, "\n")
         print_script_tree(script)
@@ -105,18 +106,16 @@ module NinixTest
     def print_script_tree(tree)
       for node in tree
         if node[0] == Script::SCRIPT_TAG
-          name, args = node[1], node[2, -1]
-          print('TAG', name, "\n")
-          print("ARGS: ", args, "\n")
-#          for n in range(args.length)
+          name, args = node[1], node[2..-2]
+          print('TAG ', name, "\n")
           if args != nil
-            for arg in 0..(args.length - 1)
-              if isinstance(args[n], str)
-                print('\tARG#{0:d}\t{1}'.format(n + 1, args[n]), "\n")
+            for n in 0..(args.length - 1)
+              if args[n].is_a?(String)
+                print("\tARG##{n+1}\t#{args[n]}", "\n")
               else
-                print('\tARG#{0:d}\tTEXT'.format(n + 1), "\n")
+                print("\tARG##{n+1}\tTEXT", "\n")
                 print_text(args[n], 2)
-              end
+               end
             end
           end
         elsif node[0] == Script::SCRIPT_TEXT
@@ -129,29 +128,26 @@ module NinixTest
     def print_text(text, indent)
       for chunk in text
         if chunk[0] == Script::TEXT_STRING
-#          print(['\t' * indent, 'STRING\t"{0}"'.format(chunk[1])].join(''), "\n")
-          print(['\t' * indent, 'STRING\t"', chunk[1].to_s, '"'].join(''), "\n")
+          print(["\t" * indent, "STRING\t\"#{chunk[1]}\""].join(''), "\n")
         elsif chunk[0] == Script::TEXT_META
-          name, args = chunk[1], chunk[2, chunk.length]
-          print(['\t' * indent, 'META\t', name].join(''), "\n")
+          name, args = chunk[1], chunk[2..chunk.length]
+          print(["\t" * indent, "META\t", name].join(''), "\n")
           for n in 0..(args.length - 1)
-            print(['\t' * indent, '\tARG#{0:d}\t{1}'.format(n + 1, args[n])].join(''), "\n")
+            print(["\t" * indent, "\tARG#{n+1}\t#{args[n]}"].join(''), "\n")
           end
         end
       end
     end
 
     def run
-#    import os
-#      if len(sys.argv) == 2 and sys.argv[1] == 'tokenizer'
+      if ARGV.length == 1 and ARGV[0] == 'tokenizer'
         test_tokenizer()
-#      elsif len(sys.argv) == 3 and sys.argv[1] == 'parser'
-#        test_parser(sys.argv[2])
-      test_parser("loose") # XXX
-#      else
-#        print('Usage:', os.path.basename(sys.argv[0]), \
-#              '[tokenizer|parser [strict|loose]]')
-#      end
+      elsif ARGV.length == 2 and ARGV[0] == 'parser'
+        test_parser(ARGV[1])
+      else
+        print("Usage: ", $0, \
+              " [tokenizer|parser [strict|loose]]\n")
+      end
     end
   end
 end
