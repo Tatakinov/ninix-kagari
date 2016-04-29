@@ -144,8 +144,8 @@ module Script
         if match == nil
           fail RuntimeError('should not reach here')
         end
-        tokens << [token, match.to_s]
-        pos += match.to_s.length
+        tokens << [token, match[0]]
+        pos = match.end(0)
       end
       return tokens
     end
@@ -198,8 +198,8 @@ module Script
         end
         if [TOKEN_NUMBER, TOKEN_OPENED_SBRA,
             TOKEN_STRING, TOKEN_CLOSED_SBRA].include?(token)
-          lexeme = lexeme.gsub('\\', "\\")
-          lexeme = lexeme.gsub('\%', '%')
+          lexeme = lexeme.gsub('\\\\', '\\')
+          lexeme = lexeme.gsub('\\%', '%')
           string_chunks << lexeme
           next
         end
@@ -397,7 +397,7 @@ module Script
       while not @tokens.empty?
         token, lexeme = next_token()
         if [TOKEN_NUMBER, TOKEN_STRING, TOKEN_OPENED_SBRA, TOKEN_TAG].include?(token)
-          lexeme = lexeme.gsub('\\', "\\")
+          lexeme = lexeme.gsub('\\', '\\')
           lexeme = lexeme.gsub('\%', '%')
           lexeme = lexeme.gsub('\]', ']')
           string_chunks << lexeme
@@ -447,11 +447,11 @@ module Script
             if param != nil or not buf.empty?
               buf << [token, param]
             end
-            params << buf
-            buf = []
             i = match.end(0)
             if i < j
               fail "assert" unless lexeme[i] == ','
+              params << buf
+              buf = []
               i += 1
             end
           end
@@ -459,11 +459,11 @@ module Script
         if i < j
           buf << [token, lexeme[i, lexeme.length]]
         end
-        if not buf.empty?
-          params << buf
-        end
-        return params
       end
+      if not buf.empty?
+        params << buf
+      end
+      return params
     end
   end
 end
