@@ -24,7 +24,7 @@ module NinixTest
       print('DICT')
       for k, v in ns.dict
         if k.is_a?(Array)
-          k = '(' + k[0].to_s, ', ' + k[1..-1].to_s, ')'
+          k = ('(' + k[0].to_s, ', ' + k[1..-1].to_s, ')')
         end
         print(k, "\n")
         for e in v
@@ -42,7 +42,7 @@ module NinixTest
       for key, dic in ns.word_chains
         print('(' + key[0].to_s + ', ' + key[1..-1].to_s + ')', "\n")
         for t, chain_list in dic
-          prefix = '-> ' + t.to_s
+          prefix = ('-> ' + t.to_s)
           for c, w in chain_list
             print(prefix, ('-> ' + c.to_s + ', ' + w.to_s), "\n")
             prefix = ['   ', ' ' * t.length].join('')

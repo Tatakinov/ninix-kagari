@@ -58,7 +58,7 @@ module NinixTest
 #      @sakura.set_surface_position(1, 600, 500)
       print("POS0: ", @sakura.get_surface_position(0), "\n")
       print("POS1: ", @sakura.get_surface_position(1), "\n")
-      @index = (@index + 1) % 10
+      @index = ((@index + 1) % 10)
       return true
     end      
     
