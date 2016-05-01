@@ -29,10 +29,10 @@ module Pix
     start_x = -1
     end_x = -1
     (alpha.ne 0).where.each {|i|
-      y = i / width
-      x = i % width
+      y = (i / width)
+      x = (i % width)
       if start_x != -1
-        if y != curr_y or x != end_x + 1
+        if y != curr_y or x != (end_x + 1)
           region.union!(start_x, curr_y, end_x - start_x + 1, 1)
           curr_y = y
           start_x = x
@@ -75,8 +75,8 @@ module Pix
       end
       fail "assert" unless visual != nil
       left, top = 0, 0 # XXX
-      width = screen.width - left
-      height = screen.height - top
+      width = (screen.width - left)
+      height = (screen.height - top)
       @workarea = [left, top, width, height]
     end
   end
@@ -186,8 +186,8 @@ module Pix
     fail "assert" unless buf[12..15] == "IHDR" # name of the first chunk in a PNG datastream
     w = buf[16, 4]
     h = buf[20, 4]
-    width = (w[0].ord << 24) + (w[1].ord << 16) + (w[2].ord << 8) + w[3].ord
-    height = (h[0].ord << 24) + (h[1].ord << 16) + (h[2].ord << 8) + h[3].ord
+    width = ((w[0].ord << 24) + (w[1].ord << 16) + (w[2].ord << 8) + w[3].ord)
+    height = ((h[0].ord << 24) + (h[1].ord << 16) + (h[2].ord << 8) + h[3].ord)
     return width, height
   end
 
@@ -213,7 +213,7 @@ module Pix
     key = ''
     j = 0
     for i in 0..tmp.length-1
-      value = tmp[i].ord ^ m_half[j].ord
+      value = (tmp[i].ord ^ m_half[j].ord)
       if value == 0
         break
       end
@@ -245,12 +245,12 @@ module Pix
 
   def self.get_DDP_IHDR(path)
     size = File.size(path)
-    key = size << 2    
+    key = (size << 2)
     buf = ""
     f = File.open(path, 'rb')
     for i in 0..23
       c = f.read(1)
-      key = (key * 0x08088405 + 1) & 0xffffffff
+      key = ((key * 0x08088405 + 1) & 0xffffffff)
       buf << ((c[0].ord ^ key >> 24) & 0xff).chr
     end
     return buf
@@ -294,7 +294,7 @@ module Pix
     key = ''
     j = 0
     for i in 0..tmp.length-1
-      value = tmp[i].ord ^ m_half[j].ord
+      value = (tmp[i].ord ^ m_half[j].ord)
       if value == 0
         break
       end
@@ -336,7 +336,7 @@ module Pix
     key = buf.length << 2
     loader = Gdk::PixbufLoader.new('png')
     for i in 0..buf.length-1
-      key = (key * 0x08088405 + 1) & 0xffffffff
+      key = ((key * 0x08088405 + 1) & 0xffffffff)
       loader.write(((buf[i].ord ^ key >> 24) & 0xff).chr)
     end
     pixbuf = loader.pixbuf

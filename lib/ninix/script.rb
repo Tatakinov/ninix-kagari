@@ -39,11 +39,11 @@ module Script
         fail ValueError('unknown error scheme: ' + error.to_s)
       end
       @error = error
-      @script = script or []
-      @src = src or ''
+      @script = (script or [])
+      @src = (src or '')
       @column = column
-      @length = length or 0
-      @skip = skip or 0
+      @length = (length or 0)
+      @skip = (skip or 0)
     end
 
     def get_item
@@ -440,7 +440,7 @@ module Script
             end
             param = re_quote.match(match[0])
             if param != nil
-              param = param.pre_match + param[1] + param.post_match
+              param = (param.pre_match + param[1] + param.post_match)
             else
               param = match[0]
             end

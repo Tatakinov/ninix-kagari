@@ -423,7 +423,7 @@ module Surface
         title = @parent.handle_request('GET', 'get_keroname') or \
         ['surface.', name].join('')
       else
-        name = 'char' + side.to_i.to_s
+        name = ('char' + side.to_i.to_s)
         title = ['surface.', name].join('')
       end
       if config_alias == nil
@@ -502,19 +502,19 @@ module Surface
           x = Integer(x)
           y = Integer(y)
         rescue
-          error = 'invalid element spec for ' + key + ': ' + config[key]
+          error = ('invalid element spec for ' + key + ': ' + config[key])
           break
         end
         basename = File.basename(filename, ".*")
         ext = File.extname(filename)
         ext = ext.downcase
         if not ['.png', '.dgp', '.ddp'].include?(ext)
-          error = 'unsupported file format for ' + key + ': ' + filename
+          error = ('unsupported file format for ' + key + ': ' + filename)
           break
         end
         basename = basename.downcase
         if not elements.include?(basename)
-          error = key + ' file not found: ' + filename
+          error = (key + ' file not found: ' + filename)
           break
         end
         surface = elements[basename][0]
@@ -526,7 +526,7 @@ module Surface
         elsif method == 'base'
           surface_list << [surface, x, y, method]
         else
-          error = 'unknown method for ' + key + ': ' + method
+          error = ('unknown method for ' + key + ': ' + method)
           break
         end
         Logging::Logging.debug(key + ': ' + method + ' ' + filename + ', x=' + x.to_i.to_s + ', y=' + y.to_i.to_s)
@@ -632,12 +632,12 @@ module Surface
         @parent.handle_request(
           'NOTIFY', 'set_balloon_direction', side, direction)
         if direction == 0 # left
-          base_x = x + ox
+          base_x = (x + ox)
         else
           w, h = get_surface_size(side)
-          base_x = x + w - ox
+          base_x = (x + w - ox)
         end
-        base_y = y + oy
+        base_y = (y + oy)
         @parent.handle_request(
           'NOTIFY', 'set_balloon_position', side, base_x, base_y)
       end
@@ -650,7 +650,7 @@ module Surface
         align = get_alignment(side)
         w, h = get_max_size(side)
         if side == 0 # sakura
-          x = left + scrn_w - w
+          x = (left + scrn_w - w)
         else
           b0w, b0h = @parent.handle_request(
                  'GET', 'get_balloon_size', side - 1)
@@ -661,16 +661,16 @@ module Surface
           o0x, o0y = get_balloon_offset(side - 1)
           o1x, o1y = get_balloon_offset(side)
           offset = [0, b1w - (b0w - o0x)].max
-          if (s0x + o0x - b0w) - offset - w + o1x < left
+          if ((s0x + o0x - b0w) - offset - w + o1x) < left
             x = left
           else
-            x = (s0x + o0x - b0w) - offset - w + o1x
+            x = ((s0x + o0x - b0w) - offset - w + o1x)
           end
         end
         if align == 1 # top
           y = top
         else
-          y = top + scrn_h - h
+          y = (top + scrn_h - h)
         end
         set_position(side, x, y)
         s0x, s0y, s0w, s0h = x, y, w, h # for next loop
@@ -898,8 +898,8 @@ module Surface
       left, top, scrn_w, scrn_h = get_workarea(0)
       x0, y0 = get_position(0)
       s0w, s0h = get_surface_size(0)
-      if x0 + s0w / 3 < left or x0 + s0w * 2 / 3 > left + scrn_w or \
-        y0 + s0h / 3 < top or y0 + s0h * 2 / 3 > top + scrn_h
+      if (x0 + s0w / 3) < left or (x0 + s0w * 2 / 3) > (left + scrn_w) or \
+        (y0 + s0h / 3) < top or (y0 + s0h * 2 / 3) > (top + scrn_h)
         @mikire = 1
       else
         @mikire = 0
@@ -910,14 +910,14 @@ module Surface
       end
       x1, y1 = get_position(1)
       s1w, s1h = get_surface_size(1)
-      if (x0 < x1 + s1w / 2 and
-          x1 + s1w / 2 < x0 + s0w and
-          y0 < y1 + s1h / 2 and
-          y1 + s1h / 2 < y0 + s0h) or
-        (x1 < x0 + s0w / 2 and
-         x0 + s0w / 2 < x1 + s1w and
-         y1 < y0 + s0h / 2 and
-         y0 + s0h / 2 < y1 + s1h)
+      if (x0 < (x1 + s1w / 2) and
+          (x1 + s1w / 2) < (x0 + s0w) and
+          y0 < (y1 + s1h / 2) and
+          (y1 + s1h / 2) < (y0 + s0h)) or
+        (x1 < (x0 + s0w / 2) and
+         (x0 + s0w / 2) < (x1 + s1w) and
+         y1 < (y0 + s0h / 2) and
+         (y0 + s0h / 2) < (y1 + s1h))
         @kasanari = 1
       else
         @kasanari = 0
@@ -1081,7 +1081,7 @@ module Surface
           x = config.get(name + '.balloon.offsetx').to_i
           y = config.get(name + '.balloon.offsety').to_i
         else
-          name = 'char' + side.to_i.to_s
+          name = ('char' + side.to_i.to_s)
           x, y = nil, nil # XXX
         end
         if x == nil
@@ -1177,15 +1177,15 @@ module Surface
       x, y = @position # XXX: without window_offset
       w, h = get_surface_size(:surface_id => @surface_id)
       dw, dh = get_max_size()
-      xoffset = (dw - w) / 2
+      xoffset = ((dw - w) / 2)
       if get_alignment() == 0
-        yoffset = dh - h
+        yoffset = (dh - h)
         left, top, scrn_w, scrn_h = @window.workarea
-        y = top + scrn_h - dh
+        y = (top + scrn_h - dh)
       elsif get_alignment() == 1
         yoffset = 0
       else
-        yoffset = (dh - h) / 2
+        yoffset = ((dh - h) / 2)
       end
       @window_offset = [xoffset, yoffset]
       # resize window
@@ -1513,7 +1513,7 @@ module Surface
       value = config.get(name)
       if value != nil
         scale = get_scale
-        value = value.to_f * scale / 100
+        value = (value.to_f * scale / 100)
       end
       return value
     end
@@ -1550,7 +1550,7 @@ module Surface
       new_x, new_y = get_position()
       @window.move(new_x, new_y)
       left, top, scrn_w, scrn_h = @window.workarea
-      if x > left + scrn_w / 2
+      if x > (left + scrn_w / 2)
         new_direction = 0
       else
         new_direction = 1
@@ -1561,12 +1561,12 @@ module Surface
       ox = (ox * scale / 100).to_i
       oy = (oy * scale / 100).to_i
       if new_direction == 0 # left
-        base_x = new_x + ox
+        base_x = (new_x + ox)
       else
         w, h = get_surface_size()
-        base_x = new_x + w - ox
+        base_x = (new_x + w - ox)
       end
-      base_y = new_y + oy
+      base_y = (new_y + oy)
       @parent.handle_request(
         'NOTIFY', 'set_balloon_position', @side, base_x, base_y)
       @parent.handle_request('NOTIFY', 'notify_observer', 'set position')
@@ -1593,7 +1593,7 @@ module Surface
         left, top, scrn_w, scrn_h = @window.workarea
         sw, sh = get_max_size()
         sx, sy = @position # XXX: without window_offset
-        sy = top + scrn_h - sh
+        sy = (top + scrn_h - sh)
         set_position(sx, sy)
       elsif align == 1
         left, top, scrn_w, scrn_h = @window.workarea

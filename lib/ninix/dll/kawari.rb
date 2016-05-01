@@ -208,7 +208,7 @@ module Kawari
 
   def self.parse_quotes(data, start)
     buf = []
-    i = start + 1
+    i = (start + 1)
     j = data.length
     while i < j
       if data[i] == '"'
@@ -246,7 +246,7 @@ module Kawari
 
   def self.parse_inline_script(data, start)
     buf = ['$']
-    i = start + 1
+    i = (start + 1)
     j = data.length
     npar = 0
     while i < j
@@ -270,7 +270,7 @@ module Kawari
         if data[i] == '('
           npar = npar + 1
         elsif data[i] == ')'
-          npar = npar - 1
+          npar = (npar - 1)
         end
         buf << data[i]
         i += 1
@@ -556,7 +556,7 @@ module Kawari
           communicate = nil
         else
           if @system_entries.include?('system.Age')
-            age = @system_entries['system.Age'].to_i + 1
+            age = (@system_entries['system.Age'].to_i + 1)
             @system_entries['system.Age'] = age.to_s
             @system_entries['system-Age'] = age.to_s
           else
@@ -692,7 +692,7 @@ module Kawari
             elsif newname == 'system.communicate'
               segment = get_system_entry('communicate')
             else
-              segment = @system_entries.include?(newname) ? @system_entries[newname] : segment
+              segment = (@system_entries.include?(newname) ? @system_entries[newname] : segment)
             end
           else
             segment = get(newname, :context => context, :depth => depth + 1)
@@ -1003,7 +1003,7 @@ module Kawari
       name = expand(argv[1])
       n = atoi(expand(argv[2]))
       for d in @rdictlist
-        c = d.include?(name) ? d[name] : []
+        c = (d.include?(name) ? d[name] : [])
         if n < c.length
           return c[n].map {|s| expand(s) }.join('')
         end
@@ -1047,7 +1047,7 @@ module Kawari
       name = expand(argv[1])
       n = 0
       for d in @rdictlist
-        c = d.include?(name) ? d[name] : []
+        c = (d.include?(name) ? d[name] : [])
         n += c.length
       end
       return n.to_s
@@ -1060,7 +1060,7 @@ module Kawari
       name = expand(argv[1])
       n = atoi(expand(argv[2]))
       for d in @rdictlist
-        c = d.include?(name) ? d[name] : []
+        c = (d.include?(name) ? d[name] : [])
         if n < c.length
           return c[n].join('')
         end
@@ -1119,7 +1119,7 @@ module Kawari
       n = 0
       for word in word_list
         n += 1
-        entry = name.to_s + '.' + n.to_s
+        entry = (name.to_s + '.' + n.to_s)
         set(entry, word)
       end
       set([name, '.size'].join(''), n.to_s)
@@ -1212,7 +1212,7 @@ module Kawari
       n = 0
       for line in linelist
         n += 1
-        entry = name.to_s + '.' + n.to_s
+        entry = (name.to_s + '.' + n.to_s)
         if line.end_with?("\r\n")
           line = line[0..-3]
         elsif line.end_with?("\r") or line.end_with?("\n")
@@ -2169,10 +2169,10 @@ module Kawari
         end
         to = communicate_to()
       end
-      result = "SHIORI/3.0 200 OK\r\n" \
-               "Sender: Kawari\r\n" \
-               "Charset: " + $charset.to_s + "\r\n" \
-               "Value: " + result.to_s + "\r\n"
+      result = ("SHIORI/3.0 200 OK\r\n" \
+                "Sender: Kawari\r\n" \
+                "Charset: " + $charset.to_s + "\r\n" \
+                "Value: " + result.to_s + "\r\n")
       if to != nil
         result = [result, "Reference0: " + to.to_s + "\r\n"].join('')
       end
@@ -2225,10 +2225,10 @@ module Kawari
       saori_header = []
       saori_value = {}
       saori_protocol = ''
-      req = "EXECUTE SAORI/1.0\r\n" \
-            "Sender: KAWARI\r\n" \
-            "SecurityLevel: local\r\n" \
-            "Charset: " + $charset.to_s + "\r\n"
+      req = ("EXECUTE SAORI/1.0\r\n" \
+             "Sender: KAWARI\r\n" \
+             "SecurityLevel: local\r\n" \
+             "Charset: " + $charset.to_s + "\r\n")
       for i in 2..argv.length-1
         req = [req,
                "Argument" + (i - 2).to_s + ": " + expand(argv[i]).to_s + "\r\n"].join('')
@@ -2293,9 +2293,9 @@ module Kawari
       saori_header = []
       saori_value = {}
       saori_protocol = ''
-      req = "EXECUTE SAORI/1.0\r\n" \
-            "Sender: KAWARI\r\n" \
-            "SecurityLevel: local\r\n"
+      req = ("EXECUTE SAORI/1.0\r\n" \
+             "Sender: KAWARI\r\n" \
+             "SecurityLevel: local\r\n")
       for i in 3..argv.length-1
         req = [req,
                "Argument" + (i -3).to_s + ": " + expand(argv[i]) + "\r\n"].join('')

@@ -39,28 +39,28 @@ module Misaka
     if path == nil and position == nil
       error = 'lexical error'
     elsif path == nil
-      at = 'line ' + position[0].to_s + ', column ' + position[1].to_s
-      error = 'lexical error at ' + at.to_s
+      at = ('line ' + position[0].to_s + ', column ' + position[1].to_s)
+      error = ('lexical error at ' + at.to_s)
     elsif position == nil
-      error = 'lexical error in ' + path.to_s
+      error = ('lexical error in ' + path.to_s)
     else
-      at = 'line ' + position[0].to_s + ', column ' + position[1].to_s
-      error = 'lexical error at ' + at.to_s + ' in ' + path.to_s
+      at = ('line ' + position[0].to_s + ', column ' + position[1].to_s)
+      error = ('lexical error at ' + at.to_s + ' in ' + path.to_s)
     end
     fail MisakaError.new(error)
   end
 
   def self.syntax_error(message, path: nil, position: nil)
     if path == nil and position == nil
-      error = 'syntax error (' + message.to_s + ')'
+      error = ('syntax error (' + message.to_s + ')')
     elsif path == nil
-      at = 'line ' + position[0].to_s + ', column ' + position[1].to_s
-      error = 'syntax error at ' + at.to_s + ' (' + message.to_s{1} + ')'
+      at = ('line ' + position[0].to_s + ', column ' + position[1].to_s)
+      error = ('syntax error at ' + at.to_s + ' (' + message.to_s{1} + ')')
     elsif position == nil
-      error = 'syntax error in ' + path.to_s + ' (' + message.to_s{1} + ')'
+      error = ('syntax error in ' + path.to_s + ' (' + message.to_s{1} + ')')
     else
-      at = 'line ' + position[0].to_s + ', column ' + position[1].to_s
-      error = 'syntax error at ' + at.to_s + ' in ' + path.to_s + ' (' + message.to_s + ')'
+      at = ('line ' + position[0].to_s + ', column ' + position[1].to_s)
+      error = ('syntax error at ' + at.to_s + ' in ' + path.to_s + ' (' + message.to_s + ')')
     end
     fail MisakaError.new(error)
   end
@@ -200,7 +200,7 @@ module Misaka
         if column == 0
           match = Re_comment.match(temp)
           if match != nil
-            column = column + match[0].length
+            column = (column + match[0].length)
             temp = match.post_match
             next
           end
@@ -231,10 +231,10 @@ module Misaka
           Misaka.lexical_error(:path => path, :position => [line, column])
         end
         if token == TOKEN_NEWLINE
-          line = line + 1
+          line = (line + 1)
           column = 0
         else
-          column = column + lexeme.length
+          column = (column + lexeme.length)
         end
       end
       return line, column
@@ -1928,7 +1928,7 @@ module Misaka
           value /= operand
           value = value.to_i
         elsif expression[i] == '%' and operand != 0
-          value = value % operand
+          value = (value % operand)
         end
       end
       return value.to_s
@@ -1948,7 +1948,7 @@ module Misaka
         rescue #except ValueError:
           operand = 0
         end
-        value = operand**value
+        value = (operand**value)
       end
       return value.to_s
     end

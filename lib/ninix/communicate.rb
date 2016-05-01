@@ -102,20 +102,20 @@ module Communicate
         flags = ''
         if flag_break
           if !flags.empty?
-            flags = flags + ','
-            flags = flags + 'break'
+            flags = (flags + ',')
+            flags = (flags + 'break')
           end
           if sstp != nil ## FIXME: owned, remote
             if !flags.empty?
-              flags = flags + ','
+              flags = (flags + ',')
             end
-            flags = flags + 'sstp-send'
+            flags = (flags + 'sstp-send')
           end
           if notranslate
             if !flags.empty?
-              flags = flags + ','
+              flags = (flags + ',')
           end
-            flags = flags + 'notranslate'
+            flags = (flags + 'notranslate')
           end
         end
         refs = []

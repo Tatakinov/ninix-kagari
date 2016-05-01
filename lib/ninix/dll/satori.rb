@@ -263,7 +263,7 @@ module Satori
         pos = 0
         while line[pos..-1].count('φ') >0
           pos = line.index('φ', pos)
-          if pos == line.length - 1
+          if pos == (line.length - 1)
             line_buffer = line[0..-2]
             break
           else
@@ -335,9 +335,9 @@ module Satori
       if @talk.include?('')
         @count['NoNameTalk'] = @talk[''].length
       end
-      @count['OtherTalk'] = @count['Talk'] \
-                            - @count['NoNameTalk'] \
-                            - @count['EventTalk']
+      @count['OtherTalk'] = (@count['Talk'] \
+                             - @count['NoNameTalk'] \
+                             - @count['EventTalk'])
       @count['Words'] = @word.length
       word = 0
       for value in @word.values()
@@ -367,7 +367,7 @@ module Satori
         num_open += line.count('（') ### FIXME: φ
         num_close += line.count('）') ### FIXME: φ
         if num_open > 0 and num_open != num_close
-          if n == linelist.length - 1
+          if n == (linelist.length - 1)
             Logging::Logging.debug(
               'satori.py: syntax error (unbalanced parens)')
           else
@@ -380,7 +380,7 @@ module Satori
         end
         line = [prev, linelist[n]].join('')
         prev = ''
-        current_lineno = lineno + n - 2
+        current_lineno = (lineno + n - 2)
         if not line.empty? and line[0] == '＄' and not phi_escape[current_lineno].include?(0)
           node = parse_assignment(line)
           if node != nil
@@ -435,7 +435,7 @@ module Satori
         num_open += line.count('（') ### FIXME: φ
         num_close += line.count('）') ### FIXME: φ
         if num_open > 0 and num_open != num_close
-          if n == linelist.length - 1
+          if n == (linelist.length - 1)
             Logging::Logging.debug(
               'satori.py: syntax error (unbalanced parens)')
           else
@@ -607,7 +607,7 @@ module Satori
         end
         nest = text[position..pos_new-1].count('（') - text[position..pos_new-1].count('）')
         if nest > 0
-          current = pos_new + 1
+          current = (pos_new + 1)
         else
           current = pos_new
           break
@@ -946,7 +946,7 @@ module Satori
 
     def print_nodelist(node_list, depth: 0)
       for node in node_list
-        indent = '  ' * depth
+        indent = ('  ' * depth)
         if node[0] == NODE_TEXT
           temp = node[1].map {|x| x.encode('utf-8', :invalid => :replace, :undef => :replace) }.join('')
           print([indent, 'NODE_TEXT "' + temp + '"'].join(''), "\n")
@@ -1096,7 +1096,7 @@ module Satori
       @save_timer = 0
       @url_list = {}
       @boot_script = nil
-      @script_history = [nil] * 64
+      @script_history = ([nil] * 64)
       @wait_percent = 100
       @random_talk = -1
       @reserved_talk = {}
@@ -1188,7 +1188,7 @@ module Satori
                 'デフォルトサーフェス1'].include?(name)
               next
             end
-            line = name.to_s + "\t" + value.to_s
+            line = (name.to_s + "\t" + value.to_s)
             line = line.encode('CP932', :invalid => :replace, :undef => :replace)
             if encrypted
               line = Satori.encrypt(Satori.encrypt(line)).join('')
@@ -1197,9 +1197,9 @@ module Satori
             f.write("\r\n")
           end
           for side in [0, 1]
-            name = 'デフォルトサーフェス' + side.to_s
+            name = ('デフォルトサーフェス' + side.to_s)
             value = to_zenkaku(@default_surface[side].to_s)
-            line = name.to_s + "\t" + value.to_s
+            line = (name.to_s + "\t" + value.to_s)
             line = line.encode('CP932', :invalid => :replace, :undef => :replace)
             if encrypted
               line = Satori.encrypt(Satori.encrypt(line)).join('')
@@ -1208,9 +1208,9 @@ module Satori
             f.write("\r\n")
           end
           for side in [0, 1]
-            name = '前回終了時サーフェス' + side.to_s
+            name = ('前回終了時サーフェス' + side.to_s)
             value = to_zenkaku(@current_surface[side].to_s)
-            line = name.to_s + "\t" + value.to_s
+            line = (name.to_s + "\t" + value.to_s)
             line = line.encode('CP932', :invalid => :replace, :undef => :replace)
             if encrypted
               line = Satori.encrypt(Satori.encrypt(line)).join('')
@@ -1220,7 +1220,7 @@ module Satori
           end
           name = '起動回数'
           value = to_zenkaku(@runcount.to_s)
-          line = name.to_s + "\t" + value.to_s
+          line = (name.to_s + "\t" + value.to_s)
           line = line.encode('CP932', :invalid => :replace, :undef => :replace)
           if encrypted
             line = Satori.encrypt(Satori.encrypt(line)).join('')
@@ -1229,7 +1229,7 @@ module Satori
           f.write("\r\n")
           for name in @timer.keys
             value = to_zenkaku(@timer[name])
-            line = name.to_s + "\t" + value.to_s
+            line = (name.to_s + "\t" + value.to_s)
             line = line.encode('CP932', :invalid => :replace, :undef => :replace)
             if encrypted
               line = Satori.encrypt(Satori.encrypt(line)).join('')
@@ -1239,7 +1239,7 @@ module Satori
           end
           for name in @reserved_talk.keys
             value = to_zenkaku(@reserved_talk[name])
-            line = ['次から', value, '回目のトーク'].join('') + "\t" + name.to_s
+            line = (['次から', value, '回目のトーク'].join('') + "\t" + name.to_s)
             line = line.encode('CP932', :invalid => :replace, :undef => :replace)
             if encrypted
               line = Satori.encrypt(Satori.encrypt(line)).join('')
@@ -1256,7 +1256,7 @@ module Satori
 
     def finalize
       get_event_response('OnSatoriUnload')
-      accumulative_runtime = @runtime + get_runtime()
+      accumulative_runtime = (@runtime + get_runtime())
       assign('単純累計秒', to_zenkaku(accumulative_runtime))
       save_database()
     end
@@ -1312,7 +1312,7 @@ module Satori
         end
         count += 1
         if count >= @touch_threshold
-          event = ref3.to_s + ref4.to_s + 'なでられ'
+          event = (ref3.to_s + ref4.to_s + 'なでられ')
           count = 0
         end
         @mouse_move_count[key] = [count, Time.now]
@@ -1324,7 +1324,7 @@ module Satori
         end
         count += 1
         if count >= 2
-          event = ref3.to_s + ref4.to_s + 'ころころ'
+          event = (ref3.to_s + ref4.to_s + 'ころころ')
           count = 0
         end
         @mouse_wheel_count[key] = [count, Time.now]
@@ -1541,7 +1541,7 @@ module Satori
           @reserved_talk.delete(value)
         end
       elsif name == '起動回数'
-        @runcount = to_integer(value) + 1
+        @runcount = (to_integer(value) + 1)
       elsif value == nil or value.empty?
         if @variable.include?(name)
           @variable.delete(name)
@@ -1666,7 +1666,7 @@ module Satori
       if rate == nil
         rate = 0.1
       else
-        rate = [[rate, 1].max, 100].min / 100.0
+        rate = ([[rate, 1].max, 100].min / 100.0)
       end
       diff = (interval * rate).to_i
       @random_talk = Array(interval - diff..interval + diff).sample
@@ -1879,7 +1879,7 @@ module Satori
             start = match.begin(0)
             if start < @newline.length or \
               script[start - @newline.length..start-1] != @newline
-              script = script[0..match.end(0)-1] + @newline_script + script[match.end(0)..-1]
+              script = (script[0..match.end(0)-1] + @newline_script + script[match.end(0)..-1])
             end
           else
             break
@@ -1899,7 +1899,7 @@ module Satori
             start = match.begin(0)
             if start < @newline.length or \
               script[start - @newline.length..start-1] != @newline
-              script = script[0..match.end(0)-1] + @newline_script + script[match.end(0)..-1]
+              script = (script[0..match.end(0)-1] + @newline_script + script[match.end(0)..-1])
             end
           else
             break
@@ -1934,7 +1934,7 @@ module Satori
           pos = script.index(']', i)
           if pos > i
             buf << script[i..pos]
-            i = pos + 1
+            i = (pos + 1)
             next
           end
         end
@@ -2205,7 +2205,7 @@ module Satori
             if node[i] == '/'
               value = (value / operand).to_i
             elsif node[i] == '%'
-              value = value % operand
+              value = (value % operand)
             else
               fail RuntimeError('should not reach here')
             end
@@ -2237,7 +2237,7 @@ module Satori
             end
             value = -value
           elsif node[1] == '!'
-            value = ['０', '0'].include?(value) ? 1 : 0
+            value = (['０', '0'].include?(value) ? 1 : 0)
           else
             fail RuntimeError('should not reach here')
           end
@@ -2421,9 +2421,9 @@ module Satori
           end_ = to_integer(expand(args[2], :caller_history => history))
           step = to_integer(expand(args[3], :caller_history => history))
           if step > 0
-            end_ = end_ + 1
+            end_ = (end_ + 1)
           elsif step < 0
-            end_ = end_ - 1
+            end_ = (end_ - 1)
           else
             return '' # infinite loop
           end
@@ -2869,10 +2869,10 @@ module Satori
       if not result.empty?
         @silent_time = 0
       end
-      result = "SHIORI/3.0 200 OK\r\n" \
-               "Sender: Satori\r\n" \
-               "Charset: UTF-8\r\n" \
-               "Value: " + result.to_s + "\r\n"
+      result = ("SHIORI/3.0 200 OK\r\n" \
+                "Sender: Satori\r\n" \
+                "Charset: UTF-8\r\n" \
+                "Value: " + result.to_s + "\r\n")
       if to != nil
         result = [result, "Reference0: " + to.to_s + "\r\n"].join('')
       end
@@ -2889,10 +2889,10 @@ module Satori
       saori_header = []
       saori_value = {}
       saori_protocol = ''
-      req = "EXECUTE SAORI/1.0\r\n" \
-            "Sender: Satori\r\n" \
-            "SecurityLevel: local\r\n" \
-            "Charset: Shift_JIS\r\n" ## XXX
+      req = ("EXECUTE SAORI/1.0\r\n" \
+             "Sender: Satori\r\n" \
+             "SecurityLevel: local\r\n" \
+             "Charset: Shift_JIS\r\n") ## XXX
       default_args = @saori_function[name][1..-1]
       n = default_args.length
       for i in 0..default_args.length-1

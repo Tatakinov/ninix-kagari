@@ -489,12 +489,12 @@ module Sakura
       direction = @balloon.window[side].direction
       sx, sy = get_surface_position(side)
       if direction == 0 # left
-        nx = ox + x_delta
+        nx = (ox + x_delta)
       else
         w, h = @surface.get_surface_size(side)
-        nx = ox - x_delta
+        nx = (ox - x_delta)
       end
-      ny = oy + y_delta
+      ny = (oy + y_delta)
       @surface.set_balloon_offset(side, [nx, ny])
     end
 
@@ -603,7 +603,7 @@ module Sakura
 
     def get_idle_time()
       now = Time.new.to_f
-      idle = now - @idle_start
+      idle = (now - @idle_start)
       return idle
     end
 
@@ -1568,17 +1568,17 @@ module Sakura
         rect = @surface.get_collision_area(side, 'face')
         if rect != nil
           x1, y1, x2, y2 = rect
-          return x + ((x2 - x1) / 2).to_i, y + ((y2 - y1) / 2).to_i
+          return (x + ((x2 - x1) / 2).to_i), (y + ((y2 - y1) / 2).to_i)
         else
-          return x + (w / 2).to_i, y + (h / 4).to_i
+          return (x + (w / 2).to_i), (y + (h / 4).to_i)
         end
       elsif baseposition == 2
         rect = @surface.get_collision_area(side, 'bust')
         if rect != nil
           x1, y1, x2, y2 = rect
-          return x + ((x2 - x1) / 2).to_i, y + ((y2 - y1) / 2).to_i
+          return (x + ((x2 - x1) / 2).to_i), (y + ((y2 - y1) / 2).to_i)
         else
-          return x + (w / 2).to_i, y + (h / 2).to_i
+          return (x + (w / 2).to_i), (y + (h / 2).to_i)
         end
       elsif baseposition == 3
         centerx, centery = @surface.get_center(side)
@@ -1595,12 +1595,12 @@ module Sakura
           rect = @surface.get_collision_area(side, 'head')
           if rect != nil
             x1, y1, x2, y2 = rect
-            return x + ((x2 - x1) / 2).to_i, y + ((y2 - y1) / 2).to_i
+            return (x + ((x2 - x1) / 2).to_i), (y + ((y2 - y1) / 2).to_i)
           else
-            return x + (w / 2).to_i, y + (h / 8).to_i
+            return (x + (w / 2).to_i), (y + (h / 8).to_i)
           end
         end
-        return x + centerx, y + centery
+        return (x + centerx), (y + centery)
       end
     end
 
@@ -2037,7 +2037,7 @@ module Sakura
       w, h = get_surface_size(@script_side)
       x, y = get_surface_position(@script_side)
       left, top, scrn_w, scrn_h = @surface.get_workarea(@script_side)
-      if sx + (sw / 2).to_i > left + (scrn_w / 2).to_i
+      if (sx + (sw / 2).to_i) > (left + (scrn_w / 2).to_i)
         new_x = [x - (scrn_w / 20).to_i, sx - (scrn_w / 20).to_i].min
       else
         new_x = [x + (scrn_w / 20).to_i, sx + (scrn_w / 20).to_i].max
@@ -2066,14 +2066,14 @@ module Sakura
       w, h = get_surface_size(@script_side)
       x, y = get_surface_position(@script_side)
       left, top, scrn_w, scrn_h = @surface.get_workarea(@script_side)
-      if (x < sx + (sw / 2).to_i and sx + (sw / 2).to_i < x + w) or
-        (sx < x + (w / 2).to_i and x + (w / 2).to_i < sx + sw)
+      if (x < (sx + (sw / 2).to_i) and (sx + (sw / 2).to_i) < (x + w)) or
+        (sx < (x + (w / 2).to_i) and (x + (w / 2).to_i) < (sx + sw))
         return
       end
-      if sx + (sw / 2).to_i > x + (w / 2).to_i
-        new_x = sx - (w / 2).to_i + 1
+      if (sx + (sw / 2).to_i) > (x + (w / 2).to_i)
+        new_x = (sx - (w / 2).to_i + 1)
       else
-        new_x = sx + sw - (w / 2).to_i - 1
+        new_x = (sx + sw - (w / 2).to_i - 1)
       end
       new_x = [new_x, left].max
       new_x = [new_x, left + scrn_w - w].min
@@ -2149,12 +2149,12 @@ module Sakura
 
     def __set_weight(value, unit)
       begin
-        amount = Integer(value) * unit - 0.01
+        amount = (Integer(value) * unit - 0.01)
       rescue ArgumentError
         amount = 0
       end
       if amount > 0
-        @script_wait = Time.new.to_f + amount
+        @script_wait = (Time.new.to_f + amount)
       end
     end
 
@@ -2317,7 +2317,7 @@ module Sakura
       re__u = Regexp.new('\A(0x[a-fA-F0-9]{4}|[0-9]{4})\z')
       if re__u.match(args[0]) != nil
         temp = Integer(re__u.match(args[0])[0])
-        temp1 = (temp & 0xFF00) >> 8
+        temp1 = ((temp & 0xFF00) >> 8)
         temp2 = (temp & 0x00FF)
         text = [temp2, temp1].pack("C*").force_encoding("UTF-16LE").encode("UTF-8", :invalid => :replace, :undef => :replace)
         @balloon.append_text(@script_side, text)
@@ -2814,7 +2814,7 @@ module Sakura
         script_speed = @parent.handle_request(
           'GET', 'get_preference', 'script_speed')
         if script_speed > 0
-          @script_wait = Time.new.to_f + script_speed * 0.02
+          @script_wait = (Time.new.to_f + script_speed * 0.02)
         end
         return
       end
@@ -2915,7 +2915,7 @@ module Sakura
         elsif chunk[1] == '%et'
           buf << @current_time[5].to_s[-1] + '万年'
         elsif chunk[1] == '%wronghour'
-          wrongtime = Time.new.to_f + [-2, -1, 1, 2].sample * 3600
+          wrongtime = (Time.new.to_f + [-2, -1, 1, 2].sample * 3600)
           buf << time.localtime(wrongtime)[3].to_s
         elsif chunk[1] == '%exh'
           buf << get_uptime().to_s

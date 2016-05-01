@@ -224,14 +224,14 @@ module Bln
       # -1: left, 1: right
       if @position == 'sakura'
         s0_x, s0_y, s0_w, s0_h = get_sakura_status('SurfaceSakura')
-        if s0_x + (s0_w / 2).to_i > left + (scrn_w / 2).to_i
+        if (s0_x + (s0_w / 2).to_i) > (left + (scrn_w / 2).to_i)
           @direction = -1
         else
           @direction = 1
         end
       elsif @position == 'kero'
         s1_x, s1_y, s1_w, s1_h = get_sakura_status('SurfaceKero')
-        if s1_x + (s1_w / 2).to_i > left + (scrn_w / 2).to_i
+        if (s1_x + (s1_w / 2).to_i) > (left + (scrn_w / 2).to_i)
           @direction = -1
         else
           @direction = 1
@@ -273,16 +273,16 @@ module Bln
       h = balloon_surface.height
       @x = @y = 0
       if data.include?('offset.x')
-        @x += @direction * data['offset.x'].to_i
+        @x += (@direction * data['offset.x'].to_i)
       end
       if data.include?('offset.y')
         @y += data['offset.y'].to_i
       end
       if data.include?('offset.random')
-        @x += data['offset.random'].to_i * Random.rand(-1.0..2.0)
-        @y += data['offset.random'].to_i * Random.rand(-1.0..2.0)
+        @x += (data['offset.random'].to_i * Random.rand(-1.0..2.0))
+        @y += (data['offset.random'].to_i * Random.rand(-1.0..2.0))
       end
-      @x += @direction * offset_x.to_i
+      @x += (@direction * offset_x.to_i)
       @y += offset_y.to_i
       @action_x = 0
       @action_y = 0
@@ -339,9 +339,9 @@ module Bln
         (@right - @left) > 0 and (@bottom - @top) > 0
         @script = text
         if data.include?('font.color')
-          fontcolor_r = data['font.color'][0..1].to_i(16) / 255.0
-          fontcolor_g = data['font.color'][2..3].to_i(16) /255.0
-          fontcolor_b = data['font.color'][4..5].to_i(16) / 255.0
+          fontcolor_r = (data['font.color'][0..1].to_i(16) / 255.0)
+          fontcolor_g = (data['font.color'][2..3].to_i(16) /255.0)
+          fontcolor_b = (data['font.color'][4..5].to_i(16) / 255.0)
           @fontcolor = [fontcolor_r, fontcolor_g, fontcolor_b]
         else
           @fontcolor = [0.0, 0.0, 0.0] # XXX
@@ -468,8 +468,8 @@ module Bln
       if @window == nil
         return
       end
-      new_x = @base_x + ((@x + @action_x + @vx) * @scale / 100.0).to_i
-      new_y = @base_y + ((@y + @action_y + @vy) * @scale / 100.0).to_i
+      new_x = (@base_x + ((@x + @action_x + @vx) * @scale / 100.0).to_i)
+      new_y = (@base_y + ((@y + @action_y + @vy) * @scale / 100.0).to_i)
       @window.move(new_x, new_y)
     end
 
@@ -531,37 +531,37 @@ module Bln
       if @position == 'lefttop'
         #pass
       elsif @position == 'leftbottom'
-        y = top + scrn_h - h
+        y = (top + scrn_h - h)
       elsif @position == 'righttop'
-        x = left + scrn_w - w
+        x = (left + scrn_w - w)
       elsif @position == 'rightbottom'
-        x = left + scrn_w - w
-        y = top + scrn_h - h
+        x = (left + scrn_w - w)
+        y = (top + scrn_h - h)
       elsif @position == 'center'
-        x = left + ((scrn_w - w) / 2).to_i
-        y = top + ((scrn_h - h) / 2).to_i
+        x = (left + ((scrn_w - w) / 2).to_i)
+        y = (top + ((scrn_h - h) / 2).to_i)
       elsif @position == 'leftcenter'
-        y = top + ((scrn_h - h) / 2).to_i
+        y = (top + ((scrn_h - h) / 2).to_i)
       elsif @position == 'rightcenter'
-        x = left + scrn_w - w
-        y = top + ((scrn_h - h) / 2).to_i
+        x = (left + scrn_w - w)
+        y = (top + ((scrn_h - h) / 2).to_i)
       elsif @position == 'centertop'
-        x = left + ((scrn_w - w) / 2).to_i
+        x = (left + ((scrn_w - w) / 2).to_i)
       elsif @position == 'centerbottom'
-        x = left + ((scrn_w - w) / 2).to_i
-        y = top + scrn_h - h
+        x = (left + ((scrn_w - w) / 2).to_i)
+        y = (top + scrn_h - h)
       elsif @position == 'sakura'
         if @direction == 1 # right
-          x = s0_x + s0_w
+          x = (s0_x + s0_w)
         else
-          x = s0_x - w
+          x = (s0_x - w)
         end
         y = s0_y
       elsif @position == 'kero'
         if @direction == 1 # right
-          x = s1_x + s1_w
+          x = (s1_x + s1_w)
         else
-          x = s1_x - w
+          x = (s1_x - w)
         end
         y = s1_y
       elsif @position == 'sakurab'
@@ -718,7 +718,7 @@ module Bln
             return nil
           end
         else
-          if Time.now - @start_time >= @startdelay * 0.001
+          if (Time.now - @start_time) >= (@startdelay * 0.001)
             @start_time = Time.now
             @visible = true
             @window.show()
@@ -727,7 +727,7 @@ module Bln
       end
       if @visible
         if @life_time != nil
-          if Time.now - @start_time >= @life_time * 0.001 and \
+          if (Time.now - @start_time) >= (@life_time * 0.001) and \
             not (not @processed_script.empty? or not @processed_text.empty?)
             destroy()
             return nil
@@ -735,33 +735,33 @@ module Bln
         end
         if @action != nil
           if  @action['method'] == 'sinwave'
-            offset = @action['ref1'] \
-                     * Math.sin(2.0 * Math::PI \
-                                * (((Time.now - \
-                                     @start_time) * 1000).to_i \
-                                   % @action['ref2']).to_f / @action['ref2'])
+            offset = (@action['ref1'] \
+                      * Math.sin(2.0 * Math::PI \
+                                 * (((Time.now - \
+                                      @start_time) * 1000).to_i \
+                                    % @action['ref2']).to_f / @action['ref2']))
             if @action['ref0'] == 1
               @action_y = offset.to_i
             else
               @action_x = offset.to_i
             end
           elsif @action['method'] == 'vibrate'
-            offset = (((Time.now - @start_time) * 1000).to_i / \
-                      @action['ref2']).to_i % 2
+            offset = ((((Time.now - @start_time) * 1000).to_i / \
+                       @action['ref2']).to_i % 2)
             @action_x = (offset * @action['ref0']).to_i
             @action_y = (offset * @action['ref1']).to_i
           end
         end
         if (@slide_vx != 0 or @slide_vy != 0) and \
           @slide_autostop > 0 and \
-          @slide_autostop * 0.001 + 0.05 <= Time.now - @start_time
-          @vx = @direction * ((@slide_autostop / 50.0 + 1) * @slide_vx).to_i
+          (@slide_autostop * 0.001 + 0.05) <= (Time.now - @start_time)
+          @vx = (@direction * ((@slide_autostop / 50.0 + 1) * @slide_vx).to_i)
           @slide_vx = 0
           @vy = ((@slide_autostop / 50.0 + 1) * @slide_vy).to_i
           @slide_vy = 0
         end
         if @slide_vx != 0
-          @vx = @direction * (((Time.now - @start_time) * @slide_vx) / 50 * 1000.-).to_i
+          @vx = (@direction * (((Time.now - @start_time) * @slide_vx) / 50 * 1000.-).to_i)
         end
         if @slide_vy != 0
           @vy = (((Time.now - @start_time) * @slide_vy) / 50 * 1000.0).to_i
@@ -813,7 +813,7 @@ module Bln
           @text = [@text, @processed_text[0]].join("")
           draw_text(@text)
           @processed_text = @processed_text[1..-1]
-          @script_wait = Time.now + 0.014
+          @script_wait = (Time.now + 0.014)
         end
         return
       end
@@ -826,15 +826,15 @@ module Bln
         elsif name == '\w'
           if args != nil
             begin
-              amount = Integer(args[0]) * 0.05 - 0.01
+              amount = (Integer(args[0]) * 0.05 - 0.01)
             rescue
               amount = 0
             end
           else
-            amount = 1 * 0.05 - 0.01
+            amount = (1 * 0.05 - 0.01)
           end
           if amount > 0
-            @script_wait = Time.now + amount
+            @script_wait = (Time.now + amount)
           end
         elsif name == '\b'
           if args != nil
@@ -921,7 +921,7 @@ module Bln
         end
       end
       if @move_notify_time == nil or \
-         Time.now - @move_notify_time > 500 * 0.001
+         (Time.now - @move_notify_time) > (500 * 0.001)
         x, y = @window.winpos_to_surfacepos(
              event.x.to_i, event.y.to_i, @scale)
         @__sakura.notify_event(

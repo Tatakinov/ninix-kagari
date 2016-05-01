@@ -96,9 +96,9 @@ module Seriko
       quality = @parent.handle_request('GET', 'get_preference', 'animation_quality')
       @fps = DEFAULT_FPS * quality
       if @prev_tick == 0 ## First time
-        delta_tick = 1000.0 / @fps # [msec]
+        delta_tick = (1000.0 / @fps) # [msec]
       else
-        delta_tick = (current_tick - @prev_tick) / 1000 # [msec]
+        delta_tick = ((current_tick - @prev_tick) / 1000) # [msec]
       end
       @next_tick += delta_tick
       @prev_tick = current_tick
@@ -664,9 +664,9 @@ module Seriko
         actor = Seriko::PassiveActor.new(actor_id, interval)
       end
       if version == 1
-        key = actor_id.to_s + 'option'
+        key = (actor_id.to_s + 'option')
       else
-        key = 'animation' + actor_id.to_s + '.option'
+        key = ('animation' + actor_id.to_s + '.option')
       end
       if config.include?(key) and config[key] == 'exclusive'
         actor.set_exclusive()
@@ -674,14 +674,14 @@ module Seriko
       begin
         for n in 0..127 # up to 128 patterns (0 - 127)
           if version == 1
-            key = actor_id.to_s + 'pattern' + n.to_s
+            key = (actor_id.to_s + 'pattern' + n.to_s)
           else
-            key = 'animation' + actor_id.to_s + '.pattern' + n.to_s
+            key = ('animation' + actor_id.to_s + '.pattern' + n.to_s)
           end
           if not config.include?(key)
-            key = actor_id.to_s + 'patturn' + n.to_s # only for version 1
+            key = (actor_id.to_s + 'patturn' + n.to_s) # only for version 1
             if not config.include?(key)
-              key = actor_id.to_s + 'putturn' + n.to_s # only for version 1
+              key = (actor_id.to_s + 'putturn' + n.to_s) # only for version 1
               if not config.include?(key)
                 next # XXX
               end
@@ -698,7 +698,7 @@ module Seriko
           end
           if version == 1
             surface = match[1].to_i.to_s
-            interval = match[2].to_i.abs * 10
+            interval = (match[2].to_i.abs * 10)
             method = match[3]
           else
             method = match[1]
@@ -832,12 +832,12 @@ module Seriko
       begin
         for n in 0..127 # up to 128 patterns (0 - 127)
           if version == 1
-            key = mayuna_id.to_s + 'pattern' + n.to_s
+            key = (mayuna_id.to_s + 'pattern' + n.to_s)
           else
-            key = 'animation' + mayuna_id.to_s + '.pattern' + n.to_s
+            key = ('animation' + mayuna_id.to_s + '.pattern' + n.to_s)
           end
           if not config.include?(key)
-            key = mayuna_id.to_s + 'patturn' + n.to_s # only for version 1
+            key = (mayuna_id.to_s + 'patturn' + n.to_s) # only for version 1
             if not config.include?(key)
               next # XXX
             end
@@ -853,7 +853,7 @@ module Seriko
           end
           if version == 1
             surface = match[1].to_i.to_s
-            interval = match[2].to_i.abs * 10
+            interval = (match[2].to_i.abs * 10)
             method = match[3]
           else
             method = match[1]

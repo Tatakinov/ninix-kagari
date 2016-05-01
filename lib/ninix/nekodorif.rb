@@ -446,19 +446,19 @@ module Nekodorif
       left, top, scrn_w, scrn_h = @window.workarea
       if reset != 0
         @x = left
-        @y = top + scrn_h - @h
+        @y = (top + scrn_h - @h)
       else
         if @omni != 0
-          @y = top + scrn_h - @h
+          @y = (top + scrn_h - @h)
         end
       end
       @window.move(@x, @y)
     end
 
     def move(x_delta, y_delta)
-      @x = @x + x_delta
+      @x = (@x + x_delta)
       if @omni != 0
-        @y = @y + y_delta
+        @y = (@y + y_delta)
       end
       set_position()
     end
@@ -607,7 +607,7 @@ module Nekodorif
     end
 
     def set_movement(timing)
-      key = timing + 'fall.type'
+      key = (timing + 'fall.type')
       if @data.include?(key) and \
         ['gravity', 'evenspeed', 'none'].include?(@data[key])
           @settings['fall.type'] = @data[key]
@@ -617,7 +617,7 @@ module Nekodorif
       if @data.include?(timing + 'fall.speed')
         @settings['fall.speed'] = @data[timing + 'fall.speed']
       else
-        @settings['fall.speed'] =1
+        @settings['fall.speed'] = 1
       end
       if @settings['fall.speed'] < 1
         @settings['fall.speed'] = 1
@@ -625,7 +625,7 @@ module Nekodorif
       if @settings['fall.speed'] > 100
         @settings['fall.speed'] = 100
       end
-      key = timing + 'slide.type'
+      key = (timing + 'slide.type')
       if @data.include?(key) and \
         ['none', 'sinwave', 'leaf'].include?(@data[key])
         @settings['slide.type'] = @data[key]
@@ -671,8 +671,8 @@ module Nekodorif
       target_x, target_y = @target.get_surface_position(@side)
       target_w, target_h = @target.get_surface_size(@side)
       left, top, scrn_w, scrn_h = @window.workarea
-      @x = target_x + target_w / 2 - @w / 2 + (@offset_x * @__scale / 100).to_i
-      @y = top + (@offset_y * @__scale / 100).to_i
+      @x = (target_x + target_w / 2 - @w / 2 + (@offset_x * @__scale / 100).to_i)
+      @y = (top + (@offset_y * @__scale / 100).to_i)
       @window.move(@x, @y)
     end
 
@@ -799,8 +799,8 @@ module Nekodorif
         #pass
       else
         if @settings['fall.type'] == 'gravity'
-          @y += @settings['fall.speed'].to_i * \
-          (@time / 20.0)**2
+          @y += (@settings['fall.speed'].to_i * \
+          (@time / 20.0)**2)
         elsif @settings['fall.type'] == 'evenspeed'
           @y += @settings['fall.speed']
         else
@@ -819,10 +819,10 @@ module Nekodorif
       for side in [0, 1]
         target_x, target_y = @target.get_surface_position(side)
         target_w, target_h = @target.get_surface_size(side)
-        center_x = @x + @w / 2
-        center_y = @y + @h / 2
-        if target_x < center_x and center_x < target_x + target_w and \
-          target_y < center_y and center_y < target_y + target_h
+        center_x = (@x + @w / 2)
+        center_y = (@y + @h / 2)
+        if target_x < center_x and center_x < (target_x + target_w) and \
+          target_y < center_y and center_y < (target_y + target_h)
           @side = side
           return 1
         end
@@ -832,10 +832,10 @@ module Nekodorif
 
     def check_mikire
       left, top, scrn_w, scrn_h = @window.workarea
-      if @x + @w - @w / 3 > left + scrn_w or \
-        @x + @w / 3 < left or \
-        @y + @h - @h / 3 > top + scrn_h or \
-        @y + @h / 3 < top
+      if (@x + @w - @w / 3) > (left + scrn_w) or \
+        (@x + @w / 3) < left or \
+        (@y + @h - @h / 3) > (top + scrn_h) or \
+        (@y + @h / 3) < top
         return 1
       else
         return 0

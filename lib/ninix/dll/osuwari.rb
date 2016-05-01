@@ -172,16 +172,16 @@ module Osuwari
       end
       w, h = @__sakura.get_surface_size(side)
       if pos[0] == 'T'
-        y = target_y + offset_y
+        y = (target_y + offset_y)
       elsif pos[0] == 'B'
-        y = target_y + target_h + offset_y - h
+        y = (target_y + target_h + offset_y - h)
       else
         return false # should not reach here
       end
       if pos[1] == 'L'
-        x = target_x + offset_x
+        x = (target_x + offset_x)
       elsif pos[1] == 'R'
-        x = target_x + target_w + offset_x - w
+        x = (target_x + target_w + offset_x - w)
       else
         return false # should not reach here
       end

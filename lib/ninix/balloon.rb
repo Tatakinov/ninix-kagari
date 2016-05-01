@@ -190,7 +190,7 @@ module Balloon
         id_format = 'k'
         balloon = @balloon1
       else
-        name = 'balloon.char' + side.to_s
+        name = ('balloon.char' + side.to_s)
         id_format = 'k'
         balloon = @balloon1
       end
@@ -545,9 +545,9 @@ module Balloon
       text_b = desc.get(['font.color.b', 'fontcolor.b'], :default => 0).to_i
       @text_normal_color = [text_r / 255.0, text_g / 255.0, text_b / 255.0]
       if desc.get('maskmethod').to_i == 1
-        text_r = 255 - text_r
-        text_g = 255 - text_g
-        text_b = 255 - text_b
+        text_r = (255 - text_r)
+        text_g = (255 - text_g)
+        text_b = (255 - text_b)
       end
       @text_active_color = [text_r / 255.0, text_g / 255.0, text_b / 255.0]
       sstp_r = desc.get('sstpmessage.font.color.r', :default => text_r).to_i
@@ -625,7 +625,7 @@ module Balloon
       if pango_size == 0
         default_size = 12 # for Windows environment
         size = @desc.get(['font.height', 'font.size'], :default => default_size).to_i
-        pango_size = size * 3 / 4 # convert from Windows to GTK+
+        pango_size = (size * 3 / 4) # convert from Windows to GTK+
         pango_size *= Pango::SCALE
       end
       @font_desc.set_size(pango_size)
@@ -639,7 +639,7 @@ module Balloon
         if pango_size == 0
           default_size = 10 # for Windows environment
           size = @desc.get('sstpmessage.font.height', :default => default_size).to_i
-          pango_size = size * 3 / 4 # convert from Windows to GTK+
+          pango_size = (size * 3 / 4) # convert from Windows to GTK+
           pango_size *= Pango::SCALE
         end
         @sstp_font_desc.set_size(pango_size)
@@ -704,34 +704,34 @@ module Balloon
       wpx = __get('wordwrappoint.x',
                   __get('validrect.right', -14).to_i).to_i
       if wpx > 0
-        line_width = wpx - origin_x
+        line_width = (wpx - origin_x)
       elsif wpx < 0
-        line_width = @width - origin_x + wpx
+        line_width = (@width - origin_x + wpx)
       else
-        line_width = @width - origin_x * 2
+        line_width = (@width - origin_x * 2)
       end
       wpy = __get('validrect.bottom', -14).to_i
       if wpy > 0
-        text_height = [wpy, @height].min - origin_y
+        text_height = ([wpy, @height].min - origin_y)
       elsif wpy < 0
-        text_height = @height - origin_y + wpy
+        text_height = (@height - origin_y + wpy)
       else
-        text_height = @height - origin_y * 2
+        text_height = (@height - origin_y * 2)
       end
-      line_height = @font_height + @line_space
+      line_height = (@font_height + @line_space)
       @lines = (text_height / line_height).to_i
       @line_regions = []
       y = origin_y
       for _ in 0..@lines
         @line_regions << [origin_x, y, line_width, line_height]
-        y = y + line_height
+        y = (y + line_height)
       end
       @line_width = line_width
       # sstp message region
       if @side == 0
         w, h = @sstp_layout.pixel_size
         x, y = @sstp[1]
-        w = line_width + origin_x - x
+        w = (line_width + origin_x - x)
         @sstp_region = [x, y, w, h]
       end
     end
@@ -742,15 +742,15 @@ module Balloon
                              __get('validrect.top', 14).to_i).to_i).to_i
       wpy = __get('validrect.bottom', -14).to_i
       if wpy > 0
-        text_height = [wpy, @height].min - origin_y
+        text_height = ([wpy, @height].min - origin_y)
       elsif wpy < 0
-        text_height = @height - origin_y + wpy
+        text_height = (@height - origin_y + wpy)
       else
-        text_height = @height - origin_y * 2
+        text_height = (@height - origin_y * 2)
       end
-      line_height = @font_height + @line_space
+      line_height = (@font_height + @line_space)
       origin_x, y, line_width, line_height = @line_regions[offset]
-      @lines = offset + ((text_height - new_y) / line_height).to_i
+      @lines = (offset + ((text_height - new_y) / line_height).to_i)
       y = new_y
       for i in offset..(@line_regions.length - 1)
         @line_regions[i] = [origin_x, y, line_width, line_height]
@@ -778,10 +778,10 @@ module Balloon
 
     def set_balloon(num)
       @num = num
-      balloon_id = @id_format + (num * 2 + @__direction).to_i.to_s
+      balloon_id = (@id_format + (num * 2 + @__direction).to_i.to_s)
       @balloon_surface = get_image_surface(balloon_id)
       if @balloon_surface == nil
-        balloon_id = @id_format + (0 + @__direction).to_i.to_s
+        balloon_id = (@id_format + (0 + @__direction).to_i.to_s)
         @balloon_surface = get_image_surface(balloon_id)
       end
       fail "assert" unless @balloon_surface != nil
@@ -817,7 +817,7 @@ module Balloon
       end
       value = value.to_i
       if value < 0
-        value = base + value
+        value = (base + value)
       end
       return value.to_i
     end
@@ -858,14 +858,14 @@ module Balloon
       px, py = get_balloon_windowposition()
       w, h = get_balloon_size()
       if @__direction == 0
-        x = base_x + px - w
+        x = (base_x + px - w)
       else
-        x = base_x + px
+        x = (base_x + px)
       end
-      y = base_y + py
+      y = (base_y + py)
       left, top, scrn_w, scrn_h = @window.workarea
-      if y + h > scrn_h # XXX
-        y = scrn_h - h
+      if (y + h) > scrn_h # XXX
+        y = (scrn_h - h)
       end
       if y < top # XXX
         y = top
@@ -927,16 +927,16 @@ module Balloon
       if @sstp_region == nil
         show()
       end
-      @sstp_message = message.to_s + " (" + sender.to_s + ")"
+      @sstp_message = (message.to_s + " (" + sender.to_s + ")")
       x, y, w, h = @sstp_region
       @sstp_layout.set_text(@sstp_message)
       message_width, message_height = @sstp_layout.pixel_size
       if message_width > w
-        @sstp_message = '... (' + sender + ')'
+        @sstp_message = ('... (' + sender + ')')
         i = 0
         while true
           i += 1
-          s = message[0, i] + '... (' + sender + ')'
+          s = (message[0, i] + '... (' + sender + ')')
           @sstp_layout.set_text(s)
           message_width, message_height = \
           @sstp_layout.pixel_size
@@ -986,7 +986,7 @@ module Balloon
     end
 
     def redraw_arrow1(widget, cr)
-      if @lineno + @lines >= @text_buffer.length
+      if (@lineno + @lines) >= @text_buffer.length
         return
       end
       cr.save()
@@ -1070,7 +1070,7 @@ module Balloon
         h = image_surface.height
         if x == 'centerx'
           bw, bh = get_balloon_size(:scaling => false)
-          x = (bw - w) / 2
+          x = ((bw - w) / 2)
         else
           begin
             x = Integer(x)
@@ -1080,7 +1080,7 @@ module Balloon
         end
         if y == 'centery'
           bw, bh = get_balloon_size(:scaling => false)
-          y = (bh - h) / 2
+          y = ((bh - h) / 2)
         else
           begin
             y = Integer(y)
@@ -1124,9 +1124,9 @@ module Balloon
               mh = @sstp_surface.height
               @layout.set_text(@text_buffer[i][0, c])
               text_w, text_h = @layout.pixel_size
-              mx = x + text_w
-              my = y + (@font_height + @line_space) / 2
-              my = my - mh / 2
+              mx = (x + text_w)
+              my = (y + (@font_height + @line_space) / 2)
+              my = (my - mh / 2)
               cr.set_source(@sstp_surface, mx, my)
               cr.paint()
             end
@@ -1151,11 +1151,11 @@ module Balloon
       cr.save()
       sl = @link_buffer[index][0]
       el = @link_buffer[index][2]
-      if @lineno <= sl and sl <= @lineno + @lines
+      if @lineno <= sl and sl <= (@lineno + @lines)
         sn = @link_buffer[index][1]
         en = @link_buffer[index][3]
         for n in sl..el
-          if n - @lineno >= @line_regions.length
+          if (n - @lineno) >= @line_regions.length
             break
           end
           x, y, w, h = @line_regions[n - @lineno]
@@ -1214,11 +1214,11 @@ module Balloon
       for i in 0..(@link_buffer.length - 1)
         sl = @link_buffer[i][0]
         el = @link_buffer[i][2]
-        if @lineno <= sl and sl <= @lineno + @lines
+        if @lineno <= sl and sl <= (@lineno + @lines)
           sn = @link_buffer[i][1]
           en = @link_buffer[i][3]
           for n in sl..el
-            if n - @lineno >= @line_regions.length
+            if (n - @lineno) >= @line_regions.length
               break
             end
             x, y, w, h = @line_regions[n - @lineno]
@@ -1238,7 +1238,7 @@ module Balloon
             @layout.set_markup(markup, -1)
             text_w, text_h = @layout.pixel_size
             w = text_w
-            if x <= px and px < x + w and y <= py and py < y + h
+            if x <= px and px < (x + w) and y <= py and py < (y + h)
               new_selection = i
               break
             end
@@ -1279,10 +1279,10 @@ module Balloon
           if @x_root != nil and \
             @y_root != nil
             @dragged = true
-            x_delta = (event.x_root - @x_root) * 100 / scale + @x_fractions
-            y_delta = (event.y_root - @y_root) * 100 / scale + @y_fractions
-            @x_fractions = x_delta - x_delta.to_i
-            @y_fractions = y_delta - y_delta.to_i
+            x_delta = ((event.x_root - @x_root) * 100 / scale + @x_fractions)
+            y_delta = ((event.y_root - @y_root) * 100 / scale + @y_fractions)
+            @x_fractions = (x_delta - x_delta.to_i)
+            @y_fractions = (y_delta - y_delta.to_i)
             @parent.handle_request(
               'NOTIFY', 'update_balloon_offset',
               @side, x_delta.to_i, y_delta.to_i)
@@ -1307,7 +1307,7 @@ module Balloon
           @darea.queue_draw()
         end
       elsif event.direction == Gdk::ScrollDirection::DOWN
-        if @lineno + @lines < @text_buffer.length
+        if (@lineno + @lines) < @text_buffer.length
           @lineno = [@lineno + 2,
                      @text_buffer.length - @lines].min
           check_link_region(px, py)
@@ -1336,7 +1336,7 @@ module Balloon
       w = @arrow0_surface.width
       h = @arrow0_surface.height
       x, y = @arrow[0]
-      if x <= px and px <= x + w and y <= py and py <= y + h
+      if x <= px and px <= (x + w) and y <= py and py <= (y + h)
         if @lineno > 0
           @lineno = [@lineno - 2, 0].max
           @darea.queue_draw()
@@ -1347,7 +1347,7 @@ module Balloon
       w = @arrow1_surface.width
       h = @arrow1_surface.height
       x, y = @arrow[1]
-      if x <= px and px <= x + w and y <= py and py <= y + h
+      if x <= px and px <= (x + w) and y <= py and py <= (y + h)
         if @lineno + @lines < @text_buffer.length
           @lineno = [@lineno + 2,
                      @text_buffer.length - @lines].min
@@ -1419,7 +1419,7 @@ module Balloon
         @newline_required = false
         index = @text_buffer.length
       else
-        index = @text_buffer.length - 1
+        index = (@text_buffer.length - 1)
         s = @text_buffer.pop
         column = s.length
       end
@@ -1435,22 +1435,22 @@ module Balloon
           break
         end
         if text[i, 2] == '\n'
-          if j >= i + 8 and text[i, 8] == '\n[half]'
+          if j >= (i + 8) and text[i, 8] == '\n[half]'
             @text_buffer << [text[p..i-1], '\n[half]'].join('')
-            p = i = i + 8
+            p = i = (i + 8)
           else
             if i == 0
               @text_buffer << ""
             else
               @text_buffer << text[p..i-1]
             end
-            p = i = i + 2
+            p = i = (i + 2)
           end
           draw_last_line(:column => column)
           column = 0
           next
         end
-        n = i + 1
+        n = (i + 1)
         if not @__shown
           show()
         end
@@ -1475,11 +1475,11 @@ module Balloon
         line = 0
         offset = 0
       else
-        line = @text_buffer.length - 1
+        line = (@text_buffer.length - 1)
         offset = @text_buffer[-1].length
       end
       if @newline_required
-        line = line + 1
+        line = (line + 1)
         offset = 0
       end
       @sstp_marker << [line, offset]
@@ -1487,7 +1487,7 @@ module Balloon
       h = @sstp_surface.height
       i = 1
       while true
-        space = "\u3000" * i # XXX
+        space = ("\u3000" * i) # XXX
         @layout.set_text(space)
         text_w, text_h = @layout.pixel_size
         if text_w > w
@@ -1505,7 +1505,7 @@ module Balloon
         sl = 0
         sn = 0
       else
-        sl = @text_buffer.length - 1
+        sl = (@text_buffer.length - 1)
         sn = @text_buffer[-1].length
       end
       @link_buffer << [sl, sn, sl, sn, link_id, '', '']
@@ -1520,7 +1520,7 @@ module Balloon
         el = 0
         en = 0
       else
-        el = @text_buffer.length - 1
+        el = (@text_buffer.length - 1)
         en = @text_buffer[-1].length
       end
       for i in 0..@link_buffer.length-1
@@ -1542,7 +1542,7 @@ module Balloon
         sl = 0
         sn = 0
       else
-        sl = @text_buffer.length - 1
+        sl = (@text_buffer.length - 1)
         sn = @text_buffer[-1].length
       end
       @meta_buffer << [sl, sn, tag]
@@ -1563,11 +1563,11 @@ module Balloon
       if not @__shown
         return
       end
-      line = @text_buffer.length - 1
-      if @lineno <= line and line < @lineno + @lines
+      line = (@text_buffer.length - 1)
+      if @lineno <= line and line < (@lineno + @lines)
         x, y, w, h = @line_regions[line - @lineno]
         if @text_buffer[line].end_with?('\n[half]')
-          offset = line - @lineno + 1
+          offset = (line - @lineno + 1)
           new_y = (y + (@font_height + @line_space) / 2).to_i
           update_line_regions(offset, new_y)
         else
@@ -1580,9 +1580,9 @@ module Balloon
               mh = @sstp_surface.height
               @layout.set_text(@text_buffer[l][0, c])
               text_w, text_h = @layout.pixel_size
-              mx = x + text_w
-              my = y + (@font_height + @line_space) / 2
-              my = my - mh / 2
+              mx = (x + text_w)
+              my = (y + (@font_height + @line_space) / 2)
+              my = (my - mh / 2)
               cr = @darea.get_window().cairo_create()
               cr.set_source(@sstp_surface, mx, my)
               cr.paint()
@@ -1592,7 +1592,7 @@ module Balloon
       else
         @darea.queue_draw()
         if @autoscroll
-          while line >= @lineno + @lines
+          while line >= (@lineno + @lines)
             @lineno += 1
             @darea.queue_draw()
           end

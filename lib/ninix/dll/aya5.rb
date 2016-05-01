@@ -32,7 +32,7 @@ module Aya5
     c = char[0].ord
     j = 0
     while j < 3
-      msb = c & 0x80
+      msb = (c & 0x80)
       c <<= 1
       c &= 0xff
       if msb != 0
@@ -51,7 +51,7 @@ module Aya5
     c ^= 0xd2
     j = 0
     while j < 3
-      lsb = c & 0x01
+      lsb = (c & 0x01)
       c >>= 1
       if lsb != 0
         c |= 0x80
@@ -806,7 +806,7 @@ module Aya5
               next_line != 'else'
               break
             end
-            i = i + 1
+            i = (i + 1)
           end
           if not inner_blocks.empty?
             result << [TYPE_IF, inner_blocks]
@@ -935,7 +935,7 @@ module Aya5
         end
         nest = tokens[position..pos_new-1].count(token_open) - tokens[position..pos_new-1].count(token_close) # - 1
         if nest > 0
-          current = pos_new + 1
+          current = (pos_new + 1)
         else
           current = pos_new
           break
@@ -1235,7 +1235,7 @@ module Aya5
               end
             end
             if ope_index != nil
-              ope_index = -1 - ope_index
+              ope_index = (-1 - ope_index)
             end
           ensure
             statement_tokens.reverse!
@@ -1290,7 +1290,7 @@ module Aya5
           end
         end
         if ope_index != nil
-          ope_index = -1 - ope_index
+          ope_index = (-1 - ope_index)
         end
       ensure
         condition_tokens.reverse!
@@ -1543,7 +1543,7 @@ module Aya5
             if is_inner_block != 0
               if index_to_return < 0
                 result << alternatives.sample
-              elsif index_to_return <= alternatives.length - 1
+              elsif index_to_return <= (alternatives.length - 1)
                 result << alternatives[index_to_return]
               else # out of range
                 result << ''
@@ -1881,12 +1881,12 @@ module Aya5
           end
           if @sequential[0] != list_
             @sequential[0] = list_
-            @sequential[1] = [0] * result.length
+            @sequential[1] = ([0] * result.length)
           else
             for index in 0..result.length-1
               current = @sequential[1][index]
               if current < result[index].length - 1
-                @sequential[1][index] = current + 1
+                @sequential[1][index] = (current + 1)
                 break
               else
                 @sequential[1][index] = 0
@@ -2335,11 +2335,11 @@ module Aya5
           end
           startpoint = pos
         end
-        if pos == line.length - 1 # XXX
+        if pos == (line.length - 1) # XXX
           break
         end
         if line[pos + 1] == '('
-          start_ = pos + 2
+          start_ = (pos + 2)
           nest = 0
           current_ = start_
           while line[current_..-1].count(')') > 0
@@ -2349,7 +2349,7 @@ module Aya5
             end
             nest = line[start_..close_-1].count('(') - line[start_..close_-1].count(')')
             if nest > 0
-              current_ = close_ + 1
+              current_ = (close_ + 1)
             else
               current_ = close_
               break
@@ -2358,7 +2358,7 @@ module Aya5
           lines_ = parse([line[start_..current_-1]])
           result_ = evaluate(namespace, lines_, -1, 1, :is_block => 0, :connect => 1)
           buf = [buf, result_.to_s].join('')
-          startpoint = current_ + 1
+          startpoint = (current_ + 1)
           next
         end
         endpoint = line.length
@@ -2388,11 +2388,11 @@ module Aya5
               buf = [buf, format(history[index])].join('')
             end
           end
-          startpoint = endpoint + 1
+          startpoint = (endpoint + 1)
           next
         end
         replaced = false
-        while endpoint > startpoint + 1
+        while endpoint > (startpoint + 1)
           token = line[startpoint + 1..endpoint-1]
           func = @dic.get_function(token)
           is_system_func = system_functions.exists(token)
@@ -2432,7 +2432,7 @@ module Aya5
               end
               history << result_of_func
               buf = [buf, format(result_of_func)].join('')
-              startpoint = end_of_parenthesis + 1
+              startpoint = (end_of_parenthesis + 1)
               replaced = true
               break
             elsif func != nil
@@ -2491,7 +2491,7 @@ module Aya5
                 buf = [buf,
                        format(content_of_var)].join('')
                 if have_index
-                  startpoint = end_of_block + 1
+                  startpoint = (end_of_block + 1)
                 else
                   startpoint = endpoint
                 end
@@ -2982,7 +2982,7 @@ module Aya5
           result = [result, "\\"].join('')
         end
         result = [result, filelist[index]].join('')
-        if index != filelist.length - 1
+        if index != (filelist.length - 1)
           result = [result, separator].join('')
         end
       end
@@ -3189,7 +3189,7 @@ module Aya5
     end
 
     def GETTICKCOUNT(namespace, argv)
-      past = Time.now - @aya.get_boot_time()
+      past = (Time.now - @aya.get_boot_time())
       return (past * 1000.0).to_i
     end
 
@@ -3615,7 +3615,7 @@ module Aya5
       end
       line = ''
       while i != 0
-        mod = i % 2
+        mod = (i % 2)
         i = (i / 2).to_i
         line = [mod.to_s, line].join('')
       end
@@ -3914,8 +3914,8 @@ module Aya5
           end
           i = position
           @tokens << line[token_startpoint..position]
-          token_startpoint = position + 1
-          i = position + 1
+          token_startpoint = (position + 1)
+          i = (position + 1)
         elsif c == "'"
           position = line.index("'", i + 1)
           if position == nil or position < 0 ## FIXME
@@ -3924,7 +3924,7 @@ module Aya5
           i = position
           @tokens << line[token_startpoint..position]
           token_startpoint = position + 1
-          i = position + 1
+          i = (position + 1)
         elsif c == ' ' or c == '\t' or c == '　'
           if i != 0
             append_unless_empty(line[token_startpoint..i-1].strip())
@@ -4037,7 +4037,7 @@ module Aya5
           @is_empty = true
         else
           token = @line[@position..separator_position-1]
-          @position = separator_position + @separator.length
+          @position = (separator_position + @separator.length)
         end
         @array << token
       end
@@ -4120,7 +4120,7 @@ module Aya5
             else
               @line = [@line, @array[i]].join('')
             end
-            if i != @array.length-1
+            if i != (@array.length - 1)
               @line = [@line, @separator].join('')
             end
           end
@@ -4163,11 +4163,11 @@ module Aya5
     def dump
       line = nil
       if @type == TYPE_STRING
-        line = @name.to_s + ', "' + @line.to_s + '", "' + @separator.to_s + '"'
+        line = (@name.to_s + ', "' + @line.to_s + '", "' + @separator.to_s + '"')
       elsif @type == TYPE_NEW_ARRAY
         #pass ## FIXME
       elsif @type != TYPE_ARRAY
-        line = @name.to_s + ', ' + @line.to_s
+        line = (@name.to_s + ', ' + @line.to_s)
       else
         #pass
       end

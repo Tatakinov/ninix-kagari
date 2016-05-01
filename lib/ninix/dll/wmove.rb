@@ -130,11 +130,11 @@ module Wmove
           begin
             x, y = @__sakura.get_surface_position(side)
             w, h = @__sakura.get_surface_size(side)
-            result = "SAORI/1.0 200 OK\r\n" \
-                     + "Result: " + x.to_s + "\r\n" \
-                     + "Value0: " + x.to_s + "\r\n" \
-                     + "Value1: " + (x + (w / 2).to_i).to_s + "\r\n" \
-                     + "Value2: " + (x + w).to_s + "\r\n\r\n"
+            result = ("SAORI/1.0 200 OK\r\n" \
+                      + "Result: " + x.to_s + "\r\n" \
+                      + "Value0: " + x.to_s + "\r\n" \
+                      + "Value1: " + (x + (w / 2).to_i).to_s + "\r\n" \
+                      + "Value2: " + (x + w).to_s + "\r\n\r\n")
             result = result.encode('ascii', :invalid => :replace, :undef => :replace)
           rescue
             result = RESPONSE[500]
@@ -142,10 +142,10 @@ module Wmove
         elsif name == 'GET_DESKTOP_SIZE'
           begin
             left, top, scrn_w, scrn_h = @__sakura.get_workarea(0) # XXX
-            result = "SAORI/1.0 200 OK\r\n" \
-                     + "Result: " + scrn_w.to_s + "\r\n" \
-                     + "Value0: " + scrn_w.to_s + "\r\n" \
-                     + "Value1: " + scrn_h.to_s + "\r\n\r\n"
+            result = ("SAORI/1.0 200 OK\r\n" \
+                      + "Result: " + scrn_w.to_s + "\r\n" \
+                      + "Value0: " + scrn_w.to_s + "\r\n" \
+                      + "Value1: " + scrn_h.to_s + "\r\n\r\n")
             result = result.encode('ascii', :invalid => :replace, :undef => :replace)
           rescue
             result = RESPONSE[500]
@@ -226,7 +226,7 @@ module Wmove
               if to < 0
                 to = 0
               elsif to > left + scrn_w - w
-                to = left + scrn_w - w
+                to = (left + scrn_w - w)
               end
             end
             if (to - x).abs > speed

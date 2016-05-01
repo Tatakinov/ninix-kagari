@@ -102,7 +102,7 @@ module SSTPLib
       if not parse_request(line)
         return
       end
-      name = "do_" + @command.to_s + "_" + @version[0] + "_" + @version[2]
+      name = ("do_" + @command.to_s + "_" + @version[0] + "_" + @version[2])
       begin
         method(name).call()
       rescue

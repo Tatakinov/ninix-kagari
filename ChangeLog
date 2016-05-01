@@ -1,3 +1,8 @@
+Sun May 1 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* 文4互換モジュールを修正した.
+	* 代入文などが演算子の優先順位に依存しないように括弧を付与した.
+	  (実際に一部の式が意図と違う動作になっていたのを修正.)
+
 Fri April 29 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* SakuraScriptの処理を修正した.
 

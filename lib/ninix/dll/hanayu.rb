@@ -111,7 +111,7 @@ module Hanayu
       year = base.year
       month = base.month
       day = base.day
-      target_time = Time.new(year, month, day, 0, 0, 0) + offset * 24 *60 * 60
+      target_time = (Time.new(year, month, day, 0, 0, 0) + offset * 24 *60 * 60)
       year = target_time.year
       month = target_time.month
       day = target_time.day
@@ -171,10 +171,10 @@ module Hanayu
           if @seven_days[j][0] == key
             @seven_days[j][4] = old_seven_days[i][4]
             if j == 6
-              @seven_days[j][4] = @seven_days[j][4] + \
-                                  (current_time - \
-                                   @last_update) / \
-                                  (60.0 * 60.0)
+              @seven_days[j][4] = (@seven_days[j][4] + \
+                                   (current_time - \
+                                    @last_update) / \
+                                   (60.0 * 60.0))
             end
           end
         end
@@ -291,8 +291,8 @@ module Hanayu
       left, top = 0, 0 # XXX
       scrn_w = scrn.width - left
       scrn_h = scrn.height - top
-      @x = left + (scrn_w / 2).to_i
-      @y = top + (scrn_h / 4).to_i
+      @x = (left + (scrn_w / 2).to_i)
+      @y = (top + (scrn_h / 4).to_i)
       @window.move(@x, @y)
       @darea = Gtk::DrawingArea.new
       @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
@@ -457,7 +457,7 @@ module Hanayu
       for index_ in 0..num-1
         @layout.set_text(@args[index_ * 2])
         w, h = @layout.pixel_size
-        pos_x = 60 + index_ * step + (step / 2).to_i - (w / 2).to_i
+        pos_x = (60 + index_ * step + (step / 2).to_i - (w / 2).to_i)
         pos_y = 268
         cr.move_to(pos_x, pos_y)
         cr.show_pango_layout(@layout)
@@ -489,11 +489,11 @@ module Hanayu
       cr.set_line_width(line_width)
       cr.set_source_rgb(*get_color('line'))
       for index_ in 1..num-1
-        src_x = 60 + (index_ - 1) * step + (step / 2).to_i
-        src_y = 220 - (
-          168 * @args[(index_ - 1) * 2 + 1] / (limit_max - limit_min)).to_i
-        dst_x = 60 + index_ * step + (step / 2).to_i
-        dst_y = 220 - (168 * @args[index_ * 2 + 1] / (limit_max - limit_min)).to_i
+        src_x = (60 + (index_ - 1) * step + (step / 2).to_i)
+        src_y = (220 - (
+          168 * @args[(index_ - 1) * 2 + 1] / (limit_max - limit_min)).to_i)
+        dst_x = (60 + index_ * step + (step / 2).to_i)
+        dst_y = (220 - (168 * @args[index_ * 2 + 1] / (limit_max - limit_min)).to_i)
         cr.move_to(src_x, src_y)
         cr.line_to(dst_x, dst_y)
         cr.stroke()
@@ -536,9 +536,9 @@ module Hanayu
         if surface != nil
           w = surface.width
           h = surface.height
-          x = 60 + index_ * step + (step / 2).to_i - (w / 2).to_i
-          y = 220 - (
-            168 * @args[index_ * 2 + 1] / (limit_max - limit_min)).to_i - (h / 2).to_i
+          x = (60 + index_ * step + (step / 2).to_i - (w / 2).to_i)
+          y = (220 - (
+            168 * @args[index_ * 2 + 1] / (limit_max - limit_min)).to_i - (h / 2).to_i)
           cr.set_source(surface, x, y)
           cr.paint()
         end
@@ -591,8 +591,8 @@ module Hanayu
       cr.set_source_rgb(*get_color('frame'))
       num = (@args.length / 2).to_i
       for index_ in 0..num-1
-        x = 146 + (Math.cos(Math::PI * (0.5 - 2.0 * index_ / num)) * 114).to_i
-        y = 146 - (Math.sin(Math::PI * (0.5 - 2.0 * index_ / num)) * 114).to_i
+        x = (146 + (Math.cos(Math::PI * (0.5 - 2.0 * index_ / num)) * 114).to_i)
+        y = (146 - (Math.sin(Math::PI * (0.5 - 2.0 * index_ / num)) * 114).to_i)
         cr.move_to(146, 146,)
         cr.line_to(x, y)
         cr.stroke()
@@ -631,25 +631,25 @@ module Hanayu
       cr.set_line_width(line_width)
       cr.set_source_rgb(*get_color('line'))
       if limit_max > 0
-        value = @args[(num - 1) * 2 + 1] / limit_max
+        value = (@args[(num - 1) * 2 + 1] / limit_max)
       else
         value = 1.0
       end
-      src_x = 146 + (Math.cos(
-                      Math::PI * (0.5 - 2.0 * (num - 1) / num)) * value * 100).to_i
-      src_y = 146 - (Math.sin(
-                      Math::PI * (0.5 - 2.0 * (num - 1) / num)) * value * 100).to_i
+      src_x = (146 + (Math.cos(
+                       Math::PI * (0.5 - 2.0 * (num - 1) / num)) * value * 100).to_i)
+      src_y = (146 - (Math.sin(
+                       Math::PI * (0.5 - 2.0 * (num - 1) / num)) * value * 100).to_i)
       cr.move_to(src_x, src_y)
       for index_ in 0..num-1
         if limit_max > 0
-          value = @args[index_ * 2 + 1] / limit_max
+          value = (@args[index_ * 2 + 1] / limit_max)
         else
           value = 1.0
         end
-        dst_x = 146 + (
-          Math.cos(Math::PI * (0.5 - 2.0 * index_ / num)) * value * 100).to_i
-        dst_y = 146 - (
-          Math.sin(Math::PI * (0.5 - 2.0 * index_ / num)) * value * 100).to_i
+        dst_x = (146 + (
+          Math.cos(Math::PI * (0.5 - 2.0 * index_ / num)) * value * 100).to_i)
+        dst_y = (146 - (
+          Math.sin(Math::PI * (0.5 - 2.0 * index_ / num)) * value * 100).to_i)
         cr.line_to(dst_x, dst_y)
       end
       cr.stroke()
@@ -659,15 +659,15 @@ module Hanayu
       cr.set_source_rgb(*get_color('font'))
       for index_ in 0..num-1
         ##if limit_max > 0
-        ##  value = @args[index_ * 2 + 1] / limit_max
+        ##  value = (@args[index_ * 2 + 1] / limit_max)
         ##else
         ##  value = 1.0
         ##end
         value = 1.2 # XXX
-        x = 146 + (Math.cos(
-                    Math::PI * (0.5 - 2.0 * index_ / num)) * value * 100).to_i
-        y = 146 - (Math.sin(
-                    Math::PI * (0.5 - 2.0 * index_ / num)) * value * 100).to_i
+        x = (146 + (Math.cos(
+                    Math::PI * (0.5 - 2.0 * index_ / num)) * value * 100).to_i)
+        y = (146 - (Math.sin(
+                    Math::PI * (0.5 - 2.0 * index_ / num)) * value * 100).to_i)
         @layout.set_text(@args[index_ * 2])
         w, h = @layout.pixel_size
         x -= (w / 2).to_i

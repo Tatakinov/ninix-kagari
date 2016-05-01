@@ -28,7 +28,7 @@ module Aya
     c = char[0].ord
     j = 0
     while j < 3
-      msb = c & 0x80
+      msb = (c & 0x80)
       c <<= 1
       c &= 0xff
       if msb != 0
@@ -47,7 +47,7 @@ module Aya
     c ^= 0xd2
     j = 0
     while j < 3
-      lsb = c & 0x01
+      lsb = (c & 0x01)
       c >>= 1
       if lsb != 0
         c |= 0x80
@@ -88,7 +88,7 @@ module Aya
       position = line.index('"', position)
       if position != nil and 0 <= position and position < pos_new
         position += 1
-        while position < line.length - 1
+        while position < (line.length - 1)
           if line[position] == '"'
             position += 1
             break
@@ -553,9 +553,9 @@ module Aya
       end
       reset_request()
       if @ver_3 # Ver.3
-        result = "SHIORI/3.0 200 OK\r\n" \
-                 "Sender: AYA\r\n" \
-                 "Value: " + result.to_s + "\r\n\r\n".encode('CP932', :invalid => :replace, :undef => :replace)
+        result = ("SHIORI/3.0 200 OK\r\n" \
+                  "Sender: AYA\r\n" \
+                  "Value: " + result.to_s + "\r\n\r\n".encode('CP932', :invalid => :replace, :undef => :replace))
         return result
       else
         return result.encode('CP932', :invalid => :replace, :undef => :replace)
@@ -1197,7 +1197,7 @@ module Aya
               next_line != 'else'
               break
             end
-            i = i + 1
+            i = (i + 1)
           end
           if not inner_blocks.empty?
             result << [TYPE_IF, inner_blocks]
@@ -1433,7 +1433,7 @@ module Aya
               end
             end
             if ope_index != nil
-              ope_index = -1 - ope_index
+              ope_index = (-1 - ope_index)
             end
           ensure
             statement_tokens.reverse!
@@ -1504,7 +1504,7 @@ module Aya
           end
         end
         if ope_index != nil
-          ope_index = -1 - ope_index
+          ope_index = (-1 - ope_index)
         end
       ensure
         condition_tokens.reverse!
@@ -1735,7 +1735,7 @@ module Aya
             if is_inner_block != 0
               if index_to_return < 0
                 result << alternatives.sample
-              elsif index_to_return <= alternatives.length - 1
+              elsif index_to_return <= (alternatives.length - 1)
                 result << alternatives[index_to_return]
               else # out of range
                 result << ''
@@ -1763,7 +1763,7 @@ module Aya
           local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
           result_of_inner_func = evaluate(local_namespace,
                                           inner_func, -1, 1)
-          if result_of_inner_func != nil and not result_of_inner_func.empty?
+          if result_of_inner_func != nil
             alternatives << result_of_inner_func
           end
         elsif line[0] == TYPE_SUBSTITUTION
@@ -1842,7 +1842,9 @@ module Aya
               result_of_inner_block = evaluate(local_namespace,
                                                inner_block,
                                                -1, 1)
-              if result_of_inner_block != nil and not result_of_inner_block.empty?
+              if not result_of_inner_block.nil? and
+                not [0, false].include?(result_of_inner_block) and
+                not result_of_inner_block.empty?
                 alternatives << result_of_inner_block
               end
               break
@@ -1856,7 +1858,7 @@ module Aya
             local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1)
-            if result_of_inner_block != nil and not result_of_inner_block.empty?
+            if result_of_inner_block != nil
               alternatives << result_of_inner_block
             end
             if @status == CODE_RETURN
@@ -1881,7 +1883,7 @@ module Aya
             local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
             result_of_inner_block = evaluate(local_namespace,
                                              inner_block, -1, 1)
-            if result_of_inner_block != nil and not result_of_inner_block.empty?
+            if result_of_inner_block != nil
               alternatives << result_of_inner_block
             end
             if @status == CODE_RETURN
@@ -1907,7 +1909,9 @@ module Aya
           local_namespace = AyaNamespace.new(@dic.aya, :parent => namespace)
           result_of_inner_block = evaluate(local_namespace,
                                            inner_block, index, 1)
-          if result_of_inner_block != nil and not result_of_inner_block.empty?
+          if not result_of_inner_block.nil? and
+            not [0, false].include?(result_of_inner_block) and
+            not result_of_inner_block.empty?
             alternatives << result_of_inner_block
           end
         elsif line[0] == TYPE_CASE
@@ -1927,7 +1931,9 @@ module Aya
               if value_min <= left and left <= value_max
                 result_of_inner_block = evaluate(
                   local_namespace, inner_block, -1, 1)
-                if result_of_inner_block != nil and not result_of_inner_block.empty?
+                if not result_of_inner_block.nil? and
+                  not [0, false].include?(result_of_inner_block) and
+                  not result_of_inner_block.empty?
                   alternatives << result_of_inner_block
                   break_flag = true
                   break
@@ -1945,12 +1951,16 @@ module Aya
           end
         elsif line[0] == TYPE_STATEMENT
           result_of_func = evaluate_statement(namespace, line, 0)
-          if result_of_func != nil and not result_of_func.empty?
+          if not result_of_func.nil? and
+            not [0, false].include?(result_of_func) and
+            not result_of_func.empty?
             alternatives << result_of_func
           end
         else
           result_of_eval = evaluate_token(namespace, line)
-          if result_of_eval != nil and not result_of_eval.empty?
+          if not result_of_eval.nil? and
+            not [0, false].include?(result_of_eval) and
+            not result_of_eval.empty?
             alternatives << result_of_eval
           end
         end
@@ -1963,12 +1973,12 @@ module Aya
           end
           if @sequential[0] != list_
             @sequential[0] = list_
-            @sequential[1] = [0] * result.length
+            @sequential[1] = ([0] * result.length)
           else
             for index in 0..result.length-1
               current = @sequential[1][index]
               if current < result[index].length - 1
-                @sequential[1][index] = current + 1
+                @sequential[1][index] = (current + 1)
                 break
               else
                 @sequential[1][index] = 0
@@ -2262,29 +2272,29 @@ module Aya
           left_result = left_result.to_f
           right_result = right_result.to_f
         end
-        result = left_result < right_result
+        result = (left_result < right_result)
       elsif ope[1] == '>'
         if right_result.is_a?(String) != left_result.is_a?(String)
           left_result = left_result.to_f
           right_result = right_result.to_f
         end
-        result = left_result > right_result
+        result = (left_result > right_result)
       elsif ope[1] == '<='
         if right_result.is_a?(String) != left_result.is_a?(String)
           left_result = left_result.to_f
           right_result = right_result.to_f
         end
-        result = left_result <= right_result
+        result = (left_result <= right_result)
       elsif ope[1] == '>='
         if right_result.is_a?(String) != left_result.is_a?(String)
           left_result = left_result.to_f
           right_result = right_result.to_f
         end
-        result = left_result >= right_result
+        result = (left_result >= right_result)
       elsif ope[1] == '||'
-        result = left_result or right_result
+        result = (left_result or right_result)
       elsif ope[1] == '&&'
-        result = left_result and right_result
+        result = (left_result and right_result)
       else
         #pass
       end
@@ -2452,11 +2462,11 @@ module Aya
               buf = [buf, format(history[index])].join('')
             end
           end
-          startpoint = endpoint + 1
+          startpoint = (endpoint + 1)
           next
         end
         replaced = false
-        while endpoint > startpoint + 1
+        while endpoint > (startpoint + 1)
           token = line[startpoint + 1..endpoint-1]
           if token == 'random' or token == 'ascii' # Ver.3
             if endpoint < line.length and \
@@ -2478,7 +2488,7 @@ module Aya
               end
               history << content_of_var
               buf = [buf, format(content_of_var)].join('')
-              startpoint = end_of_block + 1
+              startpoint = (end_of_block + 1)
               replaced = true
               break
             end
@@ -2524,12 +2534,12 @@ module Aya
               else
                 result_of_func = func.call(:argv => arguments)
               end
-              if result_of_func == nil
+              if result_of_func.nil?
                 result_of_func = ''
               end
               history << result_of_func
               buf = [buf, format(result_of_func)].join('')
-              startpoint = end_of_parenthesis + 1
+              startpoint = (end_of_parenthesis + 1)
               replaced = true
               break
             elsif func != nil
@@ -2542,7 +2552,7 @@ module Aya
             else
               result_of_func = system_functions.call(
                 namespace, token, [])
-              if result_of_func == nil
+              if result_of_func.nil?
                 result_of_func = ''
               end
               history << result_of_func
@@ -2588,7 +2598,7 @@ module Aya
                 buf = [buf,
                        format(content_of_var)].join('')
                 if have_index
-                  startpoint = end_of_block + 1
+                  startpoint = (end_of_block + 1)
                 else
                   startpoint = endpoint
                 end
@@ -2805,7 +2815,7 @@ module Aya
         if line == nil or line == ''
           value = 0
         elsif line.start_with?('"') and line.end_with?('"')
-          value = line.count(',') + 1
+          value = (line.count(',') + 1)
         else
           target_namespace = select_namespace(namespace, line)
           value = target_namespace.get_size(line)
@@ -2969,7 +2979,7 @@ module Aya
           result = [result, "\\"].join('')
         end
         result = [result, filelist[index]].join('')
-        if index != filelist.length - 1
+        if index != (filelist.length - 1)
           result = [result, separator].join('')
         end
       end
@@ -3622,7 +3632,7 @@ module Aya
       end
       line = ''
       while i != 0
-        mod = i % 2
+        mod = (i % 2)
         i = (i / 2).to_i
         line = [mod.to_s, line].join('')
       end
@@ -3834,9 +3844,9 @@ module Aya
       elsif name == 'systemuphour'
         result = (past / 60.0 / 60.0).to_i
       elsif name == 'systemupminute'
-        result = (past / 60.0).to_i % 60
+        result = ((past / 60.0).to_i % 60)
       elsif name == 'systemupsecond'
-        result = past.to_i % 60
+        result = (past.to_i % 60)
       elsif ['memoryload', 'memorytotalphys', 'memoryavailphys',
              'memorytotalvirtual', 'memoryavailvirtual'].include?(name)
         result = 0 # FIXME
@@ -3958,7 +3968,7 @@ module Aya
             end
           end
           position = i
-          while position < length - 1
+          while position < (length - 1)
             position += 1
             if line[position] == '"'
               break
@@ -3967,7 +3977,7 @@ module Aya
           i = position
           if block_nest_level == 0
             @tokens << line[token_startpoint..position]
-            token_startpoint = position + 1
+            token_startpoint = (position + 1)
           end
           i += 1
         elsif block_nest_level == 0 and (c == ' ' or c == "\t")
@@ -4142,7 +4152,7 @@ module Aya
             else
               @line = [@line, @array[i]].join('')
             end
-            if i != @array.length-1
+            if i != (@array.length - 1)
               @line = [@line, @separator].join('')
             end
           end
@@ -4171,9 +4181,9 @@ module Aya
     def dump
       line = nil
       if @type == TYPE_STRING
-        line = @name.to_s + ', "' + @line.to_s + '", "' + @separator.to_s + '"'
+        line = (@name.to_s + ', "' + @line.to_s + '", "' + @separator.to_s + '"')
       elsif @type != TYPE_ARRAY
-        line = @name.to_s + ', ' + @line.to_s
+        line = (@name.to_s + ', ' + @line.to_s)
       else
         #pass
       end
@@ -4219,7 +4229,7 @@ module Aya
           if not locked
             return position
           end
-          while position < @length-1
+          while position < (@length - 1)
             position += 1
             if @line[position] == '"'
               break

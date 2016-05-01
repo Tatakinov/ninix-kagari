@@ -399,8 +399,8 @@ module Kinoko
               [1, 1], [0, 0], [1, 0], [0.5, 0.5]][@data['baseadjust']]
       offsetx = (@data['offsetx'] * @__scale / 100).to_i
       offsety = (@data['offsety'] * @__scale / 100).to_i
-      @x = base_x - (@w * a).to_i + offsetx + xoffset
-      @y = base_y - (@h * b).to_i + offsety + yoffset
+      @x = (base_x - (@w * a).to_i + offsetx + xoffset)
+      @y = (base_y - (@h * b).to_i + offsety + yoffset)
       @window.move(@x, @y)
     end
 

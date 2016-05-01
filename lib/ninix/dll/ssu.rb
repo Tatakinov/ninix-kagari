@@ -83,7 +83,7 @@ module Ssu
       @value = []
       result = method(@function[name][0]).call(args)
       if result != nil and not result.to_s.empty?
-        s = "SAORI/1.0 200 OK\r\nResult: " + result.to_s + "\r\n"
+        s = ("SAORI/1.0 200 OK\r\nResult: " + result.to_s + "\r\n")
         if not @value.empty?
           for i in 0..@value.length-1
             s = [s, "Value" + i.to_s + ": " + @value[i].to_s + "\r\n"].join("")
@@ -147,7 +147,7 @@ module Ssu
       if args.length == 2
         end_ = s.length
       elsif args.length == 3 and ssu_is_digit([args[2]]) == 1
-        end_ = start + ssu_zen2han([args[2]]).to_i
+        end_ = (start + ssu_zen2han([args[2]]).to_i)
       else
         return ''
       end
@@ -206,17 +206,17 @@ module Ssu
       end
       result = false
       if ['>', '＞'].include?(ope)
-        result = left > right
+        result = (left > right)
       elsif ['>=', '＞＝'].include?(ope)
-        result = left >= right
+        result = (left >= right)
       elsif ['<', '＜'].include?(ope)
-        result = left < right
+        result = (left < right)
       elsif ['<=', '＜＝'].include?(ope)
-        result = left <= right
+        result = (left <= right)
       elsif ['==', '＝＝'].include?(ope)
-        result = left == right
+        result = (left == right)
       elsif ['!=', '！＝'].include?(ope)
-        result = left != right
+        result = (left != right)
       else
         #pass # 'should not reach here'
       end

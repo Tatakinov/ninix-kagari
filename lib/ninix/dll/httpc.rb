@@ -76,7 +76,7 @@ module Httpc
           if ne == nil
             break
           end
-          nc = ne + le
+          nc = (ne + le)
           result << data[ns..ne-1]
         end
       else

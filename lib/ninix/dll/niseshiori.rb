@@ -227,14 +227,14 @@ module Niseshiori
               keylist = [[nil, cat], [cattype, cat]]
             end
             for key in keylist
-              value = @dict.include?(key) ? @dict[key] : []
+              value = (@dict.include?(key) ? @dict[key] : [])
               value.concat(words)
               @dict[key] = value
             end
           end
           if cattype != nil
             key = ['\\', cattype].join('')
-            value = @dict.include?(key) ? @dict[key] : []
+            value = (@dict.include?(key) ? @dict[key] : [])
             value.concat(words)
             @dict[key] = value
           end
@@ -268,7 +268,7 @@ module Niseshiori
             next
           end
           if c != nil
-            ch_list = @type_chains.include?(t1) ? @type_chains[t1] : []
+            ch_list = (@type_chains.include?(t1) ? @type_chains[t1] : [])
             ch_list << [c, w1]
             @type_chains[t1] = ch_list
           end
@@ -280,34 +280,34 @@ module Niseshiori
             next
           end
           if c != nil
-            ch_list = @type_chains.include?(t2) ? @type_chains[t2] : []
+            ch_list = (@type_chains.include?(t2) ? @type_chains[t2] : [])
             ch_list << [c, w2]
             @type_chains[t2] = ch_list
           end
           m1 = ['%', t1[1..-1]].join('')
           m2 = ['%', t2[1..-1]].join('')
           key = [m1, w1]
-          dic = @word_chains.include?(key) ? @word_chains[key] : {}
-          ch_list = dic.include?(m2) ? dic[m2] : []
+          dic = (@word_chains.include?(key) ? @word_chains[key] : {})
+          ch_list = (dic.include?(m2) ? dic[m2] : [])
           if not ch_list.include?([c, w2])
             ch_list << [c, w2]
             dic[m2] = ch_list
             @word_chains[key] = dic
           end
           key = [m2, w2]
-          dic = @word_chains.include?(key) ? @word_chains[key] : {}
-          ch_list = dic.include?(m1) ? dic[m1] : []
+          dic = (@word_chains.include?(key) ? @word_chains[key] : {})
+          ch_list = (dic.include?(m1) ? dic[m1] : [])
           if not ch_list.include?([c, w1])
             ch_list << [c, w1]
             dic[m1] = ch_list
             @word_chains[key] = dic
           end
-          ch_list = @dict.include?(t1) ? @dict[t1] : []
+          ch_list = (@dict.include?(t1) ? @dict[t1] : [])
           if not ch_list.include?(w1)
             ch_list << w1
             @dict[t1] = ch_list
           end
-          ch_list = @dict.include?(t2) ? @dict[t2] : []
+          ch_list = (@dict.include?(t2) ? @dict[t2] : [])
           if not ch_list.include?(w2)
             ch_list << w2
             @dict[t2] = ch_list
@@ -315,11 +315,11 @@ module Niseshiori
         elsif Re_type.match(command) != nil or Re_user.match(command) != nil
           words = split(argv).map {|s| s.strip if not s.strip.empty? }
           words.delete(nil)
-          value = @dict.include?(command) ? @dict[command] : []
+          value = (@dict.include?(command) ? @dict[command] : [])
           value.concat(words)
           @dict[command] = value
         elsif ['\dms', '\e'].include?(command)
-          value = @dict.include?(command) ? @dict[command] : []
+          value = (@dict.include?(command) ? @dict[command] : [])
           value << argv
           @dict[command] = value
         elsif command == '\ft'
@@ -338,14 +338,14 @@ module Niseshiori
           argv = split(argv, :maxcount => 1).map {|s| s.strip }
           if argv.length == 2
             cond = parse_condition(argv[0])
-            re_list = @responses.include?(cond) ? @responses[cond] : []
+            re_list = (@responses.include?(cond) ? @responses[cond] : [])
             re_list << argv[1]
             @responses[cond] = re_list
           end
         elsif command == '\hl'
           argv = split(argv, :maxcount => 1).map {|s| s.strip }
           if argv.length == 2
-            hl_list = @greetings.include?(argv[0]) ? @greetings[argv[0]] : []
+            hl_list = (@greetings.include?(argv[0]) ? @greetings[argv[0]] : [])
             hl_list << argv[1]
             @greetings[argv[0]] = hl_list
           end
@@ -353,7 +353,7 @@ module Niseshiori
           argv = split(argv, :maxcount => 1).map {|s| s.strip }
           if argv.length == 2
             cond = parse_condition(argv[0])
-            ev_list = @events.include?(cond) ? @events[cond] : []
+            ev_list = (@events.include?(cond) ? @events[cond] : [])
             ev_list << argv[1]
             @events[cond] = ev_list
           end
@@ -363,7 +363,7 @@ module Niseshiori
             if ['sakura.recommendsites',
                 'kero.recommendsites',
                 'sakura.portalsites'].include?(argv[0])
-              id_list = @resources.include?(argv[0]) ? @resources[argv[0]] : ''
+              id_list = (@resources.include?(argv[0]) ? @resources[argv[0]] : '')
               if not id_list.empty?
                 id_list = [id_list, "\2"].join('')
               end
@@ -397,7 +397,7 @@ module Niseshiori
             count += 1
           end
         end
-        end_ = pos = pos + 1
+        end_ = pos = (pos + 1)
       end
       buf << line[end_..-1]
       return buf.map {|s| s.gsub('\\,', ',') }
@@ -713,7 +713,7 @@ module Niseshiori
             elsif num == 3
               @ai_talk_interval = 60
             else
-              @ai_talk_interval = min(max(num, 4), 999)
+              @ai_talk_interval = [[num, 4].max, 999].min
             end
             save_database()
             @ai_talk_count = 0
@@ -853,7 +853,7 @@ module Niseshiori
       end
       if choices == nil or choices.empty?
         if key.is_a?(Array)
-          key = '(' + key[0].to_s + ', ' + key[1..-1].to_s + ')'
+          key = ('(' + key[0].to_s + ', ' + key[1..-1].to_s + ')')
         end
         Logging::Logging.debug(key.to_s + ' not found')
         return default
@@ -862,9 +862,9 @@ module Niseshiori
       t = replace_meta(s)
       if key.is_a?(Array)
         if key[0] == nil
-          key = '\\[' + key[1].to_s + ']'
+          key = ('\\[' + key[1].to_s + ']')
         else
-          key = '\\' + key[0].to_s + '[' + key[1].to_s + ']'
+          key = ('\\' + key[0].to_s + '[' + key[1].to_s + ']')
         end
       end
       Logging::Logging.debug([key, '=>', s].join(''))
@@ -898,9 +898,9 @@ module Niseshiori
       elsif name == '%sakuraname'
         result = '%selfname'
       elsif name == '%username'
-        result = @username or '%username'
+        result = (@username or '%username')
       elsif name.start_with?('%get[') and name.end_with?(']')
-        value = @variables.include?(name[5..-2]) ? @variables[name[5..-2]] : '?'
+        value = (@variables.include?(name[5..-2]) ? @variables[name[5..-2]] : '?')
         begin
           result = Integer(value)
         rescue #except ValueError:
@@ -960,7 +960,7 @@ module Niseshiori
         result = @kasanari.to_s
       elsif name == '%ver' ## FIXME
         if REVISION[1..10] == 'Revision: '
-          result = '偽栞 for ninix (rev.' + REVISION[11..-3] + ')'
+          result = ('偽栞 for ninix (rev.' + REVISION[11..-3] + ')')
         else
           result = '偽栞 for ninix'
         end
@@ -999,9 +999,9 @@ module Niseshiori
         operand = interp_expr(tree[i + 1])
         begin
           if tree[i] == '+'
-            value = Integer(value) + Integer(operand)
+            value = (Integer(value) + Integer(operand))
           elsif tree[i] == '-'
-            value = Integer(value) - Integer(operand)
+            value = (Integer(value) - Integer(operand))
           end
         rescue #except ValueError:
           value = [value, tree[i], operand].join('')
@@ -1016,11 +1016,11 @@ module Niseshiori
         operand = interp_expr(tree[i + 1])
         begin
           if tree[i] == '*'
-            value = Integer(value) * Integer(operand)
+            value = (Integer(value) * Integer(operand))
           elsif tree[i] == '/'
             value = (Integer(value) / Integer(operand)).to_i
           elsif tree[i] == '\\'
-            value = Integer(value) % Integer(operand)
+            value = (Integer(value) % Integer(operand))
           end
         rescue #except (ValueError, ZeroDivisionError):
           value = [value, tree[i], operand].join('')

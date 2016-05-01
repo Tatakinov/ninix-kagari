@@ -39,7 +39,7 @@ module Ninix_Main
   bindtextdomain("ninix-aya")
 
   def self.handleException(exception)
-    message = "Uncaught exception (" + exception.class.to_s + ")\n" + exception.backtrace.join("\n")
+    message = ("Uncaught exception (" + exception.class.to_s + ")\n" + exception.backtrace.join("\n"))
     Logging::Logging.error(message)
     response_id = 1
     dialog = Gtk::MessageDialog.new(
@@ -328,7 +328,7 @@ module Ninix_Main
     def handle_request(event_type, event, *arglist)
       return @parent.handle_request(event_type, event, *arglist)
     end
- 
+
     def create_menuitem(data)
       desc, balloon = data
       subdir = balloon['balloon_dir'][0]
@@ -1711,36 +1711,36 @@ module Ninix_Main
                  time, time_w, time_h]
       end
       w1 = 280
-      w2 = w - w1 - w3 - w4 - 70
+      w2 = (w - w1 - w3 - w4 - 70)
       x = 20
       y = 15
-      x += w1 + 10
+      x += (w1 + 10)
       label = 'name'
       layout.set_text(label)
       label_name_w, label_name_h = layout.pixel_size
       cr.set_source_rgb(0.8, 0.8, 0.8) # gray
       cr.move_to(x, y)
       cr.show_pango_layout(layout)
-      x = x + w2 + 10
+      x = (x + w2 + 10)
       label = 'rate'
       layout.set_text(label)
       label_rate_w, label_rate_h = layout.pixel_size
       cr.set_source_rgb(0.8, 0.8, 0.8) # gray
       cr.move_to(x + w3 - label_rate_w, y)
       cr.show_pango_layout(layout)
-      x += w3 + 10
+      x += (w3 + 10)
       label = 'time'
       layout.set_text(label)
       label_time_w, label_time_h = layout.pixel_size
       cr.set_source_rgb(0.8, 0.8, 0.8) # gray
       cr.move_to(x + w4 - label_time_w, y)
       cr.show_pango_layout(layout)
-      y += [label_name_h, label_rate_h, label_time_h].max + 4
+      y += ([label_name_h, label_rate_h, label_time_h].max + 4)
       for clock, name, name_w, name_h, rate, rate_w, rate_h, time, time_w, \
           time_h in rows
         x = 20
         bw = (clock / total * w1).to_i
-        bh = [name_h, rate_h, time_h].max - 1
+        bh = ([name_h, rate_h, time_h].max - 1)
         cr.set_source_rgb(0.8, 0.8, 0.8) # gray
         cr.rectangle(x + 1, y + 1, bw, bh)
         cr.stroke()
@@ -1750,7 +1750,7 @@ module Ninix_Main
         cr.set_source_rgb(0.0, 0.0, 0.0) # black
         cr.rectangle(x, y, bw, bh)
         cr.stroke()
-        x += w1 + 10
+        x += (w1 + 10)
         layout.set_text(name)
         end_ = name.length
         while end_ > 0
@@ -1765,17 +1765,17 @@ module Ninix_Main
         cr.set_source_rgb(0.0, 0.0, 0.0) # black
         cr.move_to(x, y)
         cr.show_pango_layout(layout)
-        x += w2 + 10
+        x += (w2 + 10)
         layout.set_text(rate)
         cr.set_source_rgb(0.0, 0.0, 0.0) # black
         cr.move_to(x + w3 - rate_w, y)
         cr.show_pango_layout(layout)
-        x += w3 + 10
+        x += (w3 + 10)
         layout.set_text(time)
         cr.set_source_rgb(0.0, 0.0, 0.0) # black
         cr.move_to(x + w4 - time_w, y)
         cr.show_pango_layout(layout)
-        y += [name_h, rate_h, time_h].max + 4
+        y += ([name_h, rate_h, time_h].max + 4)
       end
     end
   end

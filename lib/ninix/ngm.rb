@@ -276,7 +276,7 @@ module NGM
     TYPE = ['Sakura', 'Kero']
 
     def image_filename(set_id, side)
-      p = TYPE[side] + "_" + set_id.to_s + ".png"
+      p = (TYPE[side] + "_" + set_id.to_s + ".png")
       d = File.join(@datadir, p)
       if File.exists?(d)
         return d
@@ -893,19 +893,19 @@ module NGM
     end
 
     def go_next
-      next_index = @current + 1
+      next_index = (@current + 1)
       if next_index < IDLIMIT and @catalog.data.include?(next_index)
         @current = next_index
       end
     end
 
     def exist_next
-      next_index = @current + 1
+      next_index = (@current + 1)
       return (next_index < IDLIMIT and @catalog.data.include?(next_index))
     end
 
     def previous
-      previous = @current - 1
+      previous = (@current - 1)
       #assert previous < IDLIMIT
       if @catalog.data.include?(previous)
         @current = previous
@@ -913,7 +913,7 @@ module NGM
     end
 
     def exist_previous
-      previous = @current - 1
+      previous = (@current - 1)
       #assert previous < IDLIMIT
       return @catalog.data.include?(previous)
     end
