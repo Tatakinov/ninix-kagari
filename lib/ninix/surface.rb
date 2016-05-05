@@ -360,8 +360,8 @@ module Surface
       @window = []
       @__surface = surface
       @maxsize = [maxwidth, maxheight]
-      add_window(0, default_sakura, surface_alias, :mayuna => mayuna)
-      add_window(1, default_kero, surface_alias, :mayuna => mayuna)
+      add_window(0, default_sakura, :config_alias => surface_alias, :mayuna => mayuna)
+      add_window(1, default_kero, :config_alias => surface_alias, :mayuna => mayuna)
     end
 
     def get_menu_pixmap
@@ -412,7 +412,7 @@ module Surface
       return background, foreground
     end
 
-    def add_window(side, default_id, config_alias, mayuna: {})
+    def add_window(side, default_id, config_alias: nil, mayuna: {})
       fail "assert" unless @window.length == side
       if side == 0
         name = 'sakura'

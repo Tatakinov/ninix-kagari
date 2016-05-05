@@ -442,7 +442,7 @@ module Ssu
           end
         end
         if key.start_with?('Argument') ## FIXME
-          argument.append(value)
+          argument << value
         else
           next
         end

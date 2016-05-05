@@ -1,3 +1,9 @@
+Thu May 5 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* ネットワーク更新のリダイレクト処理を修正した.
+	* ssu.dll互換モジュールを修正した.
+	* ゴーストの本体と相方以外のサーフェス処理が動作しなくなっていたのを
+	  修正した.
+
 Sun May 1 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* バージョン4.999.2リリース.
 	* 文4互換モジュールを修正した.

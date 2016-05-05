@@ -95,6 +95,7 @@ module Update
       @path = url.path
       @ghostdir = ghostdir
       @timeout = timeout
+      @redirect_limit = 5
       @state = 0
     end
 
@@ -146,7 +147,7 @@ module Update
     end
 
     def check_timeout
-      return Time.now.to_i - @timestamp > @timeout
+      return (Time.now.to_i - @timestamp) > @timeout
     end
 
     def run
@@ -168,7 +169,7 @@ module Update
         if @schedule == nil
           return false
         end
-        @final_state = @schedule.length * len_state + len_pre
+        @final_state = (@schedule.length * len_state + len_pre)
       elsif @state == @final_state
         end_updates()
       elsif (@state - len_pre) % len_state == 0
@@ -233,8 +234,18 @@ module Update
       message = @response.message
       if code == 200
         #pass
-      elsif code == 302 and redirect()
-        return
+      elsif code == 302
+        if redirect()
+          return
+        else
+          enqueue_event('OnUpdateFailure',
+                        :ref0 => 'http redirect too deep',
+                        :ref1 => '',
+                        :ref2 => '',
+                        :ref3 => 'ghost') # XXX
+          @state = nil
+          return
+        end
       elsif @state == 2 # updates2.dau
         enqueue_event('OnUpdateFailure',
                       :ref0 => code.to_s,
@@ -246,7 +257,7 @@ module Update
       else
         filename, checksum = @schedule.pop(0)
         Logging::Logging.error(
-          'failed to download ' + filename + ' (' + code.to_s + ' ' + message + ')')
+          "failed to download #{filename} (#{code} #{message})")
         @file_number += 1
         @state += 3
         return
@@ -260,10 +271,15 @@ module Update
       end
       @state += 1
       reset_timeout()
+      @redirect_limit = 5 # reset
     end
 
     def redirect
-      location = @response.getheader('location', nil)
+      @redirect_limit -= 1
+      if @redirect_limit < 0
+        return false
+      end
+      location = @response['location']
       if location == nil
         return false
       end
@@ -275,13 +291,13 @@ module Update
       if url.scheme != 'http'
         return false
       end
-      Logging::Logging.info('redirected to ' + location)
-      @http.close()
+      Logging::Logging.info("redirected to #{location}")
+      @http.finish if @http.started?
       @host = url.host
       @port = url.port
-      @path = url.path.dirname
+      @path = url.path
       @state -= 2
-      download(url[2])
+      download(@locator)
       return true
     end
 
@@ -340,7 +356,7 @@ module Update
     def make_schedule
       schedule = parse_updates2_dau()
       if schedule != nil
-        @num_files = schedule.length - 1
+        @num_files = (schedule.length - 1)
         @file_number = 0
         list = []
         for x, y in schedule
@@ -380,7 +396,9 @@ module Update
         if filename == ""
           next
         end
-        checksum = checksum.encode('ascii', :invalid => :replace, :undef => :replace) # XXX
+        if checksum != nil
+          checksum = checksum.encode('ascii', :invalid => :replace, :undef => :replace) # XXX
+        end
         path = File.join(@ghostdir, adjust_path(filename))
         begin
           f = open(path, 'rb')
