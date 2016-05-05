@@ -200,7 +200,7 @@ module Update
     end
 
     def download(locator, event: false)
-      @locator = URI.escape(locator)
+      @locator = locator # don't use URI.escape here
       @http = Net::HTTP.new(@host, @port)
       if event
         enqueue_event('OnUpdate.OnDownloadBegin',
@@ -239,7 +239,7 @@ module Update
           return
         else
           enqueue_event('OnUpdateFailure',
-                        :ref0 => 'http redirect too deep',
+                        :ref0 => 'http redirect error',
                         :ref1 => '',
                         :ref2 => '',
                         :ref3 => 'ghost') # XXX
@@ -255,7 +255,7 @@ module Update
         @state = nil
         return
       else
-        filename, checksum = @schedule.pop(0)
+        filename, checksum = @schedule.shift
         Logging::Logging.error(
           "failed to download #{filename} (#{code} #{message})")
         @file_number += 1
@@ -291,13 +291,16 @@ module Update
       if url.scheme != 'http'
         return false
       end
+      if url.path.empty?
+        return false
+      end
       Logging::Logging.info("redirected to #{location}")
       @http.finish if @http.started?
       @host = url.host
       @port = url.port
       @path = url.path
       @state -= 2
-      download(@locator)
+      download(@path)
       return true
     end
 
