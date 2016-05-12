@@ -9,25 +9,28 @@ module NinixTest
     end
 
     def is_listening(event)
-      return true
+      true
     end
 
     def enqueue_event(event, *references)
-      print("NAME: ", @name, "\n")
-      print("EVENT: ", event, "\n")
-      print("REF: ", references, "\n")
+      print("NAME:  #{@name}\n")
+      print("EVENT: #{event}\n")
+      print("REF:   #{references}\n")
     end
 
     def key
-      return @name
+      @name
     end
   end
 
   class CommunicateTest
 
-    TEST_DATA = [['Sakura', 0, 10], 
-                 ['Naru', 8, 11],
-                 ['Busuko', 6666, 1212]]
+    TEST_DATA = [
+      ['Sakura', 0, 10], 
+      ['Naru', 8, 11],
+      ['Busuko', 6666, 1212]
+    ]
+
     def initialize
       ghosts = []
       communicate = Communicate::Communicate.new

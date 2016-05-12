@@ -8,9 +8,9 @@ module NinixTest
       saori = Textcopy::Saori.new
       saori.setup
       saori.request("") # XXX
-      print(saori.execute(nil), "\n")
-      print(saori.execute(["ninix test", 0]), "\n")
-      print(saori.execute(["ninix test", 1]), "\n")
+      print "#{saori.execute(nil)}\n"
+      print "#{saori.execute(["ninix test", 0])}\n"
+      print "#{saori.execute(["ninix test", 1])}\n"
       saori.finalize
     end
   end

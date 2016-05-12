@@ -30,9 +30,7 @@ module Httpc
     end
 
     def finalize
-      for timeout_id in @__bg.keys
-        GLib::Source.remove(timeout_id)
-      end
+      @__bg.each_key {|timeout_id| GLib::Source.remove(timeout_id) }
       return 1
     end
 
@@ -41,11 +39,7 @@ module Httpc
     end
 
     def check_import
-      if @__sakura != nil
-        return 1
-      else
-        return 0
-      end
+      @__sakura.nil? ? 0 : 1
     end
 
     def get(url, start: nil, end_: nil)
@@ -68,14 +62,10 @@ module Httpc
         result = []
         while true
           ns = data.index(start, nc)
-          if ns == nil
-            break
-          end
+          break if ns.nil?
           ns += ls
           ne = data.index(end_, ns)
-          if ne == nil
-            break
-          end
+          break if ne.nil?
           nc = (ne + le)
           result << data[ns..ne-1]
         end
@@ -86,9 +76,7 @@ module Httpc
     end
 
     def execute(argument)
-      if argument == nil
-        return RESPONSE[400]
-      end
+      return RESPONSE[400] if argument.nil?
       bg = nil
       @charset = nil
       process_tag = nil
@@ -103,20 +91,22 @@ module Httpc
         end
       end
       if argument.length >= 1
-        if ['sjis', 'utf-8', 'utf-16be', 'utf-16le'].include?(argument[0])
+        case argument[0]
+        when 'sjis', 'utf-8', 'utf-16be', 'utf-16le'
           @charset = argument[0]
           argument = argument[1..-1]
-        elsif argument[0] == 'euc'
+        when 'euc'
           @charset = 'EUC-JP'
           argument = argument[1..-1]
-        elsif argument[0] == 'jis'
+        when 'jis'
           @charset = 'ISO-2022-JP '
           argument = argument[1..-1]
         end
-        if argument[0] == 'erase_tag'
+        case argument[0]
+        when 'erase_tag'
           process_tag = lambda {} ## FIXME: not supported yet
           argument = argument[1..-1]
-        elsif argument[0] == 'translate_tag'
+        when 'translate_tag'
           process_tag = lambda {} ## FIXME: not supported yet
           argument = argument[1..-1]
         end
@@ -154,7 +144,7 @@ module Httpc
 
     def notify(id, argument, process_tag)
       result = get(argument[0], :start => argument[1], :end_ => argument[2])
-      if process_tag != nil
+      if not process_tag.nil?
         #pass ## FIXME: not supported yet
       end
       @__sakura.notify_event('OnHttpcNotify', id, nil, *result)

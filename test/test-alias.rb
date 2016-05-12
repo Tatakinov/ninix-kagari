@@ -6,7 +6,7 @@ module NinixTest
 
     def initialize(path)
       conf = Alias::create_from_file(path)
-      print("ALIAS:   ", conf, "\n")
+      print("ALIAS:   #{conf}\n")
     end
   end
 end

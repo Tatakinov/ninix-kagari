@@ -37,18 +37,16 @@ module Textcopy
     end
 
     def execute(argument)
-      if argument == nil or argument.empty? or @clipboard == nil
-        return RESPONSE[400]
-      end
+      return RESPONSE[400] if argument.nil? or argument.empty? or @clipboard.nil?
       text = argument[0]
       @clipboard.set_text(text)
       if argument.length >= 2 and argument[1] != 0
-        return ["SAORI/1.0 200 OK\r\n",
-                "Result: ",
-                argument[0].encode(@charset, :invalid => :replace, :undef => :replace),
-                "\r\n\r\n"].join("")
+        "SAORI/1.0 200 OK\r\n" \
+        "Result: " \
+        "#{text.encode(@charset, :invalid => :replace, :undef => :replace)}" \
+        "\r\n\r\n"
       else
-        return RESPONSE[204]
+        RESPONSE[204]
       end
     end
   end

@@ -16,34 +16,21 @@ module EntryDB
   class EntryDatabase
 
     def initialize(db: nil)
-      if db != nil
-        @__db = db
-      elsif
-        @__db = Hash.new
-      end
+      fail "assert" unless (db.nil? or db.is_a?(Hash))
+      @__db = (db.nil? ? Hash.new : db)
     end
 
     def add(key, script)
-      if @__db.has_key?(key)
-        entries = @__db[key]
-      else
-        entries = []
-      end
-      entries << script
-      @__db[key] = entries
+      @__db[key] = [] if not @__db.has_key?(key)
+      @__db[key] << script
     end
 
     def get(key, default: nil)
-      if @__db.has_key?(key)
-        entries = @__db[key]
-        return entries.sample
-      else
-        return default
-      end
+      @__db.has_key?(key) ? @__db[key].sample : default
     end
 
     def is_empty
-      return @__db.empty?
+      @__db.empty?
     end
   end
 end
