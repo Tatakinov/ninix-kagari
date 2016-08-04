@@ -18,17 +18,9 @@ module NConfig
   class Config < Hash
 
     def get(name, default: nil)
-      if name.class == Array
-        keylist = name
-      else
-        keylist = [name]
-      end
-      for key in keylist
-        if has_key?(key)
-          return self[key]
-        end
-      end
-      return default
+      keylist = (name.is_a?(Array) ? name : [name])
+      key = keylist.find {|x| keys.include?(x) }
+      key.nil? ? default : self[key]
     end
   end
 
@@ -48,26 +40,27 @@ module NConfig
         buf << line.strip
       end
     end
+    f.close
     return create_from_buffer(buf, :charset => charset)
   end
 
   def self.create_from_buffer(buf, charset: 'CP932')
     dic = Config.new
     for line in buf
-      line = line.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+      line = line.force_encoding(charset).encode(
+        "UTF-8", :invalid => :replace, :undef => :replace)
       key, value = line.split(",", 2)
-      if key == nil or value == nil
-        next
-      end
-      key = key.strip
-      if key == 'charset'
-        value = value.strip
+      next if key.nil? or value.nil?
+      key.strip!
+      case key
+      when 'charset'
+        value.strip!
         if Encoding.name_list.include?(value)
           charset = value
         else
           Logging::Logging.error('Unsupported charset ' + value)
         end
-      elsif ['refreshundeletemask', 'icon', 'cursor', 'shiori', 'makoto'].include?(key)
+      when 'refreshundeletemask', 'icon', 'cursor', 'shiori', 'makoto'
         dic[key] = value
       else
         dic[key] = value.strip
@@ -77,6 +70,6 @@ module NConfig
   end
 
   def self.null_config()
-    return NConfig::Config.new()
+    NConfig::Config.new()
   end
 end

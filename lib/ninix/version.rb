@@ -18,19 +18,19 @@ module Version
   bindtextdomain("ninix-aya")
 
   def self.NUMBER
-    return '4.999.2'
+    '4.999.2'
   end
 
   def self.CODENAME
-    return 'shotgun debugging'
+    'shotgun debugging'
   end
 
   def self.VERSION
-    return self.NUMBER + ' (' + self.CODENAME + ')'
+    "#{self.NUMBER} (#{self.CODENAME})"
   end
 
   def self.VERSION_INFO
-    return '\h\s[0]\w8ninix-aya ' + self.VERSION + '\n' +
+    '\h\s[0]\w8ninix-aya ' + self.VERSION + '\n' +
       _('Are igai No Nanika with "Nin\'i" for X') + '\n' +
       '\_q' +
       'Copyright (c) 2001, 2002 Tamito KAJIYAMA\n' +

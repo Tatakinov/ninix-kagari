@@ -6,10 +6,10 @@ module NinixTest
 
     def initialize(path)
       conf = NConfig::create_from_file(path)
-      for key in conf.keys 
-        print("Key:   ", key, "\n")
-        print("VALUE: ", conf[key], "\n")
-      end
+      conf.each {|key, value|
+        print("Key:   #{key}\n")
+        print("Value: #{value}\n")
+      }
     end
   end
 end

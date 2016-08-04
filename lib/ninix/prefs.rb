@@ -27,11 +27,11 @@ module Prefs
   DEFAULT_BALLOON_FONTS = 'Sans'
 
   def self.get_default_surface_scale()
-    return RANGE_SCALE[0]
+    RANGE_SCALE[0]
   end
 
   def self.get_default_script_speed()
-    return RANGE_SCRIPT_SPEED[RANGE_SCRIPT_SPEED.length / 2]
+    RANGE_SCRIPT_SPEED[RANGE_SCRIPT_SPEED.length / 2]
   end
 
   class Preferences
@@ -47,25 +47,15 @@ module Prefs
     end
 
     def get(name, default)
-      if @dic.include?(name)
-        return @dic[name]
-      else
-        return default
-      end
+      @dic.include?(name) ? @dic[name] : default
     end
 
     def delete(key)
-      if @dic.include?(key)
-        @dic.delete(key)
-      end
+      @dic.delete(key) if @dic.has_key?(key)
     end
 
     def include?(name)
-      if @dic.include?(name) or @__stack.include?(name)
-        return true
-      else
-        return false
-      end
+      @dic.include?(name) or @__stack.include?(name)
     end
 
     def set(key, item)
@@ -93,13 +83,11 @@ module Prefs
     def load
       @dic = {}
       begin
-        f = open(@filename)
-        while line = f.gets
-          prefs = line.chomp.split(': ', 2)
-          key = prefs[0]
-          value = prefs[1]
-          @dic[key] = value
-        end
+        open(@filename) {|f|
+          while line = f.gets
+            @dic.store(*line.chomp.split(': ', 2))
+          end
+        }
       rescue # IOError
         return
       end
@@ -111,16 +99,17 @@ module Prefs
       rescue SystemCallError
         #pass
       end
-      f = open(@filename, 'w')
-      keys = @dic.keys.sort
-      for key in keys
-        if @__stack.include?(key)
-          value = @__stack[key]
-        else
-          value = @dic[key]
+      open(@filename, 'w') {|f|
+        keys = @dic.keys.sort
+        for key in keys
+          if @__stack.include?(key)
+            value = @__stack[key]
+          else
+            value = @dic[key]
+          end
+          f.write([key, ": ", value, "\n"].join(''))
         end
-        f.write([key, ": ", value, "\n"].join(''))
-      end
+      }
     end
   end
 

@@ -38,15 +38,16 @@ module NGM
   # 10000以上のIDを持つデータは仮登録
   IDLIMIT = 10000
 
-  ELEMENTS = ['Name', 'SakuraName', 'KeroName', 'GhostType',
-              'HPUrl', 'HPTitle', 'Author', 'PublicUrl', 'ArchiveUrl',
-              'ArchiveSize', 'ArchiveTime', 'Version', 'AIName',
-              'SurfaceSetFlg', 'KisekaeFlg', 'AliasName',
-              'SakuraSurfaceList', 'KeroSurfaceList', 'DeleteFlg',
-              'NetworkUpdateTime', 'AcceptName', 'NetworkUpdateFlg',
-              'SakuraPreviewMD5', 'KeroPreviewMD5', 'ArchiveMD5',
-              'InstallDir', 'ArchiveName', 'UpdateUrl',
-              'AnalysisError', 'InstallCount']
+  ELEMENTS = [
+    'Name', 'SakuraName', 'KeroName', 'GhostType',
+    'HPUrl', 'HPTitle', 'Author', 'PublicUrl', 'ArchiveUrl',
+    'ArchiveSize', 'ArchiveTime', 'Version', 'AIName',
+    'SurfaceSetFlg', 'KisekaeFlg', 'AliasName',
+    'SakuraSurfaceList', 'KeroSurfaceList', 'DeleteFlg',
+    'NetworkUpdateTime', 'AcceptName', 'NetworkUpdateFlg',
+    'SakuraPreviewMD5', 'KeroPreviewMD5', 'ArchiveMD5',
+    'InstallDir', 'ArchiveName', 'UpdateUrl',
+    'AnalysisError', 'InstallCount']
 
   class Catalog_xml
 
@@ -56,20 +57,14 @@ module NGM
       @url = {}
       @cgi = {}
       @datadir = datadir
-      if not Dir.exists?(@datadir)
-        FileUtils.mkdir_p(@datadir)
-      end
+      FileUtils.mkdir_p(@datadir) if not Dir.exists?(@datadir)
       @last_update = '1970-01-01 00:00:00'
       load_MasterList()
     end
 
     # data handling functions
     def get(entry, key)
-      if entry.include?(key)
-        return entry[key]
-      else
-        return nil
-      end
+      return entry[key]
     end
 
     def data
@@ -88,7 +83,8 @@ module NGM
       end
       begin
         uri = URI.parse(url)
-        uri.query = URI.encode_www_form({time: ['"', last_update, '"'].join(''), charset: 'UTF-8'})
+        uri.query = URI.encode_www_form(
+          {time: "\"#{last_update}\"", charset: 'UTF-8'})
         open(uri) {|f|
           import_from_fileobj(f)
         }
@@ -101,25 +97,24 @@ module NGM
     # private methods
     def load_MasterList
       begin
-        f = open(File.join(@datadir, 'MasterList.xml'), 'r')
-        for _ in import_from_fileobj(f)
-          #pass
-        end
-        f.close()
+        open(File.join(@datadir, 'MasterList.xml'), 'r') {|f|
+          for _ in import_from_fileobj(f)
+            #pass
+          end
+        }
       rescue # IOError
         return
       end
     end
 
     def save_MasterList
-      f = open(File.join(@datadir, 'MasterList.xml'), 'w')
-      export_to_fileobj(f)
-      f.close()
+      open(File.join(@datadir, 'MasterList.xml'), 'w') {|f|
+        export_to_fileobj(f)
+      }
     end
 
     def get_encoding(line)
-      m = Regexp.new('<\?xml version="1.0" encoding="(.+)" \?>').match(line)
-      return m[1]
+      Regexp.new('<\?xml version="1.0" encoding="(.+)" \?>').match(line)[1]
     end
 
     def create_entry(node)
@@ -150,23 +145,21 @@ module NGM
         while Gtk.events_pending?
           Gtk.main_iteration()
         end
-        if line.empty?
-          next
-        end
+        next if line.empty?
         line = line.force_encoding(encoding).encode("UTF-8", :invalid => :replace, :undef => :replace)
         m = re_list.match(line)
-        if m != nil
+        if not m.nil?
           nest += 1
           next
         end
         m = re_setid.match(line)
-        if m != nil
+        if not m.nil?
           nest += 1
           set_id = m[1].to_i
           next
         end
         m = re_set.match(line)
-        if m != nil
+        if not m.nil?
           nest -= 1
           new_entry[set_id] = create_entry(node)
           node = []

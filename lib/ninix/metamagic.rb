@@ -22,35 +22,31 @@ module MetaMagic
     end
 
     def create_menuitem(data)
-      return nil
+      nil
     end
 
     def delete_by_myself
     end
 
     def key
-      return @key
+      @key
     end
 
     def key=(data) # read only
     end
 
     def baseinfo
-      return @baseinfo
+      @baseinfo
     end
 
     def baseinfo=(data)
       @baseinfo = data
       @menuitem = create_menuitem(data)
-      if menuitem == nil
-        delete_by_myself()
-        return
-      end
-      @menuitem = menuitem
+      delete_by_myself if menuitem.nil?
     end
 
     def menuitem
-      return @menuitem
+      @menuitem
     end
 
     def menuitem=(data) # read only
@@ -69,55 +65,48 @@ module MetaMagic
     end
    
     def create_menuitem(data)
-      return nil
+      nil
     end
 
     def delete_by_myself
     end
 
     def create_instance(data)
-      return nil
+      nil
     end
 
     def key=(data) # read only
     end
 
     def key
-      return @key
+      @key
     end
 
     def baseinfo # forbidden
-      return nil
+      nil
     end
 
     def baseinfo=(data)
       @baseinfo = data
-      if @instance == nil
-        @instance = create_instance(data)
-      end
-      if @instance == nil
+      @instance = create_instance(data) if @instance.nil?
+      if @instance.nil?
         delete_by_myself()
-        return
       else
         @instance.new_(*data) # reset
-        menuitem = create_menuitem(data)
-        if menuitem == nil
-          delete_by_myself()
-          return
-        end
-        @menuitem = menuitem
+        @menuitem = create_menuitem(data)
+        delete_by_myself if menuitem.nil?
       end
     end
 
     def menuitem
-      return @menuitem
+      @menuitem
     end
 
     def menuitem=(data) # read only
     end
 
     def instance
-      return @instance
+      @instance
     end
 
     def instance=(data) # read only
