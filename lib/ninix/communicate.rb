@@ -93,18 +93,18 @@ module Communicate
               flags = (flags + ',')
               flags = (flags + 'break')
             end
-            if not sstp.nil? ## FIXME: owned, remote
-              if !flags.empty?
-                flags = (flags + ',')
-              end
-              flags = (flags + 'sstp-send')
+          end
+          if not sstp.nil? ## FIXME: owned, remote
+            if !flags.empty?
+              flags = (flags + ',')
             end
-            if notranslate
-              if !flags.empty?
-                flags = (flags + ',')
-              end
-              flags = (flags + 'notranslate')
+            flags = (flags + 'sstp-send')
+          end
+          if notranslate
+            if !flags.empty?
+              flags = (flags + ',')
             end
+            flags = (flags + 'notranslate')
           end
           refs = references.each {|value| value.to_s}.join(1.chr)
           Logging::Logging.debug(
@@ -127,12 +127,12 @@ module Communicate
               sakura.enqueue_event('OnCommunicate',
                                    selfname, script)
               next
-            else
-              if @ghosts[sakura][0] == communicate
-                sakura.enqueue_event('OnCommunicate',
-                                     selfname, script)
-                next
-              end
+            end
+          else
+            if @ghosts[sakura][0] == communicate
+              sakura.enqueue_event('OnCommunicate',
+                                   selfname, script)
+              next
             end
           end
         end
