@@ -51,16 +51,12 @@ module Gomi
       result = []
       for m in vm.mounts
         mp = m.default_location.path
-        if mp == nil
-          next
-        end
+        next if mp.nil?
         volume_trash = File.join(mp, '.Trash', Process::UID.eid.to_s)
         if not File.exist?(volume_trash)
           volume_trash = File.join(mp, '.Trash-' + Process::UID.eid.to_s)
         end
-        if not File.exist?(volume_trash)
-          next
-        end
+        next if not File.exist?(volume_trash)
         result << volume_trash
       end
       return result

@@ -40,7 +40,7 @@ module SSTPLib
     end
 
     def parse_headers()
-      if @fp == nil
+      if @fp.nil?
         return
       end
       headers = []
@@ -63,7 +63,7 @@ module SSTPLib
           message << [key, value.strip]
         end
       end
-      if message.assoc("Charset") != nil
+      if not message.assoc("Charset").nil?
         charset = message.reverse.assoc("Charset")[1] # XXX
       else
         charset = "Shift_JIS"
@@ -87,7 +87,7 @@ module SSTPLib
       @requestline = requestline
       re_requestsyntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
       match = re_requestsyntax.match(requestline)
-      if match == nil
+      if match.nil?
         @equestline = '-'
         send_error(400, :message => 'Bad Request ' + requestline.to_s)
         return false
@@ -102,13 +102,13 @@ module SSTPLib
       if not parse_request(line)
         return
       end
-      name = ("do_" + @command.to_s + "_" + @version[0] + "_" + @version[2])
+      name = ("do_#{@command}_#{@version[0]}_#{@version[2]}")
       begin
         method(name).call()
       rescue
         send_error(
           501,
-          :message => 'Not Implemented (' + @command + '/' + @version + ')')
+          :message => "Not Implemented (#{@command}/#{@version})")
         return
       end
     end

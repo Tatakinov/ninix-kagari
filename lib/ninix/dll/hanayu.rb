@@ -56,12 +56,8 @@ module Hanayu
           tmp_name = ''
           for line in f
             line = line.encode('UTF-8', :invalid => :replace, :undef => :replace).strip()
-            if line.empty?
-              next
-            end
-            if line.start_with?('//')
-              next
-            end
+            next if line.empty?
+            next if line.start_with?('//')
             if line.start_with?('[') # bln.txt like format
               graphs[name] = data
               data = {}
@@ -98,9 +94,7 @@ module Hanayu
     end
 
     def finalize
-      for name in @graphs.keys()
-        @graphs[name].destroy()
-      end
+      @graphs.each_key {|name| @graphs[name].destroy() }
       @graphs = {}
       @data = {}
       write_db()
@@ -134,15 +128,13 @@ module Hanayu
             if line.empty?
               next
             end
-            if ver == nil
+            if ver.nil?
               if line == '# Format: v1.0'
                 ver = 1
               end
               next
             end
-            if not line.include?(',')
-              next
-            end
+            next if not line.include?(',')
             key, value = line.split(',', 2)
             for index_ in 0..6
               if @seven_days[index_][0] == key
@@ -352,9 +344,8 @@ module Hanayu
     end
 
     def draw_title(widget, cr)
-      if @data.include?('title')
-        @title = @data['title']
-      end
+      return if not @data.has_key?('title')
+      @title = @data['title']
       font_size = 12 # pixel
       @font_desc = Pango::FontDescription.new
       @font_desc.set_family('Sans')
@@ -389,7 +380,7 @@ module Hanayu
       cr.save()
       cr.set_source_rgb(*get_color('background'))
       cr.paint()
-      if @surface != nil
+      if not @surface.nil?
         width = @surface.width
         height = @surface.height
         xoffset = ((WIDTH - width) / 2).to_i
@@ -426,11 +417,9 @@ module Hanayu
     end
 
     def destroy
-      if @window != nil
-        @window.destroy()
-        @window = nil
-        @timeout_id = nil
-      end
+      @window.destroy() if not @window.nil?
+      @window = nil
+      @timeout_id = nil
     end
   end
 
@@ -462,7 +451,7 @@ module Hanayu
         cr.move_to(pos_x, pos_y)
         cr.show_pango_layout(@layout)
       end
-      if @min != nil
+      if not @min.nil?
         limit_min = @min
       else
         limit_min = @args[1]
@@ -472,7 +461,7 @@ module Hanayu
           end
         end
       end
-      if @max != nil
+      if not @max.nil?
         limit_max = @max
       else
         limit_max = @args[1]

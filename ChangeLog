@@ -3,6 +3,7 @@ Sat August 6 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* surface.rbのcollision area読み込みを修正した.
 	* ssu.dll互換モジュールの文字コード変換を修正した.
 	* コミュニケートのバグを修正した.(Ruby移行時のregression.)
+	* Rubyらしいコーディングスタイルへの修正.(3)
 
 Thu August 4 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* Rubyらしいコーディングスタイルへの修正.(2)

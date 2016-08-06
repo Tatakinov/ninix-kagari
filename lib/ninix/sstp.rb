@@ -38,9 +38,7 @@ module SSTP
     end
 
     def handle_request(event_type, event, *arglist)
-      if @parent != nil
-        @parent.handle_request(event_type, event, *arglist)
-      end
+      @parent&.handle_request(event_type, event, *arglist)
     end
 
     def set_request_handler(handler) ## FIXME
@@ -48,19 +46,13 @@ module SSTP
     end
 
     def has_request_handler
-      if @request_handler != nil
-        return true
-      else
-        return false
-      end
+      not @request_handler.nil?
     end
 
     def send_response(code, data: nil)
       begin
         @request_handler.send_response(code)
-        if data != nil
-          @request_handler.write(data) # FIXME
-        end
+        @request_handler.write(data) if not data.nil? # FIXME
         @request_handler.shutdown(Socket::SHUT_WR) # XXX
       rescue
         #pass
@@ -132,26 +124,26 @@ module SSTP
         return
       end
       sender = get_sender()
-      if sender == nil
+      if sender.nil?
         return
       end
       if version == 1.3
         handle = get_handle()
-        if handle == nil
+        if handle.nil?
           return
         end
       else
         handle = nil
       end
       script_odict = get_script_odict()
-      if script_odict == nil
+      if script_odict.nil?
         return
       end
       if [1.0, 1.1].include?(version)
         entry_db = nil
       elsif [1.2, 1.3, 1.4].include?(version)
         entry_db = get_entry_db()
-        if entry_db == nil
+        if entry_db.nil?
           return
         end
       end
@@ -173,22 +165,22 @@ module SSTP
         return
       end
       sender = get_sender()
-      if sender == nil
+      if sender.nil?
         return
       end
       event = get_event()
-      if event == nil
+      if event.nil?
         return
       end
       if version == 1.0
         entry_db = nil
       elsif version == 1.1
         script_odict = get_script_odict()
-        if script_odict == nil
+        if script_odict.nil?
           return
         end
         entry_db = get_entry_db()
-        if entry_db == nil
+        if entry_db.nil?
           return
         end
       end
@@ -198,7 +190,7 @@ module SSTP
     def enqueue_request(sender, event, handle, script_odict, entry_db)
       sock_domain, remote_port, remote_hostname, remote_ip = @fp.peeraddr
       address = remote_hostname # XXX
-      if entry_db == nil or entry_db.is_empty()
+      if entry_db.nil? or entry_db.is_empty()
         send_response(200) # OK
         show_sstp_marker, use_translator = get_options()
         @server.handle_request(
@@ -264,7 +256,7 @@ module SSTP
         if check_script(script)
           return
         end
-        if if_ghost == nil
+        if if_ghost.nil?
           script_odict[''] = script
         else
           script_odict[if_ghost] = script
@@ -291,12 +283,12 @@ module SSTP
     end
 
     def get_event
-      if @headers.assoc("Event") != nil
+      if not @headers.assoc("Event").nil?
         event = @headers.reverse.assoc("Event")[1]
       else
         event = nil
       end
-      if event == nil
+      if event.nil?
         send_response(400) # Bad Request
         log_error('Event: header field not found')
         return nil
@@ -304,7 +296,7 @@ module SSTP
       buf = [event]
       for i in 0..7
         key = ['Reference', i.to_s].join("")
-        if @headers.assoc(key) != nil
+        if not @headers.assoc(key).nil?
           value = @headers.reverse.assoc(key)[1]
         else
           value = nil
@@ -315,12 +307,12 @@ module SSTP
     end
 
     def get_sender
-      if @headers.assoc('Sender') != nil
+      if not @headers.assoc('Sender').nil?
         sender = @headers.reverse.assoc('Sender')[1]
       else
         sender = nil
       end
-      if sender == nil
+      if sender.nil?
         send_response(400) # Bad Request
         log_error('Sender: header field not found')
         return nil
@@ -329,12 +321,12 @@ module SSTP
     end
 
     def get_handle
-      if @headers.assoc("HWnd") != nil
+      if not @headers.assoc("HWnd").nil?
         path = @headers.assoc("HWnd")[1]
       else
         path = nil
       end
-      if path == nil
+      if path.nil?
         send_response(400) # Bad Request
         log_error('HWnd: header field not found')
         return nil
@@ -346,7 +338,7 @@ module SSTP
         handle = nil # discard socket object
         Logging::Logging.error('cannot open Unix socket: ' + path)
       end
-      if handle == nil
+      if handle.nil?
         send_response(400) # Bad Request
         log_error('Invalid HWnd: header field')
         return nil
@@ -355,7 +347,7 @@ module SSTP
     end
 
     def get_charset
-      if @headers.assoc('Charset') != nil
+      if not @headers.assoc('Charset').nil?
         charset = @headers.reverse.assoc('Charset')[1] # XXX
       else
         charset = 'Shift_JIS'
@@ -364,7 +356,7 @@ module SSTP
     end
 
     def check_decoder
-      if @headers.assoc('Charset') != nil
+      if not @headers.assoc('Charset').nil?
         charset = @headers.reverse.assoc('Charset')[1] # XXX
       else
         charset = 'Shift_JIS'
@@ -380,7 +372,7 @@ module SSTP
 
     def get_options
       show_sstp_marker = use_translator = true
-      if @headers.assoc("Option") != nil
+      if not @headers.assoc("Option").nil?
         options = @headers.reverse.assoc("Option")[1].split(",", 0)
         for option in options
           option = option.strip()
@@ -396,11 +388,7 @@ module SSTP
 
     def local_request
       sock_domain, remote_port, remote_hostname, remote_ip = @fp.peeraddr
-      if remote_ip == "127.0.0.1"
-        return true
-      else
-        return false
-      end
+      remote_ip == "127.0.0.1"
     end
 
     # EXECUTE
@@ -436,17 +424,17 @@ module SSTP
         return
       end
       sender = get_sender()
-      if sender == nil
+      if sender.nil?
         return
       end
       command = get_command()
-      if @headers.assoc('Charset') != nil
+      if not @headers.assoc('Charset').nil?
         charset = @headers.reverse.assoc('Charset')[1] # XXX
       else
         charset = 'Shift_JIS'
       end
       charset = charset.to_s
-      if command == nil
+      if command.nil?
         return
       elsif command == 'getname'
         send_response(200)
@@ -492,7 +480,7 @@ module SSTP
       else
         command = nil
       end
-      if command == nil
+      if command.nil?
         send_response(400) # Bad Request
         log_error('Command: header field not found')
         return nil
@@ -505,11 +493,11 @@ module SSTP
         return
       end
       sender = get_sender()
-      if sender == nil
+      if sender.nil?
         return
       end
       sentence = get_sentence()
-      if sentence == nil
+      if sentence.nil?
         return
       end
       send_response(200) # OK
@@ -524,7 +512,7 @@ module SSTP
       else
         sentence = nil
       end
-      if sentence == nil
+      if sentence.nil?
         send_response(400) # Bad Request
         log_error('Sentence: header field not found')
         return nil
