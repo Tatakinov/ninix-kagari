@@ -335,7 +335,7 @@ module Surface
           rescue
             #pass
           end
-          buf << [part.capitalize(), x1, y1, x2, y2].join('')
+          buf << [part.capitalize(), x1, y1, x2, y2]
         end
         region[key] = buf
       end
