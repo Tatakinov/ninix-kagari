@@ -2195,10 +2195,10 @@ module Aya5
     end
 
     def evaluate_statement(namespace, statement, type_float)
-      num = statement[1..-1].length
-      if num == 0
+      if statement.nil? or statement.length <= 1
         return ''
       end
+      num = statement[1..-1].length
       type_ = statement[0]
       token = statement[1]
       if type_ == TYPE_STATEMENT
