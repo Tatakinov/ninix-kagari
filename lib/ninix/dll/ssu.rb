@@ -412,7 +412,7 @@ module Ssu
       if line == nil
         return req_type, argument, charset
       end
-      line = line.force_encoding(charset).strip()
+      line = line.force_encoding(charset).strip.encode('utf-8', :invalid => :replace, :undef => :replace)
       if line.empty?
         return req_type, argument, charset
       end
@@ -423,7 +423,7 @@ module Ssu
         end
       end
       for line in header
-        line = line.force_encoding(charset).strip()
+        line = line.force_encoding(charset).strip.encode('utf-8', :invalid => :replace, :undef => :replace)
         if line.empty?
           next
         end
@@ -434,11 +434,10 @@ module Ssu
         key.strip!
         value.strip!
         if key == 'Charset'
-          charset = value
-          begin
-            codecs.lookup(charset)
-          rescue
-            Logging::Logging.warning('Unsupported charset ' + charset.to_s)
+          if Encoding.name_list.include?(value)
+            charset = value
+          else
+            Logging::Logging.warning('Unsupported charset #{value}')
           end
         end
         if key.start_with?('Argument') ## FIXME

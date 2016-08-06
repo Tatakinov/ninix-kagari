@@ -1,6 +1,7 @@
 Sat August 6 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* 文5互換モジュールを修正した.
 	* surface.rbのcollision area読み込みを修正した.
+	* ssu.dll互換モジュールの文字コード変換を修正した.
 
 Thu August 4 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* Rubyらしいコーディングスタイルへの修正.(2)
