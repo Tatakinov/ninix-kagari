@@ -32,27 +32,55 @@ UNIX系OS対応デスクトップアクセサリninixに拡張機能を追加し
 
 - GTK+ (http://www.gtk.org/)
   クロスプラットフォームの GUI ライブラリです。
-  バージョン 3.16.5 での動作を確認しています。
+  バージョン 3.20.7 での動作を確認しています。
   下記GStreamerを使用する場合はRuby/GStreamerもインストールが必要です。
 
 - GStreamer (http://gstreamer.freedesktop.org/)
   このソフトウェアはninix-ayaを動作させるのに必須ではありません。
   音声ファイルの再生に使用しています。
-  バージョン 1.4.5 での動作を確認しています。
+  バージョン 1.8.2 での動作を確認しています。
+
+- Rubyzip(https://github.com/rubyzip/rubyzip)
+  Rubyからzipファイルを読み書きするためのモジュールです。
+  バージョン 1.1.7 での動作を確認しています。
+
+- Ruby gettext(http://ruby-gettext.github.io/)
+  Rubyのソフトをローカライズするためのパッケージです。
+  バージョン 3.1.7 での動作を確認しています。
 
 - CharlockHolmes (http://github.com/brianmario/charlock_holmes)
   このソフトウェアはninix-ayaを動作させるのに必須ではありません。
   Shift_JIS以外の文字コードを使用している「美坂」使用ゴーストを動作させる場合に必要です。
   バージョン 0.7.3 での動作を確認しています。
 
-
 インストール
 ------------
-Rubyバージョンについてはインストーラがまだありません。
 Linux(Debianなど)ではディストリビューションで用意されている
 パッケージの使用を推奨します。
-それ以外の環境では、アーカイブを展開して
-lib/ninix_main.rb をRuby インタプリタで実行して下さい。
+
+以下ではソースアーカイブからインストールする方法について説明します。
+(UNIX系OSを想定しています。)
+
+配布サイトよりソースアーカイブの最新版を入手し、展開します。
+
+Makefileには
+インストール先ディレクトリ (prefix)、
+ローカライズファイルのインストール先ディレクトリ(localedir)、
+華和梨8やYAYAといった栞の.soファイルのパス(shiori_so_dir)
+などを指定する項目があります。
+これらを環境に応じて変えてください。
+
+後は、以下のように make install コマンドを実行すればインストール完了です。
+
+# make install
+
+ninix-ayaを起動するためのスクリプトが一緒にインストールされますので、
+それを実行してください。
+
+$ ninix
+
+Windows環境では、アーカイブを展開して
+lib/ninix_main.rb をRuby インタプリタで実行してください。(動作未確認)
 
 ※ gemによる必要なもののインストール手順
   gem install narray
