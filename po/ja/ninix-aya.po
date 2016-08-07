@@ -1,20 +1,28 @@
 # ja.po file for ninix-aya
-# Copyright (C) 2003-2015 Shyouzou Sugitani <shy@users.osdn.me>
+# Copyright (C) 2003-2016 Shyouzou Sugitani <shy@users.osdn.me>
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: ninix-aya 5.0\n"
 "POT-Creation-Date: 2015-06-02 22:51+0900\n"
-"PO-Revision-Date: 2015-06-02 23:19+0900\n"
+"PO-Revision-Date: 2016-08-06 22:35+0900\n"
 "Last-Translator: Shyouzou Sugitani <shy@users.osdn.me>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: ../lib/ninix/nekodorif.rb:77
+msgid "Settings...(_O)"
+msgstr "設定...(_O)"
 
 #: ../lib/ninix/kinoko.rb:50
 msgid "Skin(_K)"
 msgstr "スキン(_K)"
+
+#: ../lib/ninix/nekodorif.rb:82
+msgid "Exit(_Q)"
+msgstr "終了(_Q)"
 
 #: ../lib/ninix/menu.rb:74
 msgid "Portal sites(_P)"
@@ -100,87 +108,79 @@ msgstr "猫どりふ(_N)"
 msgid "Kinoko(_K)"
 msgstr "きのこ(_K)"
 
-#: ../lib/ninix/nekodorif.rb:77
-msgid "Settings...(_O)"
-msgstr "設定...(_O)"
-
 #: ../lib/ninix/nekodorif.rb:80
 msgid "Katochan(_K)"
 msgstr "落下物(_K)"
 
-#: ../lib/ninix/nekodorif.rb:82
-msgid "Exit(_Q)"
-msgstr "終了(_Q)"
-
-#: ../lib/ninix/ngm.rb:322
+#: ../lib/ninix/ngm.rb:315
 msgid "Search for"
 msgstr "検索文字を入力して下さい"
 
-#: ../lib/ninix/ngm.rb:414
+#: ../lib/ninix/ngm.rb:407
 msgid "_File"
 msgstr "ファイル(_F)"
 
-#: ../lib/ninix/ngm.rb:415
+#: ../lib/ninix/ngm.rb:408
 msgid "_View"
 msgstr "表示(_V)"
 
-#: ../lib/ninix/ngm.rb:416
+#: ../lib/ninix/ngm.rb:409
 msgid "_Archive"
 msgstr "アーカイブ(_A)"
 
-#: ../lib/ninix/ngm.rb:417
+#: ../lib/ninix/ngm.rb:410
 msgid "_Help"
 msgstr "ヘルプ(_H)"
 
-#: ../lib/ninix/ngm.rb:419
+#: ../lib/ninix/ngm.rb:412
 msgid "Search(_F)"
 msgstr "検索(_F)"
 
-#: ../lib/ninix/ngm.rb:423
+#: ../lib/ninix/ngm.rb:416
 msgid "Search Forward(_S)"
 msgstr "次を検索(_S)"
 
-#: ../lib/ninix/ngm.rb:427
+#: ../lib/ninix/ngm.rb:420
 msgid "Settings(_O)"
 msgstr "設定(_O)"
 
-#: ../lib/ninix/ngm.rb:432
+#: ../lib/ninix/ngm.rb:425
 msgid "DB Network Update(_N)"
 msgstr "DB ネットワーク更新(_N)"
 
-#: ../lib/ninix/ngm.rb:436
+#: ../lib/ninix/ngm.rb:429
 msgid "Close(_X)"
 msgstr "終了(_X)"
 
-#: ../lib/ninix/ngm.rb:440
+#: ../lib/ninix/ngm.rb:433
 msgid "Mask(_M)"
 msgstr "表示マスク(_M)"
 
-#: ../lib/ninix/ngm.rb:445
+#: ../lib/ninix/ngm.rb:438
 msgid "Reset to Default(_Y)"
 msgstr "デフォルトに戻す(_Y)"
 
-#: ../lib/ninix/ngm.rb:450
+#: ../lib/ninix/ngm.rb:443
 msgid "Show All(_Z)"
 msgstr "すべて表示(_Z)"
 
-#: ../lib/ninix/ngm.rb:493
+#: ../lib/ninix/ngm.rb:486
 msgid "Ghost Manager"
 msgstr "ゴーストマネージャ"
 
-#: ../lib/ninix/ngm.rb:530
+#: ../lib/ninix/ngm.rb:523
 msgid "Previous"
 msgstr "前ヘ"
 
-#: ../lib/ninix/ngm.rb:537
+#: ../lib/ninix/ngm.rb:531
 msgid "Next"
 msgstr "次ヘ"
 
-#: ../lib/ninix/ngm.rb:660
+#: ../lib/ninix/ngm.rb:656
 msgid "Install"
 msgstr "Install"
 
-#: ../lib/ninix/ngm.rb:668
+#: ../lib/ninix/ngm.rb:665
 msgid "Update"
 msgstr "Update"
 
@@ -216,155 +216,6 @@ msgstr "使用サーフェス:"
 msgid " Web Page"
 msgstr "公開ページ"
 
-#: ../lib/ninix/prefs.rb:147
-msgid "Surface&Balloon"
-msgstr "サーフェス&バルーン"
-
-#: ../lib/ninix/prefs.rb:149
-msgid "Misc"
-msgstr "色々"
-
-#: ../lib/ninix/prefs.rb:151
-msgid "Debug"
-msgstr "デバッグ"
-
-#: ../lib/ninix/prefs.rb:309
-msgid "Surface Scaling"
-msgstr "サーフェス倍率"
-
-#: ../lib/ninix/prefs.rb:319 ../lib/ninix/prefs.rb:418
-msgid "Default Setting"
-msgstr "デフォルト設定"
-
-#: ../lib/ninix/prefs.rb:328
-msgid "Scale Balloon"
-msgstr "バルーンもいっしょ"
-
-#: ../lib/ninix/prefs.rb:332
-msgid "Default Balloon"
-msgstr "デフォルトのバルーン"
-
-#: ../lib/ninix/prefs.rb:346
-msgid "Balloon Name"
-msgstr "バルーン名"
-
-#: ../lib/ninix/prefs.rb:353
-msgid "Always Use This Balloon"
-msgstr "常にこのバルーンを使う"
-
-#: ../lib/ninix/prefs.rb:357
-msgid "Font(s) for balloons"
-msgstr "バルーンのフォント"
-
-#: ../lib/ninix/prefs.rb:368
-msgid "Translucency"
-msgstr "透過処理"
-
-#: ../lib/ninix/prefs.rb:375
-msgid "Use PNA file"
-msgstr "PNAファイルを使用する"
-
-#: ../lib/ninix/prefs.rb:379
-msgid "Animation"
-msgstr "アニメーション"
-
-#: ../lib/ninix/prefs.rb:389
-msgid "Quality"
-msgstr "品質"
-
-#: ../lib/ninix/prefs.rb:405
-msgid "SSTP Setting"
-msgstr "SSTP 設定"
-
-#: ../lib/ninix/prefs.rb:408
-msgid "Allowembryo"
-msgstr "IfGhostに一致するゴーストがいない場合に他のゴーストで再生(SEND/1.4)"
-
-#: ../lib/ninix/prefs.rb:412
-msgid "Script Wait"
-msgstr "表示ウェイト"
-
-#: ../lib/ninix/prefs.rb:424
-msgid "None"
-msgstr "なし"
-
-#: ../lib/ninix/prefs.rb:426
-msgid "Fast"
-msgstr "速い"
-
-#: ../lib/ninix/prefs.rb:428
-msgid "Slow"
-msgstr "遅い"
-
-#: ../lib/ninix/prefs.rb:436
-msgid "Raise & Lower"
-msgstr "Raise & Lower"
-
-#: ../lib/ninix/prefs.rb:443
-msgid "Sink after Talk"
-msgstr "喋り終わると裏へ沈む"
-
-#: ../lib/ninix/prefs.rb:447
-msgid "Raise before Talk"
-msgstr "喋る時手前に出てくる"
-
-#: ../lib/ninix/prefs.rb:458
-msgid "Surface Debugging"
-msgstr "サーフェスのデバッグ"
-
-#: ../lib/ninix/prefs.rb:465
-msgid "Display Collision Area"
-msgstr "当たり判定領域を表示する"
-
-#: ../lib/ninix/prefs.rb:469
-#, fuzzy
-msgid "Display Collision Area Name"
-msgstr "当たり判定領域を表示する"
-
-#: ../lib/ninix/sakura.rb:529
-msgid "Network Update has begun."
-msgstr "ネットワーク更新を開始しました。"
-
-#: ../lib/ninix/sakura.rb:533
-msgid "Network Update completed successfully."
-msgstr "ネットワーク更新に成功しました。"
-
-#: ../lib/ninix/sakura.rb:537
-msgid "Network Update failed."
-msgstr "ネットワーク更新に失敗しました。"
-
-#: ../lib/ninix/sakura.rb:714
-msgid "Sakura&Unyuu"
-msgstr "さくら＆うにゅう"
-
-#: ../lib/ninix/sakura.rb:721
-msgid "User"
-msgstr "ユーザーさん"
-
-#: ../lib/ninix/sakura.rb:724 ../lib/ninix/sakura.rb:731
-msgid "Sakura"
-msgstr "さくら"
-
-#: ../lib/ninix/sakura.rb:736
-msgid "Unyuu"
-msgstr "うにゅう"
-
-#: ../lib/ninix/sakura.rb:741
-msgid "Tomoyo"
-msgstr "知世"
-
-#: ../lib/ninix/sakura.rb:2974
-msgid "I'm afraid I don't have Network Update yet."
-msgstr "ネットワーク更新、\\w4まだ無いの。"
-
-#: ../lib/ninix/sakura.rb:3010
-msgid "Vanish"
-msgstr "消滅指示"
-
-#: ../lib/ninix/version.rb:34
-msgid "Are igai No Nanika with \"Nin'i\" for X"
-msgstr "あれ以外の何か with \"任意\" for X"
-
 #: ../lib/ninix_main.rb:47
 msgid "A ninix-aya error has been detected."
 msgstr "母ちゃん…勘弁!!!!"
@@ -377,14 +228,158 @@ msgstr "だからいったじゃないカーッ!!!"
 msgid "Show Details"
 msgstr "詳細"
 
-#: ../lib/ninix_main.rb:1528
+#: ../lib/ninix_main.rb:1522
 msgid "Console"
 msgstr "コンソール"
 
-#: ../lib/ninix_main.rb:1532
+#: ../lib/ninix_main.rb:1526
 msgid "Nanntokashitekudasai."
 msgstr "何とかしてください"
 
-#: lib/ninix/menu.py:150
-#~ msgid "Plugin(_P)"
-#~ msgstr "プラグイン(_P)"
+#: ../lib/ninix/prefs.rb:136
+msgid "Surface&Balloon"
+msgstr "サーフェス&バルーン"
+
+#: ../lib/ninix/prefs.rb:138
+msgid "Misc"
+msgstr "色々"
+
+#: ../lib/ninix/prefs.rb:140
+msgid "Debug"
+msgstr "デバッグ"
+
+#: ../lib/ninix/prefs.rb:297
+msgid "Surface Scaling"
+msgstr "サーフェス倍率"
+
+#: ../lib/ninix/prefs.rb:307 ../lib/ninix/prefs.rb:407
+msgid "Default Setting"
+msgstr "デフォルト設定"
+
+#: ../lib/ninix/prefs.rb:316
+msgid "Scale Balloon"
+msgstr "バルーンもいっしょ"
+
+#: ../lib/ninix/prefs.rb:320
+msgid "Default Balloon"
+msgstr "デフォルトのバルーン"
+
+#: ../lib/ninix/prefs.rb:334
+msgid "Balloon Name"
+msgstr "バルーン名"
+
+#: ../lib/ninix/prefs.rb:342
+msgid "Always Use This Balloon"
+msgstr "常にこのバルーンを使う"
+
+#: ../lib/ninix/prefs.rb:346
+msgid "Font(s) for balloons"
+msgstr "バルーンのフォント"
+
+#: ../lib/ninix/prefs.rb:357
+msgid "Translucency"
+msgstr "透過処理"
+
+#: ../lib/ninix/prefs.rb:364
+msgid "Use PNA file"
+msgstr "PNAファイルを使用する"
+
+#: ../lib/ninix/prefs.rb:368
+msgid "Animation"
+msgstr "アニメーション"
+
+#: ../lib/ninix/prefs.rb:378
+msgid "Quality"
+msgstr "品質"
+
+#: ../lib/ninix/prefs.rb:394
+msgid "SSTP Setting"
+msgstr "SSTP 設定"
+
+#: ../lib/ninix/prefs.rb:397
+msgid "Allowembryo"
+msgstr "IfGhostに一致するゴーストがいない場合に他のゴーストで再生(SEND/1.4)"
+
+#: ../lib/ninix/prefs.rb:401
+msgid "Script Wait"
+msgstr "表示ウェイト"
+
+#: ../lib/ninix/prefs.rb:413
+msgid "None"
+msgstr "なし"
+
+#: ../lib/ninix/prefs.rb:415
+msgid "Fast"
+msgstr "速い"
+
+#: ../lib/ninix/prefs.rb:417
+msgid "Slow"
+msgstr "遅い"
+
+#: ../lib/ninix/prefs.rb:425
+msgid "Raise & Lower"
+msgstr "Raise & Lower"
+
+#: ../lib/ninix/prefs.rb:432
+msgid "Sink after Talk"
+msgstr "喋り終わると裏へ沈む"
+
+#: ../lib/ninix/prefs.rb:436
+msgid "Raise before Talk"
+msgstr "喋る時手前に出てくる"
+
+#: ../lib/ninix/prefs.rb:447
+msgid "Surface Debugging"
+msgstr "サーフェスのデバッグ"
+
+#: ../lib/ninix/prefs.rb:454
+msgid "Display Collision Area"
+msgstr "当たり判定領域を表示する"
+
+#: ../lib/ninix/prefs.rb:458
+msgid "Display Collision Area Name"
+msgstr "当たり判定領域を表示する"
+
+#: ../lib/ninix/sakura.rb:533
+msgid "Network Update has begun."
+msgstr "ネットワーク更新を開始しました。"
+
+#: ../lib/ninix/sakura.rb:537
+msgid "Network Update completed successfully."
+msgstr "ネットワーク更新に成功しました。"
+
+#: ../lib/ninix/sakura.rb:541
+msgid "Network Update failed."
+msgstr "ネットワーク更新に失敗しました。"
+
+#: ../lib/ninix/sakura.rb:722
+msgid "Sakura&Unyuu"
+msgstr "さくら＆うにゅう"
+
+#: ../lib/ninix/sakura.rb:732
+msgid "User"
+msgstr "ユーザーさん"
+
+#: ../lib/ninix/sakura.rb:737 ../lib/ninix/sakura.rb:748
+msgid "Sakura"
+msgstr "さくら"
+
+#: ../lib/ninix/sakura.rb:756
+msgid "Unyuu"
+msgstr "うにゅう"
+
+#: ../lib/ninix/sakura.rb:764
+msgid "Tomoyo"
+msgstr "知世"
+
+#: ../lib/ninix/sakura.rb:3000
+msgid "I'm afraid I don't have Network Update yet."
+msgstr "ネットワーク更新、\\w4まだ無いの。"
+
+#: ../lib/ninix/sakura.rb:3036
+msgid "Vanish"
+msgstr "消滅指示"
+
+#: ../lib/ninix/version.rb:34
+msgid "Are igai No Nanika with \"Nin'i\" for X"
+msgstr "あれ以外の何か with \"任意\" for X"

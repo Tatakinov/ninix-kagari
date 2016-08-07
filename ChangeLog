@@ -1,3 +1,10 @@
+Sun August 7 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* Makefileを追加した.
+	* locale/ja.poを更新した.
+	* poファイルの追加・更新用としてgen_pot.shを追加した.
+	* bin/ninix.inを追加した.
+	  (Python版との違いは栞の.soファイルのパス設定があること.)
+
 Sat August 6 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* 文5互換モジュールを修正した.
 	* surface.rbのcollision area読み込みを修正した.

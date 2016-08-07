@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# mkdir pot
+# mkdir -p pot
 
 rxgettext lib/ninix_main.rb -o pot/ninix_main.pot
 rxgettext lib/ninix/alias.rb  -o pot/alias.pot
