@@ -18,11 +18,11 @@ module Version
   bindtextdomain("ninix-aya")
 
   def self.NUMBER
-    '4.999.2'
+    '5.0'
   end
 
   def self.CODENAME
-    'shotgun debugging'
+    'power cycle'
   end
 
   def self.VERSION
