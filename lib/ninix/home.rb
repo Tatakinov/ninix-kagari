@@ -21,35 +21,31 @@ require_relative "logging"
 module Home
 
   def self.get_ninix_home()
-    return File.join(File.expand_path('~'), '.ninix')
+    File.join(File.expand_path('~'), '.ninix')
   end
 
   def self.get_archive_dir()
-    return File.join(get_ninix_home(), 'archive')
+    File.join(get_ninix_home(), 'archive')
   end
 
   def self.get_pango_fontrc()
-    return File.join(get_ninix_home(), 'pango_fontrc')
+    File.join(get_ninix_home(), 'pango_fontrc')
   end
 
   def self.get_preferences()
-    return File.join(get_ninix_home(), 'preferences')
+    File.join(get_ninix_home(), 'preferences')
   end
 
   def self.get_normalized_path(path)
     path = path.gsub("\\", '/')
-    if File.absolute_path(path) != path
-      path = path.downcase
-    end
+    path = path.downcase if File.absolute_path(path) != path
     #FIXME: expand_path is NOT equivalent for os.path.normpath
     #return os.path.normpath(os.fsencode(path))
     return path
   end
 
   def self.load_config()
-    if not File.exists?(get_ninix_home())
-      return nil
-    end
+    return nil unless File.exists?(get_ninix_home())
     ghosts = search_ghosts()
     balloons = search_balloons()
     nekoninni = search_nekoninni()
@@ -63,20 +59,16 @@ module Home
     shiori_lib = DLL::Library.new('shiori', :saori_lib => nil)
     path = DLL.get_path()
     Dir.foreach(path, :encoding => 'UTF-8') do |filename|
-      if filename == '..' or filename == '.'
-        next
-      end
+      next if filename == '..' or filename == '.'
       if File.readable_real?(File.join(path, filename))
         name = nil
         basename = File.basename(filename, ".*")
         ext = File.extname(filename)
         ext = ext.downcase
-        if ['.rb'].include?(ext)
-          name = basename
-        end
-        if name != nil and not table.include?(name)
+        name = basename if ['.rb'].include?(ext)
+        unless name.nil? or table.include?(name)
           shiori = shiori_lib.request(['', name])
-          if shiori != nil
+          unless shiori.nil?
             table[name] = shiori
           end
         end
@@ -88,16 +80,14 @@ module Home
   def self.search_ghosts(target: nil, check_shiori: true)
     home_dir = get_ninix_home()
     ghosts = {}
-    if target != nil
+    unless target.nil?
       dirlist = []
       dirlist += target
     else
       begin
         dirlist = []
         Dir.foreach(File.join(home_dir, 'ghost'), :encoding => 'UTF-8') do |file|
-          if file == '..' or file == '.'
-            next
-          end
+          next if file == '..' or file == '.'
           dirlist << file
         end
       rescue SystemCallError
@@ -109,9 +99,7 @@ module Home
       prefix = File.join(home_dir, 'ghost', subdir)
       ghost_dir = File.join(prefix, 'ghost', 'master')
       desc = read_descript_txt(ghost_dir)
-      if desc == nil
-        desc = NConfig.null_config()
-      end
+      desc = NConfig.null_config() if desc.nil?
       shiori_dll = desc.get('shiori')
       # find a pseudo AI, shells, and a built-in balloon
       candidate = {
@@ -127,9 +115,7 @@ module Home
         end
       end
       shell_name, surface_set = find_surface_set(prefix)
-      if check_shiori and candidate['score'] == 0
-        next
-      end
+      next if check_shiori and candidate['score'].zero?
       shiori_name = candidate['name']
       if desc.get('name') == 'default'
         pos = 0
@@ -149,16 +135,14 @@ module Home
     home_dir = get_ninix_home()
     balloons = {}
     balloon_dir = File.join(home_dir, 'balloon')
-    if target != nil
+    unless target.nil?
       dirlist = []
       dirlist += target
     else
       begin
         dirlist = []
         Dir.foreach(balloon_dir, :encoding => 'UTF-8') do |file|
-          if file == '..' or file == '.'
-            next
-          end
+          next if file == '..' or file == '.'
           dirlist << file
         end
       rescue SystemCallError
@@ -167,17 +151,11 @@ module Home
     end
     for subdir in dirlist
       path = File.join(balloon_dir, subdir)
-      if not File.directory?(path)
-        next
-      end
+      next unless File.directory?(path)
       desc = read_descript_txt(path) # REQUIRED
-      if desc == nil
-        next
-      end
+      next if desc.nil?
       balloon_info = read_balloon_info(path) # REQUIRED
-      if balloon_info.empty?
-        next
-      end
+      next if balloon_info.empty?
       if balloon_info.include?('balloon_dir') # XXX
         Logging::Logging.warninig('Oops: balloon id confliction')
         next
@@ -196,9 +174,7 @@ module Home
     begin
       dirlist = []
       Dir.foreach(skin_dir, :encoding => 'UTF-8') do |file|
-        if file == '..' or file == '.'
-          next
-        end
+        next if file == '..' or file == '.'
         dirlist << file
       end
     rescue SystemCallError
@@ -206,9 +182,7 @@ module Home
     end
     for subdir in dirlist
       nekoninni = read_profile_txt(File.join(skin_dir, subdir))
-      if nekoninni == nil
-        next
-      end
+      next if nekoninni.nil?
       buf << nekoninni
     end
     return buf
@@ -221,9 +195,7 @@ module Home
     begin
       dirlist = []
       Dir.foreach(katochan_dir, :encoding => 'UTF-8') do |file|
-        if file == '..' or file == '.'
-          next
-        end
+        next if file == '..' or file == '.'
         dirlist << file
       end
     rescue SystemCallError
@@ -231,9 +203,7 @@ module Home
     end
     for subdir in dirlist
       katochan = read_katochan_txt(File.join(katochan_dir, subdir))
-      if katochan == nil
-        next
-      end
+      next if katochan.nil?
       buf << katochan
     end
     return buf
@@ -246,9 +216,7 @@ module Home
     begin
       dirlist = []
       Dir.foreach(kinoko_dir, :encoding => 'UTF-8') do |file|
-        if file == '..' or file == '.'
-          next
-        end
+        next if file == '..' or file == '.'
         dirlist << file
       end
     rescue SystemCallError
@@ -256,9 +224,7 @@ module Home
     end
     for subdir in dirlist
       kinoko = read_kinoko_ini(File.join(kinoko_dir, subdir))
-      if kinoko == nil
-        next
-      end
+      next if kinoko.nil?
       buf << kinoko
     end
     return buf
@@ -283,9 +249,7 @@ module Home
     if File.readable_real?(path)
       f = open(path, 'rb:CP932')
       line = f.readline()
-      if line.strip.empty? or line.strip() != '[KINOKO]'
-        return nil
-      end
+      return nil if line.strip.empty? or line.strip() != '[KINOKO]'
       lineno = 0
       error = nil
       for line in f
@@ -293,11 +257,9 @@ module Home
         if line.end_with?("\x00") # XXX
           line = line[0, line.length - 2]
         end
-        if line.strip.empty?
-          next
-        end
+        next if line.strip.empty?
         line = line.encode('UTF-8', :invalid => :replace, :undef => :replace)
-        if not line.include?('=')
+        unless line.include?('=')
           error = 'line ' + lineno.to_s + ': syntax error'
           break
         end
@@ -313,13 +275,13 @@ module Home
         elsif ['ontop', 'baseposition', 'baseadjust'].include?(name)
           kinoko[name] = value.to_i
         end
-        if error != nil
+        unless error.nil?
           Logging::Logging.error('Error: ' + error + "\n" + path +' (skipped)')
           return nil
         end
       end
     end
-    if not kinoko['title'].empty?
+    unless kinoko['title'].empty?
       return kinoko
     else
       return nil
@@ -332,11 +294,11 @@ module Home
     if File.readable_real?(path)
       f = open(path, 'rb:CP932')
       line = f.readline()
-      if line != nil
+      unless line.nil?
         name = line.strip.encode("UTF-8", :invalid => :replace, :undef => :replace)
       end
     end
-    if not name.empty?
+    unless name.empty?
       return [name, top_dir]
     else
       return nil
@@ -354,9 +316,7 @@ module Home
       error = nil
       for line in f
         lineno += 1
-        if line.strip.empty?
-          next
-        end
+        next if line.strip.empty?
         if line.start_with?('#')
           name = line[1, line.length - 1].strip()
           next
@@ -400,12 +360,12 @@ module Home
           end
         end
       end
-      if error != nil
+      unless error.nil?
         Logging::Logging.error('Error: ' + error + "\n" + path + ' (skipped)')
         return nil
       end
     end
-    if not katochan['name'].empty?
+    unless katochan['name'].empty?
       return katochan
     else
       return nil
@@ -448,14 +408,14 @@ module Home
     desc = read_descript_txt(File.join(top_dir, 'ghost', 'master'))
     default_sakura = desc.get('sakura.seriko.defaultsurface', :default => '0')
     default_kero = desc.get('kero.seriko.defaultsurface', :default => '10')
-    if desc != nil
+    unless desc.nil?
       shell_name = desc.get('name')
     else
       shell_name = nil
     end
-    if shell_name == nil or shell_name.empty?
+    if shell_name.nil? or shell_name.empty?
       inst = read_install_txt(top_dir)
-      if inst != nil
+      unless inst.nil?
         shell_name = inst.get('name')
       end
     end
@@ -464,10 +424,10 @@ module Home
     for name, desc, subdir in find_surface_dir(shell_dir)
       surface_dir = File.join(shell_dir, subdir)
       surface_info, alias_, tooltips, seriko_descript = read_surface_info(surface_dir)
-      if surface_info != nil and \
+      if not surface_info.nil? and \
         surface_info.include?('surface' + default_sakura.to_s) and \
         surface_info.include?('surface' + default_kero.to_s)
-        if alias_ == nil
+        if alias_.nil?
           alias_ = read_alias_txt(surface_dir)
         end
         surface_set[subdir] = [name, surface_dir, desc, alias_,
@@ -485,18 +445,14 @@ module Home
       for name, subdir in config.each_entry
         subdir = subdir.downcase
         desc = read_descript_txt(File.join(top_dir, subdir))
-        if desc == nil
-          desc = NConfig.null_config()
-        end
+        desc = NConfig.null_config() if desc.nil?
         buf << [name, desc, subdir]
       end
     else
       begin
         dirlist = []
         Dir.foreach(top_dir, :encoding => 'UTF-8') do |file|
-          if file == '..' or file == '.'
-            next
-          end
+          next if file == '..' or file == '.'
           dirlist << file
         end
       rescue SystemCallError
@@ -504,9 +460,7 @@ module Home
       end
       for subdir in dirlist
         desc = read_descript_txt(File.join(top_dir, subdir))
-        if desc == nil
-          desc = NConfig.null_config()
-        end
+        desc = NConfig.null_config() if desc.nil?
         name = desc.get('name', :default => subdir)
         buf << [name, desc, subdir]
       end
@@ -520,9 +474,7 @@ module Home
     begin
       filelist = []
       Dir.foreach(surface_dir, :encoding => 'UTF-8') do |file|
-        if file == '..' or file == '.'
-          next
-        end
+        next if file == '..' or file == '.'
         filelist << file
       end
     rescue SystemCallError
@@ -547,13 +499,9 @@ module Home
       else
         match = re_surface.match(filename)
       end
-      if match == nil
-        next
-      end
+      next if match.nil?
       img = File.join(surface_dir, filename)
-      if not File.readable_real?(img)
-        next
-      end
+      next unless File.readable_real?(img)
       key = ['surface', match[1].to_i.to_s].join('')
       txt = File.join(surface_dir, [basename, 's.txt'].join(''))
       if File.readable_real?(txt)
@@ -596,7 +544,7 @@ module Home
         filename = filename.downcase
         basename = File.basename(filename, ".*")
         ext = File.extname(filename)
-        if not surface.include?(basename)
+        unless surface.include?(basename)
           surface[basename] = [File.join(surface_dir, filename),
                                NConfig.null_config()]
         end
@@ -608,9 +556,7 @@ module Home
   def self.read_surfaces_txt(surface_dir)
     re_alias = Regexp.new('\A(sakura|kero|char[0-9]+)\.surface\.alias\z')
     config_list = []
-    if not File.directory?(surface_dir)
-      return config_list
-    end
+    return config_list unless File.directory?(surface_dir)
     Dir.foreach(surface_dir) do |file|
       next if /^\.+$/ =~ file
       if file.start_with?("surfaces") and file.end_with?(".txt")
@@ -631,18 +577,14 @@ module Home
             f.seek(0) # rewind
           end
           for line in f
-            if line.start_with?('#') or line.start_with?('//')
-              next
-            end
+            next if line.start_with?('#') or line.start_with?('//')
             if charset == 'CP932'
               # "\x81\x40": full-width space in CP932(Shift_JIS)
               temp = line.gsub(0x81.chr + 0x40.chr, "").strip()
             else
               temp = line.strip()
             end
-            if temp.empty?
-              next
-            end
+            next if temp.empty?
             if temp.start_with?('charset')
               begin
                 charset = temp.split(',', 2)[1].strip().force_encoding('ascii')
@@ -651,7 +593,7 @@ module Home
               end
               next
             end
-            if key == nil
+            if key.nil?
               if temp.end_with?('{')
                 key = temp[0, temp.length - 1].force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
                 opened = true
@@ -664,11 +606,9 @@ module Home
               if temp[0, temp.length - 2]
                 buf << temp[0, temp.length - 2]
               end
-              if not opened
-                Logging::Logging.error('syntax error: unbalnced "}" in surfaces.txt.')
-              end
+              Logging::Logging.error('syntax error: unbalnced "}" in surfaces.txt.') unless opened
               match = re_alias.match(key)
-              if match != nil
+              if not match.nil?
                 alias_buffer << key
                 alias_buffer << '{'
                 for line in buf
@@ -696,11 +636,9 @@ module Home
                 flg_append = false
                 for key in keys
                   flg_delete = false
-                  if key.empty?
-                    next
-                  end
+                  next if key.empty?
                   if key.start_with?('surface')
-                    if not include_list.empty?
+                    unless include_list.empty?
                       for num in (include_list - exclude_list)
                         key = ['surface', num].join('')
                         if flg_append
@@ -728,7 +666,7 @@ module Home
                     key_range = key
                   end
                   s, e = key_range.split("-", 2)
-                  e = s if e == nil
+                  e = s if e.nil?
                   begin
                     s = Integer(s)
                     e = Integer(e)
@@ -741,7 +679,7 @@ module Home
                     include_list.concat(Range.new(s, e).to_a)
                   end
                 end
-                if not include_list.empty?
+                unless include_list.empty?
                   for num in (include_list - exclude_list)
                     key = ['surface', num].join('')
                     if flg_append
@@ -766,7 +704,7 @@ module Home
         rescue SystemCallError
           return config_list
         end
-        if not alias_buffer.empty?
+        unless alias_buffer.empty?
           config_list << ['__alias__', Alias.create_from_buffer(alias_buffer)]
         end
         config_list << ['__tooltips__', tooltips]
@@ -779,9 +717,7 @@ module Home
     buf = []
     for n in 0..255
       key = ['element', n.to_s].join('')
-      if not config.include?(key)
-        break
-      end
+      break unless config.include?(key)
       spec = []
       for value in config[key].split(',', 0)
         spec << value.strip()
@@ -807,9 +743,7 @@ module Home
     begin
       filelist = []
       Dir.foreach(balloon_dir, :encoding => 'UTF-8') do |file|
-        if file == '..' or file == '.'
-          next
-        end
+        next if file == '..' or file == '.'
         filelist << file
       end
     rescue SystemCallError
@@ -817,17 +751,13 @@ module Home
     end
     for filename in filelist
       match = re_balloon.match(filename)
-      if match == nil
-        next
-      end
+      next if match.nil?
       img = File.join(balloon_dir, filename)
       if match[2] != 'png' and \
         File.readable_real?([img[img.length - 4, img.length - 1], 'png'].join(''))
         next
       end
-      if not File.readable_real?(img)
-        next
-      end
+      next unless File.readable_real?(img)
       key = match[1]
       txt = File.join(balloon_dir, 'balloon' + key.to_s + 's.txt')
       if File.readable_real?(txt)
@@ -839,13 +769,9 @@ module Home
     end
     for filename in filelist
       match = re_annex.match(filename)
-      if match == nil
-        next
-      end
+      next if match.nil?
       img = File.join(balloon_dir, filename)
-      if not File.readable_real?(img)
-        next
-      end
+      next unless File.readable_real?(img)
       key = match[1]
       config = NConfig.null_config()
       balloon[key] = [img, config]

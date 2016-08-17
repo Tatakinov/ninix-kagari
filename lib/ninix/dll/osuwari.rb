@@ -36,7 +36,7 @@ module Osuwari
     end
 
     def check_import
-      if @__sakura != nil
+      if not @__sakura.nil?
         return 1
       else
         return 0
@@ -48,13 +48,9 @@ module Osuwari
     end
 
     def execute(argument)
-      if argument == nil or argument.empty?
-        return RESPONSE[400]
-      end
+      return RESPONSE[400] if argument.nil? or argument.empty?
       if argument[0] == 'START'
-        if argument.length < 7
-          return RESPONSE[400]
-        end
+        return RESPONSE[400] if argument.length < 7
         begin ## FIXME
           fail "assert" unless ['ACTIVE', 'FIX'].include?(argument[2]) or 
             argument[2].start_with?('@') or 
@@ -95,11 +91,9 @@ module Osuwari
         @timeout_id = GLib::Timeout.add(100) { do_idle_tasks }
         return RESPONSE[204]
       elsif argument[0] == 'STOP'
-        if @timeout_id != nil
-          GLib::Source.remove(@timeout_id)
-          @timeout_id = nil
-          @settings = {}
-        end
+        GLib::Source.remove(@timeout_id) unless @timeout_id.nil?
+        @timeout_id = nil
+        @settings = {}
         return RESPONSE[204]
       else
         return RESPONSE[400]
@@ -107,15 +101,13 @@ module Osuwari
     end
 
     def do_idle_tasks
-      if @timeout_id == nil
-        return false
-      end
+      return false if @timeout_id.nil?
       target = @settings['target']
       left, top, scrn_w, scrn_h = @__sakura.get_workarea(0) # XXX
       target_flag = [false, false]
       if target == 'ACTIVE'
         active_window = get_active_window()
-        if active_window != nil
+        unless active_window.nil?
           if @__sakura.identify_window(active_window)
             target_flag[1] = true
           else
@@ -150,9 +142,7 @@ module Osuwari
       else
         #pass # should not reach here
       end
-      if not target_flag[0]
-        return target_flag[1]
-      end
+      return target_flag[1] unless target_flag[0]
       pos = @settings['position']
       scale = @__sakura.get_surface_scale()
       offset_x = (@settings['offset_x'] * scale / 100).to_i
@@ -171,16 +161,18 @@ module Osuwari
         end
       end
       w, h = @__sakura.get_surface_size(side)
-      if pos[0] == 'T'
+      case pos[0]
+      when 'T'
         y = (target_y + offset_y)
-      elsif pos[0] == 'B'
+      when 'B'
         y = (target_y + target_h + offset_y - h)
       else
         return false # should not reach here
       end
-      if pos[1] == 'L'
+      case pos[1]
+      when 'L'
         x = (target_x + offset_x)
-      elsif pos[1] == 'R'
+      when 'R'
         x = (target_x + target_w + offset_x - w)
       else
         return false # should not reach here
@@ -188,15 +180,16 @@ module Osuwari
       if not @settings['noclip']
         if x < left or x > left+ scrn_w or \
           y < top or y > top + scrn_h
-          if @settings['except'][1] == 'BOTTOM'
+          case @settings['except'][1]
+          when 'BOTTOM'
             #pass ## FIXME: not supported yet
-          elsif @settings['except'][1] == 'TOP'
+          when 'TOP'
             #pass ## FIXME: not supported yet
-          elsif @settings['except'][1] == 'LEFT'
+          when 'LEFT'
             #pass ## FIXME: not supported yet
-          elsif @settings['except'][1] == 'RIGTH'
+          when 'RIGTH'
             #pass ## FIXME: not supported yet
-          elsif @settings['except'][1] == 'CENTER'
+          when 'CENTER'
             #pass ## FIXME: not supported yet
           else
             #pass # should not reach here

@@ -43,15 +43,15 @@ module Yaya
 
     def find(topdir, dll_name)
       result = 0
-      if $_yaya != nil
+      unless $_yaya.nil?
         if File.file?(File.join(topdir, 'yaya.txt'))
           result = 205
-        elsif dll_name != nil and \
+        elsif not dll_name.nil? and \
              File.file?(File.join(topdir, [dll_name[0..-3], 'txt'].join('')))
           result = 105
         end
-        return result
       end
+      return result
     end
 
     def show_description
@@ -64,46 +64,38 @@ module Yaya
 
     def load(dir: nil)
       @dir = dir
-      if $_yaya != nil
-        if @dir.end_with?(File::SEPARATOR)
-          topdir = @dir
-        else
-          topdir = [@dir, File::SEPARATOR].join()
-        end
-        path = Fiddle::Pointer.malloc(
-          @dir.bytesize + 1,
-          freefunc=nil # Yaya will free this pointer
-        )
-        path[0, @dir.bytesize] = @dir
-        @id = $_yaya.multi_load(path, @dir.bytesize)
-        ret = 1
-        return ret
+      return 0 if $_yaya.nil?
+      if @dir.end_with?(File::SEPARATOR)
+        topdir = @dir
       else
-        return 0
+        topdir = [@dir, File::SEPARATOR].join()
       end
+      path = Fiddle::Pointer.malloc(
+        @dir.bytesize + 1,
+        freefunc=nil # Yaya will free this pointer
+      )
+      path[0, @dir.bytesize] = @dir
+      @id = $_yaya.multi_load(path, @dir.bytesize)
+      ret = 1
+      return ret
     end
 
     def unload
-      if $_yaya != nil
-        $_yaya.multi_unload(@id)
-        @id = nil
-      end
+      $_yaya.multi_unload(@id) unless $_yaya.nil?
+      @id = nil
     end
 
     def request(req_string)
-      if $_yaya != nil
-        request = Fiddle::Pointer.malloc(
-          req_string.bytesize + 1,
-          freefunc=nil # Yaya will free this pointer
-        )
-        request[0, req_string.bytesize] = req_string
-        rlen =[req_string.bytesize].pack("l!")
-        ret = $_yaya.multi_request(@id, request, rlen)
-        rlen, = rlen.unpack("l!")
-        return ret[0, rlen].to_s
-      else
-        return '' # FIXME
-      end
+      return '' if $_yaya.nil? # FIXME
+      request = Fiddle::Pointer.malloc(
+        req_string.bytesize + 1,
+        freefunc=nil # Yaya will free this pointer
+      )
+      request[0, req_string.bytesize] = req_string
+      rlen =[req_string.bytesize].pack("l!")
+      ret = $_yaya.multi_request(@id, request, rlen)
+      rlen, = rlen.unpack("l!")
+      return ret[0, rlen].to_s
     end
   end
 end

@@ -112,7 +112,7 @@ module Nekodorif
 
     def __set_katochan_menu(list)
       key = 'katochan'
-      if not list.empty?
+      unless list.empty?
         menu = Gtk::Menu.new()
         for katochan in list
           item = Gtk::MenuItem.new(katochan['name'])
@@ -143,31 +143,23 @@ module Nekodorif
 
     def observer_update(event, args)
       if ['set position', 'set surface'].include?(event)
-        if @skin != nil
-          @skin.set_position()
-        end
-        if @katochan != nil and @katochan.loaded
+        @skin.set_position() unless @skin.nil?
+        if not @katochan.nil? and @katochan.loaded
           @katochan.set_position()
         end
       elsif event == 'set scale'
         scale = @target.get_surface_scale()
-        if @skin != nil
-          @skin.set_scale(scale)
-        end
-        if @katochan != nil
-          @katochan.set_scale(scale)
-        end
+        @skin.set_scale(scale) unless @skin.nil?
+        @katochan.set_scale(scale) unless @katochan.nil?
       elsif event == 'finalize'
         finalize()
       else
-        Logging::Logging.debug('OBSERVER(nekodorif): ignore - ' + event)
+        Logging::Logging.debug("OBSERVER(nekodorif): ignore - #{event}")
       end
     end
 
     def load(dir, katochan, target)
-      if katochan.empty?
-        return 0
-      end
+      return 0 if katochan.empty?
       @dir = dir
       @target = target
       @target.attach_observer(self)
@@ -175,9 +167,7 @@ module Nekodorif
       scale = @target.get_surface_scale()
       @skin = Skin.new(@dir, @accelgroup, scale)
       @skin.set_responsible(self)
-      if @skin == nil
-        return 0
-      end
+      return 0 if @skin.nil?
       @katochan_list = katochan
       @katochan = nil
       launch_katochan(@katochan_list[0])
@@ -201,19 +191,13 @@ module Nekodorif
           result = nil # XXX
         end
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def do_idle_tasks
-      if not @__running
-        return false
-      end
+      return false unless @__running
       @skin.update()
-      if @katochan != nil
-        @katochan.update()
-      end
+      @katochan.update() unless @katochan.nil?
       #process_script()
       return true
     end
@@ -236,7 +220,7 @@ module Nekodorif
     end
 
     def has_katochan
-      if @katochan != nil
+      unless @katochan.nil?
         return true
       else
         return false
@@ -258,9 +242,7 @@ module Nekodorif
     end
 
     def launch_katochan(katochan)
-      if @katochan != nil
-        delete_katochan
-      end
+      delete_katochan unless @katochan.nil?
       @katochan = Katochan.new(@target)
       @katochan.set_responsible(self)
       @katochan.load(katochan)
@@ -272,12 +254,8 @@ module Nekodorif
     def finalize
       @__running = false
       @target.detach_observer(self)
-      if @katochan != nil
-        @katochan.destroy()
-      end
-      if @skin != nil
-        @skin.destroy()
-      end
+      @katochan.destroy() unless @katochan.nil?
+      @skin.destroy() unless @skin.nil?
       ##if self.balloon is not None:
       ##    self.balloon.destroy()
     end
@@ -300,7 +278,7 @@ module Nekodorif
       @__menu = Menu.new(@accelgroup)
       @__menu.set_responsible(self)
       path = File.join(@dir, 'omni.txt')
-      if File.file?(path) and File.size(path) == 0
+      if File.file?(path) and File.size(path).zero?
         @omni = 1
       else
         @omni = 0
@@ -354,7 +332,7 @@ module Nekodorif
       fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
       }
-      if not handlers.include?(event)
+      unless handlers.include?(event)
         result = @parent.handle_request(event_type, event, *arglist)
       else
         if Skin.method_defined?(event)
@@ -363,9 +341,7 @@ module Nekodorif
           result = nil
         end
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def set_scale(scale)
@@ -418,9 +394,9 @@ module Nekodorif
     end
 
     def set_surface
-      if @id[1] != nil
+      unless @id[1].nil?
         path = File.join(@dir, 'surface' + @id[0].to_s + @id[1].to_s + '.png')
-        if not File.exists?(path)
+        unless File.exists?(path)
           @id[1] = nil
           set_surface()
           return
@@ -444,32 +420,26 @@ module Nekodorif
 
     def set_position(reset: 0)
       left, top, scrn_w, scrn_h = @window.workarea
-      if reset != 0
+      unless reset.zero?
         @x = left
         @y = (top + scrn_h - @h)
       else
-        if @omni != 0
-          @y = (top + scrn_h - @h)
-        end
+        @y = (top + scrn_h - @h) unless @omni.zero?
       end
       @window.move(@x, @y)
     end
 
     def move(x_delta, y_delta)
       @x = (@x + x_delta)
-      if @omni != 0
-        @y = (@y + y_delta)
-      end
+      @y = (@y + y_delta) unless @omni.zero?
       set_position()
     end
 
     def update
-      if @id[1] != nil
+      unless @id[1].nil?
         @id[1] += 1
       else
-        if Random.rand(0..99) != 0 ## XXX
-          return
-        end
+        return unless Random.rand(0..99).zero? ## XXX
         @id[1] = 0
       end
       set_surface()
@@ -498,8 +468,7 @@ module Nekodorif
     def motion_notify(widget, event)
       x, y, state = event.x, event.y, event.state
       if state & Gdk::ModifierType::BUTTON1_MASK
-        if @x_root != nil and \
-          @y_root != nil
+        unless @x_root.nil? or @y_root.nil?
           @dragged = true
           x_delta = (event.x_root - @x_root).to_i
           y_delta = (event.y_root - @y_root).to_i
@@ -566,11 +535,11 @@ module Nekodorif
     end
 
     def get_name
-      return @data['name']
+      @data['name']
     end
 
     def get_category
-      return @data['category']
+      @data['category']
     end
 
     def get_kinoko_flag ## FIXME
@@ -578,7 +547,7 @@ module Nekodorif
     end
 
     def get_target
-      if @side == 0
+      if @side.zero?
         return @target.get_selfname()
       else
         return @target.get_keroname()
@@ -665,9 +634,7 @@ module Nekodorif
     end
 
     def set_position
-      if @settings['state'] != 'before'
-        return
-      end
+      return if @settings['state'] != 'before'
       target_x, target_y = @target.get_surface_position(@side)
       target_w, target_h = @target.get_surface_size(@side)
       left, top, scrn_w, scrn_h = @window.workarea
@@ -698,8 +665,8 @@ module Nekodorif
       set_state('before')
       if @data.include?('category')
         category = @data['category'].split(',', 0)
-        if not category.empty?
-          if not CATEGORY_LIST.include?(category[0])
+        unless category.empty?
+          unless CATEGORY_LIST.include?(category[0])
             Logging::Logging.warning('WARNING: unknown major category - ' + category[0])
             ##@data['category'] = CATEGORY_LIST[-1]
           end
@@ -846,7 +813,7 @@ module Nekodorif
       if @settings['state'] == 'fall'
         update_surface()
         update_position()
-        if check_collision() != 0
+        unless check_collision().zero?
           set_state('hit')
           @hit = 1
           if @parent.handle_request('GET', 'get_mode') == 1
@@ -857,9 +824,7 @@ module Nekodorif
             #pass ## FIXME
           end
         end
-        if check_mikire() != 0
-          set_state('dodge')
-        end
+        set_state('dodge') unless check_mikire().zero?
       elsif @settings['state'] == 'hit'
         if @data.include?('hit.waittime')
           wait_time = @data['hit.waittime']
@@ -883,9 +848,7 @@ module Nekodorif
       elsif @settings['state'] == 'after'
         update_surface()
         update_position()
-        if check_mikire() != 0
-          set_state('end')
-        end
+        set_state('end') unless check_mikire().zero?
       elsif @settings['state'] == 'end'
         if @parent.handle_request('GET', 'get_mode') == 1
           @parent.handle_request('NOTIFY', 'send_event', 'Vanish')

@@ -1,4 +1,8 @@
+Wed August 17 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* Rubyらしいコーディングスタイルへの修正.(4)
+
 Sun August 7 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* バージョン5.0(power cycle)リリース.
 	* Makefileを追加した.
 	* locale/ja.poを更新した.
 	* poファイルの追加・更新用としてgen_pot.shを追加した.

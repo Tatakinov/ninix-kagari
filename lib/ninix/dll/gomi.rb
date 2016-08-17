@@ -53,10 +53,10 @@ module Gomi
         mp = m.default_location.path
         next if mp.nil?
         volume_trash = File.join(mp, '.Trash', Process::UID.eid.to_s)
-        if not File.exist?(volume_trash)
+        unless File.exist?(volume_trash)
           volume_trash = File.join(mp, '.Trash-' + Process::UID.eid.to_s)
         end
-        next if not File.exist?(volume_trash)
+        next unless File.exist?(volume_trash)
         result << volume_trash
       end
       return result
@@ -91,17 +91,13 @@ module Gomi
     end
 
     def execute(argument)
-      if argument == nil or argument.empty?
-        return RESPONSE[400]
-      end
+      return RESPONSE[400] if argument.nil? or argument.empty?
       args = @parser.getopts(
         argument[0].split(nil, 0),
         'enVafqsvw:',
         'empty', 'number-of-items', 'version', 'asynchronous', 'force',
         'quiet', 'silent', 'verbose', 'hwnd:')
-      if @notify == nil
-        return RESPONSE[400]
-      end
+      return RESPONSE[400] if @notify.nil?
       if args['number-of-items'] or args['n']
         file_count, dir_size = get_dir_size(@home_trash)
         for volume_trash in get_volume_trash()

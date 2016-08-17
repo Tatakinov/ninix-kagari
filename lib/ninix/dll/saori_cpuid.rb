@@ -46,7 +46,7 @@ module Saori_cpuid
 
     def execute(argument)
       return RESPONSE[400] if argument.nil? or argument.empty?
-      return RESPONSE[204] if argument.length > 1 and argument[1] == 0
+      return RESPONSE[204] if argument.length > 1 and argument[1].zero?
       value =
         case argument[0]
         when 'platform';   'ninix-aya'

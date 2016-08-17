@@ -39,7 +39,7 @@ module Wmove
       @timeout_id = nil
       @dir = dir
       result = 0
-      if @__sakura == nil
+      if @__sakura.nil?
         #pass
       elsif @loaded == 1
         result = 2
@@ -53,10 +53,8 @@ module Wmove
     end
 
     def finalize
-      if @timeout_id != nil
-        GLib::Source.remove(@timeout_id)
-        @timeout_id = nil
-      end
+      GLib::Source.remove(@timeout_id) unless @timeout_id.nil?
+      @timeout_id = nil
       @commands = [[], []]
       @sakura_name = ''
       @kero_name = ''
@@ -67,29 +65,30 @@ module Wmove
       name = argument[0]
       result = true
       list_hwnd = [@sakura_name, @kero_name] ## FIXME: HWND support
-      if ['MOVE', 'MOVE_INSIDE', 'MOVETO', 'MOVETO_INSIDE'].include?(name)
+      case name
+      when 'MOVE', 'MOVE_INSIDE', 'MOVETO', 'MOVETO_INSIDE'
         if argument.length != 4 or not list_hwnd.include?(argument[1])
           result = false
         end
-      elsif ['ZMOVE', 'WAIT'].include?(name)
+      when 'ZMOVE', 'WAIT'
         if argument.length != 3 or not list_hwnd.include?(argument[1])
           result = false
         end
-      elsif ['STANDBY', 'STANDBY_INSIDE'].include?(name)
+      when 'STANDBY', 'STANDBY_INSIDE'
         if argument.length != 6 or \
           not list_hwnd.include?(argument[1]) or \
           not list_hwnd.include?(argument[2])
           result = false
         end
-      elsif ['GET_POSITION', 'CLEAR'].include?(name)
+      when 'GET_POSITION', 'CLEAR'
         if argument.length != 2 or not list_hwnd.include?(argument[1])
           result = false
         end
-      elsif name == 'GET_DESKTOP_SIZE'
+      when 'GET_DESKTOP_SIZE'
         if argument.length != 1
           result = false
         end
-      elsif name == 'NOTIFY'
+      when 'NOTIFY'
         if argument.length < 3 or argument.length > 8 or \
           not list_hwnd.include?(argument[1])
           result = false
@@ -100,20 +99,22 @@ module Wmove
 
     def request(req)
       req_type, argument = evaluate_request(req)
-      if req_type == nil
-        result = RESPONSE[400]
-      elsif req_type == 'GET Version'
-        result = RESPONSE[204]
-      elsif req_type == 'EXECUTE'
-        result = execute(argument)
-      else
-        result = RESPONSE[400]
-      end
+      result =
+        case req_type
+        when nil
+          RESPONSE[400]
+        when 'GET Version'
+          RESPONSE[204]
+        when 'EXECUTE'
+          execute(argument)
+        else
+          RESPONSE[400]
+        end
       return result
     end
 
     def execute(args)
-      if args == nil or args.empty?
+      if args.nil? or args.empty?
         result = RESPONSE[400]
       elsif not __check_argument(args)
         result = RESPONSE[400]
@@ -152,9 +153,7 @@ module Wmove
           end
         else
           enqueue_commands(name, args[1..-1])
-          if @timeout_id == nil
-            do_idle_tasks()
-          end
+          do_idle_tasks() if @timeout_id.nil?
           result = RESPONSE[204]
         end
         return result
@@ -188,7 +187,8 @@ module Wmove
       for side in [0, 1]
         if not @commands[side].empty?
           command, args = @commands[side].shift
-          if ['MOVE', 'MOVE_INSIDE'].include?(command)
+          case command
+          when 'MOVE', 'MOVE_INSIDE'
             x, y = @__sakura.get_surface_position(side)
             vx = args[0].to_i
             speed = args[1].to_i
@@ -216,7 +216,7 @@ module Wmove
             else
               @__sakura.set_surface_position(side, x + vx, y)
             end
-          elsif ['MOVETO', 'MOVETO_INSIDE'].include?(command)
+          when 'MOVETO', 'MOVETO_INSIDE'
             x, y = @__sakura.get_surface_position(side)
             to = args[0].to_i
             speed = args[1].to_i
@@ -242,9 +242,9 @@ module Wmove
             else
               @__sakura.set_surface_position(side, to, y)
             end
-          elsif ['STANDBY', 'STANDBY_INSIDE'].include?(command)
+          when 'STANDBY', 'STANDBY_INSIDE'
             #pass ## FIXME: not supported yet
-          elsif command == 'ZMOVE'
+          when 'ZMOVE'
             if args[0] == '1'
               @__sakura.raise_surface(side)
             elsif args[0] == '2'
@@ -252,7 +252,7 @@ module Wmove
             else
               #pass
             end
-          elsif command == 'WAIT'
+          when 'WAIT'
             begin
               wait = Integer(args[0]) # ms
             rescue
@@ -263,17 +263,15 @@ module Wmove
             else
               @commands[side].insert(0, ['WAIT', (wait - 20).to_s])
             end
-          elsif command == 'NOTIFY'
+          when 'NOTIFY'
             @__sakura.notify_event(*args)
           end
         end
         if @commands[0].empty? and @commands[1].empty?
-          if @timeout_id != nil
-            GLib::Source.remove(@timeout_id)
-            @timeout_id = nil
-          end
+          GLib::Source.remove(@timeout_id) unless @timeout_id.nil?
+          @timeout_id = nil
         else
-          if @timeout_id == nil
+          if @timeout_id.nil?
             @timeout_id = GLib::Timeout.add(20) { do_idle_tasks }
           end
         end

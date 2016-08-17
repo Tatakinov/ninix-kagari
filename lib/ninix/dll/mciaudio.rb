@@ -47,7 +47,7 @@ module Mciaudio
     end
 
     def check_import
-      if @__sakura != nil and Gst != nil
+      unless @__sakura.nil? or Gst.nil?
         return 1
       else
         return 0
@@ -62,29 +62,30 @@ module Mciaudio
     end
 
     def execute(argv)
-      if argv == nil
-        return RESPONSE[400]
-      end
+      return RESPONSE[400] if argv.nil?
       argc = argv.length
-      if argc == 1
-        fail "assert" unless @player != nil
-        if argv[0] == 'stop'
+      case argc
+      when 1
+        fail "assert" if @player.nil?
+        case argv[0]
+        when 'stop'
           @player.set_state(Gst::State::NULL)
-        elsif argv[0] == 'play'
-          if @player.get_state(timeout=Gst::SECOND)[1] == Gst::State::PAUSED
+        when 'play'
+          case @player.get_state(timeout=Gst::SECOND)[1]
+          when Gst::State::PAUSED
             @player.set_state(Gst::State::PLAYING)
             return RESPONSE[204]
-          elsif @player.get_state(timeout=Gst::SECOND)[1] == Gst::State::PLAYING
+          when Gst::State::PLAYING
             @player.set_state(Gst::State::PAUSED)
             return RESPONSE[204]
           end
-          if @filepath != nil and File.exist?(@filepath)
+          if not @filepath.nil? and File.exist?(@filepath)
             @player.set_property(
               'uri', 'file://' + URI.escape(@filepath))
             @player.set_state(Gst::State::PLAYING)
           end
         end
-      elsif argc == 2
+      when 2
         if argv[0] == 'load'
           @player.set_state(Gst::State::NULL)
           filename = Home.get_normalized_path(argv[1])
@@ -101,16 +102,14 @@ module Mciaudio
     end
 
     def on_message(bus, message)
-      if message == nil # XXX: workaround for Gst Version < 0.11
-        return
-      end
-      t = message.type
-      if t == Gst::MessageType::EOS
+      return if message.nil? # XXX: workaround for Gst Version < 0.11
+      case message.type
+      when Gst::MessageType::EOS
         @player.set_state(Gst::State::NULL)
-      elsif t == Gst::MessageType::ERROR
+      when Gst::MessageType::ERROR
         @player.set_state(Gst::State::NULL)
         err, debug = message.parse_error()
-        Logging::Logging.error('Error: ' + err.to_s + ', ' + debug.to_s)
+        Logging::Logging.error("Error: #{err}, #{debug}")
       end
     end
   end

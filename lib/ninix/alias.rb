@@ -18,16 +18,14 @@ module Alias
 
   def self.fatal(error)
     Logging::Logging.error('alias.rb: ' + error.to_s)
-    return NConfig.null_config()
+    NConfig.null_config()
   end
 
   def self.create_from_file(path)
     f = File.open(path, 'rb')
     buf = []
     while line = f.gets
-      if !line.strip.empty?
-        buf << line.strip
-      end
+      buf << line.strip unless line.strip.empty?
     end
     return create_from_buffer(buf)
   end
@@ -39,11 +37,9 @@ module Alias
     while i < j
       line = buf[i]
       i += 1
-      if line.length == 0
-        next
-      end
+      next if line.length.zero?
       match = re_alias.match(line)
-      if match != nil
+      if not match.nil?
         name = line
         table = {}
         begin
@@ -55,11 +51,8 @@ module Alias
               fail ValueError('unexpedted end of file')
             end
             line = line.gsub(0x81.chr + 0x40.chr, "").strip()
-            if line.length == 0
-              next
-            elsif line == '{'
-              break
-            end
+            next if line.length.zero?
+            break if line == '{'
             fail ValueError('open brace not found')
           end
           while true
@@ -70,11 +63,8 @@ module Alias
               fail ValueError('unexpected end of file')
             end
             line = line.gsub(0x81.chr + 0x40.chr, "").strip()
-            if line.length == 0
-              next
-            elsif line == '}'
-              break
-            end
+            next if line.length.zero?
+            break if line == '}'
             line = line.split(',', 2)
             if line.length == 2
               key = line[0].strip

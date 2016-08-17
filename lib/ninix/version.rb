@@ -30,13 +30,16 @@ module Version
   end
 
   def self.VERSION_INFO
-    '\h\s[0]\w8ninix-aya ' + self.VERSION + '\n' +
-      _('Are igai No Nanika with "Nin\'i" for X') + '\n' +
-      '\_q' +
-      'Copyright (c) 2001, 2002 Tamito KAJIYAMA\n' +
-      'Copyright (c) 2002-2006 MATSUMURA Namihiko\n' +
-      'Copyright (c) 2002-2016 Shyouzou Sugitani\n' +
-      'Copyright (c) 2002, 2003 ABE Hideaki\n' +
-      'Copyright (c) 2003-2005 Shun-ichi TAHARA\e'
+    '\h\s[0]\w8ninix-aya '
+      .concat("#{self.VERSION}")
+      .concat('\n')
+      .concat(_('Are igai No Nanika with "Nin\'i" for X'))
+      .concat('\n')
+      .concat('\_q')
+      .concat('Copyright (c) 2001, 2002 Tamito KAJIYAMA\n')
+      .concat('Copyright (c) 2002-2006 MATSUMURA Namihiko\n')
+      .concat('Copyright (c) 2002-2016 Shyouzou Sugitani\n')
+      .concat('Copyright (c) 2002, 2003 ABE Hideaki\n')
+      .concat('Copyright (c) 2003-2005 Shun-ichi TAHARA\e')
   end
 end

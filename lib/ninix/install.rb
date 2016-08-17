@@ -69,14 +69,7 @@ module Install
 
     def check_archive(filename)
       # check archive format
-      base = File.basename(filename)
-      ext = File.extname(filename)
-      ext = ext.downcase
-      if ['.nar', '.zip'].include?(ext)
-        # pass
-      else
-        Install.fatal('unknown archive format')
-      end
+      Install.fatal('unknown archive format') unless ['.nar', '.zip'].include?(File.extname(filename).downcase)
     end
 
     def extract_files(filename)
@@ -92,7 +85,7 @@ module Install
       if filename.start_with?('http:') or filename.start_with?('ftp:')
         url = filename
         filename = download(filename, tmpdir)
-        if filename == nil
+        if filename.nil?
           FileUtils.remove_entry_secure(tmpdir)
           Install.fatal('cannot download the archive file')
         end
@@ -103,14 +96,10 @@ module Install
         zf = Zip::File.new(filename)
         for entry in zf
           name = entry.name
-          if entry.directory?
-            next
-          end
+          next if entry.directory?
           path = File.join(tmpdir, name)
           dname, fname = File.split(path)
-          if not Dir.exists?(dname)
-            FileUtils.mkdir_p(dname)
-          end
+          FileUtils.mkdir_p(dname) unless Dir.exists?(dname)
           buf = zf.read(name)
           of = open(path, 'wb')
           of.write(buf)
@@ -139,7 +128,7 @@ module Install
       errno = 0
       # check the file type
       inst = Home.read_install_txt(tmpdir)
-      if inst == nil
+      if inst.nil?
         if File.exists?(File.join(tmpdir, 'kinoko.ini'))
           filetype = 'kinoko'
         else
@@ -148,25 +137,26 @@ module Install
       else
         filetype = inst.get('type')
       end
-      if filetype == 'ghost'
-        if not Dir.exists?(File.join(tmpdir, 'ghost', 'master'))
+      case filetype
+      when 'ghost'
+        unless Dir.exists?(File.join(tmpdir, 'ghost', 'master'))
           filetype = 'ghost.inverse'
         end
-      elsif filetype == 'ghost with balloon'
+      when 'ghost with balloon'
         filetype = 'ghost.inverse'
-      elsif ['shell', 'shell with balloon', 'supplement'].include?(filetype)
+      when 'shell', 'shell with balloon', 'supplement'
         if inst.include?('accept')
           filetype = 'supplement'
         else
           filetype = 'shell.inverse'
         end
-      elsif filetype == 'balloon'
+      when 'balloon'
         # pass
-      elsif filetype == 'skin'
+      when 'skin'
         filetype = 'nekoninni'
-      elsif filetype == 'katochan'
+      when 'katochan'
         # pass
-      elsif filetype == 'kinoko'
+      when 'kinoko'
         # pass
       else
         errno = 2 # unsupported file type
@@ -184,31 +174,30 @@ module Install
       rescue
         errno = 1
       end
-      if errno != 0
-        return nil, nil, nil, errno
-      end
+      return nil, nil, nil, errno unless errno.zero?
       begin
         filetype, errno = get_file_type(tmpdir)
       rescue
         errno = 4
         filetype = nil
       end
-      if errno != 0
+      unless errno.zero?
         FileUtils.remove_entry_secure(tmpdir)
         return filetype, nil, nil, errno
       end
       begin
-        if filetype == "ghost"
+        case filetype
+        when "ghost"
           target_dirs, names, errno = install_ghost(filename, tmpdir, homedir)
-        elsif filetype == "supplement"
+        when "supplement"
           target_dirs, names, errno = install_supplement(filename, tmpdir, homedir)
-        elsif filetype == "balloon"
+        when "balloon"
           target_dirs, names, errno = install_balloon(filename, tmpdir, homedir)
-        elsif filetype == "kinoko"
+        when "kinoko"
           target_dirs, names, errno = install_kinoko(filename, tmpdir, homedir)
-        elsif filetype == "nekoninni"
+        when "nekoninni"
           target_dirs, names, errno = install_nekoninni(filename, tmpdir, homedir)
-        elsif filetype == "katochan"
+        when "katochan"
           target_dirs, names, errno = install_katochan(filename, tmpdir, homedir)
         else
           # should not reach here
@@ -233,18 +222,14 @@ module Install
       #Logging::Logging.debug(
       #  '(size = ' + ifile.length.to_s + ' bytes)')
       arcdir = Home.get_archive_dir()
-      if not Dir.exists?(arcdir)
-        FileUtils.mkdir_p(arcdir)
-      end
+      FileUtils.mkdir_p(arcdir) unless Dir.exists?(arcdir)
       basedir = arcdir
       filename = File.join(basedir, File.basename(url))
       begin
         ofile = open(filename, 'wb')
         while true
           data = ifile.read(4096)
-          if data == nil # EOF
-            break
-          end
+          break if data.nil? # EOF
           ofile.write(data)
         end
       rescue # IOError, SystemCallError
@@ -265,9 +250,7 @@ module Install
     end
 
     def rename_files(basedir)
-      if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|cygwin|bccwin/ # XXX
-        return
-      end
+      return if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|cygwin|bccwin/ # XXX
       Dir.foreach(basedir) { |filename|
         next if /\A\.+\z/ =~ filename
         filename2 = filename.downcase
@@ -275,9 +258,7 @@ module Install
         if filename != filename2
           File.rename(File.join(basedir, filename), path)
         end
-        if File.directory?(path)
-          rename_files(path)
-        end
+        rename_files(path) if File.directory?(path)
       }
     end
 
@@ -295,9 +276,7 @@ module Install
 
     def remove_files_and_dirs(target_dir, mask)
       path = File.absolute_path(target_dir)
-      if not File.directory?(path)
-        return
-      end
+      return unless File.directory?(path)
       Dir.foreach(path) { |filename|
         next if /\A\.+\z/ =~ filename
         remove_files(mask, path, filename)
@@ -326,9 +305,7 @@ module Install
     end
 
     def lower_files(top_dir)
-      if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|cygwin|bccwin/ # XXX
-        return
-      end
+      return if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|cygwin|bccwin/ # XXX
       n = 0
       Dir.foreach(top_dir) { |filename|
         next if /\A\.+\z/ =~ filename
@@ -340,9 +317,7 @@ module Install
             'renamed ' + File.join(top_dir, filename))
           n += 1
         end
-        if File.directory?(path)
-          n += lower_files(path)
-        end
+        n += lower_files(path) if File.directory?(path)
       }
       return n
     end
@@ -368,9 +343,7 @@ module Install
 
     def select(candidates)
       fail "assert" unless candidates.length >= 1
-      if candidates.length == 1
-        return candidates[0]
-      end
+      return candidates[0] if candidates.length == 1
       ls = @treeview.get_model()
       ls.clear()
       for i, item in enumerate(candidates)
@@ -380,9 +353,7 @@ module Install
       ts.select_iter(ls.get_iter_first())
       response = @select_dialog.run()
       @select_dialog.hide()
-      if response != Gtk::ResponseType::ACCEPT
-        return nil
-      end
+      return nil if response != Gtk::ResponseType::ACCEPT
       model, it = ts.get_selected()
       return candidates[model.get_value(it, 0)]
     end
@@ -390,13 +361,9 @@ module Install
     def install_ghost(archive, tmpdir, homedir)
       # find install.txt
       inst = Home.read_install_txt(tmpdir)
-      if inst == nil
-        Install.fatal('install.txt not found')
-      end
+      Install.fatal('install.txt not found') if inst.nil?
       target_dir = inst.get('directory')
-      if target_dir == nil
-        Install.fatal('"directory" not found in install.txt')
-      end
+      Install.fatal('"directory" not found in install.txt') if target_dir.nil?
       prefix = File.join(homedir, 'ghost', target_dir)
       ghost_src = File.join(tmpdir, 'ghost', 'master')
       shell_src = File.join(tmpdir, 'shell')
@@ -432,11 +399,11 @@ module Install
       # find balloon
       balloon_dir = inst.get('balloon.directory')
       balloon_name = nil
-      if balloon_dir != nil
+      unless balloon_dir.nil?
         balloon_dir = Home.get_normalized_path(balloon_dir)
         balloon_dst = File.join(homedir, 'balloon', balloon_dir)
         balloon_src = inst.get('balloon.source.directory')
-        if balloon_src != nil
+        unless balloon_src.nil?
           balloon_src = Home.get_normalized_path(balloon_src)
         else
           balloon_src = balloon_dir
@@ -457,14 +424,14 @@ module Install
                              File.join(balloon_dst, path)]
           end
           install_files(balloon_list)
-          if inst_balloon != nil
+          unless inst_balloon.nil?
             balloon_name = inst_balloon.get('name')
           end
         end
       end
       if Dir.exists?(prefix)
         inst_dst = Home.read_install_txt(prefix)
-        if inst.get('refresh', :default => 0).to_i != 0
+        unless inst.get('refresh', :default => 0).to_i.zero?
           # uninstall older versions of the ghost
           if confirm_refresh(prefix, 'ghost')
             mask = []
@@ -477,7 +444,7 @@ module Install
             return nil, nil, 3
           end
         else
-          if not confirm_overwrite(prefix, 'ghost')
+          unless confirm_overwrite(prefix, 'ghost')
             return nil, nil, 3
           end
         end
@@ -487,10 +454,10 @@ module Install
       install_files(filelist)
       # create SETTINGS
       path = File.join(prefix, 'SETTINGS')
-      if not File.exists?(path)
+      unless File.exists?(path)
         begin
           f = open(path, 'w')
-          if balloon_dir != nil
+          unless balloon_dir.nil?
             f.write(["balloon_directory, ", balloon_dir, "\n"].join(''))
           end
         rescue # IOError, SystemCallError => e
@@ -498,7 +465,7 @@ module Install
         ensure
           f.close()
         end
-        if balloon_dir == nil # XXX
+        if balloon_dir.nil? # XXX
           balloon_dir = ''
         end
       end
@@ -507,7 +474,7 @@ module Install
 
     def install_supplement(archive, tmpdir, homedir)
       inst = Home.read_install_txt(tmpdir)
-      if inst != nil and inst.include?('accept')
+      if not inst.nil? and inst.include?('accept')
         Logging::Logging.info('searching supplement target ...')
         candidates = []
         begin
@@ -522,7 +489,7 @@ module Install
           end
           desc = Home.read_descript_txt(
                                         File.join(path, 'ghost', 'master'))
-          if desc != nil and desc.get('sakura.name') == inst.get('accept')
+          if not desc.nil? and desc.get('sakura.name') == inst.get('accept')
             candidates << dirname
           end
         end
@@ -531,7 +498,7 @@ module Install
           return nil, nil, 4
         else
           target = select(candidates)
-          if target == nil
+          if target.nil?
             return nil, nil, 4
           end
           path = File.join(homedir, 'ghost', target)
@@ -539,7 +506,7 @@ module Install
             if inst.get('type') == 'shell'
               path = File.join(path, 'shell', inst['directory'])
             else
-              if not inst.include?('type')
+              unless inst.include?('type')
                 Logging::Logging.error('supplement type not specified')
               else
                 Logging::Logging.error('unsupported supplement type: ' + inst['type'])
@@ -548,7 +515,7 @@ module Install
             end
           end
           Logging::Logging.info('found')
-          if not Dir.exists?(path)
+          unless Dir.exists?(path)
             FileUtils.mkdir_p(path)
           end
           File.delete(File.join(tmpdir, 'install.txt'))
@@ -561,11 +528,11 @@ module Install
     def install_balloon(archive, srcdir, homedir)
       # find install.txt
       inst = Home.read_install_txt(srcdir)
-      if inst == nil
+      if inst.nil?
         Install.fatal('install.txt not found')
       end
       target_dir = inst.get('directory')
-      if target_dir == nil
+      if target_dir.nil?
         Install.fatal('"directory" not found in install.txt')
       end
       dstdir = File.join(homedir, 'balloon', target_dir)
@@ -578,7 +545,7 @@ module Install
       ##             File.join(dstdir, 'install.txt')]
       if Dir.exists?(dstdir)
         inst_dst = Home.read_install_txt(dstdir)
-        if inst.get('refresh', :default => 0).to_i != 0
+        unless inst.get('refresh', :default => 0).to_i.zero?
           # uninstall older versions of the balloon
           if confirm_refresh(dstdir, 'balloon')
             mask = []
@@ -590,7 +557,7 @@ module Install
             return nil, nil, 3
           end
         else
-          if not confirm_overwrite(dstdir, 'balloon')
+          unless confirm_overwrite(dstdir, 'balloon')
             return nil, nil, 3
           end
         end
@@ -610,7 +577,7 @@ module Install
       for subdir in dirlist
         path = File.join(homedir, 'kinoko', subdir)
         kinoko = Home.read_kinoko_ini(path)
-        if kinoko == nil
+        if kinoko.nil?
           next
         end
         kinoko_name = kinoko['title']
@@ -626,11 +593,11 @@ module Install
     def install_kinoko(archive, srcdir, homedir)
       # find kinoko.ini
       kinoko = Home.read_kinoko_ini(srcdir)
-      if kinoko == nil
+      if kinoko.nil?
         Install.fatal('failed to read kinoko.ini')
       end
       kinoko_name = kinoko['title']
-      if kinoko['extractpath'] != nil
+      unless kinoko['extractpath'].nil?
         dstdir = File.join(homedir, 'kinoko', kinoko['extractpath'])
       else
         dstdir = File.join(homedir, 'kinoko', File.basename(archive)[0,-4])
@@ -654,9 +621,7 @@ module Install
 
     def uninstall_nekoninni(homedir, dir)
       nekoninni_dir = File.join(homedir, 'nekodorif', 'skin', dir)
-      if not Dir.exists?(nekoninni_dir)
-        return
-      end
+      return unless Dir.exists?(nekoninni_dir)
       if confirm_removal(nekoninni_dir, 'nekodorif skin')
         FileUtils.remove_entry_secure(nekoninni_dir)
       end
@@ -665,11 +630,11 @@ module Install
     def install_nekoninni(archive, srcdir, homedir)
       # find install.txt
       inst = Home.read_install_txt(srcdir)
-      if inst == nil
+      if inst.nil?
         Install.fatal('install.txt not found')
       end
       target_dir = inst.get('directory')
-      if target_dir == nil
+      if target_dir.nil?
         Install.fatal('"directory" not found in install.txt')
       end
       dstdir = File.join(homedir, 'nekodorif', 'skin', target_dir)
@@ -692,9 +657,7 @@ module Install
 
     def uninstall_katochan(homedir, target_dir)
       katochan_dir = File.join(homedir, 'nekodorif', 'katochan', target_dir)
-      if not Dir.exists?(katochan_dir)
-        return
-      end
+      return unless Dir.exists?(katochan_dir)
       if confirm_removal(katochan_dir, 'nekodorif katochan')
         FileUtils.remove_entry_secure(katochan_dir)
       end
@@ -703,11 +666,11 @@ module Install
     def install_katochan(archive, srcdir, homedir)
       # find install.txt
       inst = Home.read_install_txt(srcdir)
-      if inst == nil
+      if inst.nil?
         Install.fatal('install.txt not found')
       end
       target_dir = inst.get('directory')
-      if target_dir == nil
+      if target_dir.nil?
         Install.fatal('"directory" not found in install.txt')
       end
       dstdir = File.join(homedir, 'nekodorif', 'katochan', target_dir)
@@ -745,9 +708,7 @@ module Install
     def install_files(filelist)
       for from_path, to_path in filelist
         dirname, filename = File.split(to_path)
-        if not Dir.exists?(dirname)
-          FileUtils.mkdir_p(dirname)
-        end
+        FileUtils.mkdir_p(dirname) unless Dir.exists?(dirname)
         FileUtils.copy(from_path, to_path)
       end
     end

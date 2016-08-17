@@ -166,27 +166,27 @@ module Prefs
     def reset
       @fontchooser.set_font_name(get('balloon_fonts', :default => DEFAULT_BALLOON_FONTS))
       set_default_balloon(get('default_balloon'))
-      @ignore_button.set_active(get('ignore_default', :default => 0) != 0)
+      @ignore_button.set_active((not get('ignore_default', :default => 0).zero?))
       scale = get('surface_scale', :default => Prefs.get_default_surface_scale())
-      if not RANGE_SCALE.include?(scale)
+      unless RANGE_SCALE.include?(scale)
         @surface_scale_combo.set_active(RANGE_SCALE.index(Prefs.get_default_surface_scale()))
       else
         @surface_scale_combo.set_active(RANGE_SCALE.index(scale))
       end
       script_speed = get('script_speed', :default => Prefs.get_default_script_speed())
-      if not RANGE_SCRIPT_SPEED.include?(script_speed)
+      unless RANGE_SCRIPT_SPEED.include?(script_speed)
         @script_speed_combo.set_active(
                                        RANGE_SCRIPT_SPEED.index(Prefs.get_default_script_speed()))
       else
         @script_speed_combo.set_active(RANGE_SCRIPT_SPEED.index(script_speed))
       end
-      @balloon_scaling_button.set_active(get('balloon_scaling') != 0)
-      @allowembryo_button.set_active(get('allowembryo') != 0)
-      @check_collision_button.set_active(get('check_collision', :default => 0) != 0)
-      @check_collision_name_button.set_active(get('check_collision_name', :default => 0) != 0)
-      @use_pna_button.set_active(get('use_pna', :default => 1) != 0)
-      @sink_after_talk_button.set_active(get('sink_after_talk') != 0)
-      @raise_before_talk_button.set_active(get('raise_before_talk') != 0)
+      @balloon_scaling_button.set_active((not get('balloon_scaling').zero?))
+      @allowembryo_button.set_active((not get('allowembryo').zero?))
+      @check_collision_button.set_active((not get('check_collision', :default => 0).zero?))
+      @check_collision_name_button.set_active((not get('check_collision_name', :default => 0).zero?))
+      @use_pna_button.set_active((not get('use_pna', :default => 1).zero?))
+      @sink_after_talk_button.set_active((not get('sink_after_talk').zero?))
+      @raise_before_talk_button.set_active((not get('raise_before_talk').zero?))
       @animation_quality_adjustment.set_value(get('animation_quality', :default => 1.0))
     end
 
@@ -227,9 +227,9 @@ module Prefs
       @__prefs.set('allowembryo', (@allowembryo_button.active? ? 1 : 0).to_s)
       @__prefs.set('balloon_fonts', @fontchooser.font_name)
       selected = @balloon_treeview.selection.selected
-      if selected != nil
+      unless selected.nil?
         model, listiter = selected
-        if listiter != nil # XXX
+        unless listiter.nil? # XXX
           directory = model.get_value(listiter, 1)
           @__prefs.set('default_balloon', directory)
         end
@@ -409,11 +409,12 @@ module Prefs
       label.show()
       @script_speed_combo = Gtk::ComboBoxText.new()
       for index in 0..(RANGE_SCRIPT_SPEED.length - 1)
-        if index == 0
+        case index
+        when 0
           label = _('None')
-        elsif index == 1
+        when 1
           label = ['1 (', _('Fast'), ')'].join('')
-        elsif index == RANGE_SCRIPT_SPEED.length - 1
+        when RANGE_SCRIPT_SPEED.length - 1
           label = [index.to_s, ' (', _('Slow'), ')'].join('')
         else
           label = index.to_s
@@ -472,18 +473,18 @@ module Prefs
       @balloon_treeview.set_model(model)
       listiter = model.iter_first
       selected = false
-      while listiter != nil
+      while not listiter.nil?
         value = model.get_value(listiter, 1)
-        if value == directory or directory == nil
+        if value == directory or directory.nil?
           @balloon_treeview.selection.select_iter(listiter)
           selected = true
           break
         end
         listiter.next!
       end
-      if not selected
+      unless selected
         listiter = model.iter_first
-        fail "assert" unless listiter != nil
+        fail "assert" if listiter.nil?
         @balloon_treeview.selection.select_iter(listiter)
       end
     end

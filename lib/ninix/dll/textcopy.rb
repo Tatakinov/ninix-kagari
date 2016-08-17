@@ -40,7 +40,7 @@ module Textcopy
       return RESPONSE[400] if argument.nil? or argument.empty? or @clipboard.nil?
       text = argument[0]
       @clipboard.set_text(text)
-      if argument.length >= 2 and argument[1] != 0
+      if argument.length >= 2 and not argument[1].zero?
         "SAORI/1.0 200 OK\r\n" \
         "Result: " \
         "#{text.encode(@charset, :invalid => :replace, :undef => :replace)}" \

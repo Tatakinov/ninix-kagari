@@ -40,7 +40,7 @@ module Makoto
         end
         i += 2
       elsif s[i] == '('
-        if validity == 0
+        if validity.zero?
           segments << buf.join
           buf = []
           i += 1
@@ -69,11 +69,11 @@ module Makoto
     end
     if validity == 2
       expanded = segments[1..segments.length-1].sample
-      if repeat_count != nil
+      unless repeat_count.nil?
         expanded = (expanded * rand(repeat_count))
       end
       return i, segments[0] + expanded
-    elsif validity == 0
+    elsif validity.zero?
       return j, buf.join
     else
       return j, s[start..s.length-1]
@@ -104,22 +104,16 @@ module Makoto
                            ['((1|2)|(a|b)', ['((1|2)|(a|b)']],
                            ]
       result = execute(test)
-      if verbose != 0
-        print("'", test.to_s, "'", ' => ', "'", result.to_s, "'", ' ... ',)
-      end
+      print("'", test.to_s, "'", ' => ', "'", result.to_s, "'", ' ... ',) unless verbose.zero?
       begin
-        if expected == nil
+        if expected.nil?
           fail "assert" unless result == test
         else
           fail "assert" unless expected.include?(result)
         end
-        if verbose != 0
-          print("OK\n")
-        end
+        print("OK\n") unless verbose.zero?
       rescue #AssertionError
-        if verbose != 0
-          print("NG\n")
-        end
+        print("NG\n") unless verbose.zero?
         raise
       end
     end
