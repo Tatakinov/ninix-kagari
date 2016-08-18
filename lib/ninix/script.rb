@@ -35,7 +35,7 @@ module Script
           error: 'strict',
           script: nil, src: nil, column: nil, length: nil, skip: nil)
       super()
-      if not ['strict', 'loose'].include?(error)
+      unless ['strict', 'loose'].include?(error)
         fail ValueError('unknown error scheme: ' + error.to_s)
       end
       @error = error
@@ -52,7 +52,7 @@ module Script
       else
         done = @script
       end
-      if @error == 'strict' or @column == nil
+      if @error == 'strict' or @column.nil?
         script = ''
       else
         script = @src[@column + @skip, @src.length]
@@ -61,9 +61,9 @@ module Script
     end
 
     def format
-      if @column != nil
+      unless @column.nil?
         column = @column
-        if not @src.empty?
+        unless @src.empty?
           dump = [@src[0..@column-1],
                   "\x1b[7m",
                   (@src[column, @length] or ' '),
@@ -83,25 +83,26 @@ module Script
   class Parser
 
     def initialize(error: 'strict')
-      if not ['strict', 'loose'].include?(error)
+      unless ['strict', 'loose'].include?(error)
         fail ArgumentError('unknown error scheme: ' + error.to_s)
       end
       @error = error
     end
 
     def perror(position: 'column', skip: nil)
-      if not ['column', 'eol'].include?(position)
+      unless ['column', 'eol'].include?(position)
         fail ArgumentError('unknown position scheme: ', position.to_s)
       end
-      if not ['length', 'rest', nil].include?(skip)
+      unless ['length', 'rest', nil].include?(skip)
         fail ArgumentError('unknown skip scheme: ', skip.to_s)
       end
       if position == 'column'
         column = @column
         length = @length
-        if skip == 'length'
+        case skip
+        when 'length'
           skip = length
-        elsif skip == 'rest'
+        when 'rest'
           skip = @src[column, @src.length].length
         else
           skip = 0
@@ -137,13 +138,9 @@ module Script
       while pos < end_
         for token, pattern in patterns
           match = pattern.match(s, pos)
-          if match != nil and match.begin(0) == pos
-            break
-          end
+          break if not match.nil? and match.begin(0) == pos
         end
-        if match == nil
-          fail RuntimeError('should not reach here')
-        end
+        fail RuntimeError('should not reach here') if match.nil?
         tokens << [token, match[0]]
         pos = match.end(0)
       end
@@ -156,18 +153,14 @@ module Script
       rescue IndexError
         raise perror(:position => 'eol'), 'unexpected end of script'
       end
-      if token == nil
-        return "", ""
-      end
+      return "", "" if token.nil?
       @column += @length
       @length = lexeme.length
       return token, lexeme
     end
 
     def parse(s)
-      if s == nil or s.empty?
-        return []
-      end
+      return [] if s.nil? or s.empty?
       # tokenize the script
       @src = s
       @tokens = tokenize(@src)
@@ -182,10 +175,10 @@ module Script
       while not @tokens.empty?
         token, lexeme = next_token()
         if token == TOKEN_STRING and lexeme == '\\'
-          if not string_chunks.empty?
+          unless string_chunks.empty?
             text << [TEXT_STRING, string_chunks.join('')]
           end
-          if not text.empty?
+          unless text.empty?
             @script << [SCRIPT_TEXT, text, @column]
           end
           fail perror(:skip => 'length'), 'unknown tag'
@@ -203,7 +196,7 @@ module Script
           string_chunks << lexeme
           next
         end
-        if not string_chunks.empty?
+        unless string_chunks.empty?
           text << [TEXT_STRING, string_chunks.join('')]
           string_chunks = []
         end
@@ -212,7 +205,7 @@ module Script
             argument = read_sbra_id()
             text << [TEXT_META, lexeme, argument]
           elsif lexeme == '%*'
-            if not text.empty?
+            unless text.empty?
               @script << [SCRIPT_TEXT, text, @column]
               text = []
             end
@@ -222,7 +215,7 @@ module Script
           end
           next
         end
-        if not text.empty?
+        unless text.empty?
           @script << [SCRIPT_TEXT, text, @column]
           text = []
         end
@@ -309,7 +302,7 @@ module Script
             @script << [SCRIPT_TAG, lexeme, @column]
           end
         elsif ["\\_a"].include?(lexeme)
-          if anchor == nil
+          if anchor.nil?
             anchor = perror(:skip => 'rest')
             @script << [SCRIPT_TAG, lexeme, read_sbra_id(), @column]
           else
@@ -327,7 +320,7 @@ module Script
           return []
         end
       end
-      if anchor != nil
+      unless anchor.nil?
         if @script[-1][0, 2] == [SCRIPT_TAG, '\e']
           @script.insert(@script.length - 1,
                          [SCRIPT_TAG, '\_a', @script[-1][2]])
@@ -337,10 +330,10 @@ module Script
         anchor.script = @script
         fail anchor, 'syntax error (unbalanced \_a tag)'
       end
-      if not string_chunks.empty?
+      unless string_chunks.empty?
         text << [TEXT_STRING, string_chunks.join('')]
       end
-      if not text.empty?
+      unless text.empty?
         @script << [SCRIPT_TEXT, text, @column]
       end
       return @script
@@ -348,25 +341,17 @@ module Script
 
     def read_number
       token, number = next_token()
-      if token != TOKEN_NUMBER
-        fail perror, 'syntax error (expected a number)'
-      end
+      fail perror, 'syntax error (expected a number)' if token != TOKEN_NUMBER
       return number
     end
 
     def read_sbra_number
       token, lexeme = next_token()
-      if token != TOKEN_OPENED_SBRA
-        fail perror, 'syntax error (expected a square bracket)'
-      end
+      fail perror, 'syntax error (expected a square bracket)' if token != TOKEN_OPENED_SBRA
       token, number = next_token()
-      if token != TOKEN_NUMBER
-        fail perror(:skip => 'length'), 'syntax error (expected a number)'
-      end
+      fail perror(:skip => 'length'), 'syntax error (expected a number)' if token != TOKEN_NUMBER
       token, lexeme = next_token()
-      if token != TOKEN_CLOSED_SBRA
-        fail perror(:skip => 'length'), 'syntax error (expected a square bracket)'
-      end
+      fail perror(:skip => 'length'), 'syntax error (expected a square bracket)' if token != TOKEN_CLOSED_SBRA
       return number
     end
 
@@ -388,9 +373,7 @@ module Script
 
     def read_sbra_text
       token, lexeme = next_token()
-      if token != TOKEN_OPENED_SBRA
-        fail perror, 'syntax error (expected a square bracket)'
-      end
+      fail perror, 'syntax error (expected a square bracket)' if token != TOKEN_OPENED_SBRA
       text = []
       string_chunks = []
       close_flag = false
@@ -403,23 +386,22 @@ module Script
           string_chunks << lexeme
           next
         end
-        if not string_chunks.empty?
+        unless string_chunks.empty?
           text << [TEXT_STRING, string_chunks.join('')]
           string_chunks = []
         end
-        if token == TOKEN_CLOSED_SBRA
+        case token
+        when TOKEN_CLOSED_SBRA
           close_flag = true
           break
-        elsif token == TOKEN_META
+        when TOKEN_META
           text << [TEXT_META, lexeme]
         else
           fail perror(:skip => 'length'), 'syntax error (wrong type of argument)'
           return []
         end
       end
-      if not close_flag
-        fail perror(:position => 'eol'), 'unexpected end of script'
-      end
+      fail perror(:position => 'eol'), 'unexpected end of script' unless close_flag
       return text
     end
 
@@ -435,16 +417,14 @@ module Script
         if token == TEXT_STRING
           while i < j
             match = re_param.match(lexeme, i)
-            if match == nil or match.begin(0) != i
-              break
-            end
+            break if match.nil? or match.begin(0) != i
             param = re_quote.match(match[0])
-            if param != nil
+            unless param.nil?
               param = (param.pre_match + param[1] + param.post_match)
             else
               param = match[0]
             end
-            if param != nil or not buf.empty?
+            unless param.nil? and buf.empty?
               buf << [token, param]
             end
             i = match.end(0)
@@ -460,7 +440,7 @@ module Script
           buf << [token, lexeme[i, lexeme.length]]
         end
       end
-      if not buf.empty?
+      unless buf.empty?
         params << buf
       end
       return params

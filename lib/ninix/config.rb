@@ -36,9 +36,7 @@ module NConfig
     end
     buf = []
     while line = f.gets
-      if not line.strip.empty?
-        buf << line.strip
-      end
+      buf << line.strip unless line.strip.empty?
     end
     f.close
     return create_from_buffer(buf, :charset => charset)

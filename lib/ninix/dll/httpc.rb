@@ -44,18 +44,18 @@ module Httpc
 
     def get(url, start: nil, end_: nil)
       url = URI.parse(url)
-      if not ((url.scheme == 'http' or url.scheme == 'https') and
-              #url.params == nil and
-              url.query == nil and
-              url.fragment == nil)
+      unless ((url.scheme == 'http' or url.scheme == 'https') and
+              #url.params.nil? and
+              url.query.nil? and
+              url.fragment.nil?)
         return RESPONSE[400] # XXX
       end
       data = open(url) do |f|
         @charset = f.charset
         f.read()
       end
-      if start != nil
-        fail "assert" unless end_ != nil
+      unless start.nil?
+        fail "assert" if end_.nil?
         nc = 0
         ls = start.length
         le = end_.length
@@ -112,29 +112,24 @@ module Httpc
         end
       end
       if argument.empty?
-        ##fail "assert" unless bg == nil and process_tag == nil
-        return "SAORI/1.0 200 OK\r\nResult: " + @loaded.to_s + " \r\n\r\n"
+        ##fail "assert" unless bg.nil? and process_tag.nil?
+        return "SAORI/1.0 200 OK\r\nResult: #{@loaded} \r\n\r\n"
       elsif argument.length > 3
         return RESPONSE[400]
       elsif argument.length == 2 # FIXME: not supported yet
         return "SAORI/1.0 200 OK\r\nResult: 0\r\n\r\n"
       else
-        if bg != nil # needs multi-threading?
+        if not bg.nil? # needs multi-threading?
           timeout_id = GLib::Timeout.add(1000) { notify(bg, argument, process_tag) } # XXX
           @__bg[timeout_id] = bg
           return nil # "SAORI/1.0 204 No Content\r\n\r\n"
         else
           data = get(argument[0], :start => argument[1], :end_ => argument[2])
-          if data.empty?
-            return nil # "SAORI/1.0 204 No Content\r\n\r\n"
-          end
-          if data == RESPONSE[400] # XXX
-            return data
-          end
-          result = "SAORI/1.0 200 OK\r\n" + "Result: " + data[0].to_s + "\r\n"
+          return nil if data.empty? # "SAORI/1.0 204 No Content\r\n\r\n"
+          return data if data == RESPONSE[400] # XXX
+          result = "SAORI/1.0 200 OK\r\nResult: #{data[0]}\r\n"
           for n in 0..data.length-1
-            result = [result,
-                      "Value" + n.to_s + ": " + data[n].to_s + "\r\n"].join("")
+            result = [result, "Value#{n}: #{data[n]}\r\n"].join("")
           end
           result += "\r\n"
           return result.encode('Shift_JIS', :invalid => :replace, :undef => :replace)

@@ -185,7 +185,7 @@ module Menu
           next set_stylecontext(i, *a, :provider => provider)
         end
         submenu = item.submenu
-        if submenu != nil
+        unless submenu.nil?
           provider = create_css_provider_for(submenu)
           submenu.signal_connect('realize', provider) do |i, *a, provider|
             next set_stylecontext(i, *a, :provider => provider)
@@ -219,14 +219,14 @@ module Menu
       @__align['background'] = align_background
       @__align['foreground'] = align_foreground
       @__align['sidebar'] = align_sidebar
-      if path_background != nil and File.exists?(path_background)
+      if not path_background.nil? and File.exists?(path_background)
         begin
           color = Pix.get_png_lastpix(path_background)
           @__imagepath['background'] = ["background-image: url('",
                                         path_background, "');\n",
                                         "background-color: ",
                                         color, ";\n"].join('')
-          if path_sidebar != nil and File.exists?(path_sidebar)
+          if not path_sidebar.nil? and File.exists?(path_sidebar)
               sidebar_width, sidebar_height = Pix.get_png_size(path_sidebar)
             @__imagepath['background_with_sidebar'] = ["background-image: url('",
                                                        path_sidebar,
@@ -242,18 +242,18 @@ module Menu
           # pass
         end
       end
-      if @__imagepath['background'] == nil
+      if @__imagepath['background'].nil?
         @__imagepath['background'] = ["background-image: none;\n",
                                       "background-color: transparent;\n"].join('')
       end
-      if path_foreground != nil and File.exists?(path_foreground)
+      if not path_foreground.nil? and File.exists?(path_foreground)
         begin
           color = Pix.get_png_lastpix(path_foreground)
           @__imagepath['foreground'] = ["background-image: url('",
                                         path_foreground, "');\n",
                                         "background-color: ",
                                         color, ";\n"].join('')
-          if path_sidebar != nil and File.exists?(path_sidebar)
+          if not path_sidebar.nil? and File.exists?(path_sidebar)
             sidebar_width, sidebar_height = Pix.get_png_size(path_sidebar)
             @__imagepath['foreground_with_sidebar'] = ["background-image: url('",
                                                        path_sidebar, "'),url('",
@@ -268,14 +268,14 @@ module Menu
           #pass
         end
       end
-      if @__imagepath['foreground'] == nil
+      if @__imagepath['foreground'].nil?
         @__imagepath['foreground'] = ["background-image: none;\n",
                                         "background-color: transparent;\n"].join('')
       end
     end
 
     def __set_mayuna_menu(side)
-      if @__mayuna_menu.length > side and @__mayuna_menu[side] != nil
+      if @__mayuna_menu.length > side and not @__mayuna_menu[side].nil?
         menuitem = @ui_manager.get_widget(['/popup/', 'Costume'].join(''))
         menuitem.set_submenu(@__mayuna_menu[side])
         __set_visible('Costume', true)
@@ -303,7 +303,7 @@ module Menu
         for _ in @__mayuna_menu.length..index 
           @__mayuna_menu << nil
         end
-        if mayuna_menu[side] != nil
+        unless mayuna_menu[side].nil?
           @__mayuna_menu[index] = Gtk::Menu.new()
           item = Gtk::TearoffMenuItem.new()
           item.show()
@@ -339,13 +339,13 @@ module Menu
     __re_shortcut = Regexp.new('&(?=[\x21-\x7e])')
 
     def __modify_shortcut(caption)
-      return self.__re_shortcut.sub('_', caption)
+      self.__re_shortcut.sub('_', caption)
     end
 
     __re_mnemonic = Regexp.new('\(_.\)|_')
 
     def __cut_mnemonic(caption)
-      return self.__re_mnemonic.sub('', caption)
+      self.__re_mnemonic.sub('', caption)
     end
 
     def __update_ui(side)
@@ -376,14 +376,12 @@ module Menu
           else
             name_list = @__ui[key][0][side]
           end
-          if not name_list.empty? # caption
+          unless name_list.empty? # caption
             for name in name_list
               caption = @parent.handle_request('GET', 'getstring', name)
-              if caption != nil and not caption.empty?
-                break
-              end
+              break unless caption.nil? or caption.empty?
             end
-            if caption != nil and not caption.empty?
+            unless caption.nil? or caption.empty?
               caption = __modify_shortcut(caption)
               if caption == __cut_mnemonic(caption)
                 caption = [caption, @__ui[key][1]].join('')
@@ -397,19 +395,17 @@ module Menu
         else
           name_list = @__ui[key][2][side]
         end
-        if name_list != nil and not name_list.empty? # visible
+        if not name_list.nil? and not name_list.empty? # visible
           for name in name_list
             visible = @parent.handle_request('GET', 'getstring', name)
-            if visible != nil and not visible.empty?
-              break
-            end
+            break unless visible.nil? or visible.empty?
           end
           if visible == '0'
             __set_visible(key, false)
           else
             __set_visible(key, true)
           end
-        elsif name_list == nil
+        elsif name_list.nil?
           __set_visible(key, false)
         end
       end
@@ -420,9 +416,7 @@ module Menu
       for key in @__menu_list.keys
         item = @ui_manager.get_widget(['/popup/', key].join(''))
         submenu = item.submenu
-        if submenu != nil
-          submenu.unrealize()
-        end
+        submenu.unrealize() unless submenu.nil?
       end
       if side > 1
         string = 'char' + side.to_s
@@ -431,11 +425,9 @@ module Menu
         string = ['sakura', 'kero'][side]
       end
       string = [string, '.popupmenu.visible'].join('')
-      if @parent.handle_request('GET', 'getstring', string) == '0'
-        return
-      end
+      return if @parent.handle_request('GET', 'getstring', string) == '0'
       __update_ui(side)
-      if side == 0
+      if side.zero?
         portal = @parent.handle_request(
           'GET', 'getstring', 'sakura.portalsites')
       else
@@ -460,7 +452,7 @@ module Menu
       for key in @__menu_list.keys
         item = @ui_manager.get_widget(['/popup/', key].join(''))
         visible = @__menu_list[key]['visible']
-        if item != nil
+        unless item.nil?
           if visible
             item.show()
           else
@@ -476,7 +468,7 @@ module Menu
       fail "assert" unless @__menu_list.include?(name)
       fail "assert" unless caption.is_a?(String)
       item = @ui_manager.get_widget(['/popup/', name].join(''))
-      if item != nil
+      unless item.nil?
         label = item.get_children()[0]
         label.set_text_with_mnemonic(caption)
       end
@@ -492,14 +484,12 @@ module Menu
       if side >= 1
         __set_visible('Portal', false)
       else
-        if portal != nil and not portal.empty?
+        unless portal.nil? or portal.empty?
           menu = Gtk::Menu.new()
           portal_list = portal.split(2.chr, 0)
           for site in portal_list
             entry = site.split(1.chr, 0)
-            if entry.empty?
-              next
-            end
+            next if entry.empty?
             title = entry[0]
             if title == '-'
               item = Gtk::SeparatorMenuItem.new()
@@ -521,7 +511,7 @@ module Menu
                     filename = [filename, ext].join('')
                     banner = File.join(
                       base_path, 'ghost/master/banner', filename)
-                    if not File.exists?(banner)
+                    unless File.exists?(banner)
                       banner = nil
                     else
                       break
@@ -530,7 +520,7 @@ module Menu
                 else
                   banner = File.join(
                     base_path, 'ghost/master/banner', filename)
-                  if not File.exists?(banner)
+                  unless File.exists?(banner)
                     banner = nil
                   end
                 end
@@ -543,7 +533,7 @@ module Menu
                     'NOTIFY', 'notify_site_selection', title, url)
                   next true
                 end
-                if banner != nil
+                unless banner.nil?
                   item.set_has_tooltip(true)
                   pixbuf = Pix.create_pixbuf_from_file(banner, :is_pnr => false)
                   item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
@@ -576,14 +566,12 @@ module Menu
     end
 
     def __set_recommend_menu(recommend)
-      if recommend != nil and not recommend.empty?
+      unless recommend.nil? or recommend.empty?
         menu = Gtk::Menu.new()
         recommend_list = recommend.split(2.chr, 0)
         for site in recommend_list
           entry = site.split(1.chr, 0)
-          if entry.empty?
-            next
-          end
+          next if entry.empty?
           title = entry[0]
           if title == '-'
             item = Gtk::SeparatorMenuItem.new()
@@ -604,7 +592,7 @@ module Menu
                   filename = [filename, ext].join('')
                   banner = File.join(
                     base_path, 'ghost/master/banner', filename)
-                  if not File.exists?(banner)
+                  unless File.exists?(banner)
                     banner = nil
                   else
                     break
@@ -613,7 +601,7 @@ module Menu
               else
                 banner = File.join(
                   base_path, 'ghost/master/banner', filename)
-                if not File.exists?(banner)
+                unless File.exists?(banner)
                   banner = nil
                 end
               end
@@ -625,7 +613,7 @@ module Menu
                 @parent.handle_request('NOTIFY', 'notify_site_selection', title, url)
                 next true
               end
-              if banner != nil
+              unless banner.nil?
                 item.set_has_tooltip(true)
                 pixbuf = Pix.create_pixbuf_from_file(banner, :is_pnr => false)
                 item.signal_connect('query-tooltip') do |widget, x, y, keyboardmode, tooltip|
@@ -657,9 +645,9 @@ module Menu
     end
 
     def create_ghost_menuitem(name, icon, key, handler, thumbnail)
-      if icon != nil
+      unless icon.nil?
         pixbuf = Pix.create_icon_pixbuf(icon)
-        if pixbuf == nil
+        if pixbuf.nil?
           item = Gtk::MenuItem.new(name)
         else
           image = Gtk::Image.new
@@ -678,7 +666,7 @@ module Menu
         handler.call(key)
         next true
       end
-      if thumbnail != nil
+      unless thumbnail.nil?
         item.set_has_tooltip(true)
         pixbuf = Pix.create_pixbuf_from_file(thumbnail, :is_pnr => false)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
@@ -730,8 +718,8 @@ module Menu
     end
 
     def set_stylecontext_with_sidebar(item, *args, provider: nil)
-      if @__imagepath['background_with_sidebar'] == nil or \
-        @__imagepath['foreground_with_sidebar'] == nil or \
+      if @__imagepath['background_with_sidebar'].nil? or \
+        @__imagepath['foreground_with_sidebar'].nil? or \
         @sidebar_width <= 0
         set_stylecontext(item, *args, :provider => provider)
         return false
@@ -777,9 +765,7 @@ module Menu
     end
 
     def on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
-      if pixbuf == nil
-        return false
-      end
+      return false if pixbuf.nil?
       tooltip.set_icon(pixbuf)
       return true
     end
@@ -789,7 +775,7 @@ module Menu
         ghost_menu = Gtk::Menu.new()
         for items in @parent.handle_request('GET', 'get_ghost_menus')
           item = items[path]
-          if item.parent != nil
+          unless item.parent.nil?
             item.reparent(ghost_menu)
           else
             ghost_menu << item
@@ -819,7 +805,7 @@ module Menu
     def create_meme_menu(menuitem)
       menu = Gtk::Menu.new()
       for item in menuitem.values()
-        if item.parent != nil
+        unless item.parent.nil?
           item.reparent(menu)
         else
           menu << item
@@ -840,7 +826,7 @@ module Menu
         handler.call(value)
         next true
       end
-      if thumbnail != nil
+      unless thumbnail.nil?
         item.set_has_tooltip(true)
         pixbuf = Pix.create_pixbuf_from_file(thumbnail, :is_pnr => false)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
@@ -914,7 +900,7 @@ module Menu
 
     def get_stick
       item = @ui_manager.get_widget(['/popup/', 'Stick'].join(''))
-      if item != nil and item.active?
+      if not item.nil? and item.active?
         return true
       else
         return false

@@ -81,7 +81,7 @@ module Kinoko
 
     def set_skin_menu(list)
       key = 'skin'
-      if not list.empty?
+      unless list.empty?
         menu = Gtk::Menu.new
         for skin in list
           item = Gtk::MenuItem.new(skin['title'])
@@ -120,42 +120,33 @@ module Kinoko
     def finalize()
       @__running = false
       @target.detach_observer(self)
-      if @skin != nil
-        @skin.destroy()
-      end
+      @skin.destroy() unless @skin.nil?
     end
 
     def observer_update(event, args)
-      if @skin == nil
-        return
-      end
-      if ['set position', 'set surface'].include?(event)
+      return if @skin.nil?
+      case event
+      when 'set position', 'set surface'
         @skin.set_position()
         @skin.show()
-      elsif event == 'set scale'
+      when 'set scale'
         scale = @target.get_surface_scale()
         @skin.set_scale(scale)
-      elsif event == 'hide'
+      when 'hide'
         side = args
-        if side == 0 # sakura side
-          @skin.hide()
-        end
-      elsif event == 'iconified'
+        @skin.hide() if side.zero? # sakura side
+      when 'iconified'
         @skin.hide()
-      elsif event == 'deiconified'
+      when 'deiconified'
         @skin.show()
-      elsif event == 'finalize'
+      when 'finalize'
         finalize()
-      elsif event == 'move surface'
+      when 'move surface'
         side, xoffset, yoffset = args
-        if side == 0 # sakura side
-          @skin.set_position(:xoffset => xoffset, :yoffset => yoffset)
-        end
-      elsif event == 'raise'
+        @skin.set_position(:xoffset => xoffset, :yoffset => yoffset) if side.zero? # sakura side
+      when 'raise'
         side = args
-        if side == 0 # sakura side
-          @skin.set_position()
-        end
+        @skin.set_position() if side.zero? # sakura side
       else
         Logging::Logging.debug('OBSERVER(kinoko): ignore - ' + event)
       end
@@ -183,9 +174,7 @@ module Kinoko
           result = nil
         end
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def load(data, target)
@@ -194,22 +183,15 @@ module Kinoko
       @target.attach_observer(self)
       @accelgroup = Gtk::AccelGroup.new()
       load_skin()
-      if @skin == nil
-        return 0
-      else
-        send_event('OnKinokoObjectCreate')
-      end
+      return 0 if @skin.nil?
+      send_event('OnKinokoObjectCreate')
       @__running = true
       GLib::Timeout.add(10) { do_idle_tasks } # 10[ms]
       return 1
     end
 
     def do_idle_tasks()
-      if @__running
-        return true
-      else
-        return false
-      end
+      @__running
     end
 
     def close()
@@ -218,13 +200,11 @@ module Kinoko
     end
 
     def send_event(event)
-      if not ['OnKinokoObjectCreate', 'OnKinokoObjectDestroy',
-              'OnKinokoObjectChanging', 'OnKinokoObjectChanged',
-              'OnKinokoObjectInstalled'].include?(event)
-        ## 'OnBatteryLow', 'OnBatteryCritical',
-        ## 'OnSysResourceLow', 'OnSysResourceCritical'
-        return
-      end
+      return unless ['OnKinokoObjectCreate', 'OnKinokoObjectDestroy',
+                     'OnKinokoObjectChanging', 'OnKinokoObjectChanged',
+                     'OnKinokoObjectInstalled'].include?(event)
+      ## 'OnBatteryLow', 'OnBatteryCritical',
+      ## 'OnSysResourceLow', 'OnSysResourceCritical'
       args = [@data['title'],
               @data['ghost'],
               @data['category']]
@@ -232,7 +212,7 @@ module Kinoko
     end
 
     def get_skin_list()
-      return @skin_list
+      @skin_list
     end
 
     def select_skin(args)
@@ -240,11 +220,8 @@ module Kinoko
       @skin.destroy()
       @data = args
       load_skin()
-      if @skin == nil
-        return 0
-      else
-        send_event('OnKinokoObjectChanged')
-      end
+      return 0 if @skin.nil?
+      send_event('OnKinokoObjectChanged')
       return 1
     end
   end
@@ -260,7 +237,7 @@ module Kinoko
     end
 
     def get_seriko
-      return @seriko
+      @seriko
     end
 
     def set_responsible(parent)
@@ -280,9 +257,7 @@ module Kinoko
           result = @parent.handle_request(event_type, event, *arglist)
         end
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def load(data, scale)
@@ -298,7 +273,7 @@ module Kinoko
         next true
       end
       @window.add_accel_group(@accelgroup)
-      if @data['animation'] != nil
+      unless @data['animation'].nil?
         path = File.join(@data['dir'], @data['animation'])
         actors = {'' => Seriko.get_actors(NConfig.create_from_file(path))}
       else
@@ -364,29 +339,22 @@ module Kinoko
     end
 
     def get_surface_id
-      return @surface_id
+      @surface_id
     end
 
     def get_preference(name) # dummy
-      if name == 'animation_quality'
-        return 1.0
-      else
-        return nil
-      end
+      return 1.0 if name == 'animation_quality'
+      return nil
     end
 
     def show()
-      if not @__shown
-        @window.show_all()
-        @__shown = true
-      end
+      @window.show_all() unless @__shown
+      @__shown = true
     end
 
     def hide()
-      if @__shown
-        @window.hide_all()
-        @__shown = false
-      end
+      @window.hide_all() if @__shown
+      @__shown = false
     end
 
     def append_actor(frame, actor)
@@ -431,7 +399,7 @@ module Kinoko
     end
 
     def create_image_surface(surface_id)
-      if surface_id != nil and surface_id != ''
+      unless surface_id.nil? and surface_id != ''
         surface = get_image_surface(surface_id)
       else
         surface = Pix.create_surface_from_file(@path)
@@ -441,7 +409,7 @@ module Kinoko
 
     def update_frame_buffer()
       new_surface = create_image_surface(@seriko.get_base_id)
-      rasie "assert" unless new_surface != nil
+      rasie "assert" if new_surface.nil?
       # draw overlays
       for surface_id, x, y, method in @seriko.iter_overlays()
         begin

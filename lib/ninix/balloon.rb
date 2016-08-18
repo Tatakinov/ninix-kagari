@@ -51,15 +51,13 @@ module Balloon
       handlers = {
         'reset_user_interaction' => 'reset_user_interaction',
       }
-      if not handlers.include?(event)
+      unless handlers.include?(event)
         result = @parent.handle_request(
           event_type, event, *arglist)
       else
         result = method(handlers[event]).call(*arglist)
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def reset_user_interaction
@@ -67,25 +65,18 @@ module Balloon
     end
 
     def get_text_count(side)
-      if @window.length > side
-        return @window[side].get_text_count()
-      else
-        return 0
-      end
+      return 0 unless @window.length > side
+      return @window[side].get_text_count()
     end
 
     def get_window(side)
-      if @window.length > side
-        return @window[side].get_window
-      else
-        return nil
-      end
+      return nil unless @window.length > side
+      return @window[side].get_window
     end
 
     def reset_text_count(side)
-      if @window.length > side
-        @window[side].reset_text_count()
-      end
+      return unless @window.length > side
+      @window[side].reset_text_count()
     end
 
     def reset_balloon
@@ -108,9 +99,7 @@ module Balloon
 
     def identify_window(win)
       for balloon_window in @window
-        if win == balloon_window.get_window.window
-          return true
-        end
+        return true if win == balloon_window.get_window.window
       end
       return false
     end
@@ -181,11 +170,12 @@ module Balloon
 
     def add_window(side)
       fail "assert" unless @window.length == side
-      if side == 0
+      case side
+      when 0
         name = 'balloon.sakura'
         id_format = 's'
         balloon = @balloon0
-      elsif side == 1
+      when 1
         name = 'balloon.kero'
         id_format = 'k'
         balloon = @balloon1
@@ -208,23 +198,17 @@ module Balloon
     end
 
     def get_balloon_directory
-      return @directory
+      @directory
     end
 
     def get_balloon_size(side)
-      if @window.length > side
-        return @window[side].get_balloon_size()
-      else
-        return [0, 0]
-      end
+      return [0, 0] unless @window.length > side
+      return @window[side].get_balloon_size()
     end
 
     def get_balloon_windowposition(side)
-      if @window.length > side
-        return @window[side].get_balloon_windowposition()
-      else
-        return [0, 0]
-      end
+      return [0, 0] unless @window.length > side
+      return @window[side].get_balloon_windowposition()
     end
 
     def set_balloon_default
@@ -240,23 +224,18 @@ module Balloon
     end
 
     def set_balloon(side, num)
-      if @window.length > side
-        @window[side].set_balloon(num)
-      end
+      return unless @window.length > side
+      @window[side].set_balloon(num)
     end
 
     def set_position(side, base_x, base_y)
-      if @window.length > side
-        @window[side].set_position(base_x, base_y)
-      end
+      return unless @window.length > side
+      @window[side].set_position(base_x, base_y)
     end
 
     def get_position(side)
-      if @window.length > side
-        return @window[side].get_position()
-      else
-        return [0, 0]
-      end
+      return [0, 0,] unless @window.length > side
+      return @window[side].get_position()
     end
 
     def set_autoscroll(flag)
@@ -266,17 +245,13 @@ module Balloon
     end
 
     def is_shown(side)
-      if @window.length <= side
-        return false
-      else
-        return @window[side].is_shown()
-      end
+      return false if @window.length <= side
+      return @window[side].is_shown()
     end
 
     def show(side)
-      if @window.length > side
-        @window[side].show()
-      end
+      return unless @window.length > side
+      @window[side].show()
     end
 
     def hide_all
@@ -286,9 +261,8 @@ module Balloon
     end
 
     def hide(side)
-      if @window.length > side
-        @window[side].hide()
-      end
+      return unless @window.length > side
+      @window[side].hide()
     end
 
     def raise_all
@@ -298,9 +272,8 @@ module Balloon
     end
 
     def raise_(side)
-      if @window.length > side
-        @window[side].raise_()
-      end
+      return unless @window.length > side
+      @window[side].raise_()
     end
 
     def lower_all
@@ -310,9 +283,8 @@ module Balloon
     end
 
     def lower(side)
-      if @window.length > side
-        @window[side].lower()
-      end
+      return unless @window.length > side
+      @window[side].lower()
     end
 
     def synchronize(list)
@@ -326,11 +298,10 @@ module Balloon
     end
 
     def clear_text(side)
-      if not @synchronized.empty?
+      unless @synchronized.empty?
         for side in @synchronized
-          if @window.length > side
-            @window[side].clear_text()
-          end
+          next unless @window.length > side
+          @window[side].clear_text()
         end
       else
         if @window.length > side
@@ -340,11 +311,10 @@ module Balloon
     end
 
     def append_text(side, text)
-      if not @synchronized.empty?
+      unless @synchronized.empty?
         for side in @synchronized
-          if @window.length > side
-            @window[side].append_text(text)
-          end
+          next unless @window.length > side
+          @window[side].append_text(text)
         end
       else
         if @window.length > side
@@ -354,17 +324,15 @@ module Balloon
     end
 
     def append_sstp_marker(side)
-      if @window.length > side
-        @window[side].append_sstp_marker()
-      end
+      return unless @window.length > side
+      @window[side].append_sstp_marker()
     end
 
     def append_link_in(side, label)
-      if not @synchronized.empty?
+      unless @synchronized.empty?
         for side in @synchronized
-          if @window.length > side
-            @window[side].append_link_in(label)
-          end
+          next unless @window.length > side
+          @window[side].append_link_in(label)
         end
       else
         if @window.length > side
@@ -374,11 +342,10 @@ module Balloon
     end
 
     def append_link_out(side, label, value)
-      if not @synchronized.empty?
+      unless @synchronized.empty?
         for side in @synchronized
-          if @window.length > side
-            @window[side].append_link_out(label, value)
-          end
+          next unless @window.length > side
+          @window[side].append_link_out(label, value)
         end
       else
         if @window.length > side
@@ -388,7 +355,7 @@ module Balloon
     end
 
     def append_link(side, label, value, newline_required: false)
-      if not @synchronized.empty?
+      unless @synchronized.empty?
         for side in @synchronized
           if @window.length > side
             @window[side].append_link_in(label)
@@ -412,11 +379,10 @@ module Balloon
     end
 
     def append_meta(side, tag)
-      if not @synchronized.empty?
+      unless @synchronized.empty?
         for side in @synchronized
-          if @window.length > side
-            @window[side].append_meta(tag)
-          end
+          next unless @window.length > side
+          @window[side].append_meta(tag)
         end
       else
         if @window.length > side
@@ -426,9 +392,8 @@ module Balloon
     end
 
     def append_image(side, path, x, y)
-      if @window.length > side
-        @window[side].append_image(path, x, y)
-      end
+      return if side >= @window.length
+      @window[side].append_image(path, x, y)
     end
 
     def show_sstp_message(message, sender)
@@ -440,42 +405,36 @@ module Balloon
     end
 
     def open_communicatebox
-      if not @user_interaction
-        @user_interaction = true
-        @communicatebox.show()
-      end
+      return if @user_interaction
+      @user_interaction = true
+      @communicatebox.show()
     end
 
     def open_teachbox
-      if not @user_interaction
-        @user_interaction = true
-        @parent.handle_request('NOTIFY', 'notify_event', 'OnTeachStart')
-        @teachbox.show()
-      end
+      return if @user_interaction
+      @user_interaction = true
+      @parent.handle_request('NOTIFY', 'notify_event', 'OnTeachStart')
+      @teachbox.show()
     end
 
     def open_inputbox(symbol, limittime: -1, default: nil)
-      if not @user_interaction
-        @user_interaction = true
-        @inputbox.set_symbol(symbol)
-        @inputbox.set_limittime(limittime)
-        @inputbox.show(default)
-      end
+      return if @user_interaction
+      @user_interaction = true
+      @inputbox.set_symbol(symbol)
+      @inputbox.set_limittime(limittime)
+      @inputbox.show(default)
     end
 
     def open_passwordinputbox(symbol, limittime: -1, default: nil)
-      if not @user_interaction
-        @user_interaction = true
-        @passwordinputbox.set_symbol(symbol)
-        @passwordinputbox.set_limittime(limittime)
-        @passwordinputbox.show(default)
-      end
+      return if @user_interaction
+      @user_interaction = true
+      @passwordinputbox.set_symbol(symbol)
+      @passwordinputbox.set_limittime(limittime)
+      @passwordinputbox.show(default)
     end
 
     def close_inputbox(symbol)
-      if not @user_interaction
-        return
-      end
+      return unless @user_interaction
       @inputbox.close(symbol)
       @passwordinputbox.close(symbol)
     end
@@ -562,7 +521,7 @@ module Balloon
     end
 
     def get_window
-      return @window
+      @window
     end
 
     def set_responsible(parent)
@@ -571,7 +530,7 @@ module Balloon
 
     #@property
     def scale
-      scaling = (@parent.handle_request('GET', 'get_preference', 'balloon_scaling') != 0)
+      scaling = (not @parent.handle_request('GET', 'get_preference', 'balloon_scaling').zero?)
       scale = @parent.handle_request('GET', 'get_preference', 'surface_scale')
       if scaling
         return scale
@@ -581,7 +540,7 @@ module Balloon
     end
 
     def direction
-      return @__direction
+      @__direction
     end
 
     def direction=(value)
@@ -598,12 +557,10 @@ module Balloon
     end
 
     def get_image_surface(balloon_id)
-      if not @balloon.include?(balloon_id)
-        return nil
-      end
+      return nil unless @balloon.include?(balloon_id)
       begin
         path, config = @balloon[balloon_id]
-        use_pna = (@parent.handle_request('GET', 'get_preference', 'use_pna') != 0)
+        use_pna = (not @parent.handle_request('GET', 'get_preference', 'use_pna').zero?)
         surface = Pix.create_surface_from_file(path, :use_pna => use_pna)
       rescue
         return nil
@@ -612,17 +569,15 @@ module Balloon
     end
 
     def reset_fonts
-      if @parent != nil
+      unless @parent.nil?
         font_name = @parent.handle_request('GET', 'get_preference', 'balloon_fonts')
       else
         font_name = nil
       end
-      if @__font_name == font_name
-        return
-      end
+      return if @__font_name == font_name
       @font_desc = Pango::FontDescription.new(font_name)
       pango_size = @font_desc.size
-      if pango_size == 0
+      if pango_size.zero?
         default_size = 12 # for Windows environment
         size = @desc.get(['font.height', 'font.size'], :default => default_size).to_i
         pango_size = (size * 3 / 4) # convert from Windows to GTK+
@@ -633,10 +588,10 @@ module Balloon
       @layout.set_font_description(@font_desc)
       @layout.set_wrap(Pango::WRAP_CHAR) # XXX
       # font for sstp message
-      if @side == 0
+      if @side.zero?
         @sstp_font_desc = Pango::FontDescription.new(font_name)
         pango_size = @sstp_font_desc.size
-        if pango_size == 0
+        if pango_size.zero?
           default_size = 10 # for Windows environment
           size = @desc.get('sstpmessage.font.height', :default => default_size).to_i
           pango_size = (size * 3 / 4) # convert from Windows to GTK+
@@ -646,7 +601,7 @@ module Balloon
         @sstp_layout.set_font_description(@sstp_font_desc)
         @sstp_layout.set_wrap(Pango::WRAP_CHAR)
       end
-      if @balloon_id != nil
+      unless @balloon_id.nil?
         reset_message_regions()
         if @__shown
           @darea.queue_draw()
@@ -655,8 +610,8 @@ module Balloon
     end
 
     def reset_sstp_marker
-      if @side == 0
-        fail "assert" unless @balloon_surface != nil
+      if @side.zero?
+        fail "assert" if @balloon_surface.nil?
         w = @balloon_surface.width
         h = @balloon_surface.height
         # sstp marker position
@@ -668,14 +623,14 @@ module Balloon
         y = config_adjust('sstpmessage.y', h, -20)
         @sstp << [x, y] # sstp message
       end
-      # sstp marker surface (not only for @side == 0)
+      # sstp marker surface (not only for @side.zero?)
       @sstp_surface = get_image_surface('sstp')
     end
 
     def reset_arrow
       # arrow positions
       @arrow = []
-      fail "assert" unless @balloon_surface != nil
+      fail "assert" if @balloon_surface.nil?
       w = @balloon_surface.width
       h = @balloon_surface.height
       x = config_adjust('arrow0.x', w, -10)
@@ -728,7 +683,7 @@ module Balloon
       end
       @line_width = line_width
       # sstp message region
-      if @side == 0
+      if @side.zero?
         w, h = @sstp_layout.pixel_size
         x, y = @sstp[1]
         w = (line_width + origin_x - x)
@@ -780,11 +735,11 @@ module Balloon
       @num = num
       balloon_id = (@id_format + (num * 2 + @__direction).to_i.to_s)
       @balloon_surface = get_image_surface(balloon_id)
-      if @balloon_surface == nil
+      if @balloon_surface.nil?
         balloon_id = (@id_format + (0 + @__direction).to_i.to_s)
         @balloon_surface = get_image_surface(balloon_id)
       end
-      fail "assert" unless @balloon_surface != nil
+      fail "assert" if @balloon_surface.nil?
       @balloon_id = balloon_id
       # change surface and window position
       x, y = @position
@@ -797,9 +752,7 @@ module Balloon
       reset_sstp_marker()
       reset_message_regions()
       @parent.handle_request('NOTIFY', 'position_balloons')
-      if @__shown
-        @darea.queue_draw()
-      end
+      @darea.queue_draw() if @__shown
     end
 
     def set_autoscroll(flag)
@@ -809,10 +762,10 @@ module Balloon
     def config_adjust(name, base, default_value)
       path, config = @balloon[@balloon_id]
       value = config.get(name)
-      if value == nil
+      if value.nil?
         value = @desc.get(name)
       end
-      if value == nil
+      if value.nil?
         value = default_value
       end
       value = value.to_i
@@ -825,9 +778,9 @@ module Balloon
     def __get(name, default_value)
       path, config = @balloon[@balloon_id]
       value = config.get(name)
-      if value == nil
+      if value.nil?
         value = @desc.get(name)
-        if value == nil
+        if value.nil?
           value = default_value
         end
       end
@@ -837,9 +790,9 @@ module Balloon
     def __get_with_scaling(name, default_value)
       path, config = @balloon[@balloon_id]
       value = config.get(name)
-      if value == nil
+      if value.nil?
         value = @desc.get(name)
-        if value == nil
+        if value.nil?
           value = default_value
         end
       end
@@ -852,12 +805,10 @@ module Balloon
     end
 
     def set_position(base_x, base_y)
-      if @balloon_id == nil
-        return
-      end
+      return if @balloon_id.nil?
       px, py = get_balloon_windowposition()
       w, h = get_balloon_size()
-      if @__direction == 0
+      if @__direction.zero?
         x = (base_x + px - w)
       else
         x = (base_x + px)
@@ -875,7 +826,7 @@ module Balloon
     end
 
     def get_position
-      return @position
+      @position
     end
 
     def destroy(finalize: 0)
@@ -883,16 +834,12 @@ module Balloon
     end
 
     def is_shown
-      return @__shown
+      @__shown
     end
 
     def show
-      if @parent.handle_request('GET', 'lock_repaint')
-        return
-      end
-      if @__shown
-        return
-      end
+      return if @parent.handle_request('GET', 'lock_repaint')
+      return if @__shown
       @__shown = true
       # make sure window is in its position (call before showing the window)
       __move()
@@ -903,30 +850,24 @@ module Balloon
     end
 
     def hide
-      if not @__shown
-        return
-      end
+      return unless @__shown
       @window.hide()
       @__shown = false
       @images = []
     end
 
     def raise_
-      if @__shown
-        @window.window.raise
-      end
+      return unless @__shown
+      @window.window.raise
     end
 
     def lower
-      if @__shown
-        @window.get_window().lower()
-      end
+      return unless @__shown
+      @window.get_window().lower()
     end
 
     def show_sstp_message(message, sender)
-      if @sstp_region == nil
-        show()
-      end
+      show() if @sstp_region.nil?
       @sstp_message = (message.to_s + " (" + sender.to_s + ")")
       x, y, w, h = @sstp_region
       @sstp_layout.set_text(@sstp_message)
@@ -940,9 +881,7 @@ module Balloon
           @sstp_layout.set_text(s)
           message_width, message_height = \
           @sstp_layout.pixel_size
-          if message_width > w
-            break
-          end
+          break if message_width > w
           @sstp_message = s
         end
       end
@@ -955,12 +894,10 @@ module Balloon
     end
 
     def redraw_sstp_message(widget, cr)
-      if @sstp_message == nil
-        return
-      end
+      return if @sstp_message.nil?
       cr.save()
       # draw sstp marker
-      if @sstp_surface != nil
+      unless @sstp_surface.nil?
         x, y = @sstp[0]            
         cr.set_source(@sstp_surface, x, y)
         cr.paint()
@@ -975,9 +912,7 @@ module Balloon
     end
 
     def redraw_arrow0(widget, cr)
-      if @lineno <= 0
-        return
-      end
+      return if @lineno <= 0
       cr.save()
       x, y = @arrow[0]
       cr.set_source(@arrow0_surface, x, y)
@@ -986,9 +921,7 @@ module Balloon
     end
 
     def redraw_arrow1(widget, cr)
-      if (@lineno + @lines) >= @text_buffer.length
-        return
-      end
+      return if (@lineno + @lines) >= @text_buffer.length
       cr.save()
       x, y = @arrow[1]
       cr.set_source(@arrow1_surface, x, y)
@@ -1053,13 +986,9 @@ module Balloon
     end
 
     def redraw(widget, cr)
-      if @parent.handle_request('GET', 'lock_repaint')
-        return
-      end
-      if not @__shown
-        return true
-      end
-      fail "assert" unless @balloon_surface != nil
+      return if @parent.handle_request('GET', 'lock_repaint')
+      return true unless @__shown
+      fail "assert" if @balloon_surface.nil?
       @window.set_surface(cr, @balloon_surface, scale)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX
@@ -1117,7 +1046,7 @@ module Balloon
         cr.set_source_rgb(@text_normal_color)
         cr.move_to(x, y)
         cr.show_pango_layout(@layout)
-        if @sstp_surface != nil
+        unless @sstp_surface.nil?
           for l, c in @sstp_marker
             if l == i
               mw = @sstp_surface.width
@@ -1135,12 +1064,8 @@ module Balloon
         i += 1
         line += 1
       end
-      if @side == 0 and @sstp_message != nil
-        redraw_sstp_message(widget, cr)
-      end
-      if @selection != nil
-        update_link_region(widget, cr, @selection)
-      end
+      redraw_sstp_message(widget, cr) if @side.zero? and not @sstp_message.nil?
+      update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
       @window.set_shape(cr)
@@ -1245,7 +1170,7 @@ module Balloon
           end
         end
       end
-      if new_selection != nil
+      unless new_selection.nil?
         if @selection != new_selection
           sl, sn, el, en, link_id, raw_text, text = \
           @link_buffer[new_selection]
@@ -1254,7 +1179,7 @@ module Balloon
             'OnChoiceEnter', raw_text, link_id, @selection)
         end
       else
-        if @selection != nil
+        unless @selection.nil?
           @parent.handle_request('NOTIFY', 'notify_event', 'OnChoiceEnter')
         end
       end
@@ -1269,15 +1194,14 @@ module Balloon
     def motion_notify(widget, event)
       x, y, state = event.x, event.y, event.state
       px, py = @window.winpos_to_surfacepos(x, y, scale)
-      if not @link_buffer.empty?
+      unless @link_buffer.empty?
         if check_link_region(px, py)
           widget.queue_draw()
         end
       end
-      if not @parent.handle_request('GET', 'busy')
+      unless @parent.handle_request('GET', 'busy')
         if (state & Gdk::ModifierType::BUTTON1_MASK).nonzero?
-          if @x_root != nil and \
-            @y_root != nil
+          unless @x_root.nil? or @y_root.nil?
             @dragged = true
             x_delta = ((event.x_root - @x_root) * 100 / scale + @x_fractions)
             y_delta = ((event.y_root - @y_root) * 100 / scale + @y_fractions)
@@ -1291,22 +1215,21 @@ module Balloon
           end
         end
       end
-      if event.is_hint == 1
-        Gdk::Event.request_motions(event)
-      end
+      Gdk::Event.request_motions(event) if event.is_hint == 1
       return true
     end
 
     def scroll(darea, event)
       px, py = @window.winpos_to_surfacepos(
             event.x.to_i, event.y.to_i, scale)
-      if event.direction == Gdk::ScrollDirection::UP
+      case event.direction
+      when Gdk::ScrollDirection::UP
         if @lineno > 0
           @lineno = [@lineno - 2, 0].max
           check_link_region(px, py)
           @darea.queue_draw()
         end
-      elsif event.direction == Gdk::ScrollDirection::DOWN
+      when Gdk::ScrollDirection::DOWN
         if (@lineno + @lines) < @text_buffer.length
           @lineno = [@lineno + 2,
                      @text_buffer.length - @lines].min
@@ -1319,11 +1242,7 @@ module Balloon
 
     def button_press(darea, event)
       @parent.handle_request('NOTIFY', 'reset_idle_time')
-      if event.event_type == Gdk::EventType::BUTTON_PRESS
-        click = 1
-      else
-        click = 2
-      end
+      click = event.event_type == Gdk::EventType::BUTTON_PRESS ? 1 : 2
       if @parent.handle_request('GET', 'is_paused')
         @parent.handle_request('NOTIFY', 'notify_balloon_click',
                                event.button, click, @side)
@@ -1356,7 +1275,7 @@ module Balloon
         return true
       end
       # links
-      if @selection != nil
+      unless @selection.nil?
         sl, sn, el, en, link_id, raw_text, text = \
         @link_buffer[@selection]
         @parent.handle_request('NOTIFY', 'notify_link_selection',
@@ -1374,9 +1293,7 @@ module Balloon
     def button_release(window, event)
       x, y = @window.winpos_to_surfacepos(
            event.x.to_i, event.y.to_i, scale)
-      if @dragged
-        @dragged = false
-      end
+      @dragged = false if @dragged
       @x_root = nil
       @y_root = nil
       @y_fractions = 0
@@ -1397,7 +1314,7 @@ module Balloon
     end
 
     def get_text_count
-      return @text_count
+      @text_count
     end
 
     def reset_text_count
@@ -1439,7 +1356,7 @@ module Balloon
             @text_buffer << [text[p..i-1], '\n[half]'].join('')
             p = i = (i + 8)
           else
-            if i == 0
+            if i.zero?
               @text_buffer << ""
             else
               @text_buffer << text[p..i-1]
@@ -1451,9 +1368,7 @@ module Balloon
           next
         end
         n = (i + 1)
-        if not @__shown
-          show()
-        end
+        show unless @__shown
         markup = set_markup(index, text[p..n-1])
         @layout.set_markup(markup, -1)
         text_width, text_height =  @layout.pixel_size
@@ -1468,9 +1383,7 @@ module Balloon
     end
 
     def append_sstp_marker
-      if @sstp_surface != nil
-        return
-      end
+      return unless @sstp_surface.nil?
       if @text_buffer.empty?
         line = 0
         offset = 0
@@ -1490,11 +1403,8 @@ module Balloon
         space = ("\u3000" * i) # XXX
         @layout.set_text(space)
         text_w, text_h = @layout.pixel_size
-        if text_w > w
-          break
-        else
-          i += 1
-        end
+        break if text_w > w
+        i += 1
       end
       append_text(space)
       draw_last_line(:column => offset)
@@ -1512,9 +1422,7 @@ module Balloon
     end
 
     def append_link_out(link_id, text)
-      if not text
-        return
-      end
+      return unless text
       raw_text = text
       if @text_buffer.empty?
         el = 0
@@ -1535,9 +1443,7 @@ module Balloon
     end
 
     def append_meta(tag)
-      if tag == nil
-        return
-      end
+      return if tag.nil?
       if @text_buffer.empty?
         sl = 0
         sn = 0
@@ -1560,9 +1466,7 @@ module Balloon
     end
 
     def draw_last_line(column: 0)
-      if not @__shown
-        return
-      end
+      return unless @__shown
       line = (@text_buffer.length - 1)
       if @lineno <= line and line < (@lineno + @lines)
         x, y, w, h = @line_regions[line - @lineno]
@@ -1573,7 +1477,7 @@ module Balloon
         else
           @darea.queue_draw()
         end
-        if @sstp_surface != nil
+        unless @sstp_surface.nil?
           for l, c in @sstp_marker
             if l == line
               mw = @sstp_surface.width
@@ -1617,9 +1521,7 @@ module Balloon
     end
 
     def new_(desc, balloon)
-      if @window != nil
-        @window.destroy()
-      end
+      @window.destroy unless @window.nil?
       @window = Pix::BaseTransparentWindow.new()
       @window.set_title('communicate')
       @window.signal_connect('delete_event') do |w ,e|
@@ -1658,7 +1560,7 @@ module Balloon
       @entry.set_size_request(w, h)
       @entry.show()
       surface = nil
-      if balloon != nil
+      unless balloon.nil?
         path, config = balloon
         # load pixbuf
         begin
@@ -1667,7 +1569,7 @@ module Balloon
           surface = nil
         end
       end
-      if surface != nil
+      unless surface.nil?
         darea = Gtk::DrawingArea.new()
         darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
         darea.signal_connect('draw') do |w, e|
@@ -1692,7 +1594,7 @@ module Balloon
       else
         box = Gtk::Box.new(orientation=Gtk::Orientation::HORIZONTAL, spacing=10)
         box.set_border_width(10)
-        if not ENTRY.empty?
+        unless ENTRY.empty?
           label = Gtk::Label.new(label=ENTRY)
           box.pack_start(label, :expand => false, :fill => true, :padding => 0)
           label.show()
@@ -1723,10 +1625,8 @@ module Balloon
     end
 
     def destroy
-      if @window != nil
-        @window.destroy()
-        @window = nil
-      end
+      @window.destroy unless @window.nil?
+      @window = nil
     end
 
     def delete(widget, event)
@@ -1817,7 +1717,7 @@ module Balloon
     end
 
     def send(data)
-      if data != nil
+      unless data.nil?
         @parent.handle_request('NOTIFY', 'notify_event',
                                'OnCommunicate', 'user', data)
       end
@@ -1871,7 +1771,7 @@ module Balloon
     end
 
     def show(default)
-      if default != nil
+      unless default.nil?
         begin
           text = default.to_s
         rescue
@@ -1902,38 +1802,30 @@ module Balloon
     end
 
     def close(symbol)
-      if @symbol == nil
-        return
-      end
-      if symbol != '__SYSTEM_ALL_INPUT__' and @symbol != symbol
-        return
-      end
+      return if @symbol.nil?
+      return if symbol != '__SYSTEM_ALL_INPUT__' and @symbol != symbol
       @window.hide()
       cancel()
     end
 
     def send(data, cancel: false, timeout: false)
-      if @timeout_id != nil
-        GLib.source_remove(@timeout_id)
-      end
-      if data == nil
-        data = ''
-      end
+      GLib.source_remove(@timeout_id) unless @timeout_id.nil?
+      data = '' if data.nil?
       ## CHECK: symbol
       if cancel
         @parent.handle_request('NOTIFY', 'notify_event',
                                'OnUserInputCancel', '', 'cancel')
       elsif timeout and \
-        @parent.handle_request('GET', 'notify_event',
-                               'OnUserInputCancel', '', 'timeout') != nil
+        not @parent.handle_request('GET', 'notify_event',
+                                   'OnUserInputCancel', '', 'timeout').nil?
         # pass
       elsif @symbol == 'OnUserInput' and \
-           @parent.handle_request('GET', 'notify_event', 'OnUserInput', data) != nil
+            not @parent.handle_request('GET', 'notify_event', 'OnUserInput', data).nil?
         # pass
-      elsif @parent.handle_request('GET', 'notify_event',
-                                   'OnUserInput', @symbol, data) != nil
+      elsif not @parent.handle_request('GET', 'notify_event',
+                                       'OnUserInput', @symbol, data).nil?
         # pass
-      elsif @parent.handle_request('GET', 'notify_event', @symbol, data) != nil
+      elsif not @parent.handle_request('GET', 'notify_event', @symbol, data).nil?
         # pass
       end
       @symbol = nil

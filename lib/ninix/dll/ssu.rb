@@ -54,25 +54,23 @@ module Ssu
 
     def request(req)
       req_type, argument, charset = evaluate_request(req)
-      if req_type == nil
-        result = RESPONSE[400]
-      elsif req_type == 'GET Version'
-        result = RESPONSE[204]
-      elsif req_type == 'EXECUTE'
-        result = execute(argument, charset)
-      else
-        result = RESPONSE[400]
-      end
+      result =
+        case req_type
+        when nil
+          RESPONSE[400]
+        when 'GET Version'
+          RESPONSE[204]
+        when 'EXECUTE'
+          execute(argument, charset)
+        else
+          RESPONSE[400]
+        end
       return result
     end
 
     def execute(args, charset)
-      if args == nil or args.empty?
-        return RESPONSE[400]
-      end
-      if not @function.include?(args[0])
-        return RESPONSE[400]
-      end
+      return RESPONSE[400] if args.nil? or args.empty?
+      return RESPONSE[400] unless @function.include?(args[0])
       name = args[0]
       args = args[1..-1]
       if @function[name][1] == [nil]
@@ -82,19 +80,16 @@ module Ssu
       end
       @value = []
       result = method(@function[name][0]).call(args)
-      if result != nil and not result.to_s.empty?
-        s = ("SAORI/1.0 200 OK\r\nResult: " + result.to_s + "\r\n")
-        if not @value.empty?
-          for i in 0..@value.length-1
-            s = [s, "Value" + i.to_s + ": " + @value[i].to_s + "\r\n"].join("")
-          end
+      return RESPONSE[204] if result.nil? or result.to_s.empty?
+      s = "SAORI/1.0 200 OK\r\nResult: #{result}\r\n"
+      unless @value.empty?
+        for i in 0..@value.length-1
+          s = [s, "Value#{i}: #{@value[i]}\r\n"].join("")
         end
-        s = [s, "Charset: " + charset.to_s + "\r\n"].join("")
-        s = [s, "\r\n"].join("")
-        return s.encode(charset, :invalid => :replace, :undef => :replace)
-      else
-        return RESPONSE[204]
       end
+      s = [s, "Charset: #{charset}\r\n"].join("")
+      s = [s, "\r\n"].join("")
+      return s.encode(charset, :invalid => :replace, :undef => :replace)
     end
 
     def ssu_is_empty(args)
@@ -130,17 +125,14 @@ module Ssu
     end
 
     def ssu_length(args)
-      s = args[0]
-      return s.length
+      args[0].length
     end
 
     def ssu_substr(args)
       s = args[0]
       if ssu_is_digit([args[1]]) == 1
         start = ssu_zen2han([args[1]]).to_i
-        if start > s.length
-          return ''
-        end
+        return '' if start > s.length
       else
         return ''
       end
@@ -204,29 +196,28 @@ module Ssu
         left = left.length
         right = right.length
       end
-      result = false
-      if ['>', '＞'].include?(ope)
-        result = (left > right)
-      elsif ['>=', '＞＝'].include?(ope)
-        result = (left >= right)
-      elsif ['<', '＜'].include?(ope)
-        result = (left < right)
-      elsif ['<=', '＜＝'].include?(ope)
-        result = (left <= right)
-      elsif ['==', '＝＝'].include?(ope)
-        result = (left == right)
-      elsif ['!=', '！＝'].include?(ope)
-        result = (left != right)
+      case ope
+      when '>', '＞'
+        (left > right)
+      when '>=', '＞＝'
+        (left >= right)
+      when '<', '＜'
+        (left < right)
+      when '<=', '＜＝'
+        (left <= right)
+      when '==', '＝＝'
+        (left == right)
+      when '!=', '！＝'
+        (left != right)
       else
-        #pass # 'should not reach here'
+        false # 'should not reach here'
       end
-      return result
     end
 
     def ssu_if(args)
       condition = args[0]
       match = RE_CONDITION.match(condition)
-      if match != nil
+      unless match.nil?
         left = match.pre_match
         ope = match[0]
         right = match.post_match
@@ -245,12 +236,12 @@ module Ssu
     def ssu_unless(args)
       condition = args[0]
       match = RE_CONDITION.match(condition)
-      if match != nil
+      unless match.nil?
         left = match.pre_match
         ope = match[0]
         right = match.post_match
         result = eval_condition(left, ope, right)
-        if not result
+        unless result
           return args[1]
         end
       end
@@ -265,15 +256,11 @@ module Ssu
       left = args[0]
       i = 1
       while true
-        if args[i..-1].length < 2
-          break
-        end
+        break if args[i..-1].length < 2
         ope_right = args[i]
         match = RE_CONDITION.match(ope_right) # FIXME: 左辺に演算子を入れた場合にも動作するようにする
-        if match != nil
-          if not match.pre_match.strip.empty?
-            next
-          end
+        unless match.nil?
+          next unless match.pre_match.strip.empty?
           ope = match[0]
           right = match.post_match
           result = eval_condition(left, ope, right)
@@ -298,7 +285,7 @@ module Ssu
     end
 
     def ssu_count(args)
-      return args[0].scan(args[1]).size
+      args[0].scan(args[1]).size
     end
 
     def ssu_compare(args)
@@ -330,7 +317,7 @@ module Ssu
     end
 
     def ssu_erase(args)
-      return args[0].gsub(args[1], '')
+      args[0].gsub(args[1], '')
     end
 
     def ssu_erase_first(args)
@@ -339,7 +326,7 @@ module Ssu
     end
 
     def ssu_replace(args)
-      return args[0].gsub(args[1], args[2])
+      args[0].gsub(args[1], args[2])
     end
 
     def ssu_replace_first(args)
@@ -375,9 +362,7 @@ module Ssu
       left = args[0]
       i = 1
       while true
-        if args[i..-1].length < 2
-          break
-        end
+        break if args[i..-1].length < 2
         right = args[i]
         if left == right # FIXME: 左辺、右辺が数値でなくともエラーにならない
           return args[i + 1]
@@ -388,19 +373,19 @@ module Ssu
     end
 
     def ssu_kata2hira(args) ## FIXME: not supported yet
-      return ''
+      ''
     end
 
     def ssu_hira2kata(args) ## FIXME: not supported yet
-      return ''
+      ''
     end
 
     def ssu_calc(args) ## FIXME: not supported yet
-      return 0
+      0
     end
 
     def ssu_calc_float(args) ## FIXME: not supported yet
-      return 0
+      0
     end
 
     def evaluate_request(req)
@@ -409,7 +394,7 @@ module Ssu
       charset = 'CP932' # default
       header = req.lines
       line = header.shift
-      if line == nil
+      if line.nil?
         return req_type, argument, charset
       end
       line = line.force_encoding(charset).strip.encode('utf-8', :invalid => :replace, :undef => :replace)
@@ -424,12 +409,8 @@ module Ssu
       end
       for line in header
         line = line.force_encoding(charset).strip.encode('utf-8', :invalid => :replace, :undef => :replace)
-        if line.empty?
-          next
-        end
-        if not line.include?(':')
-          next
-        end
+        next if line.empty?
+        next unless line.include?(':')
         key, value = line.split(':', 2)
         key.strip!
         value.strip!

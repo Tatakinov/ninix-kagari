@@ -39,7 +39,7 @@ module Hanayu
       @dbpath = File.join(@dir, DBNAME)
       @graphs = {}
       @data = read_hanayu_txt(@dir)
-      if @data != nil and not @data.empty?
+      unless @data.nil? or @data.empty?
         read_db()
         return 1
       else
@@ -83,9 +83,7 @@ module Hanayu
               tmp_name = line
             end
           end
-          if not data.empty?
-            graphs[name] = data
-          end
+          graphs[name] = data unless data.empty?
           return graphs
         end
       rescue
@@ -125,16 +123,14 @@ module Hanayu
           ver = nil
           for line in f
             line = line.strip()
-            if line.empty?
-              next
-            end
+            next if line.empty?
             if ver.nil?
               if line == '# Format: v1.0'
                 ver = 1
               end
               next
             end
-            next if not line.include?(',')
+            next unless line.include?(',')
             key, value = line.split(',', 2)
             for index_ in 0..6
               if @seven_days[index_][0] == key
@@ -189,11 +185,10 @@ module Hanayu
     end
 
     def execute(argument)
-      if argument == nil or argument.empty?
-        return RESPONSE[400]
-      end
+      return RESPONSE[400] if argument.nil? or argument.empty?
       command = argument[0]
-      if command == 'show'
+      case command
+      when 'show'
         if argument.length >= 2
           name = argument[1]
           if @graphs.include?(name)
@@ -202,16 +197,15 @@ module Hanayu
         else
           name = ''
         end
-        if not @data.include?(name)
-          return RESPONSE[400]
-        end
+        return RESPONSE[400] unless @data.include?(name)
         if @data[name].include?('graph') and \
            ['line', 'bar', 'radar', 'radar2'].include?(@data[name]['graph'])
           graph_type = @data[name]['graph']
         else
           graph_type = 'usetime'
         end
-        if graph_type == 'usetime'
+        case graph_type
+        when 'usetime'
           update_db()
           new_args = []
           for index_ in 0..6
@@ -224,20 +218,20 @@ module Hanayu
           end
           @graphs[name] = Line.new(
             @dir, @data[name], :args => new_args, :limit_min => 0, :limit_max => 24)
-        elsif graph_type == 'line'
+        when 'line'
           @graphs[name] = Line.new(
             @dir, @data[name], :args => argument[2..-1])
-        elsif graph_type == 'bar'
+        when 'bar'
           @graphs[name] = Bar.new(
             @dir, @data[name], :args => argument[2..-1])
-        elsif graph_type == 'radar'
+        when 'radar'
           @graphs[name] = Radar.new(
             @dir, @data[name], :args => argument[2..-1])
-        elsif graph_type == 'radar2'
+        when 'radar2'
           @graphs[name] = Radar2.new(
             @dir, @data[name], :args => argument[2..-1])
         end
-      elsif command == 'hide'
+      when 'hide'
         if argument.length >= 2
           name = argument[1]
         else
@@ -344,7 +338,7 @@ module Hanayu
     end
 
     def draw_title(widget, cr)
-      return if not @data.has_key?('title')
+      return unless @data.has_key?('title')
       @title = @data['title']
       font_size = 12 # pixel
       @font_desc = Pango::FontDescription.new
@@ -380,7 +374,7 @@ module Hanayu
       cr.save()
       cr.set_source_rgb(*get_color('background'))
       cr.paint()
-      if not @surface.nil?
+      unless @surface.nil?
         width = @surface.width
         height = @surface.height
         xoffset = ((WIDTH - width) / 2).to_i
@@ -402,11 +396,12 @@ module Hanayu
     end
 
     def button_press(window, event)
-      if event.event_type == Gdk::EventType::BUTTON_PRESS
+      case event.event_type
+      when Gdk::EventType::BUTTON_PRESS
         @window.begin_move_drag(
           event.button, event.x_root.to_i, event.y_root.to_i,
           event.time)
-      elsif event.event_type == Gdk::EventType::DOUBLE_BUTTON_PRESS # double click
+      when Gdk::EventType::DOUBLE_BUTTON_PRESS # double click
         destroy()
       end
       return true
@@ -417,7 +412,7 @@ module Hanayu
     end
 
     def destroy
-      @window.destroy() if not @window.nil?
+      @window.destroy() unless @window.nil?
       @window = nil
       @timeout_id = nil
     end
@@ -451,7 +446,7 @@ module Hanayu
         cr.move_to(pos_x, pos_y)
         cr.show_pango_layout(@layout)
       end
-      if not @min.nil?
+      unless @min.nil?
         limit_min = @min
       else
         limit_min = @args[1]
@@ -461,7 +456,7 @@ module Hanayu
           end
         end
       end
-      if not @max.nil?
+      unless @max.nil?
         limit_max = @max
       else
         limit_max = @args[1]
@@ -522,7 +517,7 @@ module Hanayu
             end
           end
         end
-        if surface != nil
+        unless surface.nil?
           w = surface.width
           h = surface.height
           x = (60 + index_ * step + (step / 2).to_i - (w / 2).to_i)

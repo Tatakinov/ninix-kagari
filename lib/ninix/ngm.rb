@@ -57,25 +57,25 @@ module NGM
       @url = {}
       @cgi = {}
       @datadir = datadir
-      FileUtils.mkdir_p(@datadir) if not Dir.exists?(@datadir)
+      FileUtils.mkdir_p(@datadir) unless Dir.exists?(@datadir)
       @last_update = '1970-01-01 00:00:00'
       load_MasterList()
     end
 
     # data handling functions
     def get(entry, key)
-      return entry[key]
+      entry[key]
     end
 
     def data
-      return @data
+      @data
     end
 
     # updates etc
     def network_update#(updatehook)
       last_update = @last_update
       @last_update = Time.now.strftime('%Y-%m-%d %H:%M:%S')
-      if not @cgi.empty?
+      unless @cgi.empty?
         priority = @cgi.keys.sort
         url = @cgi[priority[-1]][-1]
       else
@@ -129,7 +129,7 @@ module NGM
     def import_from_fileobj(fileobj)
       line0 = fileobj.readline()
       encoding = get_encoding(line0)
-      if not Encoding.name_list.include?(encoding)
+      unless Encoding.name_list.include?(encoding)
         fail SystemExit('Unsupported encoding {0}'.format(repr(encoding)))
       end
       nest = 0
@@ -148,25 +148,25 @@ module NGM
         next if line.empty?
         line = line.force_encoding(encoding).encode("UTF-8", :invalid => :replace, :undef => :replace)
         m = re_list.match(line)
-        if not m.nil?
+        unless m.nil?
           nest += 1
           next
         end
         m = re_setid.match(line)
-        if not m.nil?
+        unless m.nil?
           nest += 1
           set_id = m[1].to_i
           next
         end
         m = re_set.match(line)
-        if not m.nil?
+        unless m.nil?
           nest -= 1
           new_entry[set_id] = create_entry(node)
           node = []
           next
         end
         m = re_priority.match(line)
-        if m != nil
+        unless m.nil?
           g = m
           priority = g[1].to_i
           url = g[2]
@@ -178,9 +178,9 @@ module NGM
           next
         end
         m = re_misc.match(line)
-        if m != nil
+        unless m.nil?
           g = m
-          if set_id != nil
+          unless set_id.nil?
             key = g[1]
             text = g[2]
             text = text.sub('&apos;', '\'')                
@@ -196,17 +196,18 @@ module NGM
             #               'SakuraPreviewBaseUrl',
             #               'KeroPreviewBaseUrl',
             #               'ArcMD5BaseUrl', 'NGMUpdateBaseUrl']
-            if key == 'LastUpdate'
+            case key
+            when 'LastUpdate'
               @last_update = text
-            elsif key == 'NGMVersion'
+            when 'NGMVersion'
               version = text.to_f
               if version < 0.51
                 return
               else
                 @version = version
               end
-            elsif ['SakuraPreviewBaseUrl', 'KeroPreviewBaseUrl',
-                   'ArcMD5BaseUrl', 'NGMUpdateBaseUrl'].include?(key)
+            when 'SakuraPreviewBaseUrl', 'KeroPreviewBaseUrl',
+                 'ArcMD5BaseUrl', 'NGMUpdateBaseUrl'
               @url[key] = text
             end
           end
@@ -217,7 +218,7 @@ module NGM
 
     def dump_entry(entry, fileobj)
       for key in ELEMENTS
-        if entry.include?(key) and entry[key] != nil
+        if entry.include?(key) and not entry[key].nil?
           text = entry[key]
           text = text.gsub("&", "&amp;")
           text = text.gsub("<", "&lt;")
@@ -281,8 +282,8 @@ module NGM
     def retrieve_image(set_id, side)#, updatehook)
       p = [TYPE[side], '_', set_id, '.png'].join('')
       d = File.join(@datadir, p)
-      if not File.exists?(d)
-        if side == 0
+      unless File.exists?(d)
+        if side.zero?
           url = @url['SakuraPreviewBaseUrl']
         else
           url = @url['KeroPreviewBaseUrl']
@@ -335,7 +336,7 @@ module NGM
     end
                 
     def get_pattern
-      return @pattern_entry.text
+      @pattern_entry.text
     end
 
     def hide
@@ -343,9 +344,7 @@ module NGM
     end
 
     def show(default: nil)
-      if default != nil
-        set_pattern(default)
-      end
+      set_pattern(default) unless default.nil?
       @dialog.show()
     end
 
@@ -360,11 +359,12 @@ module NGM
     end
 
     def response(widget, response)
-      if response == Gtk::ResponseType::OK
+      case response
+      when Gtk::ResponseType::OK
         ok()
-      elsif response == Gtk::ResponseType::CANCEL
+      when Gtk::ResponseType::CANCEL
         cancel()
-      elsif response == Gtk::ResponseType::DELETE_EVENT
+      when Gtk::ResponseType::DELETE_EVENT
         cancel()
       else
         # should not reach here
@@ -476,9 +476,7 @@ module NGM
             event_type, event, *arglist)
         end
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def create_dialog
@@ -553,7 +551,7 @@ module NGM
     end
 
     def search(word)
-      if word != nil and not word.empty?
+      unless word.nil? or word.empty?
         @search_word = word
         if @parent.handle_request('GET', 'search', word)
           update()
@@ -564,7 +562,7 @@ module NGM
     end
 
     def search_forward
-      if not @search_word.empty?
+      unless @search_word.empty?
         if @parent.handle_request('GET', 'search_forward', @search_word)
           update()
         else
@@ -606,7 +604,7 @@ module NGM
     end
 
     def redraw(widget, cr, side)
-      if @surface[side] != nil
+      unless @surface[side].nil?
         cr.set_source(@surface[side], 0, 0)
         cr.set_operator(Cairo::OPERATOR_OVER)
         cr.paint()
@@ -618,7 +616,7 @@ module NGM
 
     def update_surface_area
       for side in [0, 1]
-        if side == 0
+        if side.zero?
           target = 'SakuraName'
         else
           target = 'KeroName'
@@ -629,7 +627,7 @@ module NGM
         filename = @parent.handle_request('GET', 'get_image_filename', side)
         darea = @darea[side]
         darea.realize()
-        if filename != nil and not filename.empty?
+        unless filename.nil? or filename.empty?
           begin
             surface = Pix.create_surface_from_file(filename)
           rescue
@@ -766,9 +764,7 @@ module NGM
     end
 
     def show
-      if @opened
-        return
-      end
+      return if @opened
       update()
       @window.show()
       @opened = true
@@ -815,18 +811,14 @@ module NGM
           result = @parent.handle_request(event_type, event, *arglist)
         end
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def get(element)
       if @catalog.data.include?(@current)
         entry = @catalog.data[@current]
         text = @catalog.get(entry, element)
-        if text != nil
-          return text
-        end
+        return text unless text.nil?
       end
       return 'No data'
     end
@@ -842,7 +834,7 @@ module NGM
           for element in ['Name', 'SakuraName', 'KeroName',
                           'Author', 'HPTitle']
             text = @catalog.get(entry, element)
-            if text == nil or text.empty?
+            if text.nil? or text.empty?
               next
             end
             if text.include?(word)
@@ -923,7 +915,7 @@ module NGM
         target_dir = nil
       end
       assert filetype == 'ghost'
-      if target_dir != nil
+      unless target_dir.nil?
         @parent.handle_request('NOTIFY', 'add_sakura', target_dir)
       end
     end

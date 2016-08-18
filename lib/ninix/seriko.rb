@@ -43,10 +43,11 @@ module Seriko
     end
     
     def set_base_id(window, surface_id)
-      if surface_id == '-2'
+      case surface_id
+      when '-2'
         terminate(window)
         @base_id = window.get_surface_id
-      elsif surface_id == '-1'
+      when '-1'
         @base_id = window.get_surface_id
       else
         @base_id = surface_id
@@ -55,7 +56,7 @@ module Seriko
     end
 
     def get_base_id()
-      return @base_id
+      @base_id
     end
 
     def move_surface(xoffset, yoffset)
@@ -69,23 +70,21 @@ module Seriko
     def update_frame(window)
       frame, actor = get_actor_next(window)
       last_actor = actor
-      while actor != nil
+      while not actor.nil?
         actor.update(window, frame)
         last_actor = actor
         frame, actor = get_actor_next(window)
       end
-      if last_actor != nil and last_actor.exclusive? and \
-        last_actor.terminate? and @exclusive_actor == nil # XXX
+      if not last_actor.nil? and last_actor.exclusive? and \
+        last_actor.terminate? and @exclusive_actor.nil? # XXX
         invoke_restart(window)
       end
     end
 
     def get_actor_next(window)
-      if not @active.empty?
+      unless @active.empty?
         @active.sort! {|x| x[0]} # (key=lambda {|x| return x[0]})
-        if @active[0][0] <= @next_tick
-          return @active.shift
-        end
+        return @active.shift if @active[0][0] <= @next_tick
       end
       return nil, nil
     end
@@ -95,7 +94,7 @@ module Seriko
       current_tick = (Time.now.to_f * 1000000).to_i # [microsec]
       quality = @parent.handle_request('GET', 'get_preference', 'animation_quality')
       @fps = DEFAULT_FPS * quality
-      if @prev_tick == 0 ## First time
+      if @prev_tick.zero? ## First time
         delta_tick = (1000.0 / @fps) # [msec]
       else
         delta_tick = ((current_tick - @prev_tick) / 1000) # [msec]
@@ -103,20 +102,16 @@ module Seriko
       @next_tick += delta_tick
       @prev_tick = current_tick
       update_frame(window)
-      if @dirty
-        window.update_frame_buffer()
-        @dirty = false
-      end
-      if @move != nil
-        window.move_surface(*@move)
-        @move = nil
-      end
+      window.update_frame_buffer() if @dirty
+      @dirty = false
+      window.move_surface(*@move) if not @move.nil?
+      @move = nil
       @timeout_id = GLib::Timeout.add((1000.0 / @fps).to_i) { update(window) } # [msec]
       return false
     end
 
     def lock_exclusive(window, actor)
-      fail "assert" unless @exclusive_actor == nil
+      fail "assert" unless @exclusive_actor.nil?
       terminate(window)
       @exclusive_actor = actor
       actor.set_post_proc(
@@ -136,15 +131,11 @@ module Seriko
     end
 
     def remove_overlay(actor)
-      if @overlays.delete(actor)
-        @dirty = true
-      end
+      @dirty = true if @overlays.delete(actor)
     end
 
     def add_overlay(window, actor, surface_id, x, y, method)
-      if surface_id == '-2'
-        terminate(window)
-      end
+      terminate(window) if surface_id == '-2'
       if ['-1', '-2'].include?(surface_id)
         remove_overlay(actor)
         return
@@ -154,24 +145,18 @@ module Seriko
     end
 
     def invoke_actor(window, actor)
-      if @exclusive_actor != nil
+      if not @exclusive_actor.nil?
         interval = actor.get_interval()
-        if interval.start_with?('talk') or interval == 'yen-e'
-          return
-        end
+        return if interval.start_with?('talk') or interval == 'yen-e'
         @queue << actor
         return
       end
-      if actor.exclusive?
-        lock_exclusive(window, actor)
-      end
+      lock_exclusive(window, actor) if actor.exclusive?
       actor.invoke(window, @next_tick)
     end
 
     def invoke(window, actor_id, update: 0)
-      if not @seriko.include?(@base_id)
-        return
-      end
+      return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
         if actor_id == actor.get_id()
           invoke_actor(window, actor)
@@ -181,9 +166,7 @@ module Seriko
     end
 
     def invoke_yen_e(window, surface_id)
-      if not @seriko.include?(surface_id)
-        return
-      end
+      return unless @seriko.include?(surface_id)
       for actor in @seriko[surface_id]
         if actor.get_interval() == 'yen-e'
           invoke_actor(window, actor)
@@ -193,9 +176,7 @@ module Seriko
     end
 
     def invoke_talk(window, surface_id, count)
-      if not @seriko.include?(surface_id)
-        return false
-      end
+      return false unless @seriko.include?(surface_id)
       interval_count = nil
       for actor in @seriko[surface_id]
         interval = actor.get_interval()
@@ -204,7 +185,7 @@ module Seriko
           break
         end
       end
-      if interval_count != nil and count >= interval_count
+      if not interval_count.nil? and count >= interval_count
         invoke_actor(window, actor)
         return true
       else
@@ -213,9 +194,7 @@ module Seriko
     end
 
     def invoke_runonce(window)
-      if not @seriko.include?(@base_id)
-        return
-      end
+      return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
         if actor.get_interval() == 'runonce'
           invoke_actor(window, actor)
@@ -224,9 +203,7 @@ module Seriko
     end
 
     def invoke_always(window)
-      if not @seriko.include?(@base_id)
-        return
-      end
+      return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
         interval = actor.get_interval()
         if ['always', 'sometimes', 'rarely'].include?(interval) or \
@@ -238,9 +215,7 @@ module Seriko
     end
 
     def invoke_restart(window)
-      if not @seriko.include?(@base_id)
-        return
-      end
+      return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
         if @queue.include?(actor)
           @queue.remove(actor)
@@ -250,9 +225,7 @@ module Seriko
     end
 
     def invoke_kinoko(window) # XXX
-      if not @seriko.include?(@base_id)
-        return
-      end
+      return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
         if ['always', 'runonce',
             'sometimes', 'rarely',].include?(actor.get_interval())
@@ -278,9 +251,7 @@ module Seriko
     def start(window)
       invoke_runonce(window)
       invoke_always(window)
-      if @timeout_id != nil
-        GLib::Source.remove(@timeout_id)
-      end
+      GLib::Source.remove(@timeout_id) if not @timeout_id.nil?
       @timeout_id = GLib::Timeout.add((1000.0 / @fps).to_i) { update(window) } # [msec]
     end
 
@@ -297,9 +268,7 @@ module Seriko
     end
 
     def stop_actor(actor_id)
-      if not @seriko.include?(@base_id)
-        return
-      end
+      return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
         if actor.get_id() == actor_id
           actor.terminate()
@@ -308,10 +277,8 @@ module Seriko
     end
 
     def destroy()
-      if @timeout_id != nil
-        GLib::Source.remove(@timeout_id)
-        @timeout_id = nil
-      end
+      GLib::Source.remove(@timeout_id) unless @timeout_id.nil?
+      @timeout_id = nil
     end
 
     def iter_overlays()
@@ -355,19 +322,15 @@ module Seriko
     end
 
     def terminate?
-      return @terminate_flag
+      @terminate_flag
     end
 
     def exclusive?
-      if @exclusive != 0
-        return true
-      else
-        return false
-      end
+      @exclusive.zero? ? false : true
     end
 
     def set_post_proc(post_proc, args)
-      fail "assert" unless @post_proc == nil
+      fail "assert" unless @post_proc.nil?
       @post_proc = [post_proc, args]
     end
 
@@ -376,15 +339,15 @@ module Seriko
     end
 
     def get_id()
-      return @id
+      @id
     end
 
     def get_interval()
-      return @interval
+      @interval
     end
 
     def get_patterns()
-      return @patterns
+      @patterns
     end
 
     def add_pattern(surface, interval, method, args)
@@ -396,14 +359,12 @@ module Seriko
     end
 
     def update(window, base_frame)
-      if @terminate_flag
-        return false
-      end
+      return false if @terminate_flag
     end
 
     def terminate()
       @terminate_flag = true
-      if @post_proc != nil
+      unless @post_proc.nil?
         post_proc, args = @post_proc
         @post_proc = nil
         post_proc.call(*args)
@@ -427,19 +388,20 @@ module Seriko
       if OVERLAY_SET.include?(@last_method)
         window.remove_overlay(self)
       end
-      if method == 'move'
+      case method
+      when 'move'
         window.get_seriko.move_surface(args[0], args[1])
-      elsif OVERLAY_SET.include?(method)
+      when *OVERLAY_SET
         window.add_overlay(self, surface, args[0], args[1], method)
-      elsif method == 'base'
+      when 'base'
         window.get_seriko.set_base_id(window, surface)
-      elsif method == 'start'
+      when 'start'
         window.invoke(args[0], :update => 1)
-      elsif method == 'alternativestart'
+      when 'alternativestart'
         window.invoke(args.sample, :update => 1)
-      elsif method == 'stop'
+      when 'stop'
         window.get_seriko.stop_actor(args[0])
-      elsif method == 'alternativestop'
+      when 'alternativestop'
         window.get_seriko.stop_actor(args.sample)
       else
         fail RuntimeError('should not reach here')
@@ -465,10 +427,8 @@ module Seriko
     end
 
     def update(window, base_frame)
-      if @terminate_flag
-        return false
-      end
-      if @pattern == 0
+      return false if @terminate_flag
+      if @pattern.zero?
         @surface_id = window.get_surface()
       end
       surface, interval, method, args = @patterns[@pattern]
@@ -504,10 +464,8 @@ module Seriko
     end
 
     def update(window, base_frame)
-      if @terminate_flag
-        return false
-      end
-      if @pattern == 0
+      return false if @terminate_flag
+      if @pattern.zero?
         @surface_id = window.get_surface()
       end
       surface, interval, method, args = @patterns[@pattern]
@@ -541,10 +499,8 @@ module Seriko
     end
 
     def update(window, base_frame)
-      if @terminate_flag
-        return false
-      end
-      if @pattern == 0
+      return false if @terminate_flag
+      if @pattern.zero?
         @surface_id = window.get_surface()
       end
       surface, interval, method, args = @patterns[@pattern]
@@ -579,10 +535,8 @@ module Seriko
     end
 
     def update(window, base_frame)
-      if @terminate_flag
-        return false
-      end
-      if @pattern == 0
+      return false if @terminate_flag
+      if @pattern.zero?
         @surface_id = window.get_surface()
       end
       surface, interval, method, args = @patterns[@pattern]
@@ -628,15 +582,9 @@ module Seriko
       else
         return [] ## should not reach here
       end
-      if match == nil
-        next
-      end
-      if version == 1 and not re_seriko_interval_value.match(value)
-        next
-      end
-      if version == 2 and not re_seriko2_interval_value.match(value)
-        next
-      end
+      next if match.nil?
+      next if version == 1 and not re_seriko_interval_value.match(value)
+      next if version == 2 and not re_seriko2_interval_value.match(value)
       buf << [match[1].to_i, value]
     end
     actors = []
@@ -678,13 +626,11 @@ module Seriko
           else
             key = ('animation' + actor_id.to_s + '.pattern' + n.to_s)
           end
-          if not config.include?(key)
+          unless config.include?(key)
             key = (actor_id.to_s + 'patturn' + n.to_s) # only for version 1
-            if not config.include?(key)
+            unless config.include?(key)
               key = (actor_id.to_s + 'putturn' + n.to_s) # only for version 1
-              if not config.include?(key)
-                next # XXX
-              end
+              next unless config.include?(key) # XXX
             end
           end
           pattern = config[key]
@@ -693,21 +639,19 @@ module Seriko
           else
             match = re_seriko2_pattern.match(pattern)
           end
-          if match == nil
-            fail ('unsupported pattern: ' + pattern)
-          end
+          fail ("unsupported pattern: #{pattern}") if match.nil?
           if version == 1
             surface = match[1].to_i.to_s
             interval = (match[2].to_i.abs * 10)
             method = match[3]
           else
             method = match[1]
-            if match[2] == nil
+            if match[2].nil?
               surface = 0
             else
               surface = match[2].to_i.to_s
             end
-            if match[3] == nil
+            if match[3].nil?
               interval = 0
             else
               interval = match[3].to_i.abs
@@ -723,13 +667,13 @@ module Seriko
             else
               group = match[4]
             end
-            if group == nil
+            if group.nil?
               fail ('syntax error: ' + pattern)
             end
             args = [group.to_i]
           elsif ['alternativestart', 'alternativestop'].include?(method)
             args = match[6]
-            if args == nil
+            if args.nil?
               fail ('syntax error: ' + pattern)
             end
             t = []
@@ -747,12 +691,12 @@ module Seriko
               x = 0
               y = 0
             else
-              if match[4] == nil
+              if match[4].nil?
                 x = 0
               else
                 x = match[4].to_i
               end
-              if match[5] == nil
+              if match[5].nil?
                 y = 0
               else
                 y = match[5].to_i
@@ -797,32 +741,27 @@ module Seriko
     version = nil
     buf = []
     for key, value in config.each_entry
-      if version == 1
+      case version
+      when 1
         match = re_mayuna_interval.match(key)
-      elsif version == 2
+      when 2
         match = re_mayuna2_interval.match(key)
       else
         match1 = re_mayuna_interval.match(key)
         match2 = re_mayuna2_interval.match(key)
-        if match1 != nil
+        if not match1.nil?
           version = 1
           match = match1
-        elsif match2 != nil
+        elsif not match2.nil?
           version = 2
           match = match2
         else
           next
         end
       end
-      if match == nil
-        next
-      end
-      if version == 1 and not re_mayuna_interval_value.match(value)
-        next
-      end
-      if version == 2 and not re_mayuna2_interval_value.match(value)
-        next
-      end
+      next if match.nil?
+      next if version == 1 and not re_mayuna_interval_value.match(value)
+      next if version == 2 and not re_mayuna2_interval_value.match(value)
       buf << [match[1].to_i, value]
     end
     mayuna = []
@@ -848,7 +787,7 @@ module Seriko
           else
             match = re_mayuna2_pattern.match(pattern)
           end
-          if match == nil
+          if match.nil?
             fail ('unsupported pattern: ' + pattern)
           end
           if version == 1
@@ -867,12 +806,12 @@ module Seriko
               x = 0
               y = 0
             else
-              if match[4] == nil
+              if match[4].nil?
                 x = 0
               else
                 x = match[4].to_i
               end
-              if match[5] == nil
+              if match[5].nil?
                 y = 0
               else
                 y = match[5].to_i

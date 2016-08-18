@@ -17,7 +17,7 @@ require_relative "logging"
 module DLL
 
   def self.get_path() # XXX
-    return File.expand_path(File.join(File.dirname(__FILE__), 'dll'))
+    File.expand_path(File.join(File.dirname(__FILE__), 'dll'))
   end
 
 
@@ -34,21 +34,19 @@ module DLL
     end
 
     def check_import
-      return 1
+      1
     end
 
     def load(dir: nil)
-      if dir == nil
-        dir = File.expand_path(File.dirname(__FILE__))
-      end
+      dir = File.expand_path(File.dirname(__FILE__)) if dir.nil?
       @dir = dir
       result = 0
-      if check_import == 0
+      if check_import.zero?
         #pass
-      elsif @loaded != 0
+      elsif not @loaded.zero?
         result = 2
       else
-        if setup != 0
+        unless setup.zero?
           @loaded = 1
           result = 1
         end
@@ -57,42 +55,37 @@ module DLL
     end
 
     def setup
-      return 1
+      1
     end
 
     def unload
-      if @loaded == 0
-        return 0
-      else
-        @loaded = 0
-        return finalize()
-      end
+      return 0 if @loaded.zero?
+      @loaded = 0
+      return finalize()
     end
 
     def finalize
-      return 1
+      1
     end
 
     def request(req)
       req_type, argument = evaluate_request(req)
-      if req_type == nil
+      case req_type
+      when nil
         return RESPONSE[400]
-      elsif req_type == 'GET Version'
+      when 'GET Version'
         return RESPONSE[204]
-      elsif req_type == 'EXECUTE'
+      when 'EXECUTE'
         result = execute(argument)
-        if result == nil
-          return RESPONSE[204]
-        else
-          return result
-        end
+        return RESPONSE[204] if result.nil?
+        return result
       else
         return RESPONSE[400]
       end
     end
 
     def execute(args)
-      return nil
+      nil
     end
 
     def evaluate_request(req)
@@ -101,10 +94,8 @@ module DLL
       @charset = 'CP932' # default
       for line in req.split("\n", 0)
         line = line.force_encoding(@charset).strip.encode("UTF-8", :invalid => :replace, :undef => :replace)
-        if line.empty?
-          next
-        end
-        if req_type == nil
+        next if line.empty?
+        if req_type.nil?
           for request in ['EXECUTE', 'GET Version']
             if line.start_with?(request)
               req_type = request
@@ -112,9 +103,7 @@ module DLL
           end
           next
         end
-        if line.index(':') == nil
-          next
-        end
+        next if line.index(':').nil?
         key, value = line.split(':', 2)
         key = key.strip()
         if key == 'Charset'
@@ -153,9 +142,7 @@ module DLL
       name = name.gsub('\\', '/')
       head, tail = File.split(name)
       name = tail
-      if name == nil or name.empty?
-        return nil
-      end
+      return nil if name.nil? or name.empty?
       if name.downcase.end_with?('.dll') # XXX
         name = name[0, name.length - 4]
       end
@@ -171,7 +158,8 @@ module DLL
         return nil
       end
       instance = nil
-      if @type == 'saori'
+      case @type
+      when 'saori'
         begin
           saori_ = module_.class_eval('Saori')
           saori = saori_.new()
@@ -182,7 +170,7 @@ module DLL
           saori = nil
         end
         instance = saori
-      elsif @type == 'shiori'
+      when 'shiori'
         begin
           shiori_ = module_.class_eval('Shiori')
           shiori = shiori_.new(dll_name)

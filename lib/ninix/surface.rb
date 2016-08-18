@@ -51,9 +51,7 @@ module Surface
           result = @parent.handle_request(event_type, event, *arglist)
         end
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def finalize
@@ -90,9 +88,7 @@ module Surface
 
     def identify_window(win)
       for surface_window in @window
-        if win == surface_window.get_window.window
-          return true
-        end
+        return true if win == surface_window.get_window.window
       end
       return false
     end
@@ -116,12 +112,8 @@ module Surface
     end
 
     def window_state(window, event)
-      if not @parent.handle_request('GET', 'is_running')
-        return
-      end
-      if (event.changed_mask & Gdk::WindowState::ICONIFIED).zero?
-        return
-      end
+      return unless @parent.handle_request('GET', 'is_running')
+      return if (event.changed_mask & Gdk::WindowState::ICONIFIED).zero?
       if (event.new_window_state & Gdk::WindowState::ICONIFIED).nonzero?
         if window == @window[0].get_window
           @parent.handle_request('NOTIFY', 'notify_iconified')
@@ -161,9 +153,7 @@ module Surface
         @key_press_count = 0
         return true
       end
-      if not (event.event_type == Gdk::EventType::KEY_PRESS)
-        return false
-      end
+      return false unless (event.event_type == Gdk::EventType::KEY_PRESS)
       @key_press_count += 1
       if (event.state & \
           (Gdk::ModifierType::CONTROL_MASK | \
@@ -179,7 +169,7 @@ module Surface
           end
         end
       end
-      if name != nil or keycode != nil
+      unless name.nil? and keycode.nil?
         @parent.handle_request(
           'NOTIFY', 'notify_event', 'OnKeyPress', name, keycode,
           @key_press_count)
@@ -204,9 +194,7 @@ module Surface
       for basename in surface.keys
         path, config = surface[basename]
         match = RE_SURFACE_ID.match(basename)
-        if match == nil
-          next
-        end
+        next if match.nil?
         key = match[1]
         # define animation patterns
         version = 1 # default: SERIKO/1.x
@@ -236,16 +224,14 @@ module Surface
       maxheight = 0
       for basename in surface.keys
         path, config = surface[basename]
-        if path == nil
-          next
-        end
-        if not File.exists?(path)
+        next if path.nil?
+        unless File.exists?(path)
           name = File.basename(path, ".*")
           ext = File.extname(path)
           dgp_path = [name, '.dgp'].join('')
-          if not File.exists?(dgp_path)
+          unless File.exists?(dgp_path)
             ddp_path = [name, '.ddp'].join('')
-            if not File.exists?(ddp_path)
+            unless File.exists?(ddp_path)
               Logging::Logging.error(
                 path + ': file not found (ignored)')
               next
@@ -261,9 +247,7 @@ module Surface
         maxwidth = [maxwidth, w].max
         maxheight = [maxheight, h].max
         match = RE_SURFACE_ID.match(basename)
-        if match == nil
-          next
-        end
+        next if match.nil?
         key = match[1]
         surfaces[key] = elements[basename]
       end
@@ -272,9 +256,7 @@ module Surface
       for basename in surface.keys
         path, config = surface[basename]
         match = RE_SURFACE_ID.match(basename)
-        if match == nil
-          next
-        end
+        next if match.nil?
         key = match[1]
         if config.include?('element0')
           Logging::Logging.debug('surface ' + key)
@@ -284,7 +266,7 @@ module Surface
       surfaces.update(composite_surface)
       # check if necessary surfaces have been loaded
       for key in [default_sakura, default_kero]
-        if not surfaces.include?(key.to_s)
+        unless surfaces.include?(key.to_s)
           fail RuntimeError, "cannot load default surface ##{key} (abort)\n"
         end
       end
@@ -294,22 +276,16 @@ module Surface
       for basename in surface.keys
         path, config = surface[basename]
         match = RE_SURFACE_ID.match(basename)
-        if match == nil
-          next
-        end
+        next if match.nil?
         key = match[1]
         # define collision areas
         buf = []
         for n in 0..255
           # "redo" syntax
           rect = config.get(['collision', n.to_s].join(''))
-          if rect == nil
-            next
-          end
+          next if rect.nil?
           values = rect.split(',', 0)
-          if values.length != 5
-            next
-          end
+          next if values.length != 5
           begin
             x1 = Integer(values[0])
             y1 = Integer(values[1])
@@ -323,9 +299,7 @@ module Surface
         for part in ['head', 'face', 'bust']
           # "inverse" syntax
           rect = config.get(['collision.', part].join(''))
-          if rect == nil
-            next
-          end
+          next if rect.nil?
           begin
             values = rect.split(',', 0)
             x1 = Integer(values[0])
@@ -345,9 +319,7 @@ module Surface
       for basename in surface.keys
         path, config = surface[basename]
         match = RE_SURFACE_ID.match(basename)
-        if match == nil
-          next
-        end
+        next if match.nil?
         key = match[1]
         # define animation patterns
         mayuna[key] = Seriko.get_mayuna(config)
@@ -367,21 +339,21 @@ module Surface
     def get_menu_pixmap
       top_dir = @prefix
       name = @desc.get('menu.background.bitmap.filename')
-      if name != nil
+      unless name.nil?
         name = name.gsub('\\', '/')
         path_background = File.join(top_dir, name)
       else
         path_background = nil
       end
       name = @desc.get('menu.sidebar.bitmap.filename')
-      if name != nil
+      unless name.nil?
         name = name.gsub('\\', '/')
         path_sidebar = File.join(top_dir, name)
       else
         path_sidebar = nil
       end
       name = @desc.get('menu.foreground.bitmap.filename')
-      if name != nil
+      unless name.nil?
         name = name.gsub('\\', '/')
         path_foreground = File.join(top_dir, name)
       else
@@ -414,11 +386,12 @@ module Surface
 
     def add_window(side, default_id, config_alias: nil, mayuna: {})
       fail "assert" unless @window.length == side
-      if side == 0
+      case side
+      when 0
         name = 'sakura'
         title = @parent.handle_request('GET', 'get_selfname') or \
         ['surface.', name].join('')
-      elsif side == 1
+      when 1
         name = 'kero'
         title = @parent.handle_request('GET', 'get_keroname') or \
         ['surface.', name].join('')
@@ -426,7 +399,7 @@ module Surface
         name = ('char' + side.to_i.to_s)
         title = ['surface.', name].join('')
       end
-      if config_alias == nil
+      if config_alias.nil?
         surface_alias = nil
       else
         surface_alias = config_alias.get(name + '.surface.alias')
@@ -438,9 +411,7 @@ module Surface
           name + '.bindgroup' + index.to_i.to_s + '.name', :default => nil)
         default = @desc.get(
           name + '.bindgroup' + index.to_i.to_s + '.default', :default => 0)
-        if group != nil
-          bind[index] = [group, default != 0]
-        end
+        bind[index] = [group, (not default.zero?)] unless group.nil?
       end
       @mayuna[name] = []
       for index in 0..127
@@ -490,9 +461,7 @@ module Surface
       error = nil
       for n in 0..255
         key = ['element', n.to_s].join('')
-        if not config.include?(key)
-          break
-        end
+        break unless config.include?(key)
         spec = []
         for value in config[key].split(',', 0)
           spec << value.strip()
@@ -508,17 +477,17 @@ module Surface
         basename = File.basename(filename, ".*")
         ext = File.extname(filename)
         ext = ext.downcase
-        if not ['.png', '.dgp', '.ddp'].include?(ext)
+        unless ['.png', '.dgp', '.ddp'].include?(ext)
           error = ('unsupported file format for ' + key + ': ' + filename)
           break
         end
         basename = basename.downcase
-        if not elements.include?(basename)
+        unless elements.include?(basename)
           error = (key + ' file not found: ' + filename)
           break
         end
         surface = elements[basename][0]
-        if n == 0 # base surface
+        if n.zero? # base surface
           surface_list = [surface]
         elsif ['overlay', 'overlayfast',
                'interpolate', 'reduce', 'replace', 'asis'].include?(method)
@@ -531,7 +500,7 @@ module Surface
         end
         Logging::Logging.debug(key + ': ' + method + ' ' + filename + ', x=' + x.to_i.to_s + ', y=' + y.to_i.to_s)
       end
-      if error != nil
+      unless error.nil?
         Logging::Logging.error(error)
         surface_list = []
       end
@@ -553,7 +522,7 @@ module Surface
     end
 
     def set_surface_default(side)
-      if side == nil
+      if side.nil?
         for side in 0..@window.length-1
           @window[side].set_surface_default()
         end
@@ -631,7 +600,7 @@ module Surface
         ox, oy = get_balloon_offset(side)
         @parent.handle_request(
           'NOTIFY', 'set_balloon_direction', side, direction)
-        if direction == 0 # left
+        if direction.zero? # left
           base_x = (x + ox)
         else
           w, h = get_surface_size(side)
@@ -649,7 +618,7 @@ module Surface
       for side in 0..@window.length-1
         align = get_alignment(side)
         w, h = get_max_size(side)
-        if side == 0 # sakura
+        if side.zero? # sakura
           x = (left + scrn_w - w)
         else
           b0w, b0h = @parent.handle_request(
@@ -801,28 +770,26 @@ module Surface
     end
 
     def set_icon(path)
-      if path == nil or not File.exists?(path)
-        return
-      end
+      return if path.nil? or not File.exists?(path)
       for window in @window
         window.get_window.set_icon(path) # XXX
       end
     end
 
     def get_mikire
-      return @mikire
+      @mikire
     end
 
     def get_kasanari
-      return @kasanari
+      @kasanari
     end
 
     def get_name
-      return @name
+      @name
     end
 
     def get_username
-      if @desc == nil
+      if @desc.nil?
         return nil
       else
         return @desc.get('user.defaultname')
@@ -830,7 +797,7 @@ module Surface
     end
 
     def get_selfname
-      if @desc == nil
+      if @desc.nil?
         return nil
       else
         return @desc.get('sakura.name')
@@ -838,7 +805,7 @@ module Surface
     end
 
     def get_selfname2
-      if @desc == nil
+      if @desc.nil?
         return nil
       else
         return @desc.get('sakura.name2')
@@ -846,7 +813,7 @@ module Surface
     end
 
     def get_keroname
-      if @desc == nil
+      if @desc.nil?
         return nil
       else
         return @desc.get('kero.name')
@@ -854,7 +821,7 @@ module Surface
     end
 
     def get_friendname
-      if @desc == nil
+      if @desc.nil?
         return nil
       else
         return @desc.get('sakura.friend.name')
@@ -891,7 +858,7 @@ module Surface
     end
 
     def check_mikire_kasanari
-      if not is_shown(0)
+      unless is_shown(0)
         @mikire = @kasanari = 0
         return
       end
@@ -904,7 +871,7 @@ module Surface
       else
         @mikire = 0
       end
-      if not is_shown(1)
+      unless is_shown(1)
         @kasanari = 0
         return
       end
@@ -939,7 +906,7 @@ module Surface
       @tooltips = tooltips
       @align = 0
       @__current_part = ''
-      if @alias != nil and @alias[default_id] != nil
+      unless @alias.nil? or @alias[default_id].nil?
         default_id = @alias[default_id][0]
       end
       @surface_info = surface_info
@@ -995,7 +962,7 @@ module Surface
       @darea.signal_connect('scroll_event') do |w, e|
         next scroll(w, e)
       end
-      if @side == 0
+      if @side.zero?
         screen = @window.screen
         screen.signal_connect('size-changed') do |scr|
           display_changed(scr)
@@ -1010,25 +977,24 @@ module Surface
     end
 
     def get_seriko
-      return @seriko
+      @seriko
     end
 
     def get_window
-      return @window
+      @window
     end
 
     def get_surface_id
-      return @surface_id
+      @surface_id
     end
 
     def display_changed(screen)
-      if @side == 0
-        @parent.handle_request('NOTIFY', 'reset_position') # XXX
-        left, top, scrn_w, scrn_h = @window.workarea
-        @parent.handle_request(
-          'NOTIFY', 'notify_event', 'OnDisplayChange',
-          Gdk.Visual.get_best_depth(), scrn_w, scrn_h)
-      end
+      return unless @side.zero?
+      @parent.handle_request('NOTIFY', 'reset_position') # XXX
+      left, top, scrn_w, scrn_h = @window.workarea
+      @parent.handle_request(
+        'NOTIFY', 'notify_event', 'OnDisplayChange',
+        Gdk.Visual.get_best_depth(), scrn_w, scrn_h)
     end
 
     def set_responsible(parent)
@@ -1048,14 +1014,12 @@ module Surface
           result = @parent.handle_request(event_type, event, *arglist)
         end
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     @property
     def direction
-      return @__direction
+      @__direction
     end
 
     def direction=(value)
@@ -1065,18 +1029,19 @@ module Surface
     end
 
     def get_scale
-      return @parent.handle_request('GET', 'get_preference', 'surface_scale')
+      @parent.handle_request('GET', 'get_preference', 'surface_scale')
     end
 
     def get_balloon_offset
-      if @__balloon_offset == nil
+      if @__balloon_offset.nil?
         path, config = @surface_info[['surface', @surface_id].join('')]
         side = @side
-        if side == 0
+        case side
+        when 0
           name = 'sakura'
           x = config.get(name + '.balloon.offsetx').to_i
           y = config.get(name + '.balloon.offsety').to_i
-        elsif side == 1
+        when 1
           name = 'kero'
           x = config.get(name + '.balloon.offsetx').to_i
           y = config.get(name + '.balloon.offsety').to_i
@@ -1084,17 +1049,17 @@ module Surface
           name = ('char' + side.to_i.to_s)
           x, y = nil, nil # XXX
         end
-        if x == nil
+        if x.nil?
           x = @desc.get(name + '.balloon.offsetx')
-          if x == nil
+          if x.nil?
             x = 0
           else
             x = x.to_i
           end
         end
-        if y == nil
+        if y.nil?
           y = @desc.get(name + '.balloon.offsety')
-          if y == nil
+          if y.nil?
             y = 0
           else
             y = y.to_i
@@ -1120,7 +1085,7 @@ module Surface
           filelist << pathname
         end
       end
-      if not filelist.empty?
+      unless filelist.empty?
         @parent.handle_request(
           'NOTIFY', 'enqueue_event',
           'OnFileDrop2', filelist.join(1.chr), @side)
@@ -1140,7 +1105,7 @@ module Surface
     end
 
     def invoke_talk(surface_id, count)
-      return @seriko.invoke_talk(self, surface_id, count)
+      @seriko.invoke_talk(self, surface_id, count)
     end
 
     def reset_surface
@@ -1154,9 +1119,9 @@ module Surface
 
     def set_surface(surface_id)
       prev_id = @surface_id
-      if @alias != nil and @alias.include?(surface_id)
+      if not @alias.nil? and @alias.include?(surface_id)
         aliases = @alias[surface_id]
-        if not aliases.empty?
+        unless aliases.empty?
           surface_id = aliases.sample
         end
       end
@@ -1178,11 +1143,12 @@ module Surface
       w, h = get_surface_size(:surface_id => @surface_id)
       dw, dh = get_max_size()
       xoffset = ((dw - w) / 2)
-      if get_alignment() == 0
+      case get_alignment()
+      when 0
         yoffset = (dh - h)
         left, top, scrn_w, scrn_h = @window.workarea
         y = (top + scrn_h - dh)
-      elsif get_alignment() == 1
+      when 1
         yoffset = 0
       else
         yoffset = ((dh - h) / 2)
@@ -1192,7 +1158,7 @@ module Surface
       @window.update_size(*get_max_size())
       @seriko.start(self)
       # relocate window
-      if not @dragged # XXX
+      unless @dragged # XXX
         set_position(x, y)
       end
       if @side < 2
@@ -1214,17 +1180,18 @@ module Surface
     def iter_mayuna(surface_width, surface_height, mayuna, done)
       mayuna_list = [] # XXX: FIXME
       for surface_id, interval, method, args in mayuna.get_patterns
-        if ['bind', 'add'].include?(method)
+        case method
+        when 'bind', 'add'
           if @surfaces.include?(surface_id)
             dest_x, dest_y = args
             mayuna_list << [method, surface_id, dest_x, dest_y]
           end
-        elsif method == 'reduce'
+        when 'reduce'
           if @surfaces.include?(surface_id)
             dest_x, dest_y = args
             mayuna_list << [method, surface_id, dest_x, dest_y]
           end
-        elsif method == 'insert'
+        when 'insert'
           index = args[0]
           for actor in @mayuna[@surface_id]
             actor_id = actor.get_id()
@@ -1253,7 +1220,7 @@ module Surface
         use_pna = false
         is_pnr = false
       else
-        use_pna = (@parent.handle_request('GET', 'get_preference', 'use_pna') != 0)
+        use_pna = (not @parent.handle_request('GET', 'get_preference', 'use_pna').zero?)
         is_pnr = true
       end
       begin
@@ -1270,8 +1237,8 @@ module Surface
             use_pna = false
           else
             is_pnr = true
-            use_pna = (@parent.handle_request(
-                        'GET', 'get_preference', 'use_pna') != 0)
+            use_pna = (not @parent.handle_request(
+                        'GET', 'get_preference', 'use_pna').zero?)
           end
           overlay = Pix.create_surface_from_file(
             element, :is_pnr => is_pnr, :use_pna => use_pna)
@@ -1300,7 +1267,7 @@ module Surface
     end
 
     def get_image_surface(surface_id, is_asis: false)
-      if not @surfaces.include?(surface_id)
+      unless @surfaces.include?(surface_id)
         Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
         return Pix.create_blank_surface(100, 100)
       end
@@ -1308,17 +1275,15 @@ module Surface
     end
 
     def draw_region(cr)
-      if @collisions == nil
-        return
-      end
+      return if @collisions.nil?
       cr.save()
       # translate the user-space origin
       cr.translate(*@window.get_draw_offset) # XXX
       scale = get_scale
       cr.scale(scale / 100.0, scale / 100.0)
       for part, x1, y1, x2, y2 in @collisions
-        if @parent.handle_request('GET', 'get_preference',
-                                  'check_collision_name') != 0
+        unless @parent.handle_request('GET', 'get_preference',
+                                      'check_collision_name').zero?
           cr.set_operator(Cairo::OPERATOR_SOURCE)
           cr.set_source_rgba(0.4, 0.0, 0.0, 1.0) # XXX
           cr.move_to(x1 + 2, y1)
@@ -1342,7 +1307,7 @@ module Surface
     end
 
     def create_image_surface(surface_id)
-      if surface_id == nil
+      if surface_id.nil?
         surface_id = @surface_id
       end
       if @mayuna.include?(surface_id) and @mayuna[surface_id]
@@ -1378,11 +1343,9 @@ module Surface
     end
 
     def update_frame_buffer
-      if @parent.handle_request('GET', 'lock_repaint')
-        return
-      end
+      return if @parent.handle_request('GET', 'lock_repaint')
       new_surface = create_image_surface(@seriko.get_base_id)
-      fail "assert" unless new_surface != nil
+      fail "assert" if new_surface.nil?
       # update collision areas
       @collisions = @region[@seriko.get_base_id]
       # draw overlays
@@ -1417,11 +1380,9 @@ module Surface
     end
 
     def redraw(darea, cr)
-      if @image_surface == nil # XXX
-        return
-      end
+      return if @image_surface.nil? # XXX
       @window.set_surface(cr, @image_surface, get_scale)
-      if @parent.handle_request('GET', 'get_preference', 'check_collision') != 0
+      unless @parent.handle_request('GET', 'get_preference', 'check_collision').zero?
         draw_region(cr)
       end
       @window.set_shape(cr)
@@ -1436,9 +1397,7 @@ module Surface
     end
 
     def move_surface(xoffset, yoffset)
-      if @parent.handle_request('GET', 'lock_repaint')
-        return
-      end
+      return if @parent.handle_request('GET', 'lock_repaint')
       x, y = get_position()
       @window.move(x + xoffset, y + yoffset)
       if @side < 2
@@ -1463,7 +1422,7 @@ module Surface
     end
 
     def get_surface
-      return @surface_id
+      @surface_id
     end
 
     def get_max_size
@@ -1476,10 +1435,10 @@ module Surface
     end
 
     def get_surface_size(surface_id: nil)
-      if surface_id == nil
+      if surface_id.nil?
         surface_id = @surface_id
       end
-      if not @surfaces.include?(surface_id)
+      unless @surfaces.include?(surface_id)
         w, h = 100, 100 # XXX
       else
         w, h = Pix.get_png_size(@surfaces[surface_id][0])
@@ -1491,13 +1450,11 @@ module Surface
     end
 
     def get_surface_offset
-      return @window_offset
+      @window_offset
     end
 
     def get_touched_region(x, y)
-      if @collisions == nil
-        return ''
-      end
+      return '' if @collisions.nil?
       for part, x1, y1, x2, y2 in @collisions
         if x1 <= x and x <= x2 and y1 <= y and y <= y2
           Logging::Logging.debug(part + ' touched')
@@ -1511,7 +1468,7 @@ module Surface
       basename = ['surface', @surface_id].join('')
       path, config = @surface_info[basename]
       value = config.get(name)
-      if value != nil
+      unless value.nil?
         scale = get_scale
         value = (value.to_f * scale / 100)
       end
@@ -1521,10 +1478,10 @@ module Surface
     def get_center
       centerx = __get_with_scaling('point.centerx')
       centery = __get_with_scaling('point.centery')
-      if centerx != nil
+      unless centerx.nil?
         centerx = centerx.to_i
       end
-      if centery != nil
+      unless centery.nil?
         centery = centery.to_i
       end
       return centerx, centery
@@ -1533,19 +1490,17 @@ module Surface
     def get_kinoko_center
       centerx = __get_with_scaling('point.kinoko.centerx')
       centery = __get_with_scaling('point.kinoko.centery')
-      if centerx != nil
+      unless centerx.nil?
         centerx = centerx.to_i
       end
-      if centery != nil
+      unless centery.nil?
         centery = centery.to_i
       end
       return centerx, centery
     end
 
     def set_position(x, y)
-      if @parent.handle_request('GET', 'lock_repaint')
-        return
-      end
+      return if @parent.handle_request('GET', 'lock_repaint')
       @position = [x, y]
       new_x, new_y = get_position()
       @window.move(new_x, new_y)
@@ -1560,7 +1515,7 @@ module Surface
       scale = get_scale
       ox = (ox * scale / 100).to_i
       oy = (oy * scale / 100).to_i
-      if new_direction == 0 # left
+      if new_direction.zero? # left
         base_x = (new_x + ox)
       else
         w, h = get_surface_size()
@@ -1574,7 +1529,7 @@ module Surface
     end
 
     def get_position ## FIXME: position with offset(property)
-      return @position.zip(@window_offset).map {|x, y| x + y }
+      @position.zip(@window_offset).map {|x, y| x + y }
     end
 
     def set_alignment_current
@@ -1582,20 +1537,16 @@ module Surface
     end
 
     def set_alignment(align)
-      if [0, 1, 2].include?(align)
-        @align = align
-      end
-      if @dragged
-        # XXX: position will be reset after button release event
-        return
-      end
-      if align == 0
+      @align = align if [0, 1, 2].include?(align)
+      return if @dragged # XXX: position will be reset after button release event
+      case align
+      when 0
         left, top, scrn_w, scrn_h = @window.workarea
         sw, sh = get_max_size()
         sx, sy = @position # XXX: without window_offset
         sy = (top + scrn_h - sh)
         set_position(sx, sy)
-      elsif align == 1
+      when 1
         left, top, scrn_w, scrn_h = @window.workarea
         sx, sy = @position # XXX: without window_offset
         sy = top
@@ -1606,7 +1557,7 @@ module Surface
     end
 
     def get_alignment
-      return @align
+      @align
     end
 
     def destroy
@@ -1615,16 +1566,12 @@ module Surface
     end
 
     def is_shown
-      return @__shown
+      @__shown
     end
 
     def show
-      if @parent.handle_request('GET', 'lock_repaint')
-        return
-      end
-      if @__shown
-        return
-      end
+      return if @parent.handle_request('GET', 'lock_repaint')
+      return if @__shown
       @__shown = true
       x, y = get_position()
       @window.move(x, y) # XXX: call before showing the window
@@ -1634,12 +1581,11 @@ module Surface
     end
 
     def hide
-      if @__shown
-        @window.hide()
-        @__shown = false
-        @parent.handle_request(
-          'NOTIFY', 'notify_observer', 'hide', :args => [@side])
-      end
+      return unless @__shown
+      @window.hide()
+      @__shown = false
+      @parent.handle_request(
+        'NOTIFY', 'notify_observer', 'hide', :args => [@side])
     end
 
     def raise
@@ -1734,11 +1680,10 @@ module Surface
         end
       end
       @__current_part = part
-      if not @parent.handle_request('GET', 'busy')
+      unless @parent.handle_request('GET', 'busy')
         if (state & Gdk::ModifierType::BUTTON1_MASK).nonzero?
-          if @x_root != nil and \
-            @y_root != nil
-            if not @dragged
+          unless @x_root.nil? or @y_root.nil?
+            unless @dragged
               @parent.handle_request(
                 'NOTIFY', 'notify_event',
                 'OnMouseDragStart', x, y, '',
@@ -1769,14 +1714,15 @@ module Surface
     def scroll(darea, event)
       x, y = @window.winpos_to_surfacepos(
            event.x.to_i, event.y.to_i, get_scale)
-      if event.direction == Gdk::ScrollDirection::UP
+      case event.direction
+      when Gdk::ScrollDirection::UP
         count = 1
-      elsif event.direction == Gdk::ScrollDirection::DOWN
+      when Gdk::ScrollDirection::DOWN
         count = -1
       else
         count = 0
       end
-      if count != 0
+      unless count.zero?
         part = get_touched_region(x, y)
         @parent.handle_request('NOTIFY', 'notify_event',
                                'OnMouseWheel', x, y, count, @side, part)

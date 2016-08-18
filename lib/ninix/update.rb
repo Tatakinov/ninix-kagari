@@ -40,11 +40,11 @@ module Update
     end
 
     def state
-      return @state
+      @state
     end
 
     def is_active
-      return @state != nil
+      return (not @state.nil?)
     end
 
     def enqueue_event(event,
@@ -54,19 +54,12 @@ module Update
     end
 
     def get_event
-      if @event_queue.empty?
-        return nil
-      else
-        return @event_queue.shift
-      end
+      return nil if @event_queue.empty?
+      return @event_queue.shift
     end
 
     def has_events
-      if @event_queue.empty?
-        return false
-      else
-        return true
-      end
+      return (not @event_queue.empty?)
     end
 
     def start(homeurl, ghostdir, timeout: 60)
@@ -81,7 +74,7 @@ module Update
         @state = nil
         return
       end
-      if not url.scheme == 'http'
+      unless url.scheme == 'http'
         enqueue_event('OnUpdateFailure',
                       :ref0 => 'bad home URL',
                       :ref1 => '',
@@ -113,19 +106,13 @@ module Update
       @buffer = []
       if revert
         for path in @backups
-          if File.file?(path)
-            File.rename(path, path[0, path.length - BACKUPSUFFIX.length])
-          end
+          File.rename(path, path[0, path.length - BACKUPSUFFIX.length]) if File.file?(path)
         end
         for path in @newfiles
-          if File.file?(path)
-            File.delete(path)
-          end
+          File.delete(path) if File.file?(path)
         end
         for path in @newdirs
-          if File.directory?(path)
-            FileUtils.remove_entry_secure(path)
-          end
+          FileUtils.remove_entry_secure(path) if File.directory?(path)
         end
         @backups = []
       end
@@ -135,9 +122,7 @@ module Update
 
     def clean_up
       for path in @backups
-        if File.file?(path)
-          File.delete(path)
-        end
+        File.delete(path) if File.file?(path)
       end
       @backups = []
     end
@@ -153,7 +138,7 @@ module Update
     def run
       len_state = 5
       len_pre = 5
-      if @state == nil or \
+      if @state.nil? or \
         @parent.handle_request('GET', 'check_event_queue')
         return false
       elsif @state == 0
@@ -166,7 +151,7 @@ module Update
         get_content()
       elsif @state == 4
         @schedule = make_schedule()
-        if @schedule == nil
+        if @schedule.nil?
           return false
         end
         @final_state = (@schedule.length * len_state + len_pre)
@@ -263,12 +248,7 @@ module Update
         return
       end
       @buffer = []
-      size = @response.content_length
-      if size == nil
-        @size = nil
-      else
-        @size = size
-      end
+      @size = @response.content_length
       @state += 1
       reset_timeout()
       @redirect_limit = 5 # reset
@@ -276,24 +256,16 @@ module Update
 
     def redirect
       @redirect_limit -= 1
-      if @redirect_limit < 0
-        return false
-      end
+      return false if @redirect_limit < 0
       location = @response['location']
-      if location == nil
-        return false
-      end
+      return false if location.nil?
       begin
         url = URI.parse(location)
       rescue
         return false
       end
-      if url.scheme != 'http'
-        return false
-      end
-      if url.path.empty?
-        return false
-      end
+      return false if url.scheme != 'http'
+      return false if url.path.empty?
       Logging::Logging.info("redirected to #{location}")
       @http.finish if @http.started?
       @host = url.host
@@ -316,7 +288,7 @@ module Update
           @state = nil
           stop(:revert => true)
           return
-        elsif data == nil
+        elsif data.nil?
           return
         end
       elsif @response.code != '200'
@@ -329,10 +301,8 @@ module Update
         stop(:revert => true)
         return
       end
-      if not data.empty?
-        @buffer = data
-      end
-      if @size == nil or data.length < @size
+      @buffer = data unless data.empty?
+      if @size.nil? or data.length < @size
         enqueue_event('OnUpdateFailure',
                       :ref0 => 'timeout',
                       :ref1 => '',
@@ -358,7 +328,7 @@ module Update
 
     def make_schedule
       schedule = parse_updates2_dau()
-      if schedule != nil
+      unless schedule.nil?
         @num_files = (schedule.length - 1)
         @file_number = 0
         list = []
@@ -379,7 +349,7 @@ module Update
     end
 
     def get_schedule
-      return @schedule
+      @schedule
     end
 
     def parse_updates2_dau
@@ -396,10 +366,8 @@ module Update
           @state = nil
           return nil
         end
-        if filename == ""
-          next
-        end
-        if checksum != nil
+        next if filename == ""
+        unless checksum.nil?
           checksum = checksum.encode('ascii', :invalid => :replace, :undef => :replace) # XXX
         end
         path = File.join(@ghostdir, adjust_path(filename))
@@ -410,10 +378,8 @@ module Update
         rescue # IOError # does not exist or broken
           data = nil
         end
-        if data != nil
-          if checksum == Digest::MD5.hexdigest(data)
-            next
-          end
+        unless data.nil?
+          next if checksum == Digest::MD5.hexdigest(data)
         end
         schedule << [filename, checksum]
       end
@@ -432,7 +398,7 @@ module Update
       if digest == checksum
         path = File.join(@ghostdir, adjust_path(filename))
         subdir = File.dirname(path)
-        if not Dir.exists?(subdir)
+        unless Dir.exists?(subdir)
           subroot = subdir
           while true
             head, tail = File.split(subroot)
@@ -512,7 +478,7 @@ module Update
 
     def end_updates
       filelist = parse_delete_txt()
-      if not filelist.empty?
+      unless filelist.empty?
         for filename in filelist
           path = File.join(@ghostdir, filename)
           if File.exists?(path) and File.file?(path)
@@ -553,9 +519,7 @@ module Update
         f = open(File.join(@ghostdir, 'delete.txt'), 'rb')
         for line in f
           line = line.strip()
-          if line.empty?
-            next
-          end
+          next if line.empty?
           filename = line
           filelist << Home.get_normalized_path(filename)
         end

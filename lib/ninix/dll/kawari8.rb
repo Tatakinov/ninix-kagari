@@ -30,7 +30,7 @@ module Kawari8
     extern "const char *so_request(unsigned int, const char *, long *)"
     extern "void so_free(unsigned int, const char *)"
     result = so_library_init()
-    if result != 0
+    unless result.zero?
       $_kawari8 = self
     else
       $_kawari8 = nil
@@ -55,9 +55,7 @@ module Kawari8
 
     def find(topdir, dll_name)
       result = 0
-      if $_kawari8 != nil and File.file?(File.join(topdir, 'kawarirc.kis'))
-        result = 205
-      end
+      result = 205 if not $_kawari8.nil? and File.file?(File.join(topdir, 'kawarirc.kis'))
       return result
     end
 
@@ -71,56 +69,45 @@ module Kawari8
 
     def load(dir: nil)
       @dir = dir
-      if $_kawari8 != nil
-        if not @dir.end_with?(File::SEPARATOR)
-          @dir = [@dir, File::SEPARATOR].join()
-        end
-        ##_kawari8.setcallback(self.saori_exist,
-        ##                     Shiori.saori_load,
-        ##                     Shiori.saori_unload,
-        ##                     Shiori.saori_request)
-        @handle = $_kawari8.so_create(@dir, @dir.bytesize)
-        if @handle != 0
-          return 1
-        else
-          return 0
-        end
-      else
-        return 0
+      return 0 if $_kawari8.nil?
+      unless @dir.end_with?(File::SEPARATOR)
+        @dir = [@dir, File::SEPARATOR].join()
       end
+      ##_kawari8.setcallback(self.saori_exist,
+      ##                     Shiori.saori_load,
+      ##                     Shiori.saori_unload,
+      ##                     Shiori.saori_request)
+      @handle = $_kawari8.so_create(@dir, @dir.bytesize)
+      return @handle.zero? ? 0 : 1
     end
 
     def unload
-      if $_kawari8 != nil
-        $_kawari8.so_dispose(@handle)
-        ##for name in list(Shiori.saori_list.keys())
-        ##  if not name.startswith(os.fsdecode(self.dir))
-        ##    continue
-        ##  end
-        ##  if Shiori.saori_list[name][1]:
-        ##      Shiori.saori_list[name][0].unload()
-        ##  end
-        ##  del Shiori.saori_list[name]
-        ##  # XXX
-        ##  _kawari8.setcallback(lambda *a: 0, # dummy
-        ##                       Shiori.saori_load,
-        ##                       Shiori.saori_unload,
-        ##                       Shiori.saori_request)
-        ##end
-      end
+      return if $_kawari8.nil?
+      $_kawari8.so_dispose(@handle)
+      ##for name in list(Shiori.saori_list.keys())
+      ##  if not name.startswith(os.fsdecode(self.dir))
+      ##    continue
+      ##  end
+      ##  if Shiori.saori_list[name][1]:
+      ##      Shiori.saori_list[name][0].unload()
+      ##  end
+      ##  del Shiori.saori_list[name]
+      ##  # XXX
+      ##  _kawari8.setcallback(lambda *a: 0, # dummy
+      ##                       Shiori.saori_load,
+      ##                       Shiori.saori_unload,
+      ##                       Shiori.saori_request)
+      ##end
     end
 
     def request(req_string)
-      if $_kawari8 != nil
-        req_len = [req_string.bytesize].pack("l!")
-        result = $_kawari8.so_request(@handle, req_string, req_len)
-        req_len, = req_len.unpack("l!")
-        return_val = result[0, req_len].to_s
-        $_kawari8.so_free(@handle, result)
-        return return_val
-      else
-        return '' # FIXME
-      end
+      return '' if $_kawari8.nil? # FIXME
+      req_len = [req_string.bytesize].pack("l!")
+      result = $_kawari8.so_request(@handle, req_string, req_len)
+      req_len, = req_len.unpack("l!")
+      return_val = result[0, req_len].to_s
+      $_kawari8.so_free(@handle, result)
+      return return_val
     end
 
     ##def saori_exist(self, saori):
