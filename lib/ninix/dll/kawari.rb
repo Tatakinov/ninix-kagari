@@ -44,7 +44,7 @@ module Kawari
           line.start_with?(':endcrypt')
           next
         end
-        if not line.include?(':')
+        unless line.include?(':')
           Logging::Logging.debug('kawari.rb: syntax error at line ' + position[0].to_s + ' in ' + position[1].to_s)
           Logging::Logging.debug(line.strip())
           next
@@ -57,11 +57,9 @@ module Kawari
           Logging::Logging.debug(line.strip())
           next
         end
-        if phrases.empty?
-          next
-        end
+        next if phrases.empty?
         if entries == 'locale'
-          if not Encoding.name_list.include?(phrases)
+          unless Encoding.name_list.include?(phrases)
             Logging::Logging.error('kawari.rb: unsupported charset ' + phrases.to_s)
           else
             $charset = phrases
@@ -96,7 +94,7 @@ module Kawari
     for entries, phrases, position in buf
       parsed_entries = Kawari.parse_entries(entries)
       parsed_phrases = Kawari.parse_phrases(phrases)
-      if parsed_phrases == nil
+      if parsed_phrases.nil?
         Logging::Logging.debug('kawari.rb: syntax error at line ' + position[0].to_s + ' in ' + position[1].to_s + ':')
         Logging::Logging.debug(phrases.strip())
         next
@@ -113,11 +111,11 @@ module Kawari
   end
 
   def self.add_phrases(dic, entry, phrases)
-    if not dic.include?(entry)
+    unless dic.include?(entry)
       dic[entry] = []
     end
     for phrase in phrases
-      if not phrase.empty?
+      unless phrase.empty?
         phrase[0]  = phrase[0].lstrip()
         phrase[-1] = phrase[-1].rstrip()
       end
@@ -155,7 +153,7 @@ module Kawari
         i += 1
       end
       i, phrase = Kawari.parse(data, i, :stop_pattern => Re_comma)
-      if not phrase.empty?
+      unless phrase.empty?
         buf << phrase
       end
     end
@@ -167,9 +165,8 @@ module Kawari
     i = start
     j = data.length
     while i < j
-      if stop_pattern != nil and stop_pattern.match(data[i..-1]) != nil
-        break
-      elsif data[i] == '"'
+      break unless stop_pattern.nil? or stop_pattern.match(data[i..-1]).nil?
+      if data[i] == '"'
         i, text = Kawari.parse_quotes(data, i)
         buf << '"' + text + '"'
       elsif data[i..i + 1] == '${'
@@ -189,14 +186,14 @@ module Kawari
         buf << text
       end
     end
-    if not buf.empty?
+    unless buf.empty?
       if Kawari.is_space(buf[0])
         buf.delete_at(0)
       else
         buf[0] = buf[0].lstrip()
       end
     end
-    if not buf.empty?
+    unless buf.empty?
       if Kawari.is_space(buf[-1])
         buf.delete_at(-1)
       else
@@ -275,15 +272,13 @@ module Kawari
         buf << data[i]
         i += 1
       end
-      if npar == 0
-        break
-      end
+      break if npar.zero?
     end
     return i, buf.join('')
   end
 
   def self.is_space(s)
-    return s.strip.empty?
+    s.strip.empty?
   end
 
   def self.parse_text(data, start, stop_pattern: nil)
@@ -291,9 +286,8 @@ module Kawari
     i = start
     j = data.length
     while i < j
-      if stop_pattern != nil and stop_pattern.match(data[i..-1]) != nil
-        break
-      elsif ['$', '"'].include?(data[i])
+      break unless stop_pattern.nil? or stop_pattern.match(data[i..-1]).nil?
+      if ['$', '"'].include?(data[i])
         break
       elsif Kawari.is_space(data[i]) != condition
         break
@@ -407,39 +401,37 @@ module Kawari
 
     # SHIORI/1.0 API
     def getaistringrandom
-      return get('sentence')
+      get('sentence')
     end
 
     def getaistringfromtargetword(word)
-      return get('sentence') # XXX
+      get('sentence') # XXX
     end
 
     def getdms
-      return getword('dms')
+      getword('dms')
     end
 
     def getword(word_type)
       for delimiter in ['.', '-']
         name = ['compatible', delimiter, word_type].join('')
         script = get(name, :default => nil)
-        if script != nil
-          return script.strip()
-        end
+        return script.strip unless script.nil?
       end
       return ''
     end
 
     def getstring(name)
-      return get('resource.' + name.to_s)
+      get("resource.#{name}")
     end
 
     # SHIORI/2.2 API
     def get_event_response(event,
                            ref0: nil, ref1: nil, ref2: nil, ref3: nil,
                            ref4: nil, ref5: nil, ref6: nil, ref7: nil)
-      ref = [ref0, ref1, ref2,ref3, ref4, ref5, ref6, ref7].map {|r| r.to_s if r != nil }
+      ref = [ref0, ref1, ref2,ref3, ref4, ref5, ref6, ref7].map {|r| r.to_s unless r.nil? }
       for i in 0..7
-        if ref[i] != nil
+        unless ref[i].nil?
           value = ref[i]
           @system_entries['system.Reference' + i.to_s] = value
           @system_entries['system-Reference' + i.to_s] = value
@@ -451,7 +443,7 @@ module Kawari
         @system_entries['system-Sender'] = ref[0]
         @system_entries['system.Sender.Path'] = 'local' # (local/unknown/external)
         @system_entries['system-Sender.Path'] = 'local' # (local/unknown/external)
-        if not @system_entries.include?('system.Age')
+        unless @system_entries.include?('system.Age')
           @system_entries['system.Age'] = '0'
           @system_entries['system-Age'] = '0'
         end
@@ -465,41 +457,38 @@ module Kawari
                                                s1.to_s].join(',')
         end
         script = get_system_entry('OnResponse')
-        if script == nil
+        if script.nil?
           for dic in @kdictlist
             for entry in dic.keys
               break_flag = false
               for word in entry
-                if not ref[1].include?(word)
+                unless ref[1].include?(word)
                   break_flag = true
                   break
                 end
               end
-              if not break_flag
+              unless break_flag
                 script = expand(dic[entry].sample)
                 break
               end
             end
           end
         end
-        if script == nil
+        if script.nil?
           script = get_system_entry('OnResponseUnknown')
         end
-        if script != nil
+        unless script.nil?
           script = script.strip()
         end
       else
         for delimiter in ['.', '-']
           name = ['event', delimiter, event].join('')
           script = get(name, :default => nil)
-          if script != nil
+          unless script.nil?
             script = script.strip()
             break
           end
         end
-      end
-      if script != nil
-        script = script
       end
       return script
     end
@@ -515,7 +504,7 @@ module Kawari
       for delimiter in ['.', '-']
         name = ['system', delimiter, entry].join('')
         script = get(name, :default => nil)
-        if script != nil
+        unless script.nil?
           return script.strip()
         end
       end
@@ -541,7 +530,7 @@ module Kawari
       end
       @system_entries['system.OtherGhostEx'] = otherghost_ex
       @system_entries['system-OtherGhostEx'] = otherghost_ex
-      if not ghosts.empty?
+      unless ghosts.empty?
         get_system_entry('OnNotifyOther')
       end
       return ''
@@ -549,7 +538,7 @@ module Kawari
 
     def communicate_to
       communicate = get_system_entry('communicate')
-      if communicate != nil
+      unless communicate.nil?
         if communicate == 'stop'
           @system_entries['system.Age'] = '0'
           @system_entries['system-Age'] = '0'
@@ -566,9 +555,6 @@ module Kawari
         end
       end
       clear('system.communicate')
-      if communicate != nil
-        communicate = communicate
-      end
       return communicate
     end
 
@@ -576,9 +562,7 @@ module Kawari
     def clear(name)
       Logging::Logging.debug('*** clear("' + name.to_s + '")')
       for dic in @rdictlist
-        if dic.include?(name)
-          dic.delete(name)
-        end
+        dic.delete(name) if dic.include?(name)
       end
     end
 
@@ -590,7 +574,7 @@ module Kawari
           break
         end
       end
-      if not break_flag
+      unless break_flag
         dic = @rdictlist[0]
         dic[name] = []
       end
@@ -631,18 +615,16 @@ module Kawari
     end
 
     def get(name, context: nil, depth: 0, default: '')
-      if depth == MAXDEPTH
-        return ''
-      end
+      return '' if depth == MAXDEPTH
       if not name.empty? and name.start_with?('@')
         segments = context[name].sample
       else
-        if not name.include?('&')
+        unless name.include?('&')
           selection = select_simple_phrase(name)
         else
           selection = select_compound_phrase(name)
         end
-        if selection == nil
+        if selection.nil?
           Logging::Logging.debug('${{' + name.to_s + '}} not found')
           return default
         end
@@ -684,7 +666,7 @@ module Kawari
                 'system.OtherGhostEx',
                 'system-OtherGhostEx'].include?(newname)
               segment_list = @system_entries[newname]
-              if not segment_list.empty?
+              unless segment_list.empty?
                 segment = segment_list.sample
               else
                 segment = ''
@@ -742,15 +724,11 @@ module Kawari
         n += c.length
         buf << [c, d]
       end
-      if n == 0
-        return nil
-      end
+      return nil if n.zero?
       n = rand(0..n-1)
       for c, d in buf
         m = c.length
-        if n < m
-          break
-        end
+        break if n < m
         n -= m
       end
       return c[n], d        
@@ -772,12 +750,12 @@ module Kawari
       for item in buf.shift
         break_flag = false
         for cp_list in buf
-          if not cp_list.include?(item)
+          unless cp_list.include?(item)
             break_flag = true
             break
           end
         end
-        if not break_flag
+        unless break_flag
           candidates << item
         end
       end
@@ -824,13 +802,10 @@ module Kawari
         end
         handler = @kis_commands[argv[0]]
         begin
-          if handler == nil
-            fail RuntimeError.new('invalid command')
-          end
+          fail RuntimeError.new('invalid command') if handler.nil?
           values << method(handler).call(argv)
         rescue => message #except RuntimeError as message:
-          Logging::Logging.debug(
-            'kawari.rb: ' + message.to_s + ': ' + segments[i].to_s)
+          Logging::Logging.debug("kawari.rb: #{message}: #{segments[i]}")
         end
       end
       result = values.join('')
@@ -846,7 +821,7 @@ module Kawari
       command = []
       for segment in segments
         if segment == ';'
-          if not command.empty?
+          unless command.empty?
             buf << command
             command = []
           end
@@ -854,7 +829,7 @@ module Kawari
           command << segment
         end
       end
-      if not command.empty?
+      unless command.empty?
         buf << command
       end
       # strip white space before and after each command
@@ -899,11 +874,11 @@ module Kawari
       # parse arguments
       i, if_block = Kawari.parse(if_block, 0)
       i, then_block = Kawari.parse(then_block, 0)
-      if not else_block.empty?
+      unless else_block.empty?
         i, else_block = Kawari.parse(else_block, 0)
       end
       result = exec_if(if_block, then_block, else_block)
-      if not else_block.empty?
+      unless else_block.empty?
         Logging::Logging.debug(
           '>>> $(if ' + if_block.join('') + ')$(then ' + then_block.join('') + ')$(else ' + else_block.join('') + ')$(endif)')
       else
@@ -1100,20 +1075,14 @@ module Kawari
     end
 
     def exec_pirocall(argv)
-      if argv.length != 2
-        fail RuntimeError.new('syntax error')
-      end
+      fail RuntimeError.new('syntax error') if argv.length != 2
       selection = select_simple_phrase(expand(argv[1]))
-      if selection == nil
-        return ''
-      end
+      return '' if selection.nil?
       return selection[0]
     end
 
     def exec_split(argv)
-      if argv.length != 4
-        fail RuntimeError.new('syntax error')
-      end
+      fail RuntimeError.new('syntax error') if argv.length != 4
       name = expand(argv[1])
       word_list = expand(argv[2]).split(expand(argv[3]), 0)
       n = 0
@@ -1128,12 +1097,8 @@ module Kawari
 
     def get_dict_path(path)
       path = Home.get_normalized_path(path)
-      if path == nil
-        fail RuntimeError.new('invalid argument')
-      end
-      if path.start_with?('/')
-        return path
-      end
+      fail RuntimeError.new('invalid argument') if path.nil?
+      return path if path.start_with?('/')
       return File.join(@prefix, path)
     end
 
@@ -1256,7 +1221,7 @@ module Kawari
         return get(expand(argv[1]))
       elsif argv.length == 3
         result = get(expand(argv[1]))
-        if not result.empty?
+        unless result.empty?
           return result
         else
           return expand(argv[2])
@@ -1278,16 +1243,12 @@ module Kawari
         fail RuntimeError.new('syntax error')
       end
       num = atoi(expand(argv[1]))
-      if num < 256
-        return num.chr
-      end
+      return num.chr if num < 256
       return [((num >> 8) & 0xff).chr, (num & 0xff).chr].join('')
     end
 
     def exec_choice(argv)
-      if argv.length == 1
-        return ''
-      end
+      return '' if argv.length == 1
       i = rand(1..argv.length-1)        
       return expand(argv[i])
     end
@@ -1297,7 +1258,7 @@ module Kawari
         fail RuntimeError.new('syntax error')
       end
       bound = atoi(expand(argv[1]))
-      if bound == 0
+      if bound.zero?
         return 0.to_s
       elsif bound > 0
         return rand(0..bound-1).to_s
@@ -1325,35 +1286,36 @@ module Kawari
           else
             break
           end
-          if ['y', 'Y'].include?(c) # year (4 columns)
+          case c
+          when 'y', 'Y' # year (4 columns)
             buf << sprintf("%04d", now.year)
-          elsif c == 'm' # month (01 - 12)
+          when 'm' # month (01 - 12)
             buf << sprintf("%02d", now.month)
-          elsif c == 'n' # month (1 - 12)
+          when 'n' # month (1 - 12)
             buf << now.month.to_s
-          elsif c == 'd' # day (01 - 31)
+          when 'd' # day (01 - 31)
             buf << sprintf("%02d", now.day)
-          elsif c == 'e' # day (1 - 31)
+          when 'e' # day (1 - 31)
             buf << now.day.to_s
-          elsif c == 'H' # hour (00 - 23)
+          when'H' # hour (00 - 23)
             buf << sprintf("%02d", now.hour)
-          elsif c == 'k' # hour (0 - 23)
+          when 'k' # hour (0 - 23)
             buf << now.hour.to_s
-          elsif c == 'M' # minute (00 - 59)
+          when 'M' # minute (00 - 59)
             buf << sprintf("%02d", now.min)
-          elsif c == 'N' # minute (0 - 59)
+          when 'N' # minute (0 - 59)
             buf << now.min.to_s
-          elsif c == 'S' # second (00 - 59)
+          when 'S' # second (00 - 59)
             buf << sprintf("%02d", now.sec)
-          elsif c == 'r' # second (0 - 59)
+          when 'r' # second (0 - 59)
             buf << now.sec.to_s
-          elsif c == 'w' # weekday (0 = Sunday)
+          when 'w' # weekday (0 = Sunday)
             buf << now.wday.to_s
-          elsif c == 'j' # Julian day (001 - 366)
+          when 'j' # Julian day (001 - 366)
             buf << sprintf("%03d", now.yday)
-          elsif c == 'J' # Julian day (1 - 366)
+          when 'J' # Julian day (1 - 366)
             buf << now.yday.to_s
-          elsif c == '%'
+          when '%'
             buf << '%'
           else
             buf << '%'
@@ -1370,9 +1332,7 @@ module Kawari
     def exec_inc(argv)
       _inc = lambda {|value, step, bound| 
         value += step
-        if bound != nil and value > bound
-          return bound
-        end
+        return bound if not bound.nil? and value > bound
         return value
       }
       apply_counter_op(_inc, argv)
@@ -1382,9 +1342,7 @@ module Kawari
     def exec_dec(argv)
       _dec = lambda {|value, step, bound| 
         value -= step
-        if bound != nil and value < bound
-          return bound
-        end
+        return bound if not bound.nil? and value < bound
         return value
       }
       apply_counter_op(_dec, argv)
@@ -1419,29 +1377,30 @@ module Kawari
       else
         fail RuntimeError.new('syntax error')
       end
-      if ['=', '=='].include?(op)
+      case op
+      when '=', '=='
         result = (op1 == op2).to_s
-      elsif op == '!='
+      when '!='
         result = (op1 != op2).to_s
-      elsif op == '<='
+      when '<='
         result = (op1 <= op2).to_s
-      elsif op == '>='
+      when '>='
         result = (op1 >= op2).to_s
-      elsif op == '<'
+      when '<'
         result = (op1 < op2).to_s
-      elsif op == '>'
+      when '>'
         result = (op1 > op2).to_s
-      elsif op == '-eq'
+      when '-eq'
         result = (atoi(op1) == atoi(op2)).to_s
-      elsif op == '-ne'
+      when '-ne'
         result = (atoi(op1) != atoi(op2)).to_s
-      elsif op == '-le'
+      when '-le'
         result = (atoi(op1) <= atoi(op2)).to_s
-      elsif op == '-ge'
+      when '-ge'
         result = (atoi(op1) >= atoi(op2)).to_s
-      elsif op == '-lt'
+      when '-lt'
         result = (atoi(op1) < atoi(op2)).to_s
-      elsif op == '-gt'
+      when '-gt'
         result = (atoi(op1) > atoi(op2)).to_s
       else
         fail RuntimeError.new('unknown operator')
@@ -1452,9 +1411,7 @@ module Kawari
     def exec_expr(argv)
       tree = @expr_parser.parse(
         argv[1..-1].map {|e| e.join('') }.join(' '))
-      if tree == nil
-        fail RuntimeError.new('syntax error')
-      end
+      fail RuntimeError.new('syntax error') if tree.nil?
       begin
         value = interp_expr(tree)
       rescue #except ExprError:
@@ -1464,50 +1421,48 @@ module Kawari
     end
 
     def interp_expr(tree)
-      if tree[0] == ExprParser::OR_EXPR
+      case tree[0]
+      when ExprParser::OR_EXPR
         for subtree in tree[1..-1]
           value = interp_expr(subtree)
-          if not value.empty? and not ['', '0', 'false', 'False'].include?(value)
-            break
-          end
+          break unless value.empty? or ['', '0', 'false', 'False'].include?(value)
         end
         return value
-      elsif tree[0] == ExprParser::AND_EXPR
+      when ExprParser::AND_EXPR
         buf = []
         for subtree in tree[1..-1]
           value = interp_expr(subtree)
-          if value.empty? or ['', '0', 'false', 'False'].include?(value)
-            return '0'
-          end
+          return '0' if value.empty? or ['', '0', 'false', 'False'].include?(value)
           buf << value
         end
         return buf[0]
-      elsif tree[0] == ExprParser::CMP_EXPR
+      when ExprParser::CMP_EXPR
         op1 = interp_expr(tree[1])
         op2 = interp_expr(tree[3])
         if is_number(op1) and is_number(op2)
           op1 = Integer(op1)
           op2 = Integer(op2)
         end
-        if ['=', '=='].include?(tree[2])
+        case tree[2]
+        when '=', '=='
           return (op1 == op2).to_s
-        elsif tree[2] == '!='
+        when '!='
           return (op1 != op2).to_s
-        elsif tree[2] == '<='
+        when '<='
           return (op1 <= op2).to_s
-        elsif tree[2] == '>='
+        when '>='
           return (op1 >= op2).to_s
-        elsif tree[2] == '<'
+        when '<'
           return (op1 < op2).to_s
-        elsif tree[2] == '>'
+        when '>'
           return (op1 > op2).to_s
         else
           fail RuntimeError.new('unknown operator')
         end
-      elsif tree[0] == ExprParser::ADD_EXPR
+      when ExprParser::ADD_EXPR
         for i in 1.step(tree.length-1, 2)
           tree[i] = interp_expr(tree[i])
-          if not is_number(tree[i])
+          unless is_number(tree[i])
             fail ExprError
           end
         end
@@ -1520,10 +1475,10 @@ module Kawari
           end
         end
         return value.to_s
-      elsif tree[0] == ExprParser::MUL_EXPR
+      when ExprParser::MUL_EXPR
         for i in 1.step(tree.length-1, 2)
           tree[i] = interp_expr(tree[i])
-          if not is_number(tree[i])
+          unless is_number(tree[i])
             fail ExprError
           end
         end
@@ -1547,11 +1502,12 @@ module Kawari
           end
         end
         return value.to_s
-      elsif tree[0] == ExprParser::STR_EXPR
-        if tree[1] == 'length'
+      when ExprParser::STR_EXPR
+        case tree[1]
+        when 'length'
           length = get_characters(interp_expr(tree[2])).length
           return length.to_s
-        elsif tree[1] == 'index'
+        when 'index'
           s = get_characters(interp_expr(tree[2]))
           c = get_characters(interp_expr(tree[3]))
           break_flag = false
@@ -1561,37 +1517,33 @@ module Kawari
               break
             end
           end
-          if not break_flag
+          unless break_flag
             pos = 0
           end
           return pos.to_s
-        elsif tree[1] == 'match'
+        when 'match'
           begin
             match = Regexp.new(interp_expr(tree[3])).match(interp_expr(tree[2]))
           rescue #except re.error:
             match = nil
           end
-          if match != nil 
+          unless match.nil? 
             length = match.end(0) - match.begin(0)
           else
             length = 0
           end
           return length.to_s
-        elsif tree[1] == 'find'
+        when 'find'
           s = interp_expr(tree[3])
           pos = nterp_expr(tree[2]).index(s)
-          if pos == nil or pos < 0
-            return ''
-          end
+          return '' if pos.nil? or pos < 0
           return s
-        elsif tree[1] == 'findpos'
+        when 'findpos'
           s = interp_expr(tree[3])
           pos = interp_expr(tree[2]).find(s);
-          if pos == nil or pos < 0
-            return ''
-          end
+          return '' if pos.nil? or pos < 0
           return (pos + 1).to_s
-        elsif tree[1] == 'substr'
+        when 'substr'
           s = interp_expr(tree[2])
           p = interp_expr(tree[3])
           n = interp_expr(tree[4])
@@ -1605,7 +1557,7 @@ module Kawari
           end
           return ''
         end
-      elsif tree[0] == ExprParser::LITERAL
+      when ExprParser::LITERAL
         return expand(tree[1..-1])
       end
     end
@@ -1638,7 +1590,7 @@ module Kawari
     end
 
     def show_progress(func, buf)
-      if buf == nil
+      if buf.nil?
         Logging::Logging.debug(func.to_s + '() -> syntax error')
       else
         Logging::Logging.debug(func.to_s + '() -> ' + buf.to_s)
@@ -1653,7 +1605,7 @@ module Kawari
       j = data.length
       while i < j
         match = Re_token.match(data[i..-1])
-        if match != nil
+        unless match.nil?
           buf << match[0]
           i += match.end(0)
         else
@@ -1675,7 +1627,7 @@ module Kawari
 
     # internal
     def done
-      return @tokens.empty?
+      @tokens.empty?
     end
 
     def pop
@@ -1701,7 +1653,7 @@ module Kawari
     end
 
     def match_space
-      if not Kawari.is_space(pop())
+      unless Kawari.is_space(pop())
         fail ExprError
       end
     end
@@ -1725,7 +1677,7 @@ module Kawari
 
     def get_expr
       buf = get_or_expr()
-      if not done()
+      unless done()
         fail ExprError
       end
       show_progress('get_expr', buf)
@@ -1904,7 +1856,7 @@ module Kawari
     def get_str_seq
       buf = []
       while not done() and \
-           Re_token.match(look_ahead()) == nil
+           Re_token.match(look_ahead()).nil?
         buf << pop()
       end
       if buf.empty?
@@ -2074,7 +2026,7 @@ module Kawari
 
     def find(dir, dll_name)
       result = 0
-      if not Kawari.list_dict(dir).empty?
+      unless Kawari.list_dict(dir).empty?
         result = 200
       end
       $charset = 'CP932' # reset
@@ -2093,7 +2045,7 @@ module Kawari
     def request(req_string)
       header = req_string.force_encoding($charset).encode("UTF-8", :invalid => :replace, :undef => :replace).split(/\r?\n/, 0)
       req_header = {}
-      if not header.empty?
+      unless header.empty?
         line = header.shift
         line = line.strip()
         req_list = line.split(nil, -1)
@@ -2103,12 +2055,8 @@ module Kawari
         end
         for line in header
           line = line.strip()
-          if line.empty?
-            next
-          end
-          if not line.include?(':')
-            next
-          end
+          next if line.empty?
+          next unless line.include?(':')
           key, value = line.split(':', 2)
           key.strip!
           value.strip!
@@ -2164,7 +2112,7 @@ module Kawari
               :ref4 => ref4, :ref5 => ref5, :ref6 => ref6, :ref7 => ref7)
           end
         end
-        if result == nil
+        if result.nil?
           result = ''
         end
         to = communicate_to()
@@ -2173,7 +2121,7 @@ module Kawari
                 "Sender: Kawari\r\n" \
                 "Charset: " + $charset.to_s + "\r\n" \
                 "Value: " + result.to_s + "\r\n")
-      if to != nil
+      unless to.nil?
         result = [result, "Reference0: " + to.to_s + "\r\n"].join('')
       end
       result = [result, "\r\n"].join('')
@@ -2208,10 +2156,8 @@ module Kawari
 
     def exec_callsaori(kawari, argv)
       alias_ = expand(argv[1])
-      if not @saori_ini.include?(alias_)
-        return ''
-      end
-      if not @saori_list.include?(@saori_ini[alias_][0])
+      return '' unless @saori_ini.include?(alias_)
+      unless @saori_list.include?(@saori_ini[alias_][0])
         if @saori_ini[alias_][1] == 'preload'
           return ''
         else
@@ -2237,7 +2183,7 @@ module Kawari
       response = saori_request(@saori_ini[alias_][0],
                                req.encode($charset, :invalid => :replace, :undef => :replace))
       header = response.splitlines()
-      if not header.empty?
+      unless header.empty?
         line = header.shift
         line = line.strip()
         if line.include?(' ')
@@ -2247,16 +2193,12 @@ module Kawari
         end
         for line in header
           line = line.strip()
-          if line.empty?
-            next
-          end
-          if not line.include?(':')
-            next
-          end
+          next if line.empty?
+          next unless line.include?(':')
           key, value = line.split(':', 2)
           key.strip!
           value.strip!
-          if not key.empty?
+          unless key.empty?
             saori_header << key
             saori_value[key] = value
           end
@@ -2276,10 +2218,8 @@ module Kawari
     def exec_callsaorix(kawari, argv)
       alias_ = expand(argv[1])
       entry = expand(argv[2])
-      if not @saori_ini.include?(alias_)
-        return ''
-      end
-      if not @saori_list.include?(@saori_ini[alias_][0])
+      return '' unless @saori_ini.include?(alias_)
+      unless @saori_list.include?(@saori_ini[alias_][0])
         if @saori_ini[alias_][1] == 'preload'
           return ''
         else
@@ -2304,7 +2244,7 @@ module Kawari
       response = saori_request(@saori_ini[alias_][0],
                                req.encode($charset, :invalid => :replace, :undef => :replace))
       header = response.splitlines()
-      if not header.empty?
+      unless header.empty?
         line = header.shift
         line = line.strip()
         if line.include?(' ')
@@ -2314,16 +2254,12 @@ module Kawari
         end
         for line in header
           line = line.strip()
-          if line.empty?
-            next
-          end
-          if not line.include?(':')
-            next
-          end
+          next if line.empty?
+          next unless line.include?(':')
           key, value = line.split(':', 2)
           key.strip!
           value.strip!
-          if not key.empty?
+          unless key.empty?
             saori_header << key
             saori_value[key] = value
           end
@@ -2350,7 +2286,7 @@ module Kawari
         result = @saori_list[saori].load(:dir => path)
       else
         module_ = @saori.request(saori)
-        if module_ != nil
+        unless module_.nil?
           @saori_list[saori] = module_
           result = @saori_list[saori].load(:dir => path)
         end

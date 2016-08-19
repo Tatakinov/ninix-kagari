@@ -37,16 +37,12 @@ module Bln
     end
 
     def check_import
-      if @__sakura != nil
-        return 1
-      else
-        return 0
-      end
+      @__sakura.nil? ? 0 : 1
     end
 
     def setup
       @blns = read_bln_txt(@dir)
-      if not @blns.empty?
+      unless @blns.empty?
         @__sakura.attach_observer(self)
         return 1
       else
@@ -62,20 +58,16 @@ module Bln
           name = ''
           for line in f
             line = line.strip()
-            if line.empty?
-              next
-            end
-            if line.start_with?('//')
-              next
-            end
+            next if line.empty?
+            next if line.start_with?('//')
             if line.include?('[')
-              if not name.empty?
+              unless name.empty?
                 blns[name] = [data, {}]
               end
               data = {}
               start = line.index('[')
               end_ = line.index(']')
-              if end_ == nil
+              if end_.nil?
                 end_ = line.length
               end
               name = line[start + 1..end_-1]
@@ -88,7 +80,7 @@ module Bln
               end
             end
           end
-          if not name.empty?
+          unless name.empty?
             blns[name] = [data, {}]
           end
           return blns
@@ -102,7 +94,7 @@ module Bln
       for name in @blns.keys
         data, bln = @blns[name]
         for bln_id in bln.keys
-          if bln[bln_id] != nil
+          unless bln[bln_id].nil?
             bln[bln_id].destroy()
             bln.delete(bln_id)
           end
@@ -118,7 +110,7 @@ module Bln
         for name in @blns.keys
           data, bln = @blns[name]
           for bln_id in bln.keys
-            if bln[bln_id] != nil
+            unless bln[bln_id].nil?
               bln[bln_id].reset_scale()
             end
           end
@@ -127,9 +119,7 @@ module Bln
     end
 
     def execute(argument)
-      if argument == nil or argument.empty?
-        return RESPONSE[400]
-      end
+      return RESPONSE[400] if argument.nil? or argument.empty?
       name = argument[0]
       if argument.length >= 2
         text = argument[1]
@@ -166,12 +156,12 @@ module Bln
       end
       if @blns.include?(name)
         data, bln = @blns[name]
-        if bln.include?(bln_id) and update == 0
+        if bln.include?(bln_id) and update.zero?
           bln[bln_id].destroy()
           bln.delete(bln_id)
         end
-        if not text.empty?
-          if update == 0 or not bln.include?(bln_id)
+        unless text.empty?
+          if update.zero? or not bln.include?(bln_id)
             bln[bln_id] = Balloon.new(@__sakura, @dir,
                                       data, text,
                                       offset_x, offset_y, name, bln_id)
@@ -257,7 +247,7 @@ module Bln
       else
         skin = data['skin']
       end
-      if skin == nil
+      if skin.nil?
         destroy()
         return
       end
@@ -398,7 +388,7 @@ module Bln
         else
           ref3 = 0
         end
-        if ref2 != 0
+        unless ref2.zero?
           @action = {'method' => action,
                      'ref0' => ref0,
                      'ref1' => ref1,
@@ -465,18 +455,14 @@ module Bln
     end
 
     def set_position
-      if @window == nil
-        return
-      end
+      return if @window.nil?
       new_x = (@base_x + ((@x + @action_x + @vx) * @scale / 100.0).to_i)
       new_y = (@base_y + ((@y + @action_y + @vy) * @scale / 100.0).to_i)
       @window.move(new_x, new_y)
     end
 
     def set_skin
-      if @window == nil
-        return
-      end
+      return if @window.nil?
       @scale = get_sakura_status('SurfaceScale')
       w = @balloon_surface.width
       h = @balloon_surface.height
@@ -487,12 +473,8 @@ module Bln
     end
 
     def set_layout
-      if @window == nil
-        return
-      end
-      if @layout == nil
-        return
-      end
+      return if @window.nil?
+      return if @layout.nil?
       font_size = (@font_size * 3 / 4).to_i # convert from Windows to GTK+
       font_size = font_size * Pango::SCALE
       @font_desc.set_size(font_size)
@@ -501,9 +483,7 @@ module Bln
     end
 
     def reset_scale
-      if @window == nil
-        return
-      end
+      return if @window.nil?
       set_skin()
       set_position()
     end
@@ -528,46 +508,47 @@ module Bln
       b1_x, b1_y, b1_w, b1_h = get_sakura_status('BalloonKero')
       x = left
       y = top
-      if @position == 'lefttop'
+      case @position
+      when 'lefttop'
         #pass
-      elsif @position == 'leftbottom'
+      when 'leftbottom'
         y = (top + scrn_h - h)
-      elsif @position == 'righttop'
+      when 'righttop'
         x = (left + scrn_w - w)
-      elsif @position == 'rightbottom'
+      when 'rightbottom'
         x = (left + scrn_w - w)
         y = (top + scrn_h - h)
-      elsif @position == 'center'
+      when 'center'
         x = (left + ((scrn_w - w) / 2).to_i)
         y = (top + ((scrn_h - h) / 2).to_i)
-      elsif @position == 'leftcenter'
+      when 'leftcenter'
         y = (top + ((scrn_h - h) / 2).to_i)
-      elsif @position == 'rightcenter'
+      when 'rightcenter'
         x = (left + scrn_w - w)
         y = (top + ((scrn_h - h) / 2).to_i)
-      elsif @position == 'centertop'
+      when 'centertop'
         x = (left + ((scrn_w - w) / 2).to_i)
-      elsif @position == 'centerbottom'
+      when 'centerbottom'
         x = (left + ((scrn_w - w) / 2).to_i)
         y = (top + scrn_h - h)
-      elsif @position == 'sakura'
+      when 'sakura'
         if @direction == 1 # right
           x = (s0_x + s0_w)
         else
           x = (s0_x - w)
         end
         y = s0_y
-      elsif @position == 'kero'
+      when 'kero'
         if @direction == 1 # right
           x = (s1_x + s1_w)
         else
           x = (s1_x - w)
         end
         y = s1_y
-      elsif @position == 'sakurab'
+      when 'sakurab'
         x = b0_x
         y = b0_y
-      elsif @position == 'kerob'
+      when 'kerob'
         x = b1_x
         y = b1_y
       end
@@ -575,13 +556,9 @@ module Bln
     end
 
     def update_script(text, mode)
-      if @timeout_id == nil # XXX
-        return
-      end
-      if not text
-        return
-      end
-      if mode == 2 and @script != nil
+      return if @timeout_id.nil? # XXX
+      return unless text
+      if mode == 2 and not @script.nil?
         @script = [@script, text].join("")
       else
         @script = text
@@ -616,15 +593,16 @@ module Bln
     end
 
     def get_sakura_status(key)
-      if key == 'SurfaceScale'
+      case key
+      when 'SurfaceScale'
         result = @__sakura.get_surface_scale()
-      elsif key == 'SurfaceSakura_Shown'
+      when 'SurfaceSakura_Shown'
         if @__sakura.surface_is_shown(0)
           result = true
         else
           result = false
         end
-      elsif key == 'SurfaceSakura'
+      when 'SurfaceSakura'
         begin
           s0_x, s0_y = @__sakura.get_surface_position(0)
           s0_w, s0_h = @__sakura.get_surface_size(0)
@@ -633,13 +611,13 @@ module Bln
           s0_w, s0_h = 0, 0
         end
         result = s0_x, s0_y, s0_w, s0_h
-      elsif key == 'SurfaceKero_Shown'
+      when 'SurfaceKero_Shown'
         if @__sakura.surface_is_shown(1)
           result = true
         else
           result = false
         end
-      elsif key == 'SurfaceKero'
+      when 'SurfaceKero'
         begin
           s1_x, s1_y = @__sakura.get_surface_position(1)
           s1_w, s1_h = @__sakura.get_surface_size(1)
@@ -648,13 +626,13 @@ module Bln
           s1_w, s1_h = 0, 0
         end
         result = s1_x, s1_y, s1_w, s1_h
-      elsif key == 'BalloonSakura_Shown'
+      when 'BalloonSakura_Shown'
         if @__sakura.balloon_is_shown(0)
           result = true
         else
           result = false
         end
-      elsif key == 'BalloonSakura'
+      when 'BalloonSakura'
         begin
           b0_x, b0_y = @__sakura.get_balloon_position(0)
           b0_w, b0_h = @__sakura.get_balloon_size(0)
@@ -663,13 +641,13 @@ module Bln
           b0_w, b0_h = 0, 0
         end
         result = b0_x, b0_y, b0_w, b0_h
-      elsif key == 'BalloonKero_Shown'
+      when 'BalloonKero_Shown'
         if @__sakura.balloon_is_shown(1)
           result = true
         else
           result = false
         end
-      elsif key == 'BalloonKero'
+      when 'BalloonKero'
         begin
           b1_x, b1_y = @__sakura.get_balloon_position(1)
           b1_w, b1_h = @__sakura.get_balloon_size(1)
@@ -685,9 +663,7 @@ module Bln
     end
 
     def do_idle_tasks
-      if @window == nil
-        return nil
-      end
+      return if @window.nil?
       s0_shown = get_sakura_status('SurfaceSakura_Shown')
       s1_shown = get_sakura_status('SurfaceKero_Shown')
       b0_shown = get_sakura_status('BalloonSakura_Shown')
@@ -700,7 +676,7 @@ module Bln
             return nil
           end
         else
-          if not s0_shown and not s1_shown
+          unless s0_shown or s1_shown
             @start_time = Time.now
             @visible = true
             @window.show()
@@ -726,14 +702,14 @@ module Bln
         end
       end
       if @visible
-        if @life_time != nil
+        unless @life_time.nil?
           if (Time.now - @start_time) >= (@life_time * 0.001) and \
-            not (not @processed_script.empty? or not @processed_text.empty?)
+            (@processed_script.empty? and @processed_text.empty?)
             destroy()
             return nil
           end
         end
-        if @action != nil
+        unless @action.nil?
           if  @action['method'] == 'sinwave'
             offset = (@action['ref1'] \
                       * Math.sin(2.0 * Math::PI \
@@ -752,7 +728,7 @@ module Bln
             @action_y = (offset * @action['ref1']).to_i
           end
         end
-        if (@slide_vx != 0 or @slide_vy != 0) and \
+        if (not @slide_vx.zero? or not @slide_vy.zero?) and \
           @slide_autostop > 0 and \
           (@slide_autostop * 0.001 + 0.05) <= (Time.now - @start_time)
           @vx = (@direction * ((@slide_autostop / 50.0 + 1) * @slide_vx).to_i)
@@ -760,14 +736,14 @@ module Bln
           @vy = ((@slide_autostop / 50.0 + 1) * @slide_vy).to_i
           @slide_vy = 0
         end
-        if @slide_vx != 0
+        unless @slide_vx.zero?
           @vx = (@direction * (((Time.now - @start_time) * @slide_vx) / 50 * 1000.-).to_i)
         end
-        if @slide_vy != 0
+        unless @slide_vy.zero?
           @vy = (((Time.now - @start_time) * @slide_vy) / 50 * 1000.0).to_i
         end
         set_position()
-        if not @processed_script.empty? or not @processed_text.empty?
+        unless @processed_script.empty? and @processed_text.empty?
           interpret_script()
         end
       end
@@ -786,7 +762,7 @@ module Bln
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.paint()
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
-      if @layout != nil
+      unless @layout.nil?
         cr.set_source_rgb(*@fontcolor)
         cr.move_to(@left.to_i, @top.to_i)
         cr.show_pango_layout(@layout)
@@ -794,17 +770,15 @@ module Bln
     end
 
     def get_state
-      return @state
+      @state
     end
 
     def interpret_script
-      if @script_wait != nil
-        if Time.now < @script_wait
-          return
-        end
+      unless @script_wait.nil?
+        return if Time.now < @script_wait
         @script_wait = nil
       end
-      if not @processed_text.empty?
+      unless @processed_text.empty?
         if @quick_session or @state == 'orusuban'
           @text = [@text, @processed_text].join("")
           draw_text(@text)
@@ -820,11 +794,12 @@ module Bln
       node = @processed_script.shift
       if node[0] == Script::SCRIPT_TAG
         name, args = node[1], node[2..-1]
-        if name == '\n'
+        case name
+        when '\n'
           @text = [@text, "\n"].join("")
           draw_text(@text)
-        elsif name == '\w'
-          if args != nil
+        when '\w'
+          unless args.nil?
             begin
               amount = (Integer(args[0]) * 0.05 - 0.01)
             rescue
@@ -836,8 +811,8 @@ module Bln
           if amount > 0
             @script_wait = (Time.now + amount)
           end
-        elsif name == '\b'
-          if args != nil
+        when '\b'
+          unless args.nil?
             begin
               amount = Integer(args[0])
             rescue
@@ -849,11 +824,11 @@ module Bln
           if amount > 0
             @text = @text[0..-amount-1]
           end
-        elsif name == '\c'
+        when '\c'
           @text = ''
-        elsif name == '\_q'
+        when '\_q'
           @quick_session = (not @quick_session)
-        elsif name == '\l'
+        when '\l'
           @life_time = nil
           update_script('', 2)
         end
@@ -889,38 +864,32 @@ module Bln
       x, y = @window.winpos_to_surfacepos(
            event.x.to_i, event.y.to_i, @scale)
       if event.event_type == Gdk::EventType::BUTTON_RELEASE
-        if event.button == 1
+        case event.button
+        when 1
           @__sakura.notify_event(
             'OnEBMouseClick', @name, x, y, @id, 0)
-        elsif event.button == 3
+        when 3
           @__sakura.notify_event(
             'OnEBMouseClick', @name, x, y, @id, 1)
         end
       end
-      if @clickerase
-        destroy()
-      end
+      destroy if @clickerase
       return true
     end
 
     def motion_notify(widget, event)
-      if @x_root != nil and \
-         @y_root != nil
+      unless @x_root.nil? or @y_root.nil?
         x_delta = (event.x_root - @x_root).to_i
         y_delta = (event.y_root - @y_root).to_i
-        if event.state & Gdk::ModifierType::BUTTON1_MASK != 0
-          if @dragmove_horizontal
-            @x += x_delta
-          end
-          if @dragmove_vertical
-            @y += y_delta
-          end
+        unless (event.state & Gdk::ModifierType::BUTTON1_MASK).zero?
+          @x += x_delta if @dragmove_horizontal
+          @y += y_delta if @dragmove_vertical
           set_position()
           @x_root = event.x_root
           @y_root = event.y_root
         end
       end
-      if @move_notify_time == nil or \
+      if @move_notify_time.nil? or \
          (Time.now - @move_notify_time) > (500 * 0.001)
         x, y = @window.winpos_to_surfacepos(
              event.x.to_i, event.y.to_i, @scale)
@@ -941,14 +910,10 @@ module Bln
 
     def destroy
       @visible = false
-      if @window != nil
-        @window.destroy()
-        @window = nil
-      end
-      if @timeout_id != nil
-        GLib::Source.remove(@timeout_id)
-        @timeout_id = nil
-      end
+      @window.destroy() unless @window.nil?
+      @window = nil
+      GLib::Source.remove(@timeout_id) unless @timeout_id.nil?
+      @timeout_id = nil
     end
   end
 end

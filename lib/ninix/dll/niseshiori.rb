@@ -32,9 +32,7 @@ module Niseshiori
     begin
       filelist = []
       Dir.foreach(top_dir, :encoding => 'UTF-8') do |file|
-        if file == '..' or file == '.'
-          next
-        end
+        next if file == '..' or file == '.'
         filelist << file
       end
     rescue #except OSError:
@@ -42,7 +40,7 @@ module Niseshiori
     end
     re_dict_filename = Regexp.new('\Aai.*\.(dtx|txt)\z')
     for filename in filelist
-      if re_dict_filename.match(filename) != nil
+      unless re_dict_filename.match(filename).nil?
         buf << File.join(top_dir, filename)
       end
     end
@@ -84,9 +82,7 @@ module Niseshiori
     def load(top_dir)
       # read dictionaries
       dictlist = Niseshiori.list_dict(top_dir)
-      if dictlist.empty?
-        return 1
-      end
+      return 1 if dictlist.empty?
       for path in dictlist
         read_dict(path)
       end
@@ -131,16 +127,14 @@ module Niseshiori
     end
 
     def save_database
-      if @dbpath == nil
-        return
-      end
+      return if @dbpath.nil?
       begin
         open(@dbpath, 'w') do |f|
           f.write('# ns_st: ' + @ai_talk_interval.to_i.to_s + "\n")
           f.write('# ns_tn: ' + @username.to_s + "\n")
           for name in @variables.keys
             value = @variables[name]
-            if not name.start_with?('_')
+            unless name.start_with?('_')
               f.write(name.to_s + '=' + value.to_s + "\n")
             end
           end
@@ -180,9 +174,8 @@ module Niseshiori
       while i < j
         line = buf[i].strip()
         i += 1
-        if line.empty?
-          next
-        elsif i == 1 and line.start_with?('#Charset:')
+        next if line.empty?
+        if i == 1 and line.start_with?('#Charset:')
           charset = line[9..-1].force_encoding('ascii').strip()
           if ['UTF-8', 'EUC-JP', 'EUC-KR'].include?(charset) # XXX
             decode = lambda {|line| line.force_encoding(charset).encode('UTF-8', :invalid => :replace, :undef => :replace) }
@@ -198,7 +191,7 @@ module Niseshiori
           next
         end
         lines = [line]
-        while i < j and buf[i] != nil and \
+        while i < j and not buf[i].nil? and \
              (buf[i].start_with?(' ') or buf[i].start_with?("\t"))
           lines << buf[i].strip()
           i += 1
@@ -210,18 +203,18 @@ module Niseshiori
         line = decode.call(line)
         # special case: words in a category
         match = Re_category.match(line)
-        if match != nil
+        unless match.nil?
           line = line[match.end(0)..-1].strip()
           if line.empty? or not line.start_with?(',')
             syntax_error(path, line)
             next
           end
-          words = split(line).map {|s| s.strip if not s.strip.empty? }
+          words = split(line).map {|s| s.strip unless s.strip.empty? }
           words.delete(nil)
           cattype = match.to_a[1]
           catlist = match.to_a[2..-1]
           for cat in catlist.map {|s| s.strip }
-            if cattype == nil
+            if cattype.nil?
               keylist = [[nil, cat]]
             else
               keylist = [[nil, cat], [cattype, cat]]
@@ -232,7 +225,7 @@ module Niseshiori
               @dict[key] = value
             end
           end
-          if cattype != nil
+          unless cattype.nil?
             key = ['\\', cattype].join('')
             value = (@dict.include?(key) ? @dict[key] : [])
             value.concat(words)
@@ -251,35 +244,34 @@ module Niseshiori
         end
         if command == '\ch'
           argv = split(argv).map {|s| s.strip }
-          if argv.length == 5
+          case argv.length
+          when 5
             t1, w1, t2, w2, c = argv
-          elsif argv.length == 4
+          when 4
             t1, w1, t2, w2 = argv
             c = nil
-          elsif argv.length == 3
+          when 3
             t1, w1, c = argv
             t2 = w2 = nil
           else
             syntax_error(path, line)
             next
           end
-          if Re_type.match(t1) == nil and Re_user.match(t1) == nil
+          if Re_type.match(t1).nil? and Re_user.match(t1).nil?
             syntax_error(path, line)
             next
           end
-          if c != nil
+          unless c.nil?
             ch_list = (@type_chains.include?(t1) ? @type_chains[t1] : [])
             ch_list << [c, w1]
             @type_chains[t1] = ch_list
           end
-          if t2 == nil
-            next
-          end
-          if Re_type.match(t2) == nil and Re_user.match(t2) == nil
+          next if t2.nil?
+          if Re_type.match(t2).nil? and Re_user.match(t2).nil?
             syntax_error(path, line)
             next
           end
-          if c != nil
+          unless c.nil?
             ch_list = (@type_chains.include?(t2) ? @type_chains[t2] : [])
             ch_list << [c, w2]
             @type_chains[t2] = ch_list
@@ -289,7 +281,7 @@ module Niseshiori
           key = [m1, w1]
           dic = (@word_chains.include?(key) ? @word_chains[key] : {})
           ch_list = (dic.include?(m2) ? dic[m2] : [])
-          if not ch_list.include?([c, w2])
+          unless ch_list.include?([c, w2])
             ch_list << [c, w2]
             dic[m2] = ch_list
             @word_chains[key] = dic
@@ -297,23 +289,23 @@ module Niseshiori
           key = [m2, w2]
           dic = (@word_chains.include?(key) ? @word_chains[key] : {})
           ch_list = (dic.include?(m1) ? dic[m1] : [])
-          if not ch_list.include?([c, w1])
+          unless ch_list.include?([c, w1])
             ch_list << [c, w1]
             dic[m1] = ch_list
             @word_chains[key] = dic
           end
           ch_list = (@dict.include?(t1) ? @dict[t1] : [])
-          if not ch_list.include?(w1)
+          unless ch_list.include?(w1)
             ch_list << w1
             @dict[t1] = ch_list
           end
           ch_list = (@dict.include?(t2) ? @dict[t2] : [])
-          if not ch_list.include?(w2)
+          unless ch_list.include?(w2)
             ch_list << w2
             @dict[t2] = ch_list
           end
-        elsif Re_type.match(command) != nil or Re_user.match(command) != nil
-          words = split(argv).map {|s| s.strip if not s.strip.empty? }
+        elsif not Re_type.match(command).nil? or not Re_user.match(command).nil?
+          words = split(argv).map {|s| s.strip unless s.strip.empty? }
           words.delete(nil)
           value = (@dict.include?(command) ? @dict[command] : [])
           value.concat(words)
@@ -329,7 +321,7 @@ module Niseshiori
             next
           end
           w, t, s = argv
-          if Re_type.match(t) == nil
+          if Re_type.match(t).nil?
             syntax_error(path, line)
             next
           end
@@ -364,7 +356,7 @@ module Niseshiori
                 'kero.recommendsites',
                 'sakura.portalsites'].include?(argv[0])
               id_list = (@resources.include?(argv[0]) ? @resources[argv[0]] : '')
-              if not id_list.empty?
+              unless id_list.empty?
                 id_list = [id_list, "\2"].join('')
               end
               id_list = [id_list, argv[1].gsub(' ', "\1")].join('')
@@ -385,14 +377,14 @@ module Niseshiori
       buf = []
       count = 0
       end_ = pos = 0
-      while maxcount == nil or count < maxcount
+      while maxcount.nil? or count < maxcount
         pos = line.index(',', pos)
-        if pos == nil or pos < 0
+        if pos.nil? or pos < 0
           break
         elsif pos > 0 and line[pos - 1] == '\\'
           pos += 1
         else
-          if pos != 0
+          unless pos.zero?
             buf << line[end_..pos-1]
             count += 1
           end
@@ -417,7 +409,7 @@ module Niseshiori
       buf = []
       for expr in condition.split('&', -1).map {|s| s.strip }
         match = Re_comp_op.match(expr)
-        if match != nil
+        unless match.nil?
           buf << [COND_COMPARISON, [
                     expr[0..match.begin(0)-1].strip(),
                     match.to_s,
@@ -450,9 +442,7 @@ module Niseshiori
         a += 9
         y -= a
         a += 2
-        if a > 0xdd
-          a = 0x61
-        end
+        a = 0x61 if a > 0xdd
         line << ((x & 0x03) | ((y & 0x03) << 2) | \
                  ((y & 0x0c) << 2) | ((x & 0x0c) << 4)).chr
       end
@@ -461,9 +451,7 @@ module Niseshiori
 
     def getaistringrandom
       result = get_event_response('OnNSRandomTalk')
-      if result == nil or result.empty?
-        result = get('\e')
-      end
+      result = get('\e') if result.nil? or result.empty?
       return result
     end
 
@@ -475,9 +463,7 @@ module Niseshiori
         if ref[1] == 1
           @mikire += 1
           script = get_event_response('OnNSMikireHappen')
-          if script != nil
-            return script
-          end
+          return script unless script.nil?
         elsif @mikire > 0
           @mikire = 0
           return get_event_response('OnNSMikireSolve')
@@ -485,9 +471,7 @@ module Niseshiori
         if ref[2] == 1
           @kasanari += 1
           script = get_event_response('OnNSKasanariHappen')
-          if script != nil
-            return script
-          end
+          return script unless script.nil?
         elsif @kasanari > 0
           @kasanari = 0
           return get_event_response('OnNSKasanariHappen')
@@ -497,26 +481,24 @@ module Niseshiori
           if @ai_talk_count == @ai_talk_interval
             @ai_talk_count = 0
             if not @otherghost.empty? and \
-              (0..10).to_a.sample == 0
+              (0..10).to_a.sample.zero?
               target = []
               for name, s0, s1 in @otherghost
                 if @greetings.include?(name)
                   target << name
                 end
               end
-              if not target.empty?
+              unless target.empty?
                 @to = target.sample
               end
-              if not @to.empty?
+              unless @to.empty?
                 @current_time = Time.now
                 s = @greetings[@to].sample
-                if not s.empty?
+                unless s.empty?
                   s = replace_meta(s)
                   while true
                     match = Re_ns_tag.match(s)
-                    if match == nil
-                      break
-                    end
+                    break if match.nil?
                     value = eval_ns_tag(match.to_s)
                     s = [s[0..match.begin(0)-1],
                          value.to_s,
@@ -560,22 +542,20 @@ module Niseshiori
         end
         script = nil
         @to = ref[0]
-        if not candidate.empty?
+        unless candidate.empty?
           cond = candidate.sample
           script = @responses[cond].sample
         end
-        if (script == nil or script.empty?) and @responses.include?('nohit')
+        if (script.nil? or script.empty?) and @responses.include?('nohit')
           script = @responses['nohit'].sample
         end
-        if script == nil or script.empty?
+        if script.nil? or script.empty?
           @to = ''
         else
           script = replace_meta(script)
           while true
             match = Re_ns_tag.match(script)
-            if match == nil
-              break
-            end
+            break if match.nil?
             value = eval_ns_tag(match.to_s)
             script = [script[0..match.begin(0)-1],
                       value.to_s,
@@ -597,15 +577,10 @@ module Niseshiori
         end
       end
       script = get(key, :default => nil)
-      if script != nil
-        @ai_talk_count = 0
-      end
+      @ai_talk_count = 0 unless script.nil?
       @event = nil
       @reference = nil
-      if script != nil
-        script = script
-      end
-      return script
+      return script # unless script.nil?
     end
 
     def otherghostname(ghost_list)
@@ -625,15 +600,14 @@ module Niseshiori
 
     def eval_condition(condition)
       for cond_type, expr in condition
-        if not eval_conditional_expression(cond_type, expr)
-          return false
-        end
+        return false unless eval_conditional_expression(cond_type, expr)
       end
       return true
     end
 
     def eval_conditional_expression(cond_type, expr)
-      if cond_type == COND_COMPARISON
+      case cond_type
+      when COND_COMPARISON
         value1 = expand_meta(expr[0])
         value2 = expr[2]
         begin
@@ -643,27 +617,24 @@ module Niseshiori
           op1 = value1.to_s
           op2 = value2.to_s
         end
-        if expr[1] == '>='
+        case expr[1]
+        when '>='
           return op1 >= op2
-        elsif expr[1] == '<='
+        when '<='
           return op1 <= op2
-        elsif expr[1] == '>'
+        when '>'
           return op1 > op2
-        elsif expr[1] == '<'
+        when '<'
           return op1 < op2
-        elsif expr[1] == '='
+        when '='
           return op1 == op2
-        elsif expr[1] == '<>'
+        when '<>'
           return op1 != op2
         end
-      elsif cond_type == COND_STRING
-        if @event.include?(expr)
-          return true
-        end
+      when COND_STRING
+        return true if @event.include?(expr)
         for ref in @reference
-          if ref != nil and ref.to_s.include?(expr)
-            return true
-          end
+          return true if not ref.nil? and ref.to_s.include?(expr)
         end
         return false
       else
@@ -676,12 +647,10 @@ module Niseshiori
     def get(key, default: '')
       @current_time = Time.now
       s = expand(key, '', :default => default)
-      if s != nil and not s.empty?
+      unless s.nil? or s.empty?
         while true
           match = Re_ns_tag.match(s)
-          if match == nil
-            break
-          end
+          break if match.nil?
           value = eval_ns_tag(match.to_s)
           s = [s[0..match.begin(0)-1], value.to_s, s[match.end(0)..-1]].join('')
         end
@@ -704,13 +673,14 @@ module Niseshiori
           rescue #except ValueError:
             @pass
           else
-            if num == 0
+            case num
+            when 0
               @ai_talk_interval = 0
-            elsif num == 1
+            when 1
               @ai_talk_interval = 420
-            elsif num == 2
+            when 2
               @ai_talk_interval = 180
-            elsif num == 3
+            when 3
               @ai_talk_interval = 60
             else
               @ai_talk_interval = [[num, 4].max, 999].min
@@ -722,13 +692,11 @@ module Niseshiori
           name = tag[7..-2]
           @jump_entry = name
           value = get_event_response('OnNSJumpEntry')
-          if value == nil or value.empty?
-            value = ''
-          end
+          value = '' if value.nil? or value.empty?
           @jump_entry = nil
         elsif tag.start_with?('\set[') and tag.end_with?(']')
           statement = tag[5..-2]
-          if not statement.include?('=')
+          unless statement.include?('=')
             Logging::Logging.debug('niseshiori.py: syntax error')
             Logging::Logging.debug(tag)
           else
@@ -736,9 +704,9 @@ module Niseshiori
             name.strip!
             expr .strip!
             value = eval_expression(expr)
-            if value != nil
+            unless value.nil?
               @variables[name] = value
-              if not name.start_with?('_')
+              unless name.start_with?('_')
                 save_database()
               end
               Logging::Logging.debug('set ' + name.to_s + ' = "' + value.to_s + '"')
@@ -768,22 +736,22 @@ module Niseshiori
       variable_chains = []
       while true
         match = Re_meta.match(s, pos)
-        if match == nil
+        if match.nil?
           buf << s[pos..-1]
           break
         end
-        if match.begin(0) != 0
+        unless match.begin(0).zero?
           buf << s[pos..match.begin(0)-1]
         end
         meta = match.to_s
-        if match[4] != nil # %ms, %dms, %ua, etc.
-          if not variables.include?(meta)
+        unless match[4].nil? # %ms, %dms, %ua, etc.
+          unless variables.include?(meta)
             chained_meta = ['%', match[4]].join('')
             break_flag = false
             for chains in variable_chains
               if chains.include?(meta)
                 candidates_A, candidates_B = chains[chained_meta]
-                if not candidates_A.empty?
+                unless candidates_A.empty?
                   word = candidates_A.sample
                   candidates_A.delete(word)
                 else
@@ -798,7 +766,7 @@ module Niseshiori
                 break
               end
             end
-            if not break_flag
+            unless break_flag
               if match[4] == 'm?'
                 word = expand(
                   ['\\',
@@ -846,12 +814,10 @@ module Niseshiori
       end
       if choices.empty?
         match = Re_category.match(key)
-        if match != nil
-          key = match.to_a[1..2]
-        end
+        key = match.to_a[1..2] unless match.nil?
         choices = @dict[key]
       end
-      if choices == nil or choices.empty?
+      if choices.nil? or choices.empty?
         if key.is_a?(Array)
           key = ('(' + key[0].to_s + ', ' + key[1..-1].to_s + ')')
         end
@@ -861,7 +827,7 @@ module Niseshiori
       s = choices.sample
       t = replace_meta(s)
       if key.is_a?(Array)
-        if key[0] == nil
+        if key[0].nil?
           key = ('\\[' + key[1].to_s + ']')
         else
           key = ('\\' + key[0].to_s + '[' + key[1].to_s + ']')
@@ -879,7 +845,7 @@ module Niseshiori
         candidates_A = []
         candidates_B = []
         for keyword, chained_word in dic[chained_meta]
-          if keyword != nil and context.include?(keyword)
+          if not keyword.nil? and context.include?(keyword)
             candidates_A << chained_word
           else
             candidates_B << chained_word
@@ -914,18 +880,18 @@ module Niseshiori
         result = (10**(n - 1)..10**n - 1).to_a.sample
       elsif name.start_with?('%ref') and name.length == 5 and \
            '01234567'.include?(name[4])
-        if @reference == nil
+        if @reference.nil?
           result = ''
         else
           n = name[4].to_i
-          if @reference[n] == nil
+          if @reference[n].nil?
             result = ''
           else
             result = @reference[n]
           end
         end
       elsif name == '%jpentry'
-        if @jump_entry == nil
+        if @jump_entry.nil?
           result = ''
         else
           result = @jump_entry
@@ -965,7 +931,7 @@ module Niseshiori
           result = '偽栞 for ninix'
         end
       elsif name == '%sender'
-        if not @sender.empty?
+        unless @sender.empty?
           result = @sender
         else
           result = ''
@@ -986,11 +952,7 @@ module Niseshiori
 
     def eval_expression(expr)
       tree = @expr_parser.parse(expr)
-      if tree == nil
-        return nil
-      else
-        return interp_expr(tree)
-      end
+      return tree.nil? ? nil : interp_expr(tree)
     end
 
     def __interp_add_expr(tree)
@@ -1015,11 +977,12 @@ module Niseshiori
       1.step(tree.length-1, 2) do |i|
         operand = interp_expr(tree[i + 1])
         begin
-          if tree[i] == '*'
+          case tree[i]
+          when '*'
             value = (Integer(value) * Integer(operand))
-          elsif tree[i] == '/'
+          when '/'
             value = (Integer(value) / Integer(operand)).to_i
-          elsif tree[i] == '\\'
+          when '\\'
             value = (Integer(value) % Integer(operand))
           end
         rescue #except (ValueError, ZeroDivisionError):
@@ -1032,9 +995,10 @@ module Niseshiori
     def __interp_unary_expr(tree)
       operand = interp_expr(tree[1])
       begin
-        if tree[0] == '+'
+        case tree[0]
+        when '+'
           return Integer(operand)
-        elsif tree[0] == '-'
+        when '-'
           return - Integer(operand)
         end
       rescue #except ValueError:
@@ -1072,7 +1036,7 @@ module Niseshiori
     end
 
     def is_number(s)
-      return (s != nil and not s.empty? and s.chars.map.all? {|c| '0123456789'.include?(c) })
+      return (not s.nil? and not s.empty? and s.chars.map.all? {|c| '0123456789'.include?(c) })
     end
   end
 
@@ -1089,7 +1053,7 @@ module Niseshiori
     end
 
     def show_progress(func, buf)
-      if buf == nil
+      if buf.nil?
         Logging::Logging.debug(func.to_s + '() -> syntax error')
       else
         Logging::Logging.debug(func.to_s + '() -> ' + buf.to_s)
@@ -1104,23 +1068,23 @@ module Niseshiori
       end_ = 0
       while true
         match = NiseShiori::Re_meta.match(data, end_)
-        if match != nil
+        unless match.nil?
           buf << match.to_s
           end_ = match.end(0)
           next
         end
         match = Re_token_A.match(data, end_)
-        if match != nil
-          if not match.to_s.strip().empty?
+        unless match.nil?
+          unless match.to_s.strip().empty?
             buf << match.to_s
           end
           end_ = match.end(0)
           next
         end
         match = Re_token_B.match(data, end_)
-        if match != nil
+        unless match.nil?
           buf << data[end_..match.begin(0)-1]
-          if not match.to_s.strip().empty?
+          unless match.to_s.strip().empty?
             buf << match.to_s
           end
           end_ = match.end(0)
@@ -1145,7 +1109,7 @@ module Niseshiori
 
     # internal
     def done
-      return @tokens.empty?
+      @tokens.empty?
     end
 
     def pop
@@ -1165,16 +1129,12 @@ module Niseshiori
     end
 
     def match(s)
-      if pop() != s
-        fail ExprError
-      end
+      fail ExprError if pop() != s
     end
 
     def get_expr
       buf = get_add_expr()
-      if not done()
-        fail ExprError
-      end
+      fail ExprError unless done()
       show_progress('get_expr', buf)
       return buf
     end
@@ -1183,14 +1143,10 @@ module Niseshiori
       buf = [ADD_EXPR]
       while true
         buf << get_mul_expr()
-        if done() or not ['+', '-'].include?(look_ahead())
-          break
-        end
+        break if done() or not ['+', '-'].include?(look_ahead())
         buf << pop() # operator
       end
-      if buf.length == 2
-        buf = buf[1]
-      end
+      buf = buf[1] if buf.length == 2
       show_progress('get_add_expr', buf)
       return buf
     end
@@ -1199,14 +1155,10 @@ module Niseshiori
       buf = [MUL_EXPR]
       while true
         buf << get_unary_expr()
-        if done() or not ['*', '/', '\\'].include?(look_ahead())
-          break
-        end
+        break if done() or not ['*', '/', '\\'].include?(look_ahead())
         buf << pop() # operator
       end
-      if buf.length == 2
-        buf = buf[1]
-      end
+      buf = buf[1] if buf.length == 2
       show_progress('get_mul_expr', buf)
       return buf
     end
@@ -1264,9 +1216,7 @@ module Niseshiori
 
     def find(top_dir, dll_name)
       result = 0
-      if not Niseshiori.list_dict(top_dir).empty?
-        result = 100
-      end
+      result = 100 unless Niseshiori.list_dict(top_dir).empty?
       return result
     end
 
@@ -1283,7 +1233,7 @@ module Niseshiori
       header = req_string.split(/\r?\n/, 0)
       req_header = {}
       line = header.shift
-      if not line.empty?
+      unless line.empty?
         line = line.strip()
         req_list = line.split(nil, -1)
         if req_list.length >= 2
@@ -1292,12 +1242,8 @@ module Niseshiori
         end
         for line in header
           line = line.encode('utf-8', :invalid => :replace, :undef => :replace).strip()
-          if line.empty?
-            next
-          end
-          if not line.include?(':')
-            next
-          end
+          next if line.empty?
+          next unless line.include?(':')
           key, value = line.split(':', 2)
           key.strip!
           value.strip!
@@ -1339,7 +1285,7 @@ module Niseshiori
           end
         else
           result = @resources[req_header['ID']]
-          if result == nil
+          if result.nil?
             ref = []
             for n in 0..7
               if req_header.include?(['Reference', n.to_s].join(''))
@@ -1355,9 +1301,7 @@ module Niseshiori
               ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7)
           end
         end
-        if result == nil
-          result = ''
-        end
+        result = '' if result.nil?
         to = communicate_to()
       end
       result = ["SHIORI/3.0 200 OK\r\n",
@@ -1366,7 +1310,7 @@ module Niseshiori
                 "Value: ",
                 result,
                 "\r\n"].join("")
-      if to != nil
+      unless to.nil?
         result = [result,
                   "Reference0: ",
                   to,

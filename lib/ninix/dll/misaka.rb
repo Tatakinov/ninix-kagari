@@ -36,12 +36,12 @@ module Misaka
   end
 
   def self.lexical_error(path: nil, position: nil)
-    if path == nil and position == nil
+    if path.nil? and position.nil?
       error = 'lexical error'
-    elsif path == nil
+    elsif path.nil?
       at = ('line ' + position[0].to_s + ', column ' + position[1].to_s)
       error = ('lexical error at ' + at.to_s)
-    elsif position == nil
+    elsif position.nil?
       error = ('lexical error in ' + path.to_s)
     else
       at = ('line ' + position[0].to_s + ', column ' + position[1].to_s)
@@ -51,12 +51,12 @@ module Misaka
   end
 
   def self.syntax_error(message, path: nil, position: nil)
-    if path == nil and position == nil
+    if path.nil? and position.nil?
       error = ('syntax error (' + message.to_s + ')')
-    elsif path == nil
+    elsif path.nil?
       at = ('line ' + position[0].to_s + ', column ' + position[1].to_s)
       error = ('syntax error at ' + at.to_s + ' (' + message.to_s{1} + ')')
-    elsif position == nil
+    elsif position.nil?
       error = ('syntax error in ' + path.to_s + ' (' + message.to_s{1} + ')')
     else
       at = ('line ' + position[0].to_s + ', column ' + position[1].to_s)
@@ -86,46 +86,37 @@ module Misaka
     open(path) do |f|
       while true
         line = f.gets
-        if line == nil
-          break
-        end
+        break if line.nil?
         line = line.strip()
-        if line.empty? or line.start_with?('//')
-          next
-        end
-        if line == 'dictionaries'
+        next if line.empty? or line.start_with?('//')
+        case line
+        when 'dictionaries'
           line = f.gets
           if line.strip() != '{'
             Misaka.syntax_error('expected an open brace', :path => path)
           end
           while true
             line = f.gets
-            if line == nil
-              Misaka.syntax_error('unexpected end of file', :path => path)
-            end
+            Misaka.syntax_error('unexpected end of file', :path => path) if line.nil?
             line = line.strip()
-            if line == '}'
-              break
-            end
-            if line.empty? or line.start_with?('//')
-              next
-            end
+            break if line == '}'
+            next if line.empty? or line.start_with?('//')
             filelist << Home.get_normalized_path(line)
           end
-        elsif line == 'debug,0'
+        when 'debug,0'
           debug = 0
-        elsif line == 'debug,1'
+        when 'debug,1'
           debug = 1
-        elsif line == 'error,0'
+        when 'error,0'
           error = 0
-        elsif line == 'error,1'
+        when 'error,1'
           error = 1
-        elsif line == 'propertyhandler,0'
+        when 'propertyhandler,0'
           #pass
-        elsif line == 'propertyhandler,1'
+        when 'propertyhandler,1'
           #pass
         else
-          Logging::Logging.debug("misaka.rb: unknown directive '" + line.to_s + "'")
+          Logging::Logging.debug("misaka.rb: unknown directive '#{line}'")
         end
       end
     end
@@ -197,9 +188,9 @@ module Misaka
     def _match(data, line, column, path)
       temp = data.clone
       while temp.length > 0
-        if column == 0
+        if column.zero?
           match = Re_comment.match(temp)
-          if match != nil
+          unless match.nil?
             column = (column + match[0].length)
             temp = match.post_match
             next
@@ -208,11 +199,11 @@ module Misaka
         break_flag = false
         for token, pattern in Patterns
           match = pattern.match(temp)
-          if match != nil
+          unless match.nil?
             lexeme = match[0]
             if token == TOKEN_TEXT and \
               lexeme.start_with?('"') and lexeme.end_with?('"')
-              if not lexeme.include?('$')
+              unless lexeme.include?('$')
                 @buffer << [token, lexeme[1..-2], [line, column]]
               else # XXX
                 line, column = _match(lexeme[1..-2], line, column + 1, path)
@@ -226,7 +217,7 @@ module Misaka
             break
           end
         end
-        if not break_flag
+        unless break_flag
           ###print(temp[0..100 - 1])
           Misaka.lexical_error(:path => path, :position => [line, column])
         end
@@ -250,7 +241,7 @@ module Misaka
     end
 
     def get_position
-      return @position
+      @position
     end
 
     def pop
@@ -284,12 +275,10 @@ module Misaka
     def skip_space(accept_eof: false)
       while not @buffer.empty?
         token, lexeme = look_ahead()
-        if not [TOKEN_NEWLINE, TOKEN_WHITESPACE].include?(token)
-          return false
-        end
+        return false unless [TOKEN_NEWLINE, TOKEN_WHITESPACE].include?(token)
         pop()
       end
-      if not accept_eof
+      unless accept_eof
         Misaka.syntax_error('unexpected end of file', :path => @path)
       end
       return true
@@ -298,9 +287,7 @@ module Misaka
     def skip_line
       while not @buffer.empty?
         token, lexeme = pop()
-        if token == TOKEN_NEWLINE
-          break
-        end
+        break if token == TOKEN_NEWLINE
       end
     end
   end
@@ -388,7 +375,7 @@ module Misaka
         ##   token == TOKEN_OPERATOR and \
         ##   ['+', '-', '*', '/', '%'].include?(lexeme)
         ## XXX
-        if not [TOKEN_NEWLINE, TOKEN_COMMA, TOKEN_SEMICOLON].include?(token)
+        unless [TOKEN_NEWLINE, TOKEN_COMMA, TOKEN_SEMICOLON].include?(token)
           token, lexeme = @lexer.pop()
           buf << unescape(lexeme)
         else
@@ -423,9 +410,7 @@ module Misaka
           @lexer.pop()
         end
         token, lexeme = @lexer.look_ahead()
-        if token == TOKEN_NEWLINE
-          break
-        end
+        break if token == TOKEN_NEWLINE
         token, lexeme = @lexer.look_ahead()
         if token == TOKEN_OPEN_BRACE
           parameters << get_brace_expr()
@@ -442,17 +427,11 @@ module Misaka
       @lexer.pop_check(TOKEN_NEWLINE)
       sentences = []
       while true
-        if @lexer.skip_space(:accept_eof => true)
-          break
-        end
+        break if @lexer.skip_space(:accept_eof => true)
         token, lexeme = @lexer.look_ahead()
-        if token == TOKEN_DOLLAR
-          break
-        end
+        break if token == TOKEN_DOLLAR
         sentence = get_sentence()
-        if sentence == nil
-          next
-        end
+        next if sentence.nil?
         sentences << sentence
       end
       return [name, parameters, sentences]
@@ -473,9 +452,7 @@ module Misaka
           while true
             @lexer.skip_space()
             token, lexeme = @lexer.look_ahead()
-            if token == TOKEN_CLOSE_BRACE
-              break
-            end
+            break if token == TOKEN_CLOSE_BRACE
             for node in get_line()
               line << node
             end
@@ -626,9 +603,7 @@ module Misaka
                 then_clause << node
               end
               token, lexem = @lexer.pop()
-              if token == TOKEN_CLOSE_BRACE
-                break
-              end
+              break if token == TOKEN_CLOSE_BRACE
               fail "assert" unless token == TOKEN_NEWLINE
             end
             @lexer.skip_space()
@@ -645,9 +620,7 @@ module Misaka
                   else_clause << node
                 end
                 token, lexem = @lexer.pop()
-                if token == TOKEN_CLOSE_BRACE
-                  break
-                end
+                break if token == TOKEN_CLOSE_BRACE
                 fail "assert" unless token == TOKEN_NEWLINE
               end
             elsif token == TOKEN_OPEN_BRACE ## XXX
@@ -660,9 +633,7 @@ module Misaka
                   else_clause << node
                 end
                 token, lexem = @lexer.pop()
-                if token == TOKEN_CLOSE_BRACE
-                  break
-                end
+                break if token == TOKEN_CLOSE_BRACE
                 fail "assert" unless token == TOKEN_NEWLINE
               end
             else
@@ -682,9 +653,7 @@ module Misaka
               args << get_argument()
               @lexer.skip_space()
               token, lexeme = @lexer.look_ahead()
-              if token != TOKEN_COMMA
-                break
-              end
+              break if token != TOKEN_COMMA
               @lexer.pop()
               @lexer.skip_space()
             end
@@ -697,13 +666,14 @@ module Misaka
         token, lexeme = @lexer.look_ahead()
         if token == TOKEN_OPERATOR
           operator = @lexer.pop_check(TOKEN_OPERATOR)
-          if ['=', '+=', '-=', '*=', '/='].include?(operator)
+          case operator
+          when '=', '+=', '-=', '*=', '/='
             @lexer.skip_space()
             value = get_add_expr()
-          elsif operator == '++'
+          when '++'
             operator = '+='
             value = [[NODE_TEXT, '1']]
-          elsif operator == '--'
+          when '--'
             operator = '-='
             value = [[NODE_TEXT, '1']]
           else
@@ -732,7 +702,8 @@ module Misaka
       buf = []
       while true
         token, lexeme = @lexer.look_ahead()
-        if token == TOKEN_TEXT
+        case token
+        when TOKEN_TEXT
           token, lexeme = @lexer.pop()
           if unescape(lexeme).start_with?('"') and \
             unescape(lexeme).end_with?('"')
@@ -740,14 +711,14 @@ module Misaka
           else
             buf << [NODE_TEXT, unescape(lexeme)]
           end
-        elsif [TOKEN_WHITESPACE, TOKEN_DOLLAR,
-               TOKEN_OPEN_BRACKET, TOKEN_CLOSE_BRACKET,
-               TOKEN_OPERATOR, TOKEN_SEMICOLON].include?(token)
+        when TOKEN_WHITESPACE, TOKEN_DOLLAR,
+             TOKEN_OPEN_BRACKET, TOKEN_CLOSE_BRACKET,
+             TOKEN_OPERATOR, TOKEN_SEMICOLON
           token, lexeme = @lexer.pop()
           buf << [NODE_TEXT, lexeme]
-        elsif token == TOKEN_OPEN_BRACE
+        when TOKEN_OPEN_BRACE
           buf << get_brace_expr()
-        elsif token == TOKEN_NEWLINE
+        when TOKEN_NEWLINE
           @lexer.skip_space()
         else
           break
@@ -778,9 +749,7 @@ module Misaka
       while true
         @lexer.skip_space()
         token, lexeme = @lexer.look_ahead()
-        if not (token == TOKEN_OPERATOR and lexeme == '||')
-          break
-        end
+        break unless token == TOKEN_OPERATOR and lexeme == '||'
         @lexer.pop()
         @lexer.skip_space()
         buf << get_and_expr()
@@ -798,9 +767,7 @@ module Misaka
       while true
         @lexer.skip_space()
         token, lexeme = @lexer.look_ahead()
-        if not (token == TOKEN_OPERATOR and lexeme == '&&')
-          break
-        end
+        break unless token == TOKEN_OPERATOR and lexeme == '&&'
         @lexer.pop()
         @lexer.skip_space()
         buf << get_sub_expr()
@@ -851,9 +818,7 @@ module Misaka
       while true
         @lexer.skip_space()
         token, lexeme = @lexer.look_ahead()
-        if not (token == TOKEN_OPERATOR and ['+', '-'].include?(lexeme))
-          break
-        end
+        break unless token == TOKEN_OPERATOR and ['+', '-'].include?(lexeme)
         buf << lexeme
         @lexer.pop()
         @lexer.skip_space()
@@ -872,9 +837,7 @@ module Misaka
       while true
         @lexer.skip_space()
         token, lexeme = @lexer.look_ahead()
-        if not (token == TOKEN_OPERATOR and ['*', '/', '%'].include?(lexeme))
-          break
-        end
+        break unless token == TOKEN_OPERATOR and ['*', '/', '%'].include?(lexeme)
         buf << lexeme
         @lexer.pop()
         @lexer.skip_space()
@@ -893,9 +856,7 @@ module Misaka
       while true
         @lexer.skip_space()
         token, lexeme = @lexer.look_ahead()
-        if not (token == TOKEN_OPERATOR and lexeme == '^')
-          break
-        end
+        break unless token == TOKEN_OPERATOR and lexeme == '^'
         @lexer.pop()
         @lexer.skip_space()
         buf << get_unary_expr()
@@ -943,71 +904,72 @@ module Misaka
 
     def dump_node(node, depth)
       indent = '  ' * depth
-      if node[0] == NODE_TEXT
+      case node[0]
+      when NODE_TEXT
         print([indent, 'TEXT'].join(''), " ", \
               ['"', node[1], '"'].join(''), "\n")
-      elsif node[0] == NODE_STRING
+      when NODE_STRING
         print([indent, 'STRING'].join(''), " ", \
               ['"', node[1], '"'].join(''), "\n")
-      elsif node[0] == NODE_VARIABLE
+      when NODE_VARIABLE
         print([indent, 'VARIABLE'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
-      elsif node[0] == NODE_INDEXED
+      when NODE_INDEXED
         print([indent, 'INDEXED'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
         print([indent, 'index'].join(''), "\n")
         dump_list(node[2], :depth => depth + 1)
-      elsif node[0] == NODE_ASSIGNMENT
+      when NODE_ASSIGNMENT
         print([indent, 'ASSIGNMENT'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
         print([indent, 'op'].join(''), " ", node[2], "\n")
         dump_list(node[3], :depth => depth + 1)
-      elsif node[0] == NODE_FUNCTION
+      when NODE_FUNCTION
         print([indent, 'FUNCTION'].join(''), " ", node[1], "\n")
         for i in 0..node[2].length-1
           print([indent, 'args[' + i.to_s + ']'].join(''), "\n")
           dump_list(node[2][i], :depth => depth + 1)
         end
-      elsif node[0] == NODE_IF
+      when NODE_IF
         print([indent, 'IF'].join(''), "\n")
         dump_node(node[1], depth + 1)
         print([indent, 'then'].join(''), "\n")
         dump_list(node[2], :depth => depth + 1)
         print([indent, 'else'].join(''), "\n")
         dump_list(node[3], :depth => depth + 1)
-      elsif node[0] == NODE_CALC
+      when NODE_CALC
         print([indent, 'CALC'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
-      elsif node[0] == NODE_AND_EXPR
+      when NODE_AND_EXPR
         print([indent, 'AND_EXPR'].join(''), "\n")
         for i in 1..node.length-1
           dump_node(node[i], depth + 1)
         end
-      elsif node[0] == NODE_OR_EXPR
+      when NODE_OR_EXPR
         print([indent, 'OR_EXPR'].join(''), "\n")
         for i in 1..node.length-1
           dump_node(node[i], depth + 1)
         end
-      elsif node[0] == NODE_COMP_EXPR
+      when NODE_COMP_EXPR
         print([indent, 'COMP_EXPR'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
         print([indent, 'op'].join(''), " ", node[2], "\n")
         dump_list(node[3], :depth => depth + 1)
-      elsif node[0] == NODE_ADD_EXPR
+      when NODE_ADD_EXPR
         print([indent, 'ADD_EXPR'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
         for i in 2.step(node.length-1, 2)
           print([indent, 'op'].join(''), " ", node[i], "\n")
           dump_list(node[i + 1], :depth => depth + 1)
         end
-      elsif node[0] == NODE_MUL_EXPR
+      when NODE_MUL_EXPR
         print([indent, 'MUL_EXPR'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
         for i in 2.step(node.length-1, 2)
           print([indent, 'op'].join(''), " ", node[i], "\n")
           dump_list(node[i + 1], :depth => depth + 1)
         end
-      elsif node[0] == NODE_POW_EXPR
+      when NODE_POW_EXPR
         print([indent, 'POW_EXPR'].join(''), "\n")
         dump_list(node[1], :depth => depth + 1)
         for i in 2..node.length-1
@@ -1084,7 +1046,7 @@ module Misaka
     def initialize(misaka, name, item_list: nil)
       @misaka = misaka
       @name = name
-      if item_list == nil ## FIXME
+      if item_list.nil? ## FIXME
         @list = []
       else
         @list = item_list
@@ -1092,22 +1054,20 @@ module Misaka
     end
 
     def __len__
-      return @list.length
+      @list.length
     end
 
     def __getitem__(index)
-      return @list[index]
+      @list[index]
     end
 
     def get
-      if @list.empty?
-        return nil
-      end
+      return nil if @list.empty?
       return @list.sample
     end
 
     def copy(name)
-      return MisakaArray.new(@misaka, name, @list)
+      MisakaArray.new(@misaka, name, @list)
     end
   end
 
@@ -1120,9 +1080,7 @@ module Misaka
     end
 
     def get
-      if @list.empty?
-        return nil
-      end
+      return nil if @list.empty?
       if @indexes.empty?
         @indexes = Array(0..@list.length-1)
       end
@@ -1141,9 +1099,7 @@ module Misaka
     end
 
     def get
-      if @list.empty?
-        return nil
-      end
+      return nil if @list.empty?
       if @indexes.empty?
         @indexes = Array(0..@list.length-1)
       end
@@ -1169,9 +1125,7 @@ module Misaka
     end
 
     def pop
-      if @list.empty?
-        return nil
-      end
+      return nil if @list.empty?
       i = Array(0..@list.length-1).sample
       item = @list.delete_at(i)
       return item
@@ -1185,9 +1139,7 @@ module Misaka
           buf << i
         end
       end
-      if buf.empty?
-        return nil
-      end
+      return nil if buf.empty?
       i = buf.sample
       item = @list.delete_at(i)
       return item
@@ -1263,7 +1215,7 @@ module Misaka
       global_variables = []
       global_constants = []
       # charset auto-detection
-      if CharlockHolmes != nil
+      unless CharlockHolmes.nil?
         detector = CharlockHolmes::EncodingDetector.new
         for filename in filelist
           path = File.join(@misaka_dir, filename)
@@ -1349,7 +1301,7 @@ module Misaka
       variables = []
       constants = []
       for name, parameters, sentences in dic
-        if sentences == nil
+        if sentences.nil?
           next
         elsif name == '$_Variable'
           variables |= sentences
@@ -1360,9 +1312,7 @@ module Misaka
         end
         _GroupClass = Group
         conditions = []
-        if common != nil
-          conditions << common
-        end
+        conditions << common unless common.nil?
         for node in parameters
           if node[0] == NODE_IF
             conditions << node
@@ -1386,7 +1336,7 @@ module Misaka
     end
 
     def strip_newline(line)
-      return line.chomp
+      line.chomp
     end
 
     def load_database
@@ -1400,9 +1350,7 @@ module Misaka
                 'misaka.rb: malformed database (ignored)')
               break
             end
-            if line == nil
-              break
-            end
+            break if line.nil?
             header = strip_newline(line).split(nil, -1)
             if header[0] == 'SCHOLAR'
               name = header[1]
@@ -1439,9 +1387,7 @@ module Misaka
           for name in @variable.keys
             value_type, value = @variable[name]
             if value_type == TYPE_SCHOLAR
-              if value == ''
-                next
-              end
+              next if value == ''
               f.write('SCHOLAR ' + name.to_s + "\n" + value.to_s + "\n")
             elsif value_type == TYPE_ARRAY
               f.write('ARRAY ' + value.length.to_s + ' ' + name.to_s + "\n")
@@ -1475,7 +1421,7 @@ module Misaka
     def request(req_string)
       header = req_string.split(/\r?\n/, 0)
       line = header.shift
-      if line != nil
+      unless line.nil?
         line = line.force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace).strip()
         req_list = line.split(nil, -1)
         if req_list.length >= 2
@@ -1484,12 +1430,8 @@ module Misaka
         end
         for line in header
           line = line.force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace).strip()
-          if line.empty?
-            next
-          end
-          if not line.include?(':')
-            next
-          end
+          next if line.empty?
+          next unless line.include?(':')
           key, value = line.split(':', 2)
           key = key.strip()
           begin
@@ -1517,7 +1459,7 @@ module Misaka
         refs = []
         while true
           ref = get_ref(n)
-          if ref != nil
+          unless ref.nil?
             refs << ref
           else
             break
@@ -1549,16 +1491,16 @@ module Misaka
         script = get(['$', event].join(''), :default => nil)
       end
       if event == 'OnSecondChange'
-        if @random_talk == 0
+        if @random_talk.zero?
           reset_random_talk_interval()
         elsif @random_talk > 0
           @random_talk -= 1
-          if @random_talk == 0
+          if @random_talk.zero?
             script = get('$_OnRandomTalk', :default => nil)
           end
         end
       end
-      if script != nil
+      unless script.nil?
         script = script.strip()
       else
         script = ''
@@ -1573,7 +1515,7 @@ module Misaka
                   script.encode(@charset, :invalid => :replace, :undef => :replace),
                   "\r\n"].join('')
       to = eval_variable([[NODE_TEXT, '$to']])
-      if to != nil
+      unless to.nil?
         @variable.delete('$to')
         response = [response,
                     "Reference0: ",
@@ -1609,9 +1551,7 @@ module Misaka
 
     def get(name, default: '')
       grouplist = @dict[name]
-      if grouplist == nil
-        return default
-      end
+      return default if grouplist.nil?
       for group, conditions in grouplist
         if eval_and_expr(conditions) == 'true'
           return expand(group.get())
@@ -1621,9 +1561,7 @@ module Misaka
     end
 
     def expand(nodelist)
-      if nodelist == nil
-        return ''
-      end
+      return '' if nodelist.nil?
       buf = []
       for node in nodelist
         buf << eval_(node)
@@ -1641,33 +1579,34 @@ module Misaka
     end
 
     def eval_(node)
-      if node[0] == NODE_TEXT
+      case node[0]
+      when NODE_TEXT
         result = node[1]
-      elsif node[0] == NODE_STRING
+      when NODE_STRING
         result = node[1]
-      elsif node[0] == NODE_VARIABLE
+      when NODE_VARIABLE
         result = eval_variable(node[1])
-      elsif node[0] == NODE_INDEXED
+      when NODE_INDEXED
         result = eval_indexed(node[1], node[2])
-      elsif node[0] == NODE_ASSIGNMENT
+      when NODE_ASSIGNMENT
         result = eval_assignment(node[1], node[2], node[3])
-      elsif node[0] == NODE_FUNCTION
+      when NODE_FUNCTION
         result = eval_function(node[1], node[2])
-      elsif node[0] == NODE_IF
+      when NODE_IF
         result = eval_if(node[1], node[2], node[3])
-      elsif node[0] == NODE_CALC
+      when NODE_CALC
         result = eval_calc(node[1])
-      elsif node[0] == NODE_COMP_EXPR
+      when NODE_COMP_EXPR
         result = eval_comp_expr(node[1], node[2], node[3])
-      elsif node[0] == NODE_AND_EXPR
+      when NODE_AND_EXPR
         result = eval_and_expr(node[1..-1])
-      elsif node[0] == NODE_OR_EXPR
+      when NODE_OR_EXPR
         result = eval_or_expr(node[1..-1])
-      elsif node[0] == NODE_ADD_EXPR
+      when NODE_ADD_EXPR
         result = eval_add_expr(node[1..-1])
-      elsif node[0] == NODE_MUL_EXPR
+      when NODE_MUL_EXPR
         result = eval_mul_expr(node[1..-1])
-      elsif node[0] == NODE_POW_EXPR
+      when NODE_POW_EXPR
         result = eval_pow_expr(node[1..-1])
       else
         ##print(node)
@@ -1677,76 +1616,77 @@ module Misaka
     end
 
     SYSTEM_VARIABLES = [
-        # current date and time
-        '$year', '$month', '$day', '$hour', '$minute', '$second',
-        # day of week (0 = Sunday)
-        '$dayofweek',
-        # ghost uptime
-        '$elapsedhour', '$elapsedminute', '$elapsedsecond',
-        # OS uptime
-        '$elapsedhouros', '$elapsedminuteos', '$elapsedsecondos',
-        # OS accumlative uptime
-        '$elapsedhourtotal', '$elapsedminutetotal', '$elapsedsecondtotal',
-        # system information
-        '$os.version',
-        '$os.name',
-        '$os.phisicalmemorysize',
-        '$os.freememorysize',
-        '$os.totalmemorysize',
-        '$cpu.vendorname',
-        '$cpu.name',
-        '$cpu.clockcycle',
-        # number of days since the last network update
-        '$daysfromlastupdate',
-        # number of days since the first boot
-        '$daysfromfirstboot',
-        # name of the ghost with which it has communicated
-        ##'$to',
-        '$sender',
-        '$lastsentence',
-        '$otherghostlist',
-        ]
+      # current date and time
+      '$year', '$month', '$day', '$hour', '$minute', '$second',
+      # day of week (0 = Sunday)
+      '$dayofweek',
+      # ghost uptime
+      '$elapsedhour', '$elapsedminute', '$elapsedsecond',
+      # OS uptime
+      '$elapsedhouros', '$elapsedminuteos', '$elapsedsecondos',
+      # OS accumlative uptime
+      '$elapsedhourtotal', '$elapsedminutetotal', '$elapsedsecondtotal',
+      # system information
+      '$os.version',
+      '$os.name',
+      '$os.phisicalmemorysize',
+      '$os.freememorysize',
+      '$os.totalmemorysize',
+      '$cpu.vendorname',
+      '$cpu.name',
+      '$cpu.clockcycle',
+      # number of days since the last network update
+      '$daysfromlastupdate',
+      # number of days since the first boot
+      '$daysfromfirstboot',
+      # name of the ghost with which it has communicated
+      ##'$to',
+      '$sender',
+      '$lastsentence',
+      '$otherghostlist',
+    ]
 
     def eval_variable(name)
       now = Time.now
       name = expand(name)
-      if name == '$year'
+      case name
+      when '$year'
         result = now.year
-      elsif name == '$month'
+      when '$month'
         result = now.month
-      elsif name == '$day'
+      when '$day'
         result = now.day
-      elsif name == '$hour'
+      when '$hour'
         result = now.hour
-      elsif name == '$minute'
+      when '$minute'
         result = now.min
-      elsif name == '$second'
+      when '$second'
         result = now.sec
-      elsif name == '$dayofweek'
+      when '$dayofweek'
         result = now.wday
-      elsif name == '$lastsentence'
+      when '$lastsentence'
         result = @communicate[1]
-      elsif name == '$otherghostlist'
-        if not @otherghost.empty?
+      when '$otherghostlist'
+        unless @otherghost.empty?
           ghost = @otherghost.sample
           result = ghost[0]
         else
           result = ''
         end
-      elsif name == '$sender'
+      when '$sender'
         result = @communicate[0]
-      elsif SYSTEM_VARIABLES.include?(name)
+      when *SYSTEM_VARIABLES
         result = ''
-      elsif @dict.include?(name)
+      when *@dict.keys
         result = get(name)
-      elsif @constant.include?(name)
+      when *@constant.keys
         value_type, value = @constant[name]
         if value_type == TYPE_ARRAY
           result = expand(value.get())
         else
           result = value.to_s
         end
-      elsif @variable.include?(name)
+      when *@variable.keys
         value_type, value = @variable[name]
         if value_type == TYPE_ARRAY
           result = expand(value.get())
@@ -1767,29 +1707,26 @@ module Misaka
       rescue #except ValueError:
         index = 0
       end
-      if name == '$otherghostlist'
+      case name
+      when '$otherghostlist'
         group = []
         for ghost in @otherghost
           group << ghost[0]
         end
-      elsif SYSTEM_VARIABLES.include?(name)
+      when *SYSTEM_VARIABLES
         return ''
-      elsif @dict.include?(name)
+      when *@dict.keys
         grouplist = @dict[name]
         group, constraints = grouplist[0]
-      elsif @constant.include?(name)
+      when *@constant.keys
         return ''
-      elsif @variable.include?(name)
+      when *@variable.keys
         value_type, group = @variable[name]
-        if value_type != TYPE_ARRAY
-          return ''
-        end
+        return '' if value_type != TYPE_ARRAY
       else
         return ''
       end
-      if index < 0 or index >= group.length
-        return ''
-      end
+      return '' if index < 0 or index >= group.length
       return expand(group[index])
     end
 
@@ -1807,16 +1744,14 @@ module Misaka
         else
           value_type, value = nil, ''
         end
-        if value_type == nil
+        if value_type.nil?
           if @variable.include?(name)
             value_type, value = @variable[name]
           else
             value_type, value = TYPE_SCHOLAR, ''
           end
         end
-        if value_type == TYPE_ARRAY
-          return ''
-        end
+        return '' if value_type == TYPE_ARRAY
         begin
           value = Integer(value)
         rescue #except ValueError:
@@ -1828,7 +1763,7 @@ module Misaka
           value -= operand
         elsif operator == '*='
           value *= operand
-        elsif operator == '/=' and operand != 0
+        elsif operator == '/=' and not operand.zero?
           value /= operand
           value = value.to_i
         end
@@ -1924,10 +1859,10 @@ module Misaka
         end
         if expression[i] == '*'
           value *= operand
-        elsif expression[i] == '/' and operand != 0
+        elsif expression[i] == '/' and not operand.zero?
           value /= operand
           value = value.to_i
-        elsif expression[i] == '%' and operand != 0
+        elsif expression[i] == '%' and not operand.zero?
           value = (value % operand)
         end
       end
@@ -1963,14 +1898,12 @@ module Misaka
     end
 
     def eval_calc(expression)
-      return expand(expression)
+      expand(expression)
     end
 
     def eval_function(name, args)
       function = SYSTEM_FUNCTIONS[name]
-      if function == nil
-        return ''
-      end
+      return '' if function.nil?
       return method(function).call(args)
     end
 
@@ -1994,23 +1927,17 @@ module Misaka
     end
 
     def exec_reference(args)
-      if args.length != 1
-        return ''
-      end
+      return '' if args.length != 1
       n = expand_args(args[0])
       if '01234567'.include?(n)
         value = @reference[n.to_i]
-        if value != nil
-          return value.to_s
-        end
+        return value.to_s unless value.nil?
       end
       return ''
     end
 
     def exec_random(args)
-      if args.length != 1
-        return ''
-      end
+      return '' if args.length != 1
       n = expand_args(args[0])
       begin
         return Array(0..Integer(n)-1).sample.to_s
@@ -2020,16 +1947,12 @@ module Misaka
     end
 
     def exec_choice(args)
-      if args.empty?
-        return ''
-      end
+      return '' if args.empty?
       return expand_args(args.sample)
     end
 
     def exec_getvalue(args)
-      if args.length != 2
-        return ''
-      end
+      return '' if args.length != 2
       begin
         n = Integer(expand_args(args[1]))
       rescue #except ValueError:
@@ -2054,25 +1977,21 @@ module Misaka
           namelist << name
         end
       end
-      if namelist.empty?
-        return ''
-      end
+      return '' if namelist.empty?
       keylist = []
       for key in keys() # dict, variable, constant
         break_flag = false
         for name in namelist
-          if not key.include?(name)
+          unless key.include?(name)
             break_flag = true
             break
           end
         end
-        if not break_flag
+        unless break_flag
           keylist << key
         end
       end
-      if keylist.empty?
-        return ''
-      end
+      return '' if keylist.empty?
       return eval_variable([[NODE_TEXT, keylist.sample]])
     end
 
@@ -2125,120 +2044,92 @@ module Misaka
     end
 
     def exec_substring(args)
-      if args.length != 3
-        return ''
-      end
+      return '' if args.length != 3
       value = expand_args(args[2])
       begin
         count = Integer(value)
       rescue #except ValueError:
         return ''
       end
-      if count < 0
-        return ''
-      end
+      return '' if count < 0
       value = expand_args(args[1])
       begin
         offset = Integer(value)
       rescue #except ValueError:
         return ''
       end
-      if offset < 0
-        return ''
-      end
+      return '' if offset < 0
       s = expand_args(args[0]).encode(@charset, :invalid => :replace, :undef => :replace)
       return s[offset..offset + count - 1].force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace)
     end
 
     def exec_substringl(args)
-      if args.length != 2
-        return ''
-      end
+      return '' if args.length != 2
       value = expand_args(args[1])
       begin
         count = Integer(value)
       rescue #except ValueError:
         return ''
       end
-      if count < 0
-        return ''
-      end
+      return '' if count < 0
       s = expand_args(args[0]).encode(@charset, :invalid => :replace, :undef => :replace)
       return s[0..count-1].force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace)
     end
 
     def exec_substringr(args)
-      if args.length != 2
-        return ''
-      end
+      return '' if args.length != 2
       value = expand_args(args[1])
       begin
         count = Integer(value)
       rescue #except ValueError:
         return ''
       end
-      if count < 0
-        return ''
-      end
+      return '' if count < 0
       s = expand_args(args[0]).encode(@charset, :invalid => :replace, :undef => :replace)
       return s[s.length - count..-1].force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace)
     end
 
     def exec_substringfirst(args)
-      if args.length != 1
-        return ''
-      end
+      return '' if args.length != 1
       buf = expand_args(args[0])
-      if buf.empty?
-        return ''
-      else
-        return buf[0]
-      end
+      return '' if buf.empty?
+      return buf[0]
     end
 
     def exec_substringlast(args)
-      if args.length != 1
-        return ''
-      end
+      return '' if args.length != 1
       buf = expand_args(args[0])
-      if buf.empty?
-        return ''
-      else
-        return buf[-1]
-      end
+      return '' if buf.empty?
+      return buf[-1]
     end
 
     def exec_length(args)
-      if args.length != 1
-        return ''
-      end
+      return '' if args.length != 1
       return expand_args(args[0]).encode(@charset, :invalid => :replace, :undef => :replace).length.to_s
     end
 
     Katakana2hiragana = {
-        'ァ' => 'ぁ', 'ア' => 'あ', 'ィ' => 'ぃ', 'イ' => 'い', 'ゥ' => 'ぅ',
-        'ウ' => 'う', 'ェ' => 'ぇ', 'エ' => 'え', 'ォ' => 'ぉ', 'オ' => 'お',
-        'カ' => 'か', 'ガ' => 'が', 'キ' => 'き', 'ギ' => 'ぎ', 'ク' => 'く',
-        'グ' => 'ぐ', 'ケ' => 'け', 'ゲ' => 'げ', 'コ' => 'こ', 'ゴ' => 'ご',
-        'サ' => 'さ', 'ザ' => 'ざ', 'シ' => 'し', 'ジ' => 'じ', 'ス' => 'す',
-        'ズ' => 'ず', 'セ' => 'せ', 'ゼ' => 'ぜ', 'ソ' => 'そ', 'ゾ' => 'ぞ',
-        'タ' => 'た', 'ダ' => 'だ', 'チ' => 'ち', 'ヂ' => 'ぢ', 'ッ' => 'っ',
-        'ツ' => 'つ', 'ヅ' => 'づ', 'テ' => 'て', 'デ' => 'で', 'ト' => 'と',
-        'ド' => 'ど', 'ナ' => 'な', 'ニ' => 'に', 'ヌ' => 'ぬ', 'ネ' => 'ね',
-        'ノ' => 'の', 'ハ' => 'は', 'バ' => 'ば', 'パ' => 'ぱ', 'ヒ' => 'ひ',
-        'ビ' => 'び', 'ピ' => 'ぴ', 'フ' => 'ふ', 'ブ' => 'ぶ', 'プ' => 'ぷ',
-        'ヘ' => 'へ', 'ベ' => 'べ', 'ペ' => 'ぺ', 'ホ' => 'ほ', 'ボ' => 'ぼ',
-        'ポ' => 'ぽ', 'マ' => 'ま', 'ミ' => 'み', 'ム' => 'む', 'メ' => 'め',
-        'モ' => 'も', 'ャ' => 'ゃ', 'ヤ' => 'や', 'ュ' => 'ゅ', 'ユ' => 'ゆ',
-        'ョ' => 'ょ', 'ヨ' => 'よ', 'ラ' => 'ら', 'リ' => 'り', 'ル' => 'る',
-        'レ' => 'れ', 'ロ' => 'ろ', 'ヮ' => 'ゎ', 'ワ' => 'わ', 'ヰ' => 'ゐ',
-        'ヱ' => 'ゑ', 'ヲ' => 'を', 'ン' => 'ん', 'ヴ' => 'う゛',
-        }
+      'ァ' => 'ぁ', 'ア' => 'あ', 'ィ' => 'ぃ', 'イ' => 'い', 'ゥ' => 'ぅ',
+      'ウ' => 'う', 'ェ' => 'ぇ', 'エ' => 'え', 'ォ' => 'ぉ', 'オ' => 'お',
+      'カ' => 'か', 'ガ' => 'が', 'キ' => 'き', 'ギ' => 'ぎ', 'ク' => 'く',
+      'グ' => 'ぐ', 'ケ' => 'け', 'ゲ' => 'げ', 'コ' => 'こ', 'ゴ' => 'ご',
+      'サ' => 'さ', 'ザ' => 'ざ', 'シ' => 'し', 'ジ' => 'じ', 'ス' => 'す',
+      'ズ' => 'ず', 'セ' => 'せ', 'ゼ' => 'ぜ', 'ソ' => 'そ', 'ゾ' => 'ぞ',
+      'タ' => 'た', 'ダ' => 'だ', 'チ' => 'ち', 'ヂ' => 'ぢ', 'ッ' => 'っ',
+      'ツ' => 'つ', 'ヅ' => 'づ', 'テ' => 'て', 'デ' => 'で', 'ト' => 'と',
+      'ド' => 'ど', 'ナ' => 'な', 'ニ' => 'に', 'ヌ' => 'ぬ', 'ネ' => 'ね',
+      'ノ' => 'の', 'ハ' => 'は', 'バ' => 'ば', 'パ' => 'ぱ', 'ヒ' => 'ひ',
+      'ビ' => 'び', 'ピ' => 'ぴ', 'フ' => 'ふ', 'ブ' => 'ぶ', 'プ' => 'ぷ',
+      'ヘ' => 'へ', 'ベ' => 'べ', 'ペ' => 'ぺ', 'ホ' => 'ほ', 'ボ' => 'ぼ',
+      'ポ' => 'ぽ', 'マ' => 'ま', 'ミ' => 'み', 'ム' => 'む', 'メ' => 'め',
+      'モ' => 'も', 'ャ' => 'ゃ', 'ヤ' => 'や', 'ュ' => 'ゅ', 'ユ' => 'ゆ',
+      'ョ' => 'ょ', 'ヨ' => 'よ', 'ラ' => 'ら', 'リ' => 'り', 'ル' => 'る',
+      'レ' => 'れ', 'ロ' => 'ろ', 'ヮ' => 'ゎ', 'ワ' => 'わ', 'ヰ' => 'ゐ',
+      'ヱ' => 'ゑ', 'ヲ' => 'を', 'ン' => 'ん', 'ヴ' => 'う゛',
+    }
 
     def exec_hiraganacase(args)
-      if args.length != 1
-        return ''
-      end
+      return '' if args.length != 1
       buf = []
       string = expand_args(args[0]).force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace)
       #string = args[0].force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace)
@@ -2254,9 +2145,7 @@ module Misaka
     end
 
     def exec_isequallastandfirst(args)
-      if args.length != 2
-        return 'false'
-      end
+      return 'false' if args.length != 2
       buf0 = expand_args(args[0])
       buf1 = expand_args(args[1])
       if not buf0.empty? and not buf1.empty? and buf0[-1] == buf1[0]
@@ -2294,19 +2183,15 @@ module Misaka
     end
 
     def exec_stringexists(args)
-      if args.length != 2
-        return ''
-      end
+      return '' if args.length != 2
       name = expand_args(args[0])
       if @variable.include?(name)
         value_type, value = @variable[name]
       else
         value_type, value = TYPE_SCHOLAR, ''
       end
-      if value_type == TYPE_SCHOLAR
-        return ''
-      end
-      if value.index(expand_args(args[1])) == nil # value.index(expand_args(args[1])) < 0
+      return '' if value_type == TYPE_SCHOLAR
+      if value.index(expand_args(args[1])).nil? # value.index(expand_args(args[1])) < 0
         return 'false'
       else
         return 'true'
@@ -2314,17 +2199,11 @@ module Misaka
     end
 
     def exec_copy(args)
-      if args.length != 2
-        return ''
-      end
+      return '' if args.length != 2
       src_name = expand_args(args[0])
-      if not (not src_name.empty? and src_name.start_with?('$'))
-        return ''
-      end
+      return '' unless not src_name.empty? and src_name.start_with?('$')
       new_name = expand_args(args[1])
-      if not (not new_name.empty? and new_name.start_with?('$'))
-        return ''
-      end
+      return '' unless not new_name.empty? and new_name.start_with?('$')
       source = nil
       if @dict.include?(src_name)
         grouplist = @dict[src_name]
@@ -2335,7 +2214,7 @@ module Misaka
           source = value
         end
       end
-      if source == nil
+      if source.nil?
         value = MisakaArray.new(self, new_name)
       else
         value = source.copy(new_name)
@@ -2387,12 +2266,10 @@ module Misaka
     end
 
     def exec_insentence(args)
-      if args.empty?
-        return ''
-      end
+      return '' if args.empty?
       s = expand_args(args[0])
       for i in 1..args.length-1
-        if not s.include?(expand_args(args[i]))
+        unless s.include?(expand_args(args[i]))
           return 'false'
         end
       end
@@ -2400,9 +2277,7 @@ module Misaka
     end
 
     def exec_substringw(args)
-      if args.length != 3
-        return ''
-      end
+      return '' if args.length != 3
       value = expand_args(args[2])
       begin
         count = Integer(value)
@@ -2418,43 +2293,33 @@ module Misaka
       rescue #except ValueError:
         return ''
       end
-      if offset < 0
-        return ''
-      end
+      return '' if offset < 0
       buf = expand_args(args[0])
       return buf[offset..offset + count - 1]
     end
 
     def exec_substringwl(args)
-      if args.length != 2
-        return ''
-      end
+      return '' if args.length != 2
       value = expand_args(args[1])
       begin
         count = Integer(value)
       rescue #except ValueError:
         return ''
       end
-      if count < 0
-        return ''
-      end
+      return '' if count < 0
       buf = expand_args(args[0])
       return buf[0..count-1]
     end
 
     def exec_substringwr(args)
-      if args.length != 2
-        return ''
-      end
+      return '' if args.length != 2
       value = expand_args(args[1])
       begin
         count = Integer(value)
       rescue #except ValueError:
         return ''
       end
-      if count < 0
-        return ''
-      end
+      return '' if count < 0
       buf = expand_args(args[0])
       return buf[buf.length - count..-1]
     end
@@ -2462,9 +2327,7 @@ module Misaka
     Prefixes = ['さん', 'ちゃん', '君', 'くん', '様', 'さま', '氏', '先生']
 
     def exec_adjustprefix(args)
-      if args.length != 2
-        return ''
-      end
+      return '' if args.length != 2
       s = expand_args(args[0])
       for prefix in Prefixes
         if s.end_with?(prefix)
@@ -2476,9 +2339,7 @@ module Misaka
     end
 
     def exec_count(args)
-      if args.length != 1
-        return ''
-      end
+      return '' if args.length != 1
       name = expand_args(args[0])
       begin
         value_type, value = @variable[name]
@@ -2492,12 +2353,10 @@ module Misaka
     end
 
     def exec_inlastsentence(args)
-      if args.empty?
-        return ''
-      end
+      return '' if args.empty?
       s = @communicate[1]
       for i in 1..args.length-1
-        if not s.include?(expand_args(args[i]))
+        unless s.include?(expand_args(args[i]))
           return 'false'
         end
       end
@@ -2524,7 +2383,7 @@ module Misaka
       req = [req, "\r\n"].join('')
       response = @saori_library.request(expand_args(args[0]), req)
       header = response.split(/\r?\n/, 0)
-      if not header.empty?
+      unless header.empty?
         line = header.shift
         line = line.force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace).strip()
         if line.include?(' ')
@@ -2534,16 +2393,12 @@ module Misaka
         end
         for line in header
           line = line.force_encoding(@charset).encode('utf-8', :invalid => :replace, :undef => :replace).strip()
-          if line.empty?
-            next
-          end
-          if not line.include?(':')
-            next
-          end
+          next if line.empty?
+          nexy unless line.include?(':')
           key, value = line.split(':', 2)
           key.strip!
           value.strip!
-          if not key.empty?
+          unless key.empty?
             saori_header << key
             saori_value[key] = value
           end
@@ -2557,12 +2412,10 @@ module Misaka
     end
 
     def load_saori(args)
-      if args.empty?
-        return ''
-      end
+      return '' if args.empty?
       result = @saori_library.load(expand_args(args[0]),
                                    @misaka_dir)
-      if result == 0
+      if result.zero?
         return ''
       else
         result.to_s
@@ -2570,11 +2423,9 @@ module Misaka
     end
 
     def unload_saori(args)
-      if args.empty?
-        return ''
-      end
+      return '' if args.empty?
       result = @saori_library.unload(:name => expand_args(args[0]))
-      if result == 0
+      if result.zero?
         return ''
       else
         return result.to_s
@@ -2602,40 +2453,40 @@ module Misaka
   end
 
   SYSTEM_FUNCTIONS = {
-        '$reference' =>           'exec_reference',
-        '$random' =>              'exec_random',
-        '$choice' =>              'exec_choice',
-        '$getvalue' =>            'exec_getvalue',
-        '$inlastsentence' =>      'exec_inlastsentence',
-        '$isghostexists' =>       'exec_isghostexists',
-        '$search' =>              'exec_search',
-        '$backup' =>              'exec_backup',
-        '$getmousemovecount' =>   'exec_getmousemovecount',
-        '$resetmousemovecount' => 'exec_resetmousemovecount',
-        '$substring' =>           'exec_substring',
-        '$substringl' =>          'exec_substringl',
-        '$substringr' =>          'exec_substringr',
-        '$substringfirst' =>      'exec_substringfirst',
-        '$substringlast' =>       'exec_substringlast',
-        '$length' =>              'exec_length',
-        '$hiraganacase' =>        'exec_hiraganacase',
-        '$isequallastandfirst' => 'exec_isequallastandfirst',
-        '$append' =>              'exec_append',
-        '$stringexists' =>        'exec_stringexists',
-        '$copy' =>                'exec_copy',
-        '$pop' =>                 'exec_pop',
-        '$popmatchl' =>           'exec_popmatchl',
-        '$index' =>               'exec_index',
-        '$insentence' =>          'exec_insentence',
-        '$substringw' =>          'exec_substringw',
-        '$substringwl' =>         'exec_substringwl',
-        '$substringwr' =>         'exec_substringwr',
-        '$adjustprefix' =>        'exec_adjustprefix',
-        '$count' =>               'exec_count',
-        '$saori' =>               'saori',
-        '$loadsaori' =>           'load_saori',
-        '$unloadsaori' =>         'unload_saori',
-        }
+    '$reference' =>           'exec_reference',
+    '$random' =>              'exec_random',
+    '$choice' =>              'exec_choice',
+    '$getvalue' =>            'exec_getvalue',
+    '$inlastsentence' =>      'exec_inlastsentence',
+    '$isghostexists' =>       'exec_isghostexists',
+    '$search' =>              'exec_search',
+    '$backup' =>              'exec_backup',
+    '$getmousemovecount' =>   'exec_getmousemovecount',
+    '$resetmousemovecount' => 'exec_resetmousemovecount',
+    '$substring' =>           'exec_substring',
+    '$substringl' =>          'exec_substringl',
+    '$substringr' =>          'exec_substringr',
+    '$substringfirst' =>      'exec_substringfirst',
+    '$substringlast' =>       'exec_substringlast',
+    '$length' =>              'exec_length',
+    '$hiraganacase' =>        'exec_hiraganacase',
+    '$isequallastandfirst' => 'exec_isequallastandfirst',
+    '$append' =>              'exec_append',
+    '$stringexists' =>        'exec_stringexists',
+    '$copy' =>                'exec_copy',
+    '$pop' =>                 'exec_pop',
+    '$popmatchl' =>           'exec_popmatchl',
+    '$index' =>               'exec_index',
+    '$insentence' =>          'exec_insentence',
+    '$substringw' =>          'exec_substringw',
+    '$substringwl' =>         'exec_substringwl',
+    '$substringwr' =>         'exec_substringwr',
+    '$adjustprefix' =>        'exec_adjustprefix',
+    '$count' =>               'exec_count',
+    '$saori' =>               'saori',
+    '$loadsaori' =>           'load_saori',
+    '$unloadsaori' =>         'unload_saori',
+  }
 
 
   class SaoriLibrary
@@ -2649,9 +2500,9 @@ module Misaka
       result = 0
       head, name = File.split(name.gsub('\\', '/')) # XXX: don't encode here
       top_dir = File.join(top_dir, head)
-      if @saori != nil and not @saori_list.include?(name)
+      unless @saori.nil? or @saori_list.include?(name)
         module_ = @saori.request(name)
-        if module_ != nil
+        unless module_.nil?
           @saori_list[name] = module_
         end
       end
@@ -2662,7 +2513,7 @@ module Misaka
     end
 
     def unload(name: nil)
-      if name != nil
+      unless name.nil?
         name = File.split(name.gsub('\\', '/'))[-1] # XXX: don't encode here
         if @saori_list.include?(name)
           @saori_list[name].unload()

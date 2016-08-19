@@ -71,12 +71,9 @@ module Ninix_Main
     textbuffer = textview.buffer
     textbuffer.set_text(message)
     while true
-      if dialog.run() == response_id
-        frame.show()
-        button.set_sensitive(false)
-      else # close button
-        break
-      end
+      break unless dialog.run() == response_id # close button
+      frame.show()
+      button.set_sensitive(false)
     end
     dialog.destroy()
     fail SystemExit
@@ -84,9 +81,7 @@ module Ninix_Main
   
   def self.main(option)
     # parse command line arguments
-    if option[:logfile] != nil
-      Logging::Logging.add_logger(Logger.new(option[:logfile]))
-    end
+    Logging::Logging.add_logger(Logger.new(option[:logfile])) unless option[:logfile].nil?
     # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
     # UDP 7743：伺か（未使用）(IANA Registered Port for SSTP)
     # TCP 9801：伺か          (IANA Registered Port for SSTP)
@@ -95,18 +90,16 @@ module Ninix_Main
     # TCP 11000：伺か（廃止） (IANA Registered Port for IRISA)
     sstp_port = [9801]
     # parse command line arguments
-    if option[:sstp_port] != nil
+    unless option[:sstp_port].nil?
       if option[:sstp_port].to_i < 1024
         Logging::Logging.warning("Invalid --sstp-port number (ignored)")
       else
         sstp_port << option[:sstp_port].to_i
       end
     end
-    if option[:debug] != nil
-      Logging::Logging.set_level(Logger::DEBUG)
-    end
+    Logging::Logging.set_level(Logger::DEBUG) unless option[:debug].nil?
     home_dir = Home.get_ninix_home()
-    if not File.exists?(home_dir)
+    unless File.exists?(home_dir)
       begin
         FileUtils.mkdir_p(home_dir)
       rescue
@@ -155,9 +148,8 @@ module Ninix_Main
 
     def handle_request(event_type, event, *arglist)
       fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
-      handlers = {
-      }
-      if not handlers.include?(event)
+      handlers = {}
+      unless handlers.include?(event)
         if SSTPControler.method_defined?(event)
           result = method(event).call(*arglist)
         else
@@ -167,9 +159,7 @@ module Ninix_Main
       else
         result = method(handlers[event]).call(*arglist)
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def enqueue_request(event, script_odict, sender, handle,
@@ -205,13 +195,11 @@ module Ninix_Main
     end
 
     def handle_sstp_queue
-      if @__sstp_flag or @__sstp_queue.empty?
-        return
-      end
+      return if @__sstp_flag or @__sstp_queue.empty?
       event, script_odict, sender, handle, address, \
       show_sstp_marker, use_translator, \
       entry_db, request_handler = @__sstp_queue.shift
-      working = (event != nil)
+      working = (not event.nil?)
       break_flag = false
       for if_ghost in script_odict.keys()
         if not if_ghost.empty? and @parent.handle_request('GET', 'if_ghost', if_ghost, :working => working)
@@ -221,12 +209,10 @@ module Ninix_Main
           break
         end
       end
-      if not break_flag
-        if @parent.handle_request('GET', 'get_preference', 'allowembryo') == 0
-          if event == nil
-            if request_handler != nil
-              request_handler.send_response(420) # Refuse
-            end
+      unless break_flag
+        if @parent.handle_request('GET', 'get_preference', 'allowembryo').zero?
+          if event.nil?
+            request_handler.send_response(420) unless request_handler.nil? # Refuse
             return
           else
             default_script = nil
@@ -239,18 +225,16 @@ module Ninix_Main
           end
         end
       end
-      if event != nil
+      unless event.nil?
         script = @parent.handle_request('GET', 'get_event_response', event)
       else
         script = nil
       end
-      if script == nil
+      if script.nil?
         script = default_script
       end
-      if script == nil
-        if request_handler != nil
-          request_handler.send_response(204) # No Content
-        end
+      if script.nil?
+        request_handler.send_response(204) unless request_handler.nil? # No Content
         return
       end
       set_sstp_flag(sender)
@@ -285,9 +269,7 @@ module Ninix_Main
     end
 
     def get_sstp_port
-      if @sstp_servers.empty?
-        return nil
-      end
+      return nil if @sstp_servers.empty?
       return @sstp_servers[0].server_address[1]
     end
 
@@ -336,9 +318,7 @@ module Ninix_Main
       home_dir = Home.get_ninix_home()
       thumbnail_path = File.join(home_dir, 'balloon',
                                  subdir, 'thumbnail.png')
-      if not File.exists?(thumbnail_path)
-        thumbnail_path = nil
-      end
+      thumbnail_path = nil unless File.exists?(thumbnail_path)
       return handle_request(
                'GET', 'create_balloon_menuitem', name, @key, thumbnail_path)
     end
@@ -351,8 +331,8 @@ module Ninix_Main
   class Ghost < MetaMagic::Holon
 
     def initialize(key)
-        super(key)
-        @parent = nil
+      super(key)
+      @parent = nil
     end
 
     def set_responsible(parent)
@@ -360,11 +340,11 @@ module Ninix_Main
     end
 
     def handle_request(event_type, event, *arglist)
-      return @parent.handle_request(event_type, event, *arglist)
+      @parent.handle_request(event_type, event, *arglist)
     end
 
     def create_menuitem(data)
-      return @parent.handle_request('GET', 'create_menuitem', @key, data)
+      @parent.handle_request('GET', 'create_menuitem', @key, data)
     end
 
     def delete_by_myself
@@ -372,7 +352,7 @@ module Ninix_Main
     end
 
     def create_instance(data)
-      return @parent.handle_request('GET', 'create_ghost', data)
+      @parent.handle_request('GET', 'create_ghost', data)
     end
   end
 
@@ -427,31 +407,31 @@ module Ninix_Main
     end
 
     def edit_preferences(*arglist)
-      return @prefs.edit_preferences(*arglist)
+      @prefs.edit_preferences(*arglist)
     end
 
     def prefs_get(*arglist)
-      return @prefs.get(*arglist)
+      @prefs.get(*arglist)
     end
 
     def get_otherghostname(*arglist)
-      return @communicate.get_otherghostname(*arglist)
+      @communicate.get_otherghostname(*arglist)
     end
 
     def rebuild_ghostdb(*arglist)
-      return @communicate.rebuild_ghostdb(*arglist)
+      @communicate.rebuild_ghostdb(*arglist)
     end
 
     def notify_other(*arglist)
-      return @communicate.notify_other(*arglist)
+      @communicate.notify_other(*arglist)
     end
 
     def reset_sstp_flag(*arglist)
-      return @sstp_controler.reset_sstp_flag(*arglist)
+      @sstp_controler.reset_sstp_flag(*arglist)
     end
 
     def get_sstp_port(*arglist)
-      return @sstp_controler.get_sstp_port(*arglist)
+      @sstp_controler.get_sstp_port(*arglist)
     end
 
     def handle_request(event_type, event, *arglist)
@@ -467,7 +447,7 @@ module Ninix_Main
         'get_sstp_port' => 'get_sstp_port',
         'get_prefix' => 'get_sakura_prefix',
       }
-      if not handlers.include?(event)
+      unless handlers.include?(event)
         if Application.method_defined?(event)
           result = method(event).call(*arglist)
         else
@@ -476,9 +456,7 @@ module Ninix_Main
       else
         result = method(handlers[event]).call(*arglist)
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def set_collisionmode(flag, rect: false)
@@ -496,7 +474,7 @@ module Ninix_Main
       rescue
         target_dirs = nil
       end
-      if errno != 0
+      unless errno.zero?
         error_reason = {
           1 => 'extraction',
           2 => 'invalid type',
@@ -514,7 +492,7 @@ module Ninix_Main
         ##@communicate.notify_all('OnInstallCompleteEx', []) # FIXME
         if filetype != 'kinoko'
           if filetype == 'ghost'
-            if target_dirs[1] != nil
+            unless target_dirs[1].nil?
               id = 'ghost with balloon'
               name2 = names[1]
             else
@@ -530,33 +508,34 @@ module Ninix_Main
           @communicate.notify_all('OnInstallComplete', [id, name, name2])
         end
       end
-      if target_dirs != nil and not target_dirs.empty?
-        if filetype == 'ghost'
+      unless target_dirs.nil? or target_dirs.empty?
+        case filetype
+        when 'ghost'
           add_sakura(target_dirs[0])
           Sakura::ReadmeDialog.new.show(
             target_dirs[0],
             File.join(Home.get_ninix_home(),
                       'ghost', target_dirs[0]))
-          if target_dirs[1] != nil
+          unless target_dirs[1].nil?
             add_balloon(target_dirs[1])
             Sakura::ReadmeDialog.new.show(
               target_dirs[1],
               File.join(Home.get_ninix_home(),
                         'balloon', target_dirs[1]))
           end
-        elsif filetype == 'supplement'
+        when 'supplement'
           add_sakura(target_dirs) # XXX: reload
-        elsif filetype == 'balloon'
+        when 'balloon'
           add_balloon(target_dirs)
           Sakura::ReadmeDialog.new.show(
             target_dirs,
             File.join(Home.get_ninix_home(),
                       'balloon', target_dirs))
-        elsif filetype == 'nekoninni'
+        when 'nekoninni'
           @nekoninni = Home.search_nekoninni()
-        elsif filetype == 'katochan'
+        when 'katochan'
           @katochan = Home.search_katochan()
-        elsif filetype == 'kinoko'
+        when 'kinoko'
           @kinoko = Home.search_kinoko()
           @communicate.notify_all('OnKinokoObjectInstalled', names)
         end
@@ -567,12 +546,10 @@ module Ninix_Main
       installed = []
       for value in @ghosts.values()
         sakura = value.instance
-        if sakura == nil
-          next
-        end
+        next if sakura.nil?
         installed << sakura.get_name(:default => '')
       end
-      if key != nil
+      unless key.nil?
         if @ghosts.include?(key)
           sakura = @ghosts[key].instance
           sakura.notify_event('installedghostname', *installed)
@@ -591,7 +568,7 @@ module Ninix_Main
         subdir = balloon['balloon_dir'][0]
         installed << desc.get('name', :default => subdir)
       end
-      if key != nil
+      unless key.nil?
         if @ghosts.include?(key)
           sakura = @ghosts[key].instance
           sakura.notify_event('installedballoonname', *installed)
@@ -604,7 +581,7 @@ module Ninix_Main
     end
 
     def current_sakura_instance
-      return @ghosts[@current_sakura].instance
+      @ghosts[@current_sakura].instance
     end
 
     def create_ghost(data)
@@ -615,11 +592,11 @@ module Ninix_Main
     end
 
     def get_sakura_cantalk
-      return current_sakura_instance.cantalk
+      current_sakura_instance.cantalk
     end
 
     def get_event_response(event, *arglist) ## FIXME
-      return current_sakura_instance.get_event_response(*event)
+      current_sakura_instance.get_event_response(*event)
     end
 
     def keep_silence(quiet)
@@ -651,26 +628,20 @@ module Ninix_Main
       ghosts = []
       for value in @ghosts.values()
         sakura = value.instance
-        if sakura == nil
-          next
-        end
-        if not sakura.is_running()
-          next
-        end
-        if cantalk and not sakura.cantalk
-          next
-        end
+        next if sakura.nil?
+        next unless sakura.is_running()
+        next if cantalk and not sakura.cantalk
         ghosts << sakura
       end
       return ghosts
     end
 
     def get_sakura_prefix
-      return @__menu_owner.get_prefix()
+      @__menu_owner.get_prefix()
     end
 
     def getstring(name)
-      return @__menu_owner.getstring(name)
+      @__menu_owner.getstring(name)
     end
 
     def stick_window
@@ -692,13 +663,13 @@ module Ninix_Main
     end
 
     def get_current_balloon_directory
-      return @__menu_owner.get_current_balloon_directory()
+      @__menu_owner.get_current_balloon_directory()
     end
 
     def start_sakura_cb(key, caller: nil)
       sakura_name = @ghosts[key].instance.get_selfname(:default => '')
       name = @ghosts[key].instance.get_name(:default => '')
-      if caller == nil
+      if caller.nil?
         caller = @__menu_owner
       end
       caller.notify_event('OnGhostCalling', sakura_name, 'manual', name, key)
@@ -757,7 +728,7 @@ module Ninix_Main
     end
 
     def get_shell_menu
-      return @__menu_owner.get_shell_menu()
+      @__menu_owner.get_shell_menu()
     end
 
     def get_balloon_menu
@@ -770,7 +741,7 @@ module Ninix_Main
     end
 
     def create_balloon_menuitem(balloon_name, balloon_key, thumbnail)
-      return @__menu.create_meme_menuitem(
+      @__menu.create_meme_menuitem(
         balloon_name, balloon_key, lambda {|v| select_balloon(v) }, thumbnail)
     end
 
@@ -783,11 +754,11 @@ module Ninix_Main
     end
 
     def create_shell_menu(menuitems)
-      return @__menu.create_meme_menu(menuitems)
+      @__menu.create_meme_menu(menuitems)
     end
 
     def create_shell_menuitem(shell_name, shell_key, thumbnail)
-      return @__menu.create_meme_menuitem(
+      @__menu.create_meme_menuitem(
         shell_name, shell_key,
         lambda {|key| select_shell(key) }, thumbnail)
     end
@@ -796,9 +767,9 @@ module Ninix_Main
       desc = baseinfo[0]
       shiori_dir = baseinfo[1]
       icon = desc.get('icon', :default => nil)
-      if icon != nil
+      unless icon.nil?
         icon_path = File.join(shiori_dir, icon)
-        if not File.exists?(icon_path)
+        unless File.exists?(icon_path)
           icon_path = nil
         end
       else
@@ -806,7 +777,7 @@ module Ninix_Main
       end
       name = desc.get('name')
       thumbnail_path = File.join(shiori_dir, 'thumbnail.png')
-      if not File.exists?(thumbnail_path)
+      unless File.exists?(thumbnail_path)
         thumbnail_path = nil
       end
       start_menuitem = @__menu.create_ghost_menuitem(
@@ -842,9 +813,7 @@ module Ninix_Main
       nekodorif_list = []
       nekoninni = @nekoninni
       for nekoninni_name, nekoninni_dir in nekoninni
-        if nekoninni_name == nil or nekoninni_name.empty?
-          next
-        end
+        next if nekoninni_name.nil? or nekoninni_name.empty?
         item = {}
         item['name'] = nekoninni_name
         item['dir'] = nekoninni_dir
@@ -854,7 +823,7 @@ module Ninix_Main
     end
 
     def get_kinoko_list
-      return @kinoko
+      @kinoko
     end
 
     def load
@@ -864,10 +833,10 @@ module Ninix_Main
       directory = @prefs.get('sakura_dir')
       name = @prefs.get('sakura_name') # XXX: backward compat
       default_sakura = find_ghost_by_dir(directory)
-      if default_sakura == nil
+      if default_sakura.nil?
         default_sakura = find_ghost_by_name(name)
       end
-      if default_sakura == nil
+      if default_sakura.nil?
         default_sakura = choose_default_sakura()
       end
       # load ghost
@@ -952,7 +921,7 @@ module Ninix_Main
 
     def get_ghost_names
       for value in @ghosts.values()
-        if value.instance != nil
+        unless value.instance.nil?
           yield value.instance.get_selfname() ## FIXME
         end
       end
@@ -961,30 +930,24 @@ module Ninix_Main
     def if_ghost(if_ghost, working: false)
       instance_list = []
       for value in @ghosts.values()
-        if value.instance != nil
+        unless value.instance.nil?
           instance_list << value.instance
         end
       end
       for sakura in instance_list
         if working
-          if not sakura.is_running() or not sakura.cantalk
-            next
-          end
+          next unless sakura.is_running() and sakura.cantalk
         end
-        if sakura.ifghost(if_ghost)
-          return true
-        end
+        return true if sakura.ifghost(if_ghost)
       end
       return false
     end
 
     def update_sakura(name, sender)
       key = find_ghost_by_name(name)
-      if key == nil
-        return
-      end
+      return if key.nil?
       sakura = @ghosts[key].instance
-      if not sakura.is_running()
+      unless sakura.is_running()
         start_sakura(key, :init => true)
       end
       sakura.enqueue_script(nil, '\![updatebymyself]\e', sender,
@@ -992,15 +955,13 @@ module Ninix_Main
     end
 
     def select_current_sakura(ifghost: nil)
-      if ifghost != nil
+      unless ifghost.nil?
         break_flag = false
         for value in @ghosts.values()
           sakura = value.instance
-          if sakura == nil
-            next
-          end
+          next if sakura.nil?
           if sakura.ifghost(ifghost)
-            if not sakura.is_running()
+            unless sakura.is_running()
               @current_sakura = value.key
               start_sakura(@current_sakura, :init => true, :temp => 1)
             else
@@ -1011,12 +972,10 @@ module Ninix_Main
             #pass
           end
         end
-        if not break_flag
-          return
-        end
+        return unless break_flag
       else
         working_list = get_working_ghost(:cantalk => true)
-        if not working_list.empty?
+        unless working_list.empty?
           @current_sakura = working_list.sample.key
         else
           return
@@ -1066,9 +1025,7 @@ module Ninix_Main
 
     def select_ghost(sakura, sequential, event: 1, vanished: false)
       keys = @ghosts.keys
-      if keys.length < 2
-        return
-      end
+      return if keys.length < 2
       # select another ghost
       if sequential
         key = keys[(keys.index(sakura.key) + 1) % keys.length]
@@ -1081,16 +1038,12 @@ module Ninix_Main
 
     def select_ghost_by_name(sakura, name, event: 1, vanished: false)
       key = find_ghost_by_name(name)
-      if key == nil
-        return
-      end
+      return if key.nil?
       change_sakura(sakura, key, 'automatic', :event => event, :vanished => vanished)
     end
 
     def change_sakura(sakura, key, method, event: 1, vanished: false)
-      if sakura.key == key # XXX: needs reloading?
-        return
-      end
+      return if sakura.key == key # XXX: needs reloading?
       proc_obj = lambda { stop_sakura(
                             sakura,
                             lambda {|key, prev|
@@ -1100,7 +1053,7 @@ module Ninix_Main
         sakura.finalize()
         start_sakura(key, :prev => sakura.key, :vanished => vanished)
         close_ghost(sakura)
-      elsif event == 0
+      elsif event.zero?
         proc_obj.call()
       else
         sakura_name = @ghosts[key].instance.get_selfname(:default => '')
@@ -1113,7 +1066,7 @@ module Ninix_Main
 
     def stop_sakura(sakura, starter=nil, *args)
       sakura.finalize()
-      if starter != nil
+      unless starter.nil?
         starter.call(*args)
       end
       set_menu_sensitive(sakura.key, true)
@@ -1122,15 +1075,15 @@ module Ninix_Main
 
     def start_sakura(key, prev: nil, vanished: false, init: false, temp: 0, abend: nil)
       sakura = @ghosts[key].instance
-      fail "assert" unless sakura != nil
-      if prev != nil
+      fail "assert" if sakura.nil?
+      unless prev.nil?
         fail "assert" unless @ghosts.include?(prev) ## FIXME: vanish case?
-        fail "assert" unless @ghosts[prev].instance != nil
+        fail "assert" if @ghosts[prev].instance.nil?
       end
       if init
         ghost_changed = false
       else
-        fail "assert" unless prev != nil ## FIXME
+        fail "assert" if prev.nil? ## FIXME
         if prev == key
           ghost_changed = false
         else
@@ -1172,12 +1125,12 @@ module Ninix_Main
 
     def get_balloon_description(subdir)
       key = find_balloon_by_subdir(subdir)
-      if key == nil
+      if key.nil?
         ##Logging::Logging.warning('Balloon ' + subdir + ' not found.')
         default_balloon = @prefs.get('default_balloon')
         key = find_balloon_by_subdir(default_balloon)
       end
-      if key == nil
+      if key.nil?
         key = @balloons.keys[0]
       end
       return @balloons[key].baseinfo
@@ -1188,7 +1141,7 @@ module Ninix_Main
       key = sakura.key
       ghost_dir = File.split(sakura.get_prefix())[1] # XXX
       ghost_conf = Home.search_ghosts(:target => [ghost_dir])
-      if ghost_conf != nil
+      unless ghost_conf.nil?
         @ghosts[key].baseinfo = ghost_conf[key]
       else
         close_ghost(sakura) ## FIXME
@@ -1207,7 +1160,7 @@ module Ninix_Main
         Logging::Logging.info('NEW GHOST INSTALLED: ' + ghost_dir)
       end
       ghost_conf = Home.search_ghosts(:target => [ghost_dir])
-      if not ghost_conf.empty?
+      unless ghost_conf.empty?
         if exists
           sakura = @ghosts[ghost_dir].instance
           if sakura.is_running() # restart if working
@@ -1247,7 +1200,7 @@ module Ninix_Main
         Logging::Logging.info('NEW BALLOON INSTALLED: ' + balloon_dir)
       end
       balloon_conf = Home.search_balloons(:target => [balloon_dir])
-      if not balloon_conf.empty?
+      unless balloon_conf.empty?
         if exists
           @balloons[balloon_dir].baseinfo = balloon_conf[balloon_dir]
         else
@@ -1288,7 +1241,7 @@ module Ninix_Main
           end
         end
       }
-      if next_ghost != nil
+      unless next_ghost.nil?
         select_ghost_by_name(sakura, next_ghost, :vanished => true)
       else
         select_ghost(sakura, false, :vanished => true)
@@ -1330,9 +1283,7 @@ module Ninix_Main
           begin
             f = open(path, 'r')
             for line in f
-              if not line.include?(',')
-                next
-              end
+              next unless line.include?(',')
               key, value = line.split(',', 2)
               key = key.strip()
               if key == 'time'
@@ -1361,7 +1312,7 @@ module Ninix_Main
     end
 
     def confirmed
-      return @confirmed
+      @confirmed
     end
 
     def search_ghosts
@@ -1374,10 +1325,10 @@ module Ninix_Main
     end
 
     def do_idle_tasks
-      if not @confirmed
+      unless @confirmed
         @console.open()
       else
-        if not @loaded
+        unless @loaded
           load()
           # start SSTP server
           @sstp_controler.start_servers()
@@ -1469,49 +1420,37 @@ module Ninix_Main
     end
 
     def info(message)
-      if @level > Logger::INFO
-        return
-      end
+      return if @level > Logger::INFO
       tag = @tag_info
       message_with_tag(message, tag)
     end
 
     def debug(message)
-      if @level > Logger::DEBUG
-        return
-      end
+      return if @level > Logger::DEBUG
       tag = @tag_debug
       message_with_tag(message, tag)
     end
 
     def fatal(message)
-      if @level > Logger::FATAL
-        return
-      end
+      return if @level > Logger::FATAL
       tag = @tag_critical
       message_with_tag(message, tag)
     end
 
     def error(message)
-      if @level > Logger::ERROR
-        return
-      end
+      return if @level > Logger::ERROR
       tag = @tag_error
       message_with_tag(message, tag)
     end
 
     def warn(message)
-      if @level > Logger::WARN
-        return
-      end
+      return if @level > Logger::WARN
       tag = @tag_warning
       message_with_tag(message, tag)
     end
 
     def unknown(message)
-      if @level > Logger::UNKNOWN
-        return
-      end
+      return if @level > Logger::UNKNOWN
       tag = @tag_notset
       message_with_tag(message, tag)
     end
@@ -1538,9 +1477,7 @@ module Ninix_Main
     end
 
     def open
-      if @opened
-        return
-      end
+      return if @opened
       update()
       @dialog.show()
       @opened = true
@@ -1549,7 +1486,7 @@ module Ninix_Main
     def close
       @dialog.hide()
       @opened = false
-      if not @app.confirmed
+      unless @app.confirmed
         @app.quit()
       end
       return true
@@ -1566,11 +1503,12 @@ module Ninix_Main
 
     def open_file_chooser
       response = @file_chooser.run()
-      if response == Gtk::ResponseType::OK
+      case response
+      when Gtk::ResponseType::OK
         filename = @file_chooser.filename
         @app.do_install(filename)
         update()
-      elsif response == Gtk::ResponseType::CANCEL
+      when Gtk::ResponseType::CANCEL
         #pass
       end
       @file_chooser.hide()
@@ -1587,7 +1525,7 @@ module Ninix_Main
           filelist << uri
         end
       end
-      if not filelist.empty?
+      unless filelist.empty?
         for filename in filelist
           @app.do_install(filename)
         end
@@ -1627,9 +1565,7 @@ module Ninix_Main
     end
 
     def open(history)
-      if @opened
-        return
-      end
+      return if @opened
       @history = history
       @items = []
       for item in @history
@@ -1641,7 +1577,7 @@ module Ninix_Main
       @items.sort_by! {|item| item[1] }
       @items.reverse!
       ai_list = @items[0][2]
-      if not ai_list.empty?
+      unless ai_list.empty?
         path = ai_list.sample
         fail "assert" unless File.exists?(path)
         @pixbuf = Pix.create_pixbuf_from_file(path, :is_pnr => false)
@@ -1690,7 +1626,7 @@ module Ninix_Main
       cr.set_source_rgb(1.0, 1.0, 1.0) # white
       cr.paint()
       # ai.png
-      if @pixbuf != nil
+      unless @pixbuf.nil?
         cr.set_source_pixbuf(@pixbuf, 16, 32) # XXX
         cr.paint()
       end
