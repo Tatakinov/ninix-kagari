@@ -53,7 +53,7 @@ module Sakura
       base_path = @parent.handle_request('GET', 'get_prefix')
       thumbnail_path = File.join(base_path, 'shell',
                                  subdir, 'thumbnail.png')
-      if not File.exist?(thumbnail_path)
+      unless File.exist?(thumbnail_path)
         thumbnail_path = nil
       end
       return @parent.handle_request(
@@ -143,7 +143,7 @@ module Sakura
       keep_silence(false)
       @updateman = Update::NetworkUpdate.new()
       @updateman.set_responsible(self)
-      if Gst != nil
+      unless Gst.nil?
         @audio_player = Gst::ElementFactory.make('playbin', 'player')
         fakesink = Gst::ElementFactory.make('fakesink', 'fakesink')
         @audio_player.set_property('video-sink', fakesink)
@@ -169,7 +169,7 @@ module Sakura
       handlers = {
         'lock_repaint' => "get_lock_repaint"
       }
-      if not handlers.include?(event)
+      unless handlers.include?(event)
         if Sakura.method_defined?(event)
           result = method(event).call(*arglist)
         else
@@ -179,23 +179,21 @@ module Sakura
       else
         result = method(handlers[event]).call(*arglist)
       end
-      if event_type == 'GET'
-        return result
-      end
+      return result if event_type == 'GET'
     end
 
     def get_lock_repaint(*args)
-      return @lock_repaint
+      @lock_repaint
     end
 
     def attach_observer(observer)
-      if not @__observers.include?(observer)
+      unless @__observers.include?(observer)
         @__observers[observer] = 1
       end
     end
 
     def notify_observer(event, args: nil)
-      if args == nil
+      if args.nil?
         args = []
       end
       for observer in @__observers.keys
@@ -254,7 +252,7 @@ module Sakura
       name = [shiori_dll, shiori_name]
       @shiori = @__dll.request(name)
       char = 2
-      while @desc.get(sprintf('char%d.seriko.defaultsurface', char)) != nil
+      while not @desc.get(sprintf('char%d.seriko.defaultsurface', char)).nil?
         char += 1
       end
       if char > 2
@@ -296,10 +294,10 @@ module Sakura
       path = File.join(get_prefix(), 'SETTINGS')
       begin
         open(path, 'w') do |file|
-          if @balloon_directory != nil
+          unless @balloon_directory.nil?
             file.write("balloon_directory, " + @balloon_directory + "\n")
           end
-          if @shell_directory != nil
+          unless @shell_directory.nil?
             file.write("shell_directory, " + @shell_directory + "\n")
           end
         end
@@ -316,9 +314,7 @@ module Sakura
         begin
           f = open(path, 'r')
           for line in f
-            if not line.include?(',')
-              next
-            end
+            next unless line.include?(',')
             key, value = line.split(',', 2)
             key = key.strip()
             if key == 'time'
@@ -353,9 +349,7 @@ module Sakura
         begin
           f = open(path, 'r')
           for line in f
-            if not line.include?(',')
-              next
-            end
+            next unless line.include?(',')
             key, value = line.split(',', 2)
             if key.strip() == 'balloon_directory'
               balloon_directory = value.strip()
@@ -376,7 +370,7 @@ module Sakura
     end
 
     def load_shiori()
-      if @shiori != nil and @shiori.load(:dir => @shiori_dir) != 0
+      unless @shiori.nil? or @shiori.load(:dir => @shiori_dir).zero?
         if @shiori.respond_to?("show_description")
           @shiori.show_description()
         end
@@ -393,13 +387,13 @@ module Sakura
     end
 
     def finalize()
-      if not @script_finally.empty? # XXX
+      unless @script_finally.empty? # XXX
         for proc_obj in @script_finally
           proc_obj.call(:flag_break => false)
         end
         @script_finally = []
       end
-      if @__temp_mode == 0
+      if @__temp_mode.zero?
         get_event_response('OnDestroy', :event_type => 'NOTIFY')
         @shiori.unload()
       end
@@ -407,9 +401,7 @@ module Sakura
     end
 
     def enter_temp_mode()
-      if @__temp_mode == 0
-        @__temp_mode = 2
-      end
+      @__temp_mode = 2 if @__temp_mode.zero?
     end
 
     def leave_temp_mode()
@@ -417,14 +409,12 @@ module Sakura
     end
 
     def is_listening(key)
-      if not @__listening.include?(key)
-        return false
-      end
+      return false unless @__listening.include?(key)
       return @__listening[key]
     end
 
     def on_audio_message(bus, message)
-      if message == nil # XXX: workaround for Gst Version < 0.11
+      if message.nil? # XXX: workaround for Gst Version < 0.11
         if @script_mode == WAIT_MODE
           @script_mode = BROWSE_MODE
         end
@@ -434,7 +424,7 @@ module Sakura
       if t == Gst::MessageType::EOS
         @audio_player.set_state(Gst::State::NULL)
         if @script_mode == WAIT_MODE
-          fail "assert" unless not @audio_loop
+          fail "assert" if @audio_loop
           @script_mode = BROWSE_MODE
         end
         if @audio_loop
@@ -458,9 +448,9 @@ module Sakura
         @surface.add_window(side, default)
       end
       icon = @desc.get('icon', :default => nil)
-      if icon != nil
+      unless icon.nil?
         icon_path = File.join(@shiori_dir, icon)
-        if not File.exist?(icon_path)
+        unless File.exist?(icon_path)
           icon_path = nil
         end
       else
@@ -482,13 +472,11 @@ module Sakura
     end
 
     def update_balloon_offset(side, x_delta, y_delta)
-      if side >= @char
-        return
-      end
+      return if side >= @char
       ox, oy = @surface.window[side].get_balloon_offset # without scaling
       direction = @balloon.window[side].direction
       sx, sy = get_surface_position(side)
-      if direction == 0 # left
+      if direction.zero? # left
         nx = (ox + x_delta)
       else
         w, h = @surface.get_surface_size(side)
@@ -503,7 +491,7 @@ module Sakura
                        db: nil, request_handler: nil)
       if @script_queue.empty? and \
         not @time_critical_session and not @passivemode
-        if @sstp_request_handler != nil
+        unless @sstp_request_handler.nil?
           @sstp_request_handler.send_sstp_break()
           @sstp_request_handler = nil
         end
@@ -528,19 +516,19 @@ module Sakura
     end
 
     EVENT_SCRIPTS = {
-        'OnUpdateBegin' => \
-        ['\t\h\s[0]',
-         _('Network Update has begun.'),
-         '\e'].join(''),
-        'OnUpdateComplete' => \
-        ['\t\h\s[5]',
-         _('Network Update completed successfully.'),
-         '\e'].join(''),
-        'OnUpdateFailure' => \
-        ['\t\h\s[4]',
-         _('Network Update failed.'),
-         '\e'].join(''),
-        }
+      'OnUpdateBegin' => \
+      ['\t\h\s[0]',
+       _('Network Update has begun.'),
+       '\e'].join(''),
+      'OnUpdateComplete' => \
+      ['\t\h\s[5]',
+       _('Network Update completed successfully.'),
+       '\e'].join(''),
+      'OnUpdateFailure' => \
+      ['\t\h\s[4]',
+       _('Network Update failed.'),
+       '\e'].join(''),
+    }
 
     def handle_event()
       while not @event_queue.empty?
@@ -551,11 +539,11 @@ module Sakura
           default = nil
         end
         if notify_event(event, *arglist, :default => default)
-          if proc_obj != nil
+          unless proc_obj.nil?
             @script_post_proc << proc_obj
           end
           return true
-        elsif proc_obj != nil
+        elsif not proc_obj.nil?
           proc_obj.call()
           return true
         end
@@ -564,7 +552,7 @@ module Sakura
     end
 
     def is_running()
-      return @__running
+      @__running
     end
 
     def is_paused()
@@ -572,7 +560,7 @@ module Sakura
     end
 
     def is_talking()
-      if not @processed_script.empty? or not @processed_text.empty?
+      unless @processed_script.empty? and @processed_text.empty?
         return true
       else
         return false
@@ -584,12 +572,12 @@ module Sakura
               @balloon.user_interaction or \
               not @event_queue.empty? or \
               @passivemode or \
-              @sstp_request_handler != nil or \
+              not @sstp_request_handler.nil? or \
               (check_updateman and @updateman.is_active()))
     end
 
     def get_silent_time()
-      return @silent_time
+      @silent_time
     end
 
     def keep_silence(quiet)
@@ -619,12 +607,12 @@ module Sakura
     end
 
     def get_workarea(side)
-      return @surface.get_workarea(side)
+      @surface.get_workarea(side)
     end
 
     def get_surface_position(side)
       result = @surface.get_position(side)
-      if result != nil
+      unless result.nil?
         return result
       else
         return [0, 0]
@@ -636,15 +624,13 @@ module Sakura
     end
 
     def set_balloon_direction(side, direction)
-      if side >= @char
-        return
-      end
+      return if side >= @char
       @balloon.window[side].direction = direction
     end
 
     def get_balloon_size(side)
       result = @balloon.get_balloon_size(side)
-      if result != nil
+      unless result.nil?
         return result
       else
         return [0, 0]
@@ -652,12 +638,12 @@ module Sakura
     end
 
     def get_balloon_windowposition(side)
-      return @balloon.get_balloon_windowposition(side)
+      @balloon.get_balloon_windowposition(side)
     end
 
     def get_balloon_position(side)
       result = @balloon.get_position(side)
-      if result != nil
+      unless result.nil?
         return result
       else
         return [0, 0]
@@ -720,15 +706,15 @@ module Sakura
     end
 
     def get_name(default: _('Sakura&Unyuu'))
-      return @desc.get('name', :default => default)
+      @desc.get('name', :default => default)
     end
 
     def get_username()
       username = getstring('username')
-      if username == nil
+      if username.nil?
         username = @surface.get_username()
       end
-      if username == nil
+      if username.nil?
         username = @desc.get('user.defaultname', :default => _('User'))
       end
       return username
@@ -736,7 +722,7 @@ module Sakura
 
     def get_selfname(default: _('Sakura'))
       selfname = @surface.get_selfname()
-      if selfname == nil
+      if selfname.nil?
         selfname = @desc.get('sakura.name', :default => default)
       end
       return selfname
@@ -744,7 +730,7 @@ module Sakura
 
     def get_selfname2()
       selfname2 = @surface.get_selfname2()
-      if selfname2 == nil
+      if selfname2.nil?
         selfname2 = @desc.get('sakura.name2', :default => _('Sakura'))
       end
       return selfname2
@@ -752,7 +738,7 @@ module Sakura
 
     def get_keroname()
       keroname = @surface.get_keroname()
-      if keroname == nil
+      if keroname.nil?
         keroname = @desc.get('kero.name', :default => _('Unyuu'))
       end
       return keroname
@@ -760,7 +746,7 @@ module Sakura
 
     def get_friendname()
       friendname = @surface.get_friendname()
-      if friendname == nil
+      if friendname.nil?
         friendname = @desc.get('sakura.friend.name', :default => _('Tomoyo'))
       end
       return friendname
@@ -782,16 +768,16 @@ module Sakura
     end
 
     def getstring(name)
-      return get_event_response(name)
+      get_event_response(name)
     end
 
     def translate(s)
-      if s != nil
+      unless s.nil?
         if @use_makoto
           s = Makoto.execute(s)
         else
           r = get_event_response('OnTranslate', s, :translate => 0)
-          if not r.empty?
+          unless r.empty?
             s = r
           end
         end
@@ -804,18 +790,14 @@ module Sakura
       to = nil
       for line in response.force_encoding(@__charset).split(/\r?\n/, 0)
         line = line.encode("UTF-8", :invalid => :replace, :undef => :replace).strip()
-        if line.empty?
-          next
-        end
-        if not line.include?(':')
-          next
-        end
+        next if line.empty?
+        next unless line.include?(':')
         key, value = line.split(':', 2)
         key = key.strip()
         if key == 'Charset'
           charset = value.strip()
           if charset != @__charset
-            if not Encoding.name_list.include?(charset)
+            unless Encoding.name_list.include?(charset)
               Logging::Logging.warning(
                 'Unsupported charset ' + charset)
             else
@@ -840,9 +822,7 @@ module Sakura
 
     def get_event_response_with_communication(event, *arglist,
                                               event_type: 'GET', translate: 1)
-      if @__temp_mode == 1
-        return ''
-      end
+      return '' if @__temp_mode == 1
       ref = arglist
       header = [event_type.to_s, " SHIORI/3.0\r\n",
                 "Sender: ", @__sender.to_s, "\r\n",
@@ -851,7 +831,7 @@ module Sakura
                 "Charset: ", @__charset.to_s, "\r\n"].join("")
       for i in 0..ref.length-1
         value = ref[i]
-        if value != nil
+        unless value.nil?
           value = value.to_s
           header = [header,
                     "Reference", i.to_s, ": ",
@@ -863,16 +843,12 @@ module Sakura
       response = @shiori.request(header)
       if event_type != 'NOTIFY' and @cantalk
         result, to = get_value(response)
-        if translate != 0
-          result = translate(result)
-        end
+        result = translate(result) unless translate.zero?
       else
         result, to = '', nil
       end
-      if result == nil
-        result = ''
-      end
-      if to != nil and not result.empty?
+      result = '' if result.nil?
+      unless to.nil? or result.empty?
         communication = to
       else
         communication = nil
@@ -891,17 +867,17 @@ module Sakura
     def notify_start(init, vanished, ghost_changed,
                      name, prev_name, prev_shell, path, last_script,
                      abend: nil)
-      if @__temp_mode != 0
+      unless @__temp_mode.zero?
         default = nil
       else
         default = Version.VERSION_INFO
       end
       if init
-        if @ghost_time == 0
-          if not notify_event('OnFirstBoot', @vanished_count,
+        if @ghost_time.zero?
+          unless notify_event('OnFirstBoot', @vanished_count,
                               nil, nil, nil, nil, nil, nil,
                               @surface.name)
-            if abend != nil
+            unless abend.nil?
               notify_event('OnBoot', @surface.name,
                            nil, nil, nil, nil, nil,
                            'halt', abend, :default => default)
@@ -911,7 +887,7 @@ module Sakura
             end
           end
         else
-          if abend != nil
+          unless abend.nil?
             notify_event('OnBoot', @surface.name,
                          nil, nil, nil, nil, nil,
                          'halt', abend, :default => default)
@@ -925,7 +901,7 @@ module Sakura
                      Gdk::Visual.best_depth,
                      scrn_w, scrn_h, :event_type => 'NOTIFY')
       elsif vanished
-        if @ghost_time == 0
+        if @ghost_time.zero?
           if notify_event('OnFirstBoot', @vanished_count,
                           nil, nil, nil, nil, nil, nil,
                           @surface.name)
@@ -938,7 +914,7 @@ module Sakura
                            pref_shell)
           return
         end
-        if abend != nil
+        unless abend.nil?
           notify_event('OnBoot', @surface.name,
                        nil, nil, nil, nil, nil, nil,
                        'halt', abend, :default => default)
@@ -946,7 +922,7 @@ module Sakura
           notify_event('OnBoot', @surface.name, :default => default)
         end
       elsif ghost_changed
-        if @ghost_time == 0
+        if @ghost_time.zero?
           if notify_event('OnFirstBoot', @vanished_count,
                           nil, nil, nil, nil, nil, nil,
                           @surface.name)
@@ -957,7 +933,7 @@ module Sakura
                            prev_shell)
           return
         end
-        if abend != nil
+        unless abend.nil?
           notify_event('OnBoot', @surface.name,
                        nil, nil, nil, nil, nil,
                        'halt', abend, :default => default)
@@ -988,7 +964,7 @@ module Sakura
     def notify_iconified()
       @cantalk = false
       @parent.handle_request('NOTIFY', 'select_current_sakura')
-      if not @passivemode
+      unless @passivemode
         reset_script(:reset_all => true)
         stand_by(true)
         notify_event('OnWindowStateMinimize')
@@ -997,10 +973,10 @@ module Sakura
     end
 
     def notify_deiconified()
-      if not @cantalk
+      unless @cantalk
         @cantalk = true
         @parent.handle_request('NOTIFY', 'select_current_sakura')
-        if not @passivemode
+        unless @passivemode
           notify_event('OnWindowStateRestore')
         end
       end
@@ -1009,7 +985,7 @@ module Sakura
 
     def notify_link_selection(link_id, text, number)
       if @script_origin == FROM_SSTP_CLIENT and \
-        @sstp_request_handler != nil
+        not @sstp_request_handler.nil?
         @sstp_request_handler.send_answer(text)
         @sstp_request_handler = nil
       end
@@ -1019,7 +995,7 @@ module Sakura
         browser_open(link_id)
         reset_script(:reset_all => true)
         stand_by(false)
-      elsif @sstp_entry_db != nil
+      elsif not @sstp_entry_db.nil?
         # leave the previous sstp message as it is
         start_script(@sstp_entry_db.get(link_id, :default => '\e'))
         @sstp_entry_db = nil
@@ -1053,7 +1029,7 @@ module Sakura
       end
       if @vanished
         if side == 0 and button == 1
-          if @sstp_request_handler != nil
+          unless @sstp_request_handler.nil?
             @sstp_request_handler.send_sstp_break()
             @sstp_request_handler = nil
           end
@@ -1069,17 +1045,13 @@ module Sakura
         end
         return
       end
-      if @time_critical_session
-        return
-      elsif click == 1
-        if @passivemode and \
-          not @processed_script.empty?
-          return
-        end
+      return if @time_critical_session
+      if click == 1
+        return if @passivemode and not @processed_script.empty?
         part = @surface.get_touched_region(side, x, y)
         if [1, 2, 3].include?(button)
           num_button = [0, 2, 1][button - 1]
-          if not notify_event('OnMouseUp',
+          unless notify_event('OnMouseUp',
                               x, y, 0, side, part, num_button,
                               'mouse') # FIXME
             if button == 2
@@ -1105,7 +1077,7 @@ module Sakura
             8 => 'xbutton1',
             9 => 'xbutton2'
           }[button]
-          if not notify_event('OnMouseUpEx',
+          unless notify_event('OnMouseUpEx',
                               x, y, 0, side, part, ex_button,
                               'mouse') # FIXME
             notify_event('OnMouseClickEx',
@@ -1164,7 +1136,7 @@ module Sakura
       elsif @passivemode
         return
       elsif button == 1 and click == 2
-        if @sstp_request_handler != nil
+        unless @sstp_request_handler.nil?
           @sstp_request_handler.send_sstp_break()
           @sstp_request_handler = nil
           reset_script(:reset_all => true)
@@ -1188,10 +1160,8 @@ module Sakura
     end
 
     def notify_surface_mouse_motion(side, x, y, part)
-      if @surface_mouse_motion != nil
-        return
-      end
-      if not part.empty?
+      return unless @surface_mouse_motion.nil?
+      unless part.empty?
         @surface_mouse_motion = [side, x, y, part]
       else
         @surface_mouse_motion = nil
@@ -1199,9 +1169,9 @@ module Sakura
     end
 
     def notify_user_teach(word)
-      if word != nil
+      unless word.nil?
         script = translate(get_event_response('OnTeach', word))
-        if not script.empty?
+        unless script.empty?
           start_script(script)
           @balloon.hide_sstp_message()
         end
@@ -1216,15 +1186,13 @@ module Sakura
     RESET_NOTIFY_EVENT = ['OnVanishSelecting', 'OnVanishCancel']
 
     def notify_event(event, *arglist, event_type: 'GET', default: nil)
-      if @time_critical_session and event.start_with?('OnMouse')
-        return false
-      end
+      return false if @time_critical_session and event.start_with?('OnMouse')
       if RESET_NOTIFY_EVENT.include?(event)
         reset_script(:reset_all => true)
       end
       result = get_event_response_with_communication(event, *arglist,
                                                      :event_type => event_type)
-      if result != nil
+      unless result.nil?
         script, communication = result
       else
         script, communication = [default, nil]
@@ -1238,7 +1206,7 @@ module Sakura
         Logging::Logging.debug('Event: ' + event)
         for n in 0..arglist.length-1
           value = arglist[n]
-          if value != nil
+          unless value.nil?
             value = value.to_s
             Logging::Logging.debug(
               'Reference' + n.to_s + ': ' + value)
@@ -1250,13 +1218,13 @@ module Sakura
         if script.empty? # fallback
           result = get_event_response_with_communication(
             'OnClose', *arglist, :event_type => event_type)
-          if result != nil
+          unless result.nil?
             script, communication = result
           else
             script, communication = [default, nil]
           end
         end
-        if not script.empty?
+        unless script.empty?
           start_script(script)
           @balloon.hide_sstp_message()
         end
@@ -1310,7 +1278,7 @@ module Sakura
     end
 
     def get_prefix()
-      return @prefix
+      @prefix
     end
 
     def stick_window(flag)
@@ -1328,59 +1296,59 @@ module Sakura
       top_dir = @surface.prefix
       ghost_dir = File.join(get_prefix(), 'ghost', 'master')
       name = getstring('menu.background.bitmap.filename')
-      if not name.empty?
+      unless name.empty?
         name = name.gsub("\\", '/')
         path_background = File.join(top_dir, name)
       end
-      if path_background == nil
+      if path_background.nil?
         path_background = File.join(ghost_dir, 'menu_background.png')
       end
-      if not File.exist?(path_background)
+      unless File.exist?(path_background)
         path_background = nil
       end
       name = getstring('menu.sidebar.bitmap.filename')
-      if not name.empty?
+      unless name.empty?
         name = name.gsub("\\", '/')
         path_sidebar = File.join(top_dir, name)
       end
-      if path_sidebar == nil
+      if path_sidebar.nil?
         path_sidebar = File.join(ghost_dir, 'menu_sidebar.png')
       end
-      if not File.exist?(path_sidebar)
+      unless File.exist?(path_sidebar)
         path_sidebar = nil
       end
       name = getstring('menu.foreground.bitmap.filename')
-      if not name.empty?
+      unless name.empty?
         name = name.gsub("\\", '/')
         path_foreground = File.join(top_dir, name)
       end
-      if path_foreground == nil
+      if path_foreground.nil?
         path_foreground = File.join(ghost_dir, 'menu_foreground.png')
       end
-      if not File.exist?(path_foreground)
+      unless File.exist?(path_foreground)
         path_foreground = nil
       end
       align = getstring('menu.background.alignment')
-      if not align.empty?
+      unless align.empty?
         align_background = align
       end
-      if not ['lefttop', 'righttop', 'centertop'].include?(align_background)
+      unless ['lefttop', 'righttop', 'centertop'].include?(align_background)
         align_background = 'lefttop'
       end
       align_background = align_background[0..-4].encode('ascii', :invalid => :replace, :undef => :replace) # XXX
       align = getstring('menu.sidebar.alignment')
-      if not align.empty?
+      unless align.empty?
         align_sidebar = align
       end
-      if not ['top', 'bottom'].include?(align_sidebar)
+      unless ['top', 'bottom'].include?(align_sidebar)
         align_sidebar = 'bottom'
       end
       align_sidebar = align_sidebar.encode('ascii', :invalid => :replace, :undef => :replace) # XXX
       align = getstring('menu.foreground.alignment')
-      if not align.empty?
+      unless align.empty?
         align_foreground = align
       end
-      if not ['lefttop', 'righttop', 'centertop'].include?(align_foreground)
+      unless ['lefttop', 'righttop', 'centertop'].include?(align_foreground)
         align_foreground = 'lefttop'
       end
       align_foreground = align_foreground[0..-4].encode('ascii', :invalid => :replace, :undef => :replace) # XXX
@@ -1418,35 +1386,35 @@ module Sakura
     end
 
     def get_mayuna_menu()
-      return @surface.get_mayuna_menu()
+      @surface.get_mayuna_menu()
     end
 
     def get_current_balloon_directory()
-      return @balloon.get_balloon_directory()
+      @balloon.get_balloon_directory()
     end
 
     def get_current_shell()
-      return @shell_directory
+      @shell_directory
     end
 
     def get_current_shell_name()
-      return @shells[get_current_shell()].baseinfo[0]
+      @shells[get_current_shell()].baseinfo[0]
     end
 
     def get_default_shell()
       default = @shell_directory or 'master'
-      if not @shells.include?(default)
+      unless @shells.include?(default)
         default = @shells.keys()[0] # XXX
       end
       return default
     end
 
     def get_balloon_default_id()
-      return @desc.get('balloon.defaultsurface', :default => '0')
+      @desc.get('balloon.defaultsurface', :default => '0')
     end
 
     def select_shell(shell_key)
-      fail "assert" unless @shells != nil and @shells.include?(shell_key)
+      fail "assert" unless not @shells.nil? and @shells.include?(shell_key)
       @shell_directory = shell_key # save user's choice
       surface_name, surface_dir, surface_desc, surface_alias, surface, surface_tooltips, seriko_descript = \
                                                                                          @shells[shell_key].baseinfo
@@ -1481,7 +1449,7 @@ module Sakura
 
     def surface_bootup(flag_break: false)
       for side in [0, 1]
-        if not @__boot[side]
+        unless @__boot[side]
           set_surface_default(:side => side)
           @surface.show(side)
         end
@@ -1528,12 +1496,12 @@ module Sakura
     end
 
     def get_surface_scale()
-      return @parent.handle_request('GET', 'get_preference', 'surface_scale')
+      @parent.handle_request('GET', 'get_preference', 'surface_scale')
     end
 
     def get_surface_size(side)
       result = @surface.get_surface_size(side)
-      if result != nil
+      unless result.nil?
         return result
       else
         return [0, 0]
@@ -1549,7 +1517,7 @@ module Sakura
     end
 
     def get_surface_id(side)
-      return @surface.get_surface(side)
+      @surface.get_surface(side)
     end
 
     def surface_is_shown(side)
@@ -1557,7 +1525,7 @@ module Sakura
     end
 
     def get_target_window
-      return @surface.get_window(0).window
+      @surface.get_window(0).window
     end
 
     def get_kinoko_position(baseposition)
@@ -1566,7 +1534,7 @@ module Sakura
       w, h = get_surface_size(side)
       if baseposition == 1
         rect = @surface.get_collision_area(side, 'face')
-        if rect != nil
+        unless rect.nil?
           x1, y1, x2, y2 = rect
           return (x + ((x2 - x1) / 2).to_i), (y + ((y2 - y1) / 2).to_i)
         else
@@ -1574,7 +1542,7 @@ module Sakura
         end
       elsif baseposition == 2
         rect = @surface.get_collision_area(side, 'bust')
-        if rect != nil
+        unless rect.nil?
           x1, y1, x2, y2 = rect
           return (x + ((x2 - x1) / 2).to_i), (y + ((y2 - y1) / 2).to_i)
         else
@@ -1582,18 +1550,18 @@ module Sakura
         end
       elsif baseposition == 3
         centerx, centery = @surface.get_center(side)
-        if centerx == nil
+        if centerx.nil?
           centerx = (w / 2).to_i
         end
-        if centery == nil
+        if centery.nil?
           centery = (h / 2).to_i
         end
         return x + centerx, y + centery
       else # baseposition == 0 or baseposition not in [1, 2, 3]: # AKF
         centerx, centery = @surface.get_kinoko_center(side)
-        if centerx == nil or centery == nil
+        if centerx.nil? or centery.nil?
           rect = @surface.get_collision_area(side, 'head')
-          if rect != nil
+          unless rect.nil?
             x1, y1, x2, y2 = rect
             return (x + ((x2 - x1) / 2).to_i), (y + ((y2 - y1) / 2).to_i)
           else
@@ -1641,7 +1609,7 @@ module Sakura
     def start(key, init, temp, vanished, ghost_changed,
               prev_self_name, prev_name, prev_shell, last_script, abend)
       if is_running()
-        if temp != 0
+        unless temp.zero?
           enter_temp_mode()
         else
           if @__temp_mode == 1
@@ -1665,7 +1633,7 @@ module Sakura
       load_settings()
       shell_key = get_default_shell()
       @shell_directory = shell_key # XXX
-      fail "assert" unless @shells != nil and @shells.include?(shell_key)
+      fail "assert" unless not @shells.nil? and @shells.include?(shell_key)
       surface_name, surface_dir, surface_desc, surface_alias, surface, surface_tooltips, seriko_descript = \
                                                                                          @shells[shell_key].baseinfo
       if ghost_changed
@@ -1676,20 +1644,20 @@ module Sakura
       set_surface(surface_desc, surface_alias, surface, surface_name,
                        surface_dir, surface_tooltips, seriko_descript)
       balloon = nil
-      if @parent.handle_request('GET', 'get_preference', 'ignore_default') == 0 ## FIXME: change prefs key
+      if @parent.handle_request('GET', 'get_preference', 'ignore_default').zero? ## FIXME: change prefs key
         balloon_path = @desc.get('deault.balloon.path', :default => '')
         balloon_name = @desc.get('balloon', :default => '')
-        if not balloon_path.empty?
+        unless balloon_path.empty?
           balloon = @parent.handle_request(
             'GET', 'find_balloon_by_subdir', balloon_path)
         end
-        if balloon == nil and not balloon_name.empty?
+        if balloon.nil? and not balloon_name.empty?
           balloon = @parent.handle_request(
             'GET', 'find_balloon_by_name', balloon_name)
         end
       end
-      if balloon == nil
-        if @balloon_directory != nil
+      if balloon.nil?
+        unless @balloon_directory.nil?
           balloon = @balloon_directory
         else
           balloon = @parent.handle_request(
@@ -1699,7 +1667,7 @@ module Sakura
       desc, balloon = @parent.handle_request(
               'GET', 'get_balloon_description', balloon)
       set_balloon(desc, balloon)
-      if temp == 0
+      if temp.zero?
         load_shiori()
       end
       restart()
@@ -1725,9 +1693,7 @@ module Sakura
     end
 
     def stop()
-      if not @__running
-        return
-      end
+      return unless @__running
       notify_observer('finalize')
       @__running = false
       save_settings()
@@ -1736,7 +1702,7 @@ module Sakura
       hide_all()
       @surface.finalize()
       @balloon.finalize()
-      if @audio_player != nil
+      unless @audio_player.nil?
         @audio_player.set_state(Gst::State::NULL)
       end
       @audio_loop = false
@@ -1747,9 +1713,7 @@ module Sakura
       idle = get_idle_time()
       second, minute = now.localtime.to_a[0, 2]
       if @clock[0] != second
-        if @__temp_mode == 0
-          @ghost_time += 1
-        end
+        @ghost_time += 1 if @__temp_mode.zero?
         @parent.handle_request(
           'NOTIFY', 'rebuild_ghostdb',
           self,
@@ -1789,15 +1753,15 @@ module Sakura
           #pass
         elsif idle > SELECT_TIMEOUT
           @script_mode = BROWSE_MODE
-          if @sstp_request_handler != nil
+          unless @sstp_request_handler.nil?
             @sstp_request_handler.send_timeout()
             @sstp_request_handler = nil
           end
-          if not notify_event('OnChoiceTimeout')
+          unless notify_event('OnChoiceTimeout')
             stand_by(false)
           end
         end
-      elsif @sstp_handle != nil
+      elsif not @sstp_handle.nil?
         close_sstp_handle()
       elsif @balloon.user_interaction
         #pass
@@ -1811,7 +1775,7 @@ module Sakura
           end
         end
         stand_by(false)
-        if @parent.handle_request('GET', 'get_preference', 'sink_after_talk') != 0
+        unless @parent.handle_request('GET', 'get_preference', 'sink_after_talk').zero?
           @surface.lower_all()
         end
       elsif not @event_queue.empty? and handle_event()
@@ -1859,7 +1823,7 @@ module Sakura
                         @surface.get_kasanari(),
                         (not @passivemode and @cantalk))
         #pass
-      elsif @surface_mouse_motion != nil
+      elsif not @surface_mouse_motion.nil?
         side, x, y, part = @surface_mouse_motion
         notify_event('OnMouseMove', x, y, '', side, part)
         @surface_mouse_motion = nil
@@ -1873,15 +1837,13 @@ module Sakura
     end
 
     def do_idle_tasks()
-      if not @__running
-        return false
-      end
+      return false unless @__running
       if @force_quit and not busy() and \
         not (not @processed_script.empty? or not @processed_text.empty?)
         quit()
       end
       @parent.handle_request('NOTIFY', 'update_working', get_name())
-      if @__temp_mode != 0
+      unless @__temp_mode.zero?
         process_script()
         if not busy() and \
           @script_queue.empty? and \
@@ -1902,7 +1864,7 @@ module Sakura
           return true
         end
       end
-      if @reload_event != nil and not busy() and \
+      if not @reload_event.nil? and not busy() and \
         not (not @processed_script.empty? or not @processed_text.empty?)
         hide_all()
         Logging::Logging.info('reloading....')
@@ -1924,9 +1886,7 @@ module Sakura
         @updateman.run()
         while true
           event = @updateman.get_event()
-          if event == nil
-            break
-          end
+          break if event.nil?
           if event[0] == 'OnUpdateComplete' and event[1] == 'changed'
             @reload_event = event
           else
@@ -1944,18 +1904,16 @@ module Sakura
 
     ###   SCRIPT PLAYER   ###
     def start_script(script, origin: nil)
-      if script.empty?
-        return
-      end
+      return if script.empty?
       @last_script = script
-      if origin == nil
+      if origin.nil?
         @script_origin = FROM_GHOST
       else
         @script_origin = origin
       end
       reset_script(:reset_all => true)
       @__current_script = script
-      if not script.rstrip().end_with?('\e')
+      unless script.rstrip().end_with?('\e')
         script = [script, '\e'].join('')
       end
       @processed_script = []
@@ -1978,9 +1936,7 @@ module Sakura
       @quick_session = false
       set_synchronized_session(:list => [], :reset => true)
       @balloon.hide_all()
-      if @processed_script.empty?
-        return
-      end
+      return if @processed_script.empty?
       node = @processed_script[0]
       if node[0] == Script::SCRIPT_TAG and node[1] == '\C'
         @processed_script.shift
@@ -1991,7 +1947,7 @@ module Sakura
       @balloon.set_balloon_default()
       @current_time = Time.new.to_a
       reset_idle_time()
-      if @parent.handle_request('GET', 'get_preference', 'raise_before_talk') != 0
+      unless @parent.handle_request('GET', 'get_preference', 'raise_before_talk').zero?
         raise_all()
       end
     end
@@ -2025,10 +1981,11 @@ module Sakura
     end
 
     def __yen_4(args)
-      if @script_side == 0
+      case @script_side
+      when 0
         sw, sh = get_surface_size(1)
         sx, sy = get_surface_position(1)
-      elsif @script_side == 1
+      when 1
         sw, sh = get_surface_size(0)
         sx, sy = get_surface_position(0)
       else
@@ -2054,10 +2011,11 @@ module Sakura
     end
 
     def __yen_5(args)
-      if @script_side == 0
+      case @script_side
+      when 0
         sw, sh = get_surface_size(1)
         sx, sy = get_surface_position(1)
-      elsif @script_side == 1
+      when 1
         sw, sh = get_surface_size(0)
         sx, sy = get_surface_position(0)
       else
@@ -2226,7 +2184,7 @@ module Sakura
     end
 
     def __yen__a(args)
-      if @anchor != nil
+      unless @anchor.nil?
         anchor_id = @anchor[0]
         text = @anchor[1]
         @balloon.append_link_out(@script_side, anchor_id, text)
@@ -2266,7 +2224,7 @@ module Sakura
       jump_id = args[0]
       if is_URL(jump_id)
         browser_open(jump_id)
-      elsif @sstp_entry_db != nil
+      elsif not @sstp_entry_db.nil?
         start_script(@sstp_entry_db.get(jump_id, :default => '\e'))
       end
     end
@@ -2293,7 +2251,7 @@ module Sakura
       rescue ArgumentError
         text = nil
       end
-      if text == nil
+      if text.nil?
         text = '?'
       end
       @balloon.append_text(@script_side, text)
@@ -2315,7 +2273,7 @@ module Sakura
 
     def __yen__u(args)
       re__u = Regexp.new('\A(0x[a-fA-F0-9]{4}|[0-9]{4})\z')
-      if re__u.match(args[0]) != nil
+      unless re__u.match(args[0]).nil?
         temp = Integer(re__u.match(args[0])[0])
         temp1 = ((temp & 0xFF00) >> 8)
         temp2 = (temp & 0x00FF)
@@ -2327,9 +2285,7 @@ module Sakura
     end
 
     def __yen__v(args)
-      if @audio_player == nil
-        return
-      end
+      return if @audio_player.nil?
       filename = expand_meta(args[0])
       filename = Home.get_normalized_path(filename)
       path = File.join(get_prefix(), 'ghost/master', filename)
@@ -2343,17 +2299,13 @@ module Sakura
     end
 
     def __yen_8(args)
-      if @audio_player == nil
-        return
-      end
+      return if @audio_player.nil?
       filename = expand_meta(args[0])
       filename = Home.get_normalized_path(filename)
       basename = File.basename(filename)
       ext = File.extname(filename)
       ext = ext.lower()
-      if ext != '.wav'
-        return
-      end
+      return if ext != '.wav'
       path = File.join(get_prefix(), 'ghost/master', filename)
       if File.file?(path)
         @audio_player.set_state(Gst::State::NULL)
@@ -2365,18 +2317,14 @@ module Sakura
     end
 
     def __yen__V(args)
-      if @audio_loop
-        return # nothing to do
-      end
+      return if @audio_loop # nothing to do
       if @audio_player.get_state(timeout=Gst::SECOND)[1] == Gst::State::PLAYING
         @script_mode = WAIT_MODE
       end
     end
 
     def __yen_exclamation(args)
-      if args.empty?
-        return
-      end
+      return if args.empty?
       argc = args.length
       args = args.map {|s| expand_meta(s)}
       if args[0] == 'raise' and argc >= 2
@@ -2411,7 +2359,7 @@ module Sakura
         @balloon.close_inputbox(args[2])
       elsif args[0, 2] == ['change', 'balloon'] and argc > 2
         key = @parent.handle_request('GET', 'find_balloon_by_name', args[2])
-        if key != nil
+        unless key.nil?
           desc, balloon = @parent.handle_request(
                   'GET', 'get_balloon_description', key)
           select_balloon(key, desc, balloon)
@@ -2433,11 +2381,11 @@ module Sakura
         end
       elsif args[0, 2] == ['call', 'ghost'] and argc > 2
         key = @parent.handle_request('GET', 'find_ghost_by_name', args[2])
-        if key != nil
+        unless key.nil?
           @parent.handle_request('NOTIFY', 'start_sakura_cb', key, :caller => self)
         end
       elsif args[0, 1] == ['updatebymyself']
-        if not busy(:check_updateman => false)
+        unless busy(:check_updateman => false)
           __update()
         end
       elsif args[0, 1] == ['vanishbymyself']
@@ -2474,49 +2422,52 @@ module Sakura
             'NOTIFY', 'set_collisionmode', false)
         end
       elsif args[0, 2] == ['set', 'alignmentondesktop'] and argc > 2
-        if args[2] == 'bottom'
-          if not @synchronized_session.empty?
+        case args[2]
+        when 'bottom'
+          unless @synchronized_session.empty?
             for chr_id in @synchronized_session
               align_bottom(chr_id)
             end
           else
             align_bottom(@script_side)
           end
-        elsif args[2] == 'top'
-          if not @synchronized_session.empty?
+        when 'top'
+          unless @synchronized_session.empty?
             for chr_id in @synchronized_session
               align_top(chr_id)
             end
           else
             align_top(@script_side)
           end
-        elsif args[2] == 'free'
-          if not @synchronized_session.empty?
+        when 'free'
+          unless @synchronized_session.empty?
             for chr_id in @synchronized_session
               @surface.set_alignment(chr_id, 2)
             end
           else
             @surface.set_alignment(@script_side, 2)
           end
-        elsif args[2] == 'default'
+        when 'default'
           @surface.reset_alignment()
         end
       elsif args[0, 2] == ['set', 'autoscroll'] and argc > 2
-        if args[2] == 'disable'
+        case args[2]
+        when 'disable'
           @balloon.set_autoscroll(false)
-        elsif args[2] == 'enable'
+        when 'enable'
           @balloon.set_autoscroll(true)
         else
           #pass ## FIXME
         end
       elsif args[0, 2] == ['set', 'windowstate'] and argc > 2
-        if args[2] == 'minimize'
+        case args[2]
+        when 'minimize'
           @surface.window_iconify(true)
           ##elsif args[2] == '!minimize':
           ##    @surface.window_iconify(false)
-        elsif args[2] == 'stayontop'
+        when 'stayontop'
           @surface.window_stayontop(true)
-        elsif args[2] == '!stayontop'
+        when '!stayontop'
           @surface.window_stayontop(false)
         end
       elsif args[0, 2] == ['set', 'trayicon'] and argc > 2
@@ -2526,7 +2477,7 @@ module Sakura
         end
         if argc > 3
           text = args[3]
-          if not text.empty?
+          unless text.empty?
             @status_icon.set_has_tooltip(true)
             @status_icon.set_tooltip_text(text)
           else
@@ -2547,13 +2498,13 @@ module Sakura
             'tile' => 'wallpaper',
             'stretch' => 'stretched'
           }
-          if not options.include?(args[3])
+          unless options.include?(args[3])
             opt = nil
           else
             opt = options[args[3]]
           end
         end
-        if opt == nil
+        if opt.nil?
           opt = 'centered' # default
         end
         if File.exist?(path)
@@ -2595,9 +2546,7 @@ module Sakura
         end
       elsif args[0] == 'sound' and argc > 1
         command = args[1]
-        if @audio_player == nil
-          return
-        end
+        return if @audio_player.nil?
         if command == 'stop'
           @audio_player.set_state(Gst::State::NULL)
           @audio_loop = false
@@ -2637,9 +2586,7 @@ module Sakura
             @audio_player.set_state(Gst::State::PLAYING)
           end
         elsif command == 'wait'
-          if @audio_loop
-            return # nothing to do
-          end
+          return if @audio_loop # nothing to do
           if @audio_player.get_state(timeout=Gst::SECOND)[1] == Gst::State::PLAYING
             @script_mode = WAIT_MODE
           end
@@ -2675,20 +2622,12 @@ module Sakura
         bind = @surface.window[@script_side].bind # XXX
         for key in bind.keys
           group = bind[key][0].split(',', 2)
-          if category != group[0]
-            next
-          end
-          if not name.empty? and name != group[1]
-            next
-          end
+          next if category != group[0]
+          next if not name.empty? and name != group[1]
           if ['true', '1'].include?(flag)
-            if bind[key][1]
-              next
-            end
+            next if bind[key][1]
           elsif ['false', '0'].include?(flag)
-            if not bind[key][1]
-              next
-            end
+            next unless bind[key][1]
           else # 'toggle'
             #pass
           end
@@ -2712,9 +2651,7 @@ module Sakura
     end
 
     def __yen_f(args)
-      if args.length != 2 ## FIXME
-        return
-      end
+      return if args.length != 2 ## FIXME
       tag = nil
       if args[0] == 'sup'
         if args[1] == 'true'
@@ -2743,66 +2680,64 @@ module Sakura
       else
         #pass ## FIXME
       end
-      if tag != nil
+      unless tag.nil?
         @balloon.append_meta(@script_side, tag)
       end
     end
 
     SCRIPT_TAG = {
-        '\e' => "__yen_e",
-        '\y' => "__yen_e",
-        '\z' => "__yen_e",
-        '\0' => "__yen_0",
-        '\h' => "__yen_0",
-        '\1' => "__yen_1",
-        '\u' => "__yen_1",
-        '\p' => "__yen_p",
-        '\4' => "__yen_4",
-        '\5' => "__yen_5",
-        '\s' => "__yen_s",
-        '\b' => "__yen_b",
-        '\_b' => "__yen__b",
-        '\n' => "__yen_n",
-        '\c' => "__yen_c",
-        '\w' => "__yen_w",
-        '\_w' => "__yen__w",
-        '\t' => "__yen_t",
-        '\_q' => "__yen__q",
-        '\_s' => "__yen__s",
-        '\_e' => "__yen__e",
-        '\q' => "__yen_q",
-        '\URL' => "__yen_URL",
-        '\_a' => "__yen__a",
-        '\x' => "__yen_x",
-        '\a' => "__yen_a", # Obsolete: only for old SHIORI
-        '\i' => "__yen_i",
-        '\j' => "__yen_j",
-        '\-' => "__yen_minus",
-        '\+' => "__yen_plus",
-        '\_+' => "__yen__plus",
-        '\m' => "__yen_m",
-        '\&' => "__yen_and",
-        '\_m' => "__yen__m",
-        '\_u' => "__yen__u",
-        '\_v' => "__yen__v",
-        '\8' => "__yen_8",
-        '\_V' => "__yen__V",
-        '\!' => "__yen_exclamation",
-        '\__c' => "__yen___c",
-        '\__t' => "__yen___t", 
-        '\v' => "__yen_v",
-        '\f' => "__yen_f",
-        '\C' => nil # dummy
-        }
+      '\e' => "__yen_e",
+      '\y' => "__yen_e",
+      '\z' => "__yen_e",
+      '\0' => "__yen_0",
+      '\h' => "__yen_0",
+      '\1' => "__yen_1",
+      '\u' => "__yen_1",
+      '\p' => "__yen_p",
+      '\4' => "__yen_4",
+      '\5' => "__yen_5",
+      '\s' => "__yen_s",
+      '\b' => "__yen_b",
+      '\_b' => "__yen__b",
+      '\n' => "__yen_n",
+      '\c' => "__yen_c",
+      '\w' => "__yen_w",
+      '\_w' => "__yen__w",
+      '\t' => "__yen_t",
+      '\_q' => "__yen__q",
+      '\_s' => "__yen__s",
+      '\_e' => "__yen__e",
+      '\q' => "__yen_q",
+      '\URL' => "__yen_URL",
+      '\_a' => "__yen__a",
+      '\x' => "__yen_x",
+      '\a' => "__yen_a", # Obsolete: only for old SHIORI
+      '\i' => "__yen_i",
+      '\j' => "__yen_j",
+      '\-' => "__yen_minus",
+      '\+' => "__yen_plus",
+      '\_+' => "__yen__plus",
+      '\m' => "__yen_m",
+      '\&' => "__yen_and",
+      '\_m' => "__yen__m",
+      '\_u' => "__yen__u",
+      '\_v' => "__yen__v",
+      '\8' => "__yen_8",
+      '\_V' => "__yen__V",
+      '\!' => "__yen_exclamation",
+      '\__c' => "__yen___c",
+      '\__t' => "__yen___t", 
+      '\v' => "__yen_v",
+      '\f' => "__yen_f",
+      '\C' => nil # dummy
+    }
 
     def interpret_script()
-      if @script_wait != nil
-        if Time.new.to_f < @script_wait
-          return
-        end
+      unless @script_wait.nil?
+        return if Time.new.to_f < @script_wait
         @script_wait = nil
       end
-      if not @processed_text.empty?
+      unless @processed_text.empty?
         @balloon.show(@script_side)
         @balloon.append_text(@script_side, @processed_text[0])
         @processed_text = @processed_text[1..-1]
@@ -2820,7 +2755,8 @@ module Sakura
       end
       node = @processed_script.shift
       @script_position = node[-1]
-      if node[0] == Script::SCRIPT_TAG
+      case node[0]
+      when Script::SCRIPT_TAG
         name, args = node[1], node[2..-2]
         if SCRIPT_TAG.include?(name) and \
            Sakura.method_defined?(SCRIPT_TAG[name])
@@ -2828,9 +2764,9 @@ module Sakura
         else
           #pass ## FIMXE
         end
-      elsif node[0] == Script::SCRIPT_TEXT
+      when Script::SCRIPT_TEXT
         text = expand_meta(node[1])
-        if @anchor != nil
+        unless @anchor.nil?
           @anchor[1] = [@anchor[1], text].join('')
         end
         script_speed = @parent.handle_request(
@@ -2846,7 +2782,7 @@ module Sakura
     def reset_script(reset_all: false)
       if reset_all
         @script_mode = BROWSE_MODE
-        if not @script_finally.empty?
+        unless @script_finally.empty?
           for proc_obj in @script_finally
             proc_obj.call(:flag_break => true)
           end
@@ -2870,7 +2806,7 @@ module Sakura
       if reset
         @synchronized_session = []
       elsif list.empty?
-        if not @synchronized_session.empty?
+        unless @synchronized_session.empty?
           @synchronized_session = []
         else
           @synchronized_session = [0, 1]
@@ -2933,9 +2869,7 @@ module Sakura
 
     ###   SEND SSTP/1.3   ###
     def _send_sstp_handle(data)
-      if IO.select([], [@sstp_handle], [], 0) == nil
-        return
-      end
+      return if IO.select([], [@sstp_handle], [], 0).nil?
       begin
         @sstp_handle.send([data, "\n"].join(''))
       rescue SystemCallError => e
@@ -2944,17 +2878,13 @@ module Sakura
     end
 
     def write_sstp_handle(data)
-      if @sstp_handle == nil
-        return
-      end
+      return if @sstp_handle.nil?
       _send_sstp_handle(['+', data].join(''))
       ##Logging::Logging.debug('write_sstp_handle(' + data.to_s + ')')
     end
 
     def close_sstp_handle()
-      if @sstp_handle == nil
-        return
-      end
+      return if @sstp_handle.nil?
       _send_sstp_handle('-')
       ##Logging::Logging.debug('close_sstp_handle()')
       begin
@@ -2990,9 +2920,7 @@ module Sakura
     end
 
     def __update()
-      if @updateman.is_active()
-        return
-      end
+      return if @updateman.is_active()
       homeurl = getstring('homeurl')
       if homeurl.empty?
         start_script(

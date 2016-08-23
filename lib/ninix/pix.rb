@@ -43,9 +43,7 @@ module Pix
       end
       end_x = x
     }
-    if start_x != -1
-      region.union!(start_x, curr_y, end_x - start_x + 1, 1)
-    end
+    region.union!(start_x, curr_y, end_x - start_x + 1, 1) unless start_x == -1
     return region
   end
 
@@ -67,13 +65,12 @@ module Pix
     def screen_changed(widget, old_screen: nil)
       if composited?
         set_visual(screen.rgba_visual)
-        @supports_alpha = true
       else
         set_visual(screen.system_visual)
         Logging::Logging.debug("screen does NOT support alpha.\n")
-        @supports_alpha = false
       end
-      fail "assert" unless visual != nil
+      @supports_alpha = composited?
+      fail "assert" unless not visual.nil?
       left, top = 0, 0 # XXX
       width = (screen.width - left)
       height = (screen.height - top)
@@ -168,19 +165,16 @@ module Pix
 
 
   def self.get_png_size(path)
-    if not File.exists?(path)
-      return 0, 0
-    end
-    fp = File.open(path)
-    base = File.basename(path, '.*')
-    ext = File.extname(path)
-    if ext == '.dgp'
-      buf = get_DGP_IHDR(path)
-    elsif ext == '.ddp'
-      buf = get_DDP_IHDR(path)
-    else
-      buf = get_png_IHDR(path)
-    end
+    return 0, 0 if not File.exists?(path)
+    buf =
+      case File.extname(path)
+      when '.dgp'
+        get_DGP_IHDR(path)
+      when '.ddp'
+        get_DDP_IHDR(path)
+      else
+        get_png_IHDR(path)
+      end
     fail "assert" unless buf[0] == 137.chr # png format # XXX != "\x89"
     fail "assert" unless buf[1..7] == "PNG\r\n\x1a\n" # png format
     fail "assert" unless buf[12..15] == "IHDR" # name of the first chunk in a PNG datastream
@@ -192,16 +186,13 @@ module Pix
   end
 
   def self.get_png_lastpix(path)
-    if not File.exists?(path)
-      return nil
-    end
+    return nil if not File.exists?(path)
     pixbuf = pixbuf_new_from_file(path)
     fail "assert" unless [3, 4].include?(pixbuf.n_channels)
     fail "assert" unless pixbuf.bits_per_sample == 8
-    color = '#%02x%02x%02x' % [pixbuf.pixels[-3].ord,
-                               pixbuf.pixels[-2].ord,
-                               pixbuf.pixels[-1].ord]
-    return color
+    '#%02x%02x%02x' % [pixbuf.pixels[-3].ord,
+                       pixbuf.pixels[-2].ord,
+                       pixbuf.pixels[-1].ord]
   end
 
   def self.get_DGP_IHDR(path)
@@ -214,17 +205,13 @@ module Pix
     j = 0
     for i in 0..tmp.length-1
       value = (tmp[i].ord ^ m_half[j].ord)
-      if value == 0
-        break
-      end
+      break if value.zero?
       key << value.chr
       j += 1
-      if j >= m_half.length
-        j = 0
-      end
+      j = 0 if j >= m_half.length
     end
     key_length = key.length
-    if key_length == 0 # not encrypted
+    if key_length.zero? # not encrypted
       Logging::Logging.warning([filename, ' generates a null key.'].join(''))
       return get_png_IHDR(path)
     end
@@ -236,9 +223,7 @@ module Pix
       c = f.read(1)
       buf << (c[0].ord ^ key[key_pos].ord).chr
       key_pos += 1
-      if key_pos >= key_length
-        key_pos = 0
-      end
+      key_pos = 0 if key_pos >= key_length
     end
     return buf
   end
@@ -257,17 +242,15 @@ module Pix
   end
 
   def self.get_png_IHDR(path)
-    f = File.open(path, 'rb')
-    buf = f.read(24)
-    return buf
+    File.open(path, 'rb') {|f| f.read(24) }
   end
 
   def self.pixbuf_new_from_file(path)
-    return Gdk::Pixbuf.new(path)
+    Gdk::Pixbuf.new(path)
   end
 
   def self.surface_new_from_file(path)
-    return Cairo::ImageSurface.new(path)
+    Cairo::ImageSurface.new(path)
  end
 
   def self.create_icon_pixbuf(path)
@@ -276,13 +259,11 @@ module Pix
     rescue # compressed icons are not supported. :-(
       return nil
     end
-    pixbuf = pixbuf.scale(16, 16, Gdk::Pixbuf::InterpType::BILINEAR)
-    return pixbuf
+    pixbuf.scale(16, 16, Gdk::Pixbuf::InterpType::BILINEAR)
   end
 
   def self.create_blank_surface(width, height)
-    surface = Cairo::ImageSurface.new(Cairo::FORMAT_ARGB32, width, height)
-    return surface
+    Cairo::ImageSurface.new(Cairo::FORMAT_ARGB32, width, height)
   end
 
   def self.create_pixbuf_from_DGP_file(path)
@@ -295,17 +276,13 @@ module Pix
     j = 0
     for i in 0..tmp.length-1
       value = (tmp[i].ord ^ m_half[j].ord)
-      if value == 0
-        break
-      end
+      break if value.zero?
       key << value.chr
       j += 1
-      if j >= m_half.length
-        j = 0
-      end
+      j = 0 if j >= m_half.length
     end
     key_length = key.length
-    if key_length == 0 # not encrypted
+    if key_length.zero? # not encrypted
       Logging::Logging.warning([filename, ' generates a null key.'].join(''))
       pixbuf = pixbuf_new_from_file(filename)
       return pixbuf
@@ -316,14 +293,10 @@ module Pix
     f = File.open(path, 'rb')
     while true
       c = f.read(1)
-      if c == nil # EOF
-        break
-      end
+      break if c.nil? # EOF
       loader.write((c[0].ord ^ key[key_pos].ord).chr)
       key_pos += 1
-      if key_pos >= key_length
-        key_pos = 0
-      end
+      key_pos = 0 if key_pos >= key_length
     end
     pixbuf = loader.pixbuf
     loader.close()
@@ -361,17 +334,18 @@ module Pix
   def self.create_pixbuf_from_file(path, is_pnr: true, use_pna: false)
     head = File.dirname(path)
     basename = File.basename(path, '.*')
-    ext = File.extname(path)
-    if ext == '.dgp'
-      pixbuf = create_pixbuf_from_DGP_file(path)
-    elsif ext == '.ddp'
-      pixbuf = create_pixbuf_from_DDP_file(path)
-    else
-      pixbuf = pixbuf_new_from_file(path)
-    end
+    pixbuf =
+      case File.extname(path)
+      when '.dgp'
+        create_pixbuf_from_DGP_file(path)
+      when '.ddp'
+        create_pixbuf_from_DDP_file(path)
+      else
+        pixbuf_new_from_file(path)
+      end
     if is_pnr
       pixels = pixbuf.pixels
-      if not pixbuf.has_alpha?
+      unless pixbuf.has_alpha?
         r, g, b = pixels[0, 3].bytes
         pixbuf = pixbuf.add_alpha(true, r, g, b)
       else
@@ -387,7 +361,7 @@ module Pix
         pna_pixbuf = pixbuf_new_from_file(path)
         pix_na = NArray.to_na(pixbuf.pixels, NArray::BYTE)
         pix_na.reshape!(4, pix_na.size / 4)
-        if not pna_pixbuf.has_alpha?
+        unless pna_pixbuf.has_alpha?
           pna_pixbuf = pna_pixbuf.add_alpha(false, 0, 0, 0)
         end
         pna_na = NArray.to_na(pna_pixbuf.pixels, NArray::BYTE)
