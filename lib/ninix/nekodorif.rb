@@ -115,7 +115,7 @@ module Nekodorif
       unless list.empty?
         menu = Gtk::Menu.new()
         for katochan in list
-          item = Gtk::MenuItem.new(katochan['name'])
+          item = Gtk::MenuItem.new(:label => katochan['name'])
           item.signal_connect('activate', katochan) do |a, k|
             @parent.handle_request('NOTIFY', 'select_katochan', k)
             next true

@@ -84,7 +84,7 @@ module Kinoko
       unless list.empty?
         menu = Gtk::Menu.new
         for skin in list
-          item = Gtk::MenuItem.new(skin['title'])
+          item = Gtk::MenuItem.new(:label => skin['title'])
           item.signal_connect('activate', skin) do |a, k|
             @parent.handle_request('NOTIFY', 'select_skin', k)
             next true

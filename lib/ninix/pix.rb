@@ -51,7 +51,7 @@ module Pix
     alias :base_move :move
     attr_reader :workarea
 
-    def initialize(type: Gtk::Window::Type::TOPLEVEL)
+    def initialize(type: Gtk::WindowType::TOPLEVEL)
       super(type)
       set_decorated(false)
       set_resizable(false)
@@ -111,7 +111,7 @@ module Pix
 
     def move(x, y)
       left, top, scrn_w, scrn_h = @workarea
-      w, h = @darea.get_size_request() # XXX
+      w, h = @darea.size_request() # XXX
       new_x = [[left, x].max, scrn_w - w].min
       new_y = [[top, y].max, scrn_h - h].min
       base_move(new_x, new_y)
@@ -246,7 +246,7 @@ module Pix
   end
 
   def self.pixbuf_new_from_file(path)
-    Gdk::Pixbuf.new(path)
+    GdkPixbuf::Pixbuf.new(:file => path)
   end
 
   def self.surface_new_from_file(path)
@@ -259,7 +259,7 @@ module Pix
     rescue # compressed icons are not supported. :-(
       return nil
     end
-    pixbuf.scale(16, 16, Gdk::Pixbuf::InterpType::BILINEAR)
+    pixbuf.scale(16, 16, GdkPixbuf::InterpType::BILINEAR)
   end
 
   def self.create_blank_surface(width, height)
@@ -346,7 +346,7 @@ module Pix
     if is_pnr
       pixels = pixbuf.pixels
       unless pixbuf.has_alpha?
-        r, g, b = pixels[0, 3].bytes
+        r, g, b = pixels[0, 3]
         pixbuf = pixbuf.add_alpha(true, r, g, b)
       else
         pix_na = NArray.to_na(pixels, NArray::INT)

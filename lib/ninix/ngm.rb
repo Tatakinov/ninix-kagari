@@ -312,7 +312,7 @@ module NGM
         next true # XXX
       end
       @dialog.set_modal(true)
-      @dialog.set_window_position(Gtk::Window::Position::CENTER)
+      @dialog.set_window_position(Gtk::WindowPosition::CENTER)
       label = Gtk::Label.new(label=_('Search for'))
       content_area = @dialog.content_area
       content_area.add(label)
@@ -486,7 +486,7 @@ module NGM
       @window.signal_connect('delete_event') do |a|
         next close()
       end
-      @window.set_window_position(Gtk::Window::Position::CENTER)
+      @window.set_window_position(Gtk::WindowPosition::CENTER)
       @window.gravity = Gdk::Gravity::CENTER
       actions = Gtk::ActionGroup.new('Actions')
       actions.add_actions(@entries)
@@ -515,7 +515,7 @@ module NGM
       @info_area = create_info_area()
       hbox.pack_start(@info_area, :expand => false, :fill => true, :padding => 10)
       box = Gtk::ButtonBox.new(orientation=Gtk::Orientation::HORIZONTAL)
-      box.set_layout_style(Gtk::ButtonBox::Style::SPREAD)
+      box.set_layout_style(Gtk::ButtonBoxStyle::SPREAD)
       vbox.pack_start(box, :expand => false, :fill => true, :padding => 4)
       box.show()
       button = Gtk::Button.new(:label => _('Previous'))
@@ -649,7 +649,7 @@ module NGM
       vbox.show()
       hbox = Gtk::Box.new(orientation=Gtk::Orientation::HORIZONTAL)
       box = Gtk::ButtonBox.new(orientation=Gtk::Orientation::HORIZONTAL)
-      box.set_layout_style(Gtk::ButtonBox::Style::SPREAD)
+      box.set_layout_style(Gtk::ButtonBoxStyle::SPREAD)
       box.show()
       button = Gtk::Button.new(:label => _('Install'))
       button.signal_connect(

@@ -2960,7 +2960,7 @@ module Sakura
       @dialog.set_title('Vanish')
       @dialog.set_modal(true)
       @dialog.set_resizable(false)
-      @dialog.set_window_position(Gtk::Window::Position::CENTER)
+      @dialog.set_window_position(Gtk::WindowPosition::CENTER)
       @label = Gtk::Label.new(label=_('Vanish'))
       content_area = @dialog.content_area
       content_area.add(@label)
@@ -3017,7 +3017,7 @@ module Sakura
       @dialog.set_title('Readme.txt')
       @dialog.set_modal(false)
       @dialog.set_resizable(false)
-      @dialog.set_window_position(Gtk::Window::Position::CENTER)
+      @dialog.set_window_position(Gtk::WindowPosition::CENTER)
       @label = Gtk::Label.new
       @label.show()
       @textview = Gtk::TextView.new

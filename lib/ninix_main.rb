@@ -43,10 +43,13 @@ module Ninix_Main
     Logging::Logging.error(message)
     response_id = 1
     dialog = Gtk::MessageDialog.new(
-      nil, 0, Gtk::MessageType::ERROR, Gtk::MessageDialog::ButtonsType::NONE,
-      _("A ninix-aya error has been detected."))
+      :parent => nil,
+      :flags => 0,
+      :type => Gtk::MessageType::ERROR,
+      :buttons => Gtk::ButtonsType::NONE,
+      :message => _("A ninix-aya error has been detected."))
     dialog.set_title(_("Bug Detected"))
-    dialog.set_window_position(Gtk::Window::Position::CENTER)
+    dialog.set_window_position(Gtk::WindowPosition::CENTER)
     dialog.gravity = Gdk::Gravity::CENTER
     button = dialog.add_button(_("Show Details"), response_id)
     dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
@@ -1358,7 +1361,7 @@ module Ninix_Main
       @sw.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::ALWAYS)
       @sw.show()
       @tv = Gtk::TextView.new
-      @tv.set_wrap_mode(Gtk::TextTag::WrapMode::CHAR)
+      @tv.set_wrap_mode(Gtk::WrapMode::CHAR)
       @tv.override_background_color(
         Gtk::StateFlags::NORMAL, Gdk::RGBA.new(0, 0, 0, 255))
       @tv.set_cursor_visible(true)
@@ -1372,7 +1375,7 @@ module Ninix_Main
       @tag_notset = @tb.create_tag(nil, 'foreground' => 'blue')
       ### DnD data types
       ##dnd_targets = [['text/uri-list', 0, 0]]
-      ##@tv.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+      ##@tv.drag_dest_set(Gtk::DestDefaults::ALL, dnd_targets,
       ##                  Gdk::DragAction::COPY)
       @tv.drag_dest_set_target_list(nil) # important
       @tv.drag_dest_add_uri_targets()
@@ -1393,7 +1396,7 @@ module Ninix_Main
       end
       @file_chooser = Gtk::FileChooserDialog.new(
         :title => "Install..",
-        :action => Gtk::FileChooser::Action::OPEN,
+        :action => Gtk::FileChooserAction::OPEN,
         :buttons => [["_Open", Gtk::ResponseType::OK],
                     ["_Cancel", Gtk::ResponseType::CANCEL]])
       @file_chooser.set_default_response(Gtk::ResponseType::CANCEL)
@@ -1412,7 +1415,7 @@ module Ninix_Main
 
     def message_with_tag(message, tag)
       it = @tb.end_iter
-      @tb.insert(it, [Logger::SEV_LABEL[@level], ':', message, "\n"].join(""), tag)
+      @tb.insert(it, [Logger::SEV_LABEL[@level], ':', message, "\n"].join(""), :tags => [tag])
       it = @tb.end_iter
       # scroll_to_iter may not have the desired effect.
       mark = @tb.create_mark("end", it, false)

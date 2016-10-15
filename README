@@ -18,7 +18,7 @@ UNIX系OS対応デスクトップアクセサリninixに拡張機能を追加し
 
 - Ruby (http://www.ruby-lang.org/)
   本ソフトウェアの開発言語です。
-  バージョン 2.3.0 での動作を確認しています。
+  バージョン 2.3.1 での動作を確認しています。
 
 - NArray(http://masa16.github.io/narray/)
   大規模な多次元数値配列の計算を、簡単かつ高速に実現するRubyのクラスです。
@@ -26,9 +26,9 @@ UNIX系OS対応デスクトップアクセサリninixに拡張機能を追加し
 
 - Ruby/GTK3 (http://ruby-gnome2.osdn.jp/)
   Gtk+3をRubyから利用するための拡張ライブラリです。  
-  バージョン 2.2.5 での動作を確認しています。
+  バージョン 3.0.9 での動作を確認しています。
   * Windows環境ではRuby InstallerおよびDevkitをインストールしてください。
-    (ただし、2.2.5, 3.0.7共に多くの点で動作に問題がある模様です。)
+    (ただし、多くの点で動作に問題がある模様です。)
 
 - GTK+ (http://www.gtk.org/)
   クロスプラットフォームの GUI ライブラリです。
@@ -84,8 +84,8 @@ lib/ninix_main.rb をRuby インタプリタで実行してください。(動�
 
 ※ gemによる必要なもののインストール手順
   gem install narray
-  gem install gtk3 -v 2.2.5
-  gem install gstreamer -v 2.2.5
+  gem install gtk3
+  gem install gstreamer
   gem install gettext
   gem install rubyzip
 

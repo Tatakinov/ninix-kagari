@@ -69,82 +69,93 @@ module Menu
           </popup>
         </ui>
         "
-        @__menu_list = {
-            'Portal' => {
-                'entry' => ['Portal', nil, _('Portal sites(_P)'), nil],
-                'visible' => true},
-            'Recommend' => {
-                'entry' => ['Recommend', nil, _('Recommend sites(_R)'), nil],
-                'visible' => true},
-            'Options' => {
-                'entry' => ['Options', nil, _('Options(_F)'), nil],
-                'visible' => true},
-            'Options/Update' => {
-                'entry' => ['Update', nil, _('Network Update(_U)'), nil,
-                          '', lambda {|a, b| @parent.handle_request('NOTIFY', 'network_update')}],
-                'visible' => true},
-            'Options/Vanish' => {
-                'entry' => ['Vanish', nil, _('Vanish(_F)'), nil,
-                          '', lambda {|a, b| @parent.handle_request('NOTIFY', 'vanish')}],
-                'visible' => true},
-            'Options/Preferences' => {
-                'entry' => ['Preferences', nil, _('Preferences...(_O)'), nil,
-                           '', lambda {|a, b| @parent.handle_request('NOTIFY', 'edit_preferences')}],
-                'visible' => true},
-            'Options/Console' => {
-                'entry' => ['Console', nil, _('Console(_C)'), nil,
-                          '', lambda {|a, b| @parent.handle_request('NOTIFY', 'open_console')}],
-                'visible' => true},
-            'Options/Manager' => {
-                'entry' => ['Manager', nil, _('Ghost Manager(_M)'), nil,
-                          '', lambda {|a, b| @parent.handle_request('NOTIFY', 'open_ghost_manager')}],
-                'visible' => true},
-            'Information' => {
-                'entry' => ['Information', nil, _('Information(_I)'), nil],
-                'visible' => true},
-            'Information/Usage' => {
-                'entry' => ['Usage', nil, _('Usage graph(_A)'), nil,
-                          '', lambda {|a, b| @parent.handle_request('NOTIFY', 'show_usage')}],
-                'visible' => true},
-            'Information/Version' => {
-                'entry' => ['Version', nil, _('Version(_V)'), nil,
-                          '', lambda {|a, b| @parent.handle_request('NOTIFY', 'about')}],
-                'visible' => true},
-            'Close' => {
-                'entry' => ['Close', nil, _('Close(_W)'), nil,
-                          '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close_sakura')}],
-                'visible' => true},
-            'Quit' => {
-                'entry' => ['Quit', nil, _('Quit(_Q)'), nil,
-                          '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close_all')}],
-                'visible' => true},
-            'Change' => {
-                'entry' => ['Change', nil, _('Change(_G)'), nil],
-                'visible' => true},
-            'Summon' => {
-                'entry' => ['Summon', nil, _('Summon(_X)'), nil],
-                'visible' => true},
-            'Shell' => {
-                'entry' => ['Shell', nil, _('Shell(_S)'), nil],
-                'visible' => true},
-            'Balloon' => {
-                'entry' => ['Balloon', nil, _('Balloon(_B)'), nil],
-                'visible' => true},
-            'Costume' => {
-                'entry' => ['Costume', nil, _('Costume(_C)'), nil],
-                'visible' => true},
-            'Stick' => {
-                'entry' => ['Stick', nil, _('Stick(_Y)'), nil,
-                          '', lambda {|a, b| @parent.handle_request('NOTIFY', 'stick_window')},
-                          false],
-                'visible' => true},
-            'Nekodorif' => {
-                'entry' => ['Nekodorif', nil, _('Nekodorif(_N)'), nil],
-                'visible' => true},
-            'Kinoko' => {
-                'entry' => ['Kinoko', nil, _('Kinoko(_K)'), nil],
-                'visible' => true},
-            }
+      @__menu_list = {
+        'Portal' => {
+          'entry' => ['Portal', nil, _('Portal sites(_P)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+        'Recommend' => {
+          'entry' => ['Recommend', nil, _('Recommend sites(_R)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+        'Options' => {
+          'entry' => ['Options', nil, _('Options(_F)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+        'Options/Update' => {
+          'entry' => ['Update', nil, _('Network Update(_U)'), nil,
+                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'network_update')}],
+          'visible' => true},
+        'Options/Vanish' => {
+          'entry' => ['Vanish', nil, _('Vanish(_F)'), nil,
+                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'vanish')}],
+          'visible' => true},
+        'Options/Preferences' => {
+          'entry' => ['Preferences', nil, _('Preferences...(_O)'), nil,
+                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'edit_preferences')}],
+          'visible' => true},
+        'Options/Console' => {
+          'entry' => ['Console', nil, _('Console(_C)'), nil,
+                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'open_console')}],
+          'visible' => true},
+        'Options/Manager' => {
+          'entry' => ['Manager', nil, _('Ghost Manager(_M)'), nil,
+                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'open_ghost_manager')}],
+          'visible' => true},
+        'Information' => {
+          'entry' => ['Information', nil, _('Information(_I)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+        'Information/Usage' => {
+          'entry' => ['Usage', nil, _('Usage graph(_A)'), nil,
+                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'show_usage')}],
+          'visible' => true},
+        'Information/Version' => {
+          'entry' => ['Version', nil, _('Version(_V)'), nil,
+                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'about')}],
+          'visible' => true},
+        'Close' => {
+          'entry' => ['Close', nil, _('Close(_W)'), nil,
+                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close_sakura')}],
+          'visible' => true},
+        'Quit' => {
+          'entry' => ['Quit', nil, _('Quit(_Q)'), nil,
+                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close_all')}],
+          'visible' => true},
+        'Change' => {
+          'entry' => ['Change', nil, _('Change(_G)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+        'Summon' => {
+          'entry' => ['Summon', nil, _('Summon(_X)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+        'Shell' => {
+          'entry' => ['Shell', nil, _('Shell(_S)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+        'Balloon' => {
+          'entry' => ['Balloon', nil, _('Balloon(_B)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+        'Costume' => {
+          'entry' => ['Costume', nil, _('Costume(_C)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+        'Stick' => {
+          'entry' => ['Stick', nil, _('Stick(_Y)'), nil,
+                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'stick_window')},
+                      false],
+          'visible' => true},
+        'Nekodorif' => {
+          'entry' => ['Nekodorif', nil, _('Nekodorif(_N)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+        'Kinoko' => {
+          'entry' => ['Kinoko', nil, _('Kinoko(_K)'), nil,
+                      '', lambda {|a, b| }],
+          'visible' => true},
+      }
       @__fontcolor = {
         'normal' => [0, 0, 0],
         'hover' => [255, 255, 255]
@@ -311,7 +322,7 @@ module Menu
           for j in 0..mayuna_menu[side].length-1
             key, name, state = mayuna_menu[side][j]
             if key != '-'
-              item = Gtk::CheckMenuItem.new(name)
+              item = Gtk::CheckMenuItem.new(:label => name)
               item.set_name('popup menu item')
               item.set_active(state)
               item.signal_connect('activate', [index, key]) do |a, ik|
@@ -494,7 +505,7 @@ module Menu
             if title == '-'
               item = Gtk::SeparatorMenuItem.new()
             else
-              item = Gtk::MenuItem.new(title)
+              item = Gtk::MenuItem.new(:label => title)
               if entry.length < 2
                 item.set_sensitive(false)
               end
@@ -576,7 +587,7 @@ module Menu
           if title == '-'
             item = Gtk::SeparatorMenuItem.new()
           else
-            item = Gtk::MenuItem.new(title)
+            item = Gtk::MenuItem.new(:label => title)
             if entry.length < 2
               item.set_sensitive(false)
             end
@@ -648,7 +659,7 @@ module Menu
       unless icon.nil?
         pixbuf = Pix.create_icon_pixbuf(icon)
         if pixbuf.nil?
-          item = Gtk::MenuItem.new(name)
+          item = Gtk::MenuItem.new(:label => name)
         else
           image = Gtk::Image.new
           image.pixbuf = pixbuf
@@ -658,7 +669,7 @@ module Menu
           item.set_always_show_image(true) # XXX
         end
       else
-        item = Gtk::MenuItem.new(name)
+        item = Gtk::MenuItem.new(:label => name)
       end
       item.set_name('popup menu item')
       item.show()
@@ -819,7 +830,7 @@ module Menu
     end
 
     def create_meme_menuitem(name, value, handler, thumbnail)
-      item = Gtk::MenuItem.new(name)
+      item = Gtk::MenuItem.new(:label => name)
       item.set_name('popup menu item')
       item.show()
       item.signal_connect('activate') do |a, v|
@@ -847,7 +858,7 @@ module Menu
       nekodorif_menu = Gtk::Menu.new()
       for i in 0..(nekodorif_list.length - 1)
         name = nekodorif_list[i]['name']
-        item = Gtk::MenuItem.new(name)
+        item = Gtk::MenuItem.new(:label => name)
         item.set_name('popup menu item')
         item.show()
         nekodorif_menu << item
@@ -875,7 +886,7 @@ module Menu
       kinoko_menu = Gtk::Menu.new()
       for i in 0..(kinoko_list.length - 1)
         name = kinoko_list[i]['title']
-        item = Gtk::MenuItem.new(name)
+        item = Gtk::MenuItem.new(:label => name)
         item.set_name('popup menu item')
         item.show()
         kinoko_menu << item

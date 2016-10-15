@@ -1539,12 +1539,12 @@ module Balloon
       end
       # DnD data types
       dnd_targets = [['text/plain', 0, 0]]
-      @window.drag_dest_set(Gtk::Drag::DestDefaults::ALL, dnd_targets,
+      @window.drag_dest_set(Gtk::DestDefaults::ALL, dnd_targets,
                             Gdk::DragAction::COPY)
       @window.drag_dest_add_text_targets()
       @window.set_events(Gdk::EventMask::BUTTON_PRESS_MASK)
       @window.set_modal(true)
-      @window.set_window_position(Gtk::Window::Position::CENTER)
+      @window.set_window_position(Gtk::WindowPosition::CENTER)
       @window.realize()
       w = desc.get('communicatebox.width', :default => 250).to_i
       h = desc.get('communicatebox.height', :default => -1).to_i
@@ -1582,8 +1582,8 @@ module Balloon
         overlay = Gtk::Overlay.new()
         @entry.set_margin_left(x)
         @entry.set_margin_top(y)
-        @entry.set_halign(Gtk::Alignment::Align::START)
-        @entry.set_valign(Gtk::Alignment::Align::START)
+        @entry.set_halign(Gtk::Align::START)
+        @entry.set_valign(Gtk::Align::START)
         overlay.add_overlay(@entry)
         overlay.add(darea)
         overlay.show()
