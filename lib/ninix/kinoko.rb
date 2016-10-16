@@ -47,7 +47,7 @@ module Kinoko
         'settings' => [['Settings', nil, _('Settings...(_O)'), nil,
                         '', lambda {|a, b| @parent.handle_request('NOTIFY', 'edit_preferences')}],
                        '/ui/popup/Settings'],
-        'skin' => [['Skin', nil, _('Skin(_K)'), nil],
+        'skin' => [['Skin', nil, _('Skin(_K)'), nil, '', lambda {|a, b| }],
                    nil, '/ui/popup/Skin'],
         'exit' => [['Exit', nil, _('Exit(_Q)'), nil,
                     '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close')}],
@@ -133,7 +133,7 @@ module Kinoko
         scale = @target.get_surface_scale()
         @skin.set_scale(scale)
       when 'hide'
-        side = args
+        side = args[0]
         @skin.hide() if side.zero? # sakura side
       when 'iconified'
         @skin.hide()
@@ -145,7 +145,7 @@ module Kinoko
         side, xoffset, yoffset = args
         @skin.set_position(:xoffset => xoffset, :yoffset => yoffset) if side.zero? # sakura side
       when 'raise'
-        side = args
+        side = args[0]
         @skin.set_position() if side.zero? # sakura side
       else
         Logging::Logging.debug('OBSERVER(kinoko): ignore - ' + event)
@@ -399,7 +399,7 @@ module Kinoko
     end
 
     def create_image_surface(surface_id)
-      unless surface_id.nil? and surface_id != ''
+      unless surface_id.nil? or surface_id.empty?
         surface = get_image_surface(surface_id)
       else
         surface = Pix.create_surface_from_file(@path)
@@ -409,7 +409,7 @@ module Kinoko
 
     def update_frame_buffer()
       new_surface = create_image_surface(@seriko.get_base_id)
-      rasie "assert" if new_surface.nil?
+      raise "assert" if new_surface.nil?
       # draw overlays
       for surface_id, x, y, method in @seriko.iter_overlays()
         begin

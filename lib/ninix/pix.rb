@@ -250,8 +250,8 @@ module Pix
   end
 
   def self.surface_new_from_file(path)
-    Cairo::ImageSurface.new(path)
- end
+    Cairo::ImageSurface.from_png(path)
+  end
 
   def self.create_icon_pixbuf(path)
     begin
@@ -318,9 +318,6 @@ module Pix
   end
 
   def self.create_surface_from_file(path, is_pnr: true, use_pna: false)
-    head = File.dirname(path)
-    basename = File.basename(path, '.*')
-    ext = File.extname(path)
     pixbuf = create_pixbuf_from_file(path, :is_pnr => is_pnr, :use_pna => use_pna)
     surface = Cairo::ImageSurface.new(Cairo::FORMAT_ARGB32,
                                       pixbuf.width, pixbuf.height)
@@ -344,30 +341,40 @@ module Pix
         pixbuf_new_from_file(path)
       end
     if is_pnr
-      pixels = pixbuf.pixels
+      pixels = pixbuf.read_pixel_bytes
       unless pixbuf.has_alpha?
-        r, g, b = pixels[0, 3]
+        r, g, b = pixels[0, 3].bytes
         pixbuf = pixbuf.add_alpha(true, r, g, b)
       else
         pix_na = NArray.to_na(pixels, NArray::INT)
         rgba = pix_na[0]
         pix_na[pix_na.eq rgba] = 0
-        pixbuf.pixels = pix_na.to_s
+        pixbuf = GdkPixbuf::Pixbuf.new(
+          :bytes => pix_na.to_s,
+          :has_alpha => true,
+          :width => pixbuf.width,
+          :height => pixbuf.height,
+          :row_stride => pixbuf.rowstride)
       end
     end
     if use_pna
       path = File.join(head, basename + '.pna')
       if File.exists?(path)
         pna_pixbuf = pixbuf_new_from_file(path)
-        pix_na = NArray.to_na(pixbuf.pixels, NArray::BYTE)
+        pix_na = NArray.to_na(pixbuf.read_pixel_bytes, NArray::BYTE)
         pix_na.reshape!(4, pix_na.size / 4)
         unless pna_pixbuf.has_alpha?
           pna_pixbuf = pna_pixbuf.add_alpha(false, 0, 0, 0)
         end
-        pna_na = NArray.to_na(pna_pixbuf.pixels, NArray::BYTE)
+        pna_na = NArray.to_na(pna_pixbuf.read_pixel_bytes, NArray::BYTE)
         pna_na.reshape!(4, pna_na.size / 4)
         pix_na[3, true] = pna_na[0, true]
-        pixbuf.pixels = pix_na.to_s
+        pixbuf = GdkPixbuf::Pixbuf.new(
+          :bytes => pix_na.to_s,
+          :has_alpha => true,
+          :width => pixbuf.width,
+          :height => pixbuf.height,
+          :row_stride => pixbuf.rowstride)
       end
     end
     return pixbuf

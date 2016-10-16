@@ -404,47 +404,59 @@ module NGM
           </menubar>
         </ui>"
       @entries = [
-                  [ 'FileMenu', nil, _('_File') ],
-                  [ 'ViewMenu', nil, _('_View') ],
-                  [ 'ArchiveMenu', nil, _('_Archive') ],
-                  [ 'HelpMenu', nil, _('_Help') ],
-                  [ 'Search', nil,                  # name, stock id
-                    _('Search(_F)'), '<control>F',   # label, accelerator
-                    'Search',                        # tooltip
-                    lambda {|a, b| open_search_dialog()} ],
-                  [ 'Search Forward', nil,
-                    _('Search Forward(_S)'), 'F3',
-                    nil,
-                    lambda {|a, b| search_forward()} ],
-                  [ 'Settings', nil,
-                    _('Settings(_O)'), nil,
-                    nil,
-                    lambda {|a, b| @parent.handle_request(
-                                                          'NOTIFY', 'open_preference_dialog')} ],
-                  [ 'DB Network Update', nil,
-                    _('DB Network Update(_N)'), nil,
-                    nil,
-                    lambda {|a, b| network_update()} ],
-                  [ 'Close', nil,
-                    _('Close(_X)'), nil,
-                    nil,
-                    lambda {|a, b| close()} ],
-                  [ 'Mask', nil,
-                    _('Mask(_M)'), nil,
-                    nil,
-                    lambda {|a, b| @parent.handle_request(
-                                                          'NOTIFY', 'open_mask_dialog')} ],
-                  [ 'Reset to Default', nil,
-                    _('Reset to Default(_Y)'), nil,
-                    nil,
-                    lambda {|a, b| @parent.handle_request(
-                                                          'NOTIFY', 'reset_to_default')} ],
-                  [ 'Show All', nil,
-                    _('Show All(_Z)'), nil,
-                    nil,
-                    lambda {|a, b| @parent.handle_request(
-                                                          'NOTIFY', 'show_all')} ],
-                  ]
+        [ 'FileMenu', nil,
+          _('_File'), nil,
+          '',
+          lambda {|a, b| } ],
+        [ 'ViewMenu', nil,
+          _('_View'), nil,
+          '',
+          lambda {|a, b| } ],
+        [ 'ArchiveMenu', nil,
+          _('_Archive'), nil,
+          '',
+          lambda {|a, b| } ],
+        [ 'HelpMenu', nil,
+          _('_Help'), nil,
+          '',
+          lambda {|a, b| } ],
+        [ 'Search', nil,                   # name, stock id
+          _('Search(_F)'), '<control>F',   # label, accelerator
+          'Search',                        # tooltip
+          lambda {|a, b| open_search_dialog()} ],
+        [ 'Search Forward', nil,
+          _('Search Forward(_S)'), 'F3',
+          nil,
+          lambda {|a, b| search_forward()} ],
+        [ 'Settings', nil,
+          _('Settings(_O)'), nil,
+          nil,
+          lambda {|a, b| @parent.handle_request(
+                    'NOTIFY', 'open_preference_dialog')} ],
+        [ 'DB Network Update', nil,
+          _('DB Network Update(_N)'), nil,
+          nil,
+          lambda {|a, b| network_update()} ],
+        [ 'Close', nil,
+          _('Close(_X)'), nil,
+          nil,
+          lambda {|a, b| close()} ],
+        [ 'Mask', nil,
+          _('Mask(_M)'), nil,
+          nil,
+          lambda {|a, b| @parent.handle_request(
+                    'NOTIFY', 'open_mask_dialog')} ],
+        [ 'Reset to Default', nil,
+          _('Reset to Default(_Y)'), nil,
+          nil,
+          lambda {|a, b| @parent.handle_request(
+                    'NOTIFY', 'reset_to_default')} ],
+        [ 'Show All', nil,
+          _('Show All(_Z)'), nil,
+          nil,
+          lambda {|a, b| @parent.handle_request(
+                    'NOTIFY', 'show_all')} ],
+      ]
       @opened = false
       @textview = [nil, nil]
       @darea = [nil, nil]
@@ -632,10 +644,11 @@ module NGM
             surface = Pix.create_surface_from_file(filename)
           rescue
             surface = nil
-          end
+          else
             w = surface.width
             h = surface.height
             darea.set_size_request(w, h)
+          end
         else
           surface = nil
         end
