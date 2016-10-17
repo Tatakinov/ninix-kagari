@@ -1,3 +1,10 @@
+Mon October 17 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* Pix.create_pixbuf_from_fileの引数:is_pnrのデフォルト値を
+	  falseに変更した.
+	* MAYUNAのメニュー生成で落ちる問題を修正した.
+	* deprecatedになっているGtkのWidgetを使用しないようにした.
+	  (GtkTearoffMenuItemとGtkImageMenuItemの2つ.)
+
 Sun October 16 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* バージョン5.0.2リリース.
 	* Ruby-GNOME2 3.0対応の漏れを修正.

@@ -1583,7 +1583,7 @@ module Ninix_Main
       unless ai_list.empty?
         path = ai_list.sample
         fail "assert" unless File.exists?(path)
-        @pixbuf = Pix.create_pixbuf_from_file(path, :is_pnr => false)
+        @pixbuf = Pix.create_pixbuf_from_file(path)
         @pixbuf.saturate_and_pixelate(1.0, true)
       else
         @pixbuf = nil

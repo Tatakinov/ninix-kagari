@@ -390,32 +390,32 @@ module Surface
       when 0
         name = 'sakura'
         title = @parent.handle_request('GET', 'get_selfname') or \
-        ['surface.', name].join('')
+        "surface.#{name}"
       when 1
         name = 'kero'
         title = @parent.handle_request('GET', 'get_keroname') or \
-        ['surface.', name].join('')
+        "surface.#{name}"
       else
-        name = ('char' + side.to_i.to_s)
-        title = ['surface.', name].join('')
+        name = ("char#{side}")
+        title = "surface.#{name}"
       end
       if config_alias.nil?
         surface_alias = nil
       else
-        surface_alias = config_alias.get(name + '.surface.alias')
+        surface_alias = config_alias.get("#{name}.surface.alias")
       end
       # MAYUNA
       bind = {}
       for index in 0..127
         group = @desc.get(
-          name + '.bindgroup' + index.to_i.to_s + '.name', :default => nil)
+          "#{name}.bindgroup#{index}.name", :default => nil)
         default = @desc.get(
-          name + '.bindgroup' + index.to_i.to_s + '.default', :default => 0)
-        bind[index] = [group, (not default.zero?)] unless group.nil?
+          "#{name}.bindgroup#{index}.default", :default => '0')
+        bind[index] = [group, (default != '0')] unless group.nil?
       end
       @mayuna[name] = []
       for index in 0..127
-        key = @desc.get(name + '.menuitem' + index.to_i.to_s, :default => nil)
+        key = @desc.get("#{name}.menuitem#{index}", :default => nil)
         if key == '-'
           @mayuna[name] << [key, nil, 0]
         else

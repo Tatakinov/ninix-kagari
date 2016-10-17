@@ -328,7 +328,7 @@ module Pix
     return surface
   end
 
-  def self.create_pixbuf_from_file(path, is_pnr: true, use_pna: false)
+  def self.create_pixbuf_from_file(path, is_pnr: false, use_pna: false)
     head = File.dirname(path)
     basename = File.basename(path, '.*')
     pixbuf =
@@ -340,6 +340,9 @@ module Pix
       else
         pixbuf_new_from_file(path)
       end
+    # Currently cannot get a pointer to the actual pixels with
+    # the pixels method. Temporary use the read_pixel_bytes method and
+    # create another Pixbuf.
     if is_pnr
       pixels = pixbuf.read_pixel_bytes
       unless pixbuf.has_alpha?

@@ -208,7 +208,7 @@ module Menu
     def create_css_provider_for(item)
       provider = Gtk::CssProvider.new()
       style_context = item.style_context
-      style_context.add_provider(provider, 800) # XXX: 800 == Gtk::StyleProvider::PRIORITY_USER
+      style_context.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
       return provider
     end
 
@@ -316,9 +316,6 @@ module Menu
         end
         unless mayuna_menu[side].nil?
           @__mayuna_menu[index] = Gtk::Menu.new()
-          item = Gtk::TearoffMenuItem.new()
-          item.show()
-          @__mayuna_menu[index] << item
           for j in 0..mayuna_menu[side].length-1
             key, name, state = mayuna_menu[side][j]
             if key != '-'
@@ -546,7 +543,7 @@ module Menu
                 end
                 unless banner.nil?
                   item.set_has_tooltip(true)
-                  pixbuf = Pix.create_pixbuf_from_file(banner, :is_pnr => false)
+                  pixbuf = Pix.create_pixbuf_from_file(banner)
                   item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
                     next on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
                   end
@@ -626,7 +623,7 @@ module Menu
               end
               unless banner.nil?
                 item.set_has_tooltip(true)
-                pixbuf = Pix.create_pixbuf_from_file(banner, :is_pnr => false)
+                pixbuf = Pix.create_pixbuf_from_file(banner)
                 item.signal_connect('query-tooltip') do |widget, x, y, keyboardmode, tooltip|
                   next on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
                 end
@@ -656,21 +653,23 @@ module Menu
     end
 
     def create_ghost_menuitem(name, icon, key, handler, thumbnail)
+      item = Gtk::MenuItem.new()
+      box = Gtk::Box.new(Gtk::Orientation::HORIZONTAL, 6)
       unless icon.nil?
         pixbuf = Pix.create_icon_pixbuf(icon)
-        if pixbuf.nil?
-          item = Gtk::MenuItem.new(:label => name)
-        else
+        unless pixbuf.nil?
           image = Gtk::Image.new
           image.pixbuf = pixbuf
           image.show
-          item = Gtk::ImageMenuItem.new(:label => name)
-          item.set_image(image)
-          item.set_always_show_image(true) # XXX
+          box.pack_start(image, :expand => false, :fill => false, :padding => 0)
         end
-      else
-        item = Gtk::MenuItem.new(:label => name)
       end
+      label = Gtk::Label.new(name)
+      label.xalign = 0.0
+      label.show
+      box.pack_end(label, :expand => true, :fill => true, :padding => 0)
+      box.show
+      item.add(box)
       item.set_name('popup menu item')
       item.show()
       item.signal_connect('activate') do |a, v|
@@ -679,7 +678,7 @@ module Menu
       end
       unless thumbnail.nil?
         item.set_has_tooltip(true)
-        pixbuf = Pix.create_pixbuf_from_file(thumbnail, :is_pnr => false)
+        pixbuf = Pix.create_pixbuf_from_file(thumbnail)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
           next on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
         end
@@ -839,7 +838,7 @@ module Menu
       end
       unless thumbnail.nil?
         item.set_has_tooltip(true)
-        pixbuf = Pix.create_pixbuf_from_file(thumbnail, :is_pnr => false)
+        pixbuf = Pix.create_pixbuf_from_file(thumbnail)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
           next on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
         end
