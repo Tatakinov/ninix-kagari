@@ -25,137 +25,6 @@ module Menu
 
     def initialize
       @parent = nil
-      ui_info = "
-        <ui>
-          <popup name='popup'>
-            <menu action='Recommend'>
-            </menu>
-            <menu action='Portal'>
-            </menu>
-            <separator/>
-            <menuitem action='Stick'/>
-            <separator/>
-            <menu action='Options'>
-            <menuitem action='Update'/>
-            <menuitem action='Vanish'/>
-            <menuitem action='Preferences'/>
-            <menuitem action='Console'/>
-            <menuitem action='Manager'/>
-            </menu>
-            <separator/>
-            <menu action='Change'>
-            </menu>
-            <menu action='Summon'>
-            </menu>
-            <menu action='Shell'>
-            </menu>
-            <menu action='Costume'>
-            </menu>
-            <menu action='Balloon'>
-            </menu>
-            <separator/>
-            <menu action='Information'>
-            <menuitem action='Usage'/>
-            <menuitem action='Version'/>
-            </menu>
-            <separator/>
-            <menu action='Nekodorif'>
-            </menu>
-            <menu action='Kinoko'>
-            </menu>
-            <separator/>
-            <menuitem action='Close'/>
-            <menuitem action='Quit'/>
-          </popup>
-        </ui>
-        "
-      @__menu_list = {
-        'Portal' => {
-          'entry' => ['Portal', nil, _('Portal sites(_P)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-        'Recommend' => {
-          'entry' => ['Recommend', nil, _('Recommend sites(_R)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-        'Options' => {
-          'entry' => ['Options', nil, _('Options(_F)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-        'Options/Update' => {
-          'entry' => ['Update', nil, _('Network Update(_U)'), nil,
-                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'network_update')}],
-          'visible' => true},
-        'Options/Vanish' => {
-          'entry' => ['Vanish', nil, _('Vanish(_F)'), nil,
-                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'vanish')}],
-          'visible' => true},
-        'Options/Preferences' => {
-          'entry' => ['Preferences', nil, _('Preferences...(_O)'), nil,
-                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'edit_preferences')}],
-          'visible' => true},
-        'Options/Console' => {
-          'entry' => ['Console', nil, _('Console(_C)'), nil,
-                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'open_console')}],
-          'visible' => true},
-        'Options/Manager' => {
-          'entry' => ['Manager', nil, _('Ghost Manager(_M)'), nil,
-                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'open_ghost_manager')}],
-          'visible' => true},
-        'Information' => {
-          'entry' => ['Information', nil, _('Information(_I)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-        'Information/Usage' => {
-          'entry' => ['Usage', nil, _('Usage graph(_A)'), nil,
-                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'show_usage')}],
-          'visible' => true},
-        'Information/Version' => {
-          'entry' => ['Version', nil, _('Version(_V)'), nil,
-                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'about')}],
-          'visible' => true},
-        'Close' => {
-          'entry' => ['Close', nil, _('Close(_W)'), nil,
-                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close_sakura')}],
-          'visible' => true},
-        'Quit' => {
-          'entry' => ['Quit', nil, _('Quit(_Q)'), nil,
-                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close_all')}],
-          'visible' => true},
-        'Change' => {
-          'entry' => ['Change', nil, _('Change(_G)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-        'Summon' => {
-          'entry' => ['Summon', nil, _('Summon(_X)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-        'Shell' => {
-          'entry' => ['Shell', nil, _('Shell(_S)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-        'Balloon' => {
-          'entry' => ['Balloon', nil, _('Balloon(_B)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-        'Costume' => {
-          'entry' => ['Costume', nil, _('Costume(_C)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-        'Stick' => {
-          'entry' => ['Stick', nil, _('Stick(_Y)'), nil,
-                      '', lambda {|a, b| @parent.handle_request('NOTIFY', 'stick_window')},
-                      false],
-          'visible' => true},
-        'Nekodorif' => {
-          'entry' => ['Nekodorif', nil, _('Nekodorif(_N)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-        'Kinoko' => {
-          'entry' => ['Kinoko', nil, _('Kinoko(_K)'), nil,
-                      '', lambda {|a, b| }],
-          'visible' => true},
-      }
       @__fontcolor = {
         'normal' => [0, 0, 0],
         'hover' => [255, 255, 255]
@@ -171,26 +40,126 @@ module Menu
         'foreground' => nil,
         'sidebar' => nil
       }
-      actions = Gtk::ActionGroup.new('Actions')
-      entry = []
-      for key in @__menu_list.keys
-        value = @__menu_list[key]
-        if key != 'Stick'
-          entry << value['entry']
-        end
+      @__menu_list = {}
+      @__popup_menu = Gtk::Menu.new
+      item = Gtk::MenuItem.new(:label => _('Recommend sites(_R)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Recommend'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Portal sites(_P)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Portal'] = {:entry => item, :visible => true}
+      item = Gtk::SeparatorMenuItem.new()
+      @__popup_menu.add(item)
+      item = Gtk::CheckMenuItem.new(:label => _('Stick(_Y)'), :use_underline => true)
+      item.set_active(false)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'stick_window')
       end
-      actions.add_actions(entry)
-      actions.add_toggle_actions([@__menu_list['Stick']['entry']])
-      @ui_manager = Gtk::UIManager.new()
-      @ui_manager.insert_action_group(actions, 0)
-      @ui_manager.add_ui(ui_info)
-      @__popup_menu = @ui_manager.get_widget('/popup')
+      @__popup_menu.add(item)
+      @__menu_list['Stick'] = {:entry => item, :visible => true}
+      item = Gtk::SeparatorMenuItem.new()
+      @__popup_menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('Options(_F)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Options'] = {:entry => item, :visible => true}
+      menu = Gtk::Menu.new()
+      item.set_submenu(menu)
+
+      item = Gtk::MenuItem.new(:label => _('Network Update(_U)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'network_update')
+      end
+      menu.add(item)
+      @__menu_list['Options/Update'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Vanish(_F)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'vanish')
+      end
+      menu.add(item)
+      @__menu_list['Options/Vanish'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Preferences...(_O)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'edit_preferences')
+      end
+      menu.add(item)
+      @__menu_list['Options/Preferences'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Console(_C)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'open_console')
+      end
+      menu.add(item)
+      @__menu_list['Options/Console'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Ghost Manager(_M)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'open_ghost_manager')
+      end
+      menu.add(item)
+      @__menu_list['Options/Manager'] = {:entry => item, :visible => true}
+      item = Gtk::SeparatorMenuItem.new()
+      @__popup_menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('Change(_G)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Change'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Summon(_X)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Summon'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Shell(_S)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Shell'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Costume(_C)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Costume'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Balloon(_B)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Balloon'] = {:entry => item, :visible => true}
+      item = Gtk::SeparatorMenuItem.new()
+      @__popup_menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('Information(_I)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Information'] = {:entry => item, :visible => true}
+      menu = Gtk::Menu.new()
+      item.set_submenu(menu)
+      item = Gtk::MenuItem.new(:label => _('Usage graph(_A)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'show_usage')
+      end
+      menu.add(item)
+      @__menu_list['Information/Usage'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Version(_V)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'about')
+      end
+      menu.add(item)
+      @__menu_list['Information/Version'] = {:entry => item, :visible => true}
+      item = Gtk::SeparatorMenuItem.new()
+      @__popup_menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('Nekodorif(_N)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Nekodorif'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Kinoko(_K)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['Kinoko'] = {:entry => item, :visible => true}
+      item = Gtk::SeparatorMenuItem.new()
+      @__popup_menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('Close(_W)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'close_sakura')
+      end
+      @__popup_menu.add(item)
+      @__menu_list['Close'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(:label => _('Quit(_Q)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'close_all')
+      end
+      @__popup_menu.add(item)
+      @__menu_list['Quit'] = {:entry => item, :visible => true}
+      @__popup_menu.show_all
       provider = create_css_provider_for(@__popup_menu)
       @__popup_menu.signal_connect('realize', provider) do |i, *a, provider|
         next set_stylecontext_with_sidebar(i, *a, :provider => provider)
       end
       for key in @__menu_list.keys
-        item = @ui_manager.get_widget(['/popup/', key].join(''))
+        item = @__menu_list[key][:entry]
         provider = create_css_provider_for(item)
         item.signal_connect('draw', provider) do |i, *a, provider|
           next set_stylecontext(i, *a, :provider => provider)
@@ -287,7 +256,7 @@ module Menu
 
     def __set_mayuna_menu(side)
       if @__mayuna_menu.length > side and not @__mayuna_menu[side].nil?
-        menuitem = @ui_manager.get_widget(['/popup/', 'Costume'].join(''))
+        menuitem = @__menu_list['Costume'][:entry]
         menuitem.set_submenu(@__mayuna_menu[side])
         __set_visible('Costume', true)
       else
@@ -422,7 +391,7 @@ module Menu
     def popup(button, side)
       @__popup_menu.unrealize()
       for key in @__menu_list.keys
-        item = @ui_manager.get_widget(['/popup/', key].join(''))
+        item = @__menu_list[key][:entry]
         submenu = item.submenu
         submenu.unrealize() unless submenu.nil?
       end
@@ -458,8 +427,8 @@ module Menu
       __set_nekodorif_menu()
       __set_kinoko_menu()
       for key in @__menu_list.keys
-        item = @ui_manager.get_widget(['/popup/', key].join(''))
-        visible = @__menu_list[key]['visible']
+        item = @__menu_list[key][:entry]
+        visible = @__menu_list[key][:visible]
         unless item.nil?
           if visible
             item.show()
@@ -475,7 +444,7 @@ module Menu
     def __set_caption(name, caption)
       fail "assert" unless @__menu_list.include?(name)
       fail "assert" unless caption.is_a?(String)
-      item = @ui_manager.get_widget(['/popup/', name].join(''))
+      item = @__menu_list[name][:entry]
       unless item.nil?
         label = item.get_children()[0]
         label.set_text_with_mnemonic(caption)
@@ -485,7 +454,7 @@ module Menu
     def __set_visible(name, visible)
       fail "assert" unless @__menu_list.include?(name)
       fail "assert" unless [false, true].include?(visible)
-      @__menu_list[name]['visible'] = visible
+      @__menu_list[name][:visible] = visible
     end
 
     def __set_portal_menu(side, portal)
@@ -559,7 +528,7 @@ module Menu
             menu.add(item)
             item.show()
           end
-          menuitem = @ui_manager.get_widget(['/popup/', 'Portal'].join(''))
+          menuitem = @__menu_list['Portal'][:entry]
           menuitem.set_submenu(menu)
           provider = create_css_provider_for(menu)
           menu.signal_connect('realize', provider) do |i, *a, provider|
@@ -639,7 +608,7 @@ module Menu
           menu.add(item)
           item.show()
         end
-        menuitem =  @ui_manager.get_widget(['/popup/', 'Recommend'].join(''))
+        menuitem =  @__menu_list['Recommend'][:entry]
         menuitem.set_submenu(menu)
         provider = create_css_provider_for(menu)
         menu.signal_connect('realize', provider) do |i, *a, provider|
@@ -791,7 +760,7 @@ module Menu
             ghost_menu << item
           end
         end
-        menuitem = @ui_manager.get_widget(['/popup/', path].join(''))
+        menuitem = @__menu_list[path][:entry]
         menuitem.set_submenu(ghost_menu)
         provider = create_css_provider_for(ghost_menu)
         ghost_menu.signal_connect('realize', provider) do |i, *a, provider|
@@ -802,13 +771,13 @@ module Menu
 
     def __set_shell_menu
       shell_menu = @parent.handle_request('GET', 'get_shell_menu')
-      menuitem = @ui_manager.get_widget(['/popup/', 'Shell'].join(''))
+      menuitem = @__menu_list['Shell'][:entry]
       menuitem.set_submenu(shell_menu)
     end
 
     def __set_balloon_menu
       balloon_menu = @parent.handle_request('GET', 'get_balloon_menu')
-      menuitem = @ui_manager.get_widget(['/popup/', 'Balloon'].join(''))
+      menuitem = @__menu_list['Balloon'][:entry]
       menuitem.set_submenu(balloon_menu)
     end
 
@@ -872,7 +841,7 @@ module Menu
         ##if working
         ##  item.set_sensitive(false)
       end
-      menuitem = @ui_manager.get_widget(['/popup/', 'Nekodorif'].join(''))
+      menuitem = @__menu_list['Nekodorif'][:entry]
       menuitem.set_submenu(nekodorif_menu)
       provider = create_css_provider_for(nekodorif_menu)
       nekodorif_menu.signal_connect('realize', provider) do |i, *a, provider|
@@ -900,7 +869,7 @@ module Menu
         ##if working
         ##  item.set_sensitive(false)
       end
-      menuitem = @ui_manager.get_widget(['/popup/', 'Kinoko'].join(''))
+      menuitem = @__menu_list['Kinoko'][:entry]
       menuitem.set_submenu(kinoko_menu)
       provider = create_css_provider_for(kinoko_menu)
       kinoko_menu.signal_connect('realize', provider) do |i, *a, provider|
@@ -909,7 +878,7 @@ module Menu
     end
 
     def get_stick
-      item = @ui_manager.get_widget(['/popup/', 'Stick'].join(''))
+      item = @__menu_list['Stick'][:entry]
       if not item.nil? and item.active?
         return true
       else

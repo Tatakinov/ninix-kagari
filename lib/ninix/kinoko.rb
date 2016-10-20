@@ -32,41 +32,24 @@ module Kinoko
 
     def initialize(accelgroup)
       @parent = nil
-      ui_info = <<-EOS
-        <ui>
-          <popup name='popup'>
-            <menuitem action='Settings'/>
-            <menu action='Skin'>
-            </menu>
-            <separator/>
-            <menuitem action='Exit'/>
-          </popup>
-        </ui>
-      EOS
-      @__menu_list = {
-        'settings' => [['Settings', nil, _('Settings...(_O)'), nil,
-                        '', lambda {|a, b| @parent.handle_request('NOTIFY', 'edit_preferences')}],
-                       '/ui/popup/Settings'],
-        'skin' => [['Skin', nil, _('Skin(_K)'), nil, '', lambda {|a, b| }],
-                   nil, '/ui/popup/Skin'],
-        'exit' => [['Exit', nil, _('Exit(_Q)'), nil,
-                    '', lambda {|a, b| @parent.handle_request('NOTIFY', 'close')}],
-                   '/ui/popup/Exit'],
-      }
-      actions = Gtk::ActionGroup.new('Actions')
-      entry = []
-      for value in @__menu_list.values()
-        entry << value[0]
+      @__menu_list = {}
+      @__popup_menu = Gtk::Menu.new
+      item = Gtk::MenuItem.new(:label => _('Settings...(_O)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'edit_preferences')
       end
-      actions.add_actions(entry)
-      ui_manager = Gtk::UIManager.new()
-      ui_manager.insert_action_group(actions, 0)
-      ui_manager.add_ui(ui_info)
-      @__popup_menu = ui_manager.get_widget('/ui/popup')
-      for key in @__menu_list.keys
-        path = @__menu_list[key][-1]
-        @__menu_list[key][1] = ui_manager.get_widget(path)
+      @__popup_menu.add(item)
+      @__menu_list['settings'] = item
+      item = Gtk::MenuItem.new(:label => _('Skin(_K)'), :use_underline => true)
+      @__popup_menu.add(item)
+      @__menu_list['skin'] = item
+      item = Gtk::MenuItem.new(:label => _('Exit(_Q)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'close')
       end
+      @__popup_menu.add(item)
+      @__menu_list['exit'] = item
+      @__popup_menu.show_all
     end
 
     def set_responsible(parent)
@@ -92,11 +75,11 @@ module Kinoko
           menu.add(item)
           item.show()
         end
-        @__menu_list[key][1].set_submenu(menu)
+        @__menu_list[key].set_submenu(menu)
         menu.show()
-        @__menu_list[key][1].show()
+        @__menu_list[key].show()
       else
-        @__menu_list[key][1].hide()
+        @__menu_list[key].hide()
       end
     end
   end

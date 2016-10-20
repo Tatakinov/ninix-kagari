@@ -379,84 +379,6 @@ module NGM
 
     def initialize
       @parent = nil
-      @ui_info = "
-        <ui>
-          <menubar name='MenuBar'>
-            <menu action='FileMenu'>
-              <menuitem action='Search'/>
-              <menuitem action='Search Forward'/>
-              <separator/>
-              <menuitem action='Settings'/>
-              <separator/>
-              <menuitem action='DB Network Update'/>
-              <separator/>
-              <menuitem action='Close'/>
-            </menu>
-            <menu action='ViewMenu'>
-              <menuitem action='Mask'/>
-              <menuitem action='Reset to Default'/>
-              <menuitem action='Show All'/>
-            </menu>
-            <menu action='ArchiveMenu'>
-            </menu>
-            <menu action='HelpMenu'>
-            </menu>
-          </menubar>
-        </ui>"
-      @entries = [
-        [ 'FileMenu', nil,
-          _('_File'), nil,
-          '',
-          lambda {|a, b| } ],
-        [ 'ViewMenu', nil,
-          _('_View'), nil,
-          '',
-          lambda {|a, b| } ],
-        [ 'ArchiveMenu', nil,
-          _('_Archive'), nil,
-          '',
-          lambda {|a, b| } ],
-        [ 'HelpMenu', nil,
-          _('_Help'), nil,
-          '',
-          lambda {|a, b| } ],
-        [ 'Search', nil,                   # name, stock id
-          _('Search(_F)'), '<control>F',   # label, accelerator
-          'Search',                        # tooltip
-          lambda {|a, b| open_search_dialog()} ],
-        [ 'Search Forward', nil,
-          _('Search Forward(_S)'), 'F3',
-          nil,
-          lambda {|a, b| search_forward()} ],
-        [ 'Settings', nil,
-          _('Settings(_O)'), nil,
-          nil,
-          lambda {|a, b| @parent.handle_request(
-                    'NOTIFY', 'open_preference_dialog')} ],
-        [ 'DB Network Update', nil,
-          _('DB Network Update(_N)'), nil,
-          nil,
-          lambda {|a, b| network_update()} ],
-        [ 'Close', nil,
-          _('Close(_X)'), nil,
-          nil,
-          lambda {|a, b| close()} ],
-        [ 'Mask', nil,
-          _('Mask(_M)'), nil,
-          nil,
-          lambda {|a, b| @parent.handle_request(
-                    'NOTIFY', 'open_mask_dialog')} ],
-        [ 'Reset to Default', nil,
-          _('Reset to Default(_Y)'), nil,
-          nil,
-          lambda {|a, b| @parent.handle_request(
-                    'NOTIFY', 'reset_to_default')} ],
-        [ 'Show All', nil,
-          _('Show All(_Z)'), nil,
-          nil,
-          lambda {|a, b| @parent.handle_request(
-                    'NOTIFY', 'show_all')} ],
-      ]
       @opened = false
       @textview = [nil, nil]
       @darea = [nil, nil]
@@ -500,20 +422,77 @@ module NGM
       end
       @window.set_window_position(Gtk::WindowPosition::CENTER)
       @window.gravity = Gdk::Gravity::CENTER
-      actions = Gtk::ActionGroup.new('Actions')
-      actions.add_actions(@entries)
-      ui = Gtk::UIManager.new()
-      ui.insert_action_group(actions, 0)
-      @window.add_accel_group(ui.accel_group)
-      begin
-        mergeid = ui.add_ui(@ui_info)
-      rescue => e #except GObject.GError as msg:
-        Logging::Logging.error('building menus failed: ' + e.message)
+      accelgroup = Gtk::AccelGroup.new()
+      @window.add_accel_group(accelgroup)
+      menubar = Gtk::MenuBar.new()
+      item = Gtk::MenuItem.new(:label => _('_File'), :use_underline => true)
+      menubar.add(item)
+      menu = Gtk::Menu.new()
+      item.set_submenu(menu)
+      item = Gtk::MenuItem.new(:label => _('Search(_F)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        open_search_dialog()
       end
+      item.add_accelerator('activate', accelgroup, Gdk::Keyval::KEY_f,
+                           Gdk::ModifierType::CONTROL_MASK,
+                           Gtk::AccelFlags::VISIBLE)
+      menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('Search Forward(_S)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        search_forward()
+      end
+      item.add_accelerator('activate', accelgroup, Gdk::Keyval::KEY_F3,
+                           nil,
+                           Gtk::AccelFlags::VISIBLE)
+      menu.add(item)
+      item = Gtk::SeparatorMenuItem.new()
+      menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('Settings(_O)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'open_preference_dialog')
+      end
+      menu.add(item)
+      item = Gtk::SeparatorMenuItem.new()
+      menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('DB Network Update(_N)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        network_update()
+      end
+      menu.add(item)
+      item = Gtk::SeparatorMenuItem.new()
+      menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('Close(_X)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        close()
+      end
+      menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('_View'), :use_underline => true)
+      menu = Gtk::Menu.new
+      item.set_submenu(menu)
+      item = Gtk::MenuItem.new(:label => _('Mask(_M)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'open_mask_dialog')
+      end
+      menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('Reset to Default(_Y)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'reset_to_default')
+      end
+      menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('Show All(_Z)'), :use_underline => true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'show_all')
+      end
+      menu.add(item)
+      item = Gtk::MenuItem.new(:label => _('_Archive'), :use_underline => true)
+      menubar.add(item)
+      item = Gtk::MenuItem.new(:label => _('_Help'), :use_underline => true)
+      menubar.add(item)
+      menubar.show_all
       vbox = Gtk::Box.new(orientation=Gtk::Orientation::VERTICAL)
       @window.add(vbox)
       vbox.show()
-      vbox.pack_start(ui.get_widget('/MenuBar'), :expand => false, :fill => false, :padding => 0)
+      vbox.pack_start(menubar, :expand => false, :fill => false, :padding => 0)
       separator = Gtk::Separator.new(:horizontal)
       vbox.pack_start(separator, :expand => false, :fill => true, :padding => 0)
       separator.show()

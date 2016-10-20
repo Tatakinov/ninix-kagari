@@ -1,3 +1,7 @@
+Thu October 20 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* deprecatedになっているGtkのWidgetを使用しないようにした.
+	  (Gtk::ActionGroupとGtk::UIManagerの2つ.)
+
 Mon October 17 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* Pix.create_pixbuf_from_fileの引数:is_pnrのデフォルト値を
 	  falseに変更した.
