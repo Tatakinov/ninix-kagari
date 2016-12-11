@@ -1,3 +1,7 @@
+Sun December 11 2016   Shyouzou Sugitani <shy@users.osdn.me>
+	* Rubyらしいコーディングスタイルへの修正.
+	* Makotoクラスのテストをtest-makoto.rbに移動.
+
 Thu October 20 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* deprecatedになっているGtkのWidgetを使用しないようにした.
 	  (Gtk::ActionGroupとGtk::UIManagerの2つ.)

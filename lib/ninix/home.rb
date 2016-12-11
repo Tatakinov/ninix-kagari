@@ -25,15 +25,15 @@ module Home
   end
 
   def self.get_archive_dir()
-    File.join(get_ninix_home(), 'archive')
+    File.join(get_ninix_home, 'archive')
   end
 
   def self.get_pango_fontrc()
-    File.join(get_ninix_home(), 'pango_fontrc')
+    File.join(get_ninix_home, 'pango_fontrc')
   end
 
   def self.get_preferences()
-    File.join(get_ninix_home(), 'preferences')
+    File.join(get_ninix_home, 'preferences')
   end
 
   def self.get_normalized_path(path)
@@ -46,18 +46,18 @@ module Home
 
   def self.load_config()
     return nil unless File.exists?(get_ninix_home())
-    ghosts = search_ghosts()
-    balloons = search_balloons()
-    nekoninni = search_nekoninni()
-    katochan = search_katochan()
-    kinoko = search_kinoko()
+    ghosts = search_ghosts
+    balloons = search_balloons
+    nekoninni = search_nekoninni
+    katochan = search_katochan
+    kinoko = search_kinoko
     return ghosts, balloons, nekoninni, katochan, kinoko
   end
 
   def self.get_shiori()
     table = {}
     shiori_lib = DLL::Library.new('shiori', :saori_lib => nil)
-    path = DLL.get_path()
+    path = DLL.get_path
     Dir.foreach(path, :encoding => 'UTF-8') do |filename|
       next if filename == '..' or filename == '.'
       if File.readable_real?(File.join(path, filename))
@@ -68,9 +68,7 @@ module Home
         name = basename if ['.rb'].include?(ext)
         unless name.nil? or table.include?(name)
           shiori = shiori_lib.request(['', name])
-          unless shiori.nil?
-            table[name] = shiori
-          end
+          table[name] = shiori unless shiori.nil?
         end
       end
     end

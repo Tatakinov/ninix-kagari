@@ -21,7 +21,7 @@ module Makoto
       i, text = expand(s, i)
       buf << text
     end
-    return buf.join
+    buf.join
   end
 
   def self.expand(s, start)
@@ -67,55 +67,17 @@ module Makoto
         i += 1
       end
     end
-    if validity == 2
+    case validity
+    when 2
       expanded = segments[1..segments.length-1].sample
       unless repeat_count.nil?
         expanded = (expanded * rand(repeat_count))
       end
       return i, segments[0] + expanded
-    elsif validity.zero?
+    when 0
       return j, buf.join
     else
       return j, s[start..s.length-1]
-    end
-  end
-
-  def self.test(verbose: 0)
-    for test, expected in [['a(1)b', ['a1b']],
-                           ['a(1|2)b', ['a1b', 'a2b']],
-                           ['a(1)2b', ['ab', 'a1b', 'a11b']],
-                           ['a(1|2)1b', ['ab', 'a1b', 'a2b']],
-                           ['(1|2)(a|b)', ['1a', '1b', '2a', '2b']],
-                           ['((1|2)|(a|b))', ['1', '2', 'a', 'b']],
-                           ['()', ['']],
-                           ['()2', ['']],
-                           ['a()b', ['ab']],
-                           ['a()2b', ['ab']],
-                           ['a\(1\|2\)b', ['a(1|2)b']],
-                           ['\((1|2)\)', ['(1)', '(2)']],
-                           ['\(1)', ['(1)']],
-                           ['a|b', ['a|b']],
-                           # errornous cases
-                           ['(1', ['(1']],
-                           ['(1\)', ['(1\)']],
-                           ['(1|2', ['(1|2']],
-                           ['(1|2\)', ['(1|2\)']],
-                           ['(1|2)(a|b', ['1(a|b', '2(a|b']],
-                           ['((1|2)|(a|b)', ['((1|2)|(a|b)']],
-                           ]
-      result = execute(test)
-      print("'", test.to_s, "'", ' => ', "'", result.to_s, "'", ' ... ',) unless verbose.zero?
-      begin
-        if expected.nil?
-          fail "assert" unless result == test
-        else
-          fail "assert" unless expected.include?(result)
-        end
-        print("OK\n") unless verbose.zero?
-      rescue #AssertionError
-        print("NG\n") unless verbose.zero?
-        raise
-      end
     end
   end
 end
