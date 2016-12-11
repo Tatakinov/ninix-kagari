@@ -22,18 +22,18 @@ module Textcopy
   class Saori < DLL::SAORI
 
     def initialize
-      super()
+      super
       @clipboard = nil
     end
 
     def setup
       @clipboard = Gtk::Clipboard.get('PRIMARY')
-      return 1
+      1
     end
 
     def finalize
       @clipboard = nil
-      return 1
+      1
     end
 
     def execute(argument)

@@ -51,7 +51,7 @@ module Yaya
           result = 105
         end
       end
-      return result
+      result
     end
 
     def show_description
@@ -76,8 +76,7 @@ module Yaya
       )
       path[0, @dir.bytesize] = @dir
       @id = $_yaya.multi_load(path, @dir.bytesize)
-      ret = 1
-      return ret
+      1
     end
 
     def unload
@@ -95,7 +94,7 @@ module Yaya
       rlen =[req_string.bytesize].pack("l!")
       ret = $_yaya.multi_request(@id, request, rlen)
       rlen, = rlen.unpack("l!")
-      return ret[0, rlen].to_s
+      ret[0, rlen].to_s
     end
   end
 end

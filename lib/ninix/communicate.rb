@@ -32,7 +32,7 @@ module Communicate
     end
 
     def notify_all(event, references)
-      for sakura in @ghosts.keys()
+      @ghosts.each_key do |sakura|
         sakura.enqueue_event(event, *references)
       end
     end
@@ -52,9 +52,7 @@ module Communicate
                      event, name, selfname, shell_name,
                      flag_break, communicate,
                      sstp, notranslate, script, references)
-      if script.empty? and not ON_OTHER_EVENT.include?(event)
-        return
-      end
+      return if script.empty? and not ON_OTHER_EVENT.include?(event)
       on_other_event = nil
       if ON_OTHER_EVENT.include?(event)
         if flag_break and ['OnClose', 'OnVanishSelected'].include?(event)

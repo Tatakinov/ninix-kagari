@@ -25,26 +25,21 @@ module NConfig
   end
 
   def self.create_from_file(path)
-    charset = 'CP932' # default
-    f = File.open(path, 'rb')
-    if f.read(3).bytes == [239, 187, 191] # "\xEF\xBB\xBF"
-      f.close
-      f = File.open(path, 'rb:BOM|UTF-8')
-      charset = 'UTF-8'
-    else
-      f.seek(0) # rewind
-    end
+    has_bom = File.open(path) {|f| f.read(3) } == "\xEF\xBB\xBF"
+    charset = has_bom ? 'UTF-8' : 'CP932'
     buf = []
-    while line = f.gets
-      buf << line.strip unless line.strip.empty?
-    end
-    f.close
+    File.open(path, has_bom ? 'rb:BOM|UTF-8' : 'rb') {|f|
+      while line = f.gets
+        line = line.strip
+        buf << line unless line.empty?
+      end
+    }
     return create_from_buffer(buf, :charset => charset)
   end
 
   def self.create_from_buffer(buf, charset: 'CP932')
     dic = Config.new
-    for line in buf
+    buf.each do |line|
       line = line.force_encoding(charset).encode(
         "UTF-8", :invalid => :replace, :undef => :replace)
       key, value = line.split(",", 2)
@@ -68,6 +63,6 @@ module NConfig
   end
 
   def self.null_config()
-    NConfig::Config.new()
+    NConfig::Config.new
   end
 end

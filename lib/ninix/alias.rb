@@ -18,16 +18,18 @@ module Alias
 
   def self.fatal(error)
     Logging::Logging.error('alias.rb: ' + error.to_s)
-    NConfig.null_config()
+    NConfig.null_config
   end
 
   def self.create_from_file(path)
-    f = File.open(path, 'rb')
     buf = []
-    while line = f.gets
-      buf << line.strip unless line.strip.empty?
-    end
-    return create_from_buffer(buf)
+    File::open(path, 'rb') {|f|
+      while line = f.gets
+        line = line.strip
+        buf << line unless line.empty?
+      end
+    }
+    create_from_buffer(buf)
   end
 
   def self.create_from_buffer(buf)
@@ -39,7 +41,7 @@ module Alias
       i += 1
       next if line.length.zero?
       match = re_alias.match(line)
-      if not match.nil?
+      unless match.nil?
         name = line
         table = {}
         begin
@@ -110,6 +112,6 @@ module Alias
         dic[key] = value
       end
     end
-    return dic
+    dic
   end
 end
