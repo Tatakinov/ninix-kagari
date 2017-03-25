@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2016 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2017 by Shyouzou Sugitani <shy@users.osdn.me>
 #  Copyright (C) 2003-2005 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -39,7 +39,7 @@ module Ninix_Main
   bindtextdomain("ninix-aya")
 
   def self.handleException(exception)
-    message = ("Uncaught exception (" + exception.class.to_s + ")\n" + exception.backtrace.join("\n"))
+    message = ("Uncaught exception (#{exception.class})\n" + exception.backtrace.join("\n"))
     Logging::Logging.error(message)
     response_id = 1
     dialog = Gtk::MessageDialog.new(
@@ -260,11 +260,9 @@ module Ninix_Main
           buffer = socket.gets
           handler.handle(buffer)
         rescue SocketError => e
-          Logging::Logging.error(
-            'socket.error: ' + e.message)
+          Logging::Logging.error("socket.error: #{e.message}")
         rescue SystemCallError => e
-          Logging::Logging.error(
-            'socket.error: ' + e.message + ' (' + e.errno.to_s + ')')
+          Logging::Logging.error("socket.error: #{e.message} (#{e.errno})")
         rescue # may happen when ninix is terminated
           return
         end
@@ -287,13 +285,12 @@ module Ninix_Main
         begin
           server = SSTP::SSTPServer.new(port)
         rescue SystemCallError => e
-          Logging::Logging.warning(
-            'Port ' + port.to_s + ': ' + e.message + ' (ignored)')
+          Logging::Logging.warning("Port #{port}: #{e.message} (ignored)")
           next
         end
         server.set_responsible(self)
         @sstp_servers << server
-        Logging::Logging.info('Serving SSTP on port ' + port.to_s)
+        Logging::Logging.info("Serving SSTP on port #{port}")
       end
     end
   end
@@ -844,9 +841,9 @@ module Ninix_Main
       end
       # load ghost
       @current_sakura = default_sakura
-      ##for i, name in enumerate(self.get_ghost_names()):
-      ##    Logging::Logging.info(
-      ##        'GHOST(' + i.to_s +'): ' + name)
+      ##for i, name in enumerate(get_ghost_names())
+      ##    Logging::Logging.info("GHOST(#{i}): #{name}")
+      ##end
       start_sakura(@current_sakura, :init => true, :abend => @abend)
     end
 

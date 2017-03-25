@@ -1,3 +1,8 @@
+Sat March 25 2017   Shyouzou Sugitani <shy@users.osdn.me>
+	* Copyrightを2017年に更新した.
+	* Rubyらしいコーディングスタイルへの修正.
+	* HolonとMemeクラスを拡張.
+
 Sun December 11 2016   Shyouzou Sugitani <shy@users.osdn.me>
 	* Rubyらしいコーディングスタイルへの修正.
 	* Makotoクラスのテストをtest-makoto.rbに移動.

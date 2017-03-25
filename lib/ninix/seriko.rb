@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2016 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2017 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -14,17 +14,18 @@
 
 require "gtk3"
 
+require_relative "metamagic"
 require_relative "logging"
 
 module Seriko
 
-  class Controller
+  class Controller < MetaMagic::Holon
 
     DEFAULT_FPS = 30.0 # current default
 
     def initialize(seriko)
+      super("") # FIXME
       @seriko = seriko
-      @parent = nil
       @exclusive_actor = nil
       @base_id = nil
       @timeout_id = nil
@@ -38,10 +39,6 @@ module Seriko
       @dirty = true
     end
 
-    def set_responsible(parent)
-      @parent = parent
-    end
-    
     def set_base_id(window, surface_id)
       case surface_id
       when '-2'
@@ -131,12 +128,16 @@ module Seriko
     end
 
     def remove_overlay(actor)
-      @dirty = true if @overlays.delete(actor)
+      @dirty = true unless @overlays.delete(actor).nil?
     end
 
     def add_overlay(window, actor, surface_id, x, y, method)
-      terminate(window) if surface_id == '-2'
-      if ['-1', '-2'].include?(surface_id)
+      case surface_id
+      when '-2'
+        terminate(window)
+        remove_overlay(actor)
+        return
+      when '-1'
         remove_overlay(actor)
         return
       end

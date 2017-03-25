@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2016 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2017 by Shyouzou Sugitani <shy@users.osdn.me>
 #  Copyright (C) 2003 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -16,15 +16,18 @@
 require "gtk3"
 
 require_relative "pix"
-
+require_relative "metamagic"
 
 module Balloon
 
-  class Balloon
+  class Balloon < MetaMagic::Holon
     attr_accessor :window, :user_interaction
 
     def initialize
-      @parent = nil
+      super("") # FIXME
+      @handlers = {
+        'reset_user_interaction' => 'reset_user_interaction',
+      }
       @synchronized = []
       @user_interaction = false
       @window = []
@@ -40,24 +43,6 @@ module Balloon
       # create passwordinputbox
       @passwordinputbox = PasswordInputBox.new()
       @passwordinputbox.set_responsible(self)
-    end
-
-    def set_responsible(parent)
-      @parent = parent
-    end
-
-    def handle_request(event_type, event, *arglist)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
-      handlers = {
-        'reset_user_interaction' => 'reset_user_interaction',
-      }
-      unless handlers.include?(event)
-        result = @parent.handle_request(
-          event_type, event, *arglist)
-      else
-        result = method(handlers[event]).call(*arglist)
-      end
-      return result if event_type == 'GET'
     end
 
     def reset_user_interaction

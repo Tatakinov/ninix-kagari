@@ -2,7 +2,7 @@
 #
 #  yaya.rb - a (Real) YAYA loader for ninix
 #  Copyright (C) 2004 by linjian
-#  Copyright (C) 2004-2016 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2004-2017 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #  Copyright (C) 2011 by henryhu
 #
 #  This program is free software; you can redistribute it and/or modify it

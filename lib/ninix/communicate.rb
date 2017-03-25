@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  communicate.rb - ghost-to-ghost communication mechanism
-#  Copyright (C) 2002-2016 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2017 by Shyouzou Sugitani <shy@users.osdn.me>
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
 #
 #  This program is free software; you can redistribute it and/or modify it

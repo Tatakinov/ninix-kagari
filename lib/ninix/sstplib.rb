@@ -3,7 +3,7 @@
 #  sstplib.rb - an SSTP library module in Ruby
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2016 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2017 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -40,71 +40,41 @@ module SSTPLib
     end
 
     def parse_headers()
-      if @fp.nil?
-        return
-      end
-      headers = []
-      while true
-        line = @fp.readline()
-        if line.strip.empty?
-          break
-        end
-        if line.end_with?("\r\n")
-          line = line[0..-3]
-        elsif line.end_with?("\n")
-          line = line[0..-2]
-        end       
-        headers << line
-      end
+      return if @fp.nil?
       message = []
-      for h in headers
-        if h.include?(":")
-          key, value = h.split(":", 2)
-          message << [key, value.strip]
-        end
+      while line = @fp.gets
+        break if line.strip.empty?
+        line = line.chomp
+        next unless line.include?(":")
+        key, value = line.split(":", 2)
+        message << [key, value.strip]
       end
-      if not message.assoc("Charset").nil?
-        charset = message.reverse.assoc("Charset")[1] # XXX
-      else
-        charset = "Shift_JIS"
-      end
-      new_list = []
-      for item in message
-        key, value = item
-        new_list << [key, value.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)]
-      end
-      message = new_list
-      return message
+      charset = message.reverse.assoc("Charset")&.at(1) || "Shift_JIS" # XXX
+      message.each {|k, v| v.force_encoding(charset).encode!("UTF-8", :invalid => :replace, :undef => :replace) }
     end
 
     def parse_request(requestline)
       requestline = requestline.encode('Shift_JIS', :invalid => :replace, :undef => :replace)
-      if requestline.end_with?("\r\n")
-        requestline = requestline[0..-3]
-      elsif requestline.end_with?("\n")
-        requestline = requestline[0..-2]
-      end
+      requestline = requestline.chomp
       @requestline = requestline
       re_requestsyntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
       match = re_requestsyntax.match(requestline)
       if match.nil?
         @equestline = '-'
-        send_error(400, :message => 'Bad Request ' + requestline.to_s)
+        send_error(400, :message => "Bad Request #{requestline}")
         return false
       end
       @command, @version = match[1, 2]
-      @headers = parse_headers()
+      @headers = parse_headers
       return true
     end
 
     def handle(line)
       @error = @version = nil
-      if not parse_request(line)
-        return
-      end
+      return unless parse_request(line)
       name = ("do_#{@command}_#{@version[0]}_#{@version[2]}")
       begin
-        method(name).call()
+        method(name).call
       rescue
         send_error(
           501,
@@ -121,20 +91,20 @@ module SSTPLib
 
     def send_response(code, message: nil)
       log_request(code, :message => message)
-      @fp.write("SSTP/" + (@version or "1.0") + " " + code.to_i.to_s + " " + RESPONSES[code] + "\r\n\r\n")
+      @fp.write("SSTP/#{(@version or "1.0")} #{code} #{RESPONSES[code]}\r\n\r\n")
     end
 
     def log_error(message)
-      Logging::Logging.error('[' + timestamp + '] ' + message + '\n')
+      Logging::Logging.error("[#{timestamp}] #{message}\n")
     end
 
     def log_request(code, message: nil)
       if @requestline == '-'
         request = @requestline
       else
-        request = ['"', @requestline, '"'].join("")
+        request = "\"#{@requestline}\""
       end
-      Logging::Logging.info(client_hostname + ' [' + timestamp + '] ' + request + ' ' + code.to_s + ' ' + (message or RESPONSES[code]) + "\n")
+      Logging::Logging.info("#{client_hostname} [#{timestamp}] #{request} #{code} #{(message or RESPONSES[code])}\n")
     end
 
     def client_hostname
@@ -147,12 +117,7 @@ module SSTPLib
     end
 
     def timestamp
-      month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      t = Time.now.localtime
-      m = month_names[t.month - 1]
-      return sprintf('%02d/%s/%d:%02d:%02d:%02d %+05d',
-                     t.day, m, t.year, t.hour, t.min, t.sec, t.utc_offset / 36)
+      Time.now.localtime.strftime("%d/%b/%Y:%H:%M:%S %z")
     end
   end
 end

@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2016 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2017 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -52,7 +52,7 @@ module SSTP
     def send_response(code, data: nil)
       begin
         @request_handler.send_response(code)
-        @request_handler.write(data) if not data.nil? # FIXME
+        @request_handler.write(data) unless data.nil? # FIXME
         @request_handler.shutdown(Socket::SHUT_WR) # XXX
       rescue
         #pass
@@ -62,7 +62,7 @@ module SSTP
 
     def send_answer(value)
       charset = @request_handler.get_charset
-      answer = [value.encode(charset, :invalid => :replace, :undef => :replace), "\r\n\r\n"].join("")
+      answer = "#{value.encode(charset, :invalid => :replace, :undef => :replace)}\r\n\r\n"
       send_response(200, :data => answer) # OK
     end
 
@@ -87,11 +87,10 @@ module SSTP
   class SSTPRequestHandler < SSTPLib::BaseSSTPRequestHandler
 
     def handle(line)
-      if not @server.handle_request('GET', 'get_sakura_cantalk')
-        @error = @version = nil
-        if not parse_request(line)
-          return
-        end
+      unless @server.handle_request('GET', 'get_sakura_cantalk')
+        @error = nil
+        @version = nil
+        return unless parse_request(line)
         send_error(512)
       else
         super(line)
@@ -120,32 +119,24 @@ module SSTP
     end
 
     def handle_send(version)
-      if not check_decoder()
-        return
-      end
+      return unless check_decoder()
       sender = get_sender()
-      if sender.nil?
-        return
-      end
-      if version == 1.3
+      return if sender.nil?
+      case version
+      when 1.3
         handle = get_handle()
-        if handle.nil?
-          return
-        end
+        return if handle.nil?
       else
         handle = nil
       end
       script_odict = get_script_odict()
-      if script_odict.nil?
-        return
-      end
-      if [1.0, 1.1].include?(version)
+      return if script_odict.nil?
+      case version
+      when 1.0, 1.1
         entry_db = nil
-      elsif [1.2, 1.3, 1.4].include?(version)
+      when 1.2, 1.3, 1.4
         entry_db = get_entry_db()
-        if entry_db.nil?
-          return
-        end
+        return if entry_db.nil?
       end
       enqueue_request(sender, nil, handle, script_odict, entry_db)
     end
@@ -161,28 +152,19 @@ module SSTP
 
     def handle_notify(version)
       script_odict = {}
-      if not check_decoder()
-        return
-      end
+      return unless check_decoder()
       sender = get_sender()
-      if sender.nil?
-        return
-      end
+      return if sender.nil?
       event = get_event()
-      if event.nil?
-        return
-      end
-      if version == 1.0
+      return if event.nil?
+      case version
+      when 1.0
         entry_db = nil
-      elsif version == 1.1
+      when 1.1
         script_odict = get_script_odict()
-        if script_odict.nil?
-          return
-        end
+        return if script_odict.nil?
         entry_db = get_entry_db()
-        if entry_db.nil?
-          return
-        end
+        return if entry_db.nil?
       end
       enqueue_request(sender, event, nil, script_odict, entry_db)
     end
@@ -214,7 +196,7 @@ module SSTP
     PROHIBITED_TAGS = ['\j', '\-', '\+', '\_+', '\!', '\8', '\_v', '\C']
 
     def check_script(script)
-      if not local_request()
+      unless local_request()
         parser = Script::Parser.new
         nodes = []
         while true
@@ -227,11 +209,11 @@ module SSTP
             break
           end
         end
-        for node in nodes
-          if node[0] == Script::SCRIPT_TAG and \
-            PROHIBITED_TAGS.include?(node[1])
+        nodes.each do |node|
+          next unless node[0] == Script::SCRIPT_TAG
+          if PROHIBITED_TAGS.include?(node[1])
             send_response(400) # Bad Request
-            log_error('Script: tag ' + node[1].to_s + ' not allowed')
+            log_error("Script: tag #{node[1]} not allowed")
             return true
           end
         end
@@ -242,25 +224,19 @@ module SSTP
     def get_script_odict
       script_odict = {} # Ordered Hash
       if_ghost = nil
-      for item in @headers
-        name, value = item
-        if name != 'Script'
-          if name == ('IfGhost')
-            if_ghost = value
-          else
-            if_ghost = nil
-          end
+      @headers.each do |name, value|
+        case name
+        when 'IfGhost'
+          if_ghost = value
+        when 'Script'
+          # nop
+        else
+          if_ghost = nil
           next
         end
         script = value.to_s
-        if check_script(script)
-          return
-        end
-        if if_ghost.nil?
-          script_odict[''] = script
-        else
-          script_odict[if_ghost] = script
-        end
+        return if check_script(script)
+        script_odict[if_ghost || ''] = script
         if_ghost = nil
       end
       return script_odict
@@ -268,50 +244,36 @@ module SSTP
 
     def get_entry_db
       entry_db = EntryDB::EntryDatabase.new
-      for item in @headers
-        key, value = item
-        if key == "Entry"
-          entry = value.split(',', 2)
-          if entry.length != 2
-            send_response(400) # Bad Request
-            return nil
-          end
-          entry_db.add(entry[0].strip(), entry[1].strip())
+      @headers.each do |key, value|
+        next unless key == "Entry"
+        entry = value.split(',', 2)
+        if entry.length != 2
+          send_response(400) # Bad Request
+          return nil
         end
+        entry_db.add(entry[0].strip(), entry[1].strip())
       end
       return entry_db
     end
 
     def get_event
-      if not @headers.assoc("Event").nil?
-        event = @headers.reverse.assoc("Event")[1]
-      else
-        event = nil
-      end
+      event = @headers.reverse.assoc("Event")&.at(1)
       if event.nil?
         send_response(400) # Bad Request
         log_error('Event: header field not found')
         return nil
       end
       buf = [event]
-      for i in 0..7
-        key = ['Reference', i.to_s].join("")
-        if not @headers.assoc(key).nil?
-          value = @headers.reverse.assoc(key)[1]
-        else
-          value = nil
-        end
+      (0..7).each do |i|
+        key = "Reference#{i}"
+        value = @headers.reverse.assoc(key)&.at(1)
         buf << value
       end
       return buf
     end
 
     def get_sender
-      if not @headers.assoc('Sender').nil?
-        sender = @headers.reverse.assoc('Sender')[1]
-      else
-        sender = nil
-      end
+      sender = @headers.reverse.assoc('Sender')&.at(1)
       if sender.nil?
         send_response(400) # Bad Request
         log_error('Sender: header field not found')
@@ -321,11 +283,7 @@ module SSTP
     end
 
     def get_handle
-      if not @headers.assoc("HWnd").nil?
-        path = @headers.assoc("HWnd")[1]
-      else
-        path = nil
-      end
+      path = @headers.assoc("HWnd")&.at(1)
       if path.nil?
         send_response(400) # Bad Request
         log_error('HWnd: header field not found')
@@ -347,40 +305,27 @@ module SSTP
     end
 
     def get_charset
-      if not @headers.assoc('Charset').nil?
-        charset = @headers.reverse.assoc('Charset')[1] # XXX
-      else
-        charset = 'Shift_JIS'
-      end
-      return charset
+      @headers.reverse.assoc('Charset')&.at(1) || 'Shift_JIS' # XXX
     end
 
     def check_decoder
-      if not @headers.assoc('Charset').nil?
-        charset = @headers.reverse.assoc('Charset')[1] # XXX
-      else
-        charset = 'Shift_JIS'
-      end
-      if not Encoding.name_list.include?(charset)
-        send_response(420, :data => 'Refuse (unsupported charset)')
-        log_error('Unsupported charset ' + charset.to_s)
-      else
-        return true
-      end
+      charset = get_charset
+      return true if Encoding.name_list.include?(charset)
+      send_response(420, :data => 'Refuse (unsupported charset)')
+      log_error("Unsupported charset #{charset}")
       return false
     end
 
     def get_options
       show_sstp_marker = use_translator = true
-      if not @headers.assoc("Option").nil?
-        options = @headers.reverse.assoc("Option")[1].split(",", 0)
-        for option in options
-          option = option.strip()
-          if option == 'nodescript' and local_request()
-            show_sstp_marker = false
-          elsif option == 'notranslate'
-            use_translator = false
-          end
+      options = (@headers.reverse.assoc("Option")&.at(1) || "").split(",", 0)
+      options.each do |option|
+        option = option.strip()
+        case option
+        when 'nodescript'
+          show_sstp_marker = false if local_request()
+        when 'notranslate'
+          use_translator = false
         end
       end
       return show_sstp_marker, use_translator
@@ -401,11 +346,10 @@ module SSTP
     end
 
     def do_EXECUTE_1_3
-      if not local_request()
+      unless local_request()
         sock_domain, remote_port, remote_hostname, remote_ip = @fp.peeraddr
         send_response(420)
-        log_error(
-          'Unauthorized EXECUTE/1.3 request from ' + remote_hostname)
+        log_error("Unauthorized EXECUTE/1.3 request from #{remote_hostname}")
         return
       end
       handle_command()
@@ -420,66 +364,62 @@ module SSTP
     end
 
     def handle_command
-      if not check_decoder()
-        return
-      end
+      return unless check_decoder()
       sender = get_sender()
-      if sender.nil?
-        return
-      end
+      return if sender.nil?
       command = get_command()
-      if not @headers.assoc('Charset').nil?
-        charset = @headers.reverse.assoc('Charset')[1] # XXX
-      else
-        charset = 'Shift_JIS'
-      end
+      charset = get_charset
       charset = charset.to_s
-      if command.nil?
+      case command
+      when nil
         return
-      elsif command == 'getname'
+      when 'getname'
         send_response(200)
         name = @server.handle_request('GET', 'get_ghost_name')
-        @fp.write([name.encode(charset, :invalid => :replace, :undef => :replace),
-                   "\r\n"].join(""))
+        @fp.write(name.encode(
+                    charset, :invalid => :replace, :undef => :replace))
         @fp.write("\r\n")
-      elsif command == 'getversion'
+        @fp.write("\r\n")
+      when 'getversion'
         send_response(200)
-        @fp.write(["ninix-aya ",
-                   Version.VERSION.encode(charset, :invalid => :replace, :undef => :replace),
-                   "\r\n"].join(""))
+        @fp.write("ninix-aya ")
+        @fp.write(Version.VERSION.encode(
+                    charset, :invalid => :replace, :undef => :replace))
         @fp.write("\r\n")
-      elsif command == 'quiet'
+        @fp.write("\r\n")
+      when 'quiet'
         send_response(200)
         @server.handle_request('NOTIFY', 'keep_silence', true)
-      elsif command == 'restore'
+      when 'restore'
         send_response(200)
         @server.handle_request('NOTIFY', 'keep_silence', false)
-      elsif command == 'getnames'
+      when 'getnames'
         send_response(200)
         for name in @server.handle_request('GET', 'get_ghost_names')
-          @fp.write(
-            [name.encode(charset, :invalid => :replace, :undef => :replace), "\r\n"].join(""))
+          @fp.write(name.encode(
+                      charset, :invalid => :replace, :undef => :replace))
+          @fp.write("\r\n")
         end
         @fp.write("\r\n")
-      elsif command == 'checkqueue'
+      when 'checkqueue'
         send_response(200)
         count, total = @server.handle_request(
                  'GET', 'check_request_queue', sender)
-        @fp.write([count.to_s.encode(charset, :invalid => :replace, :undef => :replace), "\r\n"].join(""))
-        @fp.write([total.to_s.encode(charset, :invalid => :replace, :undef => :replace), "\r\n"].join(""))
+        @fp.write(count.to_s.encode(
+                    charset, :invalid => :replace, :undef => :replace))
+        @fp.write("\r\n")
+        @fp.write(total.to_s.encode(
+                    charset, :invalid => :replace, :undef => :replace))
+        @fp.write("\r\n")
         @fp.write("\r\n")
       else
         send_response(501) # Not Implemented
-        log_error('Not Implemented (' + command + ')')
+        log_error("Not Implemented (#{command})")
       end
     end
 
     def get_command
-      if @headers.assoc('Command')
-        command = @headers.reverse.assoc('Command')[1]
-      else
-        command = nil
-      end
+      command = @headers.reverse.assoc('Command')&.at(1)
       if command.nil?
         send_response(400) # Bad Request
         log_error('Command: header field not found')
@@ -489,17 +429,11 @@ module SSTP
     end
 
     def do_COMMUNICATE_1_1
-      if not check_decoder()
-        return
-      end
+      return unless check_decoder()
       sender = get_sender()
-      if sender.nil?
-        return
-      end
+      return if sender.nil?
       sentence = get_sentence()
-      if sentence.nil?
-        return
-      end
+      return if sentence.nil?
       send_response(200) # OK
       @server.handle_request(
         'NOTIFY', 'enqueue_event', 'OnCommunicate', sender, sentence)
@@ -507,11 +441,7 @@ module SSTP
     end
 
     def get_sentence
-      if @headers.assoc("Sentence")
-        sentence = @headers.reverse.assoc("Sentence")[1]
-      else
-        sentence = nil
-      end
+      sentence = @headers.reverse.assoc("Sentence")&.at(1)
       if sentence.nil?
         send_response(400) # Bad Request
         log_error('Sentence: header field not found')

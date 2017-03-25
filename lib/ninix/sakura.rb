@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2016 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2017 by Shyouzou Sugitani <shy@users.osdn.me>
 #  Copyright (C) 2003 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -40,11 +40,6 @@ module Sakura
 
     def initialize(key)
       super(key)
-      @parent = nil
-    end
-
-    def set_responsible(parent)
-      @parent = parent
     end
 
     def create_menuitem(data)
@@ -66,7 +61,7 @@ module Sakura
     end
   end
 
-  class Sakura
+  class Sakura < MetaMagic::Holon
     attr_reader :key, :cantalk, :last_script
 
     include GetText
@@ -88,7 +83,10 @@ module Sakura
     FROM_GHOST       = 2
  
     def initialize
-      @parent = nil
+      super("") # FIXME
+      @handlers = {
+        'lock_repaint' => "get_lock_repaint"
+      }
       @sstp_handle = nil
       @sstp_entry_db = nil
       @sstp_request_handler = nil
@@ -158,28 +156,6 @@ module Sakura
       end
       @audio_loop = false
       @reload_event = nil
-    end
-
-    def set_responsible(parent)
-      @parent = parent
-    end
-
-    def handle_request(event_type, event, *arglist)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
-      handlers = {
-        'lock_repaint' => "get_lock_repaint"
-      }
-      unless handlers.include?(event)
-        if Sakura.method_defined?(event)
-          result = method(event).call(*arglist)
-        else
-          result = @parent.handle_request(
-            event_type, event, *arglist)
-        end
-      else
-        result = method(handlers[event]).call(*arglist)
-      end
-      return result if event_type == 'GET'
     end
 
     def get_lock_repaint(*args)
@@ -2076,7 +2052,7 @@ module Sakura
     def __yen__b(args)
       begin
         filename, x, y = expand_meta(args[0]).split(',', 3)
-      rescue ArgumentError
+      rescue ArgumentError ## FIXME: no exception in Ruby
         filename, param = expand_meta(args[0]).split(',', 2)
         raise "assert" unless param == 'inline'
         x, y = 0, 0 ## FIXME
@@ -2380,6 +2356,7 @@ module Sakura
             'NOTIFY', 'select_ghost_by_name', self, args[2], :event => 0)
         end
       elsif args[0, 2] == ['call', 'ghost'] and argc > 2
+        ## FIXME: 'random', 'lastinstalled'対応
         key = @parent.handle_request('GET', 'find_ghost_by_name', args[2])
         unless key.nil?
           @parent.handle_request('NOTIFY', 'start_sakura_cb', key, :caller => self)
@@ -2470,7 +2447,7 @@ module Sakura
         when '!stayontop'
           @surface.window_stayontop(false)
         end
-      elsif args[0, 2] == ['set', 'trayicon'] and argc > 2
+      elsif args[0, 2] == ['set', 'trayicon'] and argc > 2 ## FIXME: tasktrayicon
         path = File.join(get_prefix(), args[2])
         if File.exist?(path)
           @status_icon.set_from_file(path) # XXX
@@ -2604,9 +2581,9 @@ module Sakura
       elsif args[0] == '*'
         @balloon.append_sstp_marker(@script_side)
       elsif args[0] == 'quicksession' and argc > 1
-        if args[1] == 'true'
+        if args[1] == 'true' ## FIXME: '1'でも可
           @quick_session = true
-        elsif args[1] == 'false'
+        elsif args[1] == 'false' ## FIXME: '0'でも可
           @quick_session = false
         else
           #pass ## FIXME

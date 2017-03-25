@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  metamagic.rb - unknown unknowns
-#  Copyright (C) 2011-2016 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2011-2017 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -19,6 +19,27 @@ module MetaMagic
       @key = key
       @baseinfo = nil
       @menuitem = nil
+      @parent = nil
+      @handlers = {}
+    end
+
+    def set_responsible(parent)
+      @parent = parent
+    end
+
+    def handle_request(event_type, event, *arglist)
+      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      unless @handlers.include?(event)
+        if self.class.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = @parent.handle_request(
+            event_type, event, *arglist)
+        end
+      else
+        result = method(@handlers[event]).call(*arglist)
+      end
+      return result if event_type == 'GET'
     end
 
     def create_menuitem(data)
@@ -62,8 +83,28 @@ module MetaMagic
       @baseinfo = nil
       @menuitem = nil
       @instance = nil
+      @parent = nil
+    end
+
+    def set_responsible(parent)
+      @parent = parent
     end
    
+    def handle_request(event_type, event, *arglist)
+      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      unless @handlers.include?(event)
+        if self.class.method_defined?(event)
+          result = method(event).call(*arglist)
+        else
+          result = @parent.handle_request(
+            event_type, event, *arglist)
+        end
+      else
+        result = method(@handlers[event]).call(*arglist)
+      end
+      return result if event_type == 'GET'
+    end
+
     def create_menuitem(data)
       nil
     end

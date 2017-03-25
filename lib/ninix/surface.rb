@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2016 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2017 by Shyouzou Sugitani <shy@users.osdn.me>
 #  Copyright (C) 2003 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -18,40 +18,24 @@ require "gtk3"
 require_relative "keymap"
 require_relative "pix"
 require_relative "seriko"
+require_relative "metamagic"
 require_relative "logging"
 
 module Surface
 
-  class Surface
+  class Surface < MetaMagic::Holon
     attr_reader :name, :prefix, :window
 
     def initialize
+      super("") # FIXME
       @window = []
       @desc = nil
       @mikire = 0
       @kasanari = 0
       @key_press_count = 0
-    end
-
-    def set_responsible(parent)
-      @parent = parent
-    end
-
-    def handle_request(event_type, event, *arglist)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
-      handlers = {
+      @handlers = {
         'stick_window' => 'window_stick',
       }
-      if handlers.include?(event)
-        result = handlers[event].call # no argument
-      else
-        if Surface.method_defined?(event)
-          result = method(event).call(*arglist)
-        else
-          result = @parent.handle_request(event_type, event, *arglist)
-        end
-      end
-      return result if event_type == 'GET'
     end
 
     def finalize
@@ -516,9 +500,7 @@ module Surface
     end
 
     def reset_surface
-      for window in @window
-        window.reset_surface()
-      end
+      @window.map {|window| window.reset_surface }
     end
 
     def set_surface_default(side)
@@ -892,15 +874,16 @@ module Surface
     end
   end
 
-  class SurfaceWindow
+  class SurfaceWindow < MetaMagic::Holon
     attr_reader :bind
 
     def initialize(window, side, desc, surface_alias, surface_info, tooltips,
                    surfaces, seriko, region, mayuna, bind, default_id, maxsize)
+      super("") # FIXME
+      @handlers = {}
       @window = window
       @maxsize = maxsize
       @side = side
-      @parent = nil
       @desc = desc
       @alias = surface_alias
       @tooltips = tooltips
@@ -997,27 +980,6 @@ module Surface
         Gdk.Visual.get_best_depth(), scrn_w, scrn_h)
     end
 
-    def set_responsible(parent)
-      @parent = parent
-    end
-
-    def handle_request(event_type, event, *arglist)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
-      handlers = {
-            }
-      if handlers.include?(event)
-        result = handlers[event].call # no argument
-      else
-        if SurfaceWindow.method_defined?(event)
-          result = method(event).call(*arglist)
-        else
-          result = @parent.handle_request(event_type, event, *arglist)
-        end
-      end
-      return result if event_type == 'GET'
-    end
-
-    @property
     def direction
       @__direction
     end
