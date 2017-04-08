@@ -1,3 +1,6 @@
+Sun April 9 2017   Shyouzou Sugitani <shy@users.osdn.me>
+	* バージョン5.0.3リリース.
+
 Sat April 8 2017   Shyouzou Sugitani <shy@users.osdn.me>
 	* Windows環境ではInputShapeを使用しないように修正.
 	* ワークエリアの取得方法を改善.(Gtk 3.22以降が必須となった.)

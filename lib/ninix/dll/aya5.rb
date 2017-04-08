@@ -251,7 +251,7 @@ module Aya5
     def show_description
       Logging::Logging.info(
         "Shiori: AYA5 compatible module for ninix\n" \
-        "        Copyright (C) 2002-2016 by Shyouzou Sugitani\n" \
+        "        Copyright (C) 2002-2017 by Shyouzou Sugitani\n" \
         "        Copyright (C) 2002, 2003 by MATSUMURA Namihiko")
     end
 

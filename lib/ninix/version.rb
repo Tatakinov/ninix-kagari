@@ -18,7 +18,7 @@ module Version
   bindtextdomain("ninix-aya")
 
   def self.NUMBER
-    '5.0.2'
+    '5.0.3'
   end
 
   def self.CODENAME

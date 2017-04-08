@@ -2038,7 +2038,7 @@ module Kawari
         "Shiori: KAWARI compatible module for ninix\n" \
         "        Copyright (C) 2001, 2002 by Tamito KAJIYAMA\n" \
         "        Copyright (C) 2002, 2003 by MATSUMURA Namihiko\n" \
-        "        Copyright (C) 2002-2016 by Shyouzou Sugitani\n" \
+        "        Copyright (C) 2002-2017 by Shyouzou Sugitani\n" \
         "        Copyright (C) 2003 by Shun-ichi TAHARA")
     end
 

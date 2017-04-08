@@ -1179,7 +1179,7 @@ module Misaka
         "Shiori: MISAKA compatible module for ninix\n" \
         "        Copyright (C) 2002 by Tamito KAJIYAMA\n" \
         "        Copyright (C) 2002, 2003 by MATSUMURA Namihiko\n" \
-        "        Copyright (C) 2002-2016 by Shyouzou Sugitani")
+        "        Copyright (C) 2002-2017 by Shyouzou Sugitani")
     end
 
     def reset

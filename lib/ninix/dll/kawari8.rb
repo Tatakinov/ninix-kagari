@@ -63,7 +63,7 @@ module Kawari8
       Logging::Logging.info(
         "Shiori: Real Kawari8 loader for ninix\n" \
         "        Copyright (C) 2002, 2003 by ABE Hideaki\n" \
-        "        Copyright (C) 2002-2016 by Shyouzou Sugitani\n" \
+        "        Copyright (C) 2002-2017 by Shyouzou Sugitani\n" \
         "        Copyright (C) 2002, 2003 by MATSUMURA Namihiko")
     end
 

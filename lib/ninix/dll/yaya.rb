@@ -58,7 +58,7 @@ module Yaya
       Logging::Logging.info(
         "Shiori: a (Real) YAYA loader for ninix\n" \
         "        Copyright (C) 2004 by linjian\n" \
-        "        Copyright (C) 2004-2016 by Shyouzou Sugitani\n" \
+        "        Copyright (C) 2004-2017 by Shyouzou Sugitani\n" \
         "        Copyright (C) 2011 by henryhu")
     end
 
