@@ -298,19 +298,6 @@ module Ninix_Main
 
   class BalloonMeme < MetaMagic::Meme
 
-    def initialize(key)
-      super(key)
-      @parent = nil
-    end
-
-    def set_responsible(parent)
-      @parent = parent
-    end
-
-    def handle_request(event_type, event, *arglist)
-      return @parent.handle_request(event_type, event, *arglist)
-    end
-
     def create_menuitem(data)
       desc, balloon = data
       subdir = balloon['balloon_dir'][0]
@@ -329,19 +316,6 @@ module Ninix_Main
   end
 
   class Ghost < MetaMagic::Holon
-
-    def initialize(key)
-      super(key)
-      @parent = nil
-    end
-
-    def set_responsible(parent)
-      @parent = parent
-    end
-
-    def handle_request(event_type, event, *arglist)
-      @parent.handle_request(event_type, event, *arglist)
-    end
 
     def create_menuitem(data)
       @parent.handle_request('GET', 'create_menuitem', @key, data)

@@ -1,3 +1,8 @@
+Sat April 8 2017   Shyouzou Sugitani <shy@users.osdn.me>
+	* Windows環境ではInputShapeを使用しないように修正.
+	* ワークエリアの取得方法を改善.(Gtk 3.22以降が必須となった.)
+	* HolonとMemeクラス拡張時の変更漏れを修正.
+
 Sat March 25 2017   Shyouzou Sugitani <shy@users.osdn.me>
 	* Copyrightを2017年に更新した.
 	* Rubyらしいコーディングスタイルへの修正.

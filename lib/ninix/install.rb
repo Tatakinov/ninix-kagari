@@ -14,6 +14,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
+require "tmpdir"
 require "zip"
 require "open-uri"
 require "fileutils"

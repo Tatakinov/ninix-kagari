@@ -71,10 +71,8 @@ module Pix
       end
       @supports_alpha = composited?
       fail "assert" unless not visual.nil?
-      left, top = 0, 0 # XXX
-      width = (screen.width - left)
-      height = (screen.height - top)
-      @workarea = [left, top, width, height]
+      workarea = screen.display.primary_monitor.workarea # XXX
+      @workarea = [workarea.x, workarea.y, workarea.width, workarea.height]
     end
   end
 
@@ -112,8 +110,8 @@ module Pix
     def move(x, y)
       left, top, scrn_w, scrn_h = @workarea
       w, h = @darea.size_request() # XXX
-      new_x = [[left, x].max, scrn_w - w].min
-      new_y = [[top, y].max, scrn_h - h].min
+      new_x = [[left, x].max, left + scrn_w - w].min
+      new_y = [[top, y].max, top + scrn_h - h].min
       base_move(new_x, new_y)
       @__position = [new_x, new_y]
       @__surface_position = [x, y]
@@ -153,7 +151,9 @@ module Pix
 
     def set_shape(cr)
       region = Pix.surface_to_region(cr.target.map_to_image)
-      if @supports_alpha
+      if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+        shape_combine_region(nil)
+      elsif @supports_alpha
         input_shape_combine_region(nil)
         input_shape_combine_region(region)
       else
