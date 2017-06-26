@@ -150,10 +150,9 @@ module Pix
     end
 
     def set_shape(cr)
+      return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       region = Pix.surface_to_region(cr.target.map_to_image)
-      if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
-        shape_combine_region(nil)
-      elsif @supports_alpha
+      if @supports_alpha
         input_shape_combine_region(nil)
         input_shape_combine_region(region)
       else
