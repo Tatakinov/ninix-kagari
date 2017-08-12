@@ -27,21 +27,21 @@ UNIX系OS対応デスクトップアクセサリninixに拡張機能を追加し
 
 - Ruby/GTK3 (http://ruby-gnome2.osdn.jp/)
   Gtk+3をRubyから利用するための拡張ライブラリです。  
-  バージョン 3.1.0 での動作を確認しています。
+  バージョン 3.1.8 での動作を確認しています。
 
 - GTK+ (http://www.gtk.org/)
   クロスプラットフォームの GUI ライブラリです。
-  バージョン 3.22.11 での動作を確認しています。(3.22以上が必須です。)
+  バージョン 3.22.18 での動作を確認しています。(3.22以上が必須です。)
   下記GStreamerを使用する場合はRuby/GStreamerもインストールが必要です。
 
 - GStreamer (http://gstreamer.freedesktop.org/)
   このソフトウェアはninix-ayaを動作させるのに必須ではありません。
   音声ファイルの再生に使用しています。
-  バージョン 1.10.4 での動作を確認しています。
+  バージョン 1.12.2 での動作を確認しています。
 
 - Rubyzip(https://github.com/rubyzip/rubyzip)
   Rubyからzipファイルを読み書きするためのモジュールです。
-  バージョン 1.2.0 での動作を確認しています。
+  バージョン 1.2.1 での動作を確認しています。
 
 - Ruby gettext(http://ruby-gettext.github.io/)
   Rubyのソフトをローカライズするためのパッケージです。

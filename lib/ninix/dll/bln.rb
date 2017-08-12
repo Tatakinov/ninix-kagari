@@ -346,9 +346,9 @@ module Bln
         @font_desc = Pango::FontDescription.new
         @font_desc.set_family('Sans')
         if data.include?('font.bold') and data['font.bold'] == 'on'
-          @font_desc.set_weight(Pango::WEIGHT_BOLD)
+          @font_desc.set_weight(Pango::Weight::BOLD)
         end
-        @layout.set_wrap(Pango::WRAP_CHAR)
+        @layout.set_wrap(Pango::WrapMode::CHAR)
         set_layout()
       end
       if data.include?('slide.vx')

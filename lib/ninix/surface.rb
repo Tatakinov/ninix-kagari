@@ -1253,7 +1253,7 @@ module Surface
           font_desc.set_size(8 * Pango::SCALE)
           layout = cr.create_pango_layout
           layout.set_font_description(font_desc)
-          layout.set_wrap(Pango::WRAP_WORD_CHAR) # XXX
+          layout.set_wrap(Pango::WrapMode::WORD_CHAR) # XXX
           layout.set_text(part)
           cr.show_pango_layout(layout)
         end
