@@ -343,7 +343,7 @@ module Pix
     # the pixels method. Temporary use the read_pixel_bytes method and
     # create another Pixbuf.
     if is_pnr
-      pixels = pixbuf.read_pixel_bytes
+      pixels = pixbuf.read_pixel_bytes.to_s
       unless pixbuf.has_alpha?
         r, g, b = pixels[0, 3].bytes
         pixbuf = pixbuf.add_alpha(true, r, g, b)
@@ -363,12 +363,12 @@ module Pix
       path = File.join(head, basename + '.pna')
       if File.exists?(path)
         pna_pixbuf = pixbuf_new_from_file(path)
-        pix_na = NArray.to_na(pixbuf.read_pixel_bytes, NArray::BYTE)
+        pix_na = NArray.to_na(pixbuf.read_pixel_bytes.to_s, NArray::BYTE)
         pix_na.reshape!(4, pix_na.size / 4)
         unless pna_pixbuf.has_alpha?
           pna_pixbuf = pna_pixbuf.add_alpha(false, 0, 0, 0)
         end
-        pna_na = NArray.to_na(pna_pixbuf.read_pixel_bytes, NArray::BYTE)
+        pna_na = NArray.to_na(pna_pixbuf.read_pixel_bytes.to_s, NArray::BYTE)
         pna_na.reshape!(4, pna_na.size / 4)
         pix_na[3, true] = pna_na[0, true]
         pixbuf = GdkPixbuf::Pixbuf.new(

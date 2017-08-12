@@ -1027,7 +1027,7 @@ module Balloon
           markup = set_markup(i, @text_buffer[i])
         end
         update_line_regions(line + 1, new_y)
-        @layout.set_markup(markup, -1)
+        @layout.set_markup(markup)
         cr.set_source_rgb(@text_normal_color)
         cr.move_to(x, y)
         cr.show_pango_layout(@layout)
@@ -1071,43 +1071,43 @@ module Balloon
           x, y, w, h = @line_regions[n - @lineno]
           if sl == el
             markup = set_markup(n, @text_buffer[n][0, sn])
-            @layout.set_markup(markup, -1)
+            @layout.set_markup(markup)
             text_w, text_h =  @layout.pixel_size
             x += text_w
             markup = set_markup(n, @text_buffer[n][sn, en])
-            @layout.set_markup(markup, -1)
+            @layout.set_markup(markup)
             text_w, text_h = @layout.pixel_size
             w = text_w
             start = sn
             end_ = en
           elsif n == sl
             markup = set_markup(n, @text_buffer[n][0, sn])
-            @layout.set_markup(markup, -1)
+            @layout.set_markup(markup)
             text_w, text_h = @layout.pixel_size
             x += text_w
             markup = set_markup(n, @text_buffer[n][sn, @text_buffer.length])
-            @layout.set_markup(markup, -1)
+            @layout.set_markup(markup)
             text_w, text_h = @layout.pixel_size
             w = text_w
             start = sn
             end_ = @text_buffer[n].length
           elsif n == el
             markup = set_markup(n, @text_buffer[n][0, en])
-            @layout.set_markup(markup, -1)
+            @layout.set_markup(markup)
             text_w, text_h = @layout.pixel_size
             w = text_w
             start = 0
             end_ = en
           else
             markup = set_markup(n, @text_buffer[n])
-            @layout.set_markup(markup, -1)
+            @layout.set_markup(markup)
             text_w, text_h = @layout.pixel_size
             w = text_w
             start = 0
             end_ = @text_buffer[n].length
           end
           markup = set_markup(n, @text_buffer[n][start, end_])
-          @layout.set_markup(markup, -1)
+          @layout.set_markup(markup)
           cr.set_source_rgb(@cursor_color)
           cr.rectangle(x, y, w, h)
           cr.fill()
@@ -1134,7 +1134,7 @@ module Balloon
             x, y, w, h = @line_regions[n - @lineno]
             if n == sl
               markup = set_markup(n, @text_buffer[n][0, sn])
-              @layout.set_markup(markup, -1)
+              @layout.set_markup(markup)
               text_w, text_h = @layout.pixel_size
               x += text_w
             end
@@ -1145,7 +1145,7 @@ module Balloon
             else
               markup = set_markup(n, @text_buffer[n])
             end
-            @layout.set_markup(markup, -1)
+            @layout.set_markup(markup)
             text_w, text_h = @layout.pixel_size
             w = text_w
             if x <= px and px < (x + w) and y <= py and py < (y + h)
@@ -1355,7 +1355,7 @@ module Balloon
         n = (i + 1)
         show unless @__shown
         markup = set_markup(index, text[p..n-1])
-        @layout.set_markup(markup, -1)
+        @layout.set_markup(markup)
         text_width, text_height =  @layout.pixel_size
         if text_width > @line_width
           @text_buffer << text[p..i-1]
