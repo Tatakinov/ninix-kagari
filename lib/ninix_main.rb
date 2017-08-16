@@ -134,19 +134,15 @@ module Ninix_Main
     end
   end
   
-  class SSTPControler
+  class SSTPControler < MetaMagic::Holon
 
     def initialize(sstp_port)
-      @parent = nil
+      super("") ## FIXME
       @sstp_port = sstp_port
       @sstp_servers = []
       @__sstp_queue = []
       @__sstp_flag = false
       @__current_sender = nil
-    end
-
-    def set_responsible(parent)
-      @parent = parent
     end
 
     def handle_request(event_type, event, *arglist)
@@ -678,7 +674,7 @@ module Ninix_Main
       @__menu_owner.network_update()
     end
 
-    def open_popup_menu(sakura, button, side)
+    def open_popup_menu(sakura, side)
       @__menu_owner = sakura
       path_background, path_sidebar, path_foreground, \
       align_background, align_sidebar, align_foreground = \
@@ -690,7 +686,7 @@ module Ninix_Main
       @__menu.set_fontcolor(background, foreground)
       mayuna_menu = @__menu_owner.get_mayuna_menu()
       @__menu.create_mayuna_menu(mayuna_menu)
-      @__menu.popup(button, side)
+      @__menu.popup(side)
     end
 
     def get_ghost_menus
@@ -1322,7 +1318,7 @@ module Ninix_Main
 
     def initialize(app)
       @app = app
-      @dialog = Gtk::Dialog.new
+      @dialog = Gtk::Dialog.new(:parent => nil)
       @dialog.signal_connect('delete_event') do |w, e|
         next true # XXX
       end

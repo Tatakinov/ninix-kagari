@@ -56,10 +56,10 @@ module Kinoko
       @parent = parent
     end
 
-    def popup(button)
+    def popup()
       skin_list = @parent.handle_request('GET', 'get_skin_list')
       set_skin_menu(skin_list)
-      @__popup_menu.popup(nil, nil, button, Gtk.current_event_time())
+      @__popup_menu.popup_at_pointer(nil)
     end
 
     def set_skin_menu(list)
@@ -112,6 +112,7 @@ module Kinoko
       when 'set position', 'set surface'
         @skin.set_position()
         @skin.show()
+        @skin.reset_z_order()
       when 'set scale'
         scale = @target.get_surface_scale()
         @skin.set_scale(scale)
@@ -122,14 +123,17 @@ module Kinoko
         @skin.hide()
       when 'deiconified'
         @skin.show()
+        @skin.reset_z_order()
       when 'finalize'
         finalize()
       when 'move surface'
         side, xoffset, yoffset = args
         @skin.set_position(:xoffset => xoffset, :yoffset => yoffset) if side.zero? # sakura side
+        @skin.reset_z_order()
       when 'raise'
         side = args[0]
         @skin.set_position() if side.zero? # sakura side
+        @skin.reset_z_order()
       else
         Logging::Logging.debug('OBSERVER(kinoko): ignore - ' + event)
       end
@@ -309,13 +313,8 @@ module Kinoko
       end
       @window.update_size(@w, @h)
       set_position()
-      target_window = @parent.handle_request('GET', 'get_target_window')
-      if @data['ontop']
-        @window.set_transient_for(target_window)
-      else
-        target_window.set_transient_for(@window)
-      end
       show()
+      reset_z_order()
       @seriko.reset(self, '') # XXX
       @seriko.start(self)
       @seriko.invoke_kinoko(self)
@@ -338,6 +337,16 @@ module Kinoko
     def hide()
       @window.hide_all() if @__shown
       @__shown = false
+    end
+
+    def reset_z_order
+      return unless @__shown
+      target_window = @parent.handle_request('GET', 'get_target_window')
+      if @data['ontop']
+        @window.window.restack(target_window.window, true)
+      else
+        target_window.window.restack(@window.window, true)
+      end
     end
 
     def append_actor(frame, actor)
@@ -472,7 +481,7 @@ module Kinoko
       end
       button = event.button
       if button == 3 and click == 1
-        @__menu.popup(button)
+        @__menu.popup()
       end
       return true
     end

@@ -440,11 +440,6 @@ module Sakura
       for side in 2..@char-1
         @balloon.add_window(side)
       end
-      for side in 0..@char-1
-        balloon_win = @balloon.get_window(side)
-        surface_win = @surface.get_window(side)
-        balloon_win.set_transient_for(surface_win)
-      end
     end
 
     def update_balloon_offset(side, x_delta, y_delta)
@@ -1215,7 +1210,7 @@ module Sakura
         end
         if event == 'OnMouseClick' and arglist[5] == 1
           @parent.handle_request(
-            'NOTIFY', 'open_popup_menu', self, arglist[5], arglist[3])
+            'NOTIFY', 'open_popup_menu', self, arglist[3])
         end
         @parent.handle_request(
           'NOTIFY', 'notify_other', @key,
@@ -1501,7 +1496,7 @@ module Sakura
     end
 
     def get_target_window
-      @surface.get_window(0).window
+      @surface.get_window(0)
     end
 
     def get_kinoko_position(baseposition)
@@ -2716,6 +2711,9 @@ module Sakura
       end
       unless @processed_text.empty?
         @balloon.show(@script_side)
+        balloon_win = @balloon.get_window(@script_side)
+        surface_win = @surface.get_window(@script_side)
+        balloon_win.window.restack(surface_win.window, true)
         @balloon.append_text(@script_side, @processed_text[0])
         @processed_text = @processed_text[1..-1]
         surface_id = get_surface_id(@script_side)

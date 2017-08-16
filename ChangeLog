@@ -1,3 +1,11 @@
+Wed August 16 2017   Shyouzou Sugitani <shy@users.osdn.me>
+	* deprecatedになっているメソッドを使用しないようにした.
+	  (Gtk::Menu.popup)
+	* 「きのこ」互換機能ウインドウの重なり状態制御方法を変更した.
+	* 「猫どりふ」互換機能のマウスボタンイベント処理を修正した.
+	* バルーンとサーフェスの重なり状態制御方法を変更した.
+	* SSTPControlerクラスがHolonクラスを継承するようにした.
+
 Sat August 12 2017   Shyouzou Sugitani <shy@users.osdn.me>
 	* バージョン5.0.4リリース.
 	* Ruby-GNOME2 3.1.2対応.

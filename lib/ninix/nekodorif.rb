@@ -87,10 +87,10 @@ module Nekodorif
       @parent = parent
     end
 
-    def popup(button)
+    def popup()
       katochan_list = @parent.handle_request('GET', 'get_katochan_list')
       __set_katochan_menu(katochan_list)
-      @__popup_menu.popup(nil, nil, button, Gtk.current_event_time)
+      @__popup_menu.popup_at_pointer(nil)
     end
 
     def __set_katochan_menu(list)
@@ -357,11 +357,10 @@ module Nekodorif
     end
 
     def button_press(widget, event)
-      @x_root = event.x_root
-      @y_root = event.y_root
       if event.button == 1
         if event.event_type == Gdk::EventType::BUTTON_PRESS
-          #pass
+          @x_root = event.x_root
+          @y_root = event.y_root
         elsif event.event_type == Gdk::EventType::DOUBLE_BUTTON_PRESS # double click
           if @parent.handle_request('GET', 'has_katochan')
             start()
@@ -370,7 +369,7 @@ module Nekodorif
         end
       elsif event.button == 3
         if event.event_type == Gdk::EventType::BUTTON_PRESS
-          @__menu.popup(event.button)
+          @__menu.popup()
         end
       end
       return true

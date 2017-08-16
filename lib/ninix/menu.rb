@@ -388,7 +388,7 @@ module Menu
       end
     end
 
-    def popup(button, side)
+    def popup(side)
       @__popup_menu.unrealize()
       for key in @__menu_list.keys
         item = @__menu_list[key][:entry]
@@ -437,8 +437,7 @@ module Menu
           end
         end
       end
-      @__popup_menu.popup(nil, nil, button,
-                          Gtk.current_event_time())
+      @__popup_menu.popup_at_pointer(nil)
     end
 
     def __set_caption(name, caption)
