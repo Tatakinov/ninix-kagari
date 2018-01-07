@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2004-2017 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2004-2018 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -311,7 +311,6 @@ module Kinoko
         redraw(w, cr)
         next true
       end
-      @window.update_size(@w, @h)
       set_position()
       show()
       reset_z_order()
@@ -442,8 +441,6 @@ module Kinoko
       w = [8, (w * @__scale / 100).to_i].max
       h = [8, (h * @__scale / 100).to_i].max
       @w, @h = w, h # XXX
-      @window.update_size(w, h)
-      @window.queue_resize()
       @seriko.start(self)
       @seriko.invoke_kinoko(self)
     end

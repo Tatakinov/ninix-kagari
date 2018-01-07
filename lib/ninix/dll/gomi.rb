@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  gomi.rb - a gomi.dll compatible Saori module for ninix
-#  Copyright (C) 2012-2017 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2012-2018 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as

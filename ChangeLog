@@ -1,3 +1,8 @@
+Sun January 7 2018   Shyouzou Sugitani <shy@users.osdn.me>
+	* バージョン5.0.5リリース.
+	* ウインドウの描画方法刷新によりWayland環境に対応.
+	* Copyrightを2018年に更新した.
+
 Wed August 16 2017   Shyouzou Sugitani <shy@users.osdn.me>
 	* deprecatedになっているメソッドを使用しないようにした.
 	  (Gtk::Menu.popup)

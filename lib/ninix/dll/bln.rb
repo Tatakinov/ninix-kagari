@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  bln.rb - a easyballoon compatible Saori module for ninix
-#  Copyright (C) 2002-2017 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2018 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -468,7 +468,6 @@ module Bln
       h = @balloon_surface.height
       w = [8, (w * @scale / 100).to_i].max
       h = [8, (h * @scale / 100).to_i].max
-      @window.update_size(w, h)
       @base_x, @base_y = get_coordinate(w, h)
     end
 

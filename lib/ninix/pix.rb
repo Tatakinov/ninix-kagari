@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2003-2017 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2003-2018 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -54,7 +54,7 @@ module Pix
     def initialize(type: Gtk::WindowType::TOPLEVEL)
       super(type)
       set_decorated(false)
-      set_resizable(false)
+      #set_resizable(false)
       signal_connect("screen-changed") do |widget, old_screen|
         screen_changed(widget, :old_screen => old_screen)
         next true
@@ -71,8 +71,13 @@ module Pix
       end
       @supports_alpha = composited?
       fail "assert" unless not visual.nil?
-      workarea = screen.display.primary_monitor.workarea # XXX
-      @workarea = [workarea.x, workarea.y, workarea.width, workarea.height]
+      if realized?
+        workarea = screen.display.get_monitor_at_window(window).workarea # XXX
+      else
+        workarea = screen.display.get_monitor(0).workarea # XXX
+      end
+      @workarea = [0, 0, workarea.width, workarea.height]
+      maximize # not fullscreen
     end
   end
 
@@ -85,50 +90,27 @@ module Pix
       super()
       set_app_paintable(true)
       set_focus_on_map(false)
-      @__position = [0, 0]
       @__surface_position = [0, 0]
-      signal_connect_after('size_allocate') do |a|
-        size_allocate(a)
-        next false
-      end
       # create drawing area
       @darea = Gtk::DrawingArea.new
+      @darea.set_size_request(*size) # XXX
       @darea.show()
       add(@darea)
     end
 
-    def update_size(w, h)
-      @darea.set_size_request(w, h) # XXX
-      queue_resize()
-    end
-
-    def size_allocate(allocation)
-      new_x, new_y = @__position
-      base_move(new_x, new_y)
-    end
-
     def move(x, y)
-      left, top, scrn_w, scrn_h = @workarea
-      w, h = @darea.size_request() # XXX
-      new_x = [[left, x].max, left + scrn_w - w].min
-      new_y = [[top, y].max, top + scrn_h - h].min
-      base_move(new_x, new_y)
-      @__position = [new_x, new_y]
       @__surface_position = [x, y]
       @darea.queue_draw()
     end
 
     def get_draw_offset
-      window_x, window_y = @__position
-      surface_x, surface_y = @__surface_position
-      return surface_x - window_x, surface_y - window_y
+      return @__surface_position
     end
 
     def winpos_to_surfacepos(x, y, scale)
-      window_x, window_y = @__position
       surface_x, surface_y = @__surface_position
-      new_x = ((x - (surface_x - window_x)) * 100 / scale).to_i
-      new_y = ((y - (surface_y - window_y)) * 100 / scale).to_i
+      new_x = ((x - surface_x) * 100 / scale).to_i
+      new_y = ((y - surface_y) * 100 / scale).to_i
       return new_x, new_y
     end
 

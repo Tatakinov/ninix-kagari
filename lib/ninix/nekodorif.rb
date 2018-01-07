@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2004-2017 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2004-2018 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -395,7 +395,6 @@ module Nekodorif
         return
       end
       @w, @h = w, h
-      @window.update_size(@w, @h)
       @image_surface = new_surface
       @darea.queue_draw()
     end
@@ -636,7 +635,6 @@ module Nekodorif
         return
       end
       @w, @h = w, h
-      @window.update_size(@w, @h)
       @image_surface = new_surface
       @darea.queue_draw()
     end
