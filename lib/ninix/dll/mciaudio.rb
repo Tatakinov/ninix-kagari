@@ -37,6 +37,7 @@ module Mciaudio
       bus = @player.bus
       bus.add_watch do |bus, message|
         on_message(bus, message)
+        true
       end
       @filepath = nil
       @__sakura = nil
