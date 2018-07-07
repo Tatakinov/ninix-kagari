@@ -1,0 +1,143 @@
+--------------------------
+ninix-aya(Function extended version of ninix)
+--------------------------
+
+What is this?
+----------
+Ninix-aya ,once known as 'AYA compatible modules and so forth for
+ninix', is a functionally extended fork of desktop accessory
+application 'ninix' that runs on Unix OSes.
+It also includes improvements and bug fixes not included in the
+original ninix.
+Now it runs not only on Unix OSes but also on Windows.
+After version 4.500.x (i.e. 5.x series) it switched to use Ruby.
+
+What are necessary to ruy ninix-aya?
+----------
+Following softwares are necessary to run ninix-aya.
+It may not work properly if you use older version than confirmed one.
+
+- Ruby (http://www.ruby-lang.org/)
+  Language used to develope and run this software.
+  We have confirmed the operation with version 2.3.3..
+  * Please install Ruby Installer and Devkit on Windows.
+
+- NArray(http://masa16.github.io/narray/)
+  Ruby class library that makes it easy and fast to compute
+  large-scale multidimensional numerical arrays.
+  We have confirmed the operation with version 0.6.1.1.
+
+- Ruby/GTK3 (http://ruby-gnome2.osdn.jp/)
+  Set of Ruby language bindings for the GNOME development environment.
+  We have confirmed the operation with version 3.1.8.
+
+- GTK+ (http://www.gtk.org/)
+  Multi-platform toolkit for creating graphical user interfaces.
+  We have confirmed the operation with version 3.22.18.
+  Version 3.22 or later is mandatory.
+
+- Ruby/GStreamer (http://ruby-gnome2.osdn.jp/)
+  This software is not mandatory for ninix-aya to run.
+  Used to play back audio files.
+  We have confirmed the operation with version 3.1.8.
+
+- GStreamer (http://gstreamer.freedesktop.org/)
+  This software is not mandatory for ninix-aya to run.
+  Used to play back audio files.
+  We have confirmed the operation with version 1.12.2.
+
+- Rubyzip(https://github.com/rubyzip/rubyzip)
+  Ruby library for reading and writing zip files.
+  We have confirmed the operation with version 1.2.1.
+
+- Ruby gettext(http://ruby-gettext.github.io/)
+  Ruby library and tools for localization.
+  We have confirmed the operation with version 3.2.2.
+
+- CharlockHolmes (http://github.com/brianmario/charlock_holmes)
+  This software is not mandatory for ninix-aya to run.
+  Necessary if you would like to run 'ghost' which uses 'MISAKA'
+  library and whose encoding is not Shift-JIS.
+  We have confirmed the operation with version 0.7.3.
+
+Installation
+------------
+For Linux distributions such as Debian, we recommend to use offical
+package.
+
+In following sentences we explain how to install from the source
+archive. And we assume Unix OS.
+
+Download source archive of latest version and extract it.
+
+There are items in Makefile that specifies following settings.
+
+* Global installation destination directory (prefix)
+* Installation destination directory of files for localization
+  (localedir)
+* Path for SHIORI .so files such as KAWARI8 and YAYA (shiori_so_dir)
+* And so on
+
+Modify them according to your environment.
+
+Then installation will be completed if you execute 'make install' as
+following.
+
+# make install
+
+Script to execute ninix-aya is installed. So execute it.
+
+$ ninix
+
+On Windows environment extract source archive and execute
+lib/ninix_main.rb with Ruby interpreter.
+
+* Steps to install required library by using 'gem'.
+  (You need to install DevKit in advance)
+  gem install narray
+  gem install gtk3
+  gem install gstreamer
+  gem install gettext
+  gem install rubyzip
+
+License
+----------
+Copyright (C) 2001, 2002 by Tamito KAJIYAMA <kajiyama3@geocities.co.jp>
+Copyright (C) 2002-2007 by MATSUMURA Namihiko <nie@counterghost.net>
+Copyright (C) 2002-2018 by Shyouzou Sugitani <shy@users.osdn.me>
+Copyright (C) 2002, 2003 by ABE Hideaki <abe-xx@eos.dricas.com>
+Copyright (C) 2003-2005 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License (version 2) as
+published by the Free Software Foundation.  It is distributed in the
+hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.  See the GNU General Public License for more details.
+
+Contact Information.
+------
+This software is developed and distruted by Shyouzou Sugitani and
+MATSUMURA Namihiko (a.k.a. Sakura No Nie).
+Mail addresses are
+
+Shyouzou Sugitani <shy@users.osdn.me>
+MATSUMURA Namihiko <nie@counterghost.net>
+
+Or access forums of http://osdn.jp/projects/ninix-aya/
+(There are part of old developement informations at
+http://nie.counterghost.net/)
+
+Links
+------
+Home page of Are Igai No Nanika with 'Nin-i' (Something other than
+that with 'ANY') - Ninix distribution site
+http://www.geocities.co.jp/SiliconValley-Cupertino/7565/
+
+Home page of ninix-aya developement projcet
+http://ninix-aya.osdn.jp/
+
+Ninix-aya distribution site
+http://osdn.jp/projects/ninix-aya/
+
+Concluded.
