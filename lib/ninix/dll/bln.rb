@@ -348,7 +348,7 @@ module Bln
         if data.include?('font.bold') and data['font.bold'] == 'on'
           @font_desc.set_weight(Pango::Weight::BOLD)
         end
-        @layout.set_wrap(Pango::WrapMode::CHAR)
+        @layout.set_wrap(:char)
         set_layout()
       end
       if data.include?('slide.vx')

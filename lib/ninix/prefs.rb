@@ -330,7 +330,7 @@ module Prefs
       scrolled.set_shadow_type(Gtk::ShadowType::ETCHED_IN)
       box.pack_start(scrolled, :expand => true, :fill => true, :padding => 0)
       scrolled.show()
-      treeview = Gtk::TreeView.new(nil)
+      treeview = Gtk::TreeView.new()
       column = Gtk::TreeViewColumn.new(_('Balloon Name'),
                                        Gtk::CellRendererText.new(),
                                        :text => 0)

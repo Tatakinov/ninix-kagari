@@ -442,7 +442,7 @@ module NGM
         search_forward()
       end
       item.add_accelerator('activate', accelgroup, Gdk::Keyval::KEY_F3,
-                           nil,
+                           Gdk::ModifierType.new(),
                            Gtk::AccelFlags::VISIBLE)
       menu.add(item)
       item = Gtk::SeparatorMenuItem.new()

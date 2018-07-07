@@ -355,7 +355,7 @@ module Hanayu
       default_gravity = context.base_gravity # XXX
       context.base_gravity = Pango::Gravity::EAST # Vertical Text
       layout.set_text(@title)
-      layout.set_wrap(Pango::WrapMode::WORD)
+      layout.set_wrap(:word)
       tw, th = layout.pixel_size
       cr.move_to(58, w - 20 - th)
       cr.show_pango_layout(layout)
