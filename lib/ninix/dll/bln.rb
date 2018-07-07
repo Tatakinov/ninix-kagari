@@ -346,7 +346,7 @@ module Bln
         @font_desc = Pango::FontDescription.new
         @font_desc.set_family('Sans')
         if data.include?('font.bold') and data['font.bold'] == 'on'
-          @font_desc.set_weight(Pango::Weight::BOLD)
+          @font_desc.set_weight(:bold)
         end
         @layout.set_wrap(:char)
         set_layout()
@@ -755,17 +755,15 @@ module Bln
     end
 
     def redraw(widget, cr)
-      scale = @scale
-      cr.scale(scale / 100.0, scale / 100.0)
-      cr.set_source(@balloon_surface, 0, 0)
-      cr.set_operator(Cairo::OPERATOR_SOURCE)
-      cr.paint()
+      @window.set_surface(cr, @balloon_surface, @scale)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
+      cr.translate(*@window.get_draw_offset) # XXX
       unless @layout.nil?
         cr.set_source_rgb(*@fontcolor)
         cr.move_to(@left.to_i, @top.to_i)
         cr.show_pango_layout(@layout)
       end
+      @window.set_shape(cr)
     end
 
     def get_state

@@ -1505,6 +1505,7 @@ module Balloon
     def new_(desc, balloon)
       @window.destroy unless @window.nil?
       @window = Pix::BaseTransparentWindow.new()
+      @__surface_position = [0, 0]
       @window.set_title('communicate')
       @window.signal_connect('delete_event') do |w ,e|
         next delete(w, e)
@@ -1526,10 +1527,14 @@ module Balloon
       @window.drag_dest_add_text_targets()
       @window.set_events(Gdk::EventMask::BUTTON_PRESS_MASK)
       @window.set_modal(true)
-      @window.set_window_position(Gtk::WindowPosition::CENTER)
+      #@window.set_window_position(Gtk::WindowPosition::CENTER)
       @window.realize()
+      @window.override_background_color(
+        Gtk::StateFlags::NORMAL, Gdk::RGBA.new(0, 0, 0, 0))
       w = desc.get('communicatebox.width', :default => 250).to_i
       h = desc.get('communicatebox.height', :default => -1).to_i
+      left, top, scrn_w, scrn_h = @window.workarea
+      @__surface_position = [(scrn_w - w) / 2, (scrn_h - h) / 2] # XXX
       @entry = Gtk::Entry.new
       @entry.signal_connect('activate') do |w|
         next activate(w)
@@ -1562,17 +1567,15 @@ module Balloon
         x = desc.get('communicatebox.x', :default => 10).to_i
         y = desc.get('communicatebox.y', :default => 20).to_i
         overlay = Gtk::Overlay.new()
-        @entry.set_margin_left(x)
-        @entry.set_margin_top(y)
+        @entry.set_margin_left(x + get_draw_offset()[0])
+        @entry.set_margin_top(y + get_draw_offset()[1])
         @entry.set_halign(Gtk::Align::START)
         @entry.set_valign(Gtk::Align::START)
         overlay.add_overlay(@entry)
         overlay.add(darea)
         overlay.show()
         @window.add(overlay)
-        w = surface.width
-        h = surface.height
-        darea.set_size_request(w, h)
+        darea.set_size_request(*@window.size) # XXX
       else
         box = Gtk::Box.new(orientation=Gtk::Orientation::HORIZONTAL, spacing=10)
         box.set_border_width(10)
@@ -1591,11 +1594,25 @@ module Balloon
       @entry.set_text(data.text)
     end
 
+    def get_draw_offset
+      return @__surface_position
+    end
+
     def redraw(widget, cr, surface)
+      cr.save()
+      # clear
+      cr.set_operator(Cairo::OPERATOR_SOURCE)
+      cr.set_source_rgba(0, 0, 0, 0)
+      cr.paint
+      # translate the user-space origin
+      cr.translate(*get_draw_offset) # XXX
       cr.set_source(surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)
-      cr.paint()
-      w, h = @window.size
+      # copy rectangle on the destination
+      cr.rectangle(0, 0, surface.width, surface.height)
+      cr.fill()
+      cr.restore()
+      return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       region = Pix.surface_to_region(cr.target.map_to_image)
       # XXX: to avoid losing focus in the text input region
       x = @entry.margin_left
@@ -1603,7 +1620,13 @@ module Balloon
       w = @entry.allocated_width
       h = @entry.allocated_height
       region.union!(x, y, w, h)
-      @window.input_shape_combine_region(region)
+      if @window.supports_alpha
+        @window.input_shape_combine_region(nil)
+        @window.input_shape_combine_region(region)
+      else
+        @window.shape_combine_region(nil)
+        @window.shape_combine_region(region)
+      end
     end
 
     def destroy

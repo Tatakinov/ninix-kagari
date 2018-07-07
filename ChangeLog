@@ -1,5 +1,7 @@
 Sat July 7 2018   Shyouzou Sugitani <shy@users.osdn.me>
 	* できるだけ広範囲のバージョンのRuby/Gtk3で動作するように調整した.
+	* easyballoon互換モジュールが旧描画方法のままになっていたのを修正した.
+	* CommunicateWindowが旧描画方法のままになっていたのを修正した.
 
 Sun April 29 2018   Shyouzou Sugitani <shy@users.osdn.me>
 	* MCIAudio(R)互換モジュールのメッセージ処理を修正した.

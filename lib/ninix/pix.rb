@@ -49,7 +49,7 @@ module Pix
 
   class BaseTransparentWindow < Gtk::Window
     alias :base_move :move
-    attr_reader :workarea
+    attr_reader :workarea, :supports_alpha
 
     def initialize(type: Gtk::WindowType::TOPLEVEL)
       super(type)
