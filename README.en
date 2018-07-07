@@ -19,46 +19,46 @@ It may not work properly if you use older version than confirmed one.
 
 - Ruby (http://www.ruby-lang.org/)
   Language used to develope and run this software.
-  We have confirmed the operation with version 2.3.3..
+  We have confirmed the operation with version 2.5.1 and 2.3.3.
   * Please install Ruby Installer and Devkit on Windows.
 
 - NArray(http://masa16.github.io/narray/)
   Ruby class library that makes it easy and fast to compute
   large-scale multidimensional numerical arrays.
-  We have confirmed the operation with version 0.6.1.1.
+  We have confirmed the operation with version 0.6.1.2 and 0.6.1.1.
 
 - Ruby/GTK3 (http://ruby-gnome2.osdn.jp/)
   Set of Ruby language bindings for the GNOME development environment.
-  We have confirmed the operation with version 3.1.8.
+  We have confirmed the operation with version 3.2.7 and 3.1.0.
 
 - GTK+ (http://www.gtk.org/)
   Multi-platform toolkit for creating graphical user interfaces.
-  We have confirmed the operation with version 3.22.18.
+  We have confirmed the operation with version 3.22.30 and 3.22.11.
   Version 3.22 or later is mandatory.
 
 - Ruby/GStreamer (http://ruby-gnome2.osdn.jp/)
   This software is not mandatory for ninix-aya to run.
   Used to play back audio files.
-  We have confirmed the operation with version 3.1.8.
+  We have confirmed the operation with version 3.2.7 and 3.1.0.
 
 - GStreamer (http://gstreamer.freedesktop.org/)
   This software is not mandatory for ninix-aya to run.
   Used to play back audio files.
-  We have confirmed the operation with version 1.12.2.
+  We have confirmed the operation with version 1.14.1 and 1.10.4.
 
 - Rubyzip(https://github.com/rubyzip/rubyzip)
   Ruby library for reading and writing zip files.
-  We have confirmed the operation with version 1.2.1.
+  We have confirmed the operation with version 1.2.1 and 1.2.0.
 
 - Ruby gettext(http://ruby-gettext.github.io/)
   Ruby library and tools for localization.
-  We have confirmed the operation with version 3.2.2.
+  We have confirmed the operation with version 3.2.9 and 3.2.2.
 
 - CharlockHolmes (http://github.com/brianmario/charlock_holmes)
   This software is not mandatory for ninix-aya to run.
   Necessary if you would like to run 'ghost' which uses 'MISAKA'
   library and whose encoding is not Shift-JIS.
-  We have confirmed the operation with version 0.7.3.
+  We have confirmed the operation with version 0.7.5 and 0.7.3.
 
 Installation
 ------------
