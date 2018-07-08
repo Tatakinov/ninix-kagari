@@ -1,3 +1,7 @@
+Sun July 8 2018   Shyouzou Sugitani <shy@users.osdn.me>
+	* バージョン5.0.6リリース.
+	* gemspecファイルを更新した.
+
 Sat July 7 2018   Shyouzou Sugitani <shy@users.osdn.me>
 	* できるだけ広範囲のバージョンのRuby/Gtk3で動作するように調整した.
 	* easyballoon互換モジュールが旧描画方法のままになっていたのを修正した.

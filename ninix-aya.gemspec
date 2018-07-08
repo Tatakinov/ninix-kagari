@@ -23,6 +23,7 @@ EOF
   spec.files       += Dir['lib/ninix/*.rb']
   spec.files       += Dir['lib/ninix/dll/*.rb']
   spec.files       += Dir['locale/*/LC_MESSAGES/*.mo']
+  spec.files       += %w(COPYING ChangeLog README README.en README.ninix SAORI)
   spec.bindir      = "exe"
   spec.executables << 'ninix-aya'
   spec.homepage    = 'https://ja.osdn.net/projects/ninix-aya/'
