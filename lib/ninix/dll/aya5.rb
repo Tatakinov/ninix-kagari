@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  aya5.rb - an aya.dll(Ver.5) compatible Shiori module for ninix
-#  Copyright (C) 2002-2018 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2019 by Shyouzou Sugitani <shy@users.osdn.me>
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -251,7 +251,7 @@ module Aya5
     def show_description
       Logging::Logging.info(
         "Shiori: AYA5 compatible module for ninix\n" \
-        "        Copyright (C) 2002-2018 by Shyouzou Sugitani\n" \
+        "        Copyright (C) 2002-2019 by Shyouzou Sugitani\n" \
         "        Copyright (C) 2002, 2003 by MATSUMURA Namihiko")
     end
 

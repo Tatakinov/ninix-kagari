@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2018 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2019 by Shyouzou Sugitani <shy@users.osdn.me>
 #  Copyright (C) 2003 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -1665,9 +1665,7 @@ module Surface
                                  @side, x, y, part)
         end
       end
-      if event.is_hint == 1
-        Gdk::Event.request_motions(event)
-      end
+      Gdk::Event.request_motions(event) if event.is_hint == 1
       return true
     end
 

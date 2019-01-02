@@ -2,7 +2,7 @@
 #
 #  kawari8.rb - a (Real) 華和梨 loader for ninix
 #  Copyright (C) 2002, 2003 by ABE Hideaki <abe-xx@eos.dricas.com>
-#  Copyright (C) 2002-2018 by Shyouzou Sugitani <shy@users.sourceforge.jp>
+#  Copyright (C) 2002-2019 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -63,7 +63,7 @@ module Kawari8
       Logging::Logging.info(
         "Shiori: Real Kawari8 loader for ninix\n" \
         "        Copyright (C) 2002, 2003 by ABE Hideaki\n" \
-        "        Copyright (C) 2002-2018 by Shyouzou Sugitani\n" \
+        "        Copyright (C) 2002-2019 by Shyouzou Sugitani\n" \
         "        Copyright (C) 2002, 2003 by MATSUMURA Namihiko")
     end
 

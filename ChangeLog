@@ -1,3 +1,7 @@
+Wed January 2 2019   Shyouzou Sugitani <shy@users.osdn.me>
+	* バルーンの描画処理の負荷を低減した。
+	* Copyrightを2019年に更新した.
+
 Sun July 8 2018   Shyouzou Sugitani <shy@users.osdn.me>
 	* バージョン5.0.6リリース.
 	* gemspecファイルを更新した.

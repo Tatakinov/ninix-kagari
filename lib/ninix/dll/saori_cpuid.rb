@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #  saori_cpuid.rb - a saori_cpuid compatible Saori module for ninix
-#  Copyright (C) 2003-2018 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2003-2019 by Shyouzou Sugitani <shy@users.osdn.me>
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as

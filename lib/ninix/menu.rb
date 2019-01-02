@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2003-2018 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2003-2019 by Shyouzou Sugitani <shy@users.osdn.me>
 #  Copyright (C) 2003 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it

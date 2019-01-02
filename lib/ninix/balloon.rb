@@ -2,7 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
-#  Copyright (C) 2002-2018 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2002-2019 by Shyouzou Sugitani <shy@users.osdn.me>
 #  Copyright (C) 2003 by Shun-ichi TAHARA <jado@flowernet.gr.jp>
 #
 #  This program is free software; you can redistribute it and/or modify it
@@ -454,6 +454,7 @@ module Balloon
       @y_root = nil
       @x_fractions = 0
       @y_fractions = 0
+      @reshape = true
       @darea = @window.darea
       @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
                         Gdk::EventMask::BUTTON_PRESS_MASK|
@@ -735,6 +736,7 @@ module Balloon
       reset_message_regions()
       @parent.handle_request('NOTIFY', 'position_balloons')
       @darea.queue_draw() if @__shown
+      @reshape = true
     end
 
     def set_autoscroll(flag)
@@ -805,6 +807,7 @@ module Balloon
       end
       @position = [x, y]
       __move()
+      @reshape = true
     end
 
     def get_position
@@ -829,6 +832,7 @@ module Balloon
       # make sure window is in its position (call after showing the window)
       __move()
       raise_()
+      @reshape = true
     end
 
     def hide
@@ -1050,7 +1054,10 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
-      @window.set_shape(cr)
+      if @reshape
+        @window.set_shape(cr)
+        @reshape = false
+      end
       return false
     end
 
