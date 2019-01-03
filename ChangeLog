@@ -1,4 +1,11 @@
+Thu January 3 2019   Shyouzou Sugitani <shy@users.osdn.me>
+	* 5.0.7のバルーンに対する変更から着想を得て
+	  描画処理の負荷低減を更に進め、
+	  適用対象もサーフェスまで拡大した.
+	  (「猫どりふ」、「きのこ」、"easyballoon"は対象外.)
+
 Wed January 2 2019   Shyouzou Sugitani <shy@users.osdn.me>
+	* バージョン5.0.7リリース.
 	* バルーンの描画処理の負荷を低減した。
 	* Copyrightを2019年に更新した.
 

@@ -96,6 +96,7 @@ module Pix
       @darea.set_size_request(*size) # XXX
       @darea.show()
       add(@darea)
+      @region = nil
     end
 
     def move(x, y)
@@ -140,6 +141,22 @@ module Pix
       else
         shape_combine_region(nil)
         shape_combine_region(region)
+      end
+      @region = region
+    end
+
+    def translate(cr, x, y)
+      if @region.nil?
+        set_shape(cr)
+      else
+        @region.translate!(x, y)
+        if @supports_alpha
+          input_shape_combine_region(nil)
+          input_shape_combine_region(@region)
+        else
+          shape_combine_region(nil)
+          shape_combine_region(@region)
+        end
       end
     end
   end

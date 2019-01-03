@@ -455,6 +455,7 @@ module Balloon
       @x_fractions = 0
       @y_fractions = 0
       @reshape = true
+      @translate = [0, 0]
       @darea = @window.darea
       @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
                         Gdk::EventMask::BUTTON_PRESS_MASK|
@@ -805,10 +806,10 @@ module Balloon
       if y < top # XXX
         y = top
       end
+      @translate = [x, y].zip(@position).map {|new, prev| new - prev}
       @position = [x, y]
       __move()
-      @reshape = true
-    end
+      end
 
     def get_position
       @position
@@ -1056,8 +1057,11 @@ module Balloon
       redraw_arrow1(widget, cr)
       if @reshape
         @window.set_shape(cr)
-        @reshape = false
+      else
+        @window.translate(cr, *@translate)
       end
+      @reshape = false
+      @translate = [0, 0]
       return false
     end
 
