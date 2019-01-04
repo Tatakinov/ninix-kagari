@@ -91,6 +91,7 @@ module Pix
       set_app_paintable(true)
       set_focus_on_map(false)
       @__surface_position = [0, 0]
+      @prev_position = [0, 0]
       # create drawing area
       @darea = Gtk::DrawingArea.new
       @darea.set_size_request(*size) # XXX
@@ -132,31 +133,21 @@ module Pix
       cr.restore()
     end
 
-    def set_shape(cr)
+    def set_shape(cr, reshape)
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
-      region = Pix.surface_to_region(cr.target.map_to_image)
+      if @region.nil? or reshape
+        @region = Pix.surface_to_region(cr.target.map_to_image)
+      else
+        dx, dy = @__surface_position.zip(@prev_position).map {|new, prev| new - prev}
+        @region.translate!(dx, dy)
+      end
+      @prev_position = @__surface_position
       if @supports_alpha
         input_shape_combine_region(nil)
-        input_shape_combine_region(region)
+        input_shape_combine_region(@region)
       else
         shape_combine_region(nil)
-        shape_combine_region(region)
-      end
-      @region = region
-    end
-
-    def translate(cr, x, y)
-      if @region.nil?
-        set_shape(cr)
-      else
-        @region.translate!(x, y)
-        if @supports_alpha
-          input_shape_combine_region(nil)
-          input_shape_combine_region(@region)
-        else
-          shape_combine_region(nil)
-          shape_combine_region(@region)
-        end
+        shape_combine_region(@region)
       end
     end
   end

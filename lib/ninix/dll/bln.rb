@@ -258,6 +258,7 @@ module Bln
         destroy()
         return
       end
+      @reshape = true
       @balloon_surface = balloon_surface
       w = balloon_surface.width
       h = balloon_surface.height
@@ -763,7 +764,8 @@ module Bln
         cr.move_to(@left.to_i, @top.to_i)
         cr.show_pango_layout(@layout)
       end
-      @window.set_shape(cr)
+      @window.set_shape(cr, @reshape)
+      @reshape = false
     end
 
     def get_state

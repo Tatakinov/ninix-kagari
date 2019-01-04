@@ -277,6 +277,7 @@ module Kinoko
       @seriko.set_responsible(self)
       path = File.join(@data['dir'], @data['base'])
       begin
+        @reshape = true
         @image_surface = Pix.create_surface_from_file(path)
         w = [8, (@image_surface.width * @__scale / 100).to_i].max
         h = [8, (@image_surface.height * @__scale / 100).to_i].max
@@ -375,7 +376,8 @@ module Kinoko
 
     def redraw(widget, cr)
       @window.set_surface(cr, @image_surface, @__scale)
-      @window.set_shape(cr)
+      @window.set_shape(cr, @reshape)
+      @reshape = false
     end
 
     def get_image_surface(surface_id)
@@ -399,6 +401,7 @@ module Kinoko
     end
 
     def update_frame_buffer()
+      @reshape = true # FIXME: depends on Seriko
       new_surface = create_image_surface(@seriko.get_base_id)
       raise "assert" if new_surface.nil?
       # draw overlays

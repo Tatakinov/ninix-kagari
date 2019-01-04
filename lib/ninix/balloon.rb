@@ -455,7 +455,6 @@ module Balloon
       @x_fractions = 0
       @y_fractions = 0
       @reshape = true
-      @translate = [0, 0]
       @darea = @window.darea
       @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
                         Gdk::EventMask::BUTTON_PRESS_MASK|
@@ -806,10 +805,9 @@ module Balloon
       if y < top # XXX
         y = top
       end
-      @translate = [x, y].zip(@position).map {|new, prev| new - prev}
       @position = [x, y]
       __move()
-      end
+    end
 
     def get_position
       @position
@@ -1055,13 +1053,8 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
-      if @reshape
-        @window.set_shape(cr)
-      else
-        @window.translate(cr, *@translate)
-      end
+      @window.set_shape(cr, @reshape)
       @reshape = false
-      @translate = [0, 0]
       return false
     end
 

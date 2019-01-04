@@ -912,7 +912,6 @@ module Surface
       @click_count = 0
       @__balloon_offset = nil
       @reshape = true
-      @translate = [0, 0]
       @window.signal_connect('leave_notify_event') do |w, e|
         next window_leave_notify(w, e) # XXX
       end
@@ -1308,7 +1307,7 @@ module Surface
 
     def update_frame_buffer
       return if @parent.handle_request('GET', 'lock_repaint')
-      @reshape = true
+      @reshape = true # FIXME: depends on Seriko
       new_surface = create_image_surface(@seriko.get_base_id)
       fail "assert" if new_surface.nil?
       # update collision areas
@@ -1350,13 +1349,8 @@ module Surface
       unless @parent.handle_request('GET', 'get_preference', 'check_collision').zero?
         draw_region(cr)
       end
-      if @reshape
-        @window.set_shape(cr)
-      else
-        @window.translate(cr, *@translate)
-      end
+      @window.set_shape(cr, @reshape)
       @reshape = false
-      @translate = [0, 0]
     end
 
     def remove_overlay(actor)
@@ -1472,7 +1466,6 @@ module Surface
 
     def set_position(x, y)
       return if @parent.handle_request('GET', 'lock_repaint')
-      @translate = [x, y].zip(@position).map {|new, prev| new - prev}
       @position = [x, y]
       new_x, new_y = get_position()
       @window.move(new_x, new_y)
@@ -1544,6 +1537,7 @@ module Surface
     def show
       return if @parent.handle_request('GET', 'lock_repaint')
       return if @__shown
+      @reshape = true
       @__shown = true
       x, y = get_position()
       @window.move(x, y) # XXX: call before showing the window

@@ -335,7 +335,8 @@ module Nekodorif
 
     def redraw(widget, cr)
       @window.set_surface(cr, @image_surface, @__scale)
-      @window.set_shape(cr)
+      @window.set_shape(cr, @reshape)
+      @reshape = false
     end
 
     def delete(widget, event)
@@ -395,6 +396,7 @@ module Nekodorif
         return
       end
       @w, @h = w, h
+      @reshape = true
       @image_surface = new_surface
       @darea.queue_draw()
     end
@@ -553,7 +555,8 @@ module Nekodorif
 
     def redraw(widget, cr)
       @window.set_surface(cr, @image_surface, @__scale)
-      @window.set_shape(cr)
+      @window.set_shape(cr, @reshape)
+      @reshape = false
     end
 
     def set_movement(timing)
@@ -635,6 +638,7 @@ module Nekodorif
         return
       end
       @w, @h = w, h
+      @reshape = true
       @image_surface = new_surface
       @darea.queue_draw()
     end
