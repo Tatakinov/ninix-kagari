@@ -1,4 +1,5 @@
 Fri January 4 2019   Shyouzou Sugitani <shy@users.osdn.me>
+	* Ruby移植時のミスなどを修正した.
 	* 描画処理の負荷低減を「猫どりふ」、「きのこ」、"easyballoon"
 	  まで拡大した.
 

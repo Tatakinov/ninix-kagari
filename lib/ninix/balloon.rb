@@ -1369,7 +1369,7 @@ module Balloon
     end
 
     def append_sstp_marker
-      return unless @sstp_surface.nil?
+      return if @sstp_surface.nil?
       if @text_buffer.empty?
         line = 0
         offset = 0
@@ -1473,7 +1473,7 @@ module Balloon
               mx = (x + text_w)
               my = (y + (@font_height + @line_space) / 2)
               my = (my - mh / 2)
-              cr = @darea.get_window().cairo_create()
+              cr = @darea.window.create_cairo_context
               cr.set_source(@sstp_surface, mx, my)
               cr.paint()
             end
