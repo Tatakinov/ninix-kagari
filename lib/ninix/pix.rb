@@ -20,15 +20,14 @@ module Pix
 
   def self.surface_to_region(surface)
     region = Cairo::Region.new()
-    data = surface.data
     width = surface.width
-    pix_na = NArray.to_na(data, NArray::BYTE)
+    pix_na = NArray.to_na(surface.data, NArray::BYTE)
     pix_na.reshape!(4, pix_na.size / 4)
     alpha = pix_na[3, true]
     curr_y = -1
     start_x = -1
     end_x = -1
-    (alpha.ne 0).where.each {|i|
+    alpha.where.each {|i|
       y = (i / width)
       x = (i % width)
       if start_x != -1
