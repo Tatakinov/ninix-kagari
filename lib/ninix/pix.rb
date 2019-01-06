@@ -23,14 +23,12 @@ module Pix
     width = surface.width
     pix_na = NArray.to_na(surface.data, NArray::BYTE)
     pix_na.reshape!(4, pix_na.size / 4)
-    alpha = pix_na[3, true]
-    curr_y = -1
-    start_x = -1
-    end_x = -1
-    alpha.where.each {|i|
-      y = (i / width)
-      x = (i % width)
-      if start_x != -1
+    curr_y = nil
+    start_x = nil
+    end_x = nil
+    pix_na[3, true].where.each {|i|
+      y, x = i.divmod(width)
+      unless start_x.nil?
         if y != curr_y or x != (end_x + 1)
           region.union!(start_x, curr_y, end_x - start_x + 1, 1)
           curr_y = y
@@ -42,7 +40,44 @@ module Pix
       end
       end_x = x
     }
-    region.union!(start_x, curr_y, end_x - start_x + 1, 1) unless start_x == -1
+    region.union!(start_x, curr_y, end_x - start_x + 1, 1) unless start_x.nil?
+    return region
+  end
+
+  def self.surface_to_region_with_hints(surface, device_extents)
+    device_x1, device_y1, device_x2, device_y2 = device_extents
+    region = Cairo::Region.new()
+    width = surface.width
+    height = surface.height
+    stride = surface.stride
+    device_x1 =[0, [device_x1, width - 1].min].max
+    device_x2 =[0, [device_x2, width - 1].min].max
+    device_y1 =[0, [device_y1, height - 1].min].max
+    device_y2 =[0, [device_y2, height - 1].min].max
+    device_w = device_x2 - device_x1 + 1
+    device_h = device_y2 - device_y1 + 1
+    pix_na = NArray.to_na(surface.data[device_y1 * stride, device_h * stride], NArray::BYTE)
+    pix_na.reshape!(4, width, device_h)
+    pix_na = pix_na.slice(3, device_x1..device_x2, true)
+    curr_y = nil
+    start_x = nil
+    end_x = nil
+    pix_na.where.each {|i|
+      y, x = i.divmod(device_w)
+      unless start_x.nil?
+        if y != curr_y or x != (end_x + 1)
+          region.union!(start_x, curr_y, end_x - start_x + 1, 1)
+          curr_y = y
+          start_x = x
+        end
+      else
+        curr_y = y
+        start_x = x
+      end
+      end_x = x
+    }
+    region.union!(start_x, curr_y, end_x - start_x + 1, 1) unless start_x.nil?
+    region.translate!(device_x1, device_y1)
     return region
   end
 
@@ -97,6 +132,7 @@ module Pix
       @darea.show()
       add(@darea)
       @region = nil
+      @device_extents = nil
     end
 
     def move(x, y)
@@ -128,6 +164,14 @@ module Pix
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       # copy rectangle on the destination
       cr.rectangle(0, 0, surface.width, surface.height)
+      extents = cr.path_extents # cr.fill_extents
+      device_x1, device_y1 = cr.user_to_device(
+                   extents[0],
+                   extents[1])
+      device_x2, device_y2 = cr.user_to_device(
+                   extents[2],
+                   extents[3])
+      @device_extents = [device_x1, device_y1, device_x2, device_y2].map {|f| f.to_i}
       cr.fill()
       cr.restore()
     end
@@ -135,7 +179,11 @@ module Pix
     def set_shape(cr, reshape)
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       if @region.nil? or reshape
-        @region = Pix.surface_to_region(cr.target.map_to_image)
+        if @device_extents.nil?
+          @region = Pix.surface_to_region(cr.target.map_to_image)
+        else
+          @region = Pix.surface_to_region_with_hints(cr.target.map_to_image, @device_extents)
+        end
       else
         dx, dy = @__surface_position.zip(@prev_position).map {|new, prev| new - prev}
         @region.translate!(dx, dy)
