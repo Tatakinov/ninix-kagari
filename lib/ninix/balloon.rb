@@ -798,7 +798,7 @@ module Balloon
         x = (base_x + px)
       end
       y = (base_y + py)
-      left, top, scrn_w, scrn_h = @window.workarea
+      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       if (y + h) > scrn_h # XXX
         y = (scrn_h - h)
       end
@@ -1537,7 +1537,7 @@ module Balloon
         Gtk::StateFlags::NORMAL, Gdk::RGBA.new(0, 0, 0, 0))
       w = desc.get('communicatebox.width', :default => 250).to_i
       h = desc.get('communicatebox.height', :default => -1).to_i
-      left, top, scrn_w, scrn_h = @window.workarea
+      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       @__surface_position = [(scrn_w - w) / 2, (scrn_h - h) / 2] # XXX
       @entry = Gtk::Entry.new
       @entry.signal_connect('activate') do |w|

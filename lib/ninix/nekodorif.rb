@@ -150,6 +150,7 @@ module Nekodorif
       scale = @target.get_surface_scale()
       @skin = Skin.new(@dir, @accelgroup, scale)
       @skin.set_responsible(self)
+      @skin.setup
       return 0 if @skin.nil?
       @katochan_list = katochan
       @katochan = nil
@@ -164,6 +165,7 @@ module Nekodorif
       handlers = {
         'get_katochan_list' =>  lambda { return @katochan_list },
         'get_mode' =>  lambda { return @mode },
+        'get_workarea' => lambda { return @target.get_workarea },
       }
       if handlers.include?(event)
         result = handlers[event].call # no argument
@@ -302,9 +304,6 @@ module Nekodorif
         next true
       end
       @id = [0, nil]
-      set_surface()
-      set_position(:reset => 1)
-      @window.show_all()
     end
 
     def set_responsible(parent)
@@ -325,6 +324,12 @@ module Nekodorif
         end
       end
       return result if event_type == 'GET'
+    end
+
+    def setup
+      set_surface()
+      set_position(:reset => 1)
+      @window.show_all()
     end
 
     def set_scale(scale)
@@ -402,7 +407,7 @@ module Nekodorif
     end
 
     def set_position(reset: 0)
-      left, top, scrn_w, scrn_h = @window.workarea
+      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       unless reset.zero?
         @x = left
         @y = (top + scrn_h - @h)
@@ -621,7 +626,7 @@ module Nekodorif
       return if @settings['state'] != 'before'
       target_x, target_y = @target.get_surface_position(@side)
       target_w, target_h = @target.get_surface_size(@side)
-      left, top, scrn_w, scrn_h = @window.workarea
+      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       @x = (target_x + target_w / 2 - @w / 2 + (@offset_x * @__scale / 100).to_i)
       @y = (top + (@offset_y * @__scale / 100).to_i)
       @window.move(@x, @y)
@@ -782,7 +787,7 @@ module Nekodorif
     end
 
     def check_mikire
-      left, top, scrn_w, scrn_h = @window.workarea
+      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       if (@x + @w - @w / 3) > (left + scrn_w) or \
         (@x + @w / 3) < left or \
         (@y + @h - @h / 3) > (top + scrn_h) or \

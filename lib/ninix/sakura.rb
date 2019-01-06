@@ -577,8 +577,8 @@ module Sakura
       @balloon.reset_balloon()
     end
 
-    def get_workarea(side)
-      @surface.get_workarea(side)
+    def get_workarea
+      @parent.handle_request('GET', 'get_workarea')
     end
 
     def get_surface_position(side)
@@ -867,7 +867,7 @@ module Sakura
                          :default => default)
           end
         end
-        left, top, scrn_w, scrn_h = @surface.get_workarea(0) # XXX
+        left, top, scrn_w, scrn_h = get_workarea
         notify_event('OnDisplayChange',
                      Gdk::Visual.best_depth,
                      scrn_w, scrn_h, :event_type => 'NOTIFY')
@@ -1964,7 +1964,7 @@ module Sakura
       end
       w, h = get_surface_size(@script_side)
       x, y = get_surface_position(@script_side)
-      left, top, scrn_w, scrn_h = @surface.get_workarea(@script_side)
+      left, top, scrn_w, scrn_h = get_workarea
       if (sx + (sw / 2).to_i) > (left + (scrn_w / 2).to_i)
         new_x = [x - (scrn_w / 20).to_i, sx - (scrn_w / 20).to_i].min
       else
@@ -1994,7 +1994,7 @@ module Sakura
       end
       w, h = get_surface_size(@script_side)
       x, y = get_surface_position(@script_side)
-      left, top, scrn_w, scrn_h = @surface.get_workarea(@script_side)
+      left, top, scrn_w, scrn_h = get_workarea
       if (x < (sx + (sw / 2).to_i) and (sx + (sw / 2).to_i) < (x + w)) or
         (sx < (x + (w / 2).to_i) and (x + (w / 2).to_i) < (sx + sw))
         return
@@ -2818,10 +2818,10 @@ module Sakura
         elsif chunk[1] == '%friendname'
           buf << get_friendname()
         elsif chunk[1] == '%screenwidth'
-          left, top, scrn_w, scrn_h = @surface.get_workarea(@script_side)
+          left, top, scrn_w, scrn_h = get_workarea
           buf << scrn_w.to_s
         elsif chunk[1] == '%screenheight'
-          left, top, scrn_w, scrn_h = @surface.get_workarea(@script_side)
+          left, top, scrn_w, scrn_h = get_workarea
           buf << scrn_h.to_s
         elsif chunk[1] == '%et'
           buf << @current_time[5].to_s[-1] + '万年'

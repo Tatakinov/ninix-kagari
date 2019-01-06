@@ -142,7 +142,7 @@ module Wmove
           end
         elsif name == 'GET_DESKTOP_SIZE'
           begin
-            left, top, scrn_w, scrn_h = @__sakura.get_workarea(0) # XXX
+            left, top, scrn_w, scrn_h = @__sakura.get_workarea
             result = ("SAORI/1.0 200 OK\r\n" \
                       + "Result: " + scrn_w.to_s + "\r\n" \
                       + "Value0: " + scrn_w.to_s + "\r\n" \
@@ -194,7 +194,7 @@ module Wmove
             speed = args[1].to_i
             if command == 'MOVE_INSIDE'
               w, h = @__sakura.get_surface_size(side)
-              left, top, scrn_w, scrn_h = @__sakura.get_workarea(side)
+              left, top, scrn_w, scrn_h = @__sakura.get_workarea
               if vx < 0 and x + vx <0
                 vx = [-x, 0].min
               elsif vx > 0 and x + vx + w > left + scrn_w
@@ -222,7 +222,7 @@ module Wmove
             speed = args[1].to_i
             if command == 'MOVETO_INSIDE'
               w, h = @__sakura.get_surface_size(side)
-              left, top, scrn_w, scrn_h = @__sakura.get_workarea(side)
+              left, top, scrn_w, scrn_h = @__sakura.get_workarea
               if to < 0
                 to = 0
               elsif to > left + scrn_w - w

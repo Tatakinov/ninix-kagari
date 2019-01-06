@@ -103,7 +103,7 @@ module Osuwari
     def do_idle_tasks
       return false if @timeout_id.nil?
       target = @settings['target']
-      left, top, scrn_w, scrn_h = @__sakura.get_workarea(0) # XXX
+      left, top, scrn_w, scrn_h = @__sakura.get_workarea
       target_flag = [false, false]
       if target == 'ACTIVE'
         active_window = get_active_window()

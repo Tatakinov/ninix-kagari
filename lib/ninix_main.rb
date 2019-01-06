@@ -364,6 +364,7 @@ module Ninix_Main
         'reset_sstp_flag' => 'reset_sstp_flag',
         'get_sstp_port' => 'get_sstp_port',
         'get_prefix' => 'get_sakura_prefix',
+        'get_workarea' => 'get_workarea'
       }
       unless handlers.include?(event)
         if Application.method_defined?(event)
@@ -825,8 +826,9 @@ module Ninix_Main
       return nil
     end
 
-    def run(abend)
+    def run(abend, app_window)
       @abend = abend
+      @app_window = app_window
       if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
         # The SIGTERM signal is not generated under Windows NT.
         # Win32::Console::API.SetConsoleCtrlHandler will probably not be implemented.
@@ -1258,6 +1260,10 @@ module Ninix_Main
       end
       return true
     end
+
+    def get_workarea
+      [0, 0, *@app_window.size]
+    end
   end
 
   class Console
@@ -1687,15 +1693,20 @@ gtk_app.signal_connect 'activate' do |application|
   rescue
     raise SystemExit("ninix-aya is already running")
   end
+  app_window = Pix::TransparentApplicationWindow.new(application)
+  app_window.set_title("Ninix-aya")
+  app_window.show_all
   # start
   app = Ninix_Main::Application.new(f, :sstp_port => sstp_port)
-  app.run(abend)
+  app.run(abend, app_window)
+  # end
   f.truncate(0)
   begin
     Lock.unlockfile(f)
   rescue
     #pass
   end
+  app_window.destroy
 end
 
 begin

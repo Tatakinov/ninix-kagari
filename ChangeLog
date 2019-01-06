@@ -1,4 +1,5 @@
 Sun January 6 2019   Shyouzou Sugitani <shy@users.osdn.me>
+	* Gtk::ApplicationWindowを生成し、画面サイズ算出に利用するようにした.
 	* Gtk::Applicationを使用するようにした.
 	* AYA, AYA5互換モジュールにおいてFixnum(deprecated)を
 	  使用しないよう修正した.

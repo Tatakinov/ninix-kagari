@@ -83,7 +83,7 @@ module Pix
 
   class BaseTransparentWindow < Gtk::Window
     alias :base_move :move
-    attr_reader :workarea, :supports_alpha
+    attr_reader :supports_alpha
 
     def initialize(type: Gtk::WindowType::TOPLEVEL)
       super(type)
@@ -105,12 +105,6 @@ module Pix
       end
       @supports_alpha = composited?
       fail "assert" unless not visual.nil?
-      if realized?
-        workarea = screen.display.get_monitor_at_window(window).workarea # XXX
-      else
-        workarea = screen.display.get_monitor(0).workarea # XXX
-      end
-      @workarea = [0, 0, workarea.width, workarea.height]
       maximize # not fullscreen
     end
   end
@@ -196,6 +190,36 @@ module Pix
         shape_combine_region(nil)
         shape_combine_region(@region)
       end
+    end
+  end
+
+
+  class TransparentApplicationWindow < Gtk::ApplicationWindow
+
+    def initialize(application)
+      super(application)
+      set_decorated(false)
+      set_app_paintable(true)
+      set_focus_on_map(false)
+      if composited?
+        input_shape_combine_region(Cairo::Region.new) # empty region
+      end
+      signal_connect("screen-changed") do |widget, old_screen|
+        screen_changed(widget, :old_screen => old_screen)
+        next true
+      end
+      screen_changed(self)
+    end
+
+    def screen_changed(widget, old_screen: nil)
+      if composited?
+        set_visual(screen.rgba_visual)
+      else
+        set_visual(screen.system_visual)
+        Logging::Logging.debug("screen does NOT support alpha.\n")
+      end
+      fail "assert" unless not visual.nil?
+      maximize # not fullscreen
     end
   end
 

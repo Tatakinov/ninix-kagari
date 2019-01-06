@@ -210,7 +210,7 @@ module Bln
       else
         @position = 'sakura'
       end
-      left, top, scrn_w, scrn_h = @window.workarea
+      left, top, scrn_w, scrn_h = @__sakura.get_workarea
       # -1: left, 1: right
       if @position == 'sakura'
         s0_x, s0_y, s0_w, s0_h = get_sakura_status('SurfaceSakura')
@@ -501,7 +501,7 @@ module Bln
     end
 
     def get_coordinate(w, h)
-      left, top, scrn_w, scrn_h = @window.workarea
+      left, top, scrn_w, scrn_h = @__sakura.get_workarea
       s0_x, s0_y, s0_w, s0_h = get_sakura_status('SurfaceSakura')
       s1_x, s1_y, s1_w, s1_h = get_sakura_status('SurfaceKero')
       b0_x, b0_y, b0_w, b0_h = get_sakura_status('BalloonSakura')

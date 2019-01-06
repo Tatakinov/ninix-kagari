@@ -595,7 +595,7 @@ module Surface
     end
 
     def reset_position
-      left, top, scrn_w, scrn_h = get_workarea(0) # XXX
+      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       s0x, s0y, s0w, s0h = 0, 0, 0, 0 # XXX
       for side in 0..@window.length-1
         align = get_alignment(side)
@@ -625,14 +625,6 @@ module Surface
         end
         set_position(side, x, y)
         s0x, s0y, s0w, s0h = x, y, w, h # for next loop
-      end
-    end
-
-    def get_workarea(side)
-      if @window.length > side
-        return @window[side].get_window.workarea
-      else
-        return [0, 0, 0, 0]
       end
     end
 
@@ -844,7 +836,7 @@ module Surface
         @mikire = @kasanari = 0
         return
       end
-      left, top, scrn_w, scrn_h = get_workarea(0)
+      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       x0, y0 = get_position(0)
       s0w, s0h = get_surface_size(0)
       if (x0 + s0w / 3) < left or (x0 + s0w * 2 / 3) > (left + scrn_w) or \
@@ -976,7 +968,7 @@ module Surface
       return unless @side.zero?
       @reshape = true # XXX
       @parent.handle_request('NOTIFY', 'reset_position') # XXX
-      left, top, scrn_w, scrn_h = @window.workarea
+      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       @parent.handle_request(
         'NOTIFY', 'notify_event', 'OnDisplayChange',
         Gdk.Visual.get_best_depth(), scrn_w, scrn_h)
@@ -1111,7 +1103,7 @@ module Surface
       case get_alignment()
       when 0
         yoffset = (dh - h)
-        left, top, scrn_w, scrn_h = @window.workarea
+        left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
         y = (top + scrn_h - dh)
       when 1
         yoffset = 0
@@ -1391,7 +1383,7 @@ module Surface
     end
 
     def get_max_size
-      left, top, scrn_w, scrn_h = @window.workarea
+      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       w, h = @maxsize
       scale = get_scale
       w = [scrn_w, [8, (w * scale / 100).to_i].max].min
@@ -1469,7 +1461,7 @@ module Surface
       @position = [x, y]
       new_x, new_y = get_position()
       @window.move(new_x, new_y)
-      left, top, scrn_w, scrn_h = @window.workarea
+      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       if x > (left + scrn_w / 2)
         new_direction = 0
       else
@@ -1506,13 +1498,13 @@ module Surface
       return if @dragged # XXX: position will be reset after button release event
       case align
       when 0
-        left, top, scrn_w, scrn_h = @window.workarea
+        left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
         sw, sh = get_max_size()
         sx, sy = @position # XXX: without window_offset
         sy = (top + scrn_h - sh)
         set_position(sx, sy)
       when 1
-        left, top, scrn_w, scrn_h = @window.workarea
+        left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
         sx, sy = @position # XXX: without window_offset
         sy = top
         set_position(sx, sy)
