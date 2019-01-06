@@ -82,58 +82,6 @@ module Ninix_Main
     fail SystemExit
   end
   
-  def self.main(option)
-    # parse command line arguments
-    Logging::Logging.add_logger(Logger.new(option[:logfile])) unless option[:logfile].nil?
-    # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
-    # UDP 7743：伺か（未使用）(IANA Registered Port for SSTP)
-    # TCP 9801：伺か          (IANA Registered Port for SSTP)
-    # UDP 9801：伺か（未使用）(IANA Registered Port for SSTP)
-    # TCP 9821：SSP
-    # TCP 11000：伺か（廃止） (IANA Registered Port for IRISA)
-    sstp_port = [9801]
-    # parse command line arguments
-    unless option[:sstp_port].nil?
-      if option[:sstp_port].to_i < 1024
-        Logging::Logging.warning("Invalid --sstp-port number (ignored)")
-      else
-        sstp_port << option[:sstp_port].to_i
-      end
-    end
-    Logging::Logging.set_level(Logger::DEBUG) unless option[:debug].nil?
-    home_dir = Home.get_ninix_home()
-    unless File.exists?(home_dir)
-      begin
-        FileUtils.mkdir_p(home_dir)
-      rescue
-        raise SystemExit("Cannot create Home directory (abort)\n")
-      end
-    end
-    lockfile_path = File.join(Home.get_ninix_home(), ".lock")
-    if File.exists?(lockfile_path)
-      f = open(lockfile_path, 'r')
-      abend = f.gets
-    else
-      abend = nil
-    end
-    # aquire Inter Process Mutex (not Global Mutex)
-    f = open(lockfile_path, 'w')
-    begin
-      Lock.lockfile(f)
-    rescue
-      raise SystemExit("ninix-aya is already running")
-    end
-    # start
-    app = Application.new(f, :sstp_port => sstp_port)
-    app.run(abend)
-    f.truncate(0)
-    begin
-      Lock.unlockfile(f)
-    rescue
-      #pass
-    end
-  end
-  
   class SSTPControler < MetaMagic::Holon
 
     def initialize(sstp_port)
@@ -1690,15 +1638,68 @@ end
 
 Logging::Logging.set_level(Logger::INFO)
 
-opt = OptionParser.new
-option = {}
-opt.on('--sstp-port sstp_port', 'additional port for listening SSTP requests') {|v| option[:sstp_port] = v}
-opt.on('--debug', 'debug') {|v| option[:debug] = v}
-opt.on('--logfile logfile_name', 'logfile name') {|v| option[:logfile] = v}
-opt.parse!(ARGV)
+gtk_app = Gtk::Application.new('net.osdn.ninix-aya', :flags_none)
+
+gtk_app.signal_connect 'activate' do |application|
+  # parse command line arguments
+  opt = OptionParser.new
+  option = {}
+  opt.on('--sstp-port sstp_port', 'additional port for listening SSTP requests') {|v| option[:sstp_port] = v}
+  opt.on('--debug', 'debug') {|v| option[:debug] = v}
+  opt.on('--logfile logfile_name', 'logfile name') {|v| option[:logfile] = v}
+  opt.parse!(ARGV)
+  Logging::Logging.add_logger(Logger.new(option[:logfile])) unless option[:logfile].nil?
+  # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
+  # UDP 7743：伺か（未使用）(IANA Registered Port for SSTP)
+  # TCP 9801：伺か          (IANA Registered Port for SSTP)
+  # UDP 9801：伺か（未使用）(IANA Registered Port for SSTP)
+  # TCP 9821：SSP
+  # TCP 11000：伺か（廃止） (IANA Registered Port for IRISA)
+  sstp_port = [9801]
+  # parse command line arguments
+  unless option[:sstp_port].nil?
+    if option[:sstp_port].to_i < 1024
+      Logging::Logging.warning("Invalid --sstp-port number (ignored)")
+    else
+      sstp_port << option[:sstp_port].to_i
+    end
+  end
+  Logging::Logging.set_level(Logger::DEBUG) unless option[:debug].nil?
+  home_dir = Home.get_ninix_home()
+  unless File.exists?(home_dir)
+    begin
+      FileUtils.mkdir_p(home_dir)
+    rescue
+      raise SystemExit("Cannot create Home directory (abort)\n")
+    end
+  end
+  lockfile_path = File.join(Home.get_ninix_home(), ".lock")
+  if File.exists?(lockfile_path)
+    f = open(lockfile_path, 'r')
+    abend = f.gets
+  else
+    abend = nil
+  end
+  # aquire Inter Process Mutex (not Global Mutex)
+  f = open(lockfile_path, 'w')
+  begin
+    Lock.lockfile(f)
+  rescue
+    raise SystemExit("ninix-aya is already running")
+  end
+  # start
+  app = Ninix_Main::Application.new(f, :sstp_port => sstp_port)
+  app.run(abend)
+  f.truncate(0)
+  begin
+    Lock.unlockfile(f)
+  rescue
+    #pass
+  end
+end
 
 begin
-  Ninix_Main.main(option)
+  gtk_app.run
 rescue => e # should never rescue Exception
   Ninix_Main.handleException(e)
 end
