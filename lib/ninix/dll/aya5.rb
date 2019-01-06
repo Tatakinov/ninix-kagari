@@ -1541,7 +1541,7 @@ module Aya5
           end
           value = evaluate(namespace, [[TYPE_TOKEN, var_name]], -1, 1, :is_block => 0) ## FIXME
           index = nil
-          if value.is_a?(Fixnum) or value.is_a?(Float)
+          if value.is_a?(Integer) or value.is_a?(Float)
             if ope == '++'
               target_namespace.put(var_name, value.to_i + 1, :index => index)
             elsif ope == '--'
@@ -1706,13 +1706,13 @@ module Aya5
                 index = temp
                 delimiter = ','
               end
-              fail "assert" unless index.is_a?(Fixnum)
+              fail "assert" unless index.is_a?(Integer)
               fail "assert" unless delimiter.is_a?(String)
               result_of_array = array.split(delimiter)[index]
               alternatives << result_of_array
             elsif array.is_a?(Array)
               index = evaluate(namespace, [line[1][1]], -1, 1, :is_block => 0) ## FIXME
-              fail "assert" unless index.is_a?(Fixnum)
+              fail "assert" unless index.is_a?(Integer)
               result_of_array = array[index]
               alternatives << result_of_array
             else
@@ -1735,8 +1735,8 @@ module Aya5
               index = temp
               delimiter = nil
             end
-            ##fail "assert" unless index.is_a?(Fixnum)
-            if index.is_a?(Fixnum) and \
+            ##fail "assert" unless index.is_a?(Integer)
+            if index.is_a?(Integer) and \
               target_namespace.exists(var_name)
               unless delimiter.nil?
                 array = target_namespace.get(var_name)
@@ -1896,7 +1896,7 @@ module Aya5
           if ope == '='
             elem = right
           elsif ope == ':='
-            if right.is_a?(Fixnum)
+            if right.is_a?(Integer)
               elem = right.to_f
             else
               elem = right
@@ -2189,7 +2189,7 @@ module Aya5
           if right.zero?
             return 0
           else
-            if left.is_a?(Fixnum) and right.is_a?(Fixnum)
+            if left.is_a?(Integer) and right.is_a?(Integer)
               return (left / right).to_i
             else
               return left / right
@@ -3112,7 +3112,7 @@ module Aya5
     end
 
     def GETTYPE(namespace, argv)
-      if argv[0].is_a?(Fixnum)
+      if argv[0].is_a?(Integer)
         result = 1
       elsif argv[0].is_a?(Float)
         result = 2
@@ -3581,7 +3581,7 @@ module Aya5
       line = ['> function ', argv[1].to_s, ' ： ', argv[2].to_s].join('')
       unless argv[3].nil?
         line = [line, ' = '].join('')
-        if argv[3].is_a?(Fixnum) or argv[3].is_a?(Float)
+        if argv[3].is_a?(Integer) or argv[3].is_a?(Float)
           line = [line, argv[3].to_s].join('')
         else
           line = [line, '"', argv[3].to_s, '"'].join('')
@@ -3992,7 +3992,7 @@ module Aya5
         @line = value.to_s
         if value.is_a?(String)
           @type = TYPE_STRING
-        elsif value.is_a?(Fixnum)
+        elsif value.is_a?(Integer)
           @type = TYPE_INT
         elsif value.is_a?(Float)
           @type = TYPE_REAL

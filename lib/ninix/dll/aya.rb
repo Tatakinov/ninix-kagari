@@ -1747,7 +1747,7 @@ module Aya
               return nil
             end
           end
-          if value.is_a?(Fixnum) or value.is_a?(Float)
+          if value.is_a?(Integer) or value.is_a?(Float)
             if ope == '++'
               target_namespace.put(var_name, value.to_i + 1, :index => index)
             elsif ope == '--'
@@ -1983,7 +1983,7 @@ module Aya
           when '='
             elem = right
           when ':='
-            if right.is_a?(Fixnum)
+            if right.is_a?(Integer)
               elem = right.to_f
             else
               elem = right
@@ -2303,7 +2303,7 @@ module Aya
           if right.zero?
             return 0
           else
-            if left.is_a?(Fixnum) and right.is_a?(Fixnum)
+            if left.is_a?(Integer) and right.is_a?(Integer)
               return (left / right).to_i
             else
               return left / right
@@ -3112,7 +3112,7 @@ module Aya
     end
 
     def ISINTEGER(namespace, argv)
-      if argv[0].is_a?(Fixnum)
+      if argv[0].is_a?(Integer)
         return 1
       else
         return 0
@@ -3120,7 +3120,7 @@ module Aya
     end
 
     def ISREAL(namespace, argv)
-      if argv[0].is_a?(Fixnum) or argv[0].is_a?(Float)
+      if argv[0].is_a?(Integer) or argv[0].is_a?(Float)
         return 1
       else
         return 0
@@ -3162,7 +3162,7 @@ module Aya
 
     def LIB_VALUE(namespace, argv)
       result = ''
-      if argv[0].is_a?(Fixnum)
+      if argv[0].is_a?(Integer)
         header_list = @saori_header
         if not header_list.nil? and argv[0].to_i < header_list.length
           key = header_list[argv[0].to_i]
@@ -3224,7 +3224,7 @@ module Aya
       line = ['> function ', argv[1].to_s, ' ： ', argv[2].to_s].join('')
       unless argv[3].nil?
         line = [line, ' = '].join('')
-        if argv[3].is_a?(Fixnum) or argv[3].is_a?(Float)
+        if argv[3].is_a?(Integer) or argv[3].is_a?(Float)
           line = [line, argv[3].to_s].join('')
         else
           line = [line, '"', argv[3].to_s, '"'].join('')
@@ -3374,7 +3374,7 @@ module Aya
     end
 
     def REQ_VALUE(namespace, argv)
-      if argv[0].is_a?(Fixnum)
+      if argv[0].is_a?(Integer)
         name = REQ_HEADER(namespace, [argv[0]])
       else
         name = argv[0].to_s
@@ -4035,7 +4035,7 @@ module Aya
         @line = value.to_s
         if value.is_a?(String)
           @type = TYPE_STRING
-        elsif value.is_a?(Fixnum)
+        elsif value.is_a?(Integer)
           @type = TYPE_INT
         elsif value.is_a?(Float)
           @type = TYPE_REAL

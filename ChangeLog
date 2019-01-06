@@ -1,4 +1,6 @@
 Sun January 6 2019   Shyouzou Sugitani <shy@users.osdn.me>
+	* AYA, AYA5互換モジュールにおいてFixnum(deprecated)を
+	  使用しないよう修正した.
 	* ウインドウ形状算出処理の負荷対策を実装した.
 
 Fri January 4 2019   Shyouzou Sugitani <shy@users.osdn.me>
