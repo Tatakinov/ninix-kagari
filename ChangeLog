@@ -1,3 +1,6 @@
+Sun January 13 2019   Shyouzou Sugitani <shy@users.osdn.me>
+	* バージョン5.0.9リリース.
+
 Sun January 6 2019   Shyouzou Sugitani <shy@users.osdn.me>
 	* Gtk::ApplicationWindowを生成し、画面サイズ算出に利用するようにした.
 	* Gtk::Applicationを使用するようにした.
