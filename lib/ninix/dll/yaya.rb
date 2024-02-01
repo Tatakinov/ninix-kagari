@@ -66,9 +66,10 @@ module Yaya
       @dir = dir
       return 0 if $_yaya.nil?
       if @dir.end_with?(File::SEPARATOR)
-        topdir = @dir
+        #topdir = @dir
       else
-        topdir = [@dir, File::SEPARATOR].join()
+        #topdir = [@dir, File::SEPARATOR].join()
+        @dir = [@dir, File::SEPARATOR].join()
       end
       path = Fiddle::Pointer.malloc(
         @dir.bytesize + 1,
@@ -94,7 +95,11 @@ module Yaya
       rlen =[req_string.bytesize].pack("l!")
       ret = $_yaya.multi_request(@id, request, rlen)
       rlen, = rlen.unpack("l!")
-      ret[0, rlen].to_s
+      unless ret.null?
+        ret[0, rlen].to_s
+      else
+        ''
+      end
     end
   end
 end
