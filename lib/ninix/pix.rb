@@ -209,6 +209,9 @@ module Pix
         next true
       end
       screen_changed(self)
+      set_keep_below(true)
+      set_skip_pager_hint(true)
+      set_skip_taskbar_hint(true)
     end
 
     def screen_changed(widget, old_screen: nil)
