@@ -336,8 +336,8 @@ module Ninix_Main
       @communicate.get_otherghostname(*arglist)
     end
 
-    def rebuild_ghostdb(*arglist)
-      @communicate.rebuild_ghostdb(*arglist)
+    def rebuild_ghostdb(*arglist, **kwarg)
+      @communicate.rebuild_ghostdb(*arglist, **kwarg)
     end
 
     def notify_other(*arglist)
@@ -352,7 +352,7 @@ module Ninix_Main
       @sstp_controler.get_sstp_port(*arglist)
     end
 
-    def handle_request(event_type, event, *arglist)
+    def handle_request(event_type, event, *arglist, **kwarg)
       fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       handlers = {
         'close_all' => 'close_all_ghosts',
@@ -368,12 +368,12 @@ module Ninix_Main
       }
       unless handlers.include?(event)
         if Application.method_defined?(event)
-          result = method(event).call(*arglist)
+          result = method(event).call(*arglist, **kwarg)
         else
           result = nil
         end
       else
-        result = method(handlers[event]).call(*arglist)
+        result = method(handlers[event]).call(*arglist, **kwarg)
       end
       return result if event_type == 'GET'
     end
@@ -632,6 +632,12 @@ module Ninix_Main
         path_background, path_sidebar, path_foreground,
         align_background, align_sidebar, align_foreground)
       background, foreground = @__menu_owner.get_menu_fontcolor()
+      if background[0] == -1 || background[1] == -1 || background[2] == -1
+        background = []
+      end
+      if foreground[0] == -1 || foreground[1] == -1 || foreground[2] == -1
+        foreground = []
+      end
       @__menu.set_fontcolor(background, foreground)
       mayuna_menu = @__menu_owner.get_mayuna_menu()
       @__menu.create_mayuna_menu(mayuna_menu)

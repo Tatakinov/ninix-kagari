@@ -168,7 +168,7 @@ module Sakura
       end
     end
 
-    def notify_observer(event, args: nil)
+    def notify_observer(event, *args)
       if args.nil?
         args = []
       end
