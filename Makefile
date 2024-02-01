@@ -36,7 +36,7 @@ install-bin:
 
 install-doc:
 	mkdir -p $(docdir)
-	cp README README.ninix SAORI COPYING ChangeLog $(docdir)
+	cp README.md README.ninix SAORI COPYING ChangeLog $(docdir)
 
 clean:
 	$(RM) bin/ninix *~
