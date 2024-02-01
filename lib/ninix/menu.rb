@@ -26,8 +26,8 @@ module Menu
     def initialize
       @parent = nil
       @__fontcolor = {
-        'normal' => [0, 0, 0],
-        'hover' => [255, 255, 255]
+        'normal' => [],
+        'hover' => []
       }
       @__imagepath = {
         'background' => nil,
@@ -223,8 +223,11 @@ module Menu
         end
       end
       if @__imagepath['background'].nil?
+        @__imagepath['background'] = ""
+=begin
         @__imagepath['background'] = ["background-image: none;\n",
                                       "background-color: transparent;\n"].join('')
+=end
       end
       if not path_foreground.nil? and File.exists?(path_foreground)
         begin
@@ -249,8 +252,11 @@ module Menu
         end
       end
       if @__imagepath['foreground'].nil?
+        @__imagepath['foreground'] = ""
+=begin
         @__imagepath['foreground'] = ["background-image: none;\n",
                                         "background-color: transparent;\n"].join('')
+=end
       end
     end
 
@@ -662,15 +668,32 @@ module Menu
 
     def set_stylecontext(item, *args, provider: nil)
       _, offset_y = item.translate_coordinates(item.parent, 0, 0)
+      color_normal = ""
+      unless @__fontcolor['normal'].empty?
+        color_normal = [
+            "color: ",
+            "\#",
+            sprintf("%02x", @__fontcolor['normal'][0]),
+            sprintf("%02x", @__fontcolor['normal'][1]),
+            sprintf("%02x", @__fontcolor['normal'][2]),
+            ";\n"
+        ].join("")
+      end
+      color_hover = ""
+      unless @__fontcolor['hover'].empty?
+        color_hover = [
+            "color: ",
+            "\#",
+            sprintf("%02x", @__fontcolor['hover'][0]),
+            sprintf("%02x", @__fontcolor['hover'][1]),
+            sprintf("%02x", @__fontcolor['hover'][2]),
+            ";\n"
+        ].join("")
+      end
       provider.load(data: ["menu {\n",
                            @__imagepath['background'],
                            "background-repeat: repeat-y;\n",
-                           "color: ",
-                           "\#",
-                           sprintf("%02x", @__fontcolor['normal'][0]),
-                           sprintf("%02x", @__fontcolor['normal'][1]),
-                           sprintf("%02x", @__fontcolor['normal'][2]),
-                           ";\n",
+                           color_normal,
                            ["background-position: ", @__align['background'], " ", (-offset_y).to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
@@ -683,12 +706,7 @@ module Menu
                            "menu :hover {\n",
                            @__imagepath['foreground'],
                            "background-repeat: repeat-y;\n",
-                           "color: ",
-                           "\#",
-                           sprintf("%02x", @__fontcolor['hover'][0]),
-                           sprintf("%02x", @__fontcolor['hover'][1]),
-                           sprintf("%02x", @__fontcolor['hover'][2]),
-                           ";\n",
+                           color_hover,
                            ["background-position: ", @__align['foreground'], " ", (-offset_y).to_s, "px;\n"].join(''),
                            "}"
                           ].join(""))
@@ -703,15 +721,32 @@ module Menu
         return false
       end
       _, offset_y = item.translate_coordinates(item.parent, 0, 0)
+      color_normal = ""
+      unless @__fontcolor['normal'].empty?
+        color_normal = [
+            "color: ",
+            "\#",
+            sprintf("%02x", @__fontcolor['normal'][0]),
+            sprintf("%02x", @__fontcolor['normal'][1]),
+            sprintf("%02x", @__fontcolor['normal'][2]),
+            ";\n"
+        ].join("")
+      end
+      color_hover = ""
+      unless @__fontcolor['hover'].empty?
+        color_hover = [
+            "color: ",
+            "\#",
+            sprintf("%02x", @__fontcolor['hover'][0]),
+            sprintf("%02x", @__fontcolor['hover'][1]),
+            sprintf("%02x", @__fontcolor['hover'][2]),
+            ";\n"
+        ].join("")
+      end
       provider.load(data: ["menu {\n",
                            @__imagepath['background_with_sidebar'],
                            "background-repeat: repeat-y;\n",
-                           "color: ",
-                           "\#",
-                           sprintf("%02x", @__fontcolor['normal'][0]),
-                           sprintf("%02x", @__fontcolor['normal'][1]),
-                           sprintf("%02x", @__fontcolor['normal'][2]),
-                           ";\n",
+                           color_normal,
                            ["background-position: ", "0px ", (-offset_y).to_s, "px", ", ",
                             @sidebar_width.to_s, "px", " ", (-offset_y).to_s, "px;\n"].join(''),
                            ["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
@@ -728,12 +763,7 @@ module Menu
                            "menu :hover {\n",
                            @__imagepath['foreground_with_sidebar'],
                            "background-repeat: repeat-y;\n",
-                           "color: ",
-                           "\#",
-                           sprintf("%02x", @__fontcolor['hover'][0]),
-                           sprintf("%02x", @__fontcolor['hover'][1]),
-                           sprintf("%02x", @__fontcolor['hover'][2]),
-                           ";\n",
+                           color_hover,
                            ["background-position: ", "0px ", (-offset_y).to_s, "px", ", ",
                             @sidebar_width.to_s, "px", " ", (-offset_y).to_s, "px;\n"].join(''),
                            ["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
