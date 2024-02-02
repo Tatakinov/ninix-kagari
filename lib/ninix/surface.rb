@@ -593,8 +593,10 @@ module Surface
         if direction.zero? # left
           base_x = (x + ox)
         else
-          w, h = get_surface_size(side)
-          base_x = (x + w - ox)
+          sw, sh = get_surface_size(side)
+          bw, bh = @parent.handle_request(
+              'GET', 'get_balloon_size', side)
+          base_x = (x + sw + bw - ox)
         end
         base_y = (y + oy)
         @parent.handle_request(
@@ -1476,6 +1478,8 @@ module Surface
         new_direction = 1
       end
       @__direction = new_direction
+      @parent.handle_request(
+        'NOTIFY', 'set_balloon_direction', @side, direction)
       ox, oy = get_balloon_offset # without scaling
       scale = get_scale
       ox = (ox * scale / 100).to_i
@@ -1483,8 +1487,10 @@ module Surface
       if new_direction.zero? # left
         base_x = (new_x + ox)
       else
-        w, h = get_surface_size()
-        base_x = (new_x + w - ox)
+        sw, sh = get_surface_size()
+        bw, bh = @parent.handle_request(
+            'GET', 'get_balloon_size', @side)
+        base_x = (new_x + sw + bw - ox)
       end
       base_y = (new_y + oy)
       @parent.handle_request(
