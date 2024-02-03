@@ -49,7 +49,7 @@ module Saori_cpuid
       return RESPONSE[204] if argument.length > 1 and argument[1].zero?
       value =
         case argument[0]
-        when 'platform';   'ninix-aya'
+        when 'platform';   'ninix-kagari'
         when 'os.name';    RbConfig::CONFIG['host_os']
         when 'os.version'; "" ## FIXME: not supported yet
         when 'os.build';   "" ## FIXME: not supported yet

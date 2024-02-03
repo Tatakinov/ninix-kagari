@@ -38,7 +38,7 @@ module Prefs
 
     include GetText
 
-    bindtextdomain("ninix-aya")
+    bindtextdomain("ninix-kagari")
 
     def initialize(filename)
       @dic = {}
@@ -117,7 +117,7 @@ module Prefs
 
     include GetText
 
-    bindtextdomain("ninix-aya")
+    bindtextdomain("ninix-kagari")
 
     def initialize
       @parent = nil

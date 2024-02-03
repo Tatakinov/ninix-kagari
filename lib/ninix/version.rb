@@ -15,10 +15,10 @@ require 'gettext'
 module Version
   include GetText
 
-  bindtextdomain("ninix-aya")
+  bindtextdomain("ninix-kagari")
 
   def self.NUMBER
-    '5.0.9'
+    '1.0.0'
   end
 
   def self.CODENAME
@@ -30,7 +30,7 @@ module Version
   end
 
   def self.VERSION_INFO
-    '\h\s[0]\w8ninix-aya '
+    '\h\s[0]\w8ninix-kagari '
       .concat("#{self.VERSION}")
       .concat('\n')
       .concat(_('Are igai No Nanika with "Nin\'i" for X'))
@@ -40,6 +40,7 @@ module Version
       .concat('Copyright (c) 2002-2006 MATSUMURA Namihiko\n')
       .concat('Copyright (c) 2002-2019 Shyouzou Sugitani\n')
       .concat('Copyright (c) 2002, 2003 ABE Hideaki\n')
-      .concat('Copyright (c) 2003-2005 Shun-ichi TAHARA\e')
+      .concat('Copyright (c) 2003-2005 Shun-ichi TAHARA\n')
+      .concat('Copyright (c) 2024 Tatakinov\e')
   end
 end

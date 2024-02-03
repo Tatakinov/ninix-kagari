@@ -382,7 +382,7 @@ module SSTP
         @fp.write("\r\n")
       when 'getversion'
         send_response(200)
-        @fp.write("ninix-aya ")
+        @fp.write("ninix-kagari ")
         @fp.write(Version.VERSION.encode(
                     charset, :invalid => :replace, :undef => :replace))
         @fp.write("\r\n")

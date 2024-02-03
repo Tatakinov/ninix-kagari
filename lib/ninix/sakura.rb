@@ -66,7 +66,7 @@ module Sakura
 
     include GetText
 
-    bindtextdomain("ninix-aya")
+    bindtextdomain("ninix-kagari")
     
     BALLOON_LIFE   = 10  # [sec] (0: never closed automatically)
     SELECT_TIMEOUT = 15  # [sec]
@@ -118,7 +118,7 @@ module Sakura
       @__vanish_dialog = VanishDialog.new
       @__vanish_dialog.set_responsible(self)
       @cantalk = true
-      @__sender = 'ninix-aya'
+      @__sender = 'ninix-kagari'
       @__charset = 'Shift_JIS'
       saori_lib = DLL::Library.new('saori', :sakura => self)
       @__dll = DLL::Library.new('shiori', :saori_lib => saori_lib)
@@ -250,7 +250,7 @@ module Sakura
       if flag
         @__sender = 'SSP'
       else
-        @__sender = 'ninix-aya'
+        @__sender = 'ninix-kagari'
       end
     end
 
@@ -357,7 +357,7 @@ module Sakura
       get_event_response('OnInitialize', :event_type => 'NOTIFY')
       get_event_response('basewareversion',
                          Version.VERSION,
-                         'ninix-aya',
+                         'ninix-kagari',
                          Version.NUMBER,
                          :event_type => 'NOTIFY')
     end
@@ -2924,7 +2924,7 @@ module Sakura
 
     include GetText
 
-    bindtextdomain("ninix-aya")
+    bindtextdomain("ninix-kagari")
     
     def initialize
       @parent = nil # dummy

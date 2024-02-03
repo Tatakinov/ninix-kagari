@@ -36,7 +36,7 @@ require_relative "ninix/logging"
 
 module Ninix_Main
   include GetText
-  bindtextdomain("ninix-aya")
+  bindtextdomain("ninix-kagari")
 
   def self.handleException(exception)
     message = ("Uncaught exception (#{exception.class})\n" + exception.backtrace.join("\n"))
@@ -47,7 +47,7 @@ module Ninix_Main
       :flags => 0,
       :type => Gtk::MessageType::ERROR,
       :buttons => Gtk::ButtonsType::NONE,
-      :message => _("A ninix-aya error has been detected."))
+      :message => _("A ninix-kagari error has been detected."))
     dialog.set_title(_("Bug Detected"))
     dialog.set_window_position(Gtk::WindowPosition::CENTER)
     dialog.gravity = Gdk::Gravity::CENTER
@@ -405,7 +405,7 @@ module Ninix_Main
         else
           @communicate.notify_all('OnInstallFailure', ['unknown'])
         end
-        # XXX: ninix-ayaでは発生しない.
+        # XXX: ninix-kagariでは発生しない.
         ##@communicate.notify_all('OnInstallRefuse', [])
       else
         ##@communicate.notify_all('OnInstallCompleteEx', []) # FIXME
@@ -1650,7 +1650,7 @@ end
 
 Logging::Logging.set_level(Logger::INFO)
 
-gtk_app = Gtk::Application.new('net.osdn.ninix-aya', :flags_none)
+gtk_app = Gtk::Application.new('io.github.tatakinov.ninix-kagari', :flags_none)
 
 gtk_app.signal_connect 'activate' do |application|
   # parse command line arguments
@@ -1697,10 +1697,10 @@ gtk_app.signal_connect 'activate' do |application|
   begin
     Lock.lockfile(f)
   rescue
-    raise SystemExit("ninix-aya is already running")
+    raise SystemExit("ninix-kagari is already running")
   end
   app_window = Pix::TransparentApplicationWindow.new(application)
-  app_window.set_title("Ninix-aya")
+  app_window.set_title("Ninix-kagari")
   app_window.show_all
   # start
   app = Ninix_Main::Application.new(f, :sstp_port => sstp_port)

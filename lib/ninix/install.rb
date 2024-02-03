@@ -75,7 +75,7 @@ module Install
 
     def extract_files(filename)
       # extract files from the archive
-      tmpdir = Dir.mktmpdir('ninix-aya')
+      tmpdir = Dir.mktmpdir('ninix-kagari')
       FileUtils.remove_entry_secure(tmpdir)
       begin
         FileUtils.mkdir_p(tmpdir)

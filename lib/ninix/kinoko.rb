@@ -28,7 +28,7 @@ module Kinoko
   class Menu
   include GetText
 
-  bindtextdomain("ninix-aya")
+  bindtextdomain("ninix-kagari")
 
     def initialize(accelgroup)
       @parent = nil

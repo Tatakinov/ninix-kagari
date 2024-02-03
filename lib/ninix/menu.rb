@@ -21,7 +21,7 @@ module Menu
   class Menu
     include GetText
 
-    bindtextdomain("ninix-aya")
+    bindtextdomain("ninix-kagari")
 
     def initialize
       @parent = nil
