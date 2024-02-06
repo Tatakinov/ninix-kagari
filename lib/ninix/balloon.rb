@@ -295,6 +295,123 @@ module Balloon
       end
     end
 
+    def new_line(side)
+      unless @synchronized.empty?
+        for side in @synchronized
+          next unless @window.length > side
+          @window[side].new_line
+        end
+      else
+        if @window.length > side
+          @window[side].new_line
+        end
+      end
+    end
+
+    def set_draw_absolute_x(side, pos)
+      unless @synchronized.empty?
+        for side in @synchronized
+          next unless @window.length > side
+          @window[side].set_draw_absolute_x(pos)
+        end
+      else
+        if @window.length > side
+          @window[side].set_draw_absolute_x(pos)
+        end
+      end
+    end
+
+    def set_draw_absolute_x_char(side, rate)
+      unless @synchronized.empty?
+        for side in @synchronized
+          next unless @window.length > side
+          @window[side].set_draw_absolute_x_char(rate)
+        end
+      else
+        if @window.length > side
+          @window[side].set_draw_absolute_x_char(rate)
+        end
+      end
+    end
+
+    def set_draw_relative_x(side, pos)
+      unless @synchronized.empty?
+        for side in @synchronized
+          next unless @window.length > side
+          @window[side].set_draw_relative_x(pos)
+        end
+      else
+        if @window.length > side
+          @window[side].set_draw_relative_x(pos)
+        end
+      end
+    end
+
+    def set_draw_relative_x_char(side, rate)
+      unless @synchronized.empty?
+        for side in @synchronized
+          next unless @window.length > side
+          @window[side].set_draw_relative_x(rate)
+        end
+      else
+        if @window.length > side
+          @window[side].set_draw_relative_x(rate)
+        end
+      end
+    end
+
+    def set_draw_absolute_y(side, pos)
+      unless @synchronized.empty?
+        for side in @synchronized
+          next unless @window.length > side
+          @window[side].set_draw_absolute_y(pos)
+        end
+      else
+        if @window.length > side
+          @window[side].set_draw_absolute_y(pos)
+        end
+      end
+    end
+
+    def set_draw_absolute_y_char(side, rate)
+      unless @synchronized.empty?
+        for side in @synchronized
+          next unless @window.length > side
+          @window[side].set_draw_absolute_y_char(rate)
+        end
+      else
+        if @window.length > side
+          @window[side].set_draw_absolute_y_char(rate)
+        end
+      end
+    end
+
+    def set_draw_relative_y(side, pos)
+      unless @synchronized.empty?
+        for side in @synchronized
+          next unless @window.length > side
+          @window[side].set_draw_relative_y(pos)
+        end
+      else
+        if @window.length > side
+          @window[side].set_draw_relative_y(pos)
+        end
+      end
+    end
+
+    def set_draw_relative_y_char(side, rate)
+      unless @synchronized.empty?
+        for side in @synchronized
+          next unless @window.length > side
+          @window[side].set_draw_relative_y_char(rate)
+        end
+      else
+        if @window.length > side
+          @window[side].set_draw_relative_y_char(rate)
+        end
+      end
+    end
+
     def append_text(side, text)
       unless @synchronized.empty?
         for side in @synchronized
@@ -632,74 +749,50 @@ module Balloon
 
     def reset_message_regions
       w, h = @layout.pixel_size
+      @font_width = w
       @font_height = h
       @line_space = 1
       @layout.set_spacing(@line_space)
       # font metrics
-      origin_x = __get('origin.x',
+      @origin_x = __get('origin.x',
                        __get('zeropoint.x',
                              __get('validrect.left', 14).to_i).to_i).to_i
-      origin_y = __get('origin.y',
+      @origin_y = __get('origin.y',
                        __get('zeropoint.y',
                              __get('validrect.top', 14).to_i).to_i).to_i
       wpx = __get('wordwrappoint.x',
                   __get('validrect.right', -14).to_i).to_i
+      @hpx = __get('validrect.bottom', -14).to_i
       if wpx > 0
-        line_width = (wpx - origin_x)
+        line_width = (wpx - @origin_x)
       elsif wpx < 0
-        line_width = (@width - origin_x + wpx)
+        line_width = (@width - @origin_x + wpx)
       else
-        line_width = (@width - origin_x * 2)
+        line_width = (@width - @origin_x * 2)
       end
       wpy = __get('validrect.bottom', -14).to_i
       if wpy > 0
-        text_height = ([wpy, @height].min - origin_y)
+        text_height = ([wpy, @height].min - @origin_y)
       elsif wpy < 0
-        text_height = (@height - origin_y + wpy)
+        text_height = (@height - @origin_y + wpy)
       else
-        text_height = (@height - origin_y * 2)
+        text_height = (@height - @origin_y * 2)
       end
-      line_height = (@font_height + @line_space)
-      @lines = (text_height / line_height).to_i
+      @line_height = (@font_height + @line_space)
+      @layout.set_width(line_width * Pango::SCALE)
+      @valid_width = line_width
+      @valid_height = text_height
+      @lines = (text_height / @line_height).to_i
       @line_regions = []
-      y = origin_y
-      for _ in 0..@lines
-        @line_regions << [origin_x, y, line_width, line_height]
-        y = (y + line_height)
-      end
+      y = @origin_y
+      @line_regions << [0, 0]
       @line_width = line_width
       # sstp message region
       if @side.zero?
         w, h = @sstp_layout.pixel_size
         x, y = @sstp[1]
-        w = (line_width + origin_x - x)
+        w = (line_width + @origin_x - x)
         @sstp_region = [x, y, w, h]
-      end
-    end
-
-    def update_line_regions(offset, new_y)
-      origin_y = __get('origin.y',
-                       __get('zeropoint.y',
-                             __get('validrect.top', 14).to_i).to_i).to_i
-      wpy = __get('validrect.bottom', -14).to_i
-      if wpy > 0
-        text_height = ([wpy, @height].min - origin_y)
-      elsif wpy < 0
-        text_height = (@height - origin_y + wpy)
-      else
-        text_height = (@height - origin_y * 2)
-      end
-      line_height = (@font_height + @line_space)
-      origin_x, y, line_width, line_height = @line_regions[offset]
-      @lines = (offset + ((text_height - new_y) / line_height).to_i)
-      y = new_y
-      for i in offset..(@line_regions.length - 1)
-        @line_regions[i] = [origin_x, y, line_width, line_height]
-        y += line_height
-      end
-      for i in @line_regions.length..@lines
-        @line_regions << [origin_x, y, line_width, line_height]
-        y += line_height
       end
     end
 
@@ -902,7 +995,7 @@ module Balloon
     end
 
     def redraw_arrow1(widget, cr)
-      return if (@lineno + @lines) >= @text_buffer.length
+      return if @bottom_draw_position < @valid_height
       cr.save()
       x, y = @arrow[1]
       cr.set_source(@arrow1_surface, x, y)
@@ -966,6 +1059,20 @@ module Balloon
       return text
     end
 
+    def get_last_cursor_position
+      index = @line_regions.length - 1
+      sx, sy = @line_regions[index]
+      markup = set_markup(index, @text_buffer[index])
+      @layout.set_indent(sx * Pango::SCALE)
+      @layout.set_markup(markup)
+      t = @layout.text
+      strong, weak = @layout.get_cursor_pos(t.bytesize)
+      x = (strong.x / Pango::SCALE).to_i
+      y = (strong.y / Pango::SCALE).to_i
+      h = (strong.height / Pango::SCALE).to_i
+      return [x, sy + y, h]
+    end
+
     def redraw(widget, cr)
       return if @parent.handle_request('GET', 'lock_repaint')
       return true unless @__shown
@@ -973,6 +1080,7 @@ module Balloon
       @window.set_surface(cr, @balloon_surface, scale)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX
+      @bottom_draw_position = 0
       # draw images
       for i in 0..(@images.length - 1)
         image_surface, (x, y) = @images[i]
@@ -1002,31 +1110,22 @@ module Balloon
         cr.paint()
       end
       # draw text
-      i = @lineno
-      j = @text_buffer.length
-      line = 0
-      while line < @lines
-        if i >= j
-          break
-        end
-        x, y, w, h = @line_regions[line]
-        if @text_buffer[i].end_with?('\n[half]')
-          temp = @text_buffer[i]
-          new_y = y
-          while temp.end_with?('\n[half]')
-            new_y += ((@font_height + @line_space) / 2).to_i
-            temp = temp[0..-9]
-          end
-          markup = set_markup(i, temp)
-        else
-          new_y = (y + @font_height + @line_space).to_i
-          markup = set_markup(i, @text_buffer[i])
-        end
-        update_line_regions(line + 1, new_y)
+      cr.rectangle(@origin_x, @origin_y, @valid_width, @valid_height)
+      cr.clip
+      for i in 0 .. @text_buffer.length - 1
+        sx, sy = @line_regions[i]
+        markup = set_markup(i, @text_buffer[i])
+        @layout.set_indent(sx * Pango::SCALE)
         @layout.set_markup(markup)
         cr.set_source_rgb(@text_normal_color)
-        cr.move_to(x, y)
+        cr.move_to(@origin_x, @origin_y + sy - @lineno * @line_height)
         cr.show_pango_layout(@layout)
+        t = @layout.text
+        strong, weak = @layout.get_cursor_pos(t.bytesize)
+        x = (strong.x / Pango::SCALE).to_i
+        y = (strong.y / Pango::SCALE).to_i
+        h = (strong.height / Pango::SCALE).to_i
+        @bottom_draw_position = [@bottom_draw_position, sy + y + h - @lineno * @line_height].max
         unless @sstp_surface.nil?
           for l, c in @sstp_marker
             if l == i
@@ -1042,9 +1141,8 @@ module Balloon
             end
           end
         end
-        i += 1
-        line += 1
       end
+      cr.reset_clip()
       redraw_sstp_message(widget, cr) if @side.zero? and not @sstp_message.nil?
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
@@ -1207,14 +1305,13 @@ module Balloon
       case event.direction
       when Gdk::ScrollDirection::UP
         if @lineno > 0
-          @lineno = [@lineno - 2, 0].max
+          @lineno = @lineno - 1
           check_link_region(px, py)
           @darea.queue_draw()
         end
       when Gdk::ScrollDirection::DOWN
-        if (@lineno + @lines) < @text_buffer.length
-          @lineno = [@lineno + 2,
-                     @text_buffer.length - @lines].min
+        if @bottom_draw_position > @valid_height
+          @lineno += 1
           check_link_region(px, py)
           @darea.queue_draw()
         end
@@ -1239,7 +1336,7 @@ module Balloon
       x, y = @arrow[0]
       if x <= px and px <= (x + w) and y <= py and py <= (y + h)
         if @lineno > 0
-          @lineno = [@lineno - 2, 0].max
+          @lineno = @lineno - 1
           @darea.queue_draw()
         end
         return true
@@ -1249,9 +1346,8 @@ module Balloon
       h = @arrow1_surface.height
       x, y = @arrow[1]
       if x <= px and px <= (x + w) and y <= py and py <= (y + h)
-        if @lineno + @lines < @text_buffer.length
-          @lineno = [@lineno + 2,
-                     @text_buffer.length - @lines].min
+        if @bottom_draw_position > @valid_height
+          @lineno += 1
           @darea.queue_draw()
         end
         return true
@@ -1305,6 +1401,62 @@ module Balloon
 
     def set_newline
       @newline_required = true
+    end
+
+    def new_line
+      @text_buffer << ""
+      line_height = (@font_height + @line_space)
+      rx, ry, rh = get_last_cursor_position
+      @line_regions << [rx, ry]
+    end
+
+    def set_draw_absolute_x(pos)
+      sx, sy = @line_regions[@line_regions.size - 1]
+      @line_regions[@line_regions.size - 1] = [pos, sy]
+    end
+
+    def set_draw_absolute_x_char(rate)
+      set_draw_absolute_x(@font_width * rate)
+    end
+
+    def set_draw_relative_x(pos)
+      sx, sy = @line_regions[@line_regions.size - 1]
+      set_draw_absolute_x(sx + pos)
+    end
+
+    def set_draw_relative_x_char(rate)
+      set_draw_relative_x(@font_width * rate)
+    end
+
+    def set_draw_absolute_y(pos)
+      sx, sy = @line_regions[@line_regions.size - 1]
+      if pos + @line_height > @valid_height
+        @lineno += 1
+      end
+      @line_regions[@line_regions.size - 1] = [sx, pos]
+    end
+
+    def set_draw_absolute_y_char(rate)
+      rx, ry, rh = get_last_cursor_position
+      # 最初に\n系が呼ばれたときの処理
+      if rh == 0
+        rh = @line_height
+      end
+      set_draw_absolute_y((rh * rate).to_i)
+    end
+
+    def set_draw_relative_y(pos)
+      sx, sy = @line_regions[@line_regions.size - 1]
+      set_draw_absolute_y(sy + pos)
+    end
+
+    def set_draw_relative_y_char(rate)
+      rx, ry, rh = get_last_cursor_position
+      # 最初に\n系が呼ばれたときの処理
+      if rh == 0
+        rh = @line_height
+      end
+      set_draw_relative_y((rh * rate).to_i)
     end
 
     def append_text(text)
@@ -1449,41 +1601,7 @@ module Balloon
 
     def draw_last_line(column: 0)
       return unless @__shown
-      line = (@text_buffer.length - 1)
-      if @lineno <= line and line < (@lineno + @lines)
-        x, y, w, h = @line_regions[line - @lineno]
-        if @text_buffer[line].end_with?('\n[half]')
-          offset = (line - @lineno + 1)
-          new_y = (y + (@font_height + @line_space) / 2).to_i
-          update_line_regions(offset, new_y)
-        else
-          @darea.queue_draw()
-        end
-        unless @sstp_surface.nil?
-          for l, c in @sstp_marker
-            if l == line
-              mw = @sstp_surface.width
-              mh = @sstp_surface.height
-              @layout.set_text(@text_buffer[l][0, c])
-              text_w, text_h = @layout.pixel_size
-              mx = (x + text_w)
-              my = (y + (@font_height + @line_space) / 2)
-              my = (my - mh / 2)
-              cr = @darea.window.create_cairo_context
-              cr.set_source(@sstp_surface, mx, my)
-              cr.paint()
-            end
-          end
-        end
-      else
-        @darea.queue_draw()
-        if @autoscroll
-          while line >= (@lineno + @lines)
-            @lineno += 1
-            @darea.queue_draw()
-          end
-        end
-      end
+      @darea.queue_draw()
     end
   end
 
