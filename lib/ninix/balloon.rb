@@ -373,15 +373,15 @@ module Balloon
       end
     end
 
-    def set_draw_absolute_y_char(side, rate)
+    def set_draw_absolute_y_char(side, rate, **kwarg)
       unless @synchronized.empty?
         for side in @synchronized
           next unless @window.length > side
-          @window[side].set_draw_absolute_y_char(rate)
+          @window[side].set_draw_absolute_y_char(rate, **kwarg)
         end
       else
         if @window.length > side
-          @window[side].set_draw_absolute_y_char(rate)
+          @window[side].set_draw_absolute_y_char(rate, **kwarg)
         end
       end
     end
@@ -399,15 +399,15 @@ module Balloon
       end
     end
 
-    def set_draw_relative_y_char(side, rate)
+    def set_draw_relative_y_char(side, rate, **kwarg)
       unless @synchronized.empty?
         for side in @synchronized
           next unless @window.length > side
-          @window[side].set_draw_relative_y_char(rate)
+          @window[side].set_draw_relative_y_char(rate, **kwarg)
         end
       else
         if @window.length > side
-          @window[side].set_draw_relative_y_char(rate)
+          @window[side].set_draw_relative_y_char(rate, **kwarg)
         end
       end
     end
@@ -1069,7 +1069,16 @@ module Balloon
       strong, weak = @layout.get_cursor_pos(t.bytesize)
       x = (strong.x / Pango::SCALE).to_i
       y = (strong.y / Pango::SCALE).to_i
+      # hは一番大きいheightを保存する(\n系用)
       h = (strong.height / Pango::SCALE).to_i
+      prev_x = x
+      for i in t.bytesize .. 0
+        s, w = @layout.get_cursor_pos(i)
+        if prev_x < (s.x / Pango::SCALE)
+          break
+        end
+        h = [h, (s.height / Pango::SCALE).to_i].max
+      end
       return [x, sy + y, h]
     end
 
@@ -1436,10 +1445,10 @@ module Balloon
       @line_regions[@line_regions.size - 1] = [sx, pos]
     end
 
-    def set_draw_absolute_y_char(rate)
+    def set_draw_absolute_y_char(rate, use_default_height: true)
       rx, ry, rh = get_last_cursor_position
       # 最初に\n系が呼ばれたときの処理
-      if rh == 0
+      if rh == 0 || use_default_height
         rh = @line_height
       end
       set_draw_absolute_y((rh * rate).to_i)
@@ -1450,10 +1459,10 @@ module Balloon
       set_draw_absolute_y(sy + pos)
     end
 
-    def set_draw_relative_y_char(rate)
+    def set_draw_relative_y_char(rate, use_default_height: true)
       rx, ry, rh = get_last_cursor_position
       # 最初に\n系が呼ばれたときの処理
-      if rh == 0
+      if rh == 0 || use_default_height
         rh = @line_height
       end
       set_draw_relative_y((rh * rate).to_i)

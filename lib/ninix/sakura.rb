@@ -2068,11 +2068,11 @@ module Sakura
       if not args.empty? and expand_meta(args[0]) == 'half'
         @balloon.new_line(@script_side)
         @balloon.set_draw_absolute_x(@script_side, 0)
-        @balloon.set_draw_relative_y_char(@script_side, 0.5)
+        @balloon.set_draw_relative_y_char(@script_side, 0.5, use_default_height: false)
       else
         @balloon.new_line(@script_side)
         @balloon.set_draw_absolute_x(@script_side, 0)
-        @balloon.set_draw_relative_y_char(@script_side, 1)
+        @balloon.set_draw_relative_y_char(@script_side, 1, use_default_height: false)
       end
     end
 
