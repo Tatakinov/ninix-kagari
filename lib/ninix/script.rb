@@ -274,7 +274,7 @@ module Script
         elsif ["\\q"].include?(lexeme)
           if not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
             args = split_params(read_sbra_text())
-            if args.length != 2
+            if args.length < 2
               fail perror(:skip => 'length'), 'wrong number of arguments'
               return []
             end
@@ -282,14 +282,20 @@ module Script
               fail perror(:skip => 'length'), 'syntax error (expected an ID)'
               return []
             end
-            arg1 = args[0]
-            arg2 = args[1][0][1]
-            @script << [SCRIPT_TAG, lexeme, arg1, arg2, @column]
+            arg1 = false
+            arg2 = args[0]
+            arg3 = args[1][0][1]
+            arg4 = []
+            for i in 2 .. args.length - 1
+              arg4 << args[i][0][1]
+            end
+            @script << [SCRIPT_TAG, lexeme, arg1, arg2, arg3, arg4, @column]
           else
-            arg1 = read_number()
-            arg2 = read_sbra_id()
-            arg3 = read_sbra_text()
-            @script << [SCRIPT_TAG, lexeme, arg1, arg2, arg3, @column]
+            arg1 = true
+            arg2 = read_number()
+            arg3 = read_sbra_id()
+            arg4 = read_sbra_text()
+            @script << [SCRIPT_TAG, lexeme, arg1, arg2, arg3, arg4, @column]
           end
         elsif ["\\_s"].include?(lexeme)
           if not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
@@ -304,7 +310,13 @@ module Script
         elsif ["\\_a"].include?(lexeme)
           if anchor.nil?
             anchor = perror(:skip => 'rest')
-            @script << [SCRIPT_TAG, lexeme, read_sbra_id(), @column]
+            args = split_params(read_sbra_text())
+            arg1 = args.shift
+            arg2 = []
+            for i in 0 .. args.length - 1
+              arg2 << args[i][0][1]
+            end
+            @script << [SCRIPT_TAG, lexeme, arg1, arg2, @column]
           else
             anchor = nil
             @script << [SCRIPT_TAG, lexeme, @column]

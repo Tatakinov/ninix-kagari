@@ -954,14 +954,22 @@ module Sakura
       notify_observer('deiconified')
     end
 
-    def notify_link_selection(link_id, text, number)
+    def notify_link_selection(link_id, text, args, number)
       if @script_origin == FROM_SSTP_CLIENT and \
         not @sstp_request_handler.nil?
         @sstp_request_handler.send_answer(text)
         @sstp_request_handler = nil
       end
       if is_anchor(link_id)
-        notify_event('OnAnchorSelect', link_id[1])
+        if link_id[1].start_with?('On')
+          notify_event(link_id[1], *args)
+        else
+          if args.empty?
+            notify_event('OnAnchorSelect', link_id[1])
+          else
+            # TODO: not implemented
+          end
+        end
       elsif is_URL(link_id)
         browser_open(link_id)
         reset_script(:reset_all => true)
@@ -970,9 +978,21 @@ module Sakura
         # leave the previous sstp message as it is
         start_script(@sstp_entry_db.get(link_id, :default => '\e'))
         @sstp_entry_db = nil
-      elsif not notify_event('OnChoiceSelect', link_id, text, number)
-        reset_script(:reset_all => true)
-        stand_by(false)
+      else
+        if link_id.start_with?('On')
+          ret = notify_event(link_id, *args)
+        else
+          if args.empty?
+            ret = notify_event('OnChoiceSelect', link_id, text, number)
+          else
+            # TODO: not implemented
+            ret = false
+          end
+        end
+        if not ret
+          reset_script(:reset_all => true)
+          stand_by(false)
+        end
       end
     end
 
@@ -2130,15 +2150,19 @@ module Sakura
 
     def __yen_q(args)
       newline_required = false
-      if args.length == 3 # traditional syntax
+      is_deprecated = args.shift
+      if is_deprecated # traditional syntax
         num, link_id, text = args
+        args = []
         newline_required = true
       else # new syntax
-        text, link_id = args
+        text, link_id, args = args
       end
       text = expand_meta(text)
-      @balloon.append_link(@script_side, link_id, text,
-                           :newline_required => newline_required)
+      @balloon.append_link(@script_side, link_id, text, args)
+      if newline_required
+        __yen_n([])
+      end
       @script_mode = SELECT_MODE
     end
 
@@ -2161,13 +2185,14 @@ module Sakura
     def __yen__a(args)
       unless @anchor.nil?
         anchor_id = @anchor[0]
+        args = @anchor[0].pop
         text = @anchor[1]
-        @balloon.append_link_out(@script_side, anchor_id, text)
+        @balloon.append_link_out(@script_side, anchor_id, text, args)
         @anchor = nil
       else
-        anchor_id = args[0]
-        @anchor = [['anchor', anchor_id], '']
-        @balloon.append_link_in(@script_side, @anchor[0])
+        anchor_id = args.shift[0][1]
+        @anchor = [['anchor', anchor_id, args[0]], '']
+        @balloon.append_link_in(@script_side, @anchor[0], args)
       end
     end
 

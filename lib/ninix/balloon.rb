@@ -430,52 +430,46 @@ module Balloon
       @window[side].append_sstp_marker()
     end
 
-    def append_link_in(side, label)
+    def append_link_in(side, label, args)
       unless @synchronized.empty?
         for side in @synchronized
           next unless @window.length > side
-          @window[side].append_link_in(label)
+          @window[side].append_link_in(label, args)
         end
       else
         if @window.length > side
-          @window[side].append_link_in(label)
+          @window[side].append_link_in(label, args)
         end
       end
     end
 
-    def append_link_out(side, label, value)
+    def append_link_out(side, label, value, args)
       unless @synchronized.empty?
         for side in @synchronized
           next unless @window.length > side
-          @window[side].append_link_out(label, value)
+          @window[side].append_link_out(label, value, args)
         end
       else
         if @window.length > side
-          @window[side].append_link_out(label, value)
+          @window[side].append_link_out(label, value, args)
         end
       end
     end
 
-    def append_link(side, label, value, newline_required: false)
+    def append_link(side, label, value, args)
       unless @synchronized.empty?
         for side in @synchronized
           if @window.length > side
-            @window[side].append_link_in(label)
+            @window[side].append_link_in(label, args)
             @window[side].append_text(value)
-            @window[side].append_link_out(label, value)
-            if newline_required
-              @window[side].set_newline()
-            end
+            @window[side].append_link_out(label, value, args)
           end
         end
       else
         if @window.length > side
-          @window[side].append_link_in(label)
+          @window[side].append_link_in(label, args)
           @window[side].append_text(value)
-          @window[side].append_link_out(label, value)
-          if newline_required
-            @window[side].set_newline()
-          end
+          @window[side].append_link_out(label, value, args)
         end
       end
     end
@@ -783,9 +777,7 @@ module Balloon
       @valid_width = line_width
       @valid_height = text_height
       @lines = (text_height / @line_height).to_i
-      @line_regions = []
       y = @origin_y
-      @line_regions << [0, 0]
       @line_width = line_width
       # sstp message region
       if @side.zero?
@@ -1165,60 +1157,53 @@ module Balloon
       cr.save()
       sl = @link_buffer[index][0]
       el = @link_buffer[index][2]
-      if @lineno <= sl and sl <= (@lineno + @lines)
-        sn = @link_buffer[index][1]
-        en = @link_buffer[index][3]
-        for n in sl..el
-          if (n - @lineno) >= @line_regions.length
-            break
-          end
-          x, y, w, h = @line_regions[n - @lineno]
-          if sl == el
-            markup = set_markup(n, @text_buffer[n][0, sn])
-            @layout.set_markup(markup)
-            text_w, text_h =  @layout.pixel_size
-            x += text_w
-            markup = set_markup(n, @text_buffer[n][sn, en])
-            @layout.set_markup(markup)
-            text_w, text_h = @layout.pixel_size
-            w = text_w
-            start = sn
-            end_ = en
-          elsif n == sl
-            markup = set_markup(n, @text_buffer[n][0, sn])
-            @layout.set_markup(markup)
-            text_w, text_h = @layout.pixel_size
-            x += text_w
-            markup = set_markup(n, @text_buffer[n][sn, @text_buffer.length])
-            @layout.set_markup(markup)
-            text_w, text_h = @layout.pixel_size
-            w = text_w
-            start = sn
-            end_ = @text_buffer[n].length
-          elsif n == el
-            markup = set_markup(n, @text_buffer[n][0, en])
-            @layout.set_markup(markup)
-            text_w, text_h = @layout.pixel_size
-            w = text_w
-            start = 0
-            end_ = en
-          else
-            markup = set_markup(n, @text_buffer[n])
-            @layout.set_markup(markup)
-            text_w, text_h = @layout.pixel_size
-            w = text_w
-            start = 0
-            end_ = @text_buffer[n].length
-          end
-          markup = set_markup(n, @text_buffer[n][start, end_])
+      sn = @link_buffer[index][1]
+      en = @link_buffer[index][3]
+      for n in sl .. el
+        x1, y1 = @line_regions[n]
+        if n == sl
+          markup = set_markup(n, @text_buffer[n][0, sn])
+          @layout.set_indent(x1 * Pango::SCALE)
           @layout.set_markup(markup)
-          cr.set_source_rgb(@cursor_color)
-          cr.rectangle(x, y, w, h)
-          cr.fill()
-          cr.move_to(x, y)
-          cr.set_source_rgb(@text_active_color)
-          cr.show_pango_layout(@layout)
+          t = @layout.text
+          strong, weak = @layout.get_cursor_pos(t.bytesize)
+          x1  = (strong.x / Pango::SCALE).to_i
+          y1  += (strong.y / Pango::SCALE).to_i
         end
+        if n == sl and n == el
+          markup = set_markup(n, @text_buffer[n][sn, en - sn])
+        elsif n == el
+          markup = set_markup(n, @text_buffer[n][0, en])
+        else
+          markup = set_markup(n, @text_buffer[n])
+        end
+        @layout.set_indent(x1 * Pango::SCALE)
+        @layout.set_markup(markup)
+        cr.set_source_rgb(@cursor_color)
+        t = @layout.text
+        x = x1
+        y = y1
+        cr.rectangle(@origin_x, @origin_y, @valid_width, @valid_height)
+        cr.clip()
+        for i in 0 .. t.bytesize
+          strong, weak = @layout.get_cursor_pos(i)
+          nx = (strong.x / Pango::SCALE).to_i
+          ny = (strong.y / Pango::SCALE).to_i
+          nh = (strong.height / Pango::SCALE).to_i
+          # 行頭に折り返してきた時
+          if x > nx
+            x = 0
+          end
+          if x < nx
+            cr.rectangle(@origin_x + x, @origin_y + y, nx - x, nh)
+            cr.fill()
+          end
+          x = nx
+        end
+        cr.move_to(@origin_x, @origin_y + y1 - @lineno * @line_height)
+        cr.set_source_rgb(@text_active_color)
+        cr.show_pango_layout(@layout)
+        cr.reset_clip()
       end
       cr.restore()
     end
@@ -1228,40 +1213,52 @@ module Balloon
       for i in 0..(@link_buffer.length - 1)
         sl = @link_buffer[i][0]
         el = @link_buffer[i][2]
-        if @lineno <= sl and sl <= (@lineno + @lines)
-          sn = @link_buffer[i][1]
-          en = @link_buffer[i][3]
-          for n in sl..el
-            if (n - @lineno) >= @line_regions.length
-              break
-            end
-            x, y, w, h = @line_regions[n - @lineno]
-            if n == sl
-              markup = set_markup(n, @text_buffer[n][0, sn])
-              @layout.set_markup(markup)
-              text_w, text_h = @layout.pixel_size
-              x += text_w
-            end
-            if n == sl and n == el
-              markup = set_markup(n, @text_buffer[n][sn, en])
-            elsif n == el
-              markup = set_markup(n, @text_buffer[n][0, en])
-            else
-              markup = set_markup(n, @text_buffer[n])
-            end
+        sn = @link_buffer[i][1]
+        en = @link_buffer[i][3]
+        for n in sl .. el
+          x1, y1 = @line_regions[n]
+          if n == sl
+            markup = set_markup(n, @text_buffer[n][0, sn])
+            @layout.set_indent(x1 * Pango::SCALE)
             @layout.set_markup(markup)
-            text_w, text_h = @layout.pixel_size
-            w = text_w
-            if x <= px and px < (x + w) and y <= py and py < (y + h)
+            t = @layout.text
+            strong, weak = @layout.get_cursor_pos(t.bytesize)
+            x1  = (strong.x / Pango::SCALE).to_i
+            y1  += (strong.y / Pango::SCALE).to_i
+          end
+          if n == sl and n == el
+            markup = set_markup(n, @text_buffer[n][sn, en - sn])
+          elsif n == el
+            markup = set_markup(n, @text_buffer[n][0, en])
+          else
+            markup = set_markup(n, @text_buffer[n])
+          end
+          @layout.set_indent(x1 * Pango::SCALE)
+          @layout.set_markup(markup)
+          t = @layout.text
+          for index in 0 .. t.bytesize
+            strong, weak = @layout.get_cursor_pos(t.bytesize)
+            x2 = (strong.x / Pango::SCALE).to_i
+            y2 = (strong.y / Pango::SCALE).to_i
+            h = (strong.height / Pango::SCALE).to_i
+            # 行頭に折り返してきた時
+            if x1 > x2
+              x1 = 0
+            end
+            if @origin_x + x1 <= px and px < @origin_x + x2 and @origin_y + y1 + y2 <= py and py < @origin_y + y1 + y2 + h
               new_selection = i
               break
             end
+            x1 = x2
+          end
+          if new_selection == i
+            break
           end
         end
       end
       unless new_selection.nil?
         if @selection != new_selection
-          sl, sn, el, en, link_id, raw_text, text = \
+          sl, sn, el, en, link_id, args, raw_text, text = \
           @link_buffer[new_selection]
           @parent.handle_request(
             'NOTIFY', 'notify_event',
@@ -1363,10 +1360,10 @@ module Balloon
       end
       # links
       unless @selection.nil?
-        sl, sn, el, en, link_id, raw_text, text = \
+        sl, sn, el, en, link_id, args, raw_text, text = \
         @link_buffer[@selection]
         @parent.handle_request('NOTIFY', 'notify_link_selection',
-                               link_id, raw_text, @selection)
+                               link_id, raw_text, args, @selection)
         return true
       end
       # balloon's background
@@ -1392,6 +1389,7 @@ module Balloon
       @selection = nil
       @lineno = 0
       @text_buffer = []
+      @line_regions = [[0, 0]]
       @meta_buffer = []
       @link_buffer = []
       @newline_required = false
@@ -1553,7 +1551,7 @@ module Balloon
       draw_last_line(:column => offset)
     end
 
-    def append_link_in(link_id)
+    def append_link_in(link_id, args)
       if @text_buffer.empty?
         sl = 0
         sn = 0
@@ -1561,10 +1559,10 @@ module Balloon
         sl = (@text_buffer.length - 1)
         sn = @text_buffer[-1].length
       end
-      @link_buffer << [sl, sn, sl, sn, link_id, '', '']
+      @link_buffer << [sl, sn, sl, sn, link_id, args, '', '']
     end
 
-    def append_link_out(link_id, text)
+    def append_link_out(link_id, text, args)
       return unless text
       raw_text = text
       if @text_buffer.empty?
@@ -1574,15 +1572,9 @@ module Balloon
         el = (@text_buffer.length - 1)
         en = @text_buffer[-1].length
       end
-      for i in 0..@link_buffer.length-1
-        if @link_buffer[i][4] == link_id
-          sl = @link_buffer[i][0]
-          sn = @link_buffer[i][1]
-          @link_buffer.slice!(i)
-          @link_buffer.insert(i, [sl, sn, el, en, link_id, raw_text, text])
-          break
-        end
-      end
+      sl = @link_buffer[-1][0]
+      sn = @link_buffer[-1][1]
+      @link_buffer[-1] = [sl, sn, el, en, link_id, args, raw_text, text]
     end
 
     def append_meta(tag)
