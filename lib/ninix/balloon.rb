@@ -987,7 +987,7 @@ module Balloon
     end
 
     def redraw_arrow1(widget, cr)
-      return if @bottom_draw_position < @valid_height
+      return if get_bottom_position < @valid_height
       cr.save()
       x, y = @arrow[1]
       cr.set_source(@arrow1_surface, x, y)
@@ -1074,6 +1074,27 @@ module Balloon
       return [x, sy + y, h]
     end
 
+    def get_bottom_position()
+      h = 0
+      for i in 0 .. @text_buffer.length - 1
+        sx, sy = @line_regions[i]
+        if @text_buffer[i].empty?
+          next
+        end
+        markup = set_markup(i, @text_buffer[i])
+        @layout.set_indent(sx * Pango::SCALE)
+        @layout.set_markup(markup)
+        t = @layout.text
+        for index in 0 .. t.bytesize
+          strong, weak = @layout.get_cursor_pos(t.bytesize)
+          x = (strong.x / Pango::SCALE).to_i
+          y = (strong.y / Pango::SCALE).to_i
+          h = [h, sy + y + (strong.height / Pango::SCALE).to_i].max
+        end
+      end
+      return h - @lineno * @line_height
+    end
+
     def redraw(widget, cr)
       return if @parent.handle_request('GET', 'lock_repaint')
       return true unless @__shown
@@ -1081,7 +1102,6 @@ module Balloon
       @window.set_surface(cr, @balloon_surface, scale)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX
-      @bottom_draw_position = 0
       # draw images
       for i in 0..(@images.length - 1)
         image_surface, (x, y) = @images[i]
@@ -1115,6 +1135,9 @@ module Balloon
       cr.clip
       for i in 0 .. @text_buffer.length - 1
         sx, sy = @line_regions[i]
+        if @text_buffer.empty?
+          next
+        end
         markup = set_markup(i, @text_buffer[i])
         @layout.set_indent(sx * Pango::SCALE)
         @layout.set_markup(markup)
@@ -1126,7 +1149,6 @@ module Balloon
         x = (strong.x / Pango::SCALE).to_i
         y = (strong.y / Pango::SCALE).to_i
         h = (strong.height / Pango::SCALE).to_i
-        @bottom_draw_position = [@bottom_draw_position, sy + y + h - @lineno * @line_height].max
         unless @sstp_surface.nil?
           for l, c in @sstp_marker
             if l == i
@@ -1195,7 +1217,7 @@ module Balloon
             x = 0
           end
           if x < nx
-            cr.rectangle(@origin_x + x, @origin_y + y, nx - x, nh)
+            cr.rectangle(@origin_x + x, @origin_y + y - @lineno * @line_height, nx - x, nh)
             cr.fill()
           end
           x = nx
@@ -1245,7 +1267,7 @@ module Balloon
             if x1 > x2
               x1 = 0
             end
-            if @origin_x + x1 <= px and px < @origin_x + x2 and @origin_y + y1 + y2 <= py and py < @origin_y + y1 + y2 + h
+            if @origin_x + x1 <= px and px < @origin_x + x2 and @origin_y + y1 + y2 - @lineno * @line_height <= py and py < @origin_y + y1 + y2 + h - @lineno * @line_height
               new_selection = i
               break
             end
@@ -1316,7 +1338,7 @@ module Balloon
           @darea.queue_draw()
         end
       when Gdk::ScrollDirection::DOWN
-        if @bottom_draw_position > @valid_height
+        if get_bottom_position > @valid_height
           @lineno += 1
           check_link_region(px, py)
           @darea.queue_draw()
@@ -1352,7 +1374,7 @@ module Balloon
       h = @arrow1_surface.height
       x, y = @arrow[1]
       if x <= px and px <= (x + w) and y <= py and py <= (y + h)
-        if @bottom_draw_position > @valid_height
+        if get_bottom_position > @valid_height
           @lineno += 1
           @darea.queue_draw()
         end
@@ -1437,9 +1459,6 @@ module Balloon
 
     def set_draw_absolute_y(pos)
       sx, sy = @line_regions[@line_regions.size - 1]
-      if pos + @line_height > @valid_height
-        @lineno += 1
-      end
       @line_regions[@line_regions.size - 1] = [sx, pos]
     end
 
@@ -1602,6 +1621,9 @@ module Balloon
 
     def draw_last_line(column: 0)
       return unless @__shown
+      while get_bottom_position > @valid_height
+        @lineno += 1
+      end
       @darea.queue_draw()
     end
   end
