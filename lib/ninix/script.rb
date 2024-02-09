@@ -124,7 +124,7 @@ module Script
 
     def tokenize(s)
       patterns = [
-        [TOKEN_TAG, Regexp.new(/\\[Cehunjcxtqzy*v0123456789fmia!&+-]|\\[sbp][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|\\__[ct]|\\URL/)],
+        [TOKEN_TAG, Regexp.new(/\\[Cehunjcxtqzy*v0123456789fmia!&+-]|\\[sbp][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|\\__[ctq]|\\URL/)],
         [TOKEN_META, Regexp.new(/%month|%day|%hour|%minute|%second|%username|%selfname2?|%keroname|%friendname|%songname|%screen(width|height)|%exh|%et|%m[szlchtep?]|%dms|%j|%c|%wronghour|%\*/)],
         [TOKEN_NUMBER, Regexp.new(/[0-9]+/)],
         [TOKEN_OPENED_SBRA, Regexp.new(/\[/)],
@@ -172,6 +172,7 @@ module Script
       string_chunks = []
       scope = 0
       anchor = nil
+      choice = nil
       while not @tokens.empty?
         token, lexeme = next_token()
         if token == TOKEN_STRING and lexeme == '\\'
@@ -321,6 +322,20 @@ module Script
             anchor = nil
             @script << [SCRIPT_TAG, lexeme, @column]
           end
+        elsif ["\\__q"].include?(lexeme)
+          if choice.nil?
+            choice = perror(:skip => 'rest')
+            args = split_params(read_sbra_text())
+            arg1 = args.shift
+            arg2 = []
+            for i in 0 .. args.length - 1
+              arg2 << args[i][0][1]
+            end
+            @script << [SCRIPT_TAG, lexeme, arg1, arg2, @column]
+          else
+            choice = nil
+            @script << [SCRIPT_TAG, lexeme, @column]
+          end
         elsif ["\\f"].include?(lexeme)
           args = []
           for arg in split_params(read_sbra_text())
@@ -341,6 +356,16 @@ module Script
         end
         anchor.script = @script
         fail anchor, 'syntax error (unbalanced \_a tag)'
+      end
+      unless choice.nil?
+        if @script[-1][0, 2] == [SCRIPT_TAG, '\e']
+          @script.insert(@script.length - 1,
+                         [SCRIPT_TAG, '\__q', @script[-1][2]])
+        else
+          @script << [SCRIPT_TAG, '\__q', @column]
+        end
+        choice.script = @script
+        fail choice, 'syntax error (unbalanced \__q tag)'
       end
       unless string_chunks.empty?
         text << [TEXT_STRING, string_chunks.join('')]

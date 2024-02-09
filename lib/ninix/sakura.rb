@@ -109,6 +109,7 @@ module Sakura
       @passivemode = false
       @__running = false
       @anchor = nil
+      @choice = nil
       @clock = [0, 0]
       @synchronized_session = []
       @force_quit = false
@@ -1948,7 +1949,7 @@ module Sakura
       @surface.invoke_yen_e(@script_side, surface_id)
       reset_script()
       @__balloon_life = BALLOON_LIFE
-    end    
+    end
 
     def __yen_0(args)
       ##@balloon.show(0)
@@ -2745,6 +2746,18 @@ module Sakura
       end
     end
 
+    def __yen___q(args)
+      unless @choice.nil?
+        choice_id, args, text = @choice
+        @balloon.append_link_out(@script_side, choice_id, text, args)
+        @choice = nil
+      else
+        choice_id = args.shift[0][1]
+        @choice = [choice_id, args[0], '']
+        @balloon.append_link_in(@script_side, @choice[0], @choice[1])
+      end
+    end
+
     SCRIPT_TAG = {
       '\e' => "__yen_e",
       '\y' => "__yen_e",
@@ -2791,6 +2804,7 @@ module Sakura
       '\f' => "__yen_f",
       '\C' => nil, # dummy
       '\_l' => "__yen__l",
+      '\__q' => "__yen___q",
     }
 
     def interpret_script()
@@ -2832,6 +2846,9 @@ module Sakura
         text = expand_meta(node[1])
         unless @anchor.nil?
           @anchor[1] = [@anchor[1], text].join('')
+        end
+        unless @choice.nil?
+          @choice[2] = [@choice[2], text].join('')
         end
         script_speed = @parent.handle_request(
           'GET', 'get_preference', 'script_speed')
