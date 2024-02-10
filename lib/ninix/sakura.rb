@@ -1177,7 +1177,7 @@ module Sakura
                   'OnUpdateComplete']
     RESET_NOTIFY_EVENT = ['OnVanishSelecting', 'OnVanishCancel']
 
-    def notify_event(event, *arglist, event_type: 'GET', default: nil)
+    def notify_event(event, *arglist, event_type: 'GET', default: nil, embed: false)
       return false if @time_critical_session and event.start_with?('OnMouse')
       if RESET_NOTIFY_EVENT.include?(event)
         reset_script(:reset_all => true)
@@ -1251,7 +1251,7 @@ module Sakura
         (event == 'OnSecondChange' or event == 'OnMinuteChange')
         return false
       end
-      start_script(script)
+      start_script(script, embed: embed)
       @balloon.hide_sstp_message()
       if BOOT_EVENT.include?(event)
         @script_finally << lambda {|flag_break: false| @surface_bootup }
@@ -1895,7 +1895,7 @@ module Sakura
     end
 
     ###   SCRIPT PLAYER   ###
-    def start_script(script, origin: nil)
+    def start_script(script, origin: nil, embed: false)
       return if script.empty?
       @last_script = script
       if origin.nil?
@@ -1903,9 +1903,16 @@ module Sakura
       else
         @script_origin = origin
       end
+      # embed用
+      processed_script_bak = @processed_script
       reset_script(:reset_all => true)
       @__current_script = script
-      unless script.rstrip().end_with?('\e')
+      if embed
+        pos = script.index('\e')
+        if pos
+          script = script[0, pos]
+        end
+      else not script.rstrip().end_with?('\e')
         script = [script, '\e'].join('')
       end
       @processed_script = []
@@ -1921,19 +1928,23 @@ module Sakura
           @processed_script.concat(done)
         end
       end
-      @script_mode = BROWSE_MODE
-      @script_wait = nil
-      @script_side = 0
-      @time_critical_session = false
-      @quick_session = false
-      set_synchronized_session(:list => [], :reset => true)
-      @balloon.hide_all()
+      if embed
+        @processed_script.concat(processed_script_bak)
+      else
+        @script_mode = BROWSE_MODE
+        @script_wait = nil
+        @script_side = 0
+        @time_critical_session = false
+        @quick_session = false
+        set_synchronized_session(:list => [], :reset => true)
+        @balloon.hide_all()
+      end
       return if @processed_script.empty?
       node = @processed_script[0]
       if node[0] == Script::SCRIPT_TAG and node[1] == '\C'
         @processed_script.shift
         @script_position = node[-1]
-      else
+      elsif not embed
         @balloon.clear_text_all()
       end
       @balloon.set_balloon_default()
@@ -2330,6 +2341,8 @@ module Sakura
       args = args.map {|s| expand_meta(s)}
       if args[0] == 'raise' and argc >= 2
         notify_event(*args[1..])
+      elsif args[0] == 'embed' and argc >= 2
+        notify_event(*args[1..], embed: true)
       elsif args[0, 2] == ['open', 'readme']
         ReadmeDialog.new.show(get_name(), get_prefix())
       elsif args[0, 2] == ['open', 'browser'] and argc > 2
