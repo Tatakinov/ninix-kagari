@@ -52,7 +52,7 @@ module Alias
             else
               fail ValueError('unexpedted end of file')
             end
-            line = line.gsub(0x81.chr + 0x40.chr, "").strip()
+            line = line.gsub('　', "").strip()
             next if line.length.zero?
             break if line == '{'
             fail ValueError('open brace not found')
@@ -64,7 +64,7 @@ module Alias
             else
               fail ValueError('unexpected end of file')
             end
-            line = line.gsub(0x81.chr + 0x40.chr, "").strip()
+            line = line.gsub('　', "").strip()
             next if line.length.zero?
             break if line == '}'
             line = line.split(',', 2)
