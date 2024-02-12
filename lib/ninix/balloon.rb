@@ -1410,7 +1410,7 @@ module Balloon
     def clear_text
       @selection = nil
       @lineno = 0
-      @text_buffer = []
+      @text_buffer = ['']
       @line_regions = [[0, 0]]
       @meta_buffer = []
       @link_buffer = []
@@ -1433,10 +1433,10 @@ module Balloon
     end
 
     def new_line
-      @text_buffer << ""
       line_height = (@font_height + @line_space)
       rx, ry, rh = get_last_cursor_position
       @line_regions << [rx, ry]
+      @text_buffer << ""
     end
 
     def set_draw_absolute_x(pos)
