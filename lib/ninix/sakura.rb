@@ -2341,6 +2341,8 @@ module Sakura
       args = args.map {|s| expand_meta(s)}
       if args[0] == 'raise' and argc >= 2
         notify_event(*args[1..])
+      elsif args[0] == 'raiseother' and argc >= 3
+        @parent.handle_request('NOTIFY', 'raise_other', args[1], @key, *args[2..])
       elsif args[0] == 'embed' and argc >= 2
         notify_event(*args[1..], embed: true)
       elsif args[0, 2] == ['open', 'readme']

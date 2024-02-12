@@ -37,6 +37,23 @@ module Communicate
       end
     end
 
+    def raise_other(ghost_name, sender, *args)
+      ghosts_name = []
+      if ghost_name.include?(1.chr)
+        ghosts_name = ghost_name.split(1.chr, 0)
+      end
+      for sakura in @ghosts.keys()
+        next if sakura.key == sender
+        if ghosts_name.include?(@ghosts[sakura][0])
+          sakura.enqueue_event(*args)
+        elsif ghosts_name.empty?
+          if ghost_name == '__SYSTEM_ALL_GHOST__' or ghost_name == @ghosts[sakura][0]
+            sakura.enqueue_event(*args)
+          end
+        end
+      end
+    end
+
     ON_OTHER_EVENT = {
       'OnBoot'           => 'OnOtherGhostBooted',
       'OnFirstBoot'      => 'OnOtherGhostBooted',

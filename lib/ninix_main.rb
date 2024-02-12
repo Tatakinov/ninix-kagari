@@ -344,6 +344,10 @@ module Ninix_Main
       @communicate.notify_other(*arglist)
     end
 
+    def raise_other(*arglist)
+      @communicate.raise_other(*arglist)
+    end
+
     def reset_sstp_flag(*arglist)
       @sstp_controler.reset_sstp_flag(*arglist)
     end
