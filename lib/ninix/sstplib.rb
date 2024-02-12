@@ -49,12 +49,12 @@ module SSTPLib
         key, value = line.split(":", 2)
         message << [key, value.strip]
       end
-      charset = message.reverse.assoc("Charset")&.at(1) || "Shift_JIS" # XXX
+      charset = message.reverse.assoc("Charset")&.at(1) || "UTF-8" # XXX
       message.each {|k, v| v.force_encoding(charset).encode!("UTF-8", :invalid => :replace, :undef => :replace) }
     end
 
     def parse_request(requestline)
-      requestline = requestline.encode('Shift_JIS', :invalid => :replace, :undef => :replace)
+      requestline = requestline.encode('UTF-8', :invalid => :replace, :undef => :replace)
       requestline = requestline.chomp
       @requestline = requestline
       re_requestsyntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')

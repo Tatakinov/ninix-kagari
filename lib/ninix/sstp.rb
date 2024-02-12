@@ -305,7 +305,7 @@ module SSTP
     end
 
     def get_charset
-      @headers.reverse.assoc('Charset')&.at(1) || 'Shift_JIS' # XXX
+      @headers.reverse.assoc('Charset')&.at(1) || 'UTF-8' # XXX
     end
 
     def check_decoder

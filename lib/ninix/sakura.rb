@@ -120,7 +120,7 @@ module Sakura
       @__vanish_dialog.set_responsible(self)
       @cantalk = true
       @__sender = 'ninix-kagari'
-      @__charset = 'Shift_JIS'
+      @__charset = 'UTF-8'
       saori_lib = DLL::Library.new('saori', :sakura => self)
       @__dll = DLL::Library.new('shiori', :saori_lib => saori_lib)
       @__temp_mode = 0
@@ -354,7 +354,7 @@ module Sakura
       else
         Logging::Logging.error(get_selfname + ' cannot load SHIORI(' + @shiori_name + ')')
       end
-      @__charset = 'Shift_JIS' # default
+      @__charset = 'UTF-8' # default
       get_event_response('OnInitialize', :event_type => 'NOTIFY')
       get_event_response('basewareversion',
                          Version.VERSION,
