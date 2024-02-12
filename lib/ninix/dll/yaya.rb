@@ -4,6 +4,7 @@
 #  Copyright (C) 2004 by linjian
 #  Copyright (C) 2004-2019 by Shyouzou Sugitani <shy@users.sourceforge.jp>
 #  Copyright (C) 2011 by henryhu
+#  Copyright (C) 2024 by Tatakinov
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
