@@ -1393,7 +1393,7 @@ module Satori
           @script_history << script
         end
         return script
-      when *EVENT_MAP
+      when *EVENT_MAP.keys
         if ['OnBoot', 'OnGhostChanged'].include?(event)
           unless @boot_script.nil?
             script = @boot_script
