@@ -735,10 +735,10 @@ module Seriko
   def self.get_mayuna(config)
     re_mayuna_interval = Regexp.new('\A([0-9]+)interval\z')
     re_mayuna_interval_value = Regexp.new('\A(bind)\z')
-    re_mayuna_pattern = Regexp.new('\A([0-9]+|-[12])\s*,\s*([0-9]+)\s*,\s*(bind|add|reduce|insert)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?\z')
+    re_mayuna_pattern = Regexp.new('\A([0-9]+|-[12])\s*,\s*([0-9]+)\s*,\s*(overlay|bind|add|reduce|insert)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?\z')
     re_mayuna2_interval = Regexp.new('\Aanimation([0-9]+)\.interval\z')
     re_mayuna2_interval_value = Regexp.new('\A(bind)\z')
-    re_mayuna2_pattern = Regexp.new('\A(bind|add|reduce|insert)\s*,\s*([0-9]+|-[12])\s*,\s*([0-9]+)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+(\.[0-9]+)*\))?\z')
+    re_mayuna2_pattern = Regexp.new('\A(overlay|bind|add|reduce|insert)\s*,\s*([0-9]+|-[12])\s*,\s*([0-9]+)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+(\.[0-9]+)*\))?\z')
     version = nil
     buf = []
     for key, value in config.each_entry
@@ -800,7 +800,7 @@ module Seriko
             surface = match[2].to_i.to_s
             interval = match[3].to_i.abs
           end
-          if not ['bind', 'add', 'reduce', 'insert'].include?(method)
+          if not ['overlay', 'bind', 'add', 'reduce', 'insert'].include?(method)
             next
           else
             if ['-1', '-2'].include?(surface)

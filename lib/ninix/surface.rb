@@ -1146,7 +1146,7 @@ module Surface
       mayuna_list = [] # XXX: FIXME
       for surface_id, interval, method, args in mayuna.get_patterns
         case method
-        when 'bind', 'add'
+        when 'overlay', 'bind', 'add'
           if @surfaces.include?(surface_id)
             dest_x, dest_y = args
             mayuna_list << [method, surface_id, dest_x, dest_y]
