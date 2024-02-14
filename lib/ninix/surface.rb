@@ -481,8 +481,11 @@ module Surface
         surface = elements[basename][0]
         if n.zero? # base surface
           surface_list = [surface]
-        elsif ['overlay', 'overlayfast',
+        elsif ['overlay', 'overlayfast', 'overlaymultiply',
                'interpolate', 'reduce', 'replace', 'asis'].include?(method)
+          if ['overlaymultiply'].include?(method)
+            Logging::Logging.warning('overlaymultiply is not supported. use overlayfast instead.')
+          end
           surface_list << [surface, x, y, method]
         elsif method == 'base'
           surface_list << [surface, x, y, method]
@@ -1212,17 +1215,18 @@ module Surface
         end
         cr = Cairo::Context.new(surface)
         op = {
-          'base' =>        Cairo::OPERATOR_SOURCE, # XXX
-          'overlay' =>     Cairo::OPERATOR_OVER,
-          'overlayfast' => Cairo::OPERATOR_ATOP,
-          'interpolate' => Cairo::OPERATOR_SATURATE,
-          'reduce' =>      Cairo::OPERATOR_DEST_IN,
-          'replace' =>     Cairo::OPERATOR_SOURCE,
-          'asis' =>        Cairo::OPERATOR_OVER,
+          'base' =>            Cairo::OPERATOR_SOURCE, # XXX
+          'overlay' =>         Cairo::OPERATOR_OVER,
+          'overlayfast' =>     Cairo::OPERATOR_ATOP,
+          'overlaymultiply' => Cairo::OPERATOR_ATOP, # FIXME
+          'interpolate' =>     Cairo::OPERATOR_SATURATE,
+          'reduce' =>          Cairo::OPERATOR_DEST_IN,
+          'replace' =>         Cairo::OPERATOR_SOURCE,
+          'asis' =>            Cairo::OPERATOR_OVER,
         }[method]
         cr.set_operator(op)
         cr.set_source(overlay, x, y)
-        if ['overlay', 'overlayfast'].include?(method)
+        if ['overlay', 'overlayfast', 'overlaymultiply'].include?(method)
           cr.mask(overlay, x, y)
         else
           cr.paint()
