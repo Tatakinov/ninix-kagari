@@ -1288,7 +1288,7 @@ module Surface
             for method, mayuna_id, dest_x, dest_y in iter_mayuna(surface_width, surface_height, actor, done)
               mayuna_surface = get_image_surface(mayuna_id)
               cr = Cairo::Context.new(surface)
-              if ['bind', 'add'].include?(method)
+              if ['overlay', 'bind', 'add'].include?(method)
                 cr.set_source(mayuna_surface, dest_x, dest_y)
                 cr.mask(mayuna_surface, dest_x, dest_y)
               elsif method == 'reduce'
