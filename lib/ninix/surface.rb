@@ -1305,7 +1305,7 @@ module Surface
                 'reduce' =>          Cairo::OPERATOR_DEST_IN,
               }[method]
               cr.set_operator(op)
-              cr.set_source(mayuna_surface, x, y)
+              cr.set_source(mayuna_surface, dest_x, dest_y)
               if ['overlay', 'bind', 'add', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
                 cr.mask(mayuna_surface, dest_x, dest_y)
               elsif ['replace', 'asis', 'reduce'].include?(method)
