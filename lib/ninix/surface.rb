@@ -484,7 +484,7 @@ module Surface
         elsif ['overlay', 'overlayfast', 'overlaymultiply',
                'interpolate', 'reduce', 'replace', 'asis'].include?(method)
           if ['overlaymultiply'].include?(method)
-            Logging::Logging.warning('overlaymultiply is not supported. use overlayfast instead.')
+            Logging::Logging.warning('overlaymultiply is not supported. fallback to overlayfast')
           end
           surface_list << [surface, x, y, method]
         elsif method == 'base'
@@ -1151,6 +1151,9 @@ module Surface
         case method
         when 'overlay', 'overlayfast', 'overlaymultiply', 'replace'
           if @surfaces.include?(surface_id)
+            if ['overlaymultiply'].include?(method)
+              Logging::Logging.warning('overlaymultiply is not supported. fallback to overlayfast')
+            end
             dest_x, dest_y = args
             mayuna_list << [method, surface_id, dest_x, dest_y]
           end
