@@ -748,8 +748,8 @@ module Balloon
 
     def reset_message_regions
       w, h = @layout.pixel_size
-      @font_width = w
-      @font_height = h
+      @char_width = w
+      @char_height = h
       fd = @layout.font_description
       if fd.size_is_absolute?
         @font_height = fd.size
@@ -1153,7 +1153,11 @@ module Balloon
           end
         end
         if data[:content][:attr][:inline]
-          cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y)
+          if data[:content][:attr][:is_sstp_marker]
+            cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y + ((@char_height - data[:content][:data].height) / 2).to_i)
+          else
+            cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y)
+          end
         else
           cr.set_source(data[:content][:data], x, y)
         end
@@ -1558,6 +1562,7 @@ module Balloon
           clipping: [0, 0, -1, -1],
           fixed: false,
           foreground: false,
+          is_sstp_marker: false,
         }},
         is_head: true
       }]
@@ -1607,7 +1612,7 @@ module Balloon
     end
 
     def set_draw_absolute_x_char(rate)
-      set_draw_absolute_x(@font_width * rate)
+      set_draw_absolute_x(@char_width * rate)
     end
 
     def set_draw_relative_x(pos)
@@ -1616,7 +1621,7 @@ module Balloon
     end
 
     def set_draw_relative_x_char(rate)
-      set_draw_relative_x(@font_width * rate)
+      set_draw_relative_x(@char_width * rate)
     end
 
     def set_draw_absolute_y(pos)
@@ -1688,30 +1693,30 @@ module Balloon
 
     def append_sstp_marker
       return if @sstp_surface.nil?
-      if @text_buffer.empty?
-        line = 0
-        offset = 0
-      else
-        line = (@text_buffer.length - 1)
-        offset = @text_buffer[-1].length
+      unless @data_buffer[-1][:content][:type] == TYPE_UNKNOWN
+        new_buffer(is_head: false)
       end
-      if @newline_required
-        line = (line + 1)
-        offset = 0
-      end
-      @sstp_marker << [line, offset]
-      w = @sstp_surface.width
-      h = @sstp_surface.height
-      i = 1
-      while true
-        space = ("\u3000" * i) # XXX
-        @layout.set_text(space)
-        text_w, text_h = @layout.pixel_size
-        break if text_w > w
-        i += 1
-      end
-      append_text(space)
-      draw_last_line(:column => offset)
+      data = @data_buffer[-1]
+      data[:content][:type] = TYPE_IMAGE
+      data[:content][:data] = @sstp_surface
+      data[:content][:attr] = {
+        height: @font_height,
+        color: '',
+        bold: false,
+        italic: false,
+        strike: false,
+        underline: false,
+        sub: false,
+        sup: false,
+        opaque: false,
+        inline: true,
+        clipping: [0, 0, -1, -1],
+        fixed: false,
+        foreground: false,
+        is_sstp_marker: true,
+      }
+      show
+      @darea.queue_draw
     end
 
     def append_link_in(link_id, args)
@@ -1813,6 +1818,7 @@ module Balloon
       end
       data[:content][:type] = TYPE_IMAGE
       data[:content][:data] = image_surface
+      data[:content][:attr][:is_sstp_marker] = false
       unless kwargs[:x].nil? or kwargs[:y].nil?
         data[:pos][:x] = kwargs[:x]
         data[:pos][:y] = kwargs[:y]
