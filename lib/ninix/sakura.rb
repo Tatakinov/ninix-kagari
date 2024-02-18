@@ -2706,37 +2706,99 @@ module Sakura
     end
 
     def __yen_f(args)
-      return if args.length != 2 ## FIXME
-      tag = nil
-      if args[0] == 'sup'
-        if args[1] == 'true'
-          tag = '<sup>'
+      kwargs = {}
+      if args.length == 1
+        if args[0] == 'default'
+          kwargs = {
+            height: 'default',
+            color: 'default',
+            bold: 'default',
+            italic: 'default',
+            strike: 'default',
+            underline: 'default',
+            sub: 'default',
+            sup: 'default',
+          }
+        elsif args[0] == 'disable'
+          kwargs = {
+            height: 'disable',
+            color: 'disable',
+            bold: 'disable',
+            italic: 'disable',
+            strike: 'disable',
+            underline: 'disable',
+            sub: 'disable',
+            sup: 'disable',
+          }
         else
-          tag = '</sup>'
+          return
         end
-      elsif args[0] == 'sub'
-        if args[1] == 'true'
-          tag = '<sub>'
+        @balloon.append_meta(@script_side, **kwargs)
+        return
+      end
+      return if args.length != 2 ## FIXME
+      if args[0] == 'height'
+        if args[1] == 'default'
+          kwargs[:height] = 'default'
         else
-          tag = '</sub>'
+          relative = false
+          rate = false
+          if args[1].start_with?('+') or args[1].start_with?('-')
+            relative = true
+            args[1] = args[1][1 .. -1]
+          end
+          if args[1].end_with?('%')
+            rate = true
+            args[1] = args[1][0 .. -2]
+          end
+          begin
+            value = Float(args[1])
+          rescue
+            return
+          end
+          kwargs[:height] = [value, relative, rate]
+        end
+      elsif args[0] == 'bold'
+        if ['true', '1'].include?(args[1])
+          kwargs[:bold] = true
+        elsif ['false', '0'].include?(args[1])
+          kwargs[:bold] = false
+        end
+      elsif args[0] == 'italic'
+        if ['true', '1'].include?(args[1])
+          kwargs[:italic] = true
+        elsif ['false', '0'].include?(args[1])
+          kwargs[:italic] = false
         end
       elsif args[0] == 'strike'
-        if ['true', '1', 1].include?(args[1])
-          tag = '<s>'
-        else
-          tag = '</s>'
+        if ['true', '1'].include?(args[1])
+          kwargs[:strike] = true
+        elsif ['false', '0'].include?(args[1])
+          kwargs[:strike] = false
         end
       elsif args[0] == 'underline'
-        if ['true', '1', 1].include?(args[1])
-          tag = '<u>'
-        else
-          tag = '</u>'
+        if ['true', '1'].include?(args[1])
+          kwargs[:underline] = true
+        elsif ['false', '0'].include?(args[1])
+          kwargs[:underline] = false
+        end
+      elsif args[0] == 'sup'
+        if ['true', '1'].include?(args[1])
+          kwargs[:sup] = true
+        elsif ['false', '0'].include?(args[1])
+          kwargs[:sup] = false
+        end
+      elsif args[0] == 'sub'
+        if ['true', '1'].include?(args[1])
+          kwargs[:sub] = true
+        elsif ['false', '0'].include?(args[1])
+          kwargs[:sub] = false
         end
       else
         #pass ## FIXME
       end
-      unless tag.nil?
-        @balloon.append_meta(@script_side, tag)
+      unless kwargs.empty?
+        @balloon.append_meta(@script_side, **kwargs)
       end
     end
 

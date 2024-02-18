@@ -479,15 +479,15 @@ module Balloon
       end
     end
 
-    def append_meta(side, tag)
+    def append_meta(side, **kwargs)
       unless @synchronized.empty?
         for side in @synchronized
           next unless @window.length > side
-          @window[side].append_meta(tag)
+          @window[side].append_meta(**kwargs)
         end
       else
         if @window.length > side
-          @window[side].append_meta(tag)
+          @window[side].append_meta(**kwargs)
         end
       end
     end
@@ -750,6 +750,12 @@ module Balloon
       w, h = @layout.pixel_size
       @font_width = w
       @font_height = h
+      fd = @layout.font_description
+      if fd.size_is_absolute?
+        @font_height = fd.size
+      else
+        @font_height = (fd.size / Pango::SCALE).to_i
+      end
       @line_space = 1
       @layout.set_spacing(@line_space)
       # font metrics
@@ -1012,45 +1018,16 @@ module Balloon
       return escaped_string
     end
 
-    def set_markup(index, text)
-      tags_ = ['sup', 'sub', 's', 'u']
-      count_ = {}
-      for tag_ in tags_
-        count_[tag_] = 0
+    def set_markup(text, a)
+      unless a[:height] == @font_height
+        text = ['<span size="', a[:height], 'pt">', text, '</span>'].join
       end
-      markup_list = []
-      for sl, sn, tag in @meta_buffer
-        if sl == index
-          markup_list << [sn, tag]
-        end
+      unless a[:color].empty?
+        text = ['<span color="', a[:color], '">', text, '</span>'].join
       end
-      if markup_list.empty?
-        return markup_escape_text(text)
-      end
-      markup_list.sort!
-      markup_list.reverse!
-      pn = text.length
-      for sn, tag in markup_list
-        text = [text[0, sn], tag,
-                markup_escape_text(text[sn, pn]),
-                text[pn, text.length]].join('')
-        pn = sn
-        if tag[1] == '/'
-          tag_ = tag[2, tag.length - 1]
-          fail "assert" unless tags_.include?(tag_)
-          count_[tag_] -= 1
-          if count_[tag_] < 0
-            text = ['<', tag_, '>', text].join('')
-            count_[tag_] += 1
-          end
-        else
-          tag_ = tag[1, tag.length - 1]
-          fail "assert" unless tags_.include?(tag_)
-          count_[tag_] += 1
-          if count_[tag_] > 0
-            text = [text, '</', tag_, '>'].join('')
-            count_[tag_] -= 1
-          end
+      {bold: 'b', italic: 'i', strike: 's', underline: 'u', sub: 'sub', sup: 'sup'}.each do |k, v|
+        if a[k]
+          text = ['<', v, '>', text, '</', v, '>'].join
         end
       end
       return text
@@ -1066,8 +1043,8 @@ module Balloon
         end
         case data[:content][:type]
         when TYPE_TEXT
-          markup = set_markup(i, data[:content][:data])
           @layout.set_indent(data[:pos][:x] * Pango::SCALE)
+          markup = set_markup(data[:content][:data], data[:content][:attr])
           @layout.set_markup(markup)
           t = @layout.text
           strong, weak = @layout.get_cursor_pos(t.bytesize)
@@ -1088,19 +1065,11 @@ module Balloon
         end
         case data[:content][:type]
         when TYPE_TEXT
-          markup = set_markup(i, data[:content][:data])
           @layout.set_indent(data[:pos][:x] * Pango::SCALE)
+          markup = set_markup(data[:content][:data], data[:content][:attr])
           @layout.set_markup(markup)
-          t = @layout.text
-          strong, weak = @layout.get_cursor_pos(t.bytesize)
-          prev_x = (strong.x / Pango::SCALE).to_i
-          for i in t.bytesize .. 0
-            s, w = @layout.get_cursor_pos(i)
-            if prev_x < (s.x / Pango::SCALE)
-              break
-            end
-            h = [h, (s.height / Pango::SCALE).to_i].max
-          end
+          _, h1 = @layout.pixel_size
+          h = [h, h1].max
         when TYPE_IMAGE
           h = [h, data[:content][:data].height].max
         else
@@ -1124,7 +1093,8 @@ module Balloon
         case data[:content][:type]
         when TYPE_TEXT
           @layout.set_indent(data[:pos][:x] * Pango::SCALE)
-          @layout.set_markup(data[:content][:data])
+          markup = set_markup(data[:content][:data], data[:content][:attr])
+          @layout.set_markup(markup)
           t = @layout.text
           for index in 0 .. t.bytesize
             strong, weak = @layout.get_cursor_pos(t.bytesize)
@@ -1136,24 +1106,6 @@ module Balloon
         end
         if data[:is_head]
           break
-        end
-      end
-      # return h - @lineno * @line_height
-      # FIXME
-      for i in 0 .. @text_buffer.length - 1
-        sx, sy = @line_regions[i]
-        if @text_buffer[i].empty?
-          next
-        end
-        markup = set_markup(i, @text_buffer[i])
-        @layout.set_indent(sx * Pango::SCALE)
-        @layout.set_markup(markup)
-        t = @layout.text
-        for index in 0 .. t.bytesize
-          strong, weak = @layout.get_cursor_pos(t.bytesize)
-          x = (strong.x / Pango::SCALE).to_i
-          y = (strong.y / Pango::SCALE).to_i
-          h = [h, sy + y + (strong.height / Pango::SCALE).to_i].max
         end
       end
       return h - @lineno * @line_height
@@ -1172,8 +1124,8 @@ module Balloon
       # draw background image
       for i in 0..(@data_buffer.length - 1)
         data = @data_buffer[i]
-        if data[:content][:type] == TYPE_TEXT or
-            data[:content][:attr][:foreground]
+        unless data[:content][:type] == TYPE_IMAGE and
+            not data[:content][:attr][:foreground]
           next
         end
         x = data[:pos][:x]
@@ -1214,8 +1166,9 @@ module Balloon
           next
         end
         @layout.set_indent(data[:pos][:x] * Pango::SCALE)
-        @layout.set_markup(data[:content][:data])
-        cr.set_source_rgb(data[:content][:attr][:color])
+        markup = set_markup(data[:content][:data], data[:content][:attr])
+        @layout.set_markup(markup)
+        cr.set_source_rgb(@text_normal_color)
         cr.move_to(@origin_x, @origin_y + data[:pos][:y] - @lineno * @line_height)
         cr.show_pango_layout(@layout)
       end
@@ -1349,7 +1302,8 @@ module Balloon
           x, y = data[:pos][:x], data[:pos][:y]
           if n == sl
             @layout.set_indent(x * Pango::SCALE)
-            @layout.set_markup(data[:content][:data][0, sn])
+            markup = set_markup(data[:content][:data][0, sn], data[:content][:attr])
+            @layout.set_markup(markup)
             t = @layout.text
             strong, weak = @layout.get_cursor_pos(t.bytesize)
             x = (strong.x / Pango::SCALE).to_i
@@ -1365,7 +1319,8 @@ module Balloon
             text = data[:content][:data]
           end
           @layout.set_indent(x * Pango::SCALE)
-          @layout.set_markup(text)
+          markup = set_markup(text, data[:content][:attr])
+          @layout.set_markup(markup)
           cr.set_source_rgb(@cursor_color)
           t = @layout.text
           x_bak = x
@@ -1408,7 +1363,8 @@ module Balloon
             x, y = data[:pos][:x], data[:pos][:y]
             if n == sl
               @layout.set_indent(x * Pango::SCALE)
-              @layout.set_markup(data[:content][:data][0, sn])
+              markup = set_markup(data[:content][:data][0, sn], data[:content][:attr])
+              @layout.set_markup(markup)
               t = @layout.text
               strong, weak = @layout.get_cursor_pos(t.bytesize)
               x = (strong.x / Pango::SCALE).to_i
@@ -1424,7 +1380,8 @@ module Balloon
               text = data[:content][:data]
             end
             @layout.set_indent(x * Pango::SCALE)
-            @layout.set_markup(text)
+            markup = set_markup(text, data[:content][:attr])
+            @layout.set_markup(markup)
             t = @layout.text
             for i in 0 .. t.bytesize
               strong, weak = @layout.get_cursor_pos(i)
@@ -1588,11 +1545,11 @@ module Balloon
         pos: {x: 0, y: 0, w: 0, h: 0},
         content: {type: TYPE_UNKNOWN, data: nil, attr: {
           height: @font_height,
-          color: @text_normal_color,
-          b: false,
-          i: false,
-          s: false,
-          u: false,
+          color: '',
+          bold: false,
+          italic: false,
+          strike: false,
+          underline: false,
           sup: false,
           sub: false,
           inline: false,
@@ -1705,7 +1662,8 @@ module Balloon
       when TYPE_TEXT
         concat = [data[:content][:data], text].join('')
         @layout.set_indent(data[:pos][:x])
-        @layout.set_markup(concat)
+        markup = set_markup(concat, data[:content][:attr])
+        @layout.set_markup(markup)
         t = @layout.text
         strong, weak = @layout.get_cursor_pos(t.bytesize)
         x = (strong.x / Pango::SCALE).to_i
@@ -1780,16 +1738,67 @@ module Balloon
       @link_buffer[-1] = [sl, sn, el, en, link_id, args, raw_text, text]
     end
 
-    def append_meta(tag)
-      return if tag.nil?
-      if @text_buffer.empty?
-        sl = 0
-        sn = 0
-      else
-        sl = (@text_buffer.length - 1)
-        sn = @text_buffer[-1].length
+    def append_meta(**kwargs)
+      data = @data_buffer[-1]
+      # default -> 数値へ変更。
+      kwargs.each do |k, v|
+        if v == 'default'
+          case k
+          when :height
+            kwargs[k] = [@font_height, false, false]
+          when :color
+            kwargs[k] = ''
+          when :bold
+            kwargs[k] = false
+          when :italic
+            kwargs[k] = false
+          when :strike
+            kwargs[k] = false
+          when :underline
+            kwargs[k] = false
+          when :sub
+            kwargs[k] = false
+          when :sup
+            kwargs[k] = false
+          end
+        elsif v == "disable"
+          # TODO stub
+        end
       end
-      @meta_buffer << [sl, sn, tag]
+      # heightは特殊な処理が必要。
+      unless kwargs[:height].nil?
+        v, relative, rate = kwargs[:height]
+        if rate
+          v = (data[:content][:attr][:height] * v / 100.0).to_i
+        end
+        if relative
+          v = data[:content][:attr][:height] + v
+        end
+        kwargs[:height] = v
+      end
+      case data[:content][:type]
+      when TYPE_UNKNOWN
+        # nop
+      when TYPE_TEXT
+      is_changed = false
+      kwargs.each do |k, v|
+        unless data[:content][:attr][k] == v
+          is_changed = true
+          break
+        end
+      end
+      if is_changed
+        new_buffer(is_head: false)
+      end
+      when TYPE_IMAGE
+        new_buffer(is_head: false)
+      end
+      data = @data_buffer[-1]
+      a = data[:content][:attr].dup
+      kwargs.each do |k, v|
+        a[k] = v
+      end
+      data[:content][:attr] = a
     end
 
     def append_image(path, **kwargs)
