@@ -21,6 +21,10 @@ require_relative "metamagic"
 
 module Balloon
 
+  TYPE_UNKNOWN = 0
+  TYPE_TEXT = 1
+  TYPE_IMAGE = 2
+
   class Balloon < MetaMagic::Holon
     attr_accessor :window, :user_interaction
 
@@ -488,9 +492,9 @@ module Balloon
       end
     end
 
-    def append_image(side, path, x, y)
+    def append_image(side, path, **kwargs)
       return if side >= @window.length
-      @window[side].append_image(path, x, y)
+      @window[side].append_image(path, **kwargs)
     end
 
     def show_sstp_message(message, sender)
@@ -1053,30 +1057,89 @@ module Balloon
     end
 
     def get_last_cursor_position
-      index = @line_regions.length - 1
-      sx, sy = @line_regions[index]
-      markup = set_markup(index, @text_buffer[index])
-      @layout.set_indent(sx * Pango::SCALE)
-      @layout.set_markup(markup)
-      t = @layout.text
-      strong, weak = @layout.get_cursor_pos(t.bytesize)
-      x = (strong.x / Pango::SCALE).to_i
-      y = (strong.y / Pango::SCALE).to_i
-      # hは一番大きいheightを保存する(\n系用)
-      h = (strong.height / Pango::SCALE).to_i
-      prev_x = x
-      for i in t.bytesize .. 0
-        s, w = @layout.get_cursor_pos(i)
-        if prev_x < (s.x / Pango::SCALE)
+      x, y, h = 0, 0, 0
+      (@data_buffer.length - 1).downto(0) do |i|
+        data = @data_buffer[i]
+        unless data[:content][:type] == TYPE_TEXT or
+            data[:content][:attr][:inline]
+          next
+        end
+        case data[:content][:type]
+        when TYPE_TEXT
+          markup = set_markup(i, data[:content][:data])
+          @layout.set_indent(data[:pos][:x] * Pango::SCALE)
+          @layout.set_markup(markup)
+          t = @layout.text
+          strong, weak = @layout.get_cursor_pos(t.bytesize)
+          x = (strong.x / Pango::SCALE).to_i
+        when TYPE_IMAGE
+          x = data[:pos][:x] + data[:content][:data].width
+        else
+          fail "unreachable"
+        end
+        y = data[:pos][:y]
+        break
+      end
+      (@data_buffer.length - 1).downto(0) do |i|
+        data = @data_buffer[i]
+        unless data[:content][:type] == TYPE_TEXT or
+            data[:content][:attr][:inline]
+          next
+        end
+        case data[:content][:type]
+        when TYPE_TEXT
+          markup = set_markup(i, data[:content][:data])
+          @layout.set_indent(data[:pos][:x] * Pango::SCALE)
+          @layout.set_markup(markup)
+          t = @layout.text
+          strong, weak = @layout.get_cursor_pos(t.bytesize)
+          prev_x = (strong.x / Pango::SCALE).to_i
+          for i in t.bytesize .. 0
+            s, w = @layout.get_cursor_pos(i)
+            if prev_x < (s.x / Pango::SCALE)
+              break
+            end
+            h = [h, (s.height / Pango::SCALE).to_i].max
+          end
+        when TYPE_IMAGE
+          h = [h, data[:content][:data].height].max
+        else
+          fail "unreachable"
+        end
+        if data[:is_head]
           break
         end
-        h = [h, (s.height / Pango::SCALE).to_i].max
       end
-      return [x, sy + y, h]
+      return [x, y, h]
     end
 
     def get_bottom_position()
       h = 0
+      (@data_buffer.length - 1).downto(0) do |i|
+        data = @data_buffer[i]
+        unless data[:content][:type] == TYPE_TEXT or
+            data[:content][:attr][:inline]
+          next
+        end
+        case data[:content][:type]
+        when TYPE_TEXT
+          @layout.set_indent(data[:pos][:x] * Pango::SCALE)
+          @layout.set_markup(data[:content][:data])
+          t = @layout.text
+          for index in 0 .. t.bytesize
+            strong, weak = @layout.get_cursor_pos(t.bytesize)
+            x = (strong.x / Pango::SCALE).to_i
+            h = [h, data[:pos][:y] + (strong.height / Pango::SCALE).to_i].max
+          end
+        when TYPE_IMAGE
+          h = [h, data[:content][:data].height].max
+        end
+        if data[:is_head]
+          break
+        end
+      end
+      # return h - @lineno * @line_height
+      # FIXME
       for i in 0 .. @text_buffer.length - 1
         sx, sy = @line_regions[i]
         if @text_buffer[i].empty?
@@ -1103,6 +1166,100 @@ module Balloon
       @window.set_surface(cr, @balloon_surface, scale)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX
+      # FIXME: comment
+      cr.rectangle(@origin_x, @origin_y, @valid_width, @valid_height)
+      cr.clip
+      # draw background image
+      for i in 0..(@data_buffer.length - 1)
+        data = @data_buffer[i]
+        if data[:content][:type] == TYPE_TEXT or
+            data[:content][:attr][:foreground]
+          next
+        end
+        x = data[:pos][:x]
+        y = data[:pos][:y]
+        w = data[:content][:data].width
+        h = data[:content][:data].height
+        if x == 'centerx'
+          bw, bh = get_balloon_size(:scaling => false)
+          x = ((bw - w) / 2)
+        else
+          begin
+            x = Integer(x)
+          rescue
+            next
+          end
+        end
+        if y == 'centery'
+          bw, bh = get_balloon_size(:scaling => false)
+          y = ((bh - h) / 2)
+        else
+          begin
+            y = Integer(y)
+          rescue
+            next
+          end
+        end
+        if data[:content][:attr][:inline]
+          cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y)
+        else
+          cr.set_source(data[:content][:data], x, y)
+        end
+        cr.paint()
+      end
+      # draw text
+      for i in 0..(@data_buffer.length - 1)
+        data = @data_buffer[i]
+        unless data[:content][:type] == TYPE_TEXT
+          next
+        end
+        @layout.set_indent(data[:pos][:x] * Pango::SCALE)
+        @layout.set_markup(data[:content][:data])
+        cr.set_source_rgb(data[:content][:attr][:color])
+        cr.move_to(@origin_x, @origin_y + data[:pos][:y] - @lineno * @line_height)
+        cr.show_pango_layout(@layout)
+      end
+      # draw foreground image
+      for i in 0..(@data_buffer.length - 1)
+        data = @data_buffer[i]
+        unless data[:content][:type] == TYPE_IMAGE and
+            data[:content][:attr][:foreground]
+          next
+        end
+        x = data[:pos][:x]
+        y = data[:pos][:y]
+        w = data[:content][:data].width
+        h = data[:content][:data].height
+        if x == 'centerx'
+          bw, bh = get_balloon_size(:scaling => false)
+          x = ((bw - w) / 2)
+        else
+          begin
+            x = Integer(x)
+          rescue
+            next
+          end
+        end
+        if y == 'centery'
+          bw, bh = get_balloon_size(:scaling => false)
+          y = ((bh - h) / 2)
+        else
+          begin
+            y = Integer(y)
+          rescue
+            next
+          end
+        end
+        if data[:content][:attr][:inline]
+          cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y)
+        else
+          cr.set_source(data[:content][:data], x, y)
+        end
+        cr.paint()
+      end
+      cr.reset_clip
+=begin
+      # FIXME
       # draw images
       for i in 0..(@images.length - 1)
         image_surface, (x, y) = @images[i]
@@ -1167,6 +1324,7 @@ module Balloon
         end
       end
       cr.reset_clip()
+=end
       redraw_sstp_message(widget, cr) if @side.zero? and not @sstp_message.nil?
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
@@ -1182,101 +1340,114 @@ module Balloon
       el = @link_buffer[index][2]
       sn = @link_buffer[index][1]
       en = @link_buffer[index][3]
+      cr.rectangle(@origin_x, @origin_y, @valid_width, @valid_height)
+      cr.clip
       for n in sl .. el
-        x1, y1 = @line_regions[n]
-        if n == sl
-          markup = set_markup(n, @text_buffer[n][0, sn])
-          @layout.set_indent(x1 * Pango::SCALE)
-          @layout.set_markup(markup)
+        data = @data_buffer[n]
+        case data[:content][:type]
+        when TYPE_TEXT
+          x, y = data[:pos][:x], data[:pos][:y]
+          if n == sl
+            @layout.set_indent(x * Pango::SCALE)
+            @layout.set_markup(data[:content][:data][0, sn])
+            t = @layout.text
+            strong, weak = @layout.get_cursor_pos(t.bytesize)
+            x = (strong.x / Pango::SCALE).to_i
+          end
+          text = ''
+          if sl == el
+            text = data[:content][:data][sn, en - sn]
+          elsif n == sl
+            text = data[:content][:data][sn .. -1]
+          elsif n == el
+            text = data[:content][:data][0, en]
+          else
+            text = data[:content][:data]
+          end
+          @layout.set_indent(x * Pango::SCALE)
+          @layout.set_markup(text)
+          cr.set_source_rgb(@cursor_color)
           t = @layout.text
-          strong, weak = @layout.get_cursor_pos(t.bytesize)
-          x1  = (strong.x / Pango::SCALE).to_i
-          y1  += (strong.y / Pango::SCALE).to_i
-        end
-        if n == sl and n == el
-          markup = set_markup(n, @text_buffer[n][sn, en - sn])
-        elsif n == el
-          markup = set_markup(n, @text_buffer[n][0, en])
+          x_bak = x
+          for i in 0 .. t.bytesize
+            strong, weak = @layout.get_cursor_pos(i)
+            nx = (strong.x / Pango::SCALE).to_i
+            ny = (strong.y / Pango::SCALE).to_i
+            nh = (strong.height / Pango::SCALE).to_i
+            if nx > x
+              cr.rectangle(@origin_x + x, @origin_y + y - @lineno * @line_height, nx - x, nh)
+              cr.fill()
+            end
+            x = nx
+          end
+          x = x_bak
+          cr.move_to(@origin_x, @origin_y + y - @lineno * @line_height)
+          cr.set_source_rgb(@text_active_color)
+          cr.show_pango_layout(@layout)
+        when TYPE_IMAGE
+          # TODO: 画像は縁取りくらいはしたいけどとりあえず保留
         else
-          markup = set_markup(n, @text_buffer[n])
+          # nop
         end
-        @layout.set_indent(x1 * Pango::SCALE)
-        @layout.set_markup(markup)
-        cr.set_source_rgb(@cursor_color)
-        t = @layout.text
-        x = x1
-        y = y1
-        cr.rectangle(@origin_x, @origin_y, @valid_width, @valid_height)
-        cr.clip()
-        for i in 0 .. t.bytesize
-          strong, weak = @layout.get_cursor_pos(i)
-          nx = (strong.x / Pango::SCALE).to_i
-          ny = (strong.y / Pango::SCALE).to_i
-          nh = (strong.height / Pango::SCALE).to_i
-          # 行頭に折り返してきた時
-          if x > nx
-            x = 0
-          end
-          if x < nx
-            cr.rectangle(@origin_x + x, @origin_y + y - @lineno * @line_height, nx - x, nh)
-            cr.fill()
-          end
-          x = nx
-        end
-        cr.move_to(@origin_x, @origin_y + y1 - @lineno * @line_height)
-        cr.set_source_rgb(@text_active_color)
-        cr.show_pango_layout(@layout)
-        cr.reset_clip()
       end
+      cr.reset_clip
       cr.restore()
     end
 
     def check_link_region(px, py)
       new_selection = nil
-      for i in 0..(@link_buffer.length - 1)
-        sl = @link_buffer[i][0]
-        el = @link_buffer[i][2]
-        sn = @link_buffer[i][1]
-        en = @link_buffer[i][3]
+      for index in 0..(@link_buffer.length - 1)
+        sl = @link_buffer[index][0]
+        el = @link_buffer[index][2]
+        sn = @link_buffer[index][1]
+        en = @link_buffer[index][3]
         for n in sl .. el
-          x1, y1 = @line_regions[n]
-          if n == sl
-            markup = set_markup(n, @text_buffer[n][0, sn])
-            @layout.set_indent(x1 * Pango::SCALE)
-            @layout.set_markup(markup)
+          data = @data_buffer[n]
+          case data[:content][:type]
+          when TYPE_TEXT
+            x, y = data[:pos][:x], data[:pos][:y]
+            if n == sl
+              @layout.set_indent(x * Pango::SCALE)
+              @layout.set_markup(data[:content][:data][0, sn])
+              t = @layout.text
+              strong, weak = @layout.get_cursor_pos(t.bytesize)
+              x = (strong.x / Pango::SCALE).to_i
+            end
+            text = ''
+            if sl == el
+              text = data[:content][:data][sn, en - sn]
+            elsif n == sl
+              text = data[:content][:data][sn .. -1]
+            elsif n == el
+              text = data[:content][:data][0, en]
+            else
+              text = data[:content][:data]
+            end
+            @layout.set_indent(x * Pango::SCALE)
+            @layout.set_markup(text)
             t = @layout.text
-            strong, weak = @layout.get_cursor_pos(t.bytesize)
-            x1  = (strong.x / Pango::SCALE).to_i
-            y1  += (strong.y / Pango::SCALE).to_i
-          end
-          if n == sl and n == el
-            markup = set_markup(n, @text_buffer[n][sn, en - sn])
-          elsif n == el
-            markup = set_markup(n, @text_buffer[n][0, en])
+            for i in 0 .. t.bytesize
+              strong, weak = @layout.get_cursor_pos(i)
+              nx = (strong.x / Pango::SCALE).to_i
+              ny = (strong.y / Pango::SCALE).to_i
+              nh = (strong.height / Pango::SCALE).to_i
+              if @origin_x + x <= px and px < @origin_x + nx and @origin_y + y - @lineno * @line_height <= py and py < @origin_y + y + nh - @lineno * @line_height
+                new_selection = index
+                break
+              end
+              x = nx
+            end
+          when TYPE_IMAGE
+            # FIXME
           else
-            markup = set_markup(n, @text_buffer[n])
+            # nop
           end
-          @layout.set_indent(x1 * Pango::SCALE)
-          @layout.set_markup(markup)
-          t = @layout.text
-          for index in 0 .. t.bytesize
-            strong, weak = @layout.get_cursor_pos(t.bytesize)
-            x2 = (strong.x / Pango::SCALE).to_i
-            y2 = (strong.y / Pango::SCALE).to_i
-            h = (strong.height / Pango::SCALE).to_i
-            # 行頭に折り返してきた時
-            if x1 > x2
-              x1 = 0
-            end
-            if @origin_x + x1 <= px and px < @origin_x + x2 and @origin_y + y1 + y2 - @lineno * @line_height <= py and py < @origin_y + y1 + y2 + h - @lineno * @line_height
-              new_selection = i
-              break
-            end
-            x1 = x2
-          end
-          if new_selection == i
+          if new_selection == index
             break
           end
+        end
+        if new_selection == index
+          break
         end
       end
       unless new_selection.nil?
@@ -1413,6 +1584,26 @@ module Balloon
       @lineno = 0
       @text_buffer = ['']
       @line_regions = [[0, 0]]
+      @data_buffer = [{
+        pos: {x: 0, y: 0, w: 0, h: 0},
+        content: {type: TYPE_UNKNOWN, data: nil, attr: {
+          height: @font_height,
+          color: @text_normal_color,
+          b: false,
+          i: false,
+          s: false,
+          u: false,
+          sup: false,
+          sub: false,
+          inline: false,
+          opaque: false,
+          use_self_alpha: false,
+          clipping: [0, 0, -1, -1],
+          fixed: false,
+          foreground: false,
+        }},
+        is_head: true
+      }]
       @meta_buffer = []
       @link_buffer = []
       @newline_required = false
@@ -1433,16 +1624,29 @@ module Balloon
       @newline_required = true
     end
 
+    def new_buffer(is_head: nil)
+      x, y, h = get_last_cursor_position
+      prev = @data_buffer[-1]
+      @data_buffer << {
+        pos: {x: x, y: y, w: 0, h: 0},
+        content: {type: TYPE_UNKNOWN, data: nil, attr: prev[:content][:attr].dup},
+        is_head: is_head,
+      }
+    end
+
     def new_line
-      line_height = (@font_height + @line_space)
-      rx, ry, rh = get_last_cursor_position
-      @line_regions << [rx, ry]
-      @text_buffer << ""
+      new_buffer(is_head: true)
     end
 
     def set_draw_absolute_x(pos)
-      sx, sy = @line_regions[@line_regions.size - 1]
-      @line_regions[@line_regions.size - 1] = [pos, sy]
+      data = @data_buffer[-1]
+      new = data[:pos].dup
+      new[:x] = pos
+      @data_buffer[-1] = {
+        pos: new,
+        content: data[:content],
+        is_head: data[:is_head],
+      }
     end
 
     def set_draw_absolute_x_char(rate)
@@ -1450,8 +1654,8 @@ module Balloon
     end
 
     def set_draw_relative_x(pos)
-      sx, sy = @line_regions[@line_regions.size - 1]
-      set_draw_absolute_x(sx + pos)
+      x = @data_buffer[-1][:pos][:x]
+      set_draw_absolute_x(x + pos)
     end
 
     def set_draw_relative_x_char(rate)
@@ -1459,8 +1663,14 @@ module Balloon
     end
 
     def set_draw_absolute_y(pos)
-      sx, sy = @line_regions[@line_regions.size - 1]
-      @line_regions[@line_regions.size - 1] = [sx, pos]
+      data = @data_buffer[-1]
+      new = data[:pos].dup
+      new[:y] = pos
+      @data_buffer[-1] = {
+        pos: new,
+        content: data[:content],
+        is_head: data[:is_head],
+      }
     end
 
     def set_draw_absolute_y_char(rate, use_default_height: true)
@@ -1473,8 +1683,8 @@ module Balloon
     end
 
     def set_draw_relative_y(pos)
-      sx, sy = @line_regions[@line_regions.size - 1]
-      set_draw_absolute_y(sy + pos)
+      y = @data_buffer[-1][:pos][:y]
+      set_draw_absolute_y(y + pos)
     end
 
     def set_draw_relative_y_char(rate, use_default_height: true)
@@ -1487,60 +1697,35 @@ module Balloon
     end
 
     def append_text(text)
-      if @text_buffer.empty?
-        s = ''
-        column = 0
-        index = 0
-      elsif @newline_required
-        s = ''
-        column = 0
-        @newline_required = false
-        index = @text_buffer.length
-      else
-        index = (@text_buffer.length - 1)
-        s = @text_buffer.pop
-        column = s.length
-      end
-      i = s.length
-      text = [s, text].join('')
-      j = text.length
-      @text_count += j
-      p = 0
-      while true
-        if i >= j
-          @text_buffer << text[p..i-1]
-          draw_last_line(:column => column)
-          break
-        end
-        if text[i, 2] == '\n'
-          if j >= (i + 8) and text[i, 8] == '\n[half]'
-            @text_buffer << [text[p..i-1], '\n[half]'].join('')
-            p = i = (i + 8)
-          else
-            if i.zero?
-              @text_buffer << ""
-            else
-              @text_buffer << text[p..i-1]
-            end
-            p = i = (i + 2)
+      data = @data_buffer[-1]
+      case data[:content][:type]
+      when TYPE_UNKNOWN
+        data[:content][:type] = TYPE_TEXT
+        data[:content][:data] = text
+      when TYPE_TEXT
+        concat = [data[:content][:data], text].join('')
+        @layout.set_indent(data[:pos][:x])
+        @layout.set_markup(concat)
+        t = @layout.text
+        strong, weak = @layout.get_cursor_pos(t.bytesize)
+        x = (strong.x / Pango::SCALE).to_i
+        prev_x = x
+        for i in t.bytesize .. 0
+          strong, weak = @layout.get_cursor_pos(t.bytesize)
+          x = (strong.x / Pango::SCALE).to_i
+          if prev_x > x
+            new_buffer(is_head: false)
+            set_draw_relative_y_char(1.0, use_default_height: false)
+            return append_text(text)
           end
-          draw_last_line(:column => column)
-          column = 0
-          next
         end
-        n = (i + 1)
-        show unless @__shown
-        markup = set_markup(index, text[p..n-1])
-        @layout.set_markup(markup)
-        text_width, text_height =  @layout.pixel_size
-        if text_width > @line_width
-          @text_buffer << text[p..i-1]
-          draw_last_line(:column => column)
-          column = 0
-          p = i
-        end
-        i = n
+        data[:content][:data] = concat
+      when TYPE_IMAGE
+        # \nや\_lなどが行われていない場合にここに来るのでis_headはfalse
+        new_buffer(is_head: false)
+        return append_text(text)
       end
+      draw_last_line(:column => 0)
     end
 
     def append_sstp_marker
@@ -1572,26 +1757,24 @@ module Balloon
     end
 
     def append_link_in(link_id, args)
-      if @text_buffer.empty?
-        sl = 0
-        sn = 0
-      else
-        sl = (@text_buffer.length - 1)
-        sn = @text_buffer[-1].length
-      end
+      sl = @data_buffer.length - 1
+      sn = if @data_buffer[-1][:content][:type] == TYPE_TEXT
+             @data_buffer[-1][:content][:data].length
+           else
+             0
+           end
       @link_buffer << [sl, sn, sl, sn, link_id, args, '', '']
     end
 
     def append_link_out(link_id, text, args)
       return unless text
       raw_text = text
-      if @text_buffer.empty?
-        el = 0
-        en = 0
-      else
-        el = (@text_buffer.length - 1)
-        en = @text_buffer[-1].length
-      end
+      el = @data_buffer.length - 1
+      en = if @data_buffer[-1][:content][:type] == TYPE_TEXT
+             @data_buffer[-1][:content][:data].length
+           else
+             0
+           end
       sl = @link_buffer[-1][0]
       sn = @link_buffer[-1][1]
       @link_buffer[-1] = [sl, sn, el, en, link_id, args, raw_text, text]
@@ -1609,15 +1792,29 @@ module Balloon
       @meta_buffer << [sl, sn, tag]
     end
 
-    def append_image(path, x, y)
+    def append_image(path, **kwargs)
+      unless @data_buffer[-1][:content][:type] == TYPE_UNKNOWN
+        new_buffer(is_head: false)
+      end
+      data = @data_buffer[-1]
       begin
         image_surface = Pix.create_surface_from_file(path)
       rescue
         return
       end
-      show()
-      @images << [image_surface, [x, y]]
-      @darea.queue_draw()
+      data[:content][:type] = TYPE_IMAGE
+      data[:content][:data] = image_surface
+      unless kwargs[:x].nil? or kwargs[:y].nil?
+        data[:pos][:x] = kwargs[:x]
+        data[:pos][:y] = kwargs[:y]
+      end
+      kwargs.each do |k, v|
+        if [:opaque, :inline, :clipping, :fixed, :foreground].include?(k)
+          data[:content][:attr][k] = v
+        end
+      end
+      show
+      @darea.queue_draw
     end
 
     def draw_last_line(column: 0)

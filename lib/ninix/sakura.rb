@@ -2079,20 +2079,57 @@ module Sakura
 
     def __yen__b(args)
       begin
-        filename, x, y = expand_meta(args[0]).split(',', 3)
-      rescue ArgumentError ## FIXME: no exception in Ruby
-        filename, param = expand_meta(args[0]).split(',', 2)
-        raise "assert" unless param == 'inline'
-        x, y = 0, 0 ## FIXME
+        filename, *args = expand_meta(args[0]).split(',')
+      rescue
+        # FIXME
+        return
+      end
+      kwargs = {}
+      index = if args[0] == "inline"
+        kwargs[:inline] = true
+        1
+      else
+        begin
+          kwargs[:x] = Integer(args[0])
+          kwargs[:y] = Integer(args[1])
+        rescue
+          return
+        end
+        2
+      end
+      for i in index .. args.length - 1
+        arg = arg[i]
+        if arg.start_with?('--option=')
+          arg = arg[9 .. -1]
+        end
+        if arg == "opaque"
+          kwargs[:opaque] = true
+        elsif arg == "use_self_alpha"
+          kwargs[:use_self_alpha] = true
+        elsif arg.start_with("--clipping=")
+          arg = arg[11 .. -1]
+          x1, x2, y1, y2 = arg.split(' ', 4)
+          begin
+            x1 = Integer(x1)
+            x2 = Integer(x2)
+            y1 = Integer(y1)
+            y2 = Integer(y2)
+          rescue
+            next
+          end
+          kwargs[:clipping] = [x1, y1, x2 - x1, y2 - y1]
+        elsif arg == "foreground"
+          kwargs[:foreground] = true
+        end
       end
       filename = Home.get_normalized_path(filename)
       path = File.join(get_prefix(), 'ghost/master', filename)
       if File.file?(path)
-        @balloon.append_image(@script_side, path, x, y)
+        @balloon.append_image(@script_side, path, **kwargs)
       else
         path = [path, '.png'].join('')
         if File.file?(path)
-          @balloon.append_image(@script_side, path, x, y)
+          @balloon.append_image(@script_side, path, **kwargs)
         end
       end
     end
