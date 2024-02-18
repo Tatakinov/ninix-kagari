@@ -481,8 +481,11 @@ module Surface
         surface = elements[basename][0]
         if n.zero? # base surface
           surface_list = [surface]
-        elsif ['overlay', 'overlayfast',
+        elsif ['overlay', 'overlayfast', 'overlaymultiply',
                'interpolate', 'reduce', 'replace', 'asis'].include?(method)
+          if ['overlaymultiply'].include?(method)
+            Logging::Logging.warning('overlaymultiply is not supported. fallback to overlayfast')
+          end
           surface_list << [surface, x, y, method]
         elsif method == 'base'
           surface_list << [surface, x, y, method]
@@ -1146,12 +1149,15 @@ module Surface
       mayuna_list = [] # XXX: FIXME
       for surface_id, interval, method, args in mayuna.get_patterns
         case method
-        when 'bind', 'add'
+        when 'overlay', 'overlayfast', 'overlaymultiply', 'replace'
           if @surfaces.include?(surface_id)
+            if ['overlaymultiply'].include?(method)
+              Logging::Logging.warning('overlaymultiply is not supported. fallback to overlayfast')
+            end
             dest_x, dest_y = args
             mayuna_list << [method, surface_id, dest_x, dest_y]
           end
-        when 'reduce'
+        when 'interpolate', 'asis', 'bind', 'add', 'reduce'
           if @surfaces.include?(surface_id)
             dest_x, dest_y = args
             mayuna_list << [method, surface_id, dest_x, dest_y]
@@ -1212,17 +1218,18 @@ module Surface
         end
         cr = Cairo::Context.new(surface)
         op = {
-          'base' =>        Cairo::OPERATOR_SOURCE, # XXX
-          'overlay' =>     Cairo::OPERATOR_OVER,
-          'overlayfast' => Cairo::OPERATOR_ATOP,
-          'interpolate' => Cairo::OPERATOR_SATURATE,
-          'reduce' =>      Cairo::OPERATOR_DEST_IN,
-          'replace' =>     Cairo::OPERATOR_SOURCE,
-          'asis' =>        Cairo::OPERATOR_OVER,
+          'base' =>            Cairo::OPERATOR_SOURCE, # XXX
+          'overlay' =>         Cairo::OPERATOR_OVER,
+          'overlayfast' =>     Cairo::OPERATOR_ATOP,
+          'overlaymultiply' => Cairo::OPERATOR_ATOP, # FIXME
+          'interpolate' =>     Cairo::OPERATOR_SATURATE,
+          'reduce' =>          Cairo::OPERATOR_DEST_IN,
+          'replace' =>         Cairo::OPERATOR_SOURCE,
+          'asis' =>            Cairo::OPERATOR_OVER,
         }[method]
         cr.set_operator(op)
         cr.set_source(overlay, x, y)
-        if ['overlay', 'overlayfast'].include?(method)
+        if ['overlay', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
           cr.mask(overlay, x, y)
         else
           cr.paint()
@@ -1288,12 +1295,23 @@ module Surface
             for method, mayuna_id, dest_x, dest_y in iter_mayuna(surface_width, surface_height, actor, done)
               mayuna_surface = get_image_surface(mayuna_id)
               cr = Cairo::Context.new(surface)
-              if ['bind', 'add'].include?(method)
-                cr.set_source(mayuna_surface, dest_x, dest_y)
+              op = {
+                'base' =>            Cairo::OPERATOR_SOURCE, # XXX
+                'overlay' =>         Cairo::OPERATOR_OVER,
+                'overlayfast' =>     Cairo::OPERATOR_ATOP,
+                'overlaymultiply' => Cairo::OPERATOR_ATOP, # FIXME
+                'replace' =>         Cairo::OPERATOR_SOURCE,
+                'interpolate' =>     Cairo::OPERATOR_SATURATE,
+                'asis' =>            Cairo::OPERATOR_OVER,
+                'bind' =>            Cairo::OPERATOR_OVER,
+                'add' =>             Cairo::OPERATOR_OVER,
+                'reduce' =>          Cairo::OPERATOR_DEST_IN,
+              }[method]
+              cr.set_operator(op)
+              cr.set_source(mayuna_surface, dest_x, dest_y)
+              if ['overlay', 'bind', 'add', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
                 cr.mask(mayuna_surface, dest_x, dest_y)
-              elsif method == 'reduce'
-                cr.set_operator(Cairo::OPERATOR_DEST_IN)
-                cr.set_source(mayuna_surface, dest_x, dest_y)
+              elsif ['replace', 'asis', 'reduce'].include?(method)
                 cr.paint()
               else
                 fail RuntimeError('should not reach here')
