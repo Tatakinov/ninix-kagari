@@ -767,7 +767,7 @@ module Balloon
                              __get('validrect.top', 14).to_i).to_i).to_i
       wpx = __get('wordwrappoint.x',
                   __get('validrect.right', -14).to_i).to_i
-      @hpx = __get('validrect.bottom', -14).to_i
+      @valid_rect_bottom = __get('validrect.bottom', -14).to_i
       if wpx > 0
         line_width = (wpx - @origin_x)
       elsif wpx < 0
@@ -775,11 +775,11 @@ module Balloon
       else
         line_width = (@width - @origin_x * 2)
       end
-      wpy = __get('validrect.bottom', -14).to_i
-      if wpy > 0
-        text_height = ([wpy, @height].min - @origin_y)
-      elsif wpy < 0
-        text_height = (@height - @origin_y + wpy)
+      vrb = @valid_rect_bottom
+      if vrb > 0
+        text_height = ([vrb, @height].min - @origin_y)
+      elsif vrb < 0
+        text_height = (@height - @origin_y + vrb)
       else
         text_height = (@height - @origin_y * 2)
       end
@@ -1164,14 +1164,18 @@ module Balloon
             next
           end
         end
-        if data[:content][:attr][:inline]
-          if data[:content][:attr][:is_sstp_marker]
-            cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y + ((@char_height - data[:content][:data].height) / 2).to_i)
-          else
-            cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y)
-          end
-        else
+        if data[:content][:attr][:fixed]
           cr.set_source(data[:content][:data], x, y)
+        else
+          if data[:content][:attr][:inline]
+            if data[:content][:attr][:is_sstp_marker]
+              cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y + ((@char_height - data[:content][:data].height) / 2).to_i - @lineno * @line_height)
+            else
+              cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y - @lineno * @line_height)
+            end
+          else
+            cr.set_source(data[:content][:data], x, y - @lineno * @line_height)
+          end
         end
         cr.paint()
       end
@@ -1384,6 +1388,7 @@ module Balloon
             x += @origin_x
             y += @origin_y
           end
+          y = y - @lineno * @line_height
           cr.rectangle(x, y, w, h)
           cr.stroke
         else
@@ -1465,11 +1470,12 @@ module Balloon
                 next
               end
             end
+            y = y - @lineno * @line_height
             if data[:content][:attr][:inline]
               x += @origin_x
               y += @origin_y
             end
-            if x <= px and px < x + w and y - @lineno * @line_height <= py and py < y + h - @lineno * @line_height
+            if x <= px and px < x + w and y <= py and py < y + h
               new_selection = index
             end
           else
