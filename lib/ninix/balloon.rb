@@ -1116,9 +1116,6 @@ module Balloon
             h = [h, y + data[:content][:data].height].max
           end
         end
-        if data[:is_head]
-          break
-        end
       end
       return h - @lineno * @line_height
     end
