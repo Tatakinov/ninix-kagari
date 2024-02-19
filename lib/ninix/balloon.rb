@@ -1352,7 +1352,36 @@ module Balloon
           cr.set_source_rgb(@text_active_color)
           cr.show_pango_layout(@layout)
         when TYPE_IMAGE
-          # TODO: 画像は縁取りくらいはしたいけどとりあえず保留
+          x = data[:pos][:x]
+          y = data[:pos][:y]
+          w = data[:content][:data].width
+          h = data[:content][:data].height
+          if x == 'centerx'
+            bw, bh = get_balloon_size(:scaling => false)
+            x = ((bw - w) / 2)
+          else
+            begin
+              x = Integer(x)
+            rescue
+              next
+            end
+          end
+          if y == 'centery'
+            bw, bh = get_balloon_size(:scaling => false)
+            y = ((bh - h) / 2)
+          else
+            begin
+              y = Integer(y)
+            rescue
+              next
+            end
+          end
+          if data[:content][:attr][:inline]
+            x += @origin_x
+            y += @origin_y
+          end
+          cr.rectangle(x, y, w, h)
+          cr.stroke
         else
           # nop
         end
@@ -1408,6 +1437,37 @@ module Balloon
             end
           when TYPE_IMAGE
             # FIXME
+            x = data[:pos][:x]
+            y = data[:pos][:y]
+            w = data[:content][:data].width
+            h = data[:content][:data].height
+            if x == 'centerx'
+              bw, bh = get_balloon_size(:scaling => false)
+              x = ((bw - w) / 2)
+            else
+              begin
+                x = Integer(x)
+              rescue
+                next
+              end
+            end
+            if y == 'centery'
+              bw, bh = get_balloon_size(:scaling => false)
+              y = ((bh - h) / 2)
+            else
+              begin
+                y = Integer(y)
+              rescue
+                next
+              end
+            end
+            if data[:content][:attr][:inline]
+              x += @origin_x
+              y += @origin_y
+            end
+            if x <= px and px < x + w and y - @lineno * @line_height <= py and py < y + h - @lineno * @line_height
+              new_selection = index
+            end
           else
             # nop
           end
