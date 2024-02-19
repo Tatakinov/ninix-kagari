@@ -2085,7 +2085,7 @@ module Sakura
         return
       end
       kwargs = {}
-      index = if args[0] == "inline"
+      index = if args[0] == 'inline'
         kwargs[:inline] = true
         1
       else
@@ -2102,11 +2102,11 @@ module Sakura
         if arg.start_with?('--option=')
           arg = arg[9 .. -1]
         end
-        if arg == "opaque"
+        if arg == 'opaque'
           kwargs[:opaque] = true
-        elsif arg == "use_self_alpha"
+        elsif arg == 'use_self_alpha'
           kwargs[:use_self_alpha] = true
-        elsif arg.start_with("--clipping=")
+        elsif arg.start_with('--clipping=')
           arg = arg[11 .. -1]
           x1, x2, y1, y2 = arg.split(' ', 4)
           begin
@@ -2118,7 +2118,7 @@ module Sakura
             next
           end
           kwargs[:clipping] = [x1, y1, x2 - x1, y2 - y1]
-        elsif arg == "foreground"
+        elsif arg == 'foreground'
           kwargs[:foreground] = true
         elsif arg == 'fixed'
           kwargs[:fixed] = true
