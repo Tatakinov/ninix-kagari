@@ -1471,11 +1471,14 @@ module Balloon
               end
             end
             y = y - @lineno * @line_height
+            y1 = [y, 0].max
+            y2 = [y + h, @origin_y + @valid_height].min
             if data[:content][:attr][:inline]
+              y2 = [y + h, @valid_height].min
               x += @origin_x
               y += @origin_y
             end
-            if x <= px and px < x + w and y <= py and py < y + h
+            if x <= px and px < x + w and y1 <= py and py < y2
               new_selection = index
             end
           else
