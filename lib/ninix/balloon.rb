@@ -756,7 +756,7 @@ module Balloon
       else
         @font_height = (fd.size / Pango::SCALE).to_i
       end
-      @line_space = 1
+      @line_space = 0
       @layout.set_spacing(@line_space)
       # font metrics
       @origin_x = __get('origin.x',
@@ -783,7 +783,7 @@ module Balloon
       else
         text_height = (@height - @origin_y * 2)
       end
-      @line_height = (@font_height + @line_space)
+      @line_height = (@char_height + @line_space)
       @layout.set_width(line_width * Pango::SCALE)
       @valid_width = line_width
       @valid_height = text_height
