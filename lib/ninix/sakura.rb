@@ -2120,7 +2120,12 @@ module Sakura
           kwargs[:clipping] = [x1, y1, x2 - x1, y2 - y1]
         elsif arg == "foreground"
           kwargs[:foreground] = true
+        elsif arg == 'fixed'
+          kwargs[:fixed] = true
         end
+      end
+      if kwargs[:fixed] and kwargs[:inline]
+        kwargs.delete(:fixed)
       end
       filename = Home.get_normalized_path(filename)
       path = File.join(get_prefix(), 'ghost/master', filename)
