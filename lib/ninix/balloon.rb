@@ -1131,7 +1131,7 @@ module Balloon
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX
       # FIXME: comment
-      cr.rectangle(@origin_x, @origin_y, @valid_width, @valid_height)
+      cr.rectangle(@origin_x, 0, @valid_width, @origin_y + @valid_height)
       cr.clip
       # draw background image
       for i in 0..(@data_buffer.length - 1)
@@ -1313,7 +1313,7 @@ module Balloon
       el = @link_buffer[index][2]
       sn = @link_buffer[index][1]
       en = @link_buffer[index][3]
-      cr.rectangle(@origin_x, @origin_y, @valid_width, @valid_height)
+      cr.rectangle(@origin_x, 0, @valid_width, @origin_y + @valid_height)
       cr.clip
       for n in sl .. el
         data = @data_buffer[n]
