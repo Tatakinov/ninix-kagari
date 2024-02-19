@@ -1038,7 +1038,8 @@ module Balloon
       (@data_buffer.length - 1).downto(0) do |i|
         data = @data_buffer[i]
         unless data[:content][:type] == TYPE_TEXT or
-            data[:content][:attr][:inline]
+            (data[:content][:type] == TYPE_IMAGE and
+            data[:content][:attr][:inline])
           next
         end
         case data[:content][:type]
@@ -1060,7 +1061,8 @@ module Balloon
       (@data_buffer.length - 1).downto(0) do |i|
         data = @data_buffer[i]
         unless data[:content][:type] == TYPE_TEXT or
-            data[:content][:attr][:inline]
+            (data[:content][:type] == TYPE_IMAGE and
+            data[:content][:attr][:inline])
           next
         end
         case data[:content][:type]
@@ -1473,7 +1475,8 @@ module Balloon
             if data[:content][:attr][:inline]
               y2 = [y + h, @valid_height].min
               x += @origin_x
-              y += @origin_y
+              y1 += @origin_y
+              y2 += @origin_y
             end
             if x <= px and px < x + w and y1 <= py and py < y2
               new_selection = index
