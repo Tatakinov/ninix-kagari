@@ -1091,7 +1091,7 @@ module Balloon
       (@data_buffer.length - 1).downto(0) do |i|
         data = @data_buffer[i]
         unless data[:content][:type] == TYPE_TEXT or
-            data[:content][:attr][:inline]
+            not data[:content][:attr][:fixed]
           next
         end
         case data[:content][:type]
@@ -1106,10 +1106,14 @@ module Balloon
             h = [h, data[:pos][:y] + (strong.height / Pango::SCALE).to_i].max
           end
         when TYPE_IMAGE
+          y = data[:pos][:y]
+          unless data[:content][:attr][:inline]
+            y -= @origin_y
+          end
           if data[:content][:attr][:is_sstp_marker]
-            h = [h, @char_height].max
+            h = [h, y + @char_height].max
           else
-            h = [h, data[:content][:data].height].max
+            h = [h, y + data[:content][:data].height].max
           end
         end
         if data[:is_head]
