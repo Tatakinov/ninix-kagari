@@ -1071,7 +1071,11 @@ module Balloon
           _, h1 = @layout.pixel_size
           h = [h, h1].max
         when TYPE_IMAGE
-          h = [h, data[:content][:data].height].max
+          if data[:content][:attr][:is_sstp_marker]
+            h = [h, @char_height].max
+          else
+            h = [h, data[:content][:data].height].max
+          end
         else
           fail "unreachable"
         end
@@ -1102,7 +1106,11 @@ module Balloon
             h = [h, data[:pos][:y] + (strong.height / Pango::SCALE).to_i].max
           end
         when TYPE_IMAGE
-          h = [h, data[:content][:data].height].max
+          if data[:content][:attr][:is_sstp_marker]
+            h = [h, @char_height].max
+          else
+            h = [h, data[:content][:data].height].max
+          end
         end
         if data[:is_head]
           break
