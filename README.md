@@ -1,4 +1,4 @@
-# これは何
+# What is this
 
 デスクトップマスコットの1つ、伺かの互換アプリケーションです。
 
@@ -6,21 +6,41 @@
 が長らく更新されていないので
 私の環境(Debian stable)でいい感じに動作するようにしたものになります。
 
-ついでにninix-aya自体もosdn.jpの存続が怪しいのでその保存の意味もあります。
+ついでにninix-aya自体もosdn.netの存続が怪しいのでその保存の意味もあります。
 v0.0.0がninix-aya 5.0.9に対応しているので
 必要であればそちらを参照してください。
 
-# 動作に必要なもの
+# Requirements
 
-ninix-ayaと同じなので今なら
+- ruby
+
+- ruby-gettext
+
+- ruby-gio2
+
+- ruby-gstreamer
+
+- ruby-gtk3
+
+- ruby-narray
+
+- ruby-zip
+
+が最低限必要なものになります。
+
+- ruby-charlock-holmes
+
+が一部SHIORIで使われているようなので必要であればinstallしてください。
+
+なお、ninix-ayaと必要なものは一緒なので
 
 ```
 apt install ninix-aya
 ```
 
-等ninix-ayaをインストールするコマンドを叩けば動作するはずです。
+みたいにすれば楽できます。
 
-# 注意
+# Caution
 
 エンバグ・デグレーション上等で作っているので、必ずしも最新版が
 一番良いとは限りません。
