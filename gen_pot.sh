@@ -31,10 +31,10 @@ rxgettext lib/ninix/surface.rb  -o pot/surface.pot
 rxgettext lib/ninix/update.rb  -o pot/update.pot
 rxgettext lib/ninix/version.rb  -o pot/version.pot
 
-rmsgcat pot/*.pot -o ninix-aya.pot
+rmsgcat pot/*.pot -o ninix-kagari.pot
 
-# cp ninix-aya.pot po/ja/ninix-aya.po and edit ninix-aya.pot
+# cp ninix-kagari.pot po/ja/ninix-kagari.po and edit ninix-kagari.pot
 
-# msgfmt po/ja/ninix-aya.po -o locale/ja/LC_MESSAGES/ninix-aya.mo
+# msgfmt po/ja/ninix-kagari.po -o locale/ja/LC_MESSAGES/ninix-kagari.mo
 
-# msgunfmt -o po/ja/ninix-aya.po locale/ja/LC_MESSAGES/ninix-aya.mo
+# msgunfmt -o po/ja/ninix-kagari.po locale/ja/LC_MESSAGES/ninix-kagari.mo
