@@ -1672,9 +1672,21 @@ module Balloon
     def new_buffer(is_head: nil)
       x, y, h = get_last_cursor_position
       prev = @data_buffer[-1]
+      a = prev[:content][:attr].dup
+      # 画像のattrはすべて未指定の状態にする
+      {
+        opaque: false,
+        inline: false,
+        clipping: [0, 0, -1, -1],
+        fixed: false,
+        foreground: false,
+        is_sstp_marker: false,
+      }.each do |k, v|
+        a[k] = v
+      end
       @data_buffer << {
         pos: {x: x, y: y, w: 0, h: 0},
-        content: {type: TYPE_UNKNOWN, data: nil, attr: prev[:content][:attr].dup},
+        content: {type: TYPE_UNKNOWN, data: nil, attr: a},
         is_head: is_head,
       }
     end
