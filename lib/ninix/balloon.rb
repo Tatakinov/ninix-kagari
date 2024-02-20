@@ -1469,7 +1469,9 @@ module Balloon
                 next
               end
             end
-            y = y - @lineno * @line_height
+            unless data[:content][:attr][:fixed]
+              y = y - @lineno * @line_height
+            end
             y1 = [y, 0].max
             y2 = [y + h, @origin_y + @valid_height].min
             if data[:content][:attr][:inline]
