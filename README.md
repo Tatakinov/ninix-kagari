@@ -40,12 +40,33 @@ apt install ninix-aya
 
 みたいにすれば楽できます。
 
+# Install
+
+```
+make install
+```
+
+で/opt/ninix-kagari以下に必要なファイルがインストールされます。
+インストール先を変える場合はMakefileのprefixをいじってください。
+
+インストール後はパスを通す必要があります。
+
+```
+PATH=/opt/ninix-kagari/bin:$PATH
+```
+
+実行ファイル名はninixです。
+
+```
+$ ninix
+```
+
 # Caution
 
 エンバグ・デグレーション上等で作っているので、必ずしも最新版が
 一番良いとは限りません。
 
-# ライセンス
+# License
 
 Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 
