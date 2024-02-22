@@ -1098,25 +1098,13 @@ module Balloon
         end
         case data[:content][:type]
         when TYPE_TEXT
-          @layout.set_indent(data[:pos][:x] * Pango::SCALE)
-          markup = set_markup(data[:content][:data], data[:content][:attr])
-          @layout.set_markup(markup)
-          t = @layout.text
-          for index in 0 .. t.bytesize
-            strong, weak = @layout.get_cursor_pos(t.bytesize)
-            x = (strong.x / Pango::SCALE).to_i
-            h = [h, data[:pos][:y] + (strong.height / Pango::SCALE).to_i].max
-          end
+          h = [h, data[:pos][:y] + data[:pos][:h]].max
         when TYPE_IMAGE
           y = data[:pos][:y]
           unless data[:content][:attr][:inline]
             y -= @origin_y
           end
-          if data[:content][:attr][:is_sstp_marker]
-            h = [h, y + @char_height].max
-          else
-            h = [h, y + data[:content][:data].height].max
-          end
+          h = [h, y + data[:pos][:h]].max
         end
       end
       return h - @lineno * @line_height
@@ -1139,10 +1127,23 @@ module Balloon
             not data[:content][:attr][:foreground]
           next
         end
+        if data[:content][:attr][:fixed]
+          if y + h < 0 or y > @origin_y + @valid_height
+            next
+          end
+        else
+          y1 = y - @lineno * @line_height
+          if data[:content][:attr][:inline]
+            y1 += @origin_y
+          end
+          if y1 + h < 0 or y > @origin_y + @valid_height
+            next
+          end
+        end
         x = data[:pos][:x]
         y = data[:pos][:y]
-        w = data[:content][:data].width
-        h = data[:content][:data].height
+        w = data[:pos][:w]
+        h = data[:pos][:h]
         if x == 'centerx'
           bw, bh = get_balloon_size(:scaling => false)
           x = ((bw - w) / 2)
@@ -1179,9 +1180,14 @@ module Balloon
         cr.paint()
       end
       # draw text
+      @layout.set_width(-1)
       for i in 0..(@data_buffer.length - 1)
         data = @data_buffer[i]
         unless data[:content][:type] == TYPE_TEXT
+          next
+        end
+        y1 = data[:pos][:y] + @origin_y - @lineno * @line_height
+        if y1 + data[:pos][:h] < 0 or y1 > @origin_y + @valid_height
           next
         end
         @layout.set_indent(data[:pos][:x] * Pango::SCALE)
@@ -1197,6 +1203,19 @@ module Balloon
         unless data[:content][:type] == TYPE_IMAGE and
             data[:content][:attr][:foreground]
           next
+        end
+        if data[:content][:attr][:fixed]
+          if y + h < 0 or y > @origin_y + @valid_height
+            next
+          end
+        else
+          y1 = y - @lineno * @line_height
+          if data[:content][:attr][:inline]
+            y1 += @origin_y
+          end
+          if y1 + h < 0 or y > @origin_y + @valid_height
+            next
+          end
         end
         x = data[:pos][:x]
         y = data[:pos][:y]
@@ -1757,11 +1776,19 @@ module Balloon
       data = @data_buffer[-1]
       case data[:content][:type]
       when TYPE_UNKNOWN
+        @layout.set_width(-1)
+        @layout.set_indent(data[:pos][:x])
+        markup = set_markup(text, data[:content][:attr])
+        @layout.set_markup(markup)
+        w, h = @layout.pixel_size
+        data[:pos][:w] = w
+        data[:pos][:h] = h
         data[:content][:type] = TYPE_TEXT
         data[:content][:data] = text
       when TYPE_TEXT
-        concat = [data[:content][:data], text].join('')
+        @layout.set_width(@valid_width * Pango::SCALE)
         @layout.set_indent(data[:pos][:x])
+        concat = [data[:content][:data], text].join('')
         markup = set_markup(concat, data[:content][:attr])
         @layout.set_markup(markup)
         t = @layout.text
@@ -1777,6 +1804,9 @@ module Balloon
             return append_text(text)
           end
         end
+        w, h = @layout.pixel_size
+        data[:pos][:w] = w
+        data[:pos][:h] = h
         data[:content][:data] = concat
       when TYPE_IMAGE
         # \nや\_lなどが行われていない場合にここに来るのでis_headはfalse
@@ -1792,6 +1822,8 @@ module Balloon
         new_buffer(is_head: false)
       end
       data = @data_buffer[-1]
+      data[:pos][:w] = @sstp_surface.width
+      data[:pos][:h] = @char_height
       data[:content][:type] = TYPE_IMAGE
       data[:content][:data] = @sstp_surface
       data[:content][:attr] = {
@@ -1911,6 +1943,8 @@ module Balloon
       rescue
         return
       end
+      data[:pos][:w] = image_surface.width
+      data[:pos][:h] = image_surface.height
       data[:content][:type] = TYPE_IMAGE
       data[:content][:data] = image_surface
       data[:content][:attr][:is_sstp_marker] = false
