@@ -61,6 +61,20 @@ PATH=/opt/ninix-kagari/bin:$PATH
 $ ninix
 ```
 
+# Library
+
+KAWARI(華和梨)は`/opt/ninix-kagari/lib/kawari8/libshiori.so`、
+YAYAは`/opt/ninix-kagari/lib/yaya/libaya5.so`が必要です。
+
+KAWARIは[kawari](https://github.com/kawari/kawari)に
+[このパッチ](https://gist.github.com/Tatakinov/701bf6ec0487da3e127981c50921b835)を当てたものを、
+YAYAは[yaya-shioriのfork](https://github.com/Tatakinov/yaya-shiori)の
+feature-posix-supportブランチを
+それぞれコンパイルしてください。
+
+そして、出来上がったものを上記の場所にコピーしてから、
+ninix-kagariを起動してください。
+
 # Caution
 
 エンバグ・デグレーション上等で作っているので、必ずしも最新版が
