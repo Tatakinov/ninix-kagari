@@ -1011,7 +1011,7 @@ module Balloon
     end
 
     def set_markup(text, a)
-      unless a[:height] == @font_height
+      unless a[:height].nil? or a[:height] == @font_height
         text = ['<span size="', a[:height], 'pt">', text, '</span>'].join
       end
       unless a[:color].empty?
