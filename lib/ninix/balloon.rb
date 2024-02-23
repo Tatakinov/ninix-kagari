@@ -1029,12 +1029,13 @@ module Balloon
       x, y, h = 0, 0, 0
       (@data_buffer.length - 1).downto(0) do |i|
         data = @data_buffer[i]
-        unless data[:content][:type] == TYPE_TEXT or
-            (data[:content][:type] == TYPE_IMAGE and
-            data[:content][:attr][:inline])
+        if data[:content][:type] == TYPE_IMAGE and
+            not data[:content][:attr][:inline]
           next
         end
         case data[:content][:type]
+        when TYPE_UNKNOWN
+          x = data[:pos][:x]
         when TYPE_TEXT
           @layout.set_indent(data[:pos][:x] * Pango::SCALE)
           markup = set_markup(data[:content][:data], data[:content][:attr])
@@ -1052,12 +1053,13 @@ module Balloon
       end
       (@data_buffer.length - 1).downto(0) do |i|
         data = @data_buffer[i]
-        unless data[:content][:type] == TYPE_TEXT or
-            (data[:content][:type] == TYPE_IMAGE and
-            data[:content][:attr][:inline])
+        if data[:content][:type] == TYPE_IMAGE and
+            not data[:content][:attr][:inline]
           next
         end
         case data[:content][:type]
+        when TYPE_UNKNOWN
+          h = [h, 0].max
         when TYPE_TEXT
           @layout.set_indent(data[:pos][:x] * Pango::SCALE)
           markup = set_markup(data[:content][:data], data[:content][:attr])
