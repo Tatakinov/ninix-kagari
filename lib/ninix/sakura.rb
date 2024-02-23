@@ -1981,6 +1981,8 @@ module Sakura
       end
       if chr_id >= 0
         @script_side = chr_id
+        @balloon.add_window(@script_side)
+        @balloon.set_balloon_default(side: @script_side)
       end
     end
 

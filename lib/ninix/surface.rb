@@ -28,7 +28,7 @@ module Surface
 
     def initialize
       super("") # FIXME
-      @window = []
+      @window = {}
       @desc = nil
       @mikire = 0
       @kasanari = 0
@@ -39,10 +39,10 @@ module Surface
     end
 
     def finalize
-      for surface_window in @window
+      for surface_window in @window.values
         surface_window.destroy
       end
-      @window = []
+      @window = {}
     end
 
     def create_gtk_window(title, skip_taskbar)
@@ -71,14 +71,14 @@ module Surface
     end
 
     def identify_window(win)
-      for surface_window in @window
+      for surface_window in @window.values
         return true if win == surface_window.get_window.window
       end
       return false
     end
 
     def window_stayontop(flag)
-      for surface_window in @window
+      for surface_window in @window.values
         gtk_window = surface_window.get_window
         gtk_window.set_keep_above(flag)
       end
@@ -102,7 +102,7 @@ module Surface
         if window == @window[0].get_window
           @parent.handle_request('NOTIFY', 'notify_iconified')
         end
-        for surface_window in @window
+        for surface_window in @window.values
           gtk_window = surface_window.get_window
           if gtk_window != window and \
             (gtk_window.window.state & \
@@ -111,7 +111,7 @@ module Surface
           end
         end
       else
-        for surface_window in @window
+        for surface_window in @window.values
           gtk_window = surface_window.get_window
           if gtk_window != window and \
             (gtk_window.window.state & \
@@ -148,7 +148,7 @@ module Surface
         end
         if name == 'f10'
           Logging::Logging.info('reset balloon offset')
-          for side in 0..@window.length-1
+          for side in @window.keys
             set_balloon_offset(side, nil)
           end
         end
@@ -162,7 +162,7 @@ module Surface
     end
 
     def window_stick(stick)
-      for window in @window
+      for window in @window.values
         if stick
           window.get_window.stick()
         else
@@ -197,6 +197,7 @@ module Surface
       @seriko_descript = seriko_descript
       @name = name
       @prefix = prefix
+      @surface_alias = surface_alias
       # load surface
       surfaces = {}
       elements = {}
@@ -299,25 +300,25 @@ module Surface
       end
       @__region = region
       # MAYUNA
-      mayuna = {}
+      @__mayuna = {}
       for basename in surface.keys
         path, config = surface[basename]
         match = RE_SURFACE_ID.match(basename)
         next if match.nil?
         key = match[1]
         # define animation patterns
-        mayuna[key] = Seriko.get_mayuna(config)
+        @__mayuna[key] = Seriko.get_mayuna(config)
       end
       @mayuna = {}
       # create surface windows
-      for surface_window in @window
+      for surface_window in @window.values
         surface_window.destroy()
       end
-      @window = []
+      @window = {}
       @__surface = surface
       @maxsize = [maxwidth, maxheight]
-      add_window(0, default_sakura, :config_alias => surface_alias, :mayuna => mayuna)
-      add_window(1, default_kero, :config_alias => surface_alias, :mayuna => mayuna)
+      add_window(0, default_sakura, :config_alias => @surface_alias, :mayuna => @__mayuna)
+      add_window(1, default_kero, :config_alias => @surface_alias, :mayuna => @__mayuna)
     end
 
     def get_menu_pixmap
@@ -377,7 +378,7 @@ module Surface
     end
 
     def add_window(side, default_id, config_alias: nil, mayuna: {})
-      fail "assert" unless @window.length == side
+      return if @window.include?(side)
       case side
       when 0
         name = 'sakura'
@@ -430,12 +431,16 @@ module Surface
       if @__tooltips.include?(name)
         tooltips = @__tooltips[name]
       end
+      if default_id.nil?
+        # FIXME
+        default_id = 10
+      end
       surface_window = SurfaceWindow.new(
         gtk_window, side, @desc, surface_alias, @__surface, tooltips,
         @__surfaces, seriko, @__region, mayuna, bind,
         default_id, @maxsize)
       surface_window.set_responsible(self)
-      @window << surface_window
+      @window[side] = surface_window
     end
 
     def get_mayuna_menu
@@ -503,11 +508,8 @@ module Surface
     end
 
     def get_window(side)
-      if @window.length > side
-        return @window[side].get_window
-      else 
-        return nil
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_window
     end
 
     def reset_surface
@@ -516,78 +518,57 @@ module Surface
 
     def set_surface_default(side)
       if side.nil?
-        for side in 0..@window.length-1
+        for side in @window.keys
           @window[side].set_surface_default()
         end
-      elsif 0 <= side and side < @window.length
+      elsif 0 <= side
+        add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
         @window[side].set_surface_default()
       end
     end
 
     def set_surface(side, surface_id)
-      if @window.length > side
-        @window[side].set_surface(surface_id)
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].set_surface(surface_id)
     end
 
     def get_surface(side)
-      if @window.length > side
-        return @window[side].get_surface()
-      else
-        return 0
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_surface()
     end
 
     def get_max_size(side)
-      if @window.length > side
-        return @window[side].get_max_size()
-      else
-        return @window[0].get_max_size() # XXX
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_max_size()
     end
 
     def get_surface_size(side)
-      if @window.length > side
-        return @window[side].get_surface_size()
-      else
-        return 0, 0
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_surface_size()
     end
 
     def get_surface_offset(side)
-      if @window.length > side
-        return @window[side].get_surface_offset()
-      else
-        return 0, 0
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_surface_offset()
     end
 
     def get_touched_region(side, x, y)
-      if @window.length > side
-        return @window[side].get_touched_region(x, y)
-      else
-        return ''
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_touched_region(x, y)
     end
 
     def get_center(side)
-      if @window.length > side
-        return @window[side].get_center()
-      else
-        return nil, nil
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_center()
     end
 
     def get_kinoko_center(side)
-      if @window.length > side
-        return @window[side].get_kinoko_center()
-      else
-        return nil, nil
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_kinoko_center()
     end
 
     def reset_balloon_position
-      for side in 0..@window.length-1
+      for side in @window.keys
         x, y = get_position(side)
         direction = @window[side].direction
         ox, oy = get_balloon_offset(side)
@@ -610,7 +591,7 @@ module Surface
     def reset_position
       left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       s0x, s0y, s0w, s0h = 0, 0, 0, 0 # XXX
-      for side in 0..@window.length-1
+      for side in @window.keys
         align = get_alignment(side)
         w, h = get_max_size(side)
         if side.zero? # sakura
@@ -642,37 +623,29 @@ module Surface
     end
 
     def set_position(side, x, y)
-      if @window.length > side
-        @window[side].set_position(x, y)
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].set_position(x, y)
     end
 
     def get_position(side)
-      if @window.length > side
-        return @window[side].get_position()
-      else
-        return 0, 0
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_position()
     end
 
     def set_alignment_current
-      for side in 0..@window.length-1
+      for side in @window.keys
         @window[side].set_alignment_current()
       end
     end
 
     def set_alignment(side, align)
-      if @window.length > side
-        @window[side].set_alignment(align)
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].set_alignment(align)
     end
 
     def get_alignment(side)
-      if @window.length > side
-        return @window[side].get_alignment()
-      else
-        return 0
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_alignment()
     end
 
     def reset_alignment
@@ -681,84 +654,73 @@ module Surface
       else
         align = 0
       end
-      for side in 0..@window.length-1
+      for side in @window.keys
         set_alignment(side, align)
       end
     end
 
     def is_shown(side)
-      if @window.length > side
-        return @window[side].is_shown()
-      else
-        return false
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].is_shown()
     end
 
     def show(side)
-      if @window.length > side
-        @window[side].show()
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].show()
     end
 
     def hide_all
-      for side in 0..@window.length-1
+      for side in @window.keys
         @window[side].hide()
       end
     end
 
     def hide(side)
-      if @window.length > side
-        @window[side].hide()
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].hide()
     end
 
     def raise_all
-      for side in 0..@window.length-1
+      for side in @window.keys
         @window[side].raise
       end
     end
 
     def raise(side)
-      if @window.length > side
-        @window[side].raise
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].raise
     end
 
     def lower_all
-      for side in 0..@window.length-1
+      for side in @window.keys
         @window[side].lower()
       end
     end
 
     def lower(side)
-      if @window.length > side
-        @window[side].lower()
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].lower()
     end
 
     def invoke(side, actor_id)
-      if @window.length > side
-        @window[side].invoke(actor_id)
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].invoke(actor_id)
+
     end
 
     def invoke_yen_e(side, surface_id)
-      if @window.length > side
-        @window[side].invoke_yen_e(surface_id)
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].invoke_yen_e(surface_id)
     end
 
     def invoke_talk(side, surface_id, count)
-      if @window.length > side
-        return @window[side].invoke_talk(surface_id, count)
-      else
-        return false
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].invoke_talk(surface_id, count)
     end
 
     def set_icon(path)
       return if path.nil? or not File.exists?(path)
-      for window in @window
+      for window in @window.values
         window.get_window.set_icon(path) # XXX
       end
     end
@@ -816,20 +778,17 @@ module Surface
     end
 
     def get_balloon_offset(side)
-      if @window.length > side
-        x, y = @window[side].get_balloon_offset
-        scale = @window[side].get_scale
-        x = (x * scale / 100).to_i
-        y = (y * scale / 100).to_i
-        return x, y
-      end
-      return 0, 0
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      x, y = @window[side].get_balloon_offset
+      scale = @window[side].get_scale
+      x = (x * scale / 100).to_i
+      y = (y * scale / 100).to_i
+      return x, y
     end
 
     def set_balloon_offset(side, offset)
-      if @window.length > side
-        @window[side].balloon_offset = offset
-      end
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].balloon_offset = offset
     end
 
     def toggle_bind(args)
@@ -838,10 +797,8 @@ module Surface
     end
 
     def get_collision_area(side, part)
-      if @window.length > side
-        return @window[side].get_collision_area(part)
-      end
-      return nil
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      return @window[side].get_collision_area(part)
     end
 
     def check_mikire_kasanari

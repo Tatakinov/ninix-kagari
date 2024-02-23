@@ -35,7 +35,7 @@ module Balloon
       }
       @synchronized = []
       @user_interaction = false
-      @window = []
+      @window = {}
       # create communicatebox
       @communicatebox = CommunicateBox.new()
       @communicatebox.set_responsible(self)
@@ -55,22 +55,22 @@ module Balloon
     end
 
     def get_text_count(side)
-      return 0 unless @window.length > side
+      add_window(side) unless @window.include?(side)
       return @window[side].get_text_count()
     end
 
     def get_window(side)
-      return nil unless @window.length > side
+      add_window(side) unless @window.include?(side)
       return @window[side].get_window
     end
 
     def reset_text_count(side)
-      return unless @window.length > side
+      add_window(side) unless @window.include?(side)
       @window[side].reset_text_count()
     end
 
     def reset_balloon
-      for balloon_window in @window
+      for balloon_window in @window.values
         balloon_window.reset_balloon()
       end
     end
@@ -88,7 +88,7 @@ module Balloon
     end
 
     def identify_window(win)
-      for balloon_window in @window
+      for balloon_window in @window.values
         return true if win == balloon_window.get_window.window
       end
       return false
@@ -99,10 +99,10 @@ module Balloon
     end
 
     def finalize
-      for balloon_window in @window
+      for balloon_window in @window.values
         balloon_window.destroy()
       end
-      @window = []
+      @window = {}
       @communicatebox.destroy()
       @teachbox.destroy()
       @inputbox.destroy()
@@ -142,10 +142,10 @@ module Balloon
       @balloon0 = balloon0
       @balloon1 = balloon1
       # create balloon windows
-      for balloon_window in @window
+      for balloon_window in @window.values
         balloon_window.destroy()
       end
-      @window = []
+      @window = {}
       add_window(0)
       add_window(1)
       # configure communicatebox
@@ -159,7 +159,7 @@ module Balloon
     end
 
     def add_window(side)
-      fail "assert" unless @window.length == side
+      return if @window.include?(side)
       case side
       when 0
         name = 'balloon.sakura'
@@ -178,11 +178,11 @@ module Balloon
       balloon_window = BalloonWindow.new(
         gtk_window, side, @desc, balloon, id_format)
       balloon_window.set_responsible(self)
-      @window << balloon_window
+      @window[side] = balloon_window
     end
 
     def reset_fonts
-      for window in @window
+      for window in @window.values
         window.reset_fonts()
       end
     end
@@ -192,88 +192,92 @@ module Balloon
     end
 
     def get_balloon_size(side)
-      return [0, 0] unless @window.length > side
+      add_window(side) unless @window.include?(side)
       return @window[side].get_balloon_size()
     end
 
     def get_balloon_windowposition(side)
-      return [0, 0] unless @window.length > side
+      add_window(side) unless @window.include?(side)
       return @window[side].get_balloon_windowposition()
     end
 
-    def set_balloon_default
+    def set_balloon_default(side: -1)
       default_id = @parent.handle_request('GET', 'get_balloon_default_id')
       begin
         default_id = Integer(default_id)
       rescue
         default_id = 0
       end
-      for side in 0..@window.length-1
-        @window[side].set_balloon(default_id)
+      if side >= 0
+        @window[side].set_balloon_default(default_id)
+      else
+        for side in @window.keys
+          @window[side].set_balloon(default_id)
+        end
       end
     end
 
     def set_balloon(side, num)
-      return unless @window.length > side
+      add_window(side) unless @window.include?(side)
       @window[side].set_balloon(num)
     end
 
     def set_position(side, base_x, base_y)
-      return unless @window.length > side
+      add_window(side) unless @window.include?(side)
       @window[side].set_position(base_x, base_y)
     end
 
     def get_position(side)
-      return [0, 0,] unless @window.length > side
+      add_window(side) unless @window.include?(side)
       return @window[side].get_position()
     end
 
     def set_autoscroll(flag)
-      for side in 0..@window.length-1
+      for side in @window.keys
         @window[side].set_autoscroll(flag)
       end
     end
 
     def is_shown(side)
-      return false if @window.length <= side
+      add_window(side) unless @window.include?(side)
       return @window[side].is_shown()
     end
 
     def show(side)
-      return unless @window.length > side
+      add_window(side) unless @window.include?(side)
       @window[side].show()
     end
 
     def hide_all
-      for side in 0..@window.length-1
+      for side in @window.keys
         @window[side].hide()
       end
     end
 
     def hide(side)
-      return unless @window.length > side
+      add_window(side) unless @window.include?(side)
       @window[side].hide()
     end
 
     def raise_all
-      for side in 0..@window.length-1
+      for side in @window.keys
         @window[side].raise_()
       end
     end
 
     def raise_(side)
-      return unless @window.length > side
+      add_window(side) unless @window.include?(side)
       @window[side].raise_()
     end
 
     def lower_all
-      for side in 0..@window.length-1
+      for side in @window.keys
         @window[side].lower()
       end
     end
 
     def lower(side)
-      return unless @window.length > side
+      add_window(side) unless @window.include?(side)
       @window[side].lower()
     end
 
@@ -282,7 +286,7 @@ module Balloon
     end
 
     def clear_text_all
-      for side in 0..@window.length-1
+      for side in @window.keys
         clear_text(side)
       end
     end
@@ -290,210 +294,194 @@ module Balloon
     def clear_text(side)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].clear_text()
         end
       else
-        if @window.length > side
-          @window[side].clear_text()
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].clear_text()
       end
     end
 
     def new_line(side)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].new_line
         end
       else
-        if @window.length > side
-          @window[side].new_line
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].new_line
       end
     end
 
     def set_draw_absolute_x(side, pos)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].set_draw_absolute_x(pos)
         end
       else
-        if @window.length > side
-          @window[side].set_draw_absolute_x(pos)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].set_draw_absolute_x(pos)
       end
     end
 
     def set_draw_absolute_x_char(side, rate)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].set_draw_absolute_x_char(rate)
         end
       else
-        if @window.length > side
-          @window[side].set_draw_absolute_x_char(rate)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].set_draw_absolute_x_char(rate)
       end
     end
 
     def set_draw_relative_x(side, pos)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].set_draw_relative_x(pos)
         end
       else
-        if @window.length > side
-          @window[side].set_draw_relative_x(pos)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].set_draw_relative_x(pos)
       end
     end
 
     def set_draw_relative_x_char(side, rate)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].set_draw_relative_x(rate)
         end
       else
-        if @window.length > side
-          @window[side].set_draw_relative_x(rate)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].set_draw_relative_x(rate)
       end
     end
 
     def set_draw_absolute_y(side, pos)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].set_draw_absolute_y(pos)
         end
       else
-        if @window.length > side
-          @window[side].set_draw_absolute_y(pos)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].set_draw_absolute_y(pos)
       end
     end
 
     def set_draw_absolute_y_char(side, rate, **kwarg)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].set_draw_absolute_y_char(rate, **kwarg)
         end
       else
-        if @window.length > side
-          @window[side].set_draw_absolute_y_char(rate, **kwarg)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].set_draw_absolute_y_char(rate, **kwarg)
       end
     end
 
     def set_draw_relative_y(side, pos)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].set_draw_relative_y(pos)
         end
       else
-        if @window.length > side
-          @window[side].set_draw_relative_y(pos)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].set_draw_relative_y(pos)
       end
     end
 
     def set_draw_relative_y_char(side, rate, **kwarg)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].set_draw_relative_y_char(rate, **kwarg)
         end
       else
-        if @window.length > side
-          @window[side].set_draw_relative_y_char(rate, **kwarg)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].set_draw_relative_y_char(rate, **kwarg)
       end
     end
 
     def append_text(side, text)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].append_text(text)
         end
       else
-        if @window.length > side
-          @window[side].append_text(text)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].append_text(text)
       end
     end
 
     def append_sstp_marker(side)
-      return unless @window.length > side
+      add_window(side) unless @window.include?(side)
       @window[side].append_sstp_marker()
     end
 
     def append_link_in(side, label, args)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].append_link_in(label, args)
         end
       else
-        if @window.length > side
-          @window[side].append_link_in(label, args)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].append_link_in(label, args)
       end
     end
 
     def append_link_out(side, label, value, args)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].append_link_out(label, value, args)
         end
       else
-        if @window.length > side
-          @window[side].append_link_out(label, value, args)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].append_link_out(label, value, args)
       end
     end
 
     def append_link(side, label, value, args)
       unless @synchronized.empty?
         for side in @synchronized
-          if @window.length > side
-            @window[side].append_link_in(label, args)
-            @window[side].append_text(value)
-            @window[side].append_link_out(label, value, args)
-          end
-        end
-      else
-        if @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].append_link_in(label, args)
           @window[side].append_text(value)
           @window[side].append_link_out(label, value, args)
         end
+      else
+        add_window(side) unless @window.include?(side)
+        @window[side].append_link_in(label, args)
+        @window[side].append_text(value)
+        @window[side].append_link_out(label, value, args)
       end
     end
 
     def append_meta(side, **kwargs)
       unless @synchronized.empty?
         for side in @synchronized
-          next unless @window.length > side
+          add_window(side) unless @window.include?(side)
           @window[side].append_meta(**kwargs)
         end
       else
-        if @window.length > side
-          @window[side].append_meta(**kwargs)
-        end
+        add_window(side) unless @window.include?(side)
+        @window[side].append_meta(**kwargs)
       end
     end
 
     def append_image(side, path, **kwargs)
-      return if side >= @window.length
+      add_window(side) unless @window.include?(side)
       @window[side].append_image(path, **kwargs)
     end
 
@@ -811,6 +799,10 @@ module Balloon
 
     def reset_balloon
       set_balloon(@num)
+    end
+
+    def set_balloon_default(num)
+      set_balloon(num) if @balloon_id.nil?
     end
 
     def set_balloon(num)
