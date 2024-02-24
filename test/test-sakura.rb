@@ -26,7 +26,7 @@ module NinixTest
       home_dir = Home.get_ninix_home()
       thumbnail_path = File.join(home_dir, 'balloon',
                                  subdir, 'thumbnail.png')
-      if not File.exists?(thumbnail_path)
+      if not File.exist?(thumbnail_path)
         thumbnail_path = nil
       end
       return handle_request(

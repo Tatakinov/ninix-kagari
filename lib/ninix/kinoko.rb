@@ -267,7 +267,7 @@ module Kinoko
         base = File.basename(@data['base'], ".*")
         ext = File.extname(@data['base'])
         path = File.join(@data['dir'], base + 'a.txt')
-        if File.exists?(path)
+        if File.exist?(path)
           actors = {'' =>  Seriko.get_actors(NConfig.create_from_file(path))}
         else
           actors = {'' =>  []}
@@ -383,7 +383,7 @@ module Kinoko
     def get_image_surface(surface_id)
       path = File.join(@data['dir'],
                        'surface'+ surface_id.to_s + '.png')
-      if File.exists?(path)
+      if File.exist?(path)
         surface = Pix.create_surface_from_file(path)
       else
         surface = nil
@@ -450,7 +450,7 @@ module Kinoko
 
     def set_surface(surface_id, restart: 1)
       path = File.join(@data['dir'], 'surface' + surface_id.to_s + '.png')
-      if File.exists?(path)
+      if File.exist?(path)
         @path = path
       else
         #@path = nil

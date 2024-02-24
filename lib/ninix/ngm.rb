@@ -57,7 +57,7 @@ module NGM
       @url = {}
       @cgi = {}
       @datadir = datadir
-      FileUtils.mkdir_p(@datadir) unless Dir.exists?(@datadir)
+      FileUtils.mkdir_p(@datadir) unless Dir.exist?(@datadir)
       @last_update = '1970-01-01 00:00:00'
       load_MasterList()
     end
@@ -272,7 +272,7 @@ module NGM
     def image_filename(set_id, side)
       p = (TYPE[side] + "_" + set_id.to_s + ".png")
       d = File.join(@datadir, p)
-      if File.exists?(d)
+      if File.exist?(d)
         return d
       else
         return nil
@@ -282,7 +282,7 @@ module NGM
     def retrieve_image(set_id, side)#, updatehook)
       p = [TYPE[side], '_', set_id, '.png'].join('')
       d = File.join(@datadir, p)
-      unless File.exists?(d)
+      unless File.exist?(d)
         if side.zero?
           url = @url['SakuraPreviewBaseUrl']
         else

@@ -210,13 +210,13 @@ module Surface
       for basename in surface.keys
         path, config = surface[basename]
         next if path.nil?
-        unless File.exists?(path)
+        unless File.exist?(path)
           name = File.basename(path, ".*")
           ext = File.extname(path)
           dgp_path = [name, '.dgp'].join('')
-          unless File.exists?(dgp_path)
+          unless File.exist?(dgp_path)
             ddp_path = [name, '.ddp'].join('')
-            unless File.exists?(ddp_path)
+            unless File.exist?(ddp_path)
               Logging::Logging.error(
                 path + ': file not found (ignored)')
               next
@@ -719,7 +719,7 @@ module Surface
     end
 
     def set_icon(path)
-      return if path.nil? or not File.exists?(path)
+      return if path.nil? or not File.exist?(path)
       for window in @window.values
         window.get_window.set_icon(path) # XXX
       end
@@ -1007,7 +1007,7 @@ module Surface
       for uri in data.uris
         uri_parsed = URI.parse(uri)
         pathname = URI.unescape(uri_parsed.path)
-        if uri_parsed.scheme == 'file' and File.exists?(pathname)
+        if uri_parsed.scheme == 'file' and File.exist?(pathname)
           filelist << pathname
         end
       end

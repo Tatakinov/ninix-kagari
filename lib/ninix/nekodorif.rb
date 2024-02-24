@@ -384,7 +384,7 @@ module Nekodorif
     def set_surface
       unless @id[1].nil?
         path = File.join(@dir, 'surface' + @id[0].to_s + @id[1].to_s + '.png')
-        unless File.exists?(path)
+        unless File.exist?(path)
           @id[1] = nil
           set_surface()
           return

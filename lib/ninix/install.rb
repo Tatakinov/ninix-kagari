@@ -100,7 +100,7 @@ module Install
           next if entry.directory?
           path = File.join(tmpdir, name)
           dname, fname = File.split(path)
-          FileUtils.mkdir_p(dname) unless Dir.exists?(dname)
+          FileUtils.mkdir_p(dname) unless Dir.exist?(dname)
           buf = zf.read(name)
           of = open(path, 'wb')
           of.write(buf)
@@ -130,7 +130,7 @@ module Install
       # check the file type
       inst = Home.read_install_txt(tmpdir)
       if inst.nil?
-        if File.exists?(File.join(tmpdir, 'kinoko.ini'))
+        if File.exist?(File.join(tmpdir, 'kinoko.ini'))
           filetype = 'kinoko'
         else
           Install.fatal('cannot read install.txt from the archive')
@@ -140,7 +140,7 @@ module Install
       end
       case filetype
       when 'ghost'
-        unless Dir.exists?(File.join(tmpdir, 'ghost', 'master'))
+        unless Dir.exist?(File.join(tmpdir, 'ghost', 'master'))
           filetype = 'ghost.inverse'
         end
       when 'ghost with balloon'
@@ -223,7 +223,7 @@ module Install
       #Logging::Logging.debug(
       #  '(size = ' + ifile.length.to_s + ' bytes)')
       arcdir = Home.get_archive_dir()
-      FileUtils.mkdir_p(arcdir) unless Dir.exists?(arcdir)
+      FileUtils.mkdir_p(arcdir) unless Dir.exist?(arcdir)
       basedir = arcdir
       filename = File.join(basedir, File.basename(url))
       begin
@@ -374,16 +374,16 @@ module Install
       ##filelist << [File.join(tmpdir, 'install.txt'),
       ##             File.join(prefix, 'install.txt')] # XXX
       readme_txt = File.join(tmpdir, 'readme.txt')
-      if File.exists?(readme_txt)
+      if File.exist?(readme_txt)
         filelist << [readme_txt,
                      File.join(prefix, 'readme.txt')]
       end
       thumbnail_png = File.join(tmpdir, 'thumbnail.png')
       thumbnail_pnr = File.join(tmpdir, 'thumbnail.pnr')
-      if File.exists?(thumbnail_png)
+      if File.exist?(thumbnail_png)
         filelist << [thumbnail_png,
                      File.join(prefix, 'thumbnail.png')]
-      elsif File.exists?(thumbnail_pnr)
+      elsif File.exist?(thumbnail_pnr)
         filelist << [thumbnail_pnr,
                      File.join(prefix, 'thumbnail.pnr')]
       end
@@ -411,11 +411,11 @@ module Install
         end
         inst_balloon = Home.read_install_txt(
                                              File.join(tmpdir, balloon_src))
-        if Dir.exists?(balloon_dst) and \
+        if Dir.exist?(balloon_dst) and \
           not confirm_removal(balloon_dst, 'balloon')
           # pass # don't install balloon
         else
-          if Dir.exists?(balloon_dst)
+          if Dir.exist?(balloon_dst)
             # uninstall older versions of the balloon
             remove_files_and_dirs(balloon_dst, [])
           end
@@ -430,7 +430,7 @@ module Install
           end
         end
       end
-      if Dir.exists?(prefix)
+      if Dir.exist?(prefix)
         inst_dst = Home.read_install_txt(prefix)
         unless inst.get('refresh', :default => 0).to_i.zero?
           # uninstall older versions of the ghost
@@ -455,7 +455,7 @@ module Install
       install_files(filelist)
       # create SETTINGS
       path = File.join(prefix, 'SETTINGS')
-      unless File.exists?(path)
+      unless File.exist?(path)
         begin
           f = open(path, 'w')
           unless balloon_dir.nil?
@@ -485,7 +485,7 @@ module Install
         end
         for dirname in dirlist
           path = File.join(homedir, 'ghost', dirname)
-          if File.exists?(File.join(path, 'shell', 'surface.txt'))
+          if File.exist?(File.join(path, 'shell', 'surface.txt'))
             next # ghost.inverse(obsolete)
           end
           desc = Home.read_descript_txt(
@@ -516,7 +516,7 @@ module Install
             end
           end
           Logging::Logging.info('found')
-          unless Dir.exists?(path)
+          unless Dir.exist?(path)
             FileUtils.mkdir_p(path)
           end
           File.delete(File.join(tmpdir, 'install.txt'))
@@ -544,7 +544,7 @@ module Install
       end
       ##filelist << [File.join(srcdir, 'install.txt'),
       ##             File.join(dstdir, 'install.txt')]
-      if Dir.exists?(dstdir)
+      if Dir.exist?(dstdir)
         inst_dst = Home.read_install_txt(dstdir)
         unless inst.get('refresh', :default => 0).to_i.zero?
           # uninstall older versions of the balloon
@@ -622,7 +622,7 @@ module Install
 
     def uninstall_nekoninni(homedir, dir)
       nekoninni_dir = File.join(homedir, 'nekodorif', 'skin', dir)
-      return unless Dir.exists?(nekoninni_dir)
+      return unless Dir.exist?(nekoninni_dir)
       if confirm_removal(nekoninni_dir, 'nekodorif skin')
         FileUtils.remove_entry_secure(nekoninni_dir)
       end
@@ -658,7 +658,7 @@ module Install
 
     def uninstall_katochan(homedir, target_dir)
       katochan_dir = File.join(homedir, 'nekodorif', 'katochan', target_dir)
-      return unless Dir.exists?(katochan_dir)
+      return unless Dir.exist?(katochan_dir)
       if confirm_removal(katochan_dir, 'nekodorif katochan')
         FileUtils.remove_entry_secure(katochan_dir)
       end
@@ -709,7 +709,7 @@ module Install
     def install_files(filelist)
       for from_path, to_path in filelist
         dirname, filename = File.split(to_path)
-        FileUtils.mkdir_p(dirname) unless Dir.exists?(dirname)
+        FileUtils.mkdir_p(dirname) unless Dir.exist?(dirname)
         FileUtils.copy(from_path, to_path)
       end
     end

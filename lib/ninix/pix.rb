@@ -229,7 +229,7 @@ module Pix
 
 
   def self.get_png_size(path)
-    return 0, 0 if not File.exists?(path)
+    return 0, 0 if not File.exist?(path)
     buf =
       case File.extname(path)
       when '.dgp'
@@ -250,7 +250,7 @@ module Pix
   end
 
   def self.get_png_lastpix(path)
-    return nil if not File.exists?(path)
+    return nil if not File.exist?(path)
     pixbuf = pixbuf_new_from_file(path)
     fail "assert" unless [3, 4].include?(pixbuf.n_channels)
     fail "assert" unless pixbuf.bits_per_sample == 8
@@ -426,7 +426,7 @@ module Pix
     end
     if use_pna
       path = File.join(head, basename + '.pna')
-      if File.exists?(path)
+      if File.exist?(path)
         pna_pixbuf = pixbuf_new_from_file(path)
         pix_na = NArray.to_na(pixbuf.read_pixel_bytes.to_s, NArray::BYTE)
         pix_na.reshape!(4, pix_na.size / 4)
