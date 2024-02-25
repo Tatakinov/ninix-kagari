@@ -513,7 +513,9 @@ module Surface
     end
 
     def reset_surface
-      @window.map {|window| window.reset_surface }
+      @window.each do |k, v|
+        v.reset_surface
+      end
     end
 
     def set_surface_default(side)
