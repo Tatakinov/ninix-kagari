@@ -145,13 +145,15 @@ module Sakura
       @updateman.set_responsible(self)
       unless Gst.nil?
         @audio_player = Gst::ElementFactory.make('playbin', 'player')
-        fakesink = Gst::ElementFactory.make('fakesink', 'fakesink')
-        @audio_player.set_property('video-sink', fakesink)
-        bus = @audio_player.bus
-        bus.add_signal_watch()
-        bus.signal_connect('message') do |bus, message|
-          on_audio_message(bus, message)
-          next true
+        unless @audio_player.nil?
+          fakesink = Gst::ElementFactory.make('fakesink', 'fakesink')
+          @audio_player.set_property('video-sink', fakesink)
+          bus = @audio_player.bus
+          bus.add_signal_watch()
+          bus.signal_connect('message') do |bus, message|
+            on_audio_message(bus, message)
+            next true
+          end
         end
       else
         @audio_player = nil
