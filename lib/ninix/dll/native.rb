@@ -18,17 +18,20 @@ require_relative "../logging"
 
 module Native
 
+  CP_ACP = 0
+  GPTR = 0x40
+
   extend Fiddle::Importer
   begin
     dlload "kernel32.dll"
-    include Fiddle::Win32Types
-    extern "int SetDllDirectory(LPCSTR)"
-    extern "PVOID GlobalAlloc(UINT, size_t)"
-    extern "PVOID GlobalFree(PVOID)"
-    
-    $_native = self
+    extern "int SetDllDirectoryW(wchar_t *)"
+    extern "void *GlobalAlloc(unsigned int, size_t)"
+    extern "void *GlobalFree(void *)"
+    extern "int WideCharToMultiByte(unsigned int, unsigned long, wchar_t *, int, char *, int, void *, void *)"
+
+    $_kernel32 = self
   rescue
-    $_native = nil
+    $_kernel32 = nil
   end
 
   class Shiori
@@ -41,8 +44,7 @@ module Native
 
     def find(topdir, dll_name)
       result = 0
-      # FIXME
-      if $_native.nil?
+      unless $_kernel32.nil?
         begin
           handle = Fiddle::Handle.new(File.join(topdir, dll_name))
           handle.close
@@ -61,18 +63,21 @@ module Native
     end
 
     def load(dir: nil)
-      # FIXME
-      return 0 unless $_native.nil?
       unless dir.end_with?(File::SEPARATOR)
         dir = [dir, File::SEPARATOR].join
       end
+      $_kernel32.SetDllDirectoryW(dir.encode('UTF-16LE'))
       @handle = Fiddle::Handle.new(File.join(dir, @dll_name))
       @func[:load] = Fiddle::Function.new(@handle['load'], [Fiddle::TYPE_VOIDP, Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
       @func[:request] = Fiddle::Function.new(@handle['request'], [Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOIDP)
       @func[:unload] = Fiddle::Function.new(@handle['unload'], [], Fiddle::TYPE_INT)
-      buf = Fiddle::Pointer.malloc(dir.bytesize + 1, freefunc = nil)
-      buf[0, dir.bytesize] = dir
-      return @func[:load].call(buf, dir.bytesize)
+      null = Fiddle::Pointer[0]
+      len = $_kernel32.WideCharToMultiByte(CP_ACP, 0, dir.encode('UTF-16LE'), dir.size, null, 0, null, null)
+      buf = $_kernel32.GlobalAlloc(GPTR, len)
+      len = $_kernel32.WideCharToMultiByte(CP_ACP, 0, dir.encode('UTF-16LE'), dir.size, buf, len, null, null)
+      ret =  @func[:load].call(buf, len)
+      $_kernel32.SetDllDirectoryW(null)
+      return ret
     end
 
     def unload
@@ -82,13 +87,13 @@ module Native
     end
 
     def request(req)
-      buf = Fiddle::Pointer.malloc(req.bytesize + 1, freefunc = nil)
+      buf = $_kernel32.GlobalAlloc(GPTR, req.bytesize + 1)
       buf[0, req.bytesize] = req
       len = [req.bytesize].pack('l!')
       result = @func[:request].call(buf, len)
       len, = len.unpack('l!')
       ret = result[0, len].to_s
-      Fiddle.free(result)
+      $_kernel32.GlobalFree(result)
       return ret
     end
   end
