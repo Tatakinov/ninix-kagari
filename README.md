@@ -69,7 +69,7 @@ YAYAは`/opt/ninix-kagari/lib/yaya/libaya5.so`が必要です。
 KAWARIは[kawari](https://github.com/kawari/kawari)に
 [このパッチ](https://gist.github.com/Tatakinov/701bf6ec0487da3e127981c50921b835)を当てたものを、
 YAYAは[yaya-shioriのfork](https://github.com/Tatakinov/yaya-shiori)の
-feature-posix-supportブランチを
+feature/improve\_posix\_supportブランチを
 それぞれコンパイルしてください。
 
 そして、出来上がったものを上記の場所にコピーしてから、

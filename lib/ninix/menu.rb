@@ -199,14 +199,14 @@ module Menu
       @__align['background'] = align_background
       @__align['foreground'] = align_foreground
       @__align['sidebar'] = align_sidebar
-      if not path_background.nil? and File.exists?(path_background)
+      if not path_background.nil? and File.exist?(path_background)
         begin
           color = Pix.get_png_lastpix(path_background)
           @__imagepath['background'] = ["background-image: url('",
                                         path_background, "');\n",
                                         "background-color: ",
                                         color, ";\n"].join('')
-          if not path_sidebar.nil? and File.exists?(path_sidebar)
+          if not path_sidebar.nil? and File.exist?(path_sidebar)
               sidebar_width, sidebar_height = Pix.get_png_size(path_sidebar)
             @__imagepath['background_with_sidebar'] = ["background-image: url('",
                                                        path_sidebar,
@@ -229,14 +229,14 @@ module Menu
                                       "background-color: transparent;\n"].join('')
 =end
       end
-      if not path_foreground.nil? and File.exists?(path_foreground)
+      if not path_foreground.nil? and File.exist?(path_foreground)
         begin
           color = Pix.get_png_lastpix(path_foreground)
           @__imagepath['foreground'] = ["background-image: url('",
                                         path_foreground, "');\n",
                                         "background-color: ",
                                         color, ";\n"].join('')
-          if not path_sidebar.nil? and File.exists?(path_sidebar)
+          if not path_sidebar.nil? and File.exist?(path_sidebar)
             sidebar_width, sidebar_height = Pix.get_png_size(path_sidebar)
             @__imagepath['foreground_with_sidebar'] = ["background-image: url('",
                                                        path_sidebar, "'),url('",
@@ -493,7 +493,7 @@ module Menu
                     filename = [filename, ext].join('')
                     banner = File.join(
                       base_path, 'ghost/master/banner', filename)
-                    unless File.exists?(banner)
+                    unless File.exist?(banner)
                       banner = nil
                     else
                       break
@@ -502,7 +502,7 @@ module Menu
                 else
                   banner = File.join(
                     base_path, 'ghost/master/banner', filename)
-                  unless File.exists?(banner)
+                  unless File.exist?(banner)
                     banner = nil
                   end
                 end
@@ -574,7 +574,7 @@ module Menu
                   filename = [filename, ext].join('')
                   banner = File.join(
                     base_path, 'ghost/master/banner', filename)
-                  unless File.exists?(banner)
+                  unless File.exist?(banner)
                     banner = nil
                   else
                     break
@@ -583,7 +583,7 @@ module Menu
               else
                 banner = File.join(
                   base_path, 'ghost/master/banner', filename)
-                unless File.exists?(banner)
+                unless File.exist?(banner)
                   banner = nil
                 end
               end

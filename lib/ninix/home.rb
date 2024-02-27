@@ -45,7 +45,7 @@ module Home
   end
 
   def self.load_config()
-    return nil unless File.exists?(get_ninix_home())
+    return nil unless File.exist?(get_ninix_home())
     ghosts = search_ghosts
     balloons = search_balloons
     nekoninni = search_nekoninni
@@ -438,7 +438,7 @@ module Home
   def self.find_surface_dir(top_dir)
     buf = []
     path = File.join(top_dir, 'surface.txt')
-    if File.exists?(path)
+    if File.exist?(path)
       config = NConfig.create_from_file(path)
       for name, subdir in config.each_entry
         subdir = subdir.downcase
@@ -480,7 +480,7 @@ module Home
     end
     filename_alias = {}
     path = File.join(surface_dir, 'alias.txt')
-    if File.exists?(path)
+    if File.exist?(path)
       dic = Alias.create_from_file(path)
       for basename, alias_ in dic.each_entry
         if basename.start_with?('surface')

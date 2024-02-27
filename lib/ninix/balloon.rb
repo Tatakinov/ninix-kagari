@@ -1789,11 +1789,12 @@ module Balloon
         strong, weak = @layout.get_cursor_pos(t.bytesize)
         x = (strong.x / Pango::SCALE).to_i
         prev_x = x
-        for i in t.bytesize .. 0
-          strong, weak = @layout.get_cursor_pos(t.bytesize)
+        t.bytesize.downto(0) do |i|
+          strong, weak = @layout.get_cursor_pos(i)
           x = (strong.x / Pango::SCALE).to_i
-          if prev_x > x
+          if prev_x < x
             new_buffer(is_head: false)
+            set_draw_absolute_x(0)
             set_draw_relative_y_char(1.0, use_default_height: false)
             return append_text(text)
           end

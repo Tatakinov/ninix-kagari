@@ -398,11 +398,11 @@ module Update
       if digest == checksum
         path = File.join(@ghostdir, adjust_path(filename))
         subdir = File.dirname(path)
-        unless Dir.exists?(subdir)
+        unless Dir.exist?(subdir)
           subroot = subdir
           while true
             head, tail = File.split(subroot)
-            if Dir.exists?(head)
+            if Dir.exist?(head)
               break
             else
               subroot = head
@@ -422,7 +422,7 @@ module Update
             return
           end
         end
-        if File.exists?(path)
+        if File.exist?(path)
           if File.file?(path)
             backup = [path, BACKUPSUFFIX].join('')
             File.rename(path, backup)
@@ -481,7 +481,7 @@ module Update
       unless filelist.empty?
         for filename in filelist
           path = File.join(@ghostdir, filename)
-          if File.exists?(path) and File.file?(path)
+          if File.exist?(path) and File.file?(path)
             begin
               File.unlink(path)
               Logging::Logging.info('deleted ' + path)

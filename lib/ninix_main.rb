@@ -250,7 +250,7 @@ module Ninix_Main
       home_dir = Home.get_ninix_home()
       thumbnail_path = File.join(home_dir, 'balloon',
                                  subdir, 'thumbnail.png')
-      thumbnail_path = nil unless File.exists?(thumbnail_path)
+      thumbnail_path = nil unless File.exist?(thumbnail_path)
       return handle_request(
                'GET', 'create_balloon_menuitem', name, @key, thumbnail_path)
     end
@@ -699,7 +699,7 @@ module Ninix_Main
       icon = desc.get('icon', :default => nil)
       unless icon.nil?
         icon_path = File.join(shiori_dir, icon)
-        unless File.exists?(icon_path)
+        unless File.exist?(icon_path)
           icon_path = nil
         end
       else
@@ -707,7 +707,7 @@ module Ninix_Main
       end
       name = desc.get('name')
       thumbnail_path = File.join(shiori_dir, 'thumbnail.png')
-      unless File.exists?(thumbnail_path)
+      unless File.exist?(thumbnail_path)
         thumbnail_path = nil
       end
       start_menuitem = @__menu.create_ghost_menuitem(
@@ -1210,7 +1210,7 @@ module Ninix_Main
         ghost_time = 0
         prefix = sakura.get_prefix()
         path = File.join(prefix, 'HISTORY')
-        if File.exists?(path)
+        if File.exist?(path)
           begin
             f = open(path, 'r')
             for line in f
@@ -1233,7 +1233,7 @@ module Ninix_Main
         Dir.foreach(File.join(prefix, 'shell')) { |subdir|
           next if /\A\.+\z/ =~ subdir
           path = File.join(prefix, 'shell', subdir, 'ai.png')
-          if File.exists?(path)
+          if File.exist?(path)
             ai_list << path
           end
         }
@@ -1454,7 +1454,7 @@ module Ninix_Main
       for uri in data.uris
         uri_parsed = URI.parse(uri)
         pathname = URI.unescape(uri_parsed.path)
-        if uri_parsed.scheme == 'file' and File.exists?(pathname)
+        if uri_parsed.scheme == 'file' and File.exist?(pathname)
           filelist << pathname
         elsif uri_parsed.scheme == 'http' or uri_parsed.scheme == 'ftp'
           filelist << uri
@@ -1514,7 +1514,7 @@ module Ninix_Main
       ai_list = @items[0][2]
       unless ai_list.empty?
         path = ai_list.sample
-        fail "assert" unless File.exists?(path)
+        fail "assert" unless File.exist?(path)
         @pixbuf = Pix.create_pixbuf_from_file(path)
         @pixbuf.saturate_and_pixelate(1.0, true)
       else
@@ -1683,7 +1683,7 @@ gtk_app.signal_connect 'activate' do |application|
   end
   Logging::Logging.set_level(Logger::DEBUG) unless option[:debug].nil?
   home_dir = Home.get_ninix_home()
-  unless File.exists?(home_dir)
+  unless File.exist?(home_dir)
     begin
       FileUtils.mkdir_p(home_dir)
     rescue
@@ -1691,7 +1691,7 @@ gtk_app.signal_connect 'activate' do |application|
     end
   end
   lockfile_path = File.join(Home.get_ninix_home(), ".lock")
-  if File.exists?(lockfile_path)
+  if File.exist?(lockfile_path)
     f = open(lockfile_path, 'r')
     abend = f.gets
   else
