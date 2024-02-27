@@ -12,13 +12,13 @@ v0.0.0がninix-aya 5.0.9に対応しているので
 
 # Requirements
 
+- Linux or Windows
+
 - ruby
 
 - ruby-gettext
 
 - ruby-gio2
-
-- ruby-gstreamer
 
 - ruby-gtk3
 
@@ -32,7 +32,11 @@ v0.0.0がninix-aya 5.0.9に対応しているので
 
 が一部SHIORIで使われているようなので必要であればinstallしてください。
 
-なお、ninix-ayaと必要なものは一緒なので
+- ruby-gstreamer
+
+は音声を再生する場合に必要になります。ただし、現状Windowsでは動作しません。
+
+なお、ninix-ayaと必要なものは一緒なのでパッケージ管理システムが使える場合は
 
 ```
 apt install ninix-aya
@@ -41,6 +45,8 @@ apt install ninix-aya
 みたいにすれば楽できます。
 
 # Install
+
+## Linux
 
 ```
 make install
@@ -61,7 +67,53 @@ PATH=/opt/ninix-kagari/bin:$PATH
 $ ninix
 ```
 
+## Windows
+
+rubyinstallerのRuby+Devkitの*x86*をインストールしてください。
+x64でも動くと思いますが、動作するゴーストが減ります。
+
+Start Command Prompt with Rubyをメニューから実行して、
+Requirementsに書かれているものをインストールします。
+以下は最小構成の場合。
+
+```
+> gem install gettext gio2 gtk3 narray zip
+```
+
+適当な場所にninix-kagariをgit cloneします。
+
+```
+> git clone https://github.com/Tatakinov/ninix-kagari
+```
+
+実行します。
+
+```
+> cd ninix-kagari
+> ruby lib/ninix_main.rb
+```
+
+もしかしたらnarのインストールが出来ないかもしれないので、
+その場合は`C:/Users/hoge/.ninix`フォルダ内に
+`ghost`、`balloon`フォルダを作って、その中にそれぞれゴーストとバルーンを
+入れてください。
+
+```
+.ninix
+    |- balloon
+        |- balloon1
+        |- balloon2
+        |- balloon3
+    |- ghost
+        |- ghost1
+        |- ghost2
+        |- ...
+    |- ngm
+```
+
 # Library
+
+## Linux
 
 KAWARI(華和梨)は`/opt/ninix-kagari/lib/kawari8/libshiori.so`、
 YAYAは`/opt/ninix-kagari/lib/yaya/libaya5.so`が必要です。
@@ -74,6 +126,16 @@ feature/improve\_posix\_supportブランチを
 
 そして、出来上がったものを上記の場所にコピーしてから、
 ninix-kagariを起動してください。
+
+## Windows
+
+### 32bit OS or ruby(32bit)
+
+ゴースト内蔵のSHIORIを使うため、特に何もする必要はありません。
+
+### ruby(64bit)
+
+現状ではKAWARIとYAYAを使ったゴーストは動作しないと思います。(未確認)
 
 # Caution
 
