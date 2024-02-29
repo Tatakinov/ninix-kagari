@@ -69,6 +69,12 @@ $ ninix
 
 ## Windows
 
+### Releasesのninix-kagari.zipを利用する場合
+
+zipを展開してrun.batを実行すればOKです。
+
+### 自分でruby環境を用意する場合
+
 rubyinstallerのRuby+Devkitの*x86*をインストールしてください。
 x64でも動くと思いますが、動作するゴーストが減ります。
 
@@ -93,8 +99,10 @@ Requirementsに書かれているものをインストールします。
 > ruby lib/ninix_main.rb
 ```
 
-もしかしたらnarのインストールが出来ないかもしれないので、
-その場合は`C:/Users/hoge/.ninix`フォルダ内に
+# BUG
+
+最新版(v1.1.0)時点でnarのインストールが出来ないようなので、
+`C:/Users/*UserName*/.ninix`フォルダ内に
 `ghost`、`balloon`フォルダを作って、その中にそれぞれゴーストとバルーンを
 入れてください。
 
@@ -103,7 +111,7 @@ Requirementsに書かれているものをインストールします。
     |- balloon
         |- balloon1
         |- balloon2
-        |- balloon3
+        |- ...
     |- ghost
         |- ghost1
         |- ghost2
