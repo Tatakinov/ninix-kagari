@@ -24,7 +24,7 @@ v0.0.0がninix-aya 5.0.9に対応しているので
 
 - ruby-narray
 
-- ruby-zip
+- ruby-zip (rubyzip)
 
 が最低限必要なものになります。
 
@@ -83,7 +83,7 @@ Requirementsに書かれているものをインストールします。
 以下は最小構成の場合。
 
 ```
-> gem install gettext gio2 gtk3 narray zip
+> gem install gettext gio2 gtk3 narray rubyzip
 ```
 
 適当な場所にninix-kagariをgit cloneします。
@@ -97,26 +97,6 @@ Requirementsに書かれているものをインストールします。
 ```
 > cd ninix-kagari
 > ruby lib/ninix_main.rb
-```
-
-# BUG
-
-最新版(v1.1.0)時点でnarのインストールが出来ないようなので、
-`C:/Users/*UserName*/.ninix`フォルダ内に
-`ghost`、`balloon`フォルダを作って、その中にそれぞれゴーストとバルーンを
-入れてください。
-
-```
-.ninix
-    |- balloon
-        |- balloon1
-        |- balloon2
-        |- ...
-    |- ghost
-        |- ghost1
-        |- ghost2
-        |- ...
-    |- ngm
 ```
 
 # Library
