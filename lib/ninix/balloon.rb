@@ -676,7 +676,7 @@ module Balloon
       @font_desc.set_size(pango_size)
       @__font_name = font_name
       @layout.set_font_description(@font_desc)
-      @layout.set_wrap(:char) # XXX
+      @layout.set_wrap(Pango::WrapMode::CHAR)
       # font for sstp message
       if @side.zero?
         @sstp_font_desc = Pango::FontDescription.new(font_name)
@@ -689,7 +689,7 @@ module Balloon
         end
         @sstp_font_desc.set_size(pango_size)
         @sstp_layout.set_font_description(@sstp_font_desc)
-        @sstp_layout.set_wrap(:char)
+        @sstp_layout.set_wrap(Pango::WrapMode::CHAR)
       end
       unless @balloon_id.nil?
         reset_message_regions()
