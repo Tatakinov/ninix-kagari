@@ -1771,7 +1771,7 @@ module Balloon
       case data[:content][:type]
       when TYPE_UNKNOWN
         @layout.set_width(-1)
-        @layout.set_indent(data[:pos][:x])
+        @layout.set_indent(data[:pos][:x] * Pango::SCALE)
         markup = set_markup(text, data[:content][:attr])
         @layout.set_markup(markup)
         w, h = @layout.pixel_size
@@ -1781,7 +1781,7 @@ module Balloon
         data[:content][:data] = text
       when TYPE_TEXT
         @layout.set_width(@valid_width * Pango::SCALE)
-        @layout.set_indent(data[:pos][:x])
+        @layout.set_indent(data[:pos][:x] * Pango::SCALE)
         concat = [data[:content][:data], text].join('')
         markup = set_markup(concat, data[:content][:attr])
         @layout.set_markup(markup)
