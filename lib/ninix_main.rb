@@ -436,16 +436,30 @@ module Ninix_Main
         case filetype
         when 'ghost'
           add_sakura(target_dirs[0])
+          ghost_conf = Home.search_ghosts(:target => [target_dirs[0]])
+          desc = ghost_conf[target_dirs[0]][0]
+          path = desc.get('readme')
+          path = 'readme.txt' if path.nil?
+          charset = desc.get('readme.charset')
+          charset = 'CP932' if charset.nil?
           Sakura::ReadmeDialog.new.show(
             target_dirs[0],
             File.join(Home.get_ninix_home(),
-                      'ghost', target_dirs[0]))
+                      'ghost', target_dirs[0]),
+            path, charset)
           unless target_dirs[1].nil?
             add_balloon(target_dirs[1])
+            balloon_conf = Home.search_balloons(:target => [target_dirs[1]])
+            desc = balloon_conf[target_dirs[1]][0]
+            path = desc.get('readme')
+            path = 'readme.txt' if path.nil?
+            charset = desc.get('readme.charset')
+            charset = 'CP932' if charset.nil?
             Sakura::ReadmeDialog.new.show(
               target_dirs[1],
               File.join(Home.get_ninix_home(),
-                        'balloon', target_dirs[1]))
+                        'balloon', target_dirs[1]),
+              path, charset)
           end
         when 'supplement'
           add_sakura(target_dirs) # XXX: reload

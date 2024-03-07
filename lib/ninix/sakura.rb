@@ -34,6 +34,7 @@ require_relative "update"
 require_relative "home"
 require_relative "metamagic"
 require_relative "logging"
+require_relative "case_insensitive_file"
 
 module Sakura
 
@@ -2393,7 +2394,11 @@ module Sakura
       elsif args[0] == 'embed' and argc >= 2
         notify_event(*args[1..], embed: true)
       elsif args[0, 2] == ['open', 'readme']
-        ReadmeDialog.new.show(get_name(), get_prefix())
+        path = @desc.get('readme')
+        path = 'readme.txt' if path.nil?
+        charset = @desc.get('readme.charset')
+        charset = 'CP932' if charset.nil?
+        ReadmeDialog.new.show(get_name(), get_prefix(), path, charset)
       elsif args[0, 2] == ['open', 'browser'] and argc > 2
         browser_open(args[2])
       elsif args[0, 2] == ['open', 'communicatebox']
@@ -3250,13 +3255,14 @@ module Sakura
       @parent = parent
     end
 
-    def show(name, base_path)
+    def show(name, base_path, readme, charset)
       @label.set_text(name)
-      path = File.join(base_path, 'readme.txt')
-      if File.exist?(path)
+      path = File.join(base_path, readme)
+      path = CaseInsensitiveFile.exist?(path)
+      if not path.nil? and File.file?(path)
         f = open(path)
         text = f.read()
-        text = text.force_encoding('CP932').encode("UTF-8", :invalid => :replace, :undef => :replace) # XXX
+        text = text.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace) # XXX
         @textview.buffer.set_text(text)
         @dialog.show()
       end
