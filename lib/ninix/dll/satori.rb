@@ -27,6 +27,7 @@
 # - マルチキャラクタ
 
 
+require 'nkf'
 require "pathname"
 
 require_relative "../home"
@@ -138,7 +139,7 @@ module Satori
           line = Satori.decrypt(Satori.decrypt(line))
         end
         begin
-          line = line.force_encoding('CP932').encode('utf-8', :invalid => :replace, :undef => :replace)
+          line = line.force_encoding(NKF.guess(line)).encode('utf-8', :invalid => :replace, :undef => :replace)
         rescue => e #except UnicodeError as e:
           Logging::Logging.debug('satori.py: ' + e.to_s + ' in ' + path.to_s + ' (line ' + lineno.to_s + ')')
           next
@@ -2717,7 +2718,8 @@ module Satori
         "        Copyright (C) 2002 by Tamito KAJIYAMA\n" \
         "        Copyright (C) 2002, 2003 by MATSUMURA Namihiko\n" \
         "        Copyright (C) 2002-2019 by Shyouzou Sugitani\n" \
-        "        Copyright (C) 2003, 2004 by Shun-ichi TAHARA")
+        "        Copyright (C) 2003, 2004 by Shun-ichi TAHARA\n" \
+        "        Copyright (C) 2024 by Tatakinov")
     end
 
     def request(req_string)
