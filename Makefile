@@ -11,7 +11,7 @@ docdir = $(DESTDIR)$(prefix)/doc
 libdir = $(DESTDIR)$(exec_libdir)
 localedir = /usr/local/share/locale
 
-shiori_so_dir = $(DESTDIR)$(prefix)/lib/kawari8:$(DESTDIR)$(prefix)/lib/yaya
+shiori_so_dir = $(DESTDIR)$(prefix)/lib/kawari8:$(DESTDIR)$(prefix)/lib/yaya:$(DESTDIR)$(prefix)/lib/kagari
 
 ruby = ruby
 
