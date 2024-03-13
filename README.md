@@ -1,6 +1,6 @@
 # What is this
 
-デスクトップマスコットの1つ、伺かの互換アプリケーションです。
+ninix-kagariはデスクトップマスコットの1つ、伺かの互換アプリケーションです。
 
 [ninix-aya](https://ja.osdn.net/projects/ninix-aya/)
 が長らく更新されていないので
@@ -129,6 +129,12 @@ ninix-kagariを起動してください。
 
 エンバグ・デグレーション上等で作っているので、必ずしも最新版が
 一番良いとは限りません。
+
+# SSP
+
+[SSP](http://ssp.shillest.net/)と比べてninix-kagariが優れている点は
+今のところ*ありません*。
+SSPを使える環境であればそちらを使うことを推奨します。
 
 # License
 
