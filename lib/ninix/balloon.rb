@@ -178,6 +178,7 @@ module Balloon
       balloon_window = BalloonWindow.new(
         gtk_window, side, @desc, balloon, id_format)
       balloon_window.set_responsible(self)
+      balloon_window.reset_fonts()
       @window[side] = balloon_window
     end
 
