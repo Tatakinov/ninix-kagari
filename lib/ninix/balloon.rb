@@ -1038,14 +1038,9 @@ module Balloon
         when TYPE_UNKNOWN
           x = data[:pos][:x]
         when TYPE_TEXT
-          @layout.set_indent(data[:pos][:x] * Pango::SCALE)
-          markup = set_markup(data[:content][:data], data[:content][:attr])
-          @layout.set_markup(markup)
-          t = @layout.text
-          strong, weak = @layout.get_cursor_pos(t.bytesize)
-          x = (strong.x / Pango::SCALE).to_i
+          x = data[:pos][:x] + data[:pos][:w]
         when TYPE_IMAGE
-          x = data[:pos][:x] + data[:content][:data].width
+          x = data[:pos][:x] + data[:pos][:w]
         else
           fail "unreachable"
         end
@@ -1773,9 +1768,22 @@ module Balloon
       when TYPE_UNKNOWN
         @layout.set_width(-1)
         @layout.set_indent(data[:pos][:x] * Pango::SCALE)
-        markup = set_markup(text, data[:content][:attr])
-        @layout.set_markup(markup)
-        w, h = @layout.pixel_size
+        w, h = 0, 0
+        # XXX: 空白だけのmarkupだとなぜかlayoutの幅が半分になるので
+        # 適当な文字を足して空白のみの状況を避ける
+        if /\A *\z/.match(text)
+          markup = set_markup([text, 'o'].join, data[:content][:attr])
+          @layout.set_markup(markup)
+          w1, h = @layout.pixel_size
+          markup = set_markup('-', data[:content][:attr])
+          @layout.set_markup(markup)
+          w2, _ = @layout.pixel_size
+          w = w1 - w2
+        else
+          markup = set_markup(text, data[:content][:attr])
+          @layout.set_markup(markup)
+          w, h = @layout.pixel_size
+        end
         data[:pos][:w] = w
         data[:pos][:h] = h
         data[:content][:type] = TYPE_TEXT
