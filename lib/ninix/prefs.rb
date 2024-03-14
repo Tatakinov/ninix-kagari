@@ -24,7 +24,7 @@ module Prefs
   RANGE_SCRIPT_SPEED = [-1, 0, 1, 2, 3, 4, 5, 6, 8] # -1: no wait
 
   # default settings
-  DEFAULT_BALLOON_FONTS = 'Sans'
+  DEFAULT_BALLOON_FONTS = 'Monospace'
 
   def self.get_default_surface_scale()
     RANGE_SCALE[0]
