@@ -465,10 +465,17 @@ module Ninix_Main
           add_sakura(target_dirs) # XXX: reload
         when 'balloon'
           add_balloon(target_dirs)
+          balloon_conf = Home.search_balloons(:target => [target_dirs])
+          desc = balloon_conf[target_dirs][0]
+          path = desc.get('readme')
+          path = 'readme.txt' if path.nil?
+          charset = desc.get('readme.charset')
+          charset = 'CP932' if charset.nil?
           Sakura::ReadmeDialog.new.show(
             target_dirs,
             File.join(Home.get_ninix_home(),
-                      'balloon', target_dirs))
+                      'balloon', target_dirs),
+            path, charset)
         when 'nekoninni'
           @nekoninni = Home.search_nekoninni()
         when 'katochan'
