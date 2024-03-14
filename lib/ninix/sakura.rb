@@ -2772,6 +2772,8 @@ module Sakura
           end
           kwargs[:height] = [value, relative, rate]
         end
+      elsif args[0] == 'color'
+        kwargs[:color] = args[1]
       elsif args[0] == 'bold'
         if ['true', '1'].include?(args[1])
           kwargs[:bold] = true
