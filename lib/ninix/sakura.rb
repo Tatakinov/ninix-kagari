@@ -2193,6 +2193,13 @@ module Sakura
 
     def __yen__q(args)
       @quick_session = (not @quick_session)
+      if @quick_session
+        @defer_show = []
+      else
+        for side in @defer_show
+          @balloon.show(side)
+        end
+      end
     end
 
     def __yen__s(args)
@@ -2987,6 +2994,8 @@ module Sakura
           @processed_text = text
         else
           @balloon.append_text(@script_side, text)
+          @defer_show << @script_side if @quick_session and
+            not @defer_show.include?(@script_side)
         end
       end
     end
