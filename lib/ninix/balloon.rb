@@ -2314,10 +2314,10 @@ module Balloon
       elsif @symbol == 'OnUserInput' and \
             not @parent.handle_request('GET', 'notify_event', 'OnUserInput', data).nil?
         # pass
+      elsif not @parent.handle_request('GET', 'notify_event', @symbol, data).nil?
+        # pass
       elsif not @parent.handle_request('GET', 'notify_event',
                                        'OnUserInput', @symbol, data).nil?
-        # pass
-      elsif not @parent.handle_request('GET', 'notify_event', @symbol, data).nil?
         # pass
       end
       @symbol = nil
