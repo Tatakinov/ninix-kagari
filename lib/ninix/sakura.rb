@@ -2417,8 +2417,8 @@ module Sakura
           @balloon.open_inputbox(args[2], :limittime => args[3], :default => args[4])
         elsif argc == 4
           @balloon.open_inputbox(args[2], :limittime => args[3])
-          else
-            @balloon.open_inputbox(args[2])
+        else
+          @balloon.open_inputbox(args[2])
         end
       elsif args[0, 2] == ['open', 'passwordinputbox'] and argc > 2
         if argc > 4
