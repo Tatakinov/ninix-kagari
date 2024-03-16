@@ -94,10 +94,12 @@ module Yaya
       )
       request[0, req_string.bytesize] = req_string
       rlen =[req_string.bytesize].pack("l!")
-      ret = $_yaya.multi_request(@id, request, rlen)
+      result = $_yaya.multi_request(@id, request, rlen)
       rlen, = rlen.unpack("l!")
       unless ret.null?
-        ret[0, rlen].to_s
+        ret = result[0, rlen].to_s
+        Fiddle.free(result)
+        ret
       else
         ''
       end
