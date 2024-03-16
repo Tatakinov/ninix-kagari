@@ -1771,7 +1771,7 @@ module Balloon
         w, h = 0, 0
         # XXX: 空白だけのmarkupだとなぜかlayoutの幅が半分になるので
         # 適当な文字を足して空白のみの状況を避ける
-        if /\A *\z/.match(text)
+        if text =~ /\A *\z/
           markup = set_markup([text, 'o'].join, data[:content][:attr])
           @layout.set_markup(markup)
           w1, h = @layout.pixel_size
