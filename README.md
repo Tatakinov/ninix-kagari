@@ -10,6 +10,12 @@ ninix-kagariはデスクトップマスコットの1つ、伺かの互換アプ�
 v0.0.0がninix-aya 5.0.9に対応しているので
 必要であればそちらを参照してください。
 
+# Notice
+
+Installの節を実行してninix-kagariを起動するだけではゴーストは現れません。
+
+*GhostとBalloonを少なくとも1つずつ*インストールする必要があります。
+
 # Requirements
 
 - Linux or Windows
