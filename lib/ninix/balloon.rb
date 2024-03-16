@@ -2032,6 +2032,21 @@ module Balloon
       font_desc.set_size(9 * 3 / 4 * Pango::SCALE) # XXX
       @entry.override_font(font_desc)
       @entry.set_size_request(w, h)
+      text_r = desc.get(['font.color.r', 'fontcolor.r'], :default => 0).to_i
+      text_g = desc.get(['font.color.g', 'fontcolor.g'], :default => 0).to_i
+      text_b = desc.get(['font.color.b', 'fontcolor.b'], :default => 0).to_i
+      provider = Gtk::CssProvider.new
+      context = @entry.style_context
+      context.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
+      provider.load(data: ["entry {\n",
+                            'color: #',
+                            sprintf('%02x', text_r),
+                            sprintf('%02x', text_g),
+                            sprintf('%02x', text_b),
+                            ";\n",
+                            "}"
+                          ].join)
+      @entry.set_name('entry')
       @entry.show()
       surface = nil
       unless balloon.nil?
