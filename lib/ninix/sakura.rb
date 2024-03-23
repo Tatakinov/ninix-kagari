@@ -1941,7 +1941,6 @@ module Sakura
         @time_critical_session = false
         @quick_session = false
         set_synchronized_session(:list => [], :reset => true)
-        @balloon.hide_all()
       end
       return if @processed_script.empty?
       node = @processed_script[0]
@@ -1950,6 +1949,8 @@ module Sakura
         @script_position = node[-1]
       elsif not embed
         @balloon.clear_text_all()
+      else
+        @balloon.hide_all()
       end
       @balloon.set_balloon_default()
       @current_time = Time.new.to_a
