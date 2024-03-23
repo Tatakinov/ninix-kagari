@@ -19,6 +19,7 @@ require "digest/md5"
 
 require_relative "home"
 require_relative "logging"
+require_relative "case_insensitive_file"
 
 module Update
 
@@ -319,13 +320,15 @@ module Update
 
     def adjust_path(filename)
       filename = Home.get_normalized_path(filename)
-      if ['install.txt',
+=begin
+      if not ['install.txt',
           'delete.txt',
           'readme.txt',
-          'thumbnail.png'].include?(filename) or File.dirname(filename) != "."
-        return filename
+          'thumbnail.png'].include?(filename) and File.dirname(filename) == "."
+        return File.join('ghost', 'master', filename)
       end
-      return File.join('ghost', 'master', filename)
+=end
+      return filename
     end
 
     def make_schedule
@@ -373,6 +376,8 @@ module Update
           checksum = checksum.encode('ascii', :invalid => :replace, :undef => :replace) # XXX
         end
         path = File.join(@ghostdir, adjust_path(filename))
+        tmp = CaseInsensitiveFile.exist?(path)
+        path = tmp unless tmp.nil?
         begin
           f = open(path, 'rb')
           data = f.read()
@@ -399,6 +404,8 @@ module Update
       digest = Digest::MD5.hexdigest(data)
       if digest == checksum
         path = File.join(@ghostdir, adjust_path(filename))
+        tmp = CaseInsensitiveFile.exist?(path)
+        path = tmp unless tmp.nil?
         subdir = File.dirname(path)
         unless Dir.exist?(subdir)
           subroot = subdir
