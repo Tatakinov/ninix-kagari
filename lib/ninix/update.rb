@@ -74,7 +74,7 @@ module Update
         @state = nil
         return
       end
-      unless url.scheme == 'http'
+      unless url.scheme == 'http' or url.scheme == 'https'
         enqueue_event('OnUpdateFailure',
                       :ref0 => 'bad home URL',
                       :ref1 => '',
@@ -82,7 +82,8 @@ module Update
                       :ref3 => 'ghost') # XXX
         @state = nil
         return
-      end        
+      end
+      @scheme = url.scheme
       @host = url.host
       @port = url.port
       @path = url.path
@@ -160,7 +161,7 @@ module Update
       elsif (@state - len_pre) % len_state == 0
         filename, checksum = @schedule[0]
         Logging::Logging.info('UPDATE: ' + filename + ' ' + checksum)
-        download(File.join(@path, URI.escape(filename)),
+        download(File.join(@path, URI.encode_www_form_component(filename)),
                  :event => true)
       elsif (@state - len_pre) % len_state == 1
         connect()
@@ -187,9 +188,10 @@ module Update
     def download(locator, event: false)
       @locator = locator # don't use URI.escape here
       @http = Net::HTTP.new(@host, @port)
+      @http.use_ssl=(true) if @scheme == 'https'
       if event
         enqueue_event('OnUpdate.OnDownloadBegin',
-                      :ref0 => File.basename(locator),
+                      :ref0 => File.basename(URI.decode_www_form_component(locator)),
                       :ref1 => @file_number,
                       :ref2 => @num_files,
                       :ref3 => 'ghost') # XXX
@@ -524,7 +526,7 @@ module Update
           filelist << Home.get_normalized_path(filename)
         end
       rescue # IOError
-        return nil
+        return filelist
       end
       return filelist
     end
