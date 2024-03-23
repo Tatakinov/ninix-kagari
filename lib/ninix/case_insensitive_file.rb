@@ -11,15 +11,18 @@
 #
 
 module CaseInsensitiveFile
-  def self.exist?(path)
-    if File.exist?(path)
+  def self.exist?(path, dir: false)
+    if dir and Dir.exist?(path)
       return path
     end
-    dirname = File.dirname(path)
-    basename = File.basename(path)
-    unless Dir.exist?(dirname)
+    if not dir and File.exist?(path)
+      return path
+    end
+    dirname = exist?(File.dirname(path), dir: true)
+    if dirname.nil?
       return nil
     end
+    basename = File.basename(path)
     Dir.open(dirname).each_child do |f|
       if basename.downcase == f.downcase
         return File.join(dirname, f)
