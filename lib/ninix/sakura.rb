@@ -1868,9 +1868,9 @@ module Sakura
         @updateman.clean_up() # Don't call before unloading SHIORI
         @parent.handle_request(
           'NOTIFY', 'stop_sakura', self,
-          lambda {|a|
+          starter = lambda {|a|
             @parent.handle_request('NOTIFY', 'reload_current_sakura', a) },
-          [self])
+          self)
         load_settings()
         restart()
         Logging::Logging.info('done.')
@@ -3144,6 +3144,9 @@ module Sakura
       return if @updateman.is_active()
       homeurl = getstring('homeurl')
       if homeurl.empty?
+        homeurl = @desc.get('homeurl')
+      end
+      if homeurl.nil?
         start_script(
           ['\t\h\s[0]',
            _("I'm afraid I don't have Network Update yet."),
