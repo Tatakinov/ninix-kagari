@@ -27,17 +27,17 @@ module MetaMagic
       @parent = parent
     end
 
-    def handle_request(event_type, event, *arglist)
+    def handle_request(event_type, event, *arglist, **kwargs)
       fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       unless @handlers.include?(event)
         if self.class.method_defined?(event)
-          result = method(event).call(*arglist)
+          result = method(event).call(*arglist, **kwargs)
         else
           result = @parent.handle_request(
-            event_type, event, *arglist)
+            event_type, event, *arglist, **kwargs)
         end
       else
-        result = method(@handlers[event]).call(*arglist)
+        result = method(@handlers[event]).call(*arglist, **kwargs)
       end
       return result if event_type == 'GET'
     end
@@ -90,17 +90,17 @@ module MetaMagic
       @parent = parent
     end
    
-    def handle_request(event_type, event, *arglist)
+    def handle_request(event_type, event, *arglist, **kwargs)
       fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       unless @handlers.include?(event)
         if self.class.method_defined?(event)
-          result = method(event).call(*arglist)
+          result = method(event).call(*arglist, **kwargs)
         else
           result = @parent.handle_request(
-            event_type, event, *arglist)
+            event_type, event, *arglist, **kwargs)
         end
       else
-        result = method(@handlers[event]).call(*arglist)
+        result = method(@handlers[event]).call(*arglist, **kwargs)
       end
       return result if event_type == 'GET'
     end
