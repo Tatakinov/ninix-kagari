@@ -249,7 +249,7 @@ module Satori
           line = Satori.decrypt(Satori.decrypt(line))
         end
         begin
-          line = line.force_encoding('CP932').encode('utf-8', :invalid => :replace, :undef => :replace)
+          line = line.force_encoding(NKF.guess(line)).encode('utf-8', :invalid => :replace, :undef => :replace)
         rescue => e #except UnicodeError as e:
           if path.nil?
             Logging::Logging.debug('satori.py: ' + e.to_s + ' (line ' + lineno.to_s + ')')
