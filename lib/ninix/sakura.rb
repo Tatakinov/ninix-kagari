@@ -1912,10 +1912,7 @@ module Sakura
       reset_script(:reset_all => true)
       @__current_script = script
       if embed
-        pos = script.index('\e')
-        if pos
-          script = script[0, pos]
-        end
+        # nop
       else not script.rstrip().end_with?('\e')
         script = [script, '\e'].join('')
       end
