@@ -29,7 +29,7 @@ module Http
       end
     end
 
-    def enqueue(url, blocking: nil, redirect: 5)
+    def enqueue(url, method: 'get', blocking: nil, redirect: 5)
       return [:TYPE_ERROR, 'too many redirect'] if redirect < 0
       queue = Thread::Queue.new
       thread = Thread.new(@timeout) do |timeout|
@@ -42,7 +42,15 @@ module Http
         port = uri.port
         scheme = uri.scheme
         path = uri.path
-        query = uri.query.nil? ? '' : '?' + uri.query
+        query = nil
+        case method
+        when 'get', 'head'
+          path = path + '?' + uri.query unless uri.query.nil?
+        when 'post'
+          query = uri.query
+        when 'put'
+          query = uri.query
+        end
         unless scheme == 'http' or scheme == 'https'
           queue.push([:TYPE_ERROR, 'invalid scheme'])
         end
@@ -50,14 +58,21 @@ module Http
         client.use_ssl=(true) if scheme == 'https'
         client.read_timeout=(@timeout)
         begin
-          res = client.get(path + query)
+          case method
+          when 'get', 'head', 'delete'
+            res = client.method(method).call(path)
+          when 'put', 'post'
+            res = client.method(method).call(path, query)
+          else
+            # unreachable
+          end
         rescue
           queue.push([:TYPE_ERROR, 'timeout'])
         end
         case res.code
-        when 200
+        when '200'
           queue.push([:TYPE_DATA, res.body])
-        when 301
+        when '301'
           if res['location'].nil?
             queue.push([:TYPE_ERROR, 'no location'])
           else

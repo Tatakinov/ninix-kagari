@@ -35,6 +35,7 @@ require_relative "home"
 require_relative "metamagic"
 require_relative "logging"
 require_relative "case_insensitive_file"
+require_relative "http"
 
 module Sakura
 
@@ -161,6 +162,7 @@ module Sakura
       end
       @audio_loop = false
       @reload_event = nil
+      @client = Http::Client.new
     end
 
     def get_lock_repaint(*args)
@@ -2706,6 +2708,45 @@ module Sakura
             #pass
           end
           @surface.toggle_bind([@script_side, key])
+        end
+      elsif args[0] == 'execute'
+        case args[1]
+        when 'http-get', 'http-post', 'http-head', 'http-put', 'http-delete'
+          unless args[2].nil?
+            method = args[1][5..]
+            type, data = @client.enqueue(args[2], method: method, blocking: true)
+            case type
+            when :TYPE_ERROR
+              p data
+            when :TYPE_DATA
+              # type != ERRORなのでURI.parseは必ず成功する
+              uri = URI.parse(args[2])
+              filename = File.basename(uri.path)
+              filename = '_' if filename == '.'
+              filename = '__' if filename == '..'
+              filename = 'index.html' if uri.path.end_with?('/')
+              dir = File.join(get_prefix(), 'ghost/master/var')
+              unless Dir.exist?(dir)
+                begin
+                  Dir.mkdir(dir)
+                rescue
+                  Logging::Logging.info('cannot create ' + dir)
+                end
+              end
+              path = File.join(dir, filename)
+              begin
+                File.open(path, 'w') do |fh|
+                  fh.write(data)
+                end
+              rescue
+                Logging::Logging.info('cannot write ' + path)
+              end
+            else
+              # unreachable
+            end
+          end
+        else
+          # TODO stub
         end
       else
         #pass ## FIXME
