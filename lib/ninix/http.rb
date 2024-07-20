@@ -24,7 +24,7 @@ module Http
     end
 
     def timeout=(timeout)
-      if timeout > 0 and timeout <= 180
+      if timeout > 0 and timeout <= 300
         @timeout = timeout
       end
     end
