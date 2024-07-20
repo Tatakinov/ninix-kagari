@@ -2714,7 +2714,44 @@ module Sakura
         when 'http-get', 'http-post', 'http-head', 'http-put', 'http-delete'
           unless args[2].nil?
             method = args[1][5..]
-            type, data = @client.enqueue(args[2], method: method, blocking: true)
+            query = nil
+            options = args[3..]
+            options.each do |option|
+              if option.start_with?('--async=')
+                # TODO stub
+              elsif option.start_with?('--authorization=')
+                # TODO stub
+              elsif option.start_with?('--cookie=')
+                # TODO stub
+              elsif option.start_with?('--content-type=')
+                # TODO stub
+              elsif option.start_with?('--file=')
+                # TODO stub
+              elsif option.start_with?('--header=')
+                # TODO stub
+              elsif option.start_with?('--log=')
+                # TODO stub
+              elsif option.start_with?('--nodescript=')
+                # TODO stub
+              elsif option.start_with?('--nofile=')
+                # TODO stub
+              elsif option.start_with?('--param=')
+                # TODO stub
+              elsif option.start_with?('--param-charset=')
+                # TODO stub
+              elsif option.start_with?('--param-input-file=')
+                # TODO stub
+              elsif option == '--progress-notify'
+                # TODO stub
+              elsif option.start_with?('--sync=')
+                # TODO stub
+              elsif option.start_with?('--timeout=')
+                # TODO stub
+              else
+                query = option
+              end
+            end
+            type, data = @client.enqueue(args[2], query: query, method: method, blocking: true)
             case type
             when :TYPE_ERROR
               p data

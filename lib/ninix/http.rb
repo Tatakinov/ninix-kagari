@@ -29,7 +29,7 @@ module Http
       end
     end
 
-    def enqueue(url, method: 'get', blocking: nil, redirect: 5)
+    def enqueue(url, query: nil, method: 'get', blocking: nil, redirect: 5)
       return [:TYPE_ERROR, 'too many redirect'] if redirect < 0
       queue = Thread::Queue.new
       thread = Thread.new(@timeout) do |timeout|
@@ -42,14 +42,8 @@ module Http
         port = uri.port
         scheme = uri.scheme
         path = uri.path
-        query = nil
-        case method
-        when 'get', 'head'
-          path = path + '?' + uri.query unless uri.query.nil?
-        when 'post'
-          query = uri.query
-        when 'put'
-          query = uri.query
+        if method == 'get' or method == 'head'
+          path = path + '?' + query unless query.nil?
         end
         unless scheme == 'http' or scheme == 'https'
           queue.push([:TYPE_ERROR, 'invalid scheme'])
@@ -61,8 +55,12 @@ module Http
           case method
           when 'get', 'head', 'delete'
             res = client.method(method).call(path)
-          when 'put', 'post'
-            res = client.method(method).call(path, query)
+          when 'post', 'put'
+            if query.nil?
+              Logging::Logging.debug('no query found in post/put')
+            else
+              res = client.method(method).call(path, query)
+            end
           else
             # unreachable
           end
