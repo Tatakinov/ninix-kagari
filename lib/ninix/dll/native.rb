@@ -45,13 +45,18 @@ module Native
     def find(topdir, dll_name)
       result = 0
       unless $_kernel32.nil?
+        dll_path = File.join(topdir, dll_name)
+        dll_dir = File.dirname(dll_path)
+        $_kernel32.SetDllDirectoryW(dll_dir.encode('UTF-16LE'))
         begin
-          handle = Fiddle::Handle.new(File.join(topdir, dll_name))
+          handle = Fiddle::Handle.new(dll_path)
           handle.close
           result = 1000
         rescue
           result = 0
         end
+        null = Fiddle::Pointer[0]
+        $_kernel32.SetDllDirectoryW(null)
       end
       return result
     end
@@ -66,17 +71,19 @@ module Native
       unless dir.end_with?(File::SEPARATOR)
         dir = [dir, File::SEPARATOR].join
       end
-      $_kernel32.SetDllDirectoryW(dir.encode('UTF-16LE'))
-      @handle = Fiddle::Handle.new(File.join(dir, @dll_name))
+      dll_path = File.join(dir, @dll_name)
+      dll_dir = File.dirname(dll_path)
+      $_kernel32.SetDllDirectoryW(dll_dir.encode('UTF-16LE'))
+      @handle = Fiddle::Handle.new(dll_path)
+      null = Fiddle::Pointer[0]
+      $_kernel32.SetDllDirectoryW(null)
       @func[:load] = Fiddle::Function.new(@handle['load'], [Fiddle::TYPE_VOIDP, Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
       @func[:request] = Fiddle::Function.new(@handle['request'], [Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOIDP)
       @func[:unload] = Fiddle::Function.new(@handle['unload'], [], Fiddle::TYPE_INT)
-      null = Fiddle::Pointer[0]
       len = $_kernel32.WideCharToMultiByte(CP_ACP, 0, dir.encode('UTF-16LE'), dir.size, null, 0, null, null)
       buf = $_kernel32.GlobalAlloc(GPTR, len)
       len = $_kernel32.WideCharToMultiByte(CP_ACP, 0, dir.encode('UTF-16LE'), dir.size, buf, len, null, null)
       ret =  @func[:load].call(buf, len)
-      $_kernel32.SetDllDirectoryW(null)
       return ret
     end
 
