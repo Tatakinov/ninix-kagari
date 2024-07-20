@@ -15,6 +15,7 @@
 #
 
 require "gtk3"
+require "cgi"
 
 require_relative "pix"
 require_relative "metamagic"
@@ -1012,6 +1013,7 @@ module Balloon
     end
 
     def set_markup(text, a)
+      text = CGI.escapeHTML(text)
       unless a[:height].nil? or a[:height] == @font_height
         text = ['<span size="', a[:height], 'pt">', text, '</span>'].join
       end
