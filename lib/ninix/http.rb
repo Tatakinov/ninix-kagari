@@ -94,10 +94,6 @@ module Http
       if blocking
         thread.join
       end
-      # 30xは転移先のthread/queueをpushするためpushしない。
-      unless queue.empty?
-        @threads << [thread, queue]
-      end
       return nil
     end
 
@@ -107,7 +103,10 @@ module Http
         unless thread.alive?
           @threads.delete_at(i)
           thread.join
-          __process(*queue.pop)
+          unless queue.empty?
+            __process(*queue.pop)
+            break
+          end
         end
       end
       return nil
