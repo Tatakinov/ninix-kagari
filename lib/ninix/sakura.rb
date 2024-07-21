@@ -22,6 +22,7 @@ rescue LoadError
 end
 require "cgi"
 require "uri"
+require "pathname"
 
 require_relative "surface"
 require_relative "balloon"
@@ -163,6 +164,7 @@ module Sakura
       @audio_loop = false
       @reload_event = nil
       @client = Http::Client.new
+      @client.set_responsible(self)
     end
 
     def get_lock_repaint(*args)
@@ -1892,6 +1894,8 @@ module Sakura
           end
         end
       end
+      # process async http
+      @client.run
       process_script()
       return true
     end
@@ -2713,73 +2717,92 @@ module Sakura
         case args[1]
         when 'http-get', 'http-post', 'http-head', 'http-put', 'http-delete'
           unless args[2].nil?
+            url = args[2]
             method = args[1][5..]
             query = nil
+            header = {}
+            file = nil
+            blocking = true
+            event = nil
+            charset = "UTF-8"
+            timeout = 60
             options = args[3..]
             options.each do |option|
               if option.start_with?('--async=')
-                # TODO stub
+                event = option[8 .. ]
+                blocking = false
               elsif option.start_with?('--authorization=')
-                # TODO stub
+                header["Authorization"] = option[16 .. ]
               elsif option.start_with?('--cookie=')
-                # TODO stub
+                header["Cookie"] = option[9 .. ]
               elsif option.start_with?('--content-type=')
-                # TODO stub
+                header["Content-Type"] = option[15 .. ]
               elsif option.start_with?('--file=')
-                # TODO stub
+                file = option[7 .. ]
               elsif option.start_with?('--header=')
-                # TODO stub
+                h = option[9 .. ]
+                index = s.index(/:/)
+                if index.nil?
+                  next
+                end
+                k = h[0, i]
+                v = h[i + 1 .. ].match(/\A *(.+)\z/)[1]
+                header[k] = v
               elsif option.start_with?('--log=')
                 # TODO stub
               elsif option.start_with?('--nodescript=')
                 # TODO stub
               elsif option.start_with?('--nofile=')
-                # TODO stub
+                file = false
               elsif option.start_with?('--param=')
-                # TODO stub
+                p = option[8 .. ]
+                encoded = URI.encode_www_form_component(p.encode(charset))
+                if query.nil?
+                  query = encoded
+                else
+                  query = query + '&' + encoded
+                end
               elsif option.start_with?('--param-charset=')
-                # TODO stub
+                charset = option[16 .. ]
               elsif option.start_with?('--param-input-file=')
-                # TODO stub
+                filename = option[19 .. ]
+                path = File.join(get_prefix(), 'ghost/master', filename)
+                path = Pathname.new(path).cleanpath.to_s
+                unless path.start_with?(get_prefix())
+                  next
+                end
+                File.open(path, 'rb') do |fh|
+                  # バイナリで読み込んでくれてるか?
+                  query = fh.read(nil)
+                end
               elsif option == '--progress-notify'
                 # TODO stub
               elsif option.start_with?('--sync=')
-                # TODO stub
+                event = option[7 .. ]
+                blocking = true
               elsif option.start_with?('--timeout=')
-                # TODO stub
+                t = option[10 .. ].to_i
+                unless t > 0 and t <= 300
+                  next
+                end
+                timeout = t
               else
                 query = option
               end
             end
-            type, data = @client.enqueue(args[2], query: query, method: method, blocking: true)
-            case type
-            when :TYPE_ERROR
-              p data
-            when :TYPE_DATA
-              # type != ERRORなのでURI.parseは必ず成功する
-              uri = URI.parse(args[2])
-              filename = File.basename(uri.path)
-              filename = '_' if filename == '.'
-              filename = '__' if filename == '..'
-              filename = 'index.html' if uri.path.end_with?('/')
-              dir = File.join(get_prefix(), 'ghost/master/var')
-              unless Dir.exist?(dir)
-                begin
-                  Dir.mkdir(dir)
-                rescue
-                  Logging::Logging.info('cannot create ' + dir)
-                end
-              end
-              path = File.join(dir, filename)
-              begin
-                File.open(path, 'w') do |fh|
-                  fh.write(data)
-                end
-              rescue
-                Logging::Logging.info('cannot write ' + path)
-              end
-            else
-              # unreachable
+            @client.enqueue(url, {
+              method: method,
+              query: query,
+              timeout: timeout,
+              header: header.empty? ? nil : header,
+            }, {
+              method: method,
+              url: url,
+              filename: file,
+              event: event,
+            }, blocking: blocking)
+            if blocking
+              @client.run
             end
           end
         else
