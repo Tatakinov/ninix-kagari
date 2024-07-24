@@ -1,4 +1,6 @@
-# What is this
+# ninix-kagari
+
+## What is this
 
 ninix-kagariはデスクトップマスコットの1つ、伺かの互換アプリケーションです。
 
@@ -10,13 +12,13 @@ ninix-kagariはデスクトップマスコットの1つ、伺かの互換アプ�
 v0.0.0がninix-aya 5.0.9に対応しているので
 必要であればそちらを参照してください。
 
-# Notice
+## Notice
 
 Installの節を実行してninix-kagariを起動するだけではゴーストは現れません。
 
 *GhostとBalloonを少なくとも1つずつ*インストールする必要があります。
 
-# Requirements
+## Requirements
 
 - Linux or Windows
 
@@ -50,9 +52,9 @@ apt install ninix-aya
 
 みたいにすれば楽できます。
 
-# Install
+## Install
 
-## Linux
+### Linux
 
 ```
 make install
@@ -73,13 +75,13 @@ PATH=/opt/ninix-kagari/bin:$PATH
 $ ninix
 ```
 
-## Windows
+### Windows
 
-### Releasesのninix-kagari.zipを利用する場合
+#### Releasesのninix-kagari.zipを利用する場合
 
 zipを展開してrun.batを実行すればOKです。
 
-### 自分でruby環境を用意する場合
+#### 自分でruby環境を用意する場合
 
 rubyinstallerのRuby+Devkitの*x86*をインストールしてください。
 x64でも動くと思いますが、動作するゴーストが減ります。
@@ -105,9 +107,9 @@ Requirementsに書かれているものをインストールします。
 > ruby lib/ninix_main.rb
 ```
 
-# Library
+## Library
 
-## Linux
+### Linux
 
 KAWARI(華和梨)は`/opt/ninix-kagari/lib/kawari8/libshiori.so`、
 YAYAは`/opt/ninix-kagari/lib/yaya/libaya5.so`が必要です。
@@ -121,28 +123,28 @@ feature/improve\_posix\_supportブランチを
 そして、出来上がったものを上記の場所にコピーしてから、
 ninix-kagariを起動してください。
 
-## Windows
+### Windows
 
-### 32bit OS or ruby(32bit)
+#### 32bit OS or ruby(32bit)
 
 ゴースト内蔵のSHIORIを使うため、特に何もする必要はありません。
 
-### ruby(64bit)
+#### ruby(64bit)
 
 現状ではKAWARIとYAYAを使ったゴーストは動作しないと思います。(未確認)
 
-# Caution
+## Caution
 
 エンバグ・デグレーション上等で作っているので、必ずしも最新版が
 一番良いとは限りません。
 
-# SSP
+## SSP
 
 [SSP](http://ssp.shillest.net/)と比べてninix-kagariが優れている点は
 今のところ*ありません*。
 SSPを使える環境であればそちらを使うことを推奨します。
 
-# License
+## License
 
 Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 
