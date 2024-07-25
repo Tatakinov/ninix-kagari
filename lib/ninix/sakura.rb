@@ -3138,6 +3138,7 @@ module Sakura
     end
 
     def expand_meta(text_node)
+      property_regexp = Regexp.new(/%property\[((\\\\|\\\]|(?!\\\\|\\\]).)+?)\]/)
       buf = []
       for chunk in text_node
         if chunk[0] == Script::TEXT_STRING
@@ -3180,6 +3181,9 @@ module Sakura
           buf << getword(["\\", chunk[1][1..-1]].join(''))
         elsif chunk[1] == '%dms'
           buf << getdms()
+        elsif property_regexp.match?(chunk[1])
+          key = property_regexp.match(chunk[1])[1]
+          buf << (get_property(key) or '')
         else # %c, %songname
           buf << chunk[1]
         end
@@ -3265,6 +3269,31 @@ module Sakura
         return
       end
       __update()
+    end
+
+    def get_general_property(key)
+      case key
+      when 'name'
+      when 'sakuraname'
+      when 'keroname'
+      when 'craftmanw'
+      when 'craftmanurl'
+      end
+      return nil
+    end
+
+    def get_property(key)
+      if key.start_with?('currentghost.')
+        key = key[13 .. ]
+        if false
+          # TODO stub
+        else
+          return get_general_property(key)
+        end
+      else
+        return @parent.handle_request('GET', 'get_property', key)
+      end
+      return nil
     end
   end
 

@@ -126,7 +126,7 @@ module Script
     def tokenize(s)
       patterns = [
         [TOKEN_TAG, Regexp.new(/\\[Cehunjcxtqzy*v0123456789fmia!&+-]|\\[sbp][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|\\__[ctq]|\\URL/)],
-        [TOKEN_META, Regexp.new(/%month|%day|%hour|%minute|%second|%username|%selfname2?|%keroname|%friendname|%songname|%screen(width|height)|%exh|%et|%m[szlchtep?]|%dms|%j|%c|%wronghour|%\*/)],
+        [TOKEN_META, Regexp.new(/%month|%day|%hour|%minute|%second|%username|%selfname2?|%keroname|%friendname|%songname|%screen(width|height)|%exh|%et|%m[szlchtep?]|%dms|%j|%c|%wronghour|%\*|%property\[(\\\\|\\\]|(?!\\\\|\\\]).)+?\]/)],
         [TOKEN_NUMBER, Regexp.new(/[0-9]+/)],
         [TOKEN_OPENED_SBRA, Regexp.new(/\[/)],
         [TOKEN_CLOSED_SBRA, Regexp.new(/\]/)],

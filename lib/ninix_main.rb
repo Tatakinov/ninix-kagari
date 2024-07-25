@@ -33,6 +33,7 @@ require_relative "ninix/kinoko"
 require_relative "ninix/menu"
 require_relative "ninix/metamagic"
 require_relative "ninix/logging"
+require_relative "ninix/version"
 
 
 module Ninix_Main
@@ -1295,6 +1296,33 @@ module Ninix_Main
 
     def get_workarea
       [0, 0, *@app_window.size]
+    end
+
+    def get_property(key)
+      now = Time.new
+      case key
+      when 'system.year'
+        return now.year.to_s
+      when 'system.month'
+        return now.month.to_s
+      when 'system.day'
+        return now.day.to_s
+      when 'system.hour'
+        return now.hour.to_s
+      when 'system.minute'
+        return now.min.to_s
+      when 'system.second'
+        return now.sec.to_s
+      when 'system.millisecond'
+        return (now.nsec / 1_000_000).to_s
+      when 'system.dayofweek'
+        return now.wday.to_s
+      when 'baseware.version'
+        return Version.VERSION
+      when 'baseware.name'
+        return 'ninix-kagari'
+      end
+      return nil
     end
   end
 
