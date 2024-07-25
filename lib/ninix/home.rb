@@ -21,6 +21,7 @@ require_relative "logging"
 module Home
 
   def self.get_ninix_home()
+    return File.join(ENV['NINIX_HOME'], '.ninix') if ENV.include?('NINIX_HOME')
     File.join(File.expand_path('~'), '.ninix')
   end
 
