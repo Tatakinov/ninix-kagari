@@ -18,9 +18,17 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 *GhostとBalloonを少なくとも1つずつ*インストールする必要があります。
 
-## Requirements
+## Supported OS
 
-- Linux or Windows
+- Linux
+
+- Windows
+
+- Mac?(未確認)
+
+- \*nix(未確認)
+
+## Requirements
 
 - ruby
 
@@ -106,6 +114,17 @@ Requirementsに書かれているものをインストールします。
 > cd ninix-kagari
 > ruby lib/ninix_main.rb
 ```
+
+## Option
+
+### インストールフォルダの変更(v1.4.0以降)
+
+環境変数`NINIX_HOME`を設定することで、
+ゴーストやバルーン等をインストールするフォルダを変更することができます。
+
+なお、Releaseのninix-kagari.zipではデフォルトで
+`【run.batのあるフォルダ】/.ninix`に
+それらを保存しています。
 
 ## Library
 
