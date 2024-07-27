@@ -1295,7 +1295,7 @@ module Ninix_Main
     end
 
     def get_workarea
-      [0, 0, *@app_window.size]
+      [0, 0, *@app_window.get_size]
     end
 
     def get_property(key)

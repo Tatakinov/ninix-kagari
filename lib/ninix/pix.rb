@@ -198,6 +198,7 @@ module Pix
   class TransparentApplicationWindow < Gtk::ApplicationWindow
 
     def initialize(application)
+      @size = [0, 0]
       super(application)
       set_decorated(false)
       set_app_paintable(true)
@@ -209,10 +210,21 @@ module Pix
         screen_changed(widget, :old_screen => old_screen)
         next true
       end
-      screen_changed(self)
+      signal_connect('size-allocate') do |widget, allocation, data|
+        @size = size
+        if maximized?
+          hide
+        end
+        next false
+      end
       set_keep_below(true)
       set_skip_pager_hint(true)
       set_skip_taskbar_hint(true)
+      screen_changed(self)
+    end
+
+    def get_size
+      return @size
     end
 
     def screen_changed(widget, old_screen: nil)
@@ -224,6 +236,7 @@ module Pix
       end
       fail "assert" unless not visual.nil?
       maximize # not fullscreen
+      show
     end
   end
 
