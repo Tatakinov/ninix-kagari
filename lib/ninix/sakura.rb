@@ -3148,7 +3148,7 @@ module Sakura
     end
 
     def expand_meta(text_node)
-      property_regexp = Regexp.new(/%property\[((\\\\|\\\]|(?!\\\\|\\\]).)+?)\]/)
+      property_regexp = Regexp.new(/\A%property\[((\\\\|\\\]|(?!\\\\|\\\]).)+?)\]\z/)
       buf = []
       for chunk in text_node
         if chunk[0] == Script::TEXT_STRING
