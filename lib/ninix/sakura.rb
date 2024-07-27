@@ -2808,6 +2808,16 @@ module Sakura
         else
           # TODO stub
         end
+      elsif args[1] == 'property'
+        if args[0] == 'get'
+          event = args[2]
+          keys = args[3 .. ]
+          values = []
+          keys.each do |key|
+            values << get_property(key)
+          end
+          enqueue_event(event, *values)
+        end
       else
         #pass ## FIXME
       end
