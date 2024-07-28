@@ -51,10 +51,10 @@ module Pix
     width = surface.width
     height = surface.height
     stride = surface.stride
-    device_x1 =[0, [device_x1, width - 1].min].max
-    device_x2 =[0, [device_x2, width - 1].min].max
-    device_y1 =[0, [device_y1, height - 1].min].max
-    device_y2 =[0, [device_y2, height - 1].min].max
+    device_x1 = [0, [device_x1, width - 1].min].max
+    device_x2 = [0, [device_x2, width - 1].min].max
+    device_y1 = [0, [device_y1, height - 1].min].max
+    device_y2 = [0, [device_y2, height - 1].min].max
     device_w = device_x2 - device_x1 + 1
     device_h = device_y2 - device_y1 + 1
     pix_na = NArray.to_na(surface.data[device_y1 * stride, device_h * stride], NArray::BYTE)
@@ -152,6 +152,16 @@ module Pix
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.set_source_rgba(0, 0, 0, 0)
       cr.paint
+      # FIXME ウィンドウ透過に非対応のX環境だと
+      # cr.size <= surface.sizeになるらしく、
+      # regionのoffsetが正しく機能しないので
+      # set_surface内で無理矢理regionを設定している。
+      # 激しくドラッグするとシェルが消えるので対応が必要。
+      s = cr.target.map_to_image
+      if not @supports_alpha and s.width <= surface.width and s.height <= surface.height
+        @region = Pix.surface_to_region(surface)
+        @region.translate!(*get_draw_offset)
+      end
       # translate the user-space origin
       cr.translate(*get_draw_offset) # XXX
       cr.scale(scale / 100.0, scale / 100.0)
