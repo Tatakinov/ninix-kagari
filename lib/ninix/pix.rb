@@ -128,6 +128,7 @@ module Pix
       add(@darea)
       @region = nil
       @device_extents = nil
+      @tmp_surface = nil
     end
 
     def move(x, y)
@@ -152,15 +153,15 @@ module Pix
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.set_source_rgba(0, 0, 0, 0)
       cr.paint
-      # FIXME ウィンドウ透過に非対応のX環境だと
-      # cr.size <= surface.sizeになるらしく、
-      # regionのoffsetが正しく機能しないので
-      # set_surface内で無理矢理regionを設定している。
-      # 激しくドラッグするとシェルが消えるので対応が必要。
+      # HACK
+      # ウィンドウの透過に非対応な環境ではcr.size <= surface.sizeとなり
+      # 正しいregionが取得出来ないので、surface_to_regionで
+      # 正しいregionを取得したい。
+      # しかし、set_shapeのreshapeに対応する必要があるため、
+      # 仕方なくsurfaceを一時的に保持してset_shape側でregionの設定を行う。
       s = cr.target.map_to_image
       if not @supports_alpha and s.width <= surface.width and s.height <= surface.height
-        @region = Pix.surface_to_region(surface)
-        @region.translate!(*get_draw_offset)
+        @tmp_surface = surface
       end
       # translate the user-space origin
       cr.translate(*get_draw_offset) # XXX
@@ -184,10 +185,16 @@ module Pix
     def set_shape(cr, reshape)
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       if @region.nil? or reshape
-        if @device_extents.nil?
-          @region = Pix.surface_to_region(cr.target.map_to_image)
+        if @tmp_surface.nil?
+          if @device_extents.nil?
+            @region = Pix.surface_to_region(cr.target.map_to_image)
+          else
+            @region = Pix.surface_to_region_with_hints(cr.target.map_to_image, @device_extents)
+          end
         else
-          @region = Pix.surface_to_region_with_hints(cr.target.map_to_image, @device_extents)
+          @region = Pix.surface_to_region(@tmp_surface)
+          @tmp_surface = nil
+          @region.translate!(*get_draw_offset)
         end
       else
         dx, dy = @__surface_position.zip(@prev_position).map {|new, prev| new - prev}
