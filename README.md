@@ -159,7 +159,7 @@ ninix-kagariを起動してください。
 
 ## SSP
 
-[SSP](http://ssp.shillest.net/)と比べてninix-kagariが優れている点は
+[SSP](https://ssp.shillest.net/)と比べてninix-kagariが優れている点は
 今のところ*ありません*。
 SSPを使える環境であればそちらを使うことを推奨します。
 
