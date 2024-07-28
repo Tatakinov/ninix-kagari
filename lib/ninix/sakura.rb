@@ -751,12 +751,12 @@ module Sakura
       get_event_response(name)
     end
 
-    def translate(s)
+    def translate(s, event)
       unless s.nil?
         if @use_makoto
           s = Makoto.execute(s)
         else
-          r = get_event_response('OnTranslate', s, :translate => 0)
+          r = get_event_response('OnTranslate', s, nil, event, :translate => 0)
           unless r.empty?
             s = r
           end
@@ -823,7 +823,7 @@ module Sakura
       response = @shiori.request(header)
       if event_type != 'NOTIFY' and @cantalk
         result, to = get_value(response)
-        result = translate(result) unless translate.zero?
+        result = translate(result, event.to_s) unless translate.zero?
       else
         result, to = '', nil
       end
