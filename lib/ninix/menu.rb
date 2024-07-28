@@ -319,16 +319,18 @@ module Menu
       end
     end
 
-    __re_shortcut = Regexp.new('&(?=[\x21-\x7e])')
+    @@__re_shortcut = Regexp.new('&(?=[\x21-\x7e])')
 
     def __modify_shortcut(caption)
-      self.__re_shortcut.sub('_', caption)
+      caption.sub(@@__re_shortcut, '_')
+      #@@__re_shortcut.sub('_', caption)
     end
 
-    __re_mnemonic = Regexp.new('\(_.\)|_')
+    @@__re_mnemonic = Regexp.new('\(_.\)|_')
 
     def __cut_mnemonic(caption)
-      self.__re_mnemonic.sub('', caption)
+      caption.sub(@@__re_mnemonic, '')
+      #@@__re_mnemonic.sub('', caption)
     end
 
     def __update_ui(side)
@@ -451,7 +453,7 @@ module Menu
       fail "assert" unless caption.is_a?(String)
       item = @__menu_list[name][:entry]
       unless item.nil?
-        label = item.get_children()[0]
+        label = item.children[0]
         label.set_text_with_mnemonic(caption)
       end
     end
