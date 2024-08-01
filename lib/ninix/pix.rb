@@ -87,6 +87,7 @@ module Pix
     attr_reader :supports_alpha
 
     def initialize(type: Gtk::WindowType::TOPLEVEL)
+      @width, @height = 1, 1
       super(type)
       set_decorated(false)
       #set_resizable(false)
@@ -94,6 +95,9 @@ module Pix
         screen_changed(widget, :old_screen => old_screen)
         next true
       end
+      # set to minimum
+      set_size_request(1, 1)
+      resize(@width, @height)
       screen_changed(self)
     end
 
@@ -106,7 +110,6 @@ module Pix
       end
       @supports_alpha = composited?
       fail "assert" unless not visual.nil?
-      maximize # not fullscreen
     end
   end
 
@@ -129,11 +132,6 @@ module Pix
       @region = nil
       @device_extents = nil
       @tmp_surface = nil
-    end
-
-    def move(x, y)
-      @__surface_position = [x, y]
-      @darea.queue_draw()
     end
 
     def get_draw_offset
@@ -163,8 +161,6 @@ module Pix
       if not @supports_alpha and s.width <= surface.width and s.height <= surface.height
         @tmp_surface = surface
       end
-      # translate the user-space origin
-      cr.translate(*get_draw_offset) # XXX
       cr.scale(scale / 100.0, scale / 100.0)
       cr.set_source(surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)
@@ -180,6 +176,13 @@ module Pix
       @device_extents = [device_x1, device_y1, device_x2, device_y2].map {|f| f.to_i}
       cr.fill()
       cr.restore()
+      # resize window
+      x, y, w, h = @device_extents
+      unless @width == w and @height == h
+        @width = w
+        @height = h
+        resize(@width, @height)
+      end
     end
 
     def set_shape(cr, reshape)
@@ -194,11 +197,7 @@ module Pix
         else
           @region = Pix.surface_to_region(@tmp_surface)
           @tmp_surface = nil
-          @region.translate!(*get_draw_offset)
         end
-      else
-        dx, dy = @__surface_position.zip(@prev_position).map {|new, prev| new - prev}
-        @region.translate!(dx, dy)
       end
       @prev_position = @__surface_position
       if @supports_alpha

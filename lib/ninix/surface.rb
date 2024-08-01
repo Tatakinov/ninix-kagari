@@ -45,12 +45,9 @@ module Surface
       @window = {}
     end
 
-    def create_gtk_window(title, skip_taskbar)
+    def create_gtk_window(title)
       window = Pix::TransparentWindow.new()
       window.set_title(title)
-      if skip_taskbar
-        window.set_skip_taskbar_hint(true)
-      end
       window.signal_connect('delete_event') do |w, e|
         next delete(w, e)
       end
@@ -424,8 +421,7 @@ module Surface
           end
         end
       end
-      skip_taskbar = (side >= 1)
-      gtk_window = create_gtk_window(title, skip_taskbar)
+      gtk_window = create_gtk_window(title)
       seriko = get_seriko(@__surface)
       tooltips = {}
       if @__tooltips.include?(name)
@@ -890,6 +886,12 @@ module Surface
                         Gdk::EventMask::POINTER_MOTION_MASK|
                         Gdk::EventMask::POINTER_MOTION_HINT_MASK|
                         Gdk::EventMask::SCROLL_MASK)
+      @darea.signal_connect('size-allocate') do |w, allocation, data|
+        # XXX DrawingAreaのsizeが変わったらreshapeしないと
+        # マウスやキーボードのイベントを拾わない。
+        @reshape = true
+        next false
+      end
       @darea.signal_connect('draw') do |w, e|
         redraw(w, e)
         next true
