@@ -214,8 +214,11 @@ module Pix
   class TransparentApplicationWindow < Gtk::ApplicationWindow
 
     def initialize(application)
-      @size = [0, 0]
+      Gdk.set_program_class('Ninix')
       super(application)
+      @size = [0, 0]
+      init_size = size
+      geometry = display.primary_monitor.geometry
       set_decorated(false)
       set_app_paintable(true)
       set_focus_on_map(false)
@@ -229,6 +232,11 @@ module Pix
       signal_connect('size-allocate') do |widget, allocation, data|
         @size = size
         if maximized?
+          # HACK 最大化しても初期サイズと一緒ならタイル型WMとして扱う。
+          # スクリーンサイズはこのwindowではなく別途取得したものを使う。
+          if init_size == @size
+            @size = [geometry.width, geometry.height]
+          end
           hide
         end
         next false
