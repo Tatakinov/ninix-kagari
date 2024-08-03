@@ -83,6 +83,14 @@ PATH=/opt/ninix-kagari/bin:$PATH
 $ ninix
 ```
 
+#### In Tiling Window Manager
+
+タイル型WMではウィンドウをfloatingにするための設定が必要です。
+例えばi3では`~/.config/i3/config`に次のような設定を記述します。
+```
+for_window [class="Ninix"] floating enable
+```
+
 ### Windows
 
 #### Releasesのninix-kagari.zipを利用する場合
