@@ -375,7 +375,7 @@ module Kinoko
     end
 
     def redraw(widget, cr)
-      @window.set_surface(cr, @image_surface, @__scale)
+      @window.set_surface(cr, @image_surface, @__scale, @reshape)
       @window.set_shape(cr, @reshape)
       @reshape = false
     end

@@ -756,7 +756,7 @@ module Bln
     end
 
     def redraw(widget, cr)
-      @window.set_surface(cr, @balloon_surface, @scale)
+      @window.set_surface(cr, @balloon_surface, @scale, @reshape)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX
       unless @layout.nil?

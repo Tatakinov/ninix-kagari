@@ -1106,7 +1106,7 @@ module Balloon
       return if @parent.handle_request('GET', 'lock_repaint')
       return true unless @__shown
       fail "assert" if @balloon_surface.nil?
-      @window.set_surface(cr, @balloon_surface, scale)
+      @window.set_surface(cr, @balloon_surface, scale, @reshape)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX
       # FIXME: comment

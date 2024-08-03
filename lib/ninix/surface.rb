@@ -1326,7 +1326,7 @@ module Surface
 
     def redraw(darea, cr)
       return if @image_surface.nil? # XXX
-      @window.set_surface(cr, @image_surface, get_scale)
+      @window.set_surface(cr, @image_surface, get_scale, @reshape)
       unless @parent.handle_request('GET', 'get_preference', 'check_collision').zero?
         draw_region(cr)
       end

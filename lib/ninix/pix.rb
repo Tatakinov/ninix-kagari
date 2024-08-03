@@ -145,7 +145,7 @@ module Pix
       return new_x, new_y
     end
 
-    def set_surface(cr, surface, scale)
+    def set_surface(cr, surface, scale, reshape)
       cr.save()
       # clear
       cr.set_operator(Cairo::OPERATOR_SOURCE)
@@ -153,13 +153,15 @@ module Pix
       cr.paint
       # HACK
       # ウィンドウの透過に非対応な環境ではcr.size <= surface.sizeとなり
-      # 正しいregionが取得出来ないので、surface_to_regionで
+      # surface_to_region(cr.target.map_to_image)では
+      # 正しいregionが取得出来ないので、surface_to_region(surface)で
       # 正しいregionを取得したい。
       # しかし、set_shapeのreshapeに対応する必要があるため、
-      # 仕方なくsurfaceを一時的に保持してset_shape側でregionの設定を行う。
+      # 仕方なくこちらでもreshapeか判定してregionの設定を行う。
+      # set_shapeにsurface持ち込むのはWindowsで終了時にエラーになる。
       s = cr.target.map_to_image
-      if not @supports_alpha and s.width <= surface.width and s.height <= surface.height
-        @tmp_surface = surface
+      if (@region.nil? or reshape) and not @supports_alpha and (s.width < surface.width or s.height < surface.height)
+        @region = Pix.surface_to_region(surface)
       end
       cr.scale(scale / 100.0, scale / 100.0)
       cr.set_source(surface, 0, 0)
@@ -188,15 +190,10 @@ module Pix
     def set_shape(cr, reshape)
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       if @region.nil? or reshape
-        if @tmp_surface.nil?
-          if @device_extents.nil?
-            @region = Pix.surface_to_region(cr.target.map_to_image)
-          else
-            @region = Pix.surface_to_region_with_hints(cr.target.map_to_image, @device_extents)
-          end
+        if @device_extents.nil?
+          @region = Pix.surface_to_region(cr.target.map_to_image)
         else
-          @region = Pix.surface_to_region(@tmp_surface)
-          @tmp_surface = nil
+          @region = Pix.surface_to_region_with_hints(cr.target.map_to_image, @device_extents)
         end
       end
       @prev_position = @__surface_position
