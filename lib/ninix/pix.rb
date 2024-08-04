@@ -157,11 +157,10 @@ module Pix
       # 正しいregionが取得出来ないので、surface_to_region(surface)で
       # 正しいregionを取得したい。
       # しかし、set_shapeのreshapeに対応する必要があるため、
-      # 仕方なくこちらでもreshapeか判定してregionの設定を行う。
-      # set_shapeにsurface持ち込むのはWindowsで終了時にエラーになる。
+      # 仕方なくsurfaceをshapeまで保持する
       s = cr.target.map_to_image
       if (@region.nil? or reshape) and not @supports_alpha and (s.width < surface.width or s.height < surface.height)
-        @region = Pix.surface_to_region(surface)
+        @tmp_surface = surface
       end
       cr.scale(scale / 100.0, scale / 100.0)
       cr.set_source(surface, 0, 0)
@@ -190,10 +189,14 @@ module Pix
     def set_shape(cr, reshape)
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       if @region.nil? or reshape
-        if @device_extents.nil?
-          @region = Pix.surface_to_region(cr.target.map_to_image)
+        if @tmp_surface.nil?
+          if @device_extents.nil?
+            @region = Pix.surface_to_region(cr.target.map_to_image)
+          else
+            @region = Pix.surface_to_region_with_hints(cr.target.map_to_image, @device_extents)
+          end
         else
-          @region = Pix.surface_to_region_with_hints(cr.target.map_to_image, @device_extents)
+          @region = Pix.surface_to_region(@tmp_surface)
         end
       end
       @prev_position = @__surface_position
