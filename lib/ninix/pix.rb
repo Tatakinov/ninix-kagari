@@ -422,10 +422,11 @@ module Pix
     pixbuf = create_pixbuf_from_file(path, :is_pnr => is_pnr, :use_pna => use_pna)
     surface = Cairo::ImageSurface.new(Cairo::FORMAT_ARGB32,
                                       pixbuf.width, pixbuf.height)
-    cr = Cairo::Context.new(surface)
-    cr.set_source_pixbuf(pixbuf, 0, 0)
-    cr.set_operator(Cairo::OPERATOR_SOURCE)
-    cr.paint()
+    Cairo::Context.new(surface) do |cr|
+      cr.set_source_pixbuf(pixbuf, 0, 0)
+      cr.set_operator(Cairo::OPERATOR_SOURCE)
+      cr.paint()
+    end
     return surface
   end
 

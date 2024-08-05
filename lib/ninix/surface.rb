@@ -1177,23 +1177,24 @@ module Surface
         rescue
           next
         end
-        cr = Cairo::Context.new(surface)
-        op = {
-          'base' =>            Cairo::OPERATOR_SOURCE, # XXX
-          'overlay' =>         Cairo::OPERATOR_OVER,
-          'overlayfast' =>     Cairo::OPERATOR_ATOP,
-          'overlaymultiply' => Cairo::OPERATOR_ATOP, # FIXME
-          'interpolate' =>     Cairo::OPERATOR_SATURATE,
-          'reduce' =>          Cairo::OPERATOR_DEST_IN,
-          'replace' =>         Cairo::OPERATOR_SOURCE,
-          'asis' =>            Cairo::OPERATOR_OVER,
-        }[method]
-        cr.set_operator(op)
-        cr.set_source(overlay, x, y)
-        if ['overlay', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
-          cr.mask(overlay, x, y)
-        else
-          cr.paint()
+        Cairo::Context.new(surface) do |cr|
+          op = {
+            'base' =>            Cairo::OPERATOR_SOURCE, # XXX
+            'overlay' =>         Cairo::OPERATOR_OVER,
+            'overlayfast' =>     Cairo::OPERATOR_ATOP,
+            'overlaymultiply' => Cairo::OPERATOR_ATOP, # FIXME
+            'interpolate' =>     Cairo::OPERATOR_SATURATE,
+            'reduce' =>          Cairo::OPERATOR_DEST_IN,
+            'replace' =>         Cairo::OPERATOR_SOURCE,
+            'asis' =>            Cairo::OPERATOR_OVER,
+          }[method]
+          cr.set_operator(op)
+          cr.set_source(overlay, x, y)
+          if ['overlay', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
+            cr.mask(overlay, x, y)
+          else
+            cr.paint()
+          end
         end
       end
       return surface
@@ -1255,27 +1256,28 @@ module Surface
             done << actor_id
             for method, mayuna_id, dest_x, dest_y in iter_mayuna(surface_width, surface_height, actor, done)
               mayuna_surface = get_image_surface(mayuna_id)
-              cr = Cairo::Context.new(surface)
-              op = {
-                'base' =>            Cairo::OPERATOR_SOURCE, # XXX
-                'overlay' =>         Cairo::OPERATOR_OVER,
-                'overlayfast' =>     Cairo::OPERATOR_ATOP,
-                'overlaymultiply' => Cairo::OPERATOR_ATOP, # FIXME
-                'replace' =>         Cairo::OPERATOR_SOURCE,
-                'interpolate' =>     Cairo::OPERATOR_SATURATE,
-                'asis' =>            Cairo::OPERATOR_OVER,
-                'bind' =>            Cairo::OPERATOR_OVER,
-                'add' =>             Cairo::OPERATOR_OVER,
-                'reduce' =>          Cairo::OPERATOR_DEST_IN,
-              }[method]
-              cr.set_operator(op)
-              cr.set_source(mayuna_surface, dest_x, dest_y)
-              if ['overlay', 'bind', 'add', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
-                cr.mask(mayuna_surface, dest_x, dest_y)
-              elsif ['replace', 'asis', 'reduce'].include?(method)
-                cr.paint()
-              else
-                fail RuntimeError('should not reach here')
+              Cairo::Context.new(surface) do |cr|
+                op = {
+                  'base' =>            Cairo::OPERATOR_SOURCE, # XXX
+                  'overlay' =>         Cairo::OPERATOR_OVER,
+                  'overlayfast' =>     Cairo::OPERATOR_ATOP,
+                  'overlaymultiply' => Cairo::OPERATOR_ATOP, # FIXME
+                  'replace' =>         Cairo::OPERATOR_SOURCE,
+                  'interpolate' =>     Cairo::OPERATOR_SATURATE,
+                  'asis' =>            Cairo::OPERATOR_OVER,
+                  'bind' =>            Cairo::OPERATOR_OVER,
+                  'add' =>             Cairo::OPERATOR_OVER,
+                  'reduce' =>          Cairo::OPERATOR_DEST_IN,
+                }[method]
+                cr.set_operator(op)
+                cr.set_source(mayuna_surface, dest_x, dest_y)
+                if ['overlay', 'bind', 'add', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
+                  cr.mask(mayuna_surface, dest_x, dest_y)
+                elsif ['replace', 'asis', 'reduce'].include?(method)
+                  cr.paint()
+                else
+                  fail RuntimeError('should not reach here')
+                end
               end
             end
           end
@@ -1302,22 +1304,23 @@ module Surface
           next
         end
         # overlay surface
-        cr = Cairo::Context.new(new_surface)
-        op = {
-          'base' =>        Cairo::OPERATOR_SOURCE, # XXX
-          'overlay' =>     Cairo::OPERATOR_OVER,
-          'overlayfast' => Cairo::OPERATOR_ATOP,
-          'interpolate' => Cairo::OPERATOR_SATURATE,
-          'reduce' =>      Cairo::OPERATOR_DEST_IN,
-          'replace' =>     Cairo::OPERATOR_SOURCE,
-          'asis' =>        Cairo::OPERATOR_OVER,
-        }[method]
-        cr.set_operator(op)
-        cr.set_source(overlay_surface, x, y)
-        if ['overlay', 'overlayfast'].include?(method)
-          cr.mask(overlay_surface, x, y)
-        else
-          cr.paint()
+        Cairo::Context.new(new_surface) do |cr|
+          op = {
+            'base' =>        Cairo::OPERATOR_SOURCE, # XXX
+            'overlay' =>     Cairo::OPERATOR_OVER,
+            'overlayfast' => Cairo::OPERATOR_ATOP,
+            'interpolate' => Cairo::OPERATOR_SATURATE,
+            'reduce' =>      Cairo::OPERATOR_DEST_IN,
+            'replace' =>     Cairo::OPERATOR_SOURCE,
+            'asis' =>        Cairo::OPERATOR_OVER,
+          }[method]
+          cr.set_operator(op)
+          cr.set_source(overlay_surface, x, y)
+          if ['overlay', 'overlayfast'].include?(method)
+            cr.mask(overlay_surface, x, y)
+          else
+            cr.paint()
+          end
         end
       end
       @image_surface = new_surface

@@ -412,9 +412,10 @@ module Kinoko
           next
         end
         # overlay surface
-        cr = Cairo::Context.new(new_surface)
-        cr.set_source(overlay_surface, x, y)
-        cr.mask(overlay_surface, x, y)
+        Cairo::Context.new(new_surface) do |cr|
+          cr.set_source(overlay_surface, x, y)
+          cr.mask(overlay_surface, x, y)
+        end
       end
       #@darea.queue_draw_area(0, 0, w, h)
       @image_surface = new_surface
