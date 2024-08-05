@@ -91,6 +91,19 @@ module Pix
       super(type)
       set_decorated(false)
       #set_resizable(false)
+      signal_connect('size-allocate') do |w, alloc, data|
+        unless @width == alloc.width and @height == alloc.height
+          @width, @height = alloc.width, alloc.height
+          # XXX draw中にresizeすると
+          # Assertion failed: CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count)
+          # で落ちる(Windowsのみ)が、サイズが変わるタイミングで
+          # GCすると*なぜか*落ちなくなる。
+          if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+            GC.start
+          end
+        end
+        next false
+      end
       signal_connect("screen-changed") do |widget, old_screen|
         screen_changed(widget, :old_screen => old_screen)
         next true
@@ -180,9 +193,7 @@ module Pix
       # resize window
       x, y, w, h = @device_extents
       unless @width == w and @height == h
-        @width = w
-        @height = h
-        resize(@width, @height)
+        resize(w, h)
       end
     end
 
