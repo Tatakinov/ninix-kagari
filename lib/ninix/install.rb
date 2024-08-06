@@ -468,7 +468,7 @@ module Install
           f.close()
         end
         if balloon_dir.nil? # XXX
-          balloon_dir = ''
+          #balloon_dir = ''
         end
       end
       return [[target_dir, balloon_dir], [ghost_name, balloon_name], 0]
