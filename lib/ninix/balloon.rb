@@ -2071,8 +2071,8 @@ module Balloon
         x = desc.get('communicatebox.x', :default => 10).to_i
         y = desc.get('communicatebox.y', :default => 20).to_i
         overlay = Gtk::Overlay.new()
-        @entry.set_margin_left(x + get_draw_offset()[0])
-        @entry.set_margin_top(y + get_draw_offset()[1])
+        @entry.set_margin_left(x)
+        @entry.set_margin_top(y)
         @entry.set_halign(Gtk::Align::START)
         @entry.set_valign(Gtk::Align::START)
         overlay.add_overlay(@entry)
@@ -2108,14 +2108,16 @@ module Balloon
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.set_source_rgba(0, 0, 0, 0)
       cr.paint
-      # translate the user-space origin
-      cr.translate(*get_draw_offset) # XXX
       cr.set_source(surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       # copy rectangle on the destination
       cr.rectangle(0, 0, surface.width, surface.height)
       cr.fill()
       cr.restore()
+      w, h = @window.size
+      unless w == surface.width and h == surface.height
+        @window.resize(surface.width, surface.height)
+      end
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       region = Pix.surface_to_region(cr.target.map_to_image)
       # XXX: to avoid losing focus in the text input region
