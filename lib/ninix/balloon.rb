@@ -1171,7 +1171,10 @@ module Balloon
         end
         cr.paint()
       end
+      cr.reset_clip
       # draw text
+      cr.rectangle(@origin_x, @origin_y, @valid_width, @origin_y + @valid_height)
+      cr.clip
       @layout.set_width(-1)
       for i in 0..(@data_buffer.length - 1)
         data = @data_buffer[i]
@@ -1189,7 +1192,10 @@ module Balloon
         cr.move_to(@origin_x, @origin_y + data[:pos][:y] - @lineno * @line_height)
         cr.show_pango_layout(@layout)
       end
+      cr.reset_clip
       # draw foreground image
+      cr.rectangle(@origin_x, 0, @valid_width, @origin_y + @valid_height)
+      cr.clip
       for i in 0..(@data_buffer.length - 1)
         data = @data_buffer[i]
         unless data[:content][:type] == TYPE_IMAGE and
