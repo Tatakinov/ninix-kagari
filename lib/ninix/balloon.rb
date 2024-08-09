@@ -2021,7 +2021,6 @@ module Balloon
                             Gdk::DragAction::COPY)
       @window.drag_dest_add_text_targets()
       @window.set_events(Gdk::EventMask::BUTTON_PRESS_MASK)
-      @window.set_modal(true)
       #@window.set_window_position(Gtk::WindowPosition::CENTER)
       @window.realize()
       @window.override_background_color(
