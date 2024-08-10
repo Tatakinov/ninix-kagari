@@ -1324,7 +1324,7 @@ module Surface
         end
       end
       @image_surface = new_surface
-      @darea.queue_draw()
+      @window.queue_draw()
     end
 
     def redraw(darea, cr)

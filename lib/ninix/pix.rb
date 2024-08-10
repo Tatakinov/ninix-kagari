@@ -158,6 +158,21 @@ module Pix
       return new_x, new_y
     end
 
+    def queue_draw
+      # HACK region.rectangles == []だと
+      # GTK君は賢いからqueue_drawされてもEXPOSURE_EVENTを発火しないので
+      # regionを追加して無理矢理発火させる。
+      if (not @region.nil?) and @region.rectangles == []
+        @region.union!(0, 0, 1, 1)
+        if @supports_alpha
+          input_shape_combine_region(@region)
+        else
+          shape_combine_region(@region)
+        end
+      end
+      return super
+    end
+
     def set_surface(cr, surface, scale, reshape)
       cr.save()
       # clear
