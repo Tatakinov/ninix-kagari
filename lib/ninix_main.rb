@@ -781,6 +781,7 @@ module Ninix_Main
     def load
       # load user preferences
       @prefs.load()
+      Gtk::Settings.default.set_gtk_font_name(@prefs.get('menu_fonts'))
       # choose default ghost/shell
       directory = @prefs.get('sakura_dir')
       name = @prefs.get('sakura_name') # XXX: backward compat

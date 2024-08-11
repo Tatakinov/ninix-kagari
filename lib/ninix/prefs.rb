@@ -25,6 +25,7 @@ module Prefs
 
   # default settings
   DEFAULT_BALLOON_FONTS = 'Monospace'
+  DEFAULT_MENU_FONTS = 'Sans'
 
   def self.get_default_surface_scale()
     RANGE_SCALE[0]
@@ -166,6 +167,7 @@ module Prefs
     def reset
       @fontchooser.set_font(get('balloon_fonts', :default => DEFAULT_BALLOON_FONTS))
       set_default_balloon(get('default_balloon'))
+      @menu_fontchooser.set_font(get('menu_fonts', :default => DEFAULT_MENU_FONTS))
       @ignore_button.set_active((not get('ignore_default', :default => 0).zero?))
       scale = get('surface_scale', :default => Prefs.get_default_surface_scale())
       unless RANGE_SCALE.include?(scale)
@@ -192,7 +194,7 @@ module Prefs
 
     def get(name, default: nil)
       if ['sakura_name', # XXX: backward compat
-          'sakura_dir', 'default_balloon', 'balloon_fonts'].include?(name)
+          'sakura_dir', 'default_balloon', 'balloon_fonts', 'menu_fonts'].include?(name)
         value = @__prefs.get(name, default)
       elsif ['ignore_default', 'script_speed', 'surface_scale',
              'balloon_scaling', 'allowembryo', 'check_collision',
@@ -226,6 +228,8 @@ module Prefs
     def update(commit: false)
       @__prefs.set('allowembryo', (@allowembryo_button.active? ? 1 : 0).to_s)
       @__prefs.set('balloon_fonts', @fontchooser.font)
+      @__prefs.set('menu_fonts', @menu_fontchooser.font)
+      Gtk::Settings.default.set_gtk_font_name(@menu_fontchooser.font)
       selected = @balloon_treeview.selection.selected
       unless selected.nil?
         model, listiter = selected
@@ -351,9 +355,20 @@ module Prefs
       frame.add(box)
       box.show()
       @fontchooser = Gtk::FontButton.new()
-      @fontchooser.set_show_size(false)        
+      @fontchooser.set_show_size(false)
       box.add(@fontchooser)
       @fontchooser.show()
+      frame = Gtk::Frame.new(label=_('Font(s) for menu'))
+      page.pack_start(frame, :expand => false, :fill => true, :padding => 0)
+      frame.show()
+      box = Gtk::Box.new(orientation=Gtk::Orientation::VERTICAL, spacing=5)
+      box.set_border_width(5)
+      frame.add(box)
+      box.show()
+      @menu_fontchooser = Gtk::FontButton.new()
+      @menu_fontchooser.set_show_size(false)
+      box.add(@menu_fontchooser)
+      @menu_fontchooser.show()
       frame = Gtk::Frame.new(label=_('Translucency'))
       page.pack_start(frame, :expand => false, :fill => true, :padding => 0)
       frame.show()
