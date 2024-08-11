@@ -164,7 +164,7 @@ module Prefs
     end
 
     def reset
-      @fontchooser.set_font_name(get('balloon_fonts', :default => DEFAULT_BALLOON_FONTS))
+      @fontchooser.set_font(get('balloon_fonts', :default => DEFAULT_BALLOON_FONTS))
       set_default_balloon(get('default_balloon'))
       @ignore_button.set_active((not get('ignore_default', :default => 0).zero?))
       scale = get('surface_scale', :default => Prefs.get_default_surface_scale())
@@ -225,7 +225,7 @@ module Prefs
 
     def update(commit: false)
       @__prefs.set('allowembryo', (@allowembryo_button.active? ? 1 : 0).to_s)
-      @__prefs.set('balloon_fonts', @fontchooser.font_name)
+      @__prefs.set('balloon_fonts', @fontchooser.font)
       selected = @balloon_treeview.selection.selected
       unless selected.nil?
         model, listiter = selected
