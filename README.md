@@ -24,6 +24,8 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - Windows
 
+- BSD
+
 ## Requirements
 
 - ruby
