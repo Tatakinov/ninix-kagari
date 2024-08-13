@@ -5,11 +5,13 @@
 rxgettext lib/ninix_main.rb -o pot/ninix_main.pot
 rxgettext lib/ninix/alias.rb  -o pot/alias.pot
 rxgettext lib/ninix/balloon.rb  -o pot/balloon.pot
+rxgettext lib/ninix/case_insensitive_file.rb -o pot/case_insensitive_file.pot
 rxgettext lib/ninix/communicate.rb  -o pot/communicate.pot
 rxgettext lib/ninix/config.rb  -o pot/config.pot
 rxgettext lib/ninix/dll.rb  -o pot/dll.pot
 rxgettext lib/ninix/entry_db.rb  -o pot/entry_db.pot
 rxgettext lib/ninix/home.rb  -o pot/home.pot
+rxgettext lib/ninix/http.rb  -o pot/http.pot
 rxgettext lib/ninix/install.rb  -o pot/install.pot
 rxgettext lib/ninix/keymap.rb  -o pot/keymap.pot
 rxgettext lib/ninix/kinoko.rb  -o pot/kinoko.pot
@@ -32,6 +34,11 @@ rxgettext lib/ninix/update.rb  -o pot/update.pot
 rxgettext lib/ninix/version.rb  -o pot/version.pot
 
 rmsgcat pot/*.pot -o ninix-kagari.pot
+
+# rm -r pot/* and rmdir pot
+
+# rmsgmerge -o new.pot po/ja/ninix-kagari.po ninix-kagari.po
+# edit new.pot and mv new.pot po/ja/ninix-kagari.po
 
 # cp ninix-kagari.pot po/ja/ninix-kagari.po and edit ninix-kagari.pot
 
