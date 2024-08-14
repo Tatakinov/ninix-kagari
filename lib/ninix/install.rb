@@ -123,7 +123,6 @@ module Install
           File.chmod(st_mode | 128 | 256, path)
         end
       }
-      rename_files(tmpdir)
       return tmpdir
     end
 
@@ -250,19 +249,6 @@ module Install
         zf.close()
       end
       return filename
-    end
-
-    def rename_files(basedir)
-      return if RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|cygwin|bccwin/ # XXX
-      Dir.foreach(basedir) { |filename|
-        next if /\A\.+\z/ =~ filename
-        filename2 = filename.downcase
-        path = File.join(basedir, filename2)
-        if filename != filename2
-          File.rename(File.join(basedir, filename), path)
-        end
-        rename_files(path) if File.directory?(path)
-      }
     end
 
     def list_all_directories(top, basedir)
