@@ -45,6 +45,14 @@ module Home
     return path
   end
 
+  def self.filename_to_surface_id(filename)
+    filename = filename.downcase.gsub('\\', '/')
+    dirname = File.dirname(filename)
+    basename = File.basename(filename, ".*")
+    surface_id = File.join(dirname, basename)
+    return surface_id
+  end
+
   def self.load_config()
     return nil unless File.exist?(get_ninix_home())
     ghosts = search_ghosts
@@ -540,11 +548,12 @@ module Home
       value = surface[key]
       img, config = value
       for key, method, filename, x, y in list_surface_elements(config)
-        filename = filename.downcase
+        filename = filename.downcase.gsub('\\', '/')
         basename = File.basename(filename, ".*")
         ext = File.extname(filename)
-        unless surface.include?(basename)
-          surface[basename] = [File.join(surface_dir, filename),
+        id = Home.filename_to_surface_id(filename)
+        unless surface.include?(id)
+          surface[id] = [File.join(surface_dir, filename),
                                NConfig.null_config()]
         end
       end

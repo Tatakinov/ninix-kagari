@@ -463,6 +463,7 @@ module Surface
           method, filename, x, y = spec
           x = Integer(x)
           y = Integer(y)
+          filename = filename.downcase.gsub('\\', '/')
         rescue
           error = ('invalid element spec for ' + key + ': ' + config[key])
           break
@@ -470,16 +471,16 @@ module Surface
         basename = File.basename(filename, ".*")
         ext = File.extname(filename)
         ext = ext.downcase
+        id = Home.filename_to_surface_id(filename)
         unless ['.png', '.dgp', '.ddp'].include?(ext)
           error = ('unsupported file format for ' + key + ': ' + filename)
           break
         end
-        basename = basename.downcase
-        unless elements.include?(basename)
+        unless elements.include?(id)
           error = (key + ' file not found: ' + filename)
           break
         end
-        surface = elements[basename][0]
+        surface = elements[id][0]
         if n.zero? # base surface
           surface_list = [surface]
         elsif ['overlay', 'overlayfast', 'overlaymultiply',
