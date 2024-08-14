@@ -18,6 +18,7 @@ require "tmpdir"
 require "zip"
 require "open-uri"
 require "fileutils"
+require 'nkf'
 
 require "gtk3"
 
@@ -97,7 +98,7 @@ module Install
         zf = Zip::File.new(filename)
         for entry in zf
           name = entry.name
-          normalize = name.gsub('\\', '/')
+          normalize = name.dup.force_encoding(NKF.guess(name)).encode('utf-8', :invalid => :replace, :undef => :replace).gsub('\\', '/')
           next if entry.directory? or normalize.end_with?('/')
           path = File.join(tmpdir, normalize)
           dname, fname = File.split(path)
