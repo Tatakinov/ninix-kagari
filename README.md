@@ -138,11 +138,12 @@ Requirementsに書かれているものをインストールします。
 
 KAWARI(華和梨)は`/opt/ninix-kagari/lib/kawari8/libshiori.so`、
 YAYAは`/opt/ninix-kagari/lib/yaya/libaya5.so`が必要です。
+(デフォルトのインストール先の場合)
 
-KAWARIは[kawari](https://github.com/kawari/kawari)に
-[このパッチ](https://gist.github.com/Tatakinov/701bf6ec0487da3e127981c50921b835)を当てたものを、
+KAWARIは[kawariのfork](https://github.com/Tatakinov/kawari)の
+`develop`ブランチを、
 YAYAは[yaya-shioriのfork](https://github.com/Tatakinov/yaya-shiori)の
-feature/improve\_posix\_supportブランチを
+`feature/improve_posix_support`ブランチを
 それぞれコンパイルしてください。
 
 そして、出来上がったものを上記の場所にコピーしてから、
