@@ -2244,7 +2244,9 @@ module Satori
 
     def get_reference(nodelist, history, side)
       key = expand(nodelist[1..-2], :caller_history => history)
-      if not key.nil? and ['Ｒ', 'R'].include?(key[0])
+      if key == 'SenderType' or key == 'ＳｅｎｄｅｒＴｙｐｅ'
+        return @sender_type
+      elsif not key.nil? and ['Ｒ', 'R'].include?(key[0])
         n = to_integer(key[1..-1])
         if not n.nil? and 0 <= n and n < @reference.length ## FIXME
           return '' if @reference[n].nil?
@@ -2813,6 +2815,7 @@ module Satori
           req_header[key] = value
         end
       end
+      @sender_type = req_header.include?('SenderType') ? req_header['SenderType'] : ''
       result = ''
       to = nil
       if req_header.include?('ID')
@@ -2838,17 +2841,18 @@ module Satori
             teach(req_header['Reference0'])
           end
         else
+          ref = []
+          for n in 0..7
+            if req_header.include?(['Reference', n.to_s].join(''))
+              ref << req_header[
+                ['Reference', n.to_s].join('')]
+            else
+              ref << nil
+            end
+          end
+          @reference = ref
           result = getstring(req_header['ID'])
           if result.nil?
-            ref = []
-            for n in 0..7
-              if req_header.include?(['Reference', n.to_s].join(''))
-                ref << req_header[
-                  ['Reference', n.to_s].join('')]
-              else
-                ref << nil
-              end
-            end
             ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7 = ref
             result = get_event_response(
               req_header['ID'],
