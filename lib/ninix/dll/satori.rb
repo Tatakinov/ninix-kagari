@@ -104,6 +104,11 @@ module Satori
     return buf
   end
 
+  class RuntimeError < Exception
+  end
+
+  class ValueError < Exception
+  end
 
   class Filter
 
@@ -356,6 +361,13 @@ module Satori
       line = linelist[1]
       fail "assert" unless line.start_with?('＊')
       name = line[1..-1]
+      if pos = name =~ /\t/
+        cond = parse_expression(name[pos + 1 ..])
+        name = name[0 .. pos - 1]
+      else
+        # trueになるものであれば何でも良い。
+        cond = parse_expression('１＝＝１')
+      end
       while linelist.length > 3 and not linelist[-1]
         linelist.delete_at(-1)
       end
@@ -409,12 +421,10 @@ module Satori
         end
       end
       unless buf.empty?
-        if @talk.include?(name)
-          talk_list = @talk[name]
-        else
-          talk_list = @talk[name] = []
+        unless @talk.include?(name)
+          @talk[name] = []
         end
-        talk_list << buf
+        @talk[name] << [buf, cond]
         if @is_anchor
           @anchor_list << [name, "\\_a[" + name.to_s + ']' + name.to_s + "\\_a"]
         end
@@ -427,6 +437,13 @@ module Satori
       line = linelist[1]
       fail "assert" unless line.start_with?('＠')
       name = line[1..-1]
+      if pos = name =~ /\t/
+        cond = parse_expression(name[pos + 1 ..])
+        name = name[0 .. pos - 1]
+      else
+        # trueになるものであれば何でも良い。
+        cond = parse_expression('１＝＝１')
+      end
       prev = ''
       num_open = 0
       num_close = 0
@@ -455,12 +472,10 @@ module Satori
         end
       end
       unless buf.empty?
-        if @word.include?(name)
-          word_list = @word[name]
-        else
-          word_list = @word[name] = []
+        unless @word.include?(name)
+          @word[name] = []
         end
-        word_list.concat(buf)
+        @word[name] << [buf, cond]
       end
     end
 
@@ -696,7 +711,7 @@ module Satori
         else
           list_ = [text_.join('')]
         end
-        if ['単語の追加', 'sync', 'loop', 'call',
+        if ['単語の追加', 'sync', 'loop', 'call', 'バイト値',
             'set', 'remember', 'nop', '合成単語群',
             'when', 'times', 'while', 'for'].include?(list_[0]) or list_[0].end_with?('の数')
           function = list_[0]
@@ -743,7 +758,10 @@ module Satori
       default = [[NODE_TEXT, line[0..-1]]]
       begin
         line, buf = get_or_expr(line)
-      rescue #except ValueError as e:
+      rescue ValueError => err
+        Logging::Logging.debug(err.message)
+        return default
+      rescue
         return default
       end
       return default unless line.nil? or line.empty?
@@ -758,7 +776,7 @@ module Satori
         if not line.nil? and not line.empty? and ['|', '｜'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
-          fail ValueError('broken OR operator')
+          fail ValueError, 'broken OR operator: ' + line
         end
         line, and_expr = get_and_expr(line)
         buf << and_expr
@@ -772,12 +790,12 @@ module Satori
     def get_and_expr(line)
       line, comp_expr = get_comp_expr(line)
       buf = [NODE_AND_EXPR, comp_expr]
-      while not lin.nil? and not line.empty? and ['&', '＆'].include?(line[0]) ### FIXME: φ
+      while not line.nil? and not line.empty? and ['&', '＆'].include?(line[0]) ### FIXME: φ
         line = line[1..-1]
         if not line.nil? and not line.empty? and ['&', '＆'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
-          fail ValueError('broken AND operator')
+          fail ValueError, 'broken AND operator: ' + line
         end
         line, comp_expr = get_comp_expr(line)
         buf << comp_expr
@@ -813,7 +831,7 @@ module Satori
         if not line.nil? and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
-          fail ValueError('broken EQUAL operator')
+          fail ValueError, 'broken EQUAL operator: ' + line
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, '==', add_expr]]
@@ -822,7 +840,7 @@ module Satori
         if not line.nil? and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
           line = line[1..-1]
         else
-          fail ValueError('broken NOT EQUAL operator')
+          fail ValueError, 'broken NOT EQUAL operator: ' + line
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, '!=', add_expr]]
@@ -902,7 +920,7 @@ module Satori
         if not line.nil? and not line.empty? and line[0] == ')' ### FIXME: φ
           line = line[1..-1]
         else
-          fail ValueError('expected a close paren')
+          fail ValueError, 'expected a close paren: ' + line
         end
         return line, buf
       end
@@ -931,7 +949,7 @@ module Satori
         end
       end
       if buf.empty?
-        fail ValueError('expected a constant')
+        fail ValueError, 'expected a constant: ' + line
       end
       return line, buf
     end
@@ -1027,7 +1045,7 @@ module Satori
           print([indent, 'op'].join(''), node[1], "\n")
           print_nodelist(node[2], :depth => depth + 1)
         else
-          fail RuntimeError('should not reach here')
+          fail RuntimeError, 'should not reach here'
         end
       end
     end
@@ -1443,8 +1461,15 @@ module Satori
 
     # SHIORI/2.5 API
     def getstring(name)
-      word = @word[name]
-      return expand(word.sample) unless word.nil?
+      if @word.include?(name)
+        word = []
+        @word[name].filter do |_, cond|
+          next not(['0', '０'].include?(expand(cond)))
+        end.each do |list, _|
+          word.concat(list)
+        end
+        return expand(word.sample) unless word.empty?
+      end
       return nil
     end
 
@@ -1683,6 +1708,12 @@ module Satori
       @url_list[name] = []
       list_ = @talk[name]
       return nil if list_.nil?
+      list_ = list_.filter do |_, cond|
+        next not(['0', '０'].include?(expand(cond)))
+      end.map do |talk, _|
+        next talk
+      end
+      return nil if list_.empty?
       url_list = ''
       for i in (list_.length-1).step(-1, -1)
         nodelist = list_[i]
@@ -1833,7 +1864,7 @@ module Satori
                       tag, script[match.end(0)..-1]].join('')
           end
         else
-          fail RuntimeError('should not reach here')
+          fail RuntimeError, 'should not reach here'
         end
       end
       # insert newline
@@ -1930,8 +1961,13 @@ module Satori
     end
 
     def get(name, default: '')
-      result = @talk[name]
-      return default if result.nil?
+      return default unless @talk.include?(name)
+      result = @talk[name].filter do |_, cond|
+        next not(['0', '０'].include?(expand(cond)))
+      end.map do |talk, _|
+        next talk
+      end
+      return default if result.empty?
       return expand(result.sample)
     end
 
@@ -2106,7 +2142,7 @@ module Satori
           when '>='
             buf << to_zenkaku(operand1 >= operand2 ? 1 : 0)
           else
-            fail RuntimeError('should not reach here')
+            fail RuntimeError, 'should not reach here'
           end
         when NODE_ADD_EXPR
           value_str = expand(node[1])
@@ -2129,7 +2165,7 @@ module Satori
             if node[i] == '+'
               value += operand
             else
-              fail RuntimeError('should not reach here')
+              fail RuntimeError, 'should not reach here'
             end
           end
           if value.nil?
@@ -2165,7 +2201,7 @@ module Satori
             elsif node[i] == '%'
               value = (value % operand)
             else
-              fail RuntimeError('should not reach here')
+              fail RuntimeError, 'should not reach here'
             end
           end
           if value.nil?
@@ -2191,11 +2227,11 @@ module Satori
           elsif node[1] == '!'
             value = (['０', '0'].include?(value) ? 1 : 0)
           else
-            fail RuntimeError('should not reach here')
+            fail RuntimeError, 'should not reach here'
           end
           buf << to_zenkaku(value)
         else
-          fail RuntimeError('should not reach here')
+          fail RuntimeError, 'should not reach here'
         end
       end
       return buf.join('').strip()
@@ -2235,12 +2271,23 @@ module Satori
       unless n.nil?
         return '\s[' + (n + @add_to_surface[side]).to_s + ']'
       end
-      if @word.include?(key)
-        return expand(@word[key].sample, :caller_history => history,
+      if @word.include?(key) and not (list = @word[key].filter do |_, cond|
+          next not(['0', '０'].include?(expand(cond)))
+        end).empty?
+        word = []
+        list.each do |l, _|
+          word.concat(l)
+        end
+        return expand(word.sample, :caller_history => history,
                       :side => side)
-      elsif @talk.include?(key)
+      elsif @talk.include?(key) and not (list = @talk[key].filter do |_, cond|
+          next not(['0', '０'].include?(expand(cond)))
+        end).empty?
         @reference = [nil] * 8
-        return expand(@talk[key].sample, :side => 1)
+        talk = list.map do |t, _|
+          next t
+        end
+        return expand(talk.sample, :side => 1)
       elsif @variable.include?(key)
         return @variable[key]
       elsif @timer.include?(key)
@@ -2387,6 +2434,12 @@ module Satori
                                history, side)
         end
         return buf.join('')
+      elsif name == "バイト値"
+        if args.nil?
+          return ''
+        end
+        n = to_integer(expand(args[0], :caller_history => history))
+        return n.chr
       elsif name == 'sync' ## FIXME
         #pass
       elsif name == 'set'
@@ -2462,7 +2515,7 @@ module Satori
         print('FOR :', args.length, " ", args)
         #pass
       else
-        fail RuntimeError('should not reach here')
+        fail RuntimeError, 'should not reach here'
       end
       return ''
     end
@@ -2670,11 +2723,19 @@ module Satori
       parser = Parser.new()
       parser.read(path)
       talk, word = parser.get_dict()
-      for nodelist in (talk.include?('初期化') ? talk['初期化'] : [])
+      for nodelist in (talk.include?('初期化') ? talk['初期化'].filter do |_, cond|
+          next not(['0', '０'].include?(expand(cond)))
+      end.map do |t, _|
+        next t
+      end : [])
         expand(nodelist)
       end
       @saori_function = {}
-      for nodelist in (word.include?('SAORI') ? word['SAORI'] : [])
+      for nodelist in (word.include?('SAORI') ? word['SAORI'].filter do |_, cond|
+          next not(['0', '０'].include?(expand(cond)))
+      end.map do |w, _|
+        next w
+      end : [])
         if nodelist[0][0] == NODE_TEXT
           list_ = nodelist[0][1].join('').split(',', -1)
           if list_.length >= 2 and not list_[0].nil? and not list_[1].nil?
