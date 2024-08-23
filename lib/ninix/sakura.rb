@@ -751,12 +751,13 @@ module Sakura
       get_event_response(name)
     end
 
-    def translate(s, event)
+    def translate(s, event, embed: false)
       unless s.nil?
         if @use_makoto
           s = Makoto.execute(s)
         else
-          r = get_event_response('OnTranslate', s, nil, event, :translate => 0)
+          r = get_event_response('OnTranslate', s, nil, event, :translate => 0,
+                                embed: embed)
           unless r.empty?
             s = r
           end
@@ -801,7 +802,7 @@ module Sakura
     end
 
     def get_event_response_with_communication(event, *arglist,
-                                              event_type: 'GET', translate: 1)
+        event_type: 'GET', translate: 1, embed: false)
       return '' if @__temp_mode == 1
       ref = arglist
       header = [event_type.to_s, " SHIORI/3.0\r\n",
@@ -809,6 +810,10 @@ module Sakura
                 "ID: ", event.to_s, "\r\n",
                 "SecurityLevel: local\r\n",
                 "Charset: ", @__charset.to_s, "\r\n"].join("")
+      # FIXME もっと汎用性を持たせたい。
+      if embed
+        header = [header, "SenderType: embed", "\r\n"].join
+      end
       for i in 0..ref.length-1
         value = ref[i]
         unless value.nil?
@@ -823,7 +828,7 @@ module Sakura
       response = @shiori.request(header)
       if event_type != 'NOTIFY' and @cantalk
         result, to = get_value(response)
-        result = translate(result, event.to_s) unless translate.zero?
+        result = translate(result, event.to_s, embed: embed) unless translate.zero?
       else
         result, to = '', nil
       end
@@ -836,10 +841,10 @@ module Sakura
       return result, communication
     end
 
-    def get_event_response(event, *arglist, event_type: 'GET', translate: 1)
+    def get_event_response(event, *arglist, event_type: 'GET', translate: 1, embed: false)
       result, communication = get_event_response_with_communication(
                 event, *arglist,
-                :event_type => event_type, :translate => translate)
+                event_type: event_type, translate: translate, embed: embed)
       return result
     end
 
@@ -1191,7 +1196,7 @@ module Sakura
         reset_script(:reset_all => true)
       end
       result = get_event_response_with_communication(event, *arglist,
-                                                     :event_type => event_type)
+          event_type: event_type, embed: embed)
       unless result.nil?
         script, communication = result
       else
