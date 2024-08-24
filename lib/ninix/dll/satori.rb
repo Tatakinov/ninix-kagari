@@ -2057,8 +2057,10 @@ module Satori
             buf << newline[side].to_s
           end
         when NODE_ASSIGNMENT
+          key = expand(node[1])
           value = expand(node[2])
-          result = assign(expand(node[1]), value)
+          result = assign(key, value)
+          Logging::Logging.debug('Var ' + key.to_s + ' <= ' + value.to_s)
           unless result.nil?
             buf << result
           end
@@ -2291,6 +2293,7 @@ module Satori
         end
         return expand(talk.sample, :side => 1)
       elsif @variable.include?(key)
+        Logging::Logging.debug('Var ' + key + ': ' + @variable[key].to_s)
         return @variable[key]
       elsif @timer.include?(key)
         return to_zenkaku(@timer[key])
@@ -2456,6 +2459,7 @@ module Satori
           value = expand(args[1], :caller_history => history)
         end
         unless name.empty?
+          Logging::Logging.debug('Var ' + name + ' <= ' + value.to_s)
           if value.empty?
             if @variable.include?(name)
               @variable.delete(name)
