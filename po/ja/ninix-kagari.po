@@ -3,7 +3,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: ninix-aya 5.0\n"
+"Project-Id-Version: ninix-kagari 1.6\n"
 "POT-Creation-Date: 2024-08-13 21:16+0900\n"
 "PO-Revision-Date: 2016-08-06 22:35+0900\n"
 "Last-Translator: Tatakinov <tatakinov@gmail.com>\n"
