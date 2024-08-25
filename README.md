@@ -149,7 +149,7 @@ YAYAは[yaya-shioriのfork](https://github.com/Tatakinov/yaya-shiori)の
 そして、出来上がったものを上記の場所にコピーしてから、
 ninix-kagariを起動してください。
 
-また、YAYAで`Shift_JIS`な辞書を読み込みたい場合は
+なお、YAYAで`Shift_JIS`な辞書を読み込みたい場合は
 `ja_JP.SJIS`ロケールをインストールする必要があります。
 
 ### Windows
