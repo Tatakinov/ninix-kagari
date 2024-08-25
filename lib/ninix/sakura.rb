@@ -770,7 +770,7 @@ module Sakura
       result = {}
       to = nil
       for line in response.force_encoding(@__charset).split(/\r?\n/, 0)
-        line = line.encode("UTF-8", :invalid => :replace, :undef => :replace).strip()
+        line = line.encode("UTF-8", :invalid => :replace, :undef => :replace).strip().gsub(/¥/, '\\')
         next if line.empty?
         next unless line.include?(':')
         key, value = line.split(':', 2)
