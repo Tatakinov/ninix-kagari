@@ -568,6 +568,12 @@ module Balloon
                         Gdk::EventMask::POINTER_MOTION_MASK|
                         Gdk::EventMask::POINTER_MOTION_HINT_MASK|
                         Gdk::EventMask::SCROLL_MASK)
+      @darea.signal_connect('size-allocate') do |w, allocation, data|
+        # XXX DrawingAreaのsizeが変わったらreshapeしないと
+        # マウスやキーボードのイベントを拾わない。
+        @reshape = true
+        next false
+      end
       @darea.signal_connect('draw') do |w, e|
         redraw(w, e)
         next true
