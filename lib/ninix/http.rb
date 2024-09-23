@@ -130,7 +130,12 @@ module Http
         # type != ERRORなのでURI.parseは必ず成功する
         filename = op[:filename]
         if filename == false
-          @parent.handle_request('NOTIFY', 'enqueue_event', event[:complete], op[:method], op[:event], op[:url], data.gsub(/\n/, "\x01"), '200')
+          # FIXME UTF-8 only
+          d = data.force_encoding(Encoding::UTF_8)
+          d = d.gsub(/\r\n/, "\x01")
+          d = d.gsub(/\r/, "\x01")
+          d = d.gsub(/\n/, "\x01")
+          @parent.handle_request('NOTIFY', 'enqueue_event', event[:complete], op[:method], op[:event], op[:url], d, '200')
         else
           prefix = @parent.handle_request('GET', 'get_prefix')
           dir = File.join(prefix, 'ghost/master/var')
