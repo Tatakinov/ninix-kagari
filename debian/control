@@ -1,0 +1,16 @@
+Package: ninix-kagari
+Version: @version
+Architecture: amd64
+Maintainer: Tatakinov <tatakinov@gmail.com>
+Installed-Size: @installed_size
+Depends: ruby | ruby-interpreter, ruby-gettext, ruby-gio2, ruby-gstreamer, ruby-gtk3 (>= 3.0.9), ruby-narray, ruby-zip
+Recommends: ruby-charlock-holmes
+Suggests: kawari8
+Section: games
+Priority: optional
+Homepage: https://github.com/Tatakinov/ninix-kagari
+Description: Interactive fake-AI Ukagaka-compatible desktop mascot program
+ "Ukagaka", also known as "Nanika", is a platform on which provides mascot
+ characters for the user's desktop. "Ninix-aya" is an Ukagaka-compatible
+ program, but stop developing for a long time. "Ninix-kagari" is derived
+ from "Ninix-aya".
