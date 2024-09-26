@@ -155,7 +155,13 @@ module DLL
           return nil
         end
       else
-        return nil
+        case @type
+        when 'saori'
+          require(File.join(DLL::get_path, 'saori_native.rb'))
+          return SaoriNative::Saori.create(name + '.dll')
+        else
+          return nil
+        end
       end
       instance = nil
       case @type

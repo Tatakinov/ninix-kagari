@@ -2737,11 +2737,15 @@ module Satori
         expand(nodelist)
       end
       @saori_function = {}
-      for nodelist in (word.include?('SAORI') ? word['SAORI'].filter do |_, cond|
-          next not(['0', '０'].include?(expand(cond)))
-      end.map do |w, _|
-        next w
-      end : [])
+      saori_nodelist = []
+      if word.include?('SAORI')
+        word['SAORI'].filter do |_, cond|
+            next not(['0', '０'].include?(expand(cond)))
+        end.map do |w, _|
+          next saori_nodelist.concat(w)
+        end
+      end
+      for nodelist in saori_nodelist
         if nodelist[0][0] == NODE_TEXT
           list_ = nodelist[0][1].join('').split(',', -1)
           if list_.length >= 2 and not list_[0].nil? and not list_[1].nil?
