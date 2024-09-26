@@ -4,9 +4,8 @@ RUBY=ruby
 BINDIR=usr/games
 LIBDIR=usr/lib/games/ninix-kagari
 
-SOPATH=/usr/lib/games/ninix-kagari/kawari8:/usr/lib/games/ninix-kagari/yaya:/usr/lib/games/ninix-kagari/kagari
-
 SAORIPATH=/usr/lib/games/ninix-kagari/saori
+SOPATH=${SAORIPATH}:/usr/lib/games/ninix-kagari/kawari8:/usr/lib/games/ninix-kagari/yaya:/usr/lib/games/ninix-kagari/kagari
 
 VERSION=$(./print_version.rb)
 

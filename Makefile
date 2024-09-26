@@ -11,7 +11,8 @@ docdir = $(DESTDIR)$(prefix)/doc
 libdir = $(DESTDIR)$(exec_libdir)
 localedir = /usr/local/share/locale
 
-shiori_so_dir = $(DESTDIR)$(prefix)/lib/kawari8:$(DESTDIR)$(prefix)/lib/yaya:$(DESTDIR)$(prefix)/lib/kagari
+saori_so_dir = $(DESTDIR)$(prefix)/lib/saori
+shiori_so_dir = $(saori_so_dir):$(DESTDIR)$(prefix)/lib/kawari8:$(DESTDIR)$(prefix)/lib/yaya:$(DESTDIR)$(prefix)/lib/kagari
 
 ruby = ruby
 
@@ -27,7 +28,7 @@ install-lib:
 	mkdir -p $(localedir)/ja/LC_MESSAGES
 	(cd po/ja ; msgfmt ninix-kagari.po -o $(localedir)/ja/LC_MESSAGES/ninix-kagari.mo)
 
-sed_dirs = sed -e "s,@ruby,$(ruby),g" -e "s,@libdir,$(libdir),g" -e "s,@so_path,$(shiori_so_dir),g"
+sed_dirs = sed -e "s,@ruby,$(ruby),g" -e "s,@libdir,$(libdir),g" -e "s,@so_path,$(shiori_so_dir),g" -e "s,@saori_path,$(saori_so_dir),g"
 
 install-bin:
 	mkdir -p $(bindir)
