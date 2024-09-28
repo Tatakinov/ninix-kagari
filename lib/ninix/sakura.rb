@@ -165,6 +165,7 @@ module Sakura
       @reload_event = nil
       @client = Http::Client.new
       @client.set_responsible(self)
+      @defer_show = []
     end
 
     def get_lock_repaint(*args)
@@ -1969,6 +1970,11 @@ module Sakura
     end
 
     def __yen_e(args)
+      # 最初から最後まで1つのクイックセクション内にある場合に
+      # バルーンが表示されない問題の対処
+      for side in @defer_show
+        @balloon.show(side)
+      end
       surface_id = get_surface_id(@script_side)
       @surface.invoke_yen_e(@script_side, surface_id)
       reset_script()
