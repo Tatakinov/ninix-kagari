@@ -152,6 +152,11 @@ ninix-kagariを起動してください。
 なお、YAYAで`Shift_JIS`な辞書を読み込みたい場合は
 `ja_JP.SJIS`ロケールをインストールする必要があります。
 
+#### SAORI
+
+ninix-kagariで使用できるSAORIは現状[ninix-saori](https://github.com/Tatakinov/ninix-saori)のみです。
+詳しい説明は上記URLから。
+
 ### Windows
 
 #### 32bit OS or ruby(32bit)
