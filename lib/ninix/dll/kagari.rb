@@ -20,9 +20,9 @@ module Kagari
   extend Fiddle::Importer
   begin
     dlload 'kagari.so'
-    extern 'int load(char *, long)'
-    extern 'int unload(int)'
-    extern 'char *request(int, char *, long *)'
+    extern 'int kagari_load(char *, long)'
+    extern 'int kagari_unload(int)'
+    extern 'char *kagari_request(int, char *, long *)'
 
     $_kagari = self
   rescue
