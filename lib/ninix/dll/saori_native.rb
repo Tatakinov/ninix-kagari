@@ -31,9 +31,9 @@ module SaoriNative
       @func = {}
       filename = File.basename(name, ".*")
       @handle = Fiddle::Handle.new(name)
-      @func[:load] = Fiddle::Function.new(@handle[filename + '_multi_load'], [Fiddle::TYPE_VOIDP, Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
-      @func[:request] = Fiddle::Function.new(@handle[filename + '_multi_request'], [Fiddle::TYPE_LONG, Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOIDP)
-      @func[:unload] = Fiddle::Function.new(@handle[filename + '_multi_unload'], [Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
+      @func[:load] = Fiddle::Function.new(@handle[filename + '_saori_load'], [Fiddle::TYPE_VOIDP, Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
+      @func[:request] = Fiddle::Function.new(@handle[filename + '_saori_request'], [Fiddle::TYPE_LONG, Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOIDP)
+      @func[:unload] = Fiddle::Function.new(@handle[filename + '_saori_unload'], [Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
     end
 
     def load(dir: nil)
