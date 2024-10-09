@@ -32,7 +32,7 @@ require "pathname"
 
 require_relative "../home"
 require_relative "../logging"
-
+require_relative "../error"
 
 module Satori
 
@@ -102,12 +102,6 @@ module Satori
       end
     end
     return buf
-  end
-
-  class RuntimeError < Exception
-  end
-
-  class ValueError < Exception
   end
 
   class Filter
