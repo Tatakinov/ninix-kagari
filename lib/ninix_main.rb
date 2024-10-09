@@ -34,6 +34,8 @@ require_relative "ninix/menu"
 require_relative "ninix/metamagic"
 require_relative "ninix/logging"
 require_relative "ninix/version"
+require_relative "ninix/ninix_socket"
+require_relative "ninix/error"
 
 
 module Ninix_Main
@@ -303,6 +305,30 @@ module Ninix_Main
       @__menu = Menu::Menu.new
       @__menu.set_responsible(self)
       @__menu_owner = nil
+      Dir.mkdir(NinixSocket.sockdir) if not Dir.exist?(NinixSocket.sockdir)
+      @socket = NinixSocket.new('ninix_kagari')
+      @client = []
+      @sakura_info = {}
+      GLib::Idle.add do
+        begin
+          soc = @socket.accept
+          buffer = []
+          for key, value in @sakura_info
+            for k, v in value
+              buffer << key + '.' + k.to_s + "\x01" + v.to_s
+            end
+          end
+          data = buffer.join("\x0d\x0a") + "\x0d\x0a\x00"
+          Thread.start(soc, data) do |s, d|
+            s.write([d.bytesize].pack('L*'))
+            s.write([d].pack('a*'))
+            s.close
+          end
+        rescue IO::WaitReadable, Errno::EINTR
+        end
+        next true
+      end
+
       @ghosts = {} # Ordered Hash
       odict_baseinfo = Home.search_ghosts()
       for key, value in odict_baseinfo
@@ -1325,6 +1351,24 @@ module Ninix_Main
       end
       return nil
     end
+
+    def add_sakura_info(uuid, *args)
+      return false if @sakura_info.include?(uuid)
+      return update_sakura_info(uuid, *args, force: true)
+    end
+
+    def update_sakura_info(uuid, sakura_name, kero_name, force: false)
+      return false if not force and not @sakura_info.include?(uuid)
+      @sakura_info[uuid] = {
+        name: sakura_name, keroname: kero_name
+      }
+    end
+
+    def remove_sakura_info(uuid)
+      return false if not @sakura_info.include?(uuid)
+      @sakura_info.delete(uuid)
+      return true
+    end
   end
 
   class Console
@@ -1705,6 +1749,32 @@ end
 
 Logging::Logging.set_level(Logger::INFO)
 
+# Homeの確認と2重起動防止はGtk::Applicationの外でやらないと
+# 起動中のninix-kagariが落ちる。
+begin
+  home_dir = Home.get_ninix_home()
+  unless File.exist?(home_dir)
+    begin
+      FileUtils.mkdir_p(home_dir)
+    rescue
+      raise SystemExit, "Cannot create Home directory (abort)\n"
+    end
+  end
+  lockfile_path = File.join(Home.get_ninix_home(), ".lock")
+  if File.exist?(lockfile_path)
+    lock = open(lockfile_path, 'r')
+    abend = lock.gets
+  else
+    abend = nil
+  end
+  # aquire Inter Process Mutex (not Global Mutex)
+  lock = open(lockfile_path, 'w')
+  raise SystemExit, "ninix-kagari is already running" if not Lock.lockfile(lock)
+rescue SystemExit => e
+  p e.message
+  exit false
+end
+
 gtk_app = Gtk::Application.new('io.github.tatakinov.ninix-kagari', :flags_none)
 
 gtk_app.signal_connect 'activate' do |application|
@@ -1732,38 +1802,17 @@ gtk_app.signal_connect 'activate' do |application|
     end
   end
   Logging::Logging.set_level(Logger::DEBUG) unless option[:debug].nil?
-  home_dir = Home.get_ninix_home()
-  unless File.exist?(home_dir)
-    begin
-      FileUtils.mkdir_p(home_dir)
-    rescue
-      raise SystemExit("Cannot create Home directory (abort)\n")
-    end
-  end
-  lockfile_path = File.join(Home.get_ninix_home(), ".lock")
-  if File.exist?(lockfile_path)
-    f = open(lockfile_path, 'r')
-    abend = f.gets
-  else
-    abend = nil
-  end
-  # aquire Inter Process Mutex (not Global Mutex)
-  f = open(lockfile_path, 'w')
-  begin
-    Lock.lockfile(f)
-  rescue
-    raise SystemExit("ninix-kagari is already running")
-  end
+
   app_window = Pix::TransparentApplicationWindow.new(application)
   app_window.set_title("Ninix-kagari")
   app_window.show_all
   # start
-  app = Ninix_Main::Application.new(f, :sstp_port => sstp_port)
+  app = Ninix_Main::Application.new(lock, :sstp_port => sstp_port)
   app.run(abend, app_window)
   # end
   f.truncate(0)
   begin
-    Lock.unlockfile(f)
+    Lock.unlockfile(lock)
   rescue
     #pass
   end

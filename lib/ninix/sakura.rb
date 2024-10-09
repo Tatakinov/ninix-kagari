@@ -23,6 +23,7 @@ end
 require "cgi"
 require "uri"
 require "pathname"
+require "securerandom"
 
 require_relative "surface"
 require_relative "balloon"
@@ -370,6 +371,12 @@ module Sakura
                          'ninix-kagari',
                          Version.NUMBER,
                          :event_type => 'NOTIFY')
+      loop do
+        @uuid = SecureRandom.uuid
+        if @parent.handle_request('GET', 'add_sakura_info', @uuid, @desc.get('sakura.name'), @desc.get('kero.name'))
+          break
+        end
+      end
     end
 
     def finalize()
@@ -1907,6 +1914,7 @@ module Sakura
     end
 
     def quit()
+      @parent.handle_request('NOTIFY', 'remove_sakura_info', @uuid)
       @parent.handle_request('NOTIFY', 'stop_sakura', self)
     end
 
