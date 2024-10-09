@@ -74,6 +74,7 @@ module SSTPLib
       return unless parse_request(line)
       name = ("do_#{@command}_#{@version[0]}_#{@version[2]}")
       begin
+        p "handle: #{name}"
         method(name).call
       rescue
         send_error(

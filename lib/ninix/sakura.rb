@@ -371,12 +371,6 @@ module Sakura
                          'ninix-kagari',
                          Version.NUMBER,
                          :event_type => 'NOTIFY')
-      loop do
-        @uuid = SecureRandom.uuid
-        if @parent.handle_request('GET', 'add_sakura_info', @uuid, @desc.get('sakura.name'), @desc.get('kero.name'))
-          break
-        end
-      end
     end
 
     def finalize()
@@ -1688,6 +1682,15 @@ module Sakura
       notify_start(
         init, vanished, ghost_changed,
         name, prev_name, prev_shell, surface_dir, last_script, :abend => abend)
+      loop do
+        @uuid = SecureRandom.uuid
+        if @parent.handle_request('GET', 'add_sakura_info', @uuid, @desc.get('sakura.name'), @desc.get('kero.name'))
+          break
+        end
+      end
+      @controller = UnixSSTPController.new(@uuid)
+      @controller.set_responsible(self)
+      @controller.start_servers
       GLib::Timeout.add(10) { do_idle_tasks } # 10[ms]
     end
 
@@ -1707,6 +1710,7 @@ module Sakura
 
     def stop()
       return unless @__running
+      @controller.quit
       notify_observer('finalize')
       @__running = false
       save_settings()
@@ -1909,6 +1913,9 @@ module Sakura
       end
       # process async http
       @client.run
+      #
+      @controller.handle_sstp_queue
+      @controller.receive_sstp_request
       process_script()
       return true
     end

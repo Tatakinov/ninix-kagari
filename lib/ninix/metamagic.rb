@@ -84,6 +84,7 @@ module MetaMagic
       @menuitem = nil
       @instance = nil
       @parent = nil
+      @handlers = {}
     end
 
     def set_responsible(parent)
