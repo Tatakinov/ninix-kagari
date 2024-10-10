@@ -470,7 +470,10 @@ module Sakura
 
     def enqueue_script(event, script, sender, handle,
                        host, show_sstp_marker, use_translator,
-                       db: nil, request_handler: nil)
+                       db: nil, request_handler: nil, temp_mode: false)
+      if temp_mode
+        enter_temp_mode()
+      end
       if @script_queue.empty? and \
         not @time_critical_session and not @passivemode
         unless @sstp_request_handler.nil?
@@ -1260,6 +1263,7 @@ module Sakura
       Logging::Logging.debug('=> "' + script + '"')
       if @__temp_mode == 2
         @parent.handle_request('NOTIFY', 'reset_sstp_flag')
+        @controller.handle_request('NOTIFY', 'reset_sstp_flag')
         leave_temp_mode()
       end
       if @passivemode and \
@@ -1871,9 +1875,11 @@ module Sakura
             finalize()
             @parent.handle_request('NOTIFY', 'close_ghost', self)
             @parent.handle_request('NOTIFY', 'reset_sstp_flag')
+            @controller.handle_request('NOTIFY', 'reset_sstp_flag')
             return false
           else
             @parent.handle_request('NOTIFY', 'reset_sstp_flag')
+            @controller.handle_request('NOTIFY', 'reset_sstp_flag')
             leave_temp_mode()
             return true
           end

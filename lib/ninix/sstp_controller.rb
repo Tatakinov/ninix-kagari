@@ -86,7 +86,7 @@ class BaseSSTPController < MetaMagic::Holon
       end
     end
     unless event.nil?
-      script = @parent.handle_request('GET', 'get_event_response', event)
+      script = handle_request('GET', 'get_event_response', event)
     else
       script = nil
     end
@@ -113,12 +113,9 @@ class BaseSSTPController < MetaMagic::Holon
         next
       end
       begin
-        p "receive new client."
         handler = SSTP::SSTPRequestHandler.new(sstp_server, socket)
         buffer = socket.gets
-        print "handle."
         handler.handle(buffer)
-        print "handled."
       rescue SocketError => e
         Logging::Logging.error("socket.error: #{e.message}")
       rescue SystemCallError => e
@@ -178,5 +175,10 @@ class UnixSSTPController < BaseSSTPController
     server.set_responsible(self)
     @sstp_servers << server
     Logging::Logging.info("Serving UnixSSTP on name #{@uuid}")
+  end
+
+  # HACK ninix_mainのget_event_response相当のことをここでやる
+  def get_event_response(event, *args)
+    return @parent.handle_request('GET', 'get_event_response', *event)
   end
 end

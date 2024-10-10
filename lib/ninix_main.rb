@@ -147,7 +147,6 @@ module Ninix_Main
       @__menu = Menu::Menu.new
       @__menu.set_responsible(self)
       @__menu_owner = nil
-      Dir.mkdir(NinixServer.sockdir) if not Dir.exist?(NinixServer.sockdir)
       @socket = NinixServer.new('ninix_kagari')
       @client = []
       @sakura_info = {}
@@ -431,12 +430,9 @@ module Ninix_Main
                        host, show_sstp_marker, use_translator,
                        db: nil, request_handler: nil, temp_mode: false)
       sakura = current_sakura_instance
-      if temp_mode
-        sakura.enter_temp_mode()
-      end
       sakura.enqueue_script(event, script, sender, handle,
                             host, show_sstp_marker, use_translator,
-                            :db => db, :request_handler => request_handler)
+                            db: db, request_handler: request_handler, temp_mode: temp_mode)
     end
 
     def get_working_ghost(cantalk: false)
@@ -1157,8 +1153,8 @@ module Ninix_Main
           @sstp_controler.start_servers()
           @loaded = true
         else
-          @sstp_controler.handle_sstp_queue()
           @sstp_controler.receive_sstp_request()
+          @sstp_controler.handle_sstp_queue()
         end
       end
       return true
@@ -1595,7 +1591,7 @@ Logging::Logging.set_level(Logger::INFO)
 # Homeの確認と2重起動防止はGtk::Applicationの外でやらないと
 # 起動中のninix-kagariが落ちる。
 begin
-  home_dir = Home.get_ninix_home()
+  home_dir = Home.get_default_ninix_home()
   unless File.exist?(home_dir)
     begin
       FileUtils.mkdir_p(home_dir)
@@ -1603,7 +1599,7 @@ begin
       raise SystemExit, "Cannot create Home directory (abort)\n"
     end
   end
-  lockfile_path = File.join(Home.get_ninix_home(), ".lock")
+  lockfile_path = File.join(home_dir, ".lock")
   if File.exist?(lockfile_path)
     lock = open(lockfile_path, 'r')
     abend = lock.gets

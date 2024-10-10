@@ -14,11 +14,12 @@ require 'fileutils'
 require 'socket'
 require 'tmpdir'
 
+require_relative "home"
 require_relative "metamagic"
 
 class NinixServer < MetaMagic::Holon
   def self.sockdir
-    Dir.tmpdir + '/ninix_kagari'
+    File.join(Dir.tmpdir, 'ninix_kagari', 'sock')
   end
 
   def self.finalize(socket, name)
@@ -33,6 +34,8 @@ class NinixServer < MetaMagic::Holon
   def initialize(name)
     super("") ## FIXME
     name = File.join(NinixServer.sockdir, name)
+    # TODO error handling
+    FileUtils.mkdir_p(NinixServer.sockdir) if not Dir.exist?(NinixServer.sockdir)
     FileUtils.rm(name) if File.exist?(name)
     @socket = UNIXServer.new(name)
     ObjectSpace.define_finalizer(self, NinixServer.finalize(@socket, name))
@@ -40,9 +43,5 @@ class NinixServer < MetaMagic::Holon
 
   def accept_nonblock
     return @socket.accept_nonblock
-  end
-
-  def set_responsible(parent)
-    @parent = parent
   end
 end
