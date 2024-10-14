@@ -19,7 +19,7 @@ require_relative "metamagic"
 
 class NinixServer < MetaMagic::Holon
   def self.sockdir
-    File.join(Dir.tmpdir, 'ninix_kagari', 'sock')
+    File.join(Home.get_ninix_home, 'sock')
   end
 
   def self.finalize(socket, name)

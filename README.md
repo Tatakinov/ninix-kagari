@@ -40,7 +40,11 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - ruby-zip (rubyzip)
 
+- ninix\_fmo
+
 が最低限必要なものになります。
+[ninix\_fmo](https://github.com/Tatakinov/ninix_fmo)は
+リンク先からインストールする必要があります。
 
 - ruby-charlock-holmes
 

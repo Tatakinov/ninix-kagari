@@ -17,7 +17,8 @@
 require 'optparse'
 require 'uri'
 require 'gettext'
-require "gtk3"
+require 'gtk3'
+require 'ninix_fmo'
 
 require_relative "ninix/pix"
 require_relative "ninix/home"
@@ -148,7 +149,8 @@ module Ninix_Main
       @__menu.set_responsible(self)
       @__menu_owner = nil
       @socket = NinixServer.new('ninix_kagari')
-      @client = []
+      @shm = NinixFMO::NinixFMO.new('/ninix', NinixFMO::O_RDWR | NinixFMO::O_CREAT | NinixFMO::O_EXCL)
+      @shm.write([[NinixServer.sockdir, File::SEPARATOR].join].pack('a*'))
       @sakura_info = {}
       GLib::Timeout.add(10) do
         begin
@@ -1591,7 +1593,7 @@ Logging::Logging.set_level(Logger::INFO)
 # Homeの確認と2重起動防止はGtk::Applicationの外でやらないと
 # 起動中のninix-kagariが落ちる。
 begin
-  home_dir = Home.get_default_ninix_home()
+  home_dir = Home.get_ninix_home()
   unless File.exist?(home_dir)
     begin
       FileUtils.mkdir_p(home_dir)
