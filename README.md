@@ -22,7 +22,7 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - Linux
 
-- Windows
+- Windows (10 or later)
 
 - BSD
 
@@ -110,6 +110,10 @@ Requirementsに書かれているものをインストールします。
 
 ```
 > gem install gettext gio2 gtk3 narray rubyzip
+> git clone https://github.com/Tatakinov/ninix_fmo
+> cd ninix_fmo
+> rake install
+> cd ..
 ```
 
 適当な場所にninix-kagariをgit cloneします。
