@@ -44,4 +44,8 @@ class NinixServer < MetaMagic::Holon
   def accept_nonblock
     return @socket.accept_nonblock
   end
+
+  def close
+    @socket.close
+  end
 end

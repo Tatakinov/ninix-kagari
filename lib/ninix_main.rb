@@ -1651,7 +1651,7 @@ gtk_app.signal_connect 'activate' do |application|
   app = Ninix_Main::Application.new(lock, :sstp_port => sstp_port)
   app.run(abend, app_window)
   # end
-  f.truncate(0)
+  lock.truncate(0)
   begin
     Lock.unlockfile(lock)
   rescue
