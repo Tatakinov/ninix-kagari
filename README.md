@@ -140,6 +140,14 @@ Requirementsに書かれているものをインストールします。
 `【run.batのあるフォルダ】/.ninix`に
 それらを保存しています。
 
+### UNIXソケットの使用
+
+環境変数`NINIX_DISABLE_UNIX_SOCKET`を設定することで、
+UNIXソケットを使わないようになり、
+Windows版は10より前のバージョンでも動くようになります。
+
+ただし、Direct SSTPは*使用出来なくなります*。
+
 ## Library
 
 ### Linux
