@@ -148,29 +148,31 @@ module Ninix_Main
       @__menu = Menu::Menu.new
       @__menu.set_responsible(self)
       @__menu_owner = nil
-      @socket = NinixServer.new('ninix_kagari')
+      @socket = NinixServer.new('ninix') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
       @shm = NinixFMO::NinixFMO.new('/ninix', NinixFMO::O_RDWR | NinixFMO::O_CREAT | NinixFMO::O_EXCL)
       @shm.write([[NinixServer.sockdir, File::SEPARATOR].join].pack('a*'))
       @sakura_info = {}
-      GLib::Timeout.add(10) do
-        begin
-          soc = @socket.accept_nonblock
-        rescue IO::WaitReadable, Errno::EINTR
+      unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
+        GLib::Timeout.add(10) do
+          begin
+            soc = @socket.accept_nonblock
+          rescue IO::WaitReadable, Errno::EINTR
+            next true
+          end
+          buffer = []
+          for key, value in @sakura_info
+            for k, v in value
+              buffer << key + '.' + k.to_s + "\x01" + v.to_s
+            end
+          end
+          data = buffer.join("\x0d\x0a") + "\x0d\x0a\x00"
+          Thread.start(soc, data) do |s, d|
+            s.write([d.bytesize].pack('L*'))
+            s.write([d].pack('a*'))
+            s.close
+          end
           next true
         end
-        buffer = []
-        for key, value in @sakura_info
-          for k, v in value
-            buffer << key + '.' + k.to_s + "\x01" + v.to_s
-          end
-        end
-        data = buffer.join("\x0d\x0a") + "\x0d\x0a\x00"
-        Thread.start(soc, data) do |s, d|
-          s.write([d.bytesize].pack('L*'))
-          s.write([d].pack('a*'))
-          s.close
-        end
-        next true
       end
 
       @ghosts = {} # Ordered Hash

@@ -1263,7 +1263,7 @@ module Sakura
       Logging::Logging.debug('=> "' + script + '"')
       if @__temp_mode == 2
         @parent.handle_request('NOTIFY', 'reset_sstp_flag')
-        @controller.handle_request('NOTIFY', 'reset_sstp_flag')
+        @controller.handle_request('NOTIFY', 'reset_sstp_flag') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
         leave_temp_mode()
       end
       if @passivemode and \
@@ -1692,9 +1692,11 @@ module Sakura
           break
         end
       end
-      @controller = UnixSSTPController.new(@uuid)
-      @controller.set_responsible(self)
-      @controller.start_servers
+      unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
+        @controller = UnixSSTPController.new(@uuid)
+        @controller.set_responsible(self)
+        @controller.start_servers
+      end
       GLib::Timeout.add(10) { do_idle_tasks } # 10[ms]
     end
 
@@ -1714,7 +1716,7 @@ module Sakura
 
     def stop()
       return unless @__running
-      @controller.quit
+      @controller.quit unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
       notify_observer('finalize')
       @__running = false
       save_settings()
@@ -1875,11 +1877,11 @@ module Sakura
             finalize()
             @parent.handle_request('NOTIFY', 'close_ghost', self)
             @parent.handle_request('NOTIFY', 'reset_sstp_flag')
-            @controller.handle_request('NOTIFY', 'reset_sstp_flag')
+            @controller.handle_request('NOTIFY', 'reset_sstp_flag') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
             return false
           else
             @parent.handle_request('NOTIFY', 'reset_sstp_flag')
-            @controller.handle_request('NOTIFY', 'reset_sstp_flag')
+            @controller.handle_request('NOTIFY', 'reset_sstp_flag') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
             leave_temp_mode()
             return true
           end
@@ -1920,8 +1922,10 @@ module Sakura
       # process async http
       @client.run
       #
-      @controller.handle_sstp_queue
-      @controller.receive_sstp_request
+      unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
+        @controller.handle_sstp_queue
+        @controller.receive_sstp_request
+      end
       process_script()
       return true
     end
