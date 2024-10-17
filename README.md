@@ -22,7 +22,7 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - Linux
 
-- Windows (10 or later)
+- Windows
 
 - BSD
 
