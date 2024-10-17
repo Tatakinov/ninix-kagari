@@ -888,7 +888,7 @@ module Balloon
       return if @balloon_id.nil?
       px, py = get_balloon_windowposition()
       w, h = get_balloon_size()
-      x = (base_x + px - w)
+      x = (base_x + px)
       y = (base_y + py)
       left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
       if (y + h) > scrn_h # XXX

@@ -1455,25 +1455,33 @@ module Surface
       new_x, new_y = get_position()
       @window.move(new_x, new_y)
       left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
-      if x > (left + scrn_w / 2)
-        new_direction = 0
-      else
-        new_direction = 1
-      end
-      @__direction = new_direction
-      @parent.handle_request(
-        'NOTIFY', 'set_balloon_direction', @side, direction)
       ox, oy = get_balloon_offset # without scaling
       scale = get_scale
       ox = (ox * scale / 100).to_i
       oy = (oy * scale / 100).to_i
-      if new_direction.zero? # left
-        base_x = (new_x + ox)
+      bw, bh = @parent.handle_request(
+          'GET', 'get_balloon_size', @side)
+      sw, sh = get_surface_size()
+      if @__direction.zero? # left
+        if new_x - bw + ox < 0
+          new_direction = 1
+        else
+          new_direction = 0
+        end
       else
-        sw, sh = get_surface_size()
-        bw, bh = @parent.handle_request(
-            'GET', 'get_balloon_size', @side)
-        base_x = (new_x + sw + bw - ox)
+        if new_x + sw + bw - ox > scrn_w
+          new_direction = 0
+        else
+          new_direction = 1
+        end
+      end
+      @__direction = new_direction
+      @parent.handle_request(
+        'NOTIFY', 'set_balloon_direction', @side, direction)
+      if new_direction.zero? # left
+        base_x = (new_x - bw + ox)
+      else
+        base_x = (new_x + sw - ox)
       end
       base_y = (new_y + oy)
       @parent.handle_request(
