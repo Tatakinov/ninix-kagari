@@ -114,7 +114,7 @@ class BaseSSTPController < MetaMagic::Holon
       end
       begin
         buffer = socket.gets
-        handler = SSTP::RequestHandler.create(buffer, sstp_server, socket)
+        handler = create(buffer, sstp_server, socket)
         handler.handle
       rescue SocketError => e
         Logging::Logging.error("socket.error: #{e.message}")
@@ -162,6 +162,10 @@ class TCPSSTPController < BaseSSTPController
       Logging::Logging.info("Serving SSTP on port #{port}")
     end
   end
+
+  def create(buffer, sstp_server, socket)
+    return SSTP::RequestHandler.create_with_http_support(buffer, sstp_server, socket)
+  end
 end
 
 class UnixSSTPController < BaseSSTPController
@@ -180,5 +184,9 @@ class UnixSSTPController < BaseSSTPController
   # HACK ninix_mainのget_event_response相当のことをここでやる
   def get_event_response(event, *args)
     return @parent.handle_request('GET', 'get_event_response', *event)
+  end
+
+  def create(buffer, sstp_server, socket)
+    return SSTP::RequestHandler.create(buffer, sstp_server, socket)
   end
 end

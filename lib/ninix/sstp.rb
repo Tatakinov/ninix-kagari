@@ -530,7 +530,7 @@ module SSTP
   end
 
   class RequestHandler
-    def self.create(line, server, fp)
+    def self.create_with_http_support(line, server, fp)
       return NilRequestHandler.new(server, fp) if line.nil?
       line = line.encode('UTF-8', :invalid => :replace, :undef => :replace).chomp
       re_req_http_syntax = Regexp.new('\A([A-Z]+) ([^ ]+) HTTP/([0-9]\\.[0-9])\z')
@@ -539,6 +539,12 @@ module SSTP
         method, path, version = match[1, 3]
         return HTTPRequestHandler.new(server, fp, method, path, version)
       end
+      return create(line, server, fp)
+    end
+
+    def self.create(line, server, fp)
+      return NilRequestHandler.new(server, fp) if line.nil?
+      line = line.encode('UTF-8', :invalid => :replace, :undef => :replace).chomp
       re_req_sstp_syntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
       match = re_req_sstp_syntax.match(line)
       unless match.nil?
@@ -548,5 +554,4 @@ module SSTP
       return NilRequestHandler.new(server, fp)
     end
   end
-
 end
