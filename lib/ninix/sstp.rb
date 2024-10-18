@@ -13,6 +13,7 @@
 #
 
 require "socket"
+require "stringio"
 
 require_relative "entry_db"
 require_relative "script"
@@ -89,7 +90,6 @@ module SSTP
     def handle
       unless @server.handle_request('GET', 'get_sakura_cantalk')
         @error = nil
-        @version = nil
         return unless parse_request(@fp)
         send_error(512)
       else
@@ -453,12 +453,79 @@ module SSTP
 
   class NilRequestHandler < SSTPRequestHandler
     def initialize(server, fp)
-      super(server, fp, 'unused', 'unused')
+      super(server, fp, 'unused', '1.0')
     end
 
     def parse_request(fp)
       send_error(400, :message => "Bad Request")
       return false
+    end
+  end
+
+  class HTTPRequestHandler < SSTPRequestHandler
+    def initialize(server, fp, method, path, version)
+      @server = server
+      @fp = fp
+      @method = method
+      @path = path
+      @http_version = version
+    end
+
+    def parse_request(fp)
+      return if fp.nil?
+      header = {}
+      loop do
+        line = fp.gets
+        break if line.strip.empty?
+        line = line.chomp
+        next unless line.include?(':')
+        k, v = line.split(':', 2)
+        header[k.strip] = v.strip
+      end
+      if header.include?('Content-Length') and header['Content-Length'].to_i > 0
+        length = header['Content-Length'].to_i
+        content = fp.read(length)
+      end
+      unless @path == '/api/sstp/v1'
+        send_response(0, message: "", http_code: 404, http_message: 'Not Found')
+        return false
+      end
+      if @method == 'GET'
+        endpoint
+        return false
+      end
+      unless @method == 'POST'
+        send_response(0, message: "", http_code: 400, http_message: 'Bad Request')
+        return false
+      end
+      sio = StringIO.new(content, 'r')
+      line = sio.gets
+      line = line.chomp
+      re_req_sstp_syntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
+      match = re_req_sstp_syntax.match(line)
+      if match.nil?
+        send_response(400, message: "Bad Request")
+        return false
+      end
+      @command, @version = match[1, 2]
+      super(sio)
+    end
+
+    def send_response(code, message: nil, http_code: 200, http_message: 'OK')
+      unless http_code == 200
+        @fp.write("HTTP/#{@http_version} #{http_code} #{http_message}\r\n\r\n")
+      end
+      content = response(code)
+      @fp.write("HTTP/#{@http_version} #{http_code} #{http_message}\r\n")
+      @fp.write("Content-Length: #{content.bytesize}\r\n")
+      @fp.write("\r\n")
+      return super(code, message: message)
+    end
+
+    def endpoint
+      html = '<html><body><form method="post" action="/api/sstp/v1" enctype="text/plain"><input type="hidden" name="__dummy__sstp__form__flag__" value="1"><textarea name="sstp" rows="15" cols="60"></textarea><br><input type="submit"></form></body></html>'
+      @fp.write("200 OK HTTP/1.1\r\nContent-Length: #{html.bytesize}\r\n\r\n")
+      @fp.write(html)
     end
   end
 
