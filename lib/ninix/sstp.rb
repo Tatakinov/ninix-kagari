@@ -86,14 +86,14 @@ module SSTP
 
   class SSTPRequestHandler < SSTPLib::BaseSSTPRequestHandler
 
-    def handle(line)
+    def handle
       unless @server.handle_request('GET', 'get_sakura_cantalk')
         @error = nil
         @version = nil
-        return unless parse_request(line)
+        return unless parse_request(@fp)
         send_error(512)
       else
-        super(line)
+        super
       end
     end
 
@@ -450,4 +450,36 @@ module SSTP
       return sentence
     end
   end
+
+  class NilRequestHandler < SSTPRequestHandler
+    def initialize(server, fp)
+      super(server, fp, 'unused', 'unused')
+    end
+
+    def parse_request(fp)
+      send_error(400, :message => "Bad Request")
+      return false
+    end
+  end
+
+  class RequestHandler
+    def self.create(line, server, fp)
+      return NilRequestHandler.new(server, fp) if line.nil?
+      line = line.encode('UTF-8', :invalid => :replace, :undef => :replace).chomp
+      re_req_http_syntax = Regexp.new('\A([A-Z]+) ([^ ]+) HTTP/([0-9]\\.[0-9])\z')
+      match = re_req_http_syntax.match(line)
+      unless match.nil?
+        method, path, version = match[1, 3]
+        return HTTPRequestHandler.new(server, fp, method, path, version)
+      end
+      re_req_sstp_syntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
+      match = re_req_sstp_syntax.match(line)
+      unless match.nil?
+        command, version = match[1, 2]
+        return SSTPRequestHandler.new(server, fp, command, version)
+      end
+      return NilRequestHandler.new(server, fp)
+    end
+  end
+
 end

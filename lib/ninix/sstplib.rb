@@ -34,15 +34,17 @@ module SSTPLib
         512 => 'Invisible',
         }
 
-    def initialize(server, fp)
+    def initialize(server, fp, command, version)
       @server = server
       @fp = fp
+      @command = command
+      @version = version
     end
 
-    def parse_headers()
-      return if @fp.nil?
+    def parse_headers(fp)
+      return if fp.nil?
       message = []
-      while line = @fp.gets
+      while line = fp.gets
         break if line.strip.empty?
         line = line.chomp
         next unless line.include?(":")
@@ -53,25 +55,14 @@ module SSTPLib
       message.each {|k, v| v.force_encoding(charset).encode!("UTF-8", :invalid => :replace, :undef => :replace) }
     end
 
-    def parse_request(requestline)
-      requestline = requestline.encode('UTF-8', :invalid => :replace, :undef => :replace)
-      requestline = requestline.chomp
-      @requestline = requestline
-      re_requestsyntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
-      match = re_requestsyntax.match(requestline)
-      if match.nil?
-        @equestline = '-'
-        send_error(400, :message => "Bad Request #{requestline}")
-        return false
-      end
-      @command, @version = match[1, 2]
-      @headers = parse_headers
+    def parse_request(fp)
+      @headers = parse_headers(fp)
       return true
     end
 
-    def handle(line)
-      @error = @version = nil
-      return unless parse_request(line)
+    def handle
+      @error = nil
+      return unless parse_request(@fp)
       name = ("do_#{@command}_#{@version[0]}_#{@version[2]}")
       begin
         method(name).call
@@ -91,7 +82,11 @@ module SSTPLib
 
     def send_response(code, message: nil)
       log_request(code, :message => message)
-      @fp.write("SSTP/#{(@version or "1.0")} #{code} #{RESPONSES[code]}\r\n\r\n")
+      @fp.write(response(code))
+    end
+
+    def response(code)
+      return "SSTP/#{(@version or "1.0")} #{code} #{RESPONSES[code]}\r\n\r\n"
     end
 
     def log_error(message)

@@ -113,9 +113,9 @@ class BaseSSTPController < MetaMagic::Holon
         next
       end
       begin
-        handler = SSTP::SSTPRequestHandler.new(sstp_server, socket)
         buffer = socket.gets
-        handler.handle(buffer)
+        handler = SSTP::RequestHandler.create(buffer, sstp_server, socket)
+        handler.handle
       rescue SocketError => e
         Logging::Logging.error("socket.error: #{e.message}")
       rescue SystemCallError => e
