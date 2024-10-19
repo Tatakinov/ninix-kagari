@@ -2,6 +2,7 @@
 #
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2003-2019 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2024 by Tatakinov
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -20,7 +21,19 @@ module NConfig
     def get(name, default: nil)
       keylist = (name.is_a?(Array) ? name : [name])
       key = keylist.find {|x| keys.include?(x) }
-      key.nil? ? default : self[key]
+      if key.nil?
+        if @child.nil?
+          default
+        else
+          @child.get(name, default: default)
+        end
+      else
+        self[key]
+      end
+    end
+
+    def set_child(child)
+      @child = child
     end
   end
 

@@ -3,6 +3,7 @@
 #  Copyright (C) 2001, 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
 #  Copyright (C) 2002-2019 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2024 by Tatakinov
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
@@ -411,14 +412,10 @@ module Home
     end
   end
 
-  def self.find_surface_set(top_dir, desc)
-    default_sakura = desc.get('sakura.seriko.defaultsurface', :default => '0')
-    default_kero = desc.get('kero.seriko.defaultsurface', :default => '10')
-    unless desc.nil?
-      shell_name = desc.get('name')
-    else
-      shell_name = nil
-    end
+  def self.find_surface_set(top_dir, ghost_desc)
+    default_sakura = ghost_desc.get('sakura.seriko.defaultsurface', :default => '0')
+    default_kero = ghost_desc.get('kero.seriko.defaultsurface', :default => '10')
+    shell_name = ghost_desc.get('name')
     if shell_name.nil? or shell_name.empty?
       inst = read_install_txt(top_dir)
       unless inst.nil?
@@ -436,6 +433,7 @@ module Home
         if alias_.nil?
           alias_ = read_alias_txt(surface_dir)
         end
+        desc.set_child(ghost_desc)
         surface_set[subdir] = [name, surface_dir, desc, alias_,
                                surface_info, tooltips, seriko_descript]
       end
