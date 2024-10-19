@@ -99,7 +99,10 @@ for_window [class="Ninix"] floating enable
 
 #### Releasesのninix-kagari.zipを利用する場合
 
-zipを展開してrun.batを実行すればOKです。
+zipを展開して`run.bat`を実行すればOKです。
+
+Windows10より前のバージョンを使っている方は`run_lower_version_10.bat`を
+実行してください。
 
 #### 自分でruby環境を用意する場合
 
