@@ -12,3 +12,6 @@
 
 class ValueError < StandardError
 end
+
+class NotFoundError < StandardError
+end

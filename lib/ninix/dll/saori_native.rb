@@ -14,6 +14,7 @@
 require 'fiddle'
 
 require_relative '../dll'
+require_relative '../error'
 
 module SaoriNative
 
@@ -30,10 +31,20 @@ module SaoriNative
     def initialize(name)
       @func = {}
       filename = File.basename(name, ".*")
-      @handle = Fiddle::Handle.new(name)
-      @func[:load] = Fiddle::Function.new(@handle[filename + '_saori_load'], [Fiddle::TYPE_VOIDP, Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
-      @func[:request] = Fiddle::Function.new(@handle[filename + '_saori_request'], [Fiddle::TYPE_LONG, Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOIDP)
-      @func[:unload] = Fiddle::Function.new(@handle[filename + '_saori_unload'], [Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
+      raise NotFoundError unless ENV.include?('SAORI_FALLBACK_PATH')
+      path_list = ENV['SAORI_FALLBACK_PATH'].split(':')
+      for path in path_list
+        begin
+          @handle = Fiddle::Handle.new(File.join(path, name))
+          @func[:load] = Fiddle::Function.new(@handle[filename + '_saori_load'], [Fiddle::TYPE_VOIDP, Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
+          @func[:request] = Fiddle::Function.new(@handle[filename + '_saori_request'], [Fiddle::TYPE_LONG, Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOIDP)
+          @func[:unload] = Fiddle::Function.new(@handle[filename + '_saori_unload'], [Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
+          break
+        rescue
+          # nop
+        end
+      end
+      raise NotFoundError if @handle.nil?
     end
 
     def load(dir: nil)
