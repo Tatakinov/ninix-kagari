@@ -121,7 +121,7 @@ module Home
           candidate['score'] = score
         end
       end
-      shell_name, surface_set = find_surface_set(prefix)
+      shell_name, surface_set = find_surface_set(prefix, desc)
       next if check_shiori and candidate['score'].zero?
       shiori_name = candidate['name']
       if desc.get('name') == 'default'
@@ -411,8 +411,7 @@ module Home
     end
   end
 
-  def self.find_surface_set(top_dir)
-    desc = read_descript_txt(File.join(top_dir, 'ghost', 'master'))
+  def self.find_surface_set(top_dir, desc)
     default_sakura = desc.get('sakura.seriko.defaultsurface', :default => '0')
     default_kero = desc.get('kero.seriko.defaultsurface', :default => '10')
     unless desc.nil?
