@@ -654,6 +654,24 @@ module Surface
         align = 0
       end
       for side in @window.keys
+        case side
+        when 0
+          key = 'sakura.seriko.alignmenttodesktop'
+        when 1
+          key = 'kero.seriko.alignmenttodesktop'
+        else
+          key = "char#{side}.seriko.alignmenttodesktop"
+        end
+        case @desc.get(key)
+        when 'bottom'
+          align = 0
+        when 'top'
+          align = 1
+        when 'free'
+          align = 2
+        else
+          # nop
+        end
         set_alignment(side, align)
       end
     end
