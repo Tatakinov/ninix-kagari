@@ -22,9 +22,11 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - Linux
 
-- Windows
+- Windows[^1]
 
 - BSD
+
+[^1]: Windows10より前のバージョンでは[設定が必要](#UNIXソケットの使用)
 
 ## Requirements
 
