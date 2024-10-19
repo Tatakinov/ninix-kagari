@@ -6,7 +6,7 @@ LIBDIR=usr/lib/games/ninix-kagari
 LOCALEDIR=usr/share/locale
 
 SAORIPATH=/usr/lib/games/ninix-kagari/saori
-SOPATH=${SAORIPATH}:/usr/lib/games/ninix-kagari/kawari8:/usr/lib/games/ninix-kagari/yaya:/usr/lib/games/ninix-kagari/kagari
+SOPATH=/usr/lib/games/ninix-kagari/kawari8:/usr/lib/games/ninix-kagari/yaya:/usr/lib/games/ninix-kagari/kagari
 
 VERSION=$(./print_version.rb)
 
