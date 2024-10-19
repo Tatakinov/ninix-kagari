@@ -1646,6 +1646,7 @@ gtk_app.signal_connect 'activate' do |application|
   end
   Logging::Logging.set_level(Logger::DEBUG) unless option[:debug].nil?
 
+  Gdk.set_program_class('Ninix')
   app_window = Pix::TransparentApplicationWindow.new(application)
   app_window.set_title("Ninix-kagari")
   app_window.show_all

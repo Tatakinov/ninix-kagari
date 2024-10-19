@@ -240,7 +240,6 @@ module Pix
   class TransparentApplicationWindow < Gtk::ApplicationWindow
 
     def initialize(application)
-      Gdk.set_program_class('Ninix')
       super(application)
       @size = [0, 0]
       init_size = size
