@@ -59,7 +59,7 @@ module Kagari
       end
       buf = Fiddle::Pointer.malloc(dir.bytesize + 1, free = nil)
       buf[0, dir.bytesize] = dir
-      @id = $_kagari.load(buf, dir.bytesize)
+      @id = $_kagari.kagari_load(buf, dir.bytesize)
       if @id ==-1
         return 0
       end
@@ -67,14 +67,14 @@ module Kagari
     end
 
     def unload
-      $_kagari.unload(@id)
+      $_kagari.kagari_unload(@id)
     end
 
     def request(req)
       buf = Fiddle::Pointer.malloc(req.bytesize + 1, free = nil)
       buf[0, req.bytesize] = req
       len = [req.bytesize].pack('l!')
-      result = $_kagari.request(@id, buf, len)
+      result = $_kagari.kagari_request(@id, buf, len)
       len, = len.unpack('l!')
       unless result.null?
         ret = result[0, len].to_s
