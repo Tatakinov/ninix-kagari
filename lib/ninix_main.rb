@@ -150,7 +150,7 @@ module Ninix_Main
       @__menu.set_responsible(self)
       @__menu_owner = nil
       @socket = NinixServer.new('ninix') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
-      @shm = NinixFMO::NinixFMO.new('/ninix', NinixFMO::O_RDWR | NinixFMO::O_CREAT)
+      @shm = NinixFMO::NinixFMO.new('/ninix', NinixFMO::O_RDWR ^ NinixFMO::O_CREAT)
       @shm.write([[NinixServer.sockdir, File::SEPARATOR].join].pack('a*'))
       @sakura_info = {}
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
