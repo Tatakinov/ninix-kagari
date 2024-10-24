@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ninix-kagari 1.6\n"
-"POT-Creation-Date: 2024-08-13 21:16+0900\n"
+"POT-Creation-Date: 2024-10-24 22:17+0900\n"
 "PO-Revision-Date: 2016-08-06 22:35+0900\n"
 "Last-Translator: Tatakinov <tatakinov@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,51 +52,55 @@ msgstr "コンソール(_C)"
 msgid "Ghost Manager(_M)"
 msgstr "ゴーストマネージャ(_M)"
 
-#: ../lib/ninix/menu.rb:100
+#: ../lib/ninix/menu.rb:98
+msgid "Script Log(_L)"
+msgstr "スクリプトログ(_L)"
+
+#: ../lib/ninix/menu.rb:106
 msgid "Change(_G)"
 msgstr "交代(_G)"
 
-#: ../lib/ninix/menu.rb:103
+#: ../lib/ninix/menu.rb:109
 msgid "Summon(_X)"
 msgstr "召喚(_X)"
 
-#: ../lib/ninix/menu.rb:106
+#: ../lib/ninix/menu.rb:112
 msgid "Shell(_S)"
 msgstr "シェル(_S)"
 
-#: ../lib/ninix/menu.rb:109
+#: ../lib/ninix/menu.rb:115
 msgid "Costume(_C)"
 msgstr "着せ替え(_C)"
 
-#: ../lib/ninix/menu.rb:112
+#: ../lib/ninix/menu.rb:118
 msgid "Balloon(_B)"
 msgstr "バルーン(_B)"
 
-#: ../lib/ninix/menu.rb:117
+#: ../lib/ninix/menu.rb:123
 msgid "Information(_I)"
 msgstr "情報(_I)"
 
-#: ../lib/ninix/menu.rb:122
+#: ../lib/ninix/menu.rb:128
 msgid "Usage graph(_A)"
 msgstr "使用率グラフ(_A)"
 
-#: ../lib/ninix/menu.rb:128
+#: ../lib/ninix/menu.rb:134
 msgid "Version(_V)"
 msgstr "バージョン情報(_V)"
 
-#: ../lib/ninix/menu.rb:136
+#: ../lib/ninix/menu.rb:142
 msgid "Nekodorif(_N)"
 msgstr "猫どりふ(_N)"
 
-#: ../lib/ninix/menu.rb:139
+#: ../lib/ninix/menu.rb:145
 msgid "Kinoko(_K)"
 msgstr "きのこ(_K)"
 
-#: ../lib/ninix/menu.rb:144
+#: ../lib/ninix/menu.rb:150
 msgid "Close(_W)"
 msgstr "終了(_W)"
 
-#: ../lib/ninix/menu.rb:150
+#: ../lib/ninix/menu.rb:156
 msgid "Quit(_Q)"
 msgstr "全て終了(_Q)"
 
@@ -324,43 +328,43 @@ msgstr "当たり判定領域を表示する"
 msgid "Display Collision Area Name"
 msgstr "当たり判定領域を表示する"
 
-#: ../lib/ninix/sakura.rb:501
+#: ../lib/ninix/sakura.rb:506
 msgid "Network Update has begun."
 msgstr "ネットワーク更新を開始しました。"
 
-#: ../lib/ninix/sakura.rb:505
+#: ../lib/ninix/sakura.rb:510
 msgid "Network Update completed successfully."
 msgstr "ネットワーク更新に成功しました。"
 
-#: ../lib/ninix/sakura.rb:509
+#: ../lib/ninix/sakura.rb:514
 msgid "Network Update failed."
 msgstr "ネットワーク更新に失敗しました。"
 
-#: ../lib/ninix/sakura.rb:688
+#: ../lib/ninix/sakura.rb:693
 msgid "Sakura&Unyuu"
 msgstr "さくら＆うにゅう"
 
-#: ../lib/ninix/sakura.rb:698
+#: ../lib/ninix/sakura.rb:703
 msgid "User"
 msgstr "ユーザーさん"
 
-#: ../lib/ninix/sakura.rb:703 ../lib/ninix/sakura.rb:714
+#: ../lib/ninix/sakura.rb:708 ../lib/ninix/sakura.rb:719
 msgid "Sakura"
 msgstr "さくら"
 
-#: ../lib/ninix/sakura.rb:722
+#: ../lib/ninix/sakura.rb:727
 msgid "Unyuu"
 msgstr "うにゅう"
 
-#: ../lib/ninix/sakura.rb:730
+#: ../lib/ninix/sakura.rb:735
 msgid "Tomoyo"
 msgstr "知世"
 
-#: ../lib/ninix/sakura.rb:3265
+#: ../lib/ninix/sakura.rb:3302
 msgid "I'm afraid I don't have Network Update yet."
 msgstr "ネットワーク更新、\\w4まだ無いの。"
 
-#: ../lib/ninix/sakura.rb:3326
+#: ../lib/ninix/sakura.rb:3363
 msgid "Vanish"
 msgstr "消滅指示"
 
@@ -368,27 +372,26 @@ msgstr "消滅指示"
 msgid "Are igai No Nanika with \"Nin'i\" for X"
 msgstr "あれ以外の何か with \"任意\" for X"
 
-#: ../lib/ninix_main.rb:52
+#: ../lib/ninix_main.rb:56
 #, fuzzy
 msgid "A ninix-kagari error has been detected."
 msgstr "母ちゃん…勘弁!!!!"
 
-#: ../lib/ninix_main.rb:53
+#: ../lib/ninix_main.rb:57
 msgid "Bug Detected"
 msgstr "だからいったじゃないカーッ!!!"
 
-#: ../lib/ninix_main.rb:56
+#: ../lib/ninix_main.rb:60
 msgid "Show Details"
 msgstr "詳細"
 
-#: ../lib/ninix_main.rb:1446
+#: ../lib/ninix_main.rb:1343
 msgid "Console"
 msgstr "コンソール"
 
-#: ../lib/ninix_main.rb:1450
+#: ../lib/ninix_main.rb:1347
 msgid "Nanntokashitekudasai."
 msgstr "何とかしてください"
 
-#: ../lib/ninix_main.rb:47
 #~ msgid "A ninix-aya error has been detected."
 #~ msgstr "母ちゃん…勘弁!!!!"

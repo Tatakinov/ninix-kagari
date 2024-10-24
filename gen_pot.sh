@@ -26,6 +26,7 @@ rxgettext lib/ninix/pix.rb  -o pot/pix.pot
 rxgettext lib/ninix/prefs.rb  -o pot/prefs.pot
 rxgettext lib/ninix/sakura.rb  -o pot/sakura.pot
 rxgettext lib/ninix/script.rb  -o pot/script.pot
+rxgettext lib/ninix/script_log.rb  -o pot/script_log.pot
 rxgettext lib/ninix/seriko.rb  -o pot/seriko.pot
 rxgettext lib/ninix/sstp.rb  -o pot/sstp.pot
 rxgettext lib/ninix/sstplib.rb  -o pot/sstplib.pot
