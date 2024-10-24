@@ -95,6 +95,12 @@ module Menu
       end
       menu.add(item)
       @__menu_list['Options/Manager'] = {:entry => item, :visible => true}
+      item = Gtk::MenuItem.new(label: _('Script Log(_L)'), use_underline: true)
+      item.signal_connect('activate') do |a, b|
+        @parent.handle_request('NOTIFY', 'open_script_log')
+      end
+      menu.add(item)
+      @__menu_list['Options/ScriptLog'] = {entry: item, visible: true}
       item = Gtk::SeparatorMenuItem.new()
       @__popup_menu.add(item)
       item = Gtk::MenuItem.new(:label => _('Change(_G)'), :use_underline => true)

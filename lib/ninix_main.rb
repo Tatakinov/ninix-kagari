@@ -38,6 +38,7 @@ require_relative "ninix/version"
 require_relative "ninix/ninix_server"
 require_relative "ninix/error"
 require_relative "ninix/sstp_controller"
+require_relative "ninix/script_log"
 
 module Ninix_Main
   include GetText
@@ -174,6 +175,7 @@ module Ninix_Main
           next true
         end
       end
+      @script_log = ScriptLog::Window.new
 
       @ghosts = {} # Ordered Hash
       odict_baseinfo = Home.search_ghosts()
@@ -1211,6 +1213,14 @@ module Ninix_Main
       return false if not @sakura_info.include?(uuid)
       @sakura_info.delete(uuid)
       return true
+    end
+
+    def open_script_log
+      @script_log.show
+    end
+
+    def append_script_log(name, script)
+      @script_log.append_data(name, script)
     end
   end
 

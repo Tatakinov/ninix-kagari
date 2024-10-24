@@ -1938,6 +1938,7 @@ module Sakura
     ###   SCRIPT PLAYER   ###
     def start_script(script, origin: nil, embed: false)
       return if script.empty?
+      @parent.handle_request('NOTIFY', 'append_script_log', @desc.get('name'), script)
       @last_script = script
       if origin.nil?
         @script_origin = FROM_GHOST
