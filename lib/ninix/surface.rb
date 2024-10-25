@@ -1501,13 +1501,11 @@ module Surface
         when 'polygon'
           func = proc do |f, output, x1, y1, x2, y2, *args|
             output << [x1, y1, x2, y2]
-            p output
             unless args.empty?
               f.call(f, output, x2, y2, *args)
             end
           end
           lines = []
-          p c
           func.call(func, lines, *c, c[0], c[1])
           count = 0
           for line in lines
