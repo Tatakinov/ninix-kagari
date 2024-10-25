@@ -404,6 +404,14 @@ module Seriko
         window.get_seriko.stop_actor(args[0])
       when 'alternativestop'
         window.get_seriko.stop_actor(args.sample)
+      when 'parallelstart'
+        for e in args
+          window.invoke(e, update: 1)
+        end
+      when 'parallelstop'
+        for e in args
+          window.get_seriko.stop_actor(e)
+        end
       else
         fail RuntimeError('should not reach here')
       end
@@ -573,7 +581,7 @@ module Seriko
     re_seriko_pattern = Regexp.new('\A([0-9]+|-[12])\s*,\s*([+-]?[0-9]+)\s*,\s*(overlay|overlayfast|overlaymultiply|base|move|start|alternativestart|)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?\z')
     re_seriko2_interval = Regexp.new('\Aanimation([0-9]+)\.interval\z')
     re_seriko2_interval_value = Regexp.new('\A(sometimes|rarely|random,[0-9]+|periodic,[0-9]+|always|runonce|yesn-e|talk,[0-9]+|never)\z')
-    re_seriko2_pattern = Regexp.new('\A(overlay|overlayfast|overlaymultiply|interpolate|reduce|replace|asis|base|move|start|alternativestart|stop|alternativestop)\s*,\s*([0-9]+|-[12])?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+([\.\,][0-9]+)*\))?\z')
+    re_seriko2_pattern = Regexp.new('\A(overlay|overlayfast|overlaymultiply|interpolate|reduce|replace|asis|base|move|start|alternativestart|parallelstart|stop|alternativestop|parallelstop)\s*,\s*([0-9]+|-[12])?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+([\.\,][0-9]+)*\))?\z')
     buf = []
     for key, value in config.each_entry
       if version == 1
@@ -672,7 +680,7 @@ module Seriko
               fail ('syntax error: ' + pattern)
             end
             args = [group.to_i]
-          elsif ['alternativestart', 'alternativestop'].include?(method)
+          elsif ['alternativestart', 'alternativestop', 'parallelstart', 'parallelstop'].include?(method)
             args = match[6]
             if args.nil?
               fail ('syntax error: ' + pattern)
