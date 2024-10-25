@@ -1121,6 +1121,10 @@ module Balloon
       # draw background image
       for i in 0..(@data_buffer.length - 1)
         data = @data_buffer[i]
+        x = data[:pos][:x]
+        y = data[:pos][:y]
+        w = data[:pos][:w]
+        h = data[:pos][:h]
         unless data[:content][:type] == TYPE_IMAGE and
             not data[:content][:attr][:foreground]
           next
@@ -1138,10 +1142,6 @@ module Balloon
             next
           end
         end
-        x = data[:pos][:x]
-        y = data[:pos][:y]
-        w = data[:pos][:w]
-        h = data[:pos][:h]
         if x == 'centerx'
           bw, bh = get_balloon_size(:scaling => false)
           x = ((bw - w) / 2)
