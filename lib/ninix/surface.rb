@@ -276,8 +276,58 @@ module Surface
           rescue
             next
           end
-          buf << [values[4].strip(), x1, y1, x2, y2]
+          buf << [values[4].strip, 'polygon', [x1, y1, x1, y2, x2, y2, x2, y1]]
         end
+        for n in 0..255
+          # "redo" syntax
+          rect = config.get(['collisionex', n.to_s].join(''))
+          next if rect.nil?
+          values = rect.split(',', 0)
+          id = values.shift.strip
+          type = values.shift
+          begin
+            case type
+            when 'rect'
+              m = values.map do |e|
+                Integer(e)
+              end
+              unless m.length == 4
+                next
+              end
+              buf << [id, 'polygon', [m[0], m[1], m[0], m[3], m[2], m[3], m[2], m[1]]]
+            when 'ellipse'
+              m = values.map do |e|
+                Integer(e)
+              end
+              unless m.length == 4
+                next
+              end
+              buf << [id, type, m]
+            when 'circle'
+              m = values.map do |e|
+                Integer(e)
+              end
+              unless m.length == 3
+                next
+              end
+              buf << [id, type, m]
+            when 'polygon'
+              m = values.map do |e|
+                Integer(e)
+              end
+              unless m.length > 4 and m.length % 2 == 0
+                next
+              end
+              buf << [id, type, m]
+            when 'region'
+              # TODO stub
+            end
+          rescue
+            next
+          end
+        end
+=begin
+# 使われてない?
         for part in ['head', 'face', 'bust']
           # "inverse" syntax
           rect = config.get(['collision.', part].join(''))
@@ -293,6 +343,7 @@ module Surface
           end
           buf << [part.capitalize(), x1, y1, x2, y2]
         end
+=end
         region[key] = buf
       end
       @__region = region
@@ -1234,7 +1285,9 @@ module Surface
       cr.translate(*@window.get_draw_offset) # XXX
       scale = get_scale
       cr.scale(scale / 100.0, scale / 100.0)
-      for part, x1, y1, x2, y2 in @collisions
+=begin
+# FIXME stub
+      for part, type, c in @collisions
         unless @parent.handle_request('GET', 'get_preference',
                                       'check_collision_name').zero?
           cr.set_operator(Cairo::OPERATOR_SOURCE)
@@ -1256,6 +1309,7 @@ module Surface
         cr.set_source_rgba(0.4, 0.0, 0.0, 0.8) # XXX
         cr.stroke()
       end
+=end
       cr.restore()
     end
 
@@ -1376,7 +1430,9 @@ module Surface
     end
 
     def get_collision_area(part)
-      for p, x1, y1, x2, y2 in @collisions
+      for p, type, c in @collisions
+=begin
+# FIXME stub
         if p == part
           scale = get_scale
           x1 = (x1 * scale / 100).to_i
@@ -1385,6 +1441,7 @@ module Surface
           y2 = (y2 * scale / 100).to_i
           return x1, y1, x2, y2
         end
+=end
       end
       return nil
     end
@@ -1423,10 +1480,71 @@ module Surface
 
     def get_touched_region(x, y)
       return '' if @collisions.nil?
-      for part, x1, y1, x2, y2 in @collisions
-        if x1 <= x and x <= x2 and y1 <= y and y <= y2
-          Logging::Logging.debug(part + ' touched')
-          return part
+      for part, type, c in @collisions
+        case type
+        when 'circle'
+          cx, cy, cr = c
+          if (cx - x) * (cx - x) + (cy - y) * (cy - y) <= cr * cr
+            Logging::Logging.debug(part + ' touched')
+            return part
+          end
+        when 'ellipse'
+          x1, y1, x2, y2 = c
+          xr = (x1 - x2).abs
+          xo = (x1 + x2) / 2
+          yr = (y1 - y2).abs
+          yo = (y1 + y2) / 2
+          if ((xo - x) * (xo - x) / (xr * xr)) + ((yo - y) * (yo - y) / (yr * yr)) <= 1
+            Logging::Logging.debug(part + ' touched')
+            return part
+          end
+        when 'polygon'
+          func = proc do |f, output, x1, y1, x2, y2, *args|
+            output << [x1, y1, x2, y2]
+            p output
+            unless args.empty?
+              f.call(f, output, x2, y2, *args)
+            end
+          end
+          lines = []
+          p c
+          func.call(func, lines, *c, c[0], c[1])
+          count = 0
+          for line in lines
+            if line[1] == line[3]
+              next
+            end
+            if line[1] > line[3]
+              if y == line[1]
+                next
+              elsif y == line[3]
+                count += 1
+                next
+              end
+            else
+              if y == line[1]
+                count += 1
+                next
+              elsif y == line[3]
+                next
+              end
+            end
+            if y < [line[1], line[3]].min
+              next
+            elsif y > [line[1], line[3]].max
+              next
+            end
+            intersection_x = line[0] + (y - line[1]) * (line[2] - line[0]) / (line[3] - line[1])
+            if intersection_x > x
+              count += 1
+            end
+          end
+          if count % 2 == 1
+            Logging::Logging.debug(part + ' touched')
+            return part
+          end
+        when 'region'
+          # TODO stub
         end
       end
       return ''
