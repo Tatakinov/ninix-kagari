@@ -1281,7 +1281,7 @@ module Surface
     def get_image_surface(surface_id, is_asis: false)
       unless @surfaces.include?(surface_id)
         Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
-        return Pix.create_blank_surface(100, 100)
+        return Pix.create_blank_surface(*@window.size)
       end
       return create_surface_from_file(surface_id, :is_asis => is_asis)
     end
