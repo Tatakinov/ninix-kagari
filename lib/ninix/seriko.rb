@@ -235,6 +235,15 @@ module Seriko
       end
     end
 
+    def is_playing_animation(actor_id)
+      for _, actor in @active
+        if actor.get_id == actor_id
+          return true
+        end
+      end
+      return false
+    end
+
     def reset(window, surface_id)
       @queue = []
       terminate(window)

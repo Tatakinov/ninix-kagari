@@ -1865,6 +1865,13 @@ module Sakura
         not (not @processed_script.empty? or not @processed_text.empty?)
         quit()
       end
+      unless @wait_for_animation.nil?
+        if @surface.is_playing_animation(@script_side, @wait_for_animation)
+          return true
+        else
+          @wait_for_animation = nil
+        end
+      end
       @parent.handle_request('NOTIFY', 'update_working', get_name())
       unless @__temp_mode.zero?
         process_script()
@@ -2325,6 +2332,9 @@ module Sakura
         #pass
       else
         @surface.invoke(@script_side, actor_id)
+        if args[1] == 'wait'
+          @wait_for_animation = actor_id
+        end
       end
     end
 

@@ -249,13 +249,21 @@ module Script
         elsif ["\\_w"].include?(lexeme)
           argument = read_sbra_number()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
-        elsif ["\\i", "\\j", "\\&", "\\_u", "\\_m"].include?(lexeme)
+        elsif ["\\j", "\\&", "\\_u", "\\_m"].include?(lexeme)
           argument = read_sbra_id()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
         elsif ["\\_b", "\\_c", "\\_l", "\\_v", "\\m",
                "\\3", "\\8", "\\9"].include?(lexeme)
           argument = read_sbra_text()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
+        elsif ["\\i"].include?(lexeme)
+          args = split_params(read_sbra_text())
+          a = []
+          a << args[0][0][1]
+          if args.length == 2
+            a << args[1][0][1]
+          end
+          @script << [SCRIPT_TAG, lexeme, *a, @column]
         elsif ["\\n", "\\x"].include?(lexeme)
           if not @tokens.empty? and @tokens[0][0] == TOKEN_OPENED_SBRA
             argument = read_sbra_text()

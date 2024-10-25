@@ -773,7 +773,6 @@ module Surface
     def invoke(side, actor_id)
       add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].invoke(actor_id)
-
     end
 
     def invoke_yen_e(side, surface_id)
@@ -867,6 +866,11 @@ module Surface
     def get_collision_area(side, part)
       add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_collision_area(part)
+    end
+
+    def is_playing_animation(side, actor_id)
+      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
+      @window[side].is_playing_animation(actor_id)
     end
 
     def check_mikire_kasanari
@@ -1106,6 +1110,10 @@ module Surface
 
     def invoke_talk(surface_id, count)
       @seriko.invoke_talk(self, surface_id, count)
+    end
+
+    def is_playing_animation(actor_id)
+      @seriko.is_playing_animation(actor_id)
     end
 
     def reset_surface
