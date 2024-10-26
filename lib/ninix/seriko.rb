@@ -268,7 +268,7 @@ module Seriko
     def terminate(window)
       if @seriko.include?(@base_id)
         for actor in @seriko[@base_id]
-          actor.terminate()
+          actor.terminate(window)
         end
       end
       reset_overlays()
@@ -277,11 +277,11 @@ module Seriko
       @dirty = true
     end
 
-    def stop_actor(actor_id)
+    def stop_actor(window, actor_id)
       return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
         if actor.get_id() == actor_id
-          actor.terminate()
+          actor.terminate(window)
         end
       end
     end
@@ -325,6 +325,7 @@ module Seriko
       @id = actor_id
       @interval = interval
       @patterns = []
+      @remove_overlay = false
       @last_method = nil
       @exclusive = 0
       @post_proc = nil
@@ -372,8 +373,9 @@ module Seriko
       return false if @terminate_flag
     end
 
-    def terminate()
+    def terminate(window)
       @terminate_flag = true
+      window.remove_overlay(self) unless window.nil?
       unless @post_proc.nil?
         post_proc, args = @post_proc
         @post_proc = nil
@@ -395,13 +397,14 @@ module Seriko
                    'interpolate', 'reduce', 'replace', 'asis']
 
     def show_pattern(window, surface, method, args)
-      if OVERLAY_SET.include?(@last_method)
+      if @remove_overlay and OVERLAY_SET.include?(method)
         window.remove_overlay(self)
       end
       case method
       when 'move'
         window.get_seriko.move_surface(args[0], args[1])
       when *OVERLAY_SET
+        @remove_overlay = true
         window.add_overlay(self, surface, args[0], args[1], method)
       when 'base'
         window.get_seriko.set_base_id(window, surface)
@@ -410,16 +413,16 @@ module Seriko
       when 'alternativestart'
         window.invoke(args.sample, :update => 1)
       when 'stop'
-        window.get_seriko.stop_actor(args[0])
+        window.get_seriko.stop_actor(window, args[0])
       when 'alternativestop'
-        window.get_seriko.stop_actor(args.sample)
+        window.get_seriko.stop_actor(window, args.sample)
       when 'parallelstart'
         for e in args
           window.invoke(e, update: 1)
         end
       when 'parallelstop'
         for e in args
-          window.get_seriko.stop_actor(e)
+          window.get_seriko.stop_actor(window, e)
         end
       else
         fail RuntimeError('should not reach here')
@@ -438,7 +441,7 @@ module Seriko
     end
 
     def invoke(window, base_frame)
-      terminate()
+      terminate(window)
       @terminate_flag = false
       @pattern = 0
       update(window, base_frame)
@@ -475,7 +478,7 @@ module Seriko
     end
 
     def invoke(window, base_frame)
-      terminate()
+      terminate(window)
       @terminate_flag = false
       reset()
       window.append_actor(base_frame + @wait, self)
@@ -509,7 +512,7 @@ module Seriko
     end
 
     def invoke(window, base_frame)
-      terminate()
+      terminate(window)
       @terminate_flag = false
       @wait = 0
       @pattern = 0
@@ -527,7 +530,8 @@ module Seriko
         @wait = interval
       else
         @wait = -1 # done
-        terminate()
+        # 最後で-1していない場合はlayerを保持する
+        terminate(nil)
       end
       show_pattern(window, surface, method, args)
       if @wait >= 0
@@ -545,7 +549,7 @@ module Seriko
     end
 
     def invoke(window, base_frame)
-      terminate()
+      terminate(window)
       @terminate_flag = false
       @wait = 0
       @pattern = 0
@@ -563,7 +567,8 @@ module Seriko
         @wait = interval
       else
         @wait = -1 # done
-        terminate()
+        # 最後で-1していない場合はlayerを保持する
+        terminate(nil)
       end
       show_pattern(window, surface, method, args)
       if @wait >= 0
