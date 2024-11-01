@@ -591,10 +591,10 @@ module Seriko
 
   def self.get_actors(config, version: 1)
     re_seriko_interval = Regexp.new('\A([0-9]+)interval\z')
-    re_seriko_interval_value = Regexp.new('\A(sometimes|rarely|random,[0-9]+|always|runonce|yesn-e|talk,[0-9]+|never)\z')
+    re_seriko_interval_value = Regexp.new('\A(sometimes|rarely|random,[0-9]+|always|runonce|yen-e|talk,[0-9]+|never)\z')
     re_seriko_pattern = Regexp.new('\A([0-9]+|-[12])\s*,\s*([+-]?[0-9]+)\s*,\s*(overlay|overlayfast|overlaymultiply|base|move|start|alternativestart|)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?\z')
     re_seriko2_interval = Regexp.new('\Aanimation([0-9]+)\.interval\z')
-    re_seriko2_interval_value = Regexp.new('\A(sometimes|rarely|random,[0-9]+|periodic,[0-9]+|always|runonce|yesn-e|talk,[0-9]+|never)\z')
+    re_seriko2_interval_value = Regexp.new('\A(sometimes|rarely|random,[0-9]+|periodic,[0-9]+|always|runonce|yen-e|talk,[0-9]+|never)\z')
     re_seriko2_pattern = Regexp.new('\A(overlay|overlayfast|overlaymultiply|interpolate|reduce|replace|asis|base|move|start|alternativestart|parallelstart|stop|alternativestop|parallelstop)\s*,\s*([0-9]+|-[12])?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+([\.\,][0-9]+)*\))?\z')
     buf = []
     for key, value in config.each_entry
