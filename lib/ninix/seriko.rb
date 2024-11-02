@@ -275,7 +275,7 @@ module Seriko
           bind.include?(actor.get_id)
         end.each do |actor|
           group, enable, option = bind[actor.get_id]
-          actor.toggle_bind(toggle: enable)
+          actor.toggle_bind(enable)
         end
       end
       invoke_bind(window)
@@ -348,7 +348,6 @@ module Seriko
       @exclusive = 0
       @post_proc = nil
       @terminate_flag = true
-      @enable_bind = false
     end
 
     def terminate?
@@ -378,14 +377,6 @@ module Seriko
 
     def get_patterns()
       @patterns
-    end
-
-    def toggle_bind(toggle: nil)
-      if toggle.nil?
-        @enable_bind = not(@enable_bind)
-      else
-        @enable_bind = toggle
-      end
     end
 
     def add_pattern(surface, interval, method, args)
@@ -625,6 +616,14 @@ module Seriko
 
     def get_factor
       return @factor
+    end
+
+    def toggle_bind(toggle = nil)
+      if toggle.nil?
+        @enable_bind = not(@enable_bind)
+      else
+        @enable_bind = toggle
+      end
     end
 
     def invoke(window, base_frame)
