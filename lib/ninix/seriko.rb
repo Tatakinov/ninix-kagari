@@ -762,7 +762,7 @@ module Seriko
         actor.set_exclusive()
       end
       begin
-        for n in 0..127 # up to 128 patterns (0 - 127)
+        for n in config.each_pattern(actor_id) # up to 128 patterns (0 - 127)
           if version == 1
             key = (actor_id.to_s + 'pattern' + n.to_s)
           else
@@ -865,7 +865,7 @@ module Seriko
         next
       end
       if actor.get_patterns().empty?
-        Logging::Logging.error(
+        Logging::Logging.debug(
           'seriko.rb: animation group #' + actor_id.to_s + ' has no pattern (ignored)')
         next
       end

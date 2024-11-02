@@ -380,10 +380,10 @@ module Home
     end
   end
 
-  def self.read_descript_txt(top_dir)
+  def self.read_descript_txt(top_dir, klass = NConfig::Config)
     path = File.join(top_dir, 'descript.txt')
     if File.readable_real?(path)
-      return NConfig.create_from_file(path)
+      return NConfig.create_from_file(path, klass)
     end
     return nil
   end
@@ -448,7 +448,7 @@ module Home
       config = NConfig.create_from_file(path)
       for name, subdir in config.each_entry
         subdir = subdir.downcase
-        desc = read_descript_txt(File.join(top_dir, subdir))
+        desc = read_descript_txt(File.join(top_dir, subdir), DescriptConfig)
         desc = NConfig.null_config() if desc.nil?
         buf << [name, desc, subdir]
       end
@@ -463,7 +463,7 @@ module Home
         dirlist = []
       end
       for subdir in dirlist
-        desc = read_descript_txt(File.join(top_dir, subdir))
+        desc = read_descript_txt(File.join(top_dir, subdir), NConfig::DescriptConfig)
         desc = NConfig.null_config() if desc.nil?
         name = desc.get('name', :default => subdir)
         buf << [name, desc, subdir]
@@ -509,13 +509,13 @@ module Home
       key = ['surface', match[1].to_i.to_s].join('')
       txt = File.join(surface_dir, [basename, 's.txt'].join(''))
       if File.readable_real?(txt)
-        config = NConfig.create_from_file(txt)
+        config = NConfig.create_from_file(txt, klass = NConfig::SurfaceConfig)
       else
-        config = NConfig.null_config()
+        config = NConfig.null_config(NConfig::SurfaceConfig)
       end
       txt = File.join(surface_dir, [basename, 'a.txt'].join(''))
       if File.readable_real?(txt)
-        config.update(NConfig.create_from_file(txt))
+        config.update(NConfig.create_from_file(txt, klass = NConfig::SurfaceConfig))
       end
       surface[key] = [img, config]
     end
@@ -551,7 +551,7 @@ module Home
         id = Home.filename_to_surface_id(filename)
         unless surface.include?(id)
           surface[id] = [File.join(surface_dir, filename),
-                               NConfig.null_config()]
+                               NConfig.null_config(NConfig::SurfaceConfig)]
         end
       end
     end
@@ -648,10 +648,10 @@ module Home
                         key = ['surface', num].join('')
                         if flg_append
                           config_list.reverse_each {|x|
-                            break x[1].update(NConfig.create_from_buffer(buf, :charset => charset)) if x[0] == key
+                            break x[1].update(NConfig.create_from_buffer(buf, klass = NConfig::SurfaceConfig, charset: charset)) if x[0] == key
                           }
                         else
-                          config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
+                          config_list << [key, NConfig.create_from_buffer(buf, klass = NConfig::SurfaceConfig, charset: charset)]
                         end
                       end
                     end
@@ -689,15 +689,15 @@ module Home
                     key = ['surface', num].join('')
                     if flg_append
                       config_list.reverse_each {|x|
-                        break x[1].update(NConfig.create_from_buffer(buf, :charset => charset)) if x[0] == key
+                        break x[1].update(NConfig.create_from_buffer(buf, klass = NConfig::SurfaceConfig, charset: charset)) if x[0] == key
                       }
                     else
-                      config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
+                      config_list << [key, NConfig.create_from_buffer(buf, klass = NConfig::SurfaceConfig, charset: charset)]
                     end
                   end
                 end
               elsif key == 'descript'
-                config_list << [key, NConfig.create_from_buffer(buf, :charset => charset)]
+                config_list << [key, NConfig.create_from_buffer(buf, klass = NConfig::SurfaceConfig, charset: charset)]
               end
               buf = []
               key = nil

@@ -447,14 +447,14 @@ module Surface
       end
       # MAYUNA
       bind = {}
-      for index in 0..127
+      for index in @desc.each_group(name)
         group = @desc.get(
           "#{name}.bindgroup#{index}.name", default: nil)
         default = @desc.get(
           "#{name}.bindgroup#{index}.default", default: '0')
         bind[index] = [group, (default != '0'), []] unless group.nil?
       end
-      for index in 0..127
+      for index in @desc.each_option(name)
         option = @desc.get(
           "#{name}.bindoption#{index}.group", default: nil)
         unless option.nil?
@@ -470,7 +470,7 @@ module Surface
         end
       end
       @mayuna[name] = []
-      for index in 0..127
+      for index in @desc.each_menuitem(name)
         key = @desc.get("#{name}.menuitem#{index}", :default => nil)
         if key == '-'
           @mayuna[name] << [key, nil, 0]
