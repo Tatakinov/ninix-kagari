@@ -271,13 +271,11 @@ module Seriko
       invoke_runonce(window)
       invoke_always(window)
       if @seriko.include?(@base_id)
-        bind.each do |k, v|
-          group, default, option = v
-          @seriko[@base_id].filter do |actor|
-            actor.get_id == k
-          end.each do |actor|
-            actor.toggle_bind(toggle: default)
-          end
+        @seriko[@base_id].filter do |actor|
+          bind.include?(actor.get_id)
+        end.each do |actor|
+          group, enable, option = bind[actor.get_id]
+          actor.toggle_bind(toggle: enable)
         end
       end
       invoke_bind(window)
