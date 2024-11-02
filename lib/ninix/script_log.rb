@@ -45,7 +45,7 @@ module ScriptLog
     end
 
     def append_data(name, script)
-      i = @model.append
+      i = @model.prepend
       i[0] = Time.now.to_s
       i[1] = name
       i[2] = script
