@@ -181,8 +181,8 @@ module Seriko
       interval_count = nil
       for actor in @seriko[surface_id]
         interval = actor.get_interval()
-        if interval.start_with?('talk')
-          interval_count = interval[5].to_i # XXX
+        if interval.include?('talk')
+          interval_count = actor.get_factor # XXX
           break
         end
       end
@@ -207,9 +207,9 @@ module Seriko
       return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
         interval = actor.get_interval()
-        if ['always', 'sometimes', 'rarely'].include?(interval) or \
-          interval.start_with?('random') or \
-          interval.start_with?('periodic')
+        if ['always', 'sometimes', 'rarely', 'random', 'periodic'].any? do |e|
+            interval.include?(e)
+          end
           invoke_actor(window, actor)
         end
       end
@@ -330,6 +330,7 @@ module Seriko
       @exclusive = 0
       @post_proc = nil
       @terminate_flag = true
+      @enable_bind = false
     end
 
     def terminate?
@@ -359,6 +360,10 @@ module Seriko
 
     def get_patterns()
       @patterns
+    end
+
+    def toggle_bind
+      @enable_bind = not(@enable_bind)
     end
 
     def add_pattern(surface, interval, method, args)
@@ -588,14 +593,76 @@ module Seriko
     end
   end
 
+  class MultipleActor < Actor
+    def initialize(actor_id, interval, factor)
+      super(actor_id, interval)
+      @factor = factor
+      @enable_bind = false
+    end
 
-  def self.get_actors(config, version: 1)
+    def get_factor
+      return @factor
+    end
+
+    def invoke(window, base_frame)
+      terminate(window)
+      @terminate_flag = false
+      @pattern = 0
+      update(window, base_frame)
+    end
+
+    def update(window, base_frame)
+      return false if @terminate_flag
+      return false if @interval.include?('bind') and not @enable_bind
+      if @interval == ['bind']
+        for surface, interval, method, args in @patterns
+          show_pattern(window, surface, method, args)
+        end
+      else
+        surface, interval, method, args = @patterns[@pattern]
+        @pattern += 1
+        wait = interval
+        if @pattern == @patterns.length
+          @pattern = 0
+          # random系の秒数決定の乱数(0 < x < 1)
+          while (x = rand) == 0
+          end
+          if @interval.include?('sometimes')
+            wait = (-Math.log(2, x)).ceil * 1_000_000
+          elsif @interval.include?('rarely')
+            wait = (-Math.log(4, x)).ceil * 1_000_000
+          elsif @interval.include?('random')
+            wait = (-Math.log(factor, x)).ceil * 1_000_000
+          elsif @interval.include?('periodic')
+            wait = factor * 1_000_000
+          elsif @interval.include?('always')
+            # nop
+          elsif ['runonce', 'never', 'yen-e', 'talk'].any? do |e|
+              @interval.include?(e)
+            end
+            wait = -1
+            terminate(nil)
+          else
+            fail RuntimeError, 'unreachable'
+          end
+        end
+        show_pattern(window, surface, method, args)
+        if wait >= 0
+          window.append_actor(base_frame + wait, self)
+        end
+      end
+      return false
+    end
+  end
+
+  def self.get_actors(config, version: nil)
     re_seriko_interval = Regexp.new('\A([0-9]+)interval\z')
-    re_seriko_interval_value = Regexp.new('\A(sometimes|rarely|random,[0-9]+|always|runonce|yen-e|talk,[0-9]+|never)\z')
+    re_seriko_interval_value = Regexp.new('\A(bind|sometimes|rarely|random,[0-9]+|always|runonce|yen-e|talk,[0-9]+|never)\z')
     re_seriko_pattern = Regexp.new('\A([0-9]+|-[12])\s*,\s*([+-]?[0-9]+)\s*,\s*(overlay|overlayfast|overlaymultiply|base|move|start|alternativestart|)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?\z')
     re_seriko2_interval = Regexp.new('\Aanimation([0-9]+)\.interval\z')
-    re_seriko2_interval_value = Regexp.new('\A(sometimes|rarely|random,[0-9]+|periodic,[0-9]+|always|runonce|yen-e|talk,[0-9]+|never)\z')
-    re_seriko2_pattern = Regexp.new('\A(overlay|overlayfast|overlaymultiply|interpolate|reduce|replace|asis|base|move|start|alternativestart|parallelstart|stop|alternativestop|parallelstop)\s*,\s*([0-9]+|-[12])?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+([\.\,][0-9]+)*\))?\z')
+    re_interval = '(bind|sometimes|rarely|random|periodic|always|runonce|yen-e|talk|never)'
+    re_seriko2_interval_value = Regexp.new('\A(' + re_interval + '(\+' + re_interval + ')*(,[0-9]+)?)\z')
+    re_seriko2_pattern = Regexp.new('\A(overlay|overlayfast|overlaymultiply|interpolate|reduce|replace|asis|bind|add|base|move|start|alternativestart|parallelstart|stop|alternativestop|parallelstop)\s*,\s*([0-9]+|-[12])?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+([\.\,][0-9]+)*\))?\z')
     buf = []
     for key, value in config.each_entry
       if version == 1
@@ -603,7 +670,17 @@ module Seriko
       elsif version == 2
         match = re_seriko2_interval.match(key)
       else
-        return [] ## should not reach here
+        match1 = re_seriko_interval.match(key)
+        match2 = re_seriko2_interval.match(key)
+        if not match1.nil?
+          version = 1
+          match = match1
+        elsif not match2.nil?
+          version = 2
+          match = match2
+        else
+          next
+        end
       end
       next if match.nil?
       next if version == 1 and not re_seriko_interval_value.match(value)
@@ -612,6 +689,24 @@ module Seriko
     end
     actors = []
     for actor_id, interval in buf
+      tmp = interval.split(',', 2)
+      if tmp.length == 1
+        factor = 0
+      else
+        interval, factor = tmp
+        factor = factor.to_i
+      end
+      interval = interval.split('+')
+      count = 0
+      for i in ['random', 'periodic', 'talk']
+        count += 1 if interval.include?(i)
+      end
+      if count > 1
+        Logging::Logging.error('seriko.rb: too many parameterized interval')
+        next
+      end
+      actor = Seriko::MultipleActor.new(actor_id, interval, factor)
+=begin
       if interval == 'always'
         actor = Seriko::ActiveActor.new(actor_id, interval)
       elsif interval == 'sometimes'
@@ -634,6 +729,7 @@ module Seriko
       elsif interval == 'never'
         actor = Seriko::PassiveActor.new(actor_id, interval)
       end
+=end
       if version == 1
         key = (actor_id.to_s + 'option')
       else
@@ -665,7 +761,7 @@ module Seriko
           fail ("unsupported pattern: #{pattern}") if match.nil?
           if version == 1
             surface = match[1].to_i.to_s
-            interval = (match[2].to_i.abs * 10)
+            wait = (match[2].to_i.abs * 10)
             method = match[3]
           else
             method = match[1]
@@ -675,13 +771,25 @@ module Seriko
               surface = match[2].to_i.to_s
             end
             if match[3].nil?
-              interval = 0
+              wait = 0
             else
-              interval = match[3].to_i.abs
+              wait = match[3].to_i.abs
             end
           end
           if method == ''
             method = 'base'
+          end
+          if interval == ['bind']
+            if ['start', 'stop', 'alternativestart', 'alternativestop', 'parallelstart', 'parallelstop'].include?(method)
+              Logging::Logging.error('seriko.rb: start/stop cannot use bind')
+              next
+            end
+          end
+          unless interval.include?('bind')
+            if ['bind', 'add'].include?(method)
+              Logging::Logging.error('seriko.rb: bind/add cannot use in !bind')
+              next
+            end
           end
           if ['start', 'stop'].include?(method)
             if version == 2
@@ -727,7 +835,7 @@ module Seriko
             end
             args = [x, y]
           end
-          actor.add_pattern(surface, interval, method, args)
+          actor.add_pattern(surface, wait, method, args)
         end
       rescue => e
         Logging::Logging.error('seriko.rb: ' + e.message)
@@ -740,131 +848,16 @@ module Seriko
       end
       actors << actor
     end
-    temp = []
-    for actor in actors
-      temp << [actor.get_id(), actor]
+    return actors.map do |a|
+      [a.get_id, a]
+    end.sort.map do |id, a|
+      a
     end
-    actors = temp
-    actors.sort!
-    temp = []
-    for actor_id, actor in actors
-      temp << actor
-    end
-    actors = temp
-    return actors
   end
 
   def self.get_mayuna(config)
-    re_mayuna_interval = Regexp.new('\A([0-9]+)interval\z')
-    re_mayuna_interval_value = Regexp.new('\A(bind)\z')
-    re_mayuna_pattern = Regexp.new('\A([0-9]+|-[12])\s*,\s*([0-9]+)\s*,\s*(overlay|overlayfast|overlaymultiply|replace|interpolate|asis|bind|add|reduce|insert)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?\z')
-    re_mayuna2_interval = Regexp.new('\Aanimation([0-9]+)\.interval\z')
-    re_mayuna2_interval_value = Regexp.new('\A(bind)\z')
-    re_mayuna2_pattern = Regexp.new('\A(overlay|overlayfast|overlaymultiply|replace|interpolate|asis|bind|add|reduce|insert)\s*,\s*([0-9]+|-[12])\s*,\s*([0-9]+)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+(\.[0-9]+)*\))?\z')
-    version = nil
-    buf = []
-    for key, value in config.each_entry
-      case version
-      when 1
-        match = re_mayuna_interval.match(key)
-      when 2
-        match = re_mayuna2_interval.match(key)
-      else
-        match1 = re_mayuna_interval.match(key)
-        match2 = re_mayuna2_interval.match(key)
-        if not match1.nil?
-          version = 1
-          match = match1
-        elsif not match2.nil?
-          version = 2
-          match = match2
-        else
-          next
-        end
-      end
-      next if match.nil?
-      next if version == 1 and not re_mayuna_interval_value.match(value)
-      next if version == 2 and not re_mayuna2_interval_value.match(value)
-      buf << [match[1].to_i, value]
+    return get_actors(config).filter do |a|
+      a.get_interval.include?('bind')
     end
-    mayuna = []
-    for mayuna_id, interval in buf
-      ##fail "assert" unless interval == 'bind'
-      actor = Seriko::Mayuna.new(mayuna_id, interval)
-      begin
-        for n in 0..127 # up to 128 patterns (0 - 127)
-          if version == 1
-            key = (mayuna_id.to_s + 'pattern' + n.to_s)
-          else
-            key = ('animation' + mayuna_id.to_s + '.pattern' + n.to_s)
-          end
-          if not config.include?(key)
-            key = (mayuna_id.to_s + 'patturn' + n.to_s) # only for version 1
-            if not config.include?(key)
-              next # XXX
-            end
-          end
-          pattern = config[key]
-          if version == 1
-            match = re_mayuna_pattern.match(pattern)
-          else
-            match = re_mayuna2_pattern.match(pattern)
-          end
-          if match.nil?
-            fail ('unsupported pattern: ' + pattern)
-          end
-          if version == 1
-            surface = match[1].to_i.to_s
-            interval = (match[2].to_i.abs * 10)
-            method = match[3]
-          else
-            method = match[1]
-            surface = match[2].to_i.to_s
-            interval = match[3].to_i.abs
-          end
-          if not ['overlay', 'overlayfast', 'overlaymultiply', 'replace', 'interpolate', 'asis', 'bind', 'add', 'reduce', 'insert'].include?(method)
-            next
-          else
-            if ['-1', '-2'].include?(surface)
-              x = 0
-              y = 0
-            else
-              if match[4].nil?
-                x = 0
-              else
-                x = match[4].to_i
-              end
-              if match[5].nil?
-                y = 0
-              else
-                y = match[5].to_i
-              end
-            end
-            args = [x, y]
-          end
-          actor.add_pattern(surface, interval, method, args)
-        end
-      rescue => e
-        Logging::Logging.error('seriko.rb: ' + e.message)
-        next
-      end
-      if actor.get_patterns().empty?
-        Logging::Logging.error('seriko.rb: animation group #' + mayuna_id.to_s + ' has no pattern (ignored)')
-        next
-      end
-      mayuna << actor
-    end
-    temp = []
-    for actor in mayuna
-      temp << [actor.get_id(), actor]
-    end
-    mayuna = temp
-    mayuna.sort!
-    temp = []
-    for actor_id, actor in mayuna
-      temp << actor
-    end
-    mayuna = temp
-    return mayuna
   end
 end

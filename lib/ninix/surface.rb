@@ -1184,6 +1184,7 @@ module Surface
       update_frame_buffer() #XXX
     end
 
+=begin
     def iter_mayuna(surface_width, surface_height, mayuna, done)
       mayuna_list = [] # XXX: FIXME
       for surface_id, interval, method, args in mayuna.get_patterns
@@ -1218,11 +1219,12 @@ module Surface
             end
           end
         else
-          fail RuntimeError('should not reach here')
+          fail RuntimeError, 'unreachable'
         end
       end
       return mayuna_list
     end
+=end
     
     def create_surface_from_file(surface_id, is_asis: false)
       fail "assert" unless @surfaces.include?(surface_id)
@@ -1325,6 +1327,7 @@ module Surface
       if surface_id.nil?
         surface_id = @surface_id
       end
+=begin
       if @mayuna.include?(surface_id) and @mayuna[surface_id]
         surface = get_image_surface(surface_id)
         surface_width = surface.width
@@ -1366,6 +1369,8 @@ module Surface
       else
         surface = get_image_surface(surface_id)
       end
+=end
+      surface = get_image_surface(surface_id)
       return surface
     end
 
@@ -1850,6 +1855,12 @@ module Surface
                                  group[1],
                                  0,
                                  group[0])
+        end
+        for actor in @mayuna[@surface_id]
+          if actor.get_id == bind_id
+            actor.toggle_bind
+            @seriko.invoke_actor(self, actor)
+          end
         end
         reset_surface()
       end
