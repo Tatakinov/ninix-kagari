@@ -148,7 +148,7 @@ module Seriko
     def invoke_actor(window, actor)
       if not @exclusive_actor.nil?
         interval = actor.get_interval()
-        return if interval.start_with?('talk') or interval == 'yen-e'
+        return if interval.include?('talk') or interval.include?('yen-e')
         @queue << actor
         return
       end
@@ -215,6 +215,15 @@ module Seriko
       end
     end
 
+    def invoke_bind(window)
+      return unless @seriko.include?(@base_id)
+      @seriko[@base_id].filter do |actor|
+        actor.get_interval.include?('bind')
+      end.each do |actor|
+        invoke_actor(window, actor)
+      end
+    end
+
     def invoke_restart(window)
       return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
@@ -258,9 +267,20 @@ module Seriko
       @dirty = true # XXX
     end
 
-    def start(window)
+    def start(window, bind)
       invoke_runonce(window)
       invoke_always(window)
+      if @seriko.include?(@base_id)
+        bind.each do |k, v|
+          group, default, option = v
+          @seriko[@base_id].filter do |actor|
+            actor.get_id == k
+          end.each do |actor|
+            actor.toggle_bind(toggle: default)
+          end
+        end
+      end
+      invoke_bind(window)
       GLib::Source.remove(@timeout_id) if not @timeout_id.nil?
       @timeout_id = GLib::Timeout.add((1000.0 / @fps).to_i) { update(window) } # [msec]
     end
@@ -362,8 +382,12 @@ module Seriko
       @patterns
     end
 
-    def toggle_bind
-      @enable_bind = not(@enable_bind)
+    def toggle_bind(toggle: nil)
+      if toggle.nil?
+        @enable_bind = not(@enable_bind)
+      else
+        @enable_bind = toggle
+      end
     end
 
     def add_pattern(surface, interval, method, args)
@@ -399,7 +423,8 @@ module Seriko
     end
 
     OVERLAY_SET = ['overlay', 'overlayfast', 'overlaymultiply',
-                   'interpolate', 'reduce', 'replace', 'asis']
+                   'interpolate', 'reduce', 'replace', 'asis',
+                   'bind', 'add']
 
     def show_pattern(window, surface, method, args)
       if @remove_overlay and OVERLAY_SET.include?(method)
@@ -430,7 +455,7 @@ module Seriko
           window.get_seriko.stop_actor(window, e)
         end
       else
-        fail RuntimeError('should not reach here')
+        fail RuntimeError, 'unreachable'
       end
       @last_method = method
     end
@@ -632,9 +657,9 @@ module Seriko
           elsif @interval.include?('rarely')
             wait = (-Math.log(4, x)).ceil * 1_000_000
           elsif @interval.include?('random')
-            wait = (-Math.log(factor, x)).ceil * 1_000_000
+            wait = (-Math.log(@factor, x)).ceil * 1_000_000
           elsif @interval.include?('periodic')
-            wait = factor * 1_000_000
+            wait = @factor * 1_000_000
           elsif @interval.include?('always')
             # nop
           elsif ['runonce', 'never', 'yen-e', 'talk'].any? do |e|

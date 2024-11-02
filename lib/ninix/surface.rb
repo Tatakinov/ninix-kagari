@@ -449,10 +449,25 @@ module Surface
       bind = {}
       for index in 0..127
         group = @desc.get(
-          "#{name}.bindgroup#{index}.name", :default => nil)
+          "#{name}.bindgroup#{index}.name", default: nil)
         default = @desc.get(
-          "#{name}.bindgroup#{index}.default", :default => '0')
-        bind[index] = [group, (default != '0')] unless group.nil?
+          "#{name}.bindgroup#{index}.default", default: '0')
+        bind[index] = [group, (default != '0'), []] unless group.nil?
+      end
+      for index in 0..127
+        option = @desc.get(
+          "#{name}.bindoption#{index}.group", default: nil)
+        unless option.nil?
+          category, option = option.split(',', 2)
+          option = option.split('+')
+          must_select = option.include?('mustselect')
+          for b in bind
+            group, default, _ = b
+            if group[0] == category
+              b[2] = option
+            end
+          end
+        end
       end
       @mayuna[name] = []
       for index in 0..127
@@ -467,7 +482,7 @@ module Surface
           else
             if bind.include?(key)
               group = bind[key][0].split(',', 2)
-              @mayuna[name] << [key, group[1], bind[key][1]]
+              @mayuna[name] << [key, group[1], bind[key][1], bind[key][2]]
             end
           end
         end
@@ -1163,7 +1178,7 @@ module Surface
         yoffset = ((dh - h) / 2)
       end
       @window_offset = [xoffset, yoffset]
-      @seriko.start(self)
+      @seriko.start(self, @bind)
       # relocate window
       unless @dragged # XXX
         set_position(x, y)
@@ -1394,6 +1409,8 @@ module Surface
           op = {
             'base' =>        Cairo::OPERATOR_SOURCE, # XXX
             'overlay' =>     Cairo::OPERATOR_OVER,
+            'bind' =>        Cairo::OPERATOR_OVER,
+            'add' =>         Cairo::OPERATOR_OVER,
             'overlayfast' => Cairo::OPERATOR_ATOP,
             'interpolate' => Cairo::OPERATOR_SATURATE,
             'reduce' =>      Cairo::OPERATOR_DEST_IN,
@@ -1855,12 +1872,6 @@ module Surface
                                  group[1],
                                  0,
                                  group[0])
-        end
-        for actor in @mayuna[@surface_id]
-          if actor.get_id == bind_id
-            actor.toggle_bind
-            @seriko.invoke_actor(self, actor)
-          end
         end
         reset_surface()
       end
