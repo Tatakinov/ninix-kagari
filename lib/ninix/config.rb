@@ -84,6 +84,19 @@ module NConfig
       end
     end
 
+    def merge(*others)
+      others.each do |other|
+        for k, v in other.to_hash
+          self[k] = v
+        end
+      end
+      return self
+    end
+
+    def update(*others)
+      return self.merge(*others)
+    end
+
     def delete(key)
       match = nil
       [RE_ANIMATION, RE_ANIMATION_2].each do |r|
@@ -166,6 +179,19 @@ module NConfig
         @menuitemex[id] << index
         return
       end
+    end
+
+    def merge(*others)
+      others.each do |other|
+        for k, v in other.to_hash
+          self[k] = v
+        end
+      end
+      return self
+    end
+
+    def update(*others)
+      return self.merge(*others)
     end
 
     def delete(key)
