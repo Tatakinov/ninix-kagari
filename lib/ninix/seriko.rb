@@ -864,7 +864,7 @@ module Seriko
         next
       end
       if actor.get_patterns().empty?
-        Logging::Logging.debug(
+        Logging::Logging.error(
           'seriko.rb: animation group #' + actor_id.to_s + ' has no pattern (ignored)')
         next
       end
