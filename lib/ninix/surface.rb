@@ -1199,7 +1199,6 @@ module Surface
       update_frame_buffer() #XXX
     end
 
-=begin
     def iter_mayuna(surface_width, surface_height, mayuna, done)
       mayuna_list = [] # XXX: FIXME
       for surface_id, interval, method, args in mayuna.get_patterns
@@ -1239,7 +1238,6 @@ module Surface
       end
       return mayuna_list
     end
-=end
     
     def create_surface_from_file(surface_id, is_asis: false)
       fail "assert" unless @surfaces.include?(surface_id)
@@ -1338,23 +1336,21 @@ module Surface
       cr.restore()
     end
 
-    def create_image_surface(surface_id)
+    def create_image_surface(surface_id, done = [], is_asis: false)
       if surface_id.nil?
         surface_id = @surface_id
       end
-=begin
       if @mayuna.include?(surface_id) and @mayuna[surface_id]
-        surface = get_image_surface(surface_id)
+        surface = get_image_surface(surface_id, is_asis: is_asis)
         surface_width = surface.width
         surface_height = surface.height
-        done = []
         for actor in @mayuna[surface_id]
           actor_id = actor.get_id()
           if @bind.include?(actor_id) and @bind[actor_id][1] and \
             not done.include?(actor_id)
             done << actor_id
             for method, mayuna_id, dest_x, dest_y in iter_mayuna(surface_width, surface_height, actor, done)
-              mayuna_surface = get_image_surface(mayuna_id)
+              mayuna_surface = create_image_surface(mayuna_id, done, is_asis: method == 'asis')
               Cairo::Context.new(surface) do |cr|
                 op = {
                   'base' =>            Cairo::OPERATOR_SOURCE, # XXX
@@ -1384,8 +1380,6 @@ module Surface
       else
         surface = get_image_surface(surface_id)
       end
-=end
-      surface = get_image_surface(surface_id)
       return surface
     end
 
@@ -1399,7 +1393,7 @@ module Surface
       # draw overlays
       for surface_id, x, y, method in @seriko.iter_overlays()
         begin
-          overlay_surface = get_image_surface(
+          overlay_surface = create_image_surface(
             surface_id, :is_asis => (method == 'asis'))
         rescue
           next

@@ -879,7 +879,7 @@ module Seriko
 
   def self.get_mayuna(config)
     return get_actors(config).filter do |a|
-      a.get_interval.include?('bind')
+      a.get_interval == ['bind']
     end
   end
 end
