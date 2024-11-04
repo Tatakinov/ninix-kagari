@@ -731,9 +731,10 @@ module Ninix_Main
       return nil
     end
 
-    def run(abend, app_window)
+    def run(abend, app_window, gtk_app)
       @abend = abend
       @app_window = app_window
+      @gtk_app = gtk_app
       if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
         # The SIGTERM signal is not generated under Windows NT.
         # Win32::Console::API.SetConsoleCtrlHandler will probably not be implemented.
@@ -741,7 +742,6 @@ module Ninix_Main
         Signal.trap(:TERM) {|signo| close_all_ghosts(:reason => 'shutdown') }
       end
       @timeout_id = GLib::Timeout.add(100) { do_idle_tasks } # 100[ms]
-      Gtk.main()
     end
 
     def get_ghost_names
@@ -835,7 +835,7 @@ module Ninix_Main
       @usage_dialog.close()
       @sstp_controler.quit() ## FIXME
       save_preferences()
-      Gtk.main_quit()
+      @gtk_app.quit
     end
 
     def save_preferences
@@ -1662,7 +1662,7 @@ gtk_app.signal_connect 'activate' do |application|
   app_window.show_all
   # start
   app = Ninix_Main::Application.new(lock, :sstp_port => sstp_port)
-  app.run(abend, app_window)
+  app.run(abend, app_window, gtk_app)
   # end
   lock.truncate(0)
   begin
@@ -1670,7 +1670,6 @@ gtk_app.signal_connect 'activate' do |application|
   rescue
     #pass
   end
-  app_window.destroy
 end
 
 begin
