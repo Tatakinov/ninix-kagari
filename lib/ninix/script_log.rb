@@ -38,7 +38,7 @@ module ScriptLog
       column = Gtk::TreeViewColumn.new('Script', Gtk::CellRendererText.new, { text: 2 })
       tree.append_column(column)
       scroll.add(tree)
-      self.signal_connect('delete_event') do |w|
+      signal_connect('delete_event') do |w, e|
         w.hide
       end
       box.show_all
