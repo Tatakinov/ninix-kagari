@@ -56,17 +56,14 @@ module Balloon
     end
 
     def get_text_count(side)
-      add_window(side) unless @window.include?(side)
       return @window[side].get_text_count()
     end
 
     def get_window(side)
-      add_window(side) unless @window.include?(side)
       return @window[side].get_window
     end
 
     def reset_text_count(side)
-      add_window(side) unless @window.include?(side)
       @window[side].reset_text_count()
     end
 
@@ -146,7 +143,9 @@ module Balloon
       for balloon_window in @window.values
         balloon_window.destroy()
       end
-      @window = {}
+      @window = Hash.new do |hash, key|
+        add_window(key)
+      end
       add_window(0)
       add_window(1)
       # configure communicatebox
@@ -194,12 +193,10 @@ module Balloon
     end
 
     def get_balloon_size(side)
-      add_window(side) unless @window.include?(side)
       return @window[side].get_balloon_size()
     end
 
     def get_balloon_windowposition(side)
-      add_window(side) unless @window.include?(side)
       return @window[side].get_balloon_windowposition()
     end
 
@@ -220,17 +217,14 @@ module Balloon
     end
 
     def set_balloon(side, num)
-      add_window(side) unless @window.include?(side)
       @window[side].set_balloon(num)
     end
 
     def set_position(side, base_x, base_y)
-      add_window(side) unless @window.include?(side)
       @window[side].set_position(base_x, base_y)
     end
 
     def get_position(side)
-      add_window(side) unless @window.include?(side)
       return @window[side].get_position()
     end
 
@@ -241,12 +235,10 @@ module Balloon
     end
 
     def is_shown(side)
-      add_window(side) unless @window.include?(side)
       return @window[side].is_shown()
     end
 
     def show(side)
-      add_window(side) unless @window.include?(side)
       @window[side].show()
     end
 
@@ -257,7 +249,6 @@ module Balloon
     end
 
     def hide(side)
-      add_window(side) unless @window.include?(side)
       @window[side].hide()
     end
 
@@ -268,7 +259,6 @@ module Balloon
     end
 
     def raise_(side)
-      add_window(side) unless @window.include?(side)
       @window[side].raise_()
     end
 
@@ -279,7 +269,6 @@ module Balloon
     end
 
     def lower(side)
-      add_window(side) unless @window.include?(side)
       @window[side].lower()
     end
 
@@ -296,11 +285,9 @@ module Balloon
     def clear_text(side)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].clear_text()
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].clear_text()
       end
     end
@@ -308,11 +295,9 @@ module Balloon
     def new_line(side)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].new_line
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].new_line
       end
     end
@@ -320,11 +305,9 @@ module Balloon
     def set_draw_absolute_x(side, pos)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].set_draw_absolute_x(pos)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].set_draw_absolute_x(pos)
       end
     end
@@ -332,11 +315,9 @@ module Balloon
     def set_draw_absolute_x_char(side, rate)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].set_draw_absolute_x_char(rate)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].set_draw_absolute_x_char(rate)
       end
     end
@@ -344,11 +325,9 @@ module Balloon
     def set_draw_relative_x(side, pos)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].set_draw_relative_x(pos)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].set_draw_relative_x(pos)
       end
     end
@@ -356,11 +335,9 @@ module Balloon
     def set_draw_relative_x_char(side, rate)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].set_draw_relative_x(rate)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].set_draw_relative_x(rate)
       end
     end
@@ -368,11 +345,9 @@ module Balloon
     def set_draw_absolute_y(side, pos)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].set_draw_absolute_y(pos)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].set_draw_absolute_y(pos)
       end
     end
@@ -380,11 +355,9 @@ module Balloon
     def set_draw_absolute_y_char(side, rate, **kwarg)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].set_draw_absolute_y_char(rate, **kwarg)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].set_draw_absolute_y_char(rate, **kwarg)
       end
     end
@@ -392,11 +365,9 @@ module Balloon
     def set_draw_relative_y(side, pos)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].set_draw_relative_y(pos)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].set_draw_relative_y(pos)
       end
     end
@@ -404,11 +375,9 @@ module Balloon
     def set_draw_relative_y_char(side, rate, **kwarg)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].set_draw_relative_y_char(rate, **kwarg)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].set_draw_relative_y_char(rate, **kwarg)
       end
     end
@@ -416,28 +385,23 @@ module Balloon
     def append_text(side, text)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].append_text(text)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].append_text(text)
       end
     end
 
     def append_sstp_marker(side)
-      add_window(side) unless @window.include?(side)
       @window[side].append_sstp_marker()
     end
 
     def append_link_in(side, label, args)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].append_link_in(label, args)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].append_link_in(label, args)
       end
     end
@@ -445,11 +409,9 @@ module Balloon
     def append_link_out(side, label, value, args)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].append_link_out(label, value, args)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].append_link_out(label, value, args)
       end
     end
@@ -457,13 +419,11 @@ module Balloon
     def append_link(side, label, value, args)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].append_link_in(label, args)
           @window[side].append_text(value)
           @window[side].append_link_out(label, value, args)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].append_link_in(label, args)
         @window[side].append_text(value)
         @window[side].append_link_out(label, value, args)
@@ -473,17 +433,14 @@ module Balloon
     def append_meta(side, **kwargs)
       unless @synchronized.empty?
         for side in @synchronized
-          add_window(side) unless @window.include?(side)
           @window[side].append_meta(**kwargs)
         end
       else
-        add_window(side) unless @window.include?(side)
         @window[side].append_meta(**kwargs)
       end
     end
 
     def append_image(side, path, **kwargs)
-      add_window(side) unless @window.include?(side)
       @window[side].append_image(path, **kwargs)
     end
 

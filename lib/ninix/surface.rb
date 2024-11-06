@@ -362,7 +362,9 @@ module Surface
       for surface_window in @window.values
         surface_window.destroy()
       end
-      @window = {}
+      @window = Hash.new do |hash, key|
+        add_window(key, default_kero, :config_alias => @surface_alias, :mayuna => @__mayuna)
+      end
       @__surface = surface
       @maxsize = [maxwidth, maxheight]
       add_window(0, default_sakura, :config_alias => @surface_alias, :mayuna => @__mayuna)
@@ -571,7 +573,6 @@ module Surface
     end
 
     def get_window(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_window
     end
 
@@ -587,48 +588,39 @@ module Surface
           @window[side].set_surface_default()
         end
       elsif 0 <= side
-        add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
         @window[side].set_surface_default()
       end
     end
 
     def set_surface(side, surface_id)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].set_surface(surface_id)
     end
 
     def get_surface(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_surface()
     end
 
     def get_max_size(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_max_size()
     end
 
     def get_surface_size(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_surface_size()
     end
 
     def get_surface_offset(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_surface_offset()
     end
 
     def get_touched_region(side, x, y)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_touched_region(x, y)
     end
 
     def get_center(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_center()
     end
 
     def get_kinoko_center(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_kinoko_center()
     end
 
@@ -688,12 +680,10 @@ module Surface
     end
 
     def set_position(side, x, y)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].set_position(x, y)
     end
 
     def get_position(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_position()
     end
 
@@ -704,12 +694,10 @@ module Surface
     end
 
     def set_alignment(side, align)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].set_alignment(align)
     end
 
     def get_alignment(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_alignment()
     end
 
@@ -743,12 +731,10 @@ module Surface
     end
 
     def is_shown(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].is_shown()
     end
 
     def show(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].show()
     end
 
@@ -759,7 +745,6 @@ module Surface
     end
 
     def hide(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].hide()
     end
 
@@ -770,7 +755,6 @@ module Surface
     end
 
     def raise(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].raise
     end
 
@@ -781,22 +765,18 @@ module Surface
     end
 
     def lower(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].lower()
     end
 
     def invoke(side, actor_id)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].invoke(actor_id)
     end
 
     def invoke_yen_e(side, surface_id)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].invoke_yen_e(surface_id)
     end
 
     def invoke_talk(side, surface_id, count)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].invoke_talk(surface_id, count)
     end
 
@@ -860,7 +840,6 @@ module Surface
     end
 
     def get_balloon_offset(side)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       x, y = @window[side].get_balloon_offset
       scale = @window[side].get_scale
       x = (x * scale / 100).to_i
@@ -869,7 +848,6 @@ module Surface
     end
 
     def set_balloon_offset(side, offset)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].balloon_offset = offset
     end
 
@@ -879,12 +857,10 @@ module Surface
     end
 
     def get_collision_area(side, part)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       return @window[side].get_collision_area(part)
     end
 
     def is_playing_animation(side, actor_id)
-      add_window(side, nil, config_alias: @surface_alias, mayuna: @__mayuna) unless @window.include?(side)
       @window[side].is_playing_animation(actor_id)
     end
 
