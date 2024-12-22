@@ -310,18 +310,9 @@ module Seriko
     end
 
     def iter_overlays()
-      actors = @overlays.keys()
-      temp = []
-      for actor in actors
-        temp << [actor.get_id(), actor]
+      actors = @overlays.keys().sort_by do |actor|
+        actor.get_id
       end
-      actors = temp
-      actors.sort!
-      temp = []
-      for actor_id, actor in actors
-        temp << actor
-      end
-      actors = temp
       result = []
       for actor in actors
         surface_id, x, y, method = @overlays[actor]
@@ -870,10 +861,8 @@ module Seriko
       end
       actors << actor
     end
-    return actors.map do |a|
-      [a.get_id, a]
-    end.sort.map do |id, a|
-      a
+    return actors.sort_by do |actor|
+      actor.get_id
     end
   end
 
