@@ -56,14 +56,6 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 は音声を再生する場合に必要になります。ただし、現状Windowsでは動作しません。
 
-なお、ninix-ayaと必要なものは一緒なのでパッケージ管理システムが使える場合は
-
-```
-apt install ninix-aya
-```
-
-みたいにすれば楽できます。
-
 ## Install
 
 ### Linux
