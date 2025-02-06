@@ -106,7 +106,7 @@ Requirementsに書かれているものをインストールします。
 以下は最小構成の場合。
 
 ```
-> gem install gettext gio2 gtk3 narray rubyzip
+> gem install gettext gio2 gtk3 narray rubyzip rake rake-compiler
 > git clone https://github.com/Tatakinov/ninix_fmo
 > cd ninix_fmo
 > rake install
