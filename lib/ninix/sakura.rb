@@ -651,6 +651,10 @@ module Sakura
       end
     end
 
+    def open_scriptinputbox()
+      @balloon.open_scriptinputbox
+    end
+
     def is_URL(s)
       return (s.start_with?('http://') or \
               s.start_with?('ftp://') or \

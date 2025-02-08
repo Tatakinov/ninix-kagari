@@ -49,6 +49,9 @@ module Balloon
       # create passwordinputbox
       @passwordinputbox = PasswordInputBox.new()
       @passwordinputbox.set_responsible(self)
+      # create scriptbox
+      @scriptinputbox = ScriptInputBox.new()
+      @scriptinputbox.set_responsible(self)
     end
 
     def reset_user_interaction
@@ -156,6 +159,8 @@ module Balloon
       @inputbox.new_(desc, communicate3)
       # configure passwordinputbox
       @passwordinputbox.new_(desc, communicate3)
+      # configure scriptinputbox
+      @scriptinputbox.new_(desc, communicate3)
     end
 
     def add_window(side)
@@ -479,6 +484,12 @@ module Balloon
       @passwordinputbox.set_symbol(symbol)
       @passwordinputbox.set_limittime(limittime)
       @passwordinputbox.show(default)
+    end
+
+    def open_scriptinputbox()
+      return if @user_interaction
+      @user_interaction = true
+      @scriptinputbox.show
     end
 
     def close_inputbox(symbol)
@@ -2322,6 +2333,34 @@ module Balloon
     def new_(desc, balloon)
       super
       @entry.set_visibility(false)
+    end
+  end
+
+  class ScriptInputBox < CommunicateWindow
+
+    NAME = 'scriptbox'
+    ENTRY = 'ScriptInput'
+
+    def new_(desc, balloon)
+      super
+    end
+
+    def show
+      super(:default => '')
+    end
+
+    def cancel
+      @parent.handle_request('NOTIFY', 'reset_user_interaction')
+    end
+
+    def enter
+      send(@entry.text)
+    end
+
+    def send(data)
+      return if data.nil? or data.empty?
+      @parent.handle_request('NOTIFY', 'start_script', data)
+      @parent.handle_request('NOTIFY', 'reset_user_interaction')
     end
   end
 end

@@ -517,6 +517,10 @@ module Ninix_Main
       @__menu_owner.vanish()
     end
 
+    def open_scriptinputbox
+      @__menu_owner.open_scriptinputbox()
+    end
+
     def network_update
       @__menu_owner.network_update()
     end
