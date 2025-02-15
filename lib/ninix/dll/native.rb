@@ -18,7 +18,7 @@ require_relative "../logging"
 
 module Native
 
-  CP_ACP = 0
+  CP_OEMCP = 1
   GPTR = 0x40
 
   extend Fiddle::Importer
@@ -80,9 +80,9 @@ module Native
       @func[:load] = Fiddle::Function.new(@handle['load'], [Fiddle::TYPE_VOIDP, Fiddle::TYPE_LONG], Fiddle::TYPE_INT)
       @func[:request] = Fiddle::Function.new(@handle['request'], [Fiddle::TYPE_VOIDP, Fiddle::TYPE_VOIDP], Fiddle::TYPE_VOIDP)
       @func[:unload] = Fiddle::Function.new(@handle['unload'], [], Fiddle::TYPE_INT)
-      len = $_kernel32.WideCharToMultiByte(CP_ACP, 0, dir.encode('UTF-16LE'), dir.size, null, 0, null, null)
+      len = $_kernel32.WideCharToMultiByte(CP_OEMCP, 0, dir.encode('UTF-16LE'), dir.size, null, 0, null, null)
       buf = $_kernel32.GlobalAlloc(GPTR, len)
-      len = $_kernel32.WideCharToMultiByte(CP_ACP, 0, dir.encode('UTF-16LE'), dir.size, buf, len, null, null)
+      len = $_kernel32.WideCharToMultiByte(CP_OEMCP, 0, dir.encode('UTF-16LE'), dir.size, buf, len, null, null)
       ret =  @func[:load].call(buf, len)
       return ret
     end
