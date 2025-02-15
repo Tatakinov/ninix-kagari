@@ -26,6 +26,9 @@ module Balloon
   TYPE_TEXT = 1
   TYPE_IMAGE = 2
 
+  TYPE_ABSOLUTE = 0
+  TYPE_RELATIVE = 1
+
   class Balloon < MetaMagic::Holon
     attr_accessor :window, :user_interaction
 
@@ -1047,7 +1050,7 @@ module Balloon
         else
           fail "unreachable"
         end
-        if data[:is_head]
+        if data[:head][:valid]
           break
         end
       end
@@ -1638,7 +1641,11 @@ module Balloon
           foreground: false,
           is_sstp_marker: false,
         }},
-        is_head: true
+        head: {
+          valid: true,
+          x: {type: TYPE_ABSOLUTE, value: 0},
+          y: {type: TYPE_ABSOLUTE, value: 0},
+        },
       }]
       @meta_buffer = []
       @link_buffer = []
@@ -1660,7 +1667,7 @@ module Balloon
       @newline_required = true
     end
 
-    def new_buffer(is_head: nil)
+    def new_buffer(head: {valid: false, x: {}, y: {}})
       x, y, h = get_last_cursor_position
       prev = @data_buffer[-1]
       a = prev[:content][:attr].dup
@@ -1678,12 +1685,12 @@ module Balloon
       @data_buffer << {
         pos: {x: x, y: y, w: 0, h: 0},
         content: {type: TYPE_UNKNOWN, data: nil, attr: a},
-        is_head: is_head,
+        head: head,
       }
     end
 
     def new_line
-      new_buffer(is_head: true)
+      new_buffer(head: {valid: true, x: {}, y: {}})
     end
 
     def set_draw_absolute_x(pos)
@@ -1693,7 +1700,11 @@ module Balloon
       @data_buffer[-1] = {
         pos: new,
         content: data[:content],
-        is_head: data[:is_head],
+        head: {
+          valid: true,
+          x: {type: TYPE_ABSOLUTE, value: pos},
+          y: data[:head][:y],
+        },
       }
     end
 
@@ -1704,6 +1715,7 @@ module Balloon
     def set_draw_relative_x(pos)
       x = @data_buffer[-1][:pos][:x]
       set_draw_absolute_x(x + pos)
+      @data_buffer[-1][:head][x] = { type: TYPE_RELATIVE, value: pos }
     end
 
     def set_draw_relative_x_char(rate)
@@ -1717,7 +1729,11 @@ module Balloon
       @data_buffer[-1] = {
         pos: new,
         content: data[:content],
-        is_head: data[:is_head],
+        head: {
+          valid: true,
+          x: data[:head][:x],
+          y: {type: TYPE_ABSOLUTE, value: pos},
+        },
       }
     end
 
@@ -1733,6 +1749,7 @@ module Balloon
     def set_draw_relative_y(pos)
       y = @data_buffer[-1][:pos][:y]
       set_draw_absolute_y(y + pos)
+      @data_buffer[-1][:head][:y] = { type: TYPE_RELATIVE, value: pos }
     end
 
     def set_draw_relative_y_char(rate, use_default_height: true)
@@ -1784,7 +1801,7 @@ module Balloon
           strong, weak = @layout.get_cursor_pos(i)
           x = (strong.x / Pango::SCALE).to_i
           if prev_x < x
-            new_buffer(is_head: false)
+            new_buffer
             set_draw_absolute_x(0)
             set_draw_relative_y_char(1.0, use_default_height: false)
             return append_text(text)
@@ -1795,8 +1812,8 @@ module Balloon
         data[:pos][:h] = h
         data[:content][:data] = concat
       when TYPE_IMAGE
-        # \nや\_lなどが行われていない場合にここに来るのでis_headはfalse
-        new_buffer(is_head: false)
+        # \nや\_lなどが行われていない場合にここに来るのでheadはfalse
+        new_buffer
         return append_text(text)
       end
       draw_last_line(:column => 0)
@@ -1805,7 +1822,7 @@ module Balloon
     def append_sstp_marker
       return if @sstp_surface.nil?
       unless @data_buffer[-1][:content][:type] == TYPE_UNKNOWN
-        new_buffer(is_head: false)
+        new_buffer
       end
       data = @data_buffer[-1]
       data[:pos][:w] = @sstp_surface.width
@@ -1906,10 +1923,10 @@ module Balloon
         end
       end
       if is_changed
-        new_buffer(is_head: false)
+        new_buffer
       end
       when TYPE_IMAGE
-        new_buffer(is_head: false)
+        new_buffer
       end
       data = @data_buffer[-1]
       a = data[:content][:attr].dup
@@ -1921,7 +1938,7 @@ module Balloon
 
     def append_image(path, **kwargs)
       unless @data_buffer[-1][:content][:type] == TYPE_UNKNOWN
-        new_buffer(is_head: false)
+        new_buffer
       end
       data = @data_buffer[-1]
       begin
