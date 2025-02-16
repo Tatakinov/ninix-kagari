@@ -252,10 +252,15 @@ module Script
         elsif ["\\j", "\\&", "\\_u", "\\_m"].include?(lexeme)
           argument = read_sbra_id()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
-        elsif ["\\_b", "\\_c", "\\_l", "\\_v", "\\m",
+        elsif ["\\_c", "\\_l", "\\_v", "\\m",
                "\\3", "\\8", "\\9"].include?(lexeme)
           argument = read_sbra_text()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
+        elsif ["\\_b"].include?(lexeme)
+          args = split_params(read_sbra_text())
+          @script << [SCRIPT_TAG, lexeme, *args.map do |arg|
+            arg[0][1]
+          end, @column]
         elsif ["\\i"].include?(lexeme)
           args = split_params(read_sbra_text())
           a = []

@@ -2135,12 +2135,7 @@ module Sakura
     end
 
     def __yen__b(args)
-      begin
-        filename, *args = expand_meta(args[0]).split(',')
-      rescue
-        # FIXME
-        return
-      end
+      filename = args.shift
       kwargs = {}
       index = if args[0] == 'inline'
         kwargs[:inline] = true
