@@ -2155,7 +2155,7 @@ module Sakura
         2
       end
       for i in index .. args.length - 1
-        arg = arg[i]
+        arg = args[i]
         if arg.start_with?('--option=')
           arg = arg[9 .. -1]
         end
