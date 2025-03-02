@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# mkdir -p pot
+mkdir -p pot
 
 rxgettext lib/ninix_main.rb -o pot/ninix_main.pot
 rxgettext lib/ninix/alias.rb  -o pot/alias.pot
@@ -36,7 +36,7 @@ rxgettext lib/ninix/version.rb  -o pot/version.pot
 
 rmsgcat pot/*.pot -o ninix-kagari.pot
 
-# rm -r pot/* and rmdir pot
+rm -r pot
 
 # rmsgmerge -o new.pot po/ja/ninix-kagari.po ninix-kagari.po
 # edit new.pot and mv new.pot po/ja/ninix-kagari.po
