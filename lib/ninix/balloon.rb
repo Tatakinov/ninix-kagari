@@ -1490,15 +1490,29 @@ module Balloon
       end
       unless new_selection.nil?
         if @selection != new_selection
-          sl, sn, el, en, link_id, args, raw_text, text = \
-          @link_buffer[new_selection]
-          @parent.handle_request(
-            'NOTIFY', 'notify_event',
-            'OnChoiceEnter', raw_text, link_id, @selection)
+          sl, sn, el, en, link_id, args, raw_text, text =
+            @link_buffer[new_selection]
+          is_anchor = @parent.handle_request('GET', 'is_anchor', link_id)
+          if is_anchor
+            @parent.handle_request(
+              'NOTIFY', 'notify_event',
+              'OnAnchorEnter', raw_text, link_id[1], @selection)
+          else
+            @parent.handle_request(
+              'NOTIFY', 'notify_event',
+              'OnChoiceEnter', raw_text, link_id, @selection)
+          end
         end
       else
         unless @selection.nil?
-          @parent.handle_request('NOTIFY', 'notify_event', 'OnChoiceEnter')
+          sl, sn, el, en, link_id, args, raw_text, text =
+            @link_buffer[@selection]
+          is_anchor = @parent.handle_request('GET', 'is_anchor', link_id)
+          if is_anchor
+            @parent.handle_request('NOTIFY', 'notify_event', 'OnAnchorEnter')
+          else
+            @parent.handle_request('NOTIFY', 'notify_event', 'OnChoiceEnter')
+          end
         end
       end
       if new_selection == @selection
