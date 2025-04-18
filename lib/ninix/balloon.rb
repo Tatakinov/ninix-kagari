@@ -1488,11 +1488,15 @@ module Balloon
           break
         end
       end
+      unless @hover_id.nil?
+        GLib::Source.remove(@hover_id)
+        @hover_id = nil
+      end
       unless new_selection.nil?
+        sl, sn, el, en, link_id, args, raw_text, text =
+          @link_buffer[new_selection]
+        is_anchor = @parent.handle_request('GET', 'is_anchor', link_id)
         if @selection != new_selection
-          sl, sn, el, en, link_id, args, raw_text, text =
-            @link_buffer[new_selection]
-          is_anchor = @parent.handle_request('GET', 'is_anchor', link_id)
           if is_anchor
             @parent.handle_request(
               'NOTIFY', 'notify_event',
@@ -1501,6 +1505,18 @@ module Balloon
             @parent.handle_request(
               'NOTIFY', 'notify_event',
               'OnChoiceEnter', raw_text, link_id, @selection)
+          end
+        end
+        @hover_id = GLib::Timeout.add(1000) do
+          @hover_id = nil
+          if is_anchor
+            @parent.handle_request(
+              'NOTIFY', 'notify_event',
+              'OnAnchorHover', raw_text, link_id[1], @selection)
+          else
+            @parent.handle_request(
+              'NOTIFY', 'notify_event',
+              'OnChoiceHover', raw_text, link_id, @selection)
           end
         end
       else
