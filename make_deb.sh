@@ -8,7 +8,7 @@ LOCALEDIR=usr/share/locale
 SAORIPATH=/usr/lib/games/ninix-kagari/saori
 SOPATH=/usr/lib/games/ninix-kagari/kawari8:/usr/lib/games/ninix-kagari/yaya:/usr/lib/games/ninix-kagari/kagari
 
-VERSION=$(./print_version.rb)
+VERSION=$(ruby -r './lib/ninix/version.rb' -e 'print(Version.NUMBER)')
 
 mkdir -p ${WORKDIR}/${BINDIR} ${WORKDIR}/${LIBDIR} ${WORKDIR}/${LOCALEDIR}
 cp -r debian ${WORKDIR}/DEBIAN
