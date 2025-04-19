@@ -18,7 +18,7 @@ require 'optparse'
 require 'uri'
 require 'gettext'
 require 'gtk3'
-require 'ninix_fmo'
+require 'ninix-fmo'
 
 require_relative "ninix/pix"
 require_relative "ninix/home"
