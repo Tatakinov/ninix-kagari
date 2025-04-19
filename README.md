@@ -42,10 +42,10 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - ruby-zip (rubyzip)
 
-- ninix\_fmo
+- ninix-fmo
 
 が最低限必要なものになります。
-[ninix\_fmo](https://github.com/Tatakinov/ninix_fmo)は
+[ninix-fmo](https://github.com/Tatakinov/ninix-fmo)は
 リンク先からインストールする必要があります。
 
 - ruby-charlock-holmes
@@ -107,8 +107,8 @@ Requirementsに書かれているものをインストールします。
 
 ```
 > gem install gettext gio2 gtk3 narray rubyzip rake rake-compiler
-> git clone https://github.com/Tatakinov/ninix_fmo
-> cd ninix_fmo
+> git clone https://github.com/Tatakinov/ninix-fmo
+> cd ninix-fmo
 > rake install
 > cd ..
 ```
