@@ -124,17 +124,21 @@ module NConfig
 
   class DescriptConfig < Config
     RE_CHAR = Regexp.new('\A([^\.]+)\.(bind|menuitem)')
-    RE_GROUP = Regexp.new('\A[^\.]+\.bindgroup([0-9]+)')
-    RE_OPTION = Regexp.new('\A[^\.]+\.bindoption([0-9]+)')
-    RE_MENU = Regexp.new('\A[^\.]+\.menuitem([0-9]+)')
-    RE_MENU_EX = Regexp.new('\A[^\.]+\.menuitemex([0-9]+)')
+    RE = {
+      group: Regexp.new('\A[^\.]+\.bindgroup([0-9]+)'),
+      option: Regexp.new('\A[^\.]+\.bindoption([0-9]+)'),
+      menu: Regexp.new('\A[^\.]+\.menuitem([0-9]+)'),
+      menuex: Regexp.new('\A[^\.]+\.menuitemex([0-9]+)'),
+    }
 
     def initialize(ifnone = nil)
       super(ifnone)
-      @group = {}
-      @option = {}
-      @menuitem = {}
-      @menuitemex = {}
+      @index = {}
+      RE.keys.each do |k|
+        @index[k] = Hash.new do |h, k|
+          h[k] = []
+        end
+      end
     end
 
     def []=(key, value)
@@ -144,40 +148,11 @@ module NConfig
         return
       end
       id = match[1]
-      if value.nil?
-        @group.delete(id)
-        @option.delete(id)
-        return
-      end
-      unless @group.include?(id) and @option.include?(id)
-        @group[id] = []
-        @option[id] = []
-        @menuitem[id] = []
-        @menuitemex[id] = []
-      end
-      match = RE_GROUP.match(key)
-      unless match.nil?
-        index = match[1].to_i
-        @group[id] << index
-        return
-      end
-      match = RE_OPTION.match(key)
-      unless match.nil?
-        index = match[1].to_i
-        @option[id] << index
-        return
-      end
-      match = RE_MENU.match(key)
-      unless match.nil?
-        index = match[1].to_i
-        @menuitem[id] << index
-        return
-      end
-      match = RE_MENU_EX.match(key)
-      unless match.nil?
-        index = match[1].to_i
-        @menuitemex[id] << index
-        return
+      RE.each do |k, v|
+        match = v.match(key)
+        unless match.nil?
+          @index[k][id] << match[1].to_i
+        end
       end
     end
 
@@ -191,36 +166,37 @@ module NConfig
     end
 
     def update(*others)
-      return self.merge(*others)
+      return merge(*others)
     end
 
     def delete(key)
+      super(key)
       match = RE_CHAR.match(key)
       if match.nil?
         return
       end
       id = match[1]
-      @animation.delete(id)
+    end
+
+    def each_(key, char)
+      return [] unless @index[key].include?(char)
+      return @index[key][char].sort
     end
 
     def each_group(char)
-      return [] unless @group.include?(char)
-      return @group[char].sort
+      return each_(:group, char)
     end
 
     def each_option(char)
-      return [] unless @option.include?(char)
-      return @option[char].sort
+      return each_(:option, char)
     end
 
     def each_menuitem(char)
-      return [] unless @menuitem.include?(char)
-      return @menuitem[char].sort
+      return each_(:menu, char)
     end
 
     def each_menuitemex(char)
-      return [] unless @menuitemex.include?(char)
-      return @menuitemex[char].sort
+      return each_(:menuex, char)
     end
   end
 
