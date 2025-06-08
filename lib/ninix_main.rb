@@ -124,7 +124,7 @@ module Ninix_Main
 
   class Application
 
-    def initialize(lockfile, sstp_port: [9801, 11000])
+    def initialize(lockfile, shm, sstp_port: [9801, 11000])
       @lockfile = lockfile
       @abend = nil
       @loaded = false
@@ -150,8 +150,7 @@ module Ninix_Main
       @__menu.set_responsible(self)
       @__menu_owner = nil
       @socket = NinixServer.new('ninix') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
-      @shm = NinixFMO::NinixFMO.new('/ninix', NinixFMO::O_RDWR ^ NinixFMO::O_CREAT)
-      @shm.write([[NinixServer.sockdir, File::SEPARATOR].join].pack('a*'))
+      @shm = shm
       @sakura_info = {}
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
         GLib::Timeout.add(10) do
@@ -1610,6 +1609,25 @@ Logging::Logging.set_level(Logger::INFO)
 # Homeの確認と2重起動防止はGtk::Applicationの外でやらないと
 # 起動中のninix-kagariが落ちる。
 begin
+  is_running = false
+  begin
+    shm = NinixFMO::NinixFMO.new('/ninix', NinixFMO::O_RDWR)
+    path_running = shm.read
+    UNIXSocket.open(File.join(path_running, 'ninix')) do |soc|
+      is_running = true
+      # 起動中のninix側がBroken Pipeしないように全部読み込む
+      soc.read
+    end
+  rescue
+    # 起動中のninixが存在しない場合にここに来るのでnop
+  end
+  raise SystemExit, 'ninix-kagari is already running' if is_running
+  shm = NinixFMO::NinixFMO.new('/ninix', NinixFMO::O_RDWR ^ NinixFMO::O_CREAT)
+  path = [NinixServer.sockdir, File::SEPARATOR].join
+  shm.write([path].pack('a*'))
+  if shm.read != path
+    raise SystemExit, "ninix-kagari is already running" if not Lock.lockfile(lock)
+  end
   home_dir = Home.get_ninix_home()
   unless File.exist?(home_dir)
     begin
@@ -1627,7 +1645,7 @@ begin
   end
   # aquire Inter Process Mutex (not Global Mutex)
   lock = open(lockfile_path, 'w')
-  raise SystemExit, "ninix-kagari is already running" if not Lock.lockfile(lock)
+  raise SystemExit, 'ninix-kagari is already running' if not Lock.lockfile(lock)
 rescue SystemExit => e
   p e.message
   exit false
@@ -1666,7 +1684,7 @@ gtk_app.signal_connect 'activate' do |application|
   app_window.set_title("Ninix-kagari")
   app_window.show_all
   # start
-  app = Ninix_Main::Application.new(lock, :sstp_port => sstp_port)
+  app = Ninix_Main::Application.new(lock, shm, sstp_port: sstp_port)
   app.run(abend, app_window, gtk_app)
   # end
   lock.truncate(0)
