@@ -1685,7 +1685,7 @@ gtk_app.signal_connect 'activate' do |application|
   app_window.show_all
   # start
   app = Ninix_Main::Application.new(lock, shm, sstp_port: sstp_port)
-  app.run(abend, app_window, gtk_app)
+  app.run(abend, app_window, application)
   # end
   lock.truncate(0)
   begin
