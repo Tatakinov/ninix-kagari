@@ -1692,7 +1692,11 @@ module Sakura
         name, prev_name, prev_shell, surface_dir, last_script, :abend => abend)
       loop do
         @uuid = SecureRandom.uuid
-        if @parent.handle_request('GET', 'add_sakura_info', @uuid, @desc.get('sakura.name'), @desc.get('kero.name'))
+        if @parent.handle_request('GET', 'add_sakura_info', @uuid,
+            @desc.get('sakura.name'),
+            @desc.get('kero.name'),
+            File.join(get_prefix(), '')
+                                 )
           break
         end
       end
