@@ -441,6 +441,7 @@ module Seriko
     end
   end
 
+=begin
 
   class ActiveActor < Actor # always
 
@@ -588,6 +589,7 @@ module Seriko
     end
   end
 
+=end
 
   class Mayuna < Actor
 
@@ -634,7 +636,11 @@ module Seriko
       else
         surface, interval, method, args = @patterns[@pattern]
         @pattern += 1
-        wait = interval
+        if interval.instance_of?(Array)
+          wait = rand(interval[0] .. interval[1])
+        else
+          wait = interval
+        end
         if @pattern == @patterns.length
           @pattern = 0
           # random系の秒数決定の乱数(0 < x < 1)
@@ -671,11 +677,12 @@ module Seriko
   def self.get_actors(config, version: nil)
     re_seriko_interval = Regexp.new('\A([0-9]+)interval\z')
     re_seriko_interval_value = Regexp.new('\A(bind|sometimes|rarely|random,[0-9]+|always|runonce|yen-e|talk,[0-9]+|never)\z')
-    re_seriko_pattern = Regexp.new('\A([0-9]+|-[12])\s*,\s*([+-]?[0-9]+)\s*,\s*(overlay|overlayfast|overlaymultiply|base|move|start|alternativestart|)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?\z')
+    re_seriko_pattern = Regexp.new('\A([0-9]+|-[12])\s*,\s*([+-]?[0-9]+)\s*,\s*(overlay|overlayfast|overlaymultiply|base|move|start|alternativestart|)\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+(?:-[0-9]+)?)?\s*,?\s*(\[[0-9]+(\.[0-9]+)*\])?\z')
     re_seriko2_interval = Regexp.new('\Aanimation([0-9]+)\.interval\z')
     re_interval = '(bind|sometimes|rarely|random|periodic|always|runonce|yen-e|talk|never)'
     re_seriko2_interval_value = Regexp.new('\A(' + re_interval + '(\+' + re_interval + ')*(,[0-9]+)?)\z')
-    re_seriko2_pattern = Regexp.new('\A(overlay|overlayfast|overlaymultiply|interpolate|reduce|replace|asis|bind|add|base|move|start|alternativestart|parallelstart|stop|alternativestop|parallelstop)\s*,\s*([0-9]+|-[12])?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+([\.\,][0-9]+)*\))?\z')
+    re_seriko2_pattern = Regexp.new('\A(overlay|overlayfast|overlaymultiply|interpolate|reduce|replace|asis|bind|add|base|move|start|alternativestart|parallelstart|stop|alternativestop|parallelstop)\s*,\s*([0-9]+|-[12])?\s*,?\s*([+-]?[0-9]+(?:-[0-9]+)?)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*([+-]?[0-9]+)?\s*,?\s*(\([0-9]+([\.\,][0-9]+)*\))?\z')
+    re_pattern = Regexp.new('([+-]?[0-9]+)-([0-9]+)')
     buf = []
     for key, value in config.each_entry
       if version == 1
@@ -774,7 +781,15 @@ module Seriko
           fail ("unsupported pattern: #{pattern}") if match.nil?
           if version == 1
             surface = match[1].to_i.to_s
-            wait = (match[2].to_i.abs * 10)
+            m = re_pattern.match(match[2])
+            if m.nil?
+              wait = match[2].to_i.abs * 10
+            else
+              wait = [m[1].to_i.abs * 10, m[2].to_i.abs * 10]
+              if wait[0] > wait[1]
+                wait = [wait[1], wait[0]]
+              end
+            end
             method = match[3]
           else
             method = match[1]
@@ -786,7 +801,15 @@ module Seriko
             if match[3].nil?
               wait = 0
             else
-              wait = match[3].to_i.abs
+              m = re_pattern.match(match[3])
+              if m.nil?
+                wait = match[3].to_i.abs
+              else
+                wait = [m[1].to_i.abs, m[2].to_i.abs]
+                if wait[0] > wait[1]
+                  wait = [wait[1], wait[0]]
+                end
+              end
             end
           end
           if method == ''
