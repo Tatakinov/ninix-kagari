@@ -667,6 +667,7 @@ module Seriko
         end
         show_pattern(window, surface, method, args)
         if wait >= 0
+          wait = 1 if wait.zero? # wait0のみで構成されるanimation対策
           window.append_actor(base_frame + wait, self)
         end
       end
