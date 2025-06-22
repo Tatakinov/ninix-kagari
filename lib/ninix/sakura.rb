@@ -1869,8 +1869,7 @@ module Sakura
 
     def do_idle_tasks()
       return false unless @__running
-      if @force_quit and not busy() and \
-        not (not @processed_script.empty? or not @processed_text.empty?)
+      if @force_quit and not busy() and @processed_script.empty? and @processed_text.empty?
         quit()
       end
       unless @wait_for_animation.nil?
