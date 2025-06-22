@@ -124,7 +124,7 @@ module Ninix_Main
 
   class Application
 
-    def initialize(lockfile, shm, sstp_port: [9801, 11000])
+    def initialize(lockfile, shm, sstp_port: [9801, 11000], ghost: nil)
       @lockfile = lockfile
       @abend = nil
       @loaded = false
@@ -151,6 +151,7 @@ module Ninix_Main
       @__menu_owner = nil
       @socket = NinixServer.new('ninix') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
       @shm = shm
+      @init_ghost = ghost
       @sakura_info = {}
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
         GLib::Timeout.add(10) do
@@ -657,9 +658,15 @@ module Ninix_Main
       @prefs.load()
       Gtk::Settings.default.set_gtk_font_name(@prefs.get('menu_fonts'))
       # choose default ghost/shell
+      default_sakura = nil
       directory = @prefs.get('sakura_dir')
       name = @prefs.get('sakura_name') # XXX: backward compat
-      default_sakura = find_ghost_by_dir(directory)
+      unless @init_ghost.nil?
+        default_sakura = find_ghost_by_name(@init_ghost)
+      end
+      if default_sakura.nil?
+        default_sakura = find_ghost_by_dir(directory)
+      end
       if default_sakura.nil?
         default_sakura = find_ghost_by_name(name)
       end
@@ -1660,6 +1667,9 @@ gtk_app.signal_connect 'activate' do |application|
   opt.on('--sstp-port sstp_port', 'additional port for listening SSTP requests') {|v| option[:sstp_port] = v}
   opt.on('--debug', 'debug') {|v| option[:debug] = v}
   opt.on('--logfile logfile_name', 'logfile name') {|v| option[:logfile] = v}
+  opt.on('--ghost ghost_name', 'ghost name') do |v|
+    option[:ghost] = v
+  end
   opt.parse!(ARGV)
   Logging::Logging.add_logger(Logger.new(option[:logfile])) unless option[:logfile].nil?
   # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
@@ -1679,12 +1689,17 @@ gtk_app.signal_connect 'activate' do |application|
   end
   Logging::Logging.set_level(Logger::DEBUG) unless option[:debug].nil?
 
+  option = {
+    sstp_port: sstp_port,
+    ghost: option[:ghost],
+  }
+
   Gdk.set_program_class('Ninix')
   app_window = Pix::TransparentApplicationWindow.new(application)
   app_window.set_title("Ninix-kagari")
   app_window.show_all
   # start
-  app = Ninix_Main::Application.new(lock, shm, sstp_port: sstp_port)
+  app = Ninix_Main::Application.new(lock, shm, **option)
   app.run(abend, app_window, application)
   # end
   lock.truncate(0)
