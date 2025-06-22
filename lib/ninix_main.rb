@@ -152,7 +152,7 @@ module Ninix_Main
       @socket = NinixServer.new('ninix') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
       @shm = shm
       ghost_dir = File.join(Home.get_ninix_home(), 'ghost', '')
-      if ghost.start_with?(ghost_dir)
+      if not ghost.nil? and ghost.start_with?(ghost_dir)
         ghost = ghost[ghost_dir.length ..]
 =begin
         while ghost.end_with?(File::SEPARATOR)
