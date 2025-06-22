@@ -124,7 +124,7 @@ module Ninix_Main
 
   class Application
 
-    def initialize(lockfile, shm, sstp_port: [9801, 11000], ghost: nil)
+    def initialize(lockfile, shm, sstp_port: [9801, 11000], ghost: nil, exit_if_not_found: false)
       @lockfile = lockfile
       @abend = nil
       @loaded = false
@@ -151,7 +151,17 @@ module Ninix_Main
       @__menu_owner = nil
       @socket = NinixServer.new('ninix') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
       @shm = shm
+      ghost_dir = File.join(Home.get_ninix_home(), 'ghost', '')
+      if ghost.start_with?(ghost_dir)
+        ghost = ghost[ghost_dir.length ..]
+=begin
+        while ghost.end_with?(File::SEPARATOR)
+          ghost = ghost[.. -2]
+        end
+=end
+      end
       @init_ghost = ghost
+      @exit_func = exit_if_not_found
       @sakura_info = {}
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
         GLib::Timeout.add(10) do
@@ -662,7 +672,14 @@ module Ninix_Main
       directory = @prefs.get('sakura_dir')
       name = @prefs.get('sakura_name') # XXX: backward compat
       unless @init_ghost.nil?
-        default_sakura = find_ghost_by_name(@init_ghost)
+        default_sakura = find_ghost_by_dir(@init_ghost)
+        if default_sakura.nil?
+          default_sakura = find_ghost_by_name(@init_ghost)
+        end
+        if default_sakura.nil? and not @exit_func.nil?
+          @exit_func.call
+          return
+        end
       end
       if default_sakura.nil?
         default_sakura = find_ghost_by_dir(directory)
@@ -1670,6 +1687,13 @@ gtk_app.signal_connect 'activate' do |application|
   opt.on('--ghost ghost_name', 'ghost name') do |v|
     option[:ghost] = v
   end
+  opt.on('--exit-if-not-found', 'exit if not found') do |v|
+    if v
+      option[:exit_if_not_found] = Proc.new do
+        application.quit
+      end
+    end
+  end
   opt.parse!(ARGV)
   Logging::Logging.add_logger(Logger.new(option[:logfile])) unless option[:logfile].nil?
   # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
@@ -1692,6 +1716,7 @@ gtk_app.signal_connect 'activate' do |application|
   option = {
     sstp_port: sstp_port,
     ghost: option[:ghost],
+    exit_if_not_found: option[:exit_if_not_found],
   }
 
   Gdk.set_program_class('Ninix')
