@@ -1695,7 +1695,8 @@ module Sakura
         if @parent.handle_request('GET', 'add_sakura_info', @uuid,
             @desc.get('sakura.name'),
             @desc.get('kero.name'),
-            File.join(get_prefix(), '')
+            File.join(get_prefix(), ''),
+            @desc.get('name')
                                  )
           break
         end

@@ -1229,11 +1229,11 @@ module Ninix_Main
       return update_sakura_info(uuid, *args, force: true)
     end
 
-    def update_sakura_info(uuid, sakura_name, kero_name, ghost_path, force: false)
+    def update_sakura_info(uuid, sakura_name, kero_name, ghost_path, ghost_name, force: false)
       return false if not force and not @sakura_info.include?(uuid)
       @sakura_info[uuid] = {
         name: sakura_name, keroname: kero_name,
-        ghostpath: ghost_path,
+        ghostpath: ghost_path, fullname: ghost_name,
       }
     end
 
