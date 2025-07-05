@@ -1268,7 +1268,8 @@ module Surface
         end
         # TODO
         # method毎のregion処理
-        region.union!(Pix.translate_region(overlay_pix.region, x, y))
+        overlay_pix.region.translate!(x, y)
+        region.union!(overlay_pix.region)
       end
       return Pix::Data.new(pix.surface, region)
     end
@@ -1356,7 +1357,8 @@ module Surface
               end
               # TODO
               # method毎のregion処理
-              pix.region.union!(Pix.translate_region(mayuna_overlay_pix.region, dest_x, dest_y))
+              mayuna_overlay_pix.region.translate!(dest_x, dest_y)
+              pix.region.union!(mayuna_overlay_pix.region)
             end
           end
         end
@@ -1406,7 +1408,8 @@ module Surface
         end
         # TODO
         # method毎のregion処理
-        region.union!(Pix.translate_region(overlay_pix.region, x, y))
+        overlay_pix.region.translate!(x, y)
+        region.union!(overlay_pix.region)
       end
       @image_surface = Pix::Data.new(new_pix.surface, region)
       @window.queue_draw(@image_surface.region)

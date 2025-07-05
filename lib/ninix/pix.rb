@@ -82,14 +82,6 @@ module Pix
     return region
   end
 
-  def self.translate_region(region, x, y)
-    r = Cairo::Region.new
-    region.each_rectangle do |rect|
-      r.union!(rect[0] + x, rect[1] + y, rect[2], rect[3])
-    end
-    return r
-  end
-
   class BaseTransparentWindow < Gtk::Window
     alias :base_move :move
     attr_reader :supports_alpha
