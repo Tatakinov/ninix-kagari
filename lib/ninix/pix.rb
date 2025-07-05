@@ -307,15 +307,11 @@ module Pix
         @data[path][is_pnr][use_pna] = Data.new(s, r)
       end
       data = @data[path][is_pnr][use_pna]
-      surface = Pix.create_blank_surface(data.surface.width, data.surface.height)
-      Cairo::Context.new(surface) do |cr|
-        cr.set_operator(Cairo::OPERATOR_SOURCE)
-        cr.set_source(data.surface, 0, 0)
-        cr.paint()
-      end
+      # regionは後々translate!してunion!する関係上
+      # ここでcloneしておく
       region = Cairo::Region.new
       region.union!(data.region)
-      return Data.new(surface, region)
+      return Data.new(data.surface, region)
     end
   end
 

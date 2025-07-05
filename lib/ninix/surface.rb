@@ -1232,6 +1232,12 @@ module Surface
         Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
         return Pix::Data.new(Pix.create_blank_surface(100, 100), Cairo::Region.new)
       end
+      surface = Pix.create_blank_surface(pix.surface.width, pix.surface.height)
+      Cairo::Context.new(surface) do |cr|
+        cr.set_operator(Cairo::OPERATOR_SOURCE)
+        cr.set_source(pix.surface, 0, 0)
+        cr.paint()
+      end
       region = Cairo::Region.new
       region.union!(pix.region)
       for element, x, y, method in @surfaces[surface_id][1, @surfaces[surface_id].length - 1]
@@ -1248,7 +1254,7 @@ module Surface
         rescue
           next
         end
-        Cairo::Context.new(pix.surface) do |cr|
+        Cairo::Context.new(surface) do |cr|
           op = {
             'base' =>            Cairo::OPERATOR_SOURCE, # XXX
             'overlay' =>         Cairo::OPERATOR_OVER,
@@ -1272,7 +1278,7 @@ module Surface
         overlay_pix.region.translate!(x, y)
         region.union!(overlay_pix.region)
       end
-      return Pix::Data.new(pix.surface, region)
+      return Pix::Data.new(surface, region)
     end
 
     def get_image_surface(surface_id, is_asis: false)
