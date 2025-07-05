@@ -667,7 +667,17 @@ module Seriko
         end
         show_pattern(window, surface, method, args)
         if wait >= 0
-          wait = 1 if wait.zero? # wait0のみで構成されるanimation対策
+          zero = true
+          for _, interval, _, _ in @patterns
+            if interval.instance_of?(Array) or not interval.zero?
+              zero = false
+              break
+            end
+          end
+          # wait0のみで構成されるalwaysなanimation対策
+          if zero and @pattern == 0 and @interval.include?('always') # wait0のみで構成されるanimation対策
+            wait = 1
+          end
           window.append_actor(base_frame + wait, self)
         end
       end
