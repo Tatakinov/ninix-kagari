@@ -41,6 +41,6 @@ module Version
       .concat('Copyright (c) 2002-2019 Shyouzou Sugitani\n')
       .concat('Copyright (c) 2002, 2003 ABE Hideaki\n')
       .concat('Copyright (c) 2003-2005 Shun-ichi TAHARA\n')
-      .concat('Copyright (c) 2024 Tatakinov\e')
+      .concat('Copyright (c) 2024, 2025 Tatakinov\e')
   end
 end
