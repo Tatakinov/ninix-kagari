@@ -82,6 +82,14 @@ module Pix
     return region
   end
 
+  def self.translate_region(region, x, y)
+    r = Cairo::Region.new
+    region.each_rectangle do |rect|
+      r.union!(rect[0] + x, rect[1] + y, rect[2], rect[3])
+    end
+    return r
+  end
+
   class BaseTransparentWindow < Gtk::Window
     alias :base_move :move
     attr_reader :supports_alpha
@@ -158,19 +166,19 @@ module Pix
       return new_x, new_y
     end
 
-    def queue_draw
+    def queue_draw(region)
       # HACK region.rectangles == []だと
       # GTK君は賢いからqueue_drawされてもEXPOSURE_EVENTを発火しないので
       # regionを追加して無理矢理発火させる。
-      if (not @region.nil?) and @region.rectangles == []
-        @region.union!(0, 0, 1, 1)
+      if (not region.nil?) and region.rectangles == []
+        region.union!(0, 0, 1, 1)
         if @supports_alpha
-          input_shape_combine_region(@region)
+          input_shape_combine_region(region)
         else
-          shape_combine_region(@region)
+          shape_combine_region(region)
         end
       end
-      return super
+      return super()
     end
 
     def set_surface(cr, surface, scale, reshape)
@@ -212,26 +220,26 @@ module Pix
       end
     end
 
-    def set_shape(cr, reshape)
+    def set_shape(cr, reshape, region)
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
-      if @region.nil? or reshape
+      if region.nil?
         if @tmp_surface.nil?
           if @device_extents.nil?
-            @region = Pix.surface_to_region(cr.target.map_to_image)
+            region = Pix.surface_to_region(cr.target.map_to_image)
           else
-            @region = Pix.surface_to_region_with_hints(cr.target.map_to_image, @device_extents)
+            region = Pix.surface_to_region_with_hints(cr.target.map_to_image, @device_extents)
           end
         else
-          @region = Pix.surface_to_region(@tmp_surface)
+          region = Pix.surface_to_region(@tmp_surface)
         end
       end
       @prev_position = @__surface_position
       if @supports_alpha
         input_shape_combine_region(nil)
-        input_shape_combine_region(@region)
+        input_shape_combine_region(region)
       else
         shape_combine_region(nil)
-        shape_combine_region(@region)
+        shape_combine_region(region)
       end
     end
   end
@@ -289,6 +297,50 @@ module Pix
     end
   end
 
+  class Cache
+    def initialize
+      @data = Hash.new do |h, k|
+        h[k] = Hash.new do |h, k|
+          h[k] = Hash.new do |h, k|
+            h[k] = Data.new
+          end
+        end
+      end
+    end
+
+    def load(path, is_pnr: true, use_pna: false)
+      unless @data[path][is_pnr].include?(use_pna)
+        s = Pix.create_surface_from_file(path, :is_pnr => is_pnr, :use_pna => use_pna)
+        r = Pix.surface_to_region(s)
+        @data[path][is_pnr][use_pna] = Data.new(s, r)
+      end
+      data = @data[path][is_pnr][use_pna]
+      surface = Pix.create_blank_surface(data.surface.width, data.surface.height)
+      Cairo::Context.new(surface) do |cr|
+        cr.set_operator(Cairo::OPERATOR_SOURCE)
+        cr.set_source(data.surface, 0, 0)
+        cr.paint()
+      end
+      region = Cairo::Region.new
+      region.union!(data.region)
+      return Data.new(surface, region)
+    end
+  end
+
+  class Data
+    def initialize(surface, region)
+      @surface = surface
+      @region = region
+    end
+
+    def surface
+      @surface
+    end
+
+    def region
+      @region
+    end
+  end
 
   def self.get_png_size(path)
     return 0, 0 if not File.exist?(path)

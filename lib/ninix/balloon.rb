@@ -532,6 +532,7 @@ module Balloon
       @x_fractions = 0
       @y_fractions = 0
       @reshape = true
+      @pix_cache = Pix::Cache.new
       @darea = @window.darea
       @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
                         Gdk::EventMask::BUTTON_PRESS_MASK|
@@ -630,7 +631,7 @@ module Balloon
       begin
         path, config = @balloon[balloon_id]
         use_pna = (not @parent.handle_request('GET', 'get_preference', 'use_pna').zero?)
-        surface = Pix.create_surface_from_file(path, :use_pna => use_pna)
+        surface = @pix_cache.load(path, use_pna: use_pna)
       rescue
         return nil
       end
@@ -681,8 +682,8 @@ module Balloon
     def reset_sstp_marker
       if @side.zero?
         fail "assert" if @balloon_surface.nil?
-        w = @balloon_surface.width
-        h = @balloon_surface.height
+        w = @balloon_surface.surface.width
+        h = @balloon_surface.surface.height
         # sstp marker position
         @sstp = []
         x = config_adjust('sstpmarker.x', w,  30)
@@ -700,8 +701,8 @@ module Balloon
       # arrow positions
       @arrow = []
       fail "assert" if @balloon_surface.nil?
-      w = @balloon_surface.width
-      h = @balloon_surface.height
+      w = @balloon_surface.surface.width
+      h = @balloon_surface.surface.height
       x = config_adjust('arrow0.x', w, -10)
       y = config_adjust('arrow0.y', h,  10)
       @arrow << [x, y]
@@ -796,8 +797,8 @@ module Balloon
       @balloon_id = balloon_id
       # change surface and window position
       x, y = @position
-      @width = @balloon_surface.width
-      @height = @balloon_surface.height
+      @width = @balloon_surface.surface.width
+      @height = @balloon_surface.surface.height
       reset_arrow()
       reset_sstp_marker()
       reset_message_regions()
@@ -1083,7 +1084,7 @@ module Balloon
       return if @parent.handle_request('GET', 'lock_repaint')
       return true unless @__shown
       fail "assert" if @balloon_surface.nil?
-      @window.set_surface(cr, @balloon_surface, scale, @reshape)
+      @window.set_surface(cr, @balloon_surface.surface, scale, @reshape)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX
       # FIXME: comment
@@ -1295,7 +1296,7 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
-      @window.set_shape(cr, @reshape)
+      @window.set_shape(cr, @reshape, @balloon_surface.region)
       @reshape = false
       return false
     end
@@ -1972,7 +1973,7 @@ module Balloon
       end
       data = @data_buffer[-1]
       begin
-        image_surface = Pix.create_surface_from_file(path)
+        image_surface = @pix_cache.load(path)
       rescue
         return
       end
@@ -2081,7 +2082,7 @@ module Balloon
         path, config = balloon
         # load pixbuf
         begin
-          surface = Pix.create_surface_from_file(path)
+          surface = @pix_cache.load(path)
         rescue
           surface = nil
         end
@@ -2128,16 +2129,16 @@ module Balloon
       return @__surface_position
     end
 
-    def redraw(widget, cr, surface)
+    def redraw(widget, cr, pix)
       cr.save()
       # clear
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.set_source_rgba(0, 0, 0, 0)
       cr.paint
-      cr.set_source(surface, 0, 0)
+      cr.set_source(pix.surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       # copy rectangle on the destination
-      cr.rectangle(0, 0, surface.width, surface.height)
+      cr.rectangle(0, 0, pix.surface.width, pix.surface.height)
       cr.fill()
       cr.restore()
       w, h = @window.size
@@ -2147,7 +2148,8 @@ module Balloon
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       s = cr.target.map_to_image
       s = surface if s.width < surface.width or s.height < surface.height
-      region = Pix.surface_to_region(s)
+      region = Cairo::Region.new
+      region.union!(pix.region)
       # XXX: to avoid losing focus in the text input region
       x = @entry.margin_left
       y = @entry.margin_top
