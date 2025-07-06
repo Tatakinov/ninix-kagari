@@ -948,7 +948,7 @@ module Balloon
       # draw sstp marker
       unless @sstp_surface.nil?
         x, y = @sstp[0]            
-        cr.set_source(@sstp_surface, x, y)
+        cr.set_source(@sstp_surface.surface, x, y)
         cr.paint()
       end
       # draw sstp message
@@ -964,7 +964,7 @@ module Balloon
       return if @lineno <= 0
       cr.save()
       x, y = @arrow[0]
-      cr.set_source(@arrow0_surface, x, y)
+      cr.set_source(@arrow0_surface.surface, x, y)
       cr.paint()
       cr.restore()
     end
@@ -973,7 +973,7 @@ module Balloon
       return if get_bottom_position < @valid_height
       cr.save()
       x, y = @arrow[1]
-      cr.set_source(@arrow1_surface, x, y)
+      cr.set_source(@arrow1_surface.surface, x, y)
       cr.paint()
       cr.restore()
     end
@@ -1277,8 +1277,8 @@ module Balloon
         unless @sstp_surface.nil?
           for l, c in @sstp_marker
             if l == i
-              mw = @sstp_surface.width
-              mh = @sstp_surface.height
+              mw = @sstp_surface.surface.width
+              mh = @sstp_surface.surface.height
               @layout.set_text(@text_buffer[i][0, c])
               text_w, text_h = @layout.pixel_size
               mx = (x + text_w)
@@ -1600,8 +1600,8 @@ module Balloon
       px, py = @window.winpos_to_surfacepos(
             event.x.to_i, event.y.to_i, scale)
       # up arrow
-      w = @arrow0_surface.width
-      h = @arrow0_surface.height
+      w = @arrow0_surface.surface.width
+      h = @arrow0_surface.surface.height
       x, y = @arrow[0]
       if x <= px and px <= (x + w) and y <= py and py <= (y + h)
         if @lineno > 0
@@ -1611,8 +1611,8 @@ module Balloon
         return true
       end
       # down arrow
-      w = @arrow1_surface.width
-      h = @arrow1_surface.height
+      w = @arrow1_surface.surface.width
+      h = @arrow1_surface.surface.height
       x, y = @arrow[1]
       if x <= px and px <= (x + w) and y <= py and py <= (y + h)
         if get_bottom_position > @valid_height
@@ -1856,10 +1856,10 @@ module Balloon
         new_buffer
       end
       data = @data_buffer[-1]
-      data[:pos][:w] = @sstp_surface.width
+      data[:pos][:w] = @sstp_surface.surface.width
       data[:pos][:h] = @char_height
       data[:content][:type] = TYPE_IMAGE
-      data[:content][:data] = @sstp_surface
+      data[:content][:data] = @sstp_surface.surface
       data[:content][:attr] = {
         height: @font_height,
         color: '',
@@ -1977,10 +1977,10 @@ module Balloon
       rescue
         return
       end
-      data[:pos][:w] = image_surface.width
-      data[:pos][:h] = image_surface.height
+      data[:pos][:w] = image_surface.surface.width
+      data[:pos][:h] = image_surface.surface.height
       data[:content][:type] = TYPE_IMAGE
-      data[:content][:data] = image_surface
+      data[:content][:data] = image_surface.surface
       data[:content][:attr][:is_sstp_marker] = false
       unless kwargs[:x].nil? or kwargs[:y].nil?
         data[:pos][:x] = kwargs[:x]
