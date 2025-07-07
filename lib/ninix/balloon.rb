@@ -2027,15 +2027,16 @@ module Balloon
       @window.signal_connect('delete_event') do |w ,e|
         next delete(w, e)
       end
-      @window.signal_connect('key_press_event') do |w, e|
-        next key_press(w, e)
-      end
       @window.signal_connect('button_press_event') do |w, e|
         next button_press(w, e)
       end
       @window.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
         drag_data_received(widget, context, x, y, data, info, time)
         next true
+      end
+      key_controller = Gtk::EventControllerKey.new(@window)
+      key_controller.signal_connect('key-pressed') do |ctrl, keyval, keycode, state|
+        next key_press(ctrl.widget, ctrl, keyval, keycode, state)
       end
       # DnD data types
       dnd_targets = [['text/plain', 0, 0]]
@@ -2176,8 +2177,8 @@ module Balloon
       return true
     end
 
-    def key_press(widget, event)
-      if event.keyval == Gdk::Keyval::KEY_Escape
+    def key_press(widget, ctrl, keyval, keycode, state)
+      if keyval == Gdk::Keyval::KEY_Escape
         @window.hide()
         cancel()
         return true
@@ -2232,8 +2233,8 @@ module Balloon
       return true
     end
 
-    def key_press(widget, event)
-      if event.keyval == Gdk::Keyval::KEY_Escape
+    def key_press(widget, ctrl, keyval, keycode, state)
+      if keyval == Gdk::Keyval::KEY_Escape
         @window.hide()
         cancel()
         @parent.handle_request('NOTIFY', 'reset_user_interaction')

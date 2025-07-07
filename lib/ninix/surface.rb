@@ -52,18 +52,17 @@ module Surface
       window.signal_connect('delete_event') do |w, e|
         next delete(w, e)
       end
-      window.signal_connect('key_press_event') do |w, e|
-        next key_press(w, e)
-      end
-      window.signal_connect('key_release_event') do |w, e|
-        next key_press(w, e)
-      end
       window.signal_connect('window_state_event') do |w, e|
         window_state(w, e)
         next true
       end
-      window.set_events(Gdk::EventMask::KEY_PRESS_MASK|
-                        Gdk::EventMask::KEY_RELEASE_MASK)
+      key_controller = Gtk::EventControllerKey.new(window)
+      key_controller.signal_connect('key-pressed') do |ctrl, keyval, keycode, state|
+        next key_press(ctrl.widget, ctrl, keyval, keycode, state)
+      end
+      key_controller.signal_connect('key-released') do |ctrl, keyval, keycode, state|
+        next key_release(ctrl.widget, ctrl, keyval, keycode, state)
+      end
       window.realize()
       return window
     end
@@ -128,16 +127,11 @@ module Surface
       return true
     end
 
-    def key_press(window, event)
-      name = Keymap::Keymap_old[event.keyval]
-      keycode = Keymap::Keymap_new[event.keyval]
-      if event.event_type == Gdk::EventType::KEY_RELEASE
-        @key_press_count = 0
-        return true
-      end
-      return false unless (event.event_type == Gdk::EventType::KEY_PRESS)
+    def key_press(window, event, keyval, keycode, state)
+      name = Keymap::Keymap_old[keyval]
+      keycode = Keymap::Keymap_new[keyval]
       @key_press_count += 1
-      if (event.state & \
+      if (state & \
           (Gdk::ModifierType::CONTROL_MASK | \
            Gdk::ModifierType::SHIFT_MASK)).nonzero?
         if name == 'f12'
@@ -156,6 +150,11 @@ module Surface
           'NOTIFY', 'notify_event', 'OnKeyPress', name, keycode,
           @key_press_count)
       end
+      return true
+    end
+
+    def key_release(window, event, keyval, keycode, state)
+      @key_press_count = 0
       return true
     end
 
