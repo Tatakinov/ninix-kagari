@@ -864,6 +864,10 @@ module Surface
       @window[side].is_playing_animation(actor_id)
     end
 
+    def change_animation_state(side, actor_id, state, *args)
+      @window[side].change_animation_state(actor_id, state, *args)
+    end
+
     def check_mikire_kasanari
       unless is_shown(0)
         @mikire = @kasanari = 0
@@ -1106,6 +1110,20 @@ module Surface
 
     def is_playing_animation(actor_id)
       @seriko.is_playing_animation(actor_id)
+    end
+
+    def change_animation_state(actor_id, state, *args)
+      case state
+      when :clear
+        @seriko.clear_animation(actor_id)
+      when :pause
+        @seriko.pause_animation(actor_id)
+      when :resume
+        @seriko.resume_animation(actor_id)
+      when :offset
+        x, y = *args
+        @seriko.offset_animation(actor_id, x, y)
+      end
     end
 
     def reset_surface

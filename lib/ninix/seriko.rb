@@ -246,12 +246,33 @@ module Seriko
     end
 
     def is_playing_animation(actor_id)
-      for _, actor in @active
-        if actor.get_id == actor_id
-          return true
-        end
+      @active.any? do |_, actor|
+        next actor.get_id == actor_id
       end
-      return false
+    end
+
+    def clear_animation(actor_id)
+      @active.filter! do |_, actor|
+        next actor.get_id != actor_id
+      end
+    end
+
+    def pause_animation(actor_id)
+      @active.each do |_, actor|
+        actor.pause if actor.get_id == actor_id
+      end
+    end
+
+    def resume_animation(actor_id)
+      @active.each do |_, actor|
+        actor.resume if actor.get_id == actor_id
+      end
+    end
+
+    def offset_animation(actor_id, x, y)
+      @active.each do |_, actor|
+        actor.offset(x, y) if actor.get_id == actor_id
+      end
     end
 
     def reset(window, surface_id)
@@ -624,7 +645,21 @@ module Seriko
       terminate(window)
       @terminate_flag = false
       @pattern = 0
+      @resume = true
+      @offset = [0, 0]
       update(window, base_frame)
+    end
+
+    def pause
+      @resume = false
+    end
+
+    def resume
+      @resume = true
+    end
+
+    def offset(x, y)
+      @offset = [x, y]
     end
 
     def update(window, base_frame)
@@ -632,39 +667,53 @@ module Seriko
       return false if @interval.include?('bind') and not @enable_bind
       if @interval == ['bind']
         for surface, interval, method, args in @patterns
+          if OVERLAY_SET.include?(method)
+            x = args[0] + @offset[0]
+            y = args[1] + @offset[1]
+            args = [x, y]
+          end
           show_pattern(window, surface, method, args)
         end
       else
         surface, interval, method, args = @patterns[@pattern]
-        @pattern += 1
-        if interval.instance_of?(Array)
-          wait = rand(interval[0] .. interval[1])
-        else
-          wait = interval
+        if OVERLAY_SET.include?(method)
+          x = args[0] + @offset[0]
+          y = args[1] + @offset[1]
+          args = [x, y]
         end
-        if @pattern == @patterns.length
-          @pattern = 0
-          # random系の秒数決定の乱数(0 < x < 1)
-          while (x = rand) == 0
-          end
-          if @interval.include?('sometimes')
-            wait = (-Math.log(2, x)).ceil * 1_000_000
-          elsif @interval.include?('rarely')
-            wait = (-Math.log(4, x)).ceil * 1_000_000
-          elsif @interval.include?('random')
-            wait = (-Math.log(@factor, x)).ceil * 1_000_000
-          elsif @interval.include?('periodic')
-            wait = @factor * 1_000_000
-          elsif @interval.include?('always')
-            # nop
-          elsif ['runonce', 'never', 'yen-e', 'talk'].any? do |e|
-              @interval.include?(e)
-            end
-            wait = -1
-            terminate(nil)
+        if @resume
+          @pattern += 1
+          if interval.instance_of?(Array)
+            wait = rand(interval[0] .. interval[1])
           else
-            fail RuntimeError, 'unreachable'
+            wait = interval
           end
+          if @pattern == @patterns.length
+            @pattern = 0
+            # random系の秒数決定の乱数(0 < x < 1)
+            while (x = rand) == 0
+            end
+            if @interval.include?('sometimes')
+              wait = (-Math.log(2, x)).ceil * 1_000_000
+            elsif @interval.include?('rarely')
+              wait = (-Math.log(4, x)).ceil * 1_000_000
+            elsif @interval.include?('random')
+              wait = (-Math.log(@factor, x)).ceil * 1_000_000
+            elsif @interval.include?('periodic')
+              wait = @factor * 1_000_000
+            elsif @interval.include?('always')
+              # nop
+            elsif ['runonce', 'never', 'yen-e', 'talk'].any? do |e|
+                @interval.include?(e)
+              end
+              wait = -1
+              terminate(nil)
+            else
+              fail RuntimeError, 'unreachable'
+            end
+          end
+        else
+          wait = 1
         end
         show_pattern(window, surface, method, args)
         if wait >= 0

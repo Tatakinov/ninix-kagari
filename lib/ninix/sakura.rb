@@ -2868,6 +2868,22 @@ module Sakura
           end
           enqueue_event(event, *values)
         end
+      elsif args[0] == 'anim' and not args[2].nil?
+        id = args[2].to_i
+        case args[1]
+        when 'clear'
+          @surface.change_animation_state(@script_side, id, :clear)
+        when 'pause'
+          @surface.change_animation_state(@script_side, id, :pause)
+        when 'resume'
+          @surface.change_animation_state(@script_side, id, :resume)
+        when 'offset'
+          unless args[3].nil? or args[4].nil?
+            x = args[3].to_i
+            y = args[4].to_i
+            @surface.change_animation_state(@script_side, id, :offset, x, y)
+          end
+        end
       else
         #pass ## FIXME
       end
