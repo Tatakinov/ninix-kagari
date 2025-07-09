@@ -1793,6 +1793,7 @@ module Balloon
     end
 
     def append_text(text)
+      @text_count += text.length
       data = @data_buffer[-1]
       case data[:content][:type]
       when TYPE_UNKNOWN
