@@ -170,7 +170,8 @@ module Seriko
     def invoke_yen_e(window, surface_id)
       return unless @seriko.include?(surface_id)
       for actor in @seriko[surface_id]
-        if actor.get_interval() == 'yen-e'
+        interval = actor.get_interval
+        if interval.include?('yen-e') and actor.enable
           invoke_actor(window, actor)
           break
         end
@@ -198,7 +199,8 @@ module Seriko
     def invoke_runonce(window)
       return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
-        if actor.get_interval() == 'runonce'
+        interval = actor.get_interval
+        if interval.include?('runonce') and actor.enable
           invoke_actor(window, actor)
         end
       end
@@ -207,7 +209,7 @@ module Seriko
     def invoke_always(window)
       return unless @seriko.include?(@base_id)
       for actor in @seriko[@base_id]
-        interval = actor.get_interval()
+        interval = actor.get_interval
         if ['always', 'sometimes', 'rarely', 'random', 'periodic'].any? do |e|
             interval.include?(e)
           end
@@ -218,10 +220,13 @@ module Seriko
 
     def invoke_bind(window)
       return unless @seriko.include?(@base_id)
-      @seriko[@base_id].filter do |actor|
-        actor.get_interval.include?('bind')
-      end.each do |actor|
-        invoke_actor(window, actor)
+      @seriko[@base_id].each do |actor|
+        interval = actor.get_interval
+        if interval == ['bind']
+          invoke_actor(window, actor)
+        elsif interval.include?('runonce')
+          invoke_actor(window, actor)
+        end
       end
     end
 
@@ -293,11 +298,11 @@ module Seriko
       invoke_runonce(window)
       invoke_always(window)
       if @seriko.include?(@base_id)
-        @seriko[@base_id].filter do |actor|
-          bind.include?(actor.get_id)
-        end.each do |actor|
-          group, enable, option = bind[actor.get_id]
-          actor.toggle_bind(enable)
+        @seriko[@base_id].each do |actor|
+          if bind.include?(actor.get_id)
+            group, enable, option = bind[actor.get_id]
+            actor.toggle_bind(enable)
+          end
         end
       end
       invoke_bind(window)
@@ -639,6 +644,12 @@ module Seriko
       else
         @enable_bind = toggle
       end
+    end
+
+    def enable
+      return true unless @interval.include?('bind')
+      return true if @interval.include?('bind') and @enable_bind
+      return false
     end
 
     def invoke(window, base_frame)
