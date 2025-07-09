@@ -81,7 +81,7 @@ module Seriko
 
     def get_actor_next(window)
       unless @active.empty?
-        @active.sort! {|x| x[0]} # (key=lambda {|x| return x[0]})
+        @active.sort_by! {|x| x[0]} # (key=lambda {|x| return x[0]})
         return @active.shift if @active[0][0] <= @next_tick
       end
       return nil, nil
