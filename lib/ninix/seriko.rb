@@ -658,6 +658,7 @@ module Seriko
       @pattern = 0
       @resume = true
       @offset = [0, 0]
+      @once = true
       update(window, base_frame)
     end
 
@@ -686,19 +687,15 @@ module Seriko
           show_pattern(window, surface, method, args)
         end
       else
-        surface, interval, method, args = @patterns[@pattern]
+        surface, _, method, args = @patterns[@pattern]
         if OVERLAY_SET.include?(method)
           x = args[0] + @offset[0]
           y = args[1] + @offset[1]
           args = [x, y]
         end
+        wait = nil
         if @resume
-          @pattern += 1
-          if interval.instance_of?(Array)
-            wait = rand(interval[0] .. interval[1])
-          else
-            wait = interval
-          end
+          @pattern += 1 unless @once
           if @pattern == @patterns.length
             @pattern = 0
             # random系の秒数決定の乱数(0 < x < 1)
@@ -723,10 +720,22 @@ module Seriko
               fail RuntimeError, 'unreachable'
             end
           end
+          if wait.nil?
+            _, interval, _, _ = @patterns[@pattern]
+            if interval.instance_of?(Array)
+              wait = rand(interval[0] .. interval[1])
+            else
+              wait = interval
+            end
+          end
         else
           wait = 1
         end
-        show_pattern(window, surface, method, args)
+        if @once
+          @once = false
+        else
+          show_pattern(window, surface, method, args)
+        end
         if wait >= 0
           zero = true
           for _, interval, _, _ in @patterns
