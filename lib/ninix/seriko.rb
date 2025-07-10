@@ -224,8 +224,6 @@ module Seriko
         interval = actor.get_interval
         if interval == ['bind']
           invoke_actor(window, actor)
-        elsif interval.include?('runonce')
-          invoke_actor(window, actor)
         end
       end
     end
