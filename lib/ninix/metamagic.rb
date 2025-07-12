@@ -31,13 +31,13 @@ module MetaMagic
       fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
       unless @handlers.include?(event)
         if self.class.method_defined?(event)
-          result = method(event).call(*arglist, **kwargs)
+          result = send(event, *arglist, **kwargs)
         else
           result = @parent.handle_request(
             event_type, event, *arglist, **kwargs)
         end
       else
-        result = method(@handlers[event]).call(*arglist, **kwargs)
+        result = send(@handlers[event], *arglist, **kwargs)
       end
       return result if event_type == 'GET'
     end
@@ -97,13 +97,13 @@ module MetaMagic
       fail "assert" unless EVENT_TYPE.include?(event_type)
       unless @handlers.include?(event)
         if self.class.method_defined?(event)
-          result = method(event).call(*arglist, **kwargs)
+          result = send(event, *arglist, **kwargs)
         else
           result = @parent.handle_request(
             event_type, event, *arglist, **kwargs)
         end
       else
-        result = method(@handlers[event]).call(*arglist, **kwargs)
+        result = send(@handlers[event], *arglist, **kwargs)
       end
       return result if event_type == 'GET'
     end

@@ -261,12 +261,12 @@ module Ninix_Main
       fail "assert" unless EVENT_TYPE.include?(event_type)
       unless HANDLERS.include?(event)
         if Application.method_defined?(event)
-          result = method(event).call(*arglist, **kwarg)
+          result = send(event, *arglist, **kwarg)
         else
           result = nil
         end
       else
-        result = method(HANDLERS[event]).call(*arglist, **kwarg)
+        result = send(HANDLERS[event], *arglist, **kwarg)
       end
       return result if event_type == 'GET'
     end
@@ -1410,7 +1410,7 @@ module Ninix_Main
               Gtk::ResponseType::CLOSE.to_i => 'close',
               Gtk::ResponseType::DELETE_EVENT.to_i => 'close',
              }
-      method(func[response]).call()
+      send(func[response])
       return true
     end
 
@@ -1512,7 +1512,7 @@ module Ninix_Main
       func = {Gtk::ResponseType::CLOSE.to_i => 'close',
               Gtk::ResponseType::DELETE_EVENT.to_i => 'close',
              }
-      method(func[response]).call()
+      send(func[response])
       return true
     end
 
