@@ -1554,12 +1554,12 @@ module Surface
             if line[1] > line[3]
               if y == line[1]
                 next
-              elsif y == line[3]
+              elsif y == line[3] and x <= line[2]
                 count += 1
                 next
               end
             else
-              if y == line[1]
+              if y == line[1] and x < line[0]
                 count += 1
                 next
               elsif y == line[3]
