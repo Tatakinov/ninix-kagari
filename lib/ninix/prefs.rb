@@ -157,7 +157,7 @@ module Prefs
       @__prefs.load()
       reset()
       update() # XXX
-      @parent.handle_request('NOTIFY', 'notify_preference_changed')
+      @parent.handle_request(:GET, :notify_preference_changed)
     end
 
     def save
@@ -260,19 +260,19 @@ module Prefs
     def ok
       hide()
       update(:commit => true)
-      @parent.handle_request('NOTIFY', 'notify_preference_changed')
+      @parent.handle_request(:GET, :notify_preference_changed)
     end
 
     def apply
       update()
-      @parent.handle_request('NOTIFY', 'notify_preference_changed')
+      @parent.handle_request(:GET, :notify_preference_changed)
     end
 
     def cancel
       hide()
       @__prefs.revert()
       reset()
-      @parent.handle_request('NOTIFY', 'notify_preference_changed')
+      @parent.handle_request(:GET, :notify_preference_changed)
     end
 
     def show
@@ -484,7 +484,7 @@ module Prefs
 
     def set_default_balloon(directory)
       model = Gtk::ListStore.new(String, String)
-      for name, directory in @parent.handle_request('GET', 'get_balloon_list')
+      for name, directory in @parent.handle_request(:GET, :get_balloon_list)
         listiter = model.append()
         model.set_value(listiter, 0, name)
         model.set_value(listiter, 1, directory)

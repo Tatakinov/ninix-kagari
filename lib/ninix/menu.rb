@@ -53,7 +53,7 @@ module Menu
       item = Gtk::CheckMenuItem.new(:label => _('Stick(_Y)'), :use_underline => true)
       item.set_active(false)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'stick_window')
+        @parent.handle_request(:GET, :stick_window)
       end
       @__popup_menu.add(item)
       @__menu_list['Stick'] = {:entry => item, :visible => true}
@@ -67,43 +67,43 @@ module Menu
 
       item = Gtk::MenuItem.new(:label => _('Network Update(_U)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'network_update')
+        @parent.handle_request(:GET, :network_update)
       end
       menu.add(item)
       @__menu_list['Options/Update'] = {:entry => item, :visible => true}
       item = Gtk::MenuItem.new(:label => _('Vanish(_F)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'vanish')
+        @parent.handle_request(:GET, :vanish)
       end
       menu.add(item)
       @__menu_list['Options/Vanish'] = {:entry => item, :visible => true}
       item = Gtk::MenuItem.new(:label => _('Preferences...(_O)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'edit_preferences')
+        @parent.handle_request(:GET, :edit_preferences)
       end
       menu.add(item)
       @__menu_list['Options/Preferences'] = {:entry => item, :visible => true}
       item = Gtk::MenuItem.new(:label => _('Console(_C)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'open_console')
+        @parent.handle_request(:GET, :open_console)
       end
       menu.add(item)
       @__menu_list['Options/Console'] = {:entry => item, :visible => true}
       item = Gtk::MenuItem.new(:label => _('Ghost Manager(_M)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'open_ghost_manager')
+        @parent.handle_request(:GET, :open_ghost_manager)
       end
       menu.add(item)
       @__menu_list['Options/Manager'] = {:entry => item, :visible => true}
       item = Gtk::MenuItem.new(label: _('Script Log(_L)'), use_underline: true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'open_script_log')
+        @parent.handle_request(:GET, :open_script_log)
       end
       menu.add(item)
       @__menu_list['Options/ScriptLog'] = {entry: item, visible: true}
       item = Gtk::MenuItem.new(label: _('Input Script(_S)'), use_underline: true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'open_scriptinputbox')
+        @parent.handle_request(:GET, :open_scriptinputbox)
       end
       menu.add(item)
       @__menu_list['Options/ScriptLog'] = {entry: item, visible: true}
@@ -133,13 +133,13 @@ module Menu
       item.set_submenu(menu)
       item = Gtk::MenuItem.new(:label => _('Usage graph(_A)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'show_usage')
+        @parent.handle_request(:GET, :show_usage)
       end
       menu.add(item)
       @__menu_list['Information/Usage'] = {:entry => item, :visible => true}
       item = Gtk::MenuItem.new(:label => _('Version(_V)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'about')
+        @parent.handle_request(:GET, :about)
       end
       menu.add(item)
       @__menu_list['Information/Version'] = {:entry => item, :visible => true}
@@ -155,13 +155,13 @@ module Menu
       @__popup_menu.add(item)
       item = Gtk::MenuItem.new(:label => _('Close(_W)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'close_sakura')
+        @parent.handle_request(:GET, :close_sakura)
       end
       @__popup_menu.add(item)
       @__menu_list['Close'] = {:entry => item, :visible => true}
       item = Gtk::MenuItem.new(:label => _('Quit(_Q)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'close_all')
+        @parent.handle_request(:GET, :close_all)
       end
       @__popup_menu.add(item)
       @__menu_list['Quit'] = {:entry => item, :visible => true}
@@ -310,7 +310,7 @@ module Menu
               item.set_name('popup menu item')
               item.set_active(state)
               item.signal_connect('activate', [index, key]) do |a, ik|
-                @parent.handle_request('NOTIFY', 'toggle_bind', ik)
+                @parent.handle_request(:GET, :toggle_bind, ik)
                 next true
               end
               provider = create_css_provider_for(item)
@@ -375,7 +375,7 @@ module Menu
           end
           unless name_list.empty? # caption
             for name in name_list
-              caption = @parent.handle_request('GET', 'getstring', name)
+              caption = @parent.handle_request(:GET, :getstring, name)
               break unless caption.nil? or caption.empty?
             end
             unless caption.nil? or caption.empty?
@@ -394,7 +394,7 @@ module Menu
         end
         if not name_list.nil? and not name_list.empty? # visible
           for name in name_list
-            visible = @parent.handle_request('GET', 'getstring', name)
+            visible = @parent.handle_request(:GET, :getstring, name)
             break unless visible.nil? or visible.empty?
           end
           if visible == '0'
@@ -422,11 +422,11 @@ module Menu
         string = ['sakura', 'kero'][side]
       end
       string = [string, '.popupmenu.visible'].join('')
-      return if @parent.handle_request('GET', 'getstring', string) == '0'
+      return if @parent.handle_request(:GET, :getstring, string) == '0'
       __update_ui(side)
       if side.zero?
         portal = @parent.handle_request(
-          'GET', 'getstring', 'sakura.portalsites')
+          :GET, :getstring, 'sakura.portalsites')
       else
         portal = nil
       end
@@ -438,7 +438,7 @@ module Menu
         string = ['sakura', 'kero'][side]
       end
       string = [string, '.recommendsites'].join('')
-      recommend = @parent.handle_request('GET', 'getstring', string)
+      recommend = @parent.handle_request(:GET, :getstring, string)
       __set_recommend_menu(recommend)
       __set_ghost_menu()
       __set_shell_menu()
@@ -499,7 +499,7 @@ module Menu
               end
               if entry.length > 2
                 base_path = @parent.handle_request(
-                  'GET', 'get_prefix')
+                  :GET, :get_prefix)
                 filename = entry[2].downcase
                 tail = File.extname(filename)
                 if tail.empty?
@@ -526,7 +526,7 @@ module Menu
               if entry.length > 1    
                 item.signal_connect('activate', title, url) do |a, title, url|
                   @parent.handle_request(
-                    'NOTIFY', 'notify_site_selection', title, url)
+                    :GET, :notify_site_selection, title, url)
                   next true
                 end
                 unless banner.nil?
@@ -580,7 +580,7 @@ module Menu
               url = entry[1]
             end
             if entry.length > 2
-              base_path = @parent.handle_request('GET', 'get_prefix')
+              base_path = @parent.handle_request(:GET, :get_prefix)
               filename = entry[2].downcase
               tail = File.extname(filename)
               if tail.empty?
@@ -606,7 +606,7 @@ module Menu
             end
             if entry.length > 1
               item.signal_connect('activate', title, url) do |a, title, url|
-                @parent.handle_request('NOTIFY', 'notify_site_selection', title, url)
+                @parent.handle_request(:GET, :notify_site_selection, title, url)
                 next true
               end
               unless banner.nil?
@@ -795,7 +795,7 @@ module Menu
     def __set_ghost_menu
       for path in ['Summon', 'Change']
         ghost_menu = Gtk::Menu.new()
-        for items in @parent.handle_request('GET', 'get_ghost_menus')
+        for items in @parent.handle_request(:GET, :get_ghost_menus)
           item = items[path]
           unless item.parent.nil?
             item.reparent(ghost_menu)
@@ -813,13 +813,13 @@ module Menu
     end
 
     def __set_shell_menu
-      shell_menu = @parent.handle_request('GET', 'get_shell_menu')
+      shell_menu = @parent.handle_request(:GET, :get_shell_menu)
       menuitem = @__menu_list['Shell'][:entry]
       menuitem.set_submenu(shell_menu)
     end
 
     def __set_balloon_menu
-      balloon_menu = @parent.handle_request('GET', 'get_balloon_menu')
+      balloon_menu = @parent.handle_request(:GET, :get_balloon_menu)
       menuitem = @__menu_list['Balloon'][:entry]
       menuitem.set_submenu(balloon_menu)
     end
@@ -865,7 +865,7 @@ module Menu
     end
 
     def __set_nekodorif_menu
-      nekodorif_list = @parent.handle_request('GET', 'get_nekodorif_list')
+      nekodorif_list = @parent.handle_request(:GET, :get_nekodorif_list)
       nekodorif_menu = Gtk::Menu.new()
       for i in 0..(nekodorif_list.length - 1)
         name = nekodorif_list[i]['name']
@@ -874,7 +874,7 @@ module Menu
         item.show()
         nekodorif_menu << item
         item.signal_connect('activate', nekodorif_list[i]['dir']) do |a, dir|
-          @parent.handle_request('NOTIFY', 'select_nekodorif', dir)
+          @parent.handle_request(:GET, :select_nekodorif, dir)
           next true
         end
         provider = create_css_provider_for(item)
@@ -893,7 +893,7 @@ module Menu
     end
 
     def __set_kinoko_menu
-      kinoko_list = @parent.handle_request('GET', 'get_kinoko_list')
+      kinoko_list = @parent.handle_request(:GET, :get_kinoko_list)
       kinoko_menu = Gtk::Menu.new()
       for i in 0..(kinoko_list.length - 1)
         name = kinoko_list[i]['title']
@@ -902,7 +902,7 @@ module Menu
         item.show()
         kinoko_menu << item
         item.signal_connect('activate', kinoko_list[i]) do |a, k|
-          @parent.handle_request('NOTIFY', 'select_kinoko', k)
+          @parent.handle_request(:GET, :select_kinoko, k)
           next true
         end
         provider = create_css_provider_for(item)

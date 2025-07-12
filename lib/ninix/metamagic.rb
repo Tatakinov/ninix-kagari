@@ -15,6 +15,8 @@ module MetaMagic
 
   class Meme
 
+    EVENT_TYPE = [:GET, :NOTIFY]
+
     def initialize(key)
       @key = key
       @baseinfo = nil
@@ -28,7 +30,7 @@ module MetaMagic
     end
 
     def handle_request(event_type, event, ...)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      fail "assert" unless EVENT_TYPE.include?(event_type)
       unless @handlers.include?(event)
         if self.class.method_defined?(event)
           result = send(event, ...)
@@ -39,7 +41,7 @@ module MetaMagic
       else
         result = send(@handlers[event], ...)
       end
-      return result if event_type == 'GET'
+      return result if event_type == :GET
     end
 
     def create_menuitem(data)
@@ -78,7 +80,7 @@ module MetaMagic
   class Holon
     attr_reader :baseinfo, :instance
 
-    EVENT_TYPE = ['GET', 'NOTIFY']
+    EVENT_TYPE = [:GET, :NOTIFY]
 
     def initialize(key)
       @key = key
@@ -104,7 +106,7 @@ module MetaMagic
       else
         result = send(@handlers[event], ...)
       end
-      return result if event_type == 'GET'
+      return result if event_type == :GET
     end
 
     def create_menuitem(data)

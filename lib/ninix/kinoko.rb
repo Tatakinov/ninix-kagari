@@ -36,7 +36,7 @@ module Kinoko
       @__popup_menu = Gtk::Menu.new
       item = Gtk::MenuItem.new(:label => _('Settings...(_O)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'edit_preferences')
+        @parent.handle_request(:GET, :edit_preferences)
       end
       @__popup_menu.add(item)
       @__menu_list['settings'] = item
@@ -45,7 +45,7 @@ module Kinoko
       @__menu_list['skin'] = item
       item = Gtk::MenuItem.new(:label => _('Exit(_Q)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'close')
+        @parent.handle_request(:GET, :close)
       end
       @__popup_menu.add(item)
       @__menu_list['exit'] = item
@@ -57,7 +57,7 @@ module Kinoko
     end
 
     def popup()
-      skin_list = @parent.handle_request('GET', 'get_skin_list')
+      skin_list = @parent.handle_request(:GET, :get_skin_list)
       set_skin_menu(skin_list)
       @__popup_menu.popup_at_pointer(nil)
     end
@@ -69,7 +69,7 @@ module Kinoko
         for skin in list
           item = Gtk::MenuItem.new(:label => skin['title'])
           item.signal_connect('activate', skin) do |a, k|
-            @parent.handle_request('NOTIFY', 'select_skin', k)
+            @parent.handle_request(:GET, :select_skin, k)
             next true
           end
           menu.add(item)
@@ -147,10 +147,10 @@ module Kinoko
     end
 
     def handle_request(event_type, event, *arglist)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      fail "assert" unless [:GET, :NOTIFY].include?(event_type)
       handlers = {
-        'get_target_window' =>  lambda { return @target.get_target_window }, # XXX
-        'get_kinoko_position' => lambda {|a| return @target.get_kinoko_position(a) }
+        :get_target_window =>  lambda { return @target.get_target_window }, # XXX
+        :get_kinoko_position => lambda {|a| return @target.get_kinoko_position(a) }
       }
       if handlers.include?(event)
         result = handlers[event].call(*arglist)
@@ -215,6 +215,9 @@ module Kinoko
 
   class Skin
 
+    HANDLERS = {
+    }
+
     def initialize(accelgroup)
       @frame_buffer = []
       @accelgroup = accelgroup
@@ -232,11 +235,9 @@ module Kinoko
     end
 
     def handle_request(event_type, event, *arglist)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
-      handlers = {
-      }
-      if handlers.include?(event)
-        result = handlers[event].call # no argument
+      fail "assert" unless [:GET, :NOTIFY].include?(event_type)
+      if HANDLERS.include?(event)
+        result = HANDLERS[event].call # no argument
       else
         if Skin.method_defined?(event)
           result = method(event).call(*arglist)
@@ -282,7 +283,7 @@ module Kinoko
         w = [8, (@image_surface.width * @__scale / 100).to_i].max
         h = [8, (@image_surface.height * @__scale / 100).to_i].max
       rescue ## FIXME
-        @parent.handle_request('NOTIFY', 'close')
+        @parent.handle_request(:GET, :close)
         return
       end
       @path = path
@@ -341,7 +342,7 @@ module Kinoko
 
     def reset_z_order
       return unless @__shown
-      target_window = @parent.handle_request('GET', 'get_target_window')
+      target_window = @parent.handle_request(:GET, :get_target_window)
       if @data['ontop']
         @window.window.restack(target_window.window, true)
       else
@@ -354,7 +355,7 @@ module Kinoko
     end
 
     def set_position(xoffset: 0, yoffset: 0)
-      base_x, base_y = @parent.handle_request('GET', 'get_kinoko_position', @data['baseposition'])
+      base_x, base_y = @parent.handle_request(:GET, :get_kinoko_position, @data['baseposition'])
       a, b = [[0.5, 1], [0.5, 0], [0, 0.5], [1, 0.5], [0, 1],
               [1, 1], [0, 0], [1, 0], [0.5, 0.5]][@data['baseadjust']]
       offsetx = (@data['offsetx'] * @__scale / 100).to_i
@@ -464,7 +465,7 @@ module Kinoko
     end
 
     def delete()
-      @parent.handle_request('NOTIFY', 'close')
+      @parent.handle_request(:GET, :close)
     end
 
     def destroy()

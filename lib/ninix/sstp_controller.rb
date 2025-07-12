@@ -62,15 +62,15 @@ class BaseSSTPController < MetaMagic::Holon
     working = (not event.nil?)
     break_flag = false
     for if_ghost in script_odict.keys()
-      if not if_ghost.empty? and @parent.handle_request('GET', 'if_ghost', if_ghost, :working => working)
-        @parent.handle_request('NOTIFY', 'select_current_sakura', :ifghost => if_ghost)
+      if not if_ghost.empty? and @parent.handle_request(:GET, :if_ghost, if_ghost, :working => working)
+        @parent.handle_request(:GET, :select_current_sakura, :ifghost => if_ghost)
         default_script = script_odict[if_ghost]
         break_flag = true
         break
       end
     end
     unless break_flag
-      if @parent.handle_request('GET', 'get_preference', 'allowembryo').zero?
+      if @parent.handle_request(:GET, :get_preference, 'allowembryo').zero?
         if event.nil?
           request_handler.send_response(420) unless request_handler.nil? # Refuse
           return
@@ -86,7 +86,7 @@ class BaseSSTPController < MetaMagic::Holon
       end
     end
     unless event.nil?
-      script = handle_request('GET', 'get_event_response', event)
+      script = handle_request(:GET, :get_event_response, event)
     else
       script = nil
     end
@@ -99,7 +99,7 @@ class BaseSSTPController < MetaMagic::Holon
     end
     set_sstp_flag(sender)
     @parent.handle_request(
-      'NOTIFY', 'enqueue_script',
+      :GET, :enqueue_script,
       event, script, sender, handle, address,
       show_sstp_marker, use_translator, :db => entry_db,
       :request_handler => request_handler, :temp_mode => true)
@@ -183,7 +183,7 @@ class UnixSSTPController < BaseSSTPController
 
   # HACK ninix_mainのget_event_response相当のことをここでやる
   def get_event_response(event, *args)
-    return @parent.handle_request('GET', 'get_event_response', *event)
+    return @parent.handle_request(:GET, :get_event_response, *event)
   end
 
   def create(buffer, sstp_server, socket)

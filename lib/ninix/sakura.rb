@@ -50,19 +50,19 @@ module Sakura
     def create_menuitem(data)
       shell_name = data[0]
       subdir = data[1]
-      base_path = @parent.handle_request('GET', 'get_prefix')
+      base_path = @parent.handle_request(:GET, :get_prefix)
       thumbnail_path = File.join(base_path, 'shell',
                                  subdir, 'thumbnail.png')
       unless File.exist?(thumbnail_path)
         thumbnail_path = nil
       end
       return @parent.handle_request(
-        'GET', 'create_shell_menuitem', shell_name, @key,
+        :GET, :create_shell_menuitem, shell_name, @key,
         thumbnail_path)
     end
 
     def delete_by_myself()
-      @parent.handle_request('NOTIFY', 'delete_shell', @key)
+      @parent.handle_request(:GET, :delete_shell, @key)
     end
   end
 
@@ -90,7 +90,7 @@ module Sakura
     def initialize
       super("") # FIXME
       @handlers = {
-        'lock_repaint' => "get_lock_repaint"
+        :lock_repaint => :get_lock_repaint
       }
       @sstp_handle = nil
       @sstp_entry_db = nil
@@ -233,7 +233,7 @@ module Sakura
         shell_menuitems[key] = meme.menuitem
       end
       @shell_menu = @parent.handle_request(
-        'GET', 'create_shell_menu', shell_menuitems)
+        :GET, :create_shell_menu, shell_menuitems)
       @shiori_dll = shiori_dll
       @shiori_name = shiori_name
       name = [shiori_dll, shiori_name]
@@ -592,7 +592,7 @@ module Sakura
     end
 
     def get_workarea
-      @parent.handle_request('GET', 'get_workarea')
+      @parent.handle_request(:GET, :get_workarea)
     end
 
     def get_surface_position(side)
@@ -681,7 +681,7 @@ module Sakura
     def vanish_by_myself(next_ghost)
       @vanished_count += 1
       @ghost_time = 0
-      @parent.handle_request('NOTIFY', 'vanish_sakura', self, next_ghost)
+      @parent.handle_request(:GET, :vanish_sakura, self, next_ghost)
     end
 
     def get_ifghost()
@@ -944,7 +944,7 @@ module Sakura
         @vanished_count += 1
         @ghost_time = 0
         GLib::Idle.add{
-          @parent.handle_request('NOTIFY', 'vanish_sakura', self, nil)
+          @parent.handle_request(:GET, :vanish_sakura, self, nil)
         }
       }
       enqueue_event('OnVanishSelected', :proc_obj => proc_obj)
@@ -957,7 +957,7 @@ module Sakura
 
     def notify_iconified()
       @cantalk = false
-      @parent.handle_request('NOTIFY', 'select_current_sakura')
+      @parent.handle_request(:GET, :select_current_sakura)
       unless @passivemode
         reset_script(:reset_all => true)
         stand_by(true)
@@ -969,7 +969,7 @@ module Sakura
     def notify_deiconified()
       unless @cantalk
         @cantalk = true
-        @parent.handle_request('NOTIFY', 'select_current_sakura')
+        @parent.handle_request(:GET, :select_current_sakura)
         unless @passivemode
           notify_event('OnWindowStateRestore')
         end
@@ -1253,10 +1253,10 @@ module Sakura
         end
         if event == 'OnMouseClick' and arglist[5] == 1
           @parent.handle_request(
-            'NOTIFY', 'open_popup_menu', self, arglist[3])
+            :GET, :open_popup_menu, self, arglist[3])
         end
         @parent.handle_request(
-          'NOTIFY', 'notify_other', @key,
+          :GET, :notify_other, @key,
           event, get_name(:default => ''),
           get_selfname(:default => ''),
           get_current_shell_name(),
@@ -1266,8 +1266,8 @@ module Sakura
       end
       Logging::Logging.debug('=> "' + script + '"')
       if @__temp_mode == 2
-        @parent.handle_request('NOTIFY', 'reset_sstp_flag')
-        @controller.handle_request('NOTIFY', 'reset_sstp_flag') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
+        @parent.handle_request(:GET, :reset_sstp_flag)
+        @controller.handle_request(:GET, :reset_sstp_flag) unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
         leave_temp_mode()
       end
       if @passivemode and \
@@ -1281,7 +1281,7 @@ module Sakura
       end
       proc_obj = lambda {|flag_break: false|
         @parent.handle_request(
-          'NOTIFY', 'notify_other', @key,
+          :GET, :notify_other, @key,
           event, get_name(:default => ''),
           get_selfname(:default => ''),
           get_current_shell_name(),
@@ -1511,7 +1511,7 @@ module Sakura
     end
 
     def get_surface_scale()
-      @parent.handle_request('GET', 'get_preference', 'surface_scale')
+      @parent.handle_request(:GET, :get_preference, 'surface_scale')
     end
 
     def get_surface_size(side)
@@ -1659,16 +1659,16 @@ module Sakura
       set_surface(surface_desc, surface_alias, surface, surface_name,
                        surface_dir, surface_tooltips, seriko_descript)
       balloon = nil
-      if @parent.handle_request('GET', 'get_preference', 'ignore_default').zero? ## FIXME: change prefs key
+      if @parent.handle_request(:GET, :get_preference, 'ignore_default').zero? ## FIXME: change prefs key
         balloon_path = @desc.get('deault.balloon.path', :default => '')
         balloon_name = @desc.get('balloon', :default => '')
         unless balloon_path.empty?
           balloon = @parent.handle_request(
-            'GET', 'find_balloon_by_subdir', balloon_path)
+            :GET, :find_balloon_by_subdir, balloon_path)
         end
         if balloon.nil? and not balloon_name.empty?
           balloon = @parent.handle_request(
-            'GET', 'find_balloon_by_name', balloon_name)
+            :GET, :find_balloon_by_name, balloon_name)
         end
       end
       if balloon.nil?
@@ -1676,11 +1676,11 @@ module Sakura
           balloon = @balloon_directory
         else
           balloon = @parent.handle_request(
-            'GET', 'get_preference', 'default_balloon')
+            :GET, :get_preference, 'default_balloon')
         end
       end
       desc, balloon = @parent.handle_request(
-              'GET', 'get_balloon_description', balloon)
+              :GET, :get_balloon_description, balloon)
       set_balloon(desc, balloon)
       if temp.zero?
         load_shiori()
@@ -1692,7 +1692,7 @@ module Sakura
         name, prev_name, prev_shell, surface_dir, last_script, :abend => abend)
       loop do
         @uuid = SecureRandom.uuid
-        if @parent.handle_request('GET', 'add_sakura_info', @uuid,
+        if @parent.handle_request(:GET, :add_sakura_info, @uuid,
             @desc.get('sakura.name'),
             @desc.get('kero.name'),
             File.join(get_prefix(), ''),
@@ -1730,7 +1730,7 @@ module Sakura
       @__running = false
       save_settings()
       save_history()
-      @parent.handle_request('NOTIFY', 'rebuild_ghostdb', self, :name => nil)
+      @parent.handle_request(:GET, :rebuild_ghostdb, self, :name => nil)
       hide_all()
       @surface.finalize()
       @balloon.finalize()
@@ -1747,13 +1747,13 @@ module Sakura
       if @clock[0] != second
         @ghost_time += 1 if @__temp_mode.zero?
         @parent.handle_request(
-          'NOTIFY', 'rebuild_ghostdb',
+          :GET, :rebuild_ghostdb,
           self,
           :name => get_selfname(),
           :s0 => get_surface_id(0),
           :s1 => get_surface_id(1))
         otherghostname = @parent.handle_request(
-          'GET', 'get_otherghostname', get_selfname())
+          :GET, :get_otherghostname, get_selfname())
         if otherghostname != @old_otherghostname
           notify_event('otherghostname', otherghostname,
                        :event_type => 'NOTIFY')
@@ -1807,7 +1807,7 @@ module Sakura
           end
         end
         stand_by(false)
-        unless @parent.handle_request('GET', 'get_preference', 'sink_after_talk').zero?
+        unless @parent.handle_request(:GET, :get_preference, 'sink_after_talk').zero?
           @surface.lower_all()
         end
       elsif not @event_queue.empty? and handle_event()
@@ -1830,7 +1830,7 @@ module Sakura
           start_script(script, :origin => FROM_SSTP_CLIENT)
           proc_obj = lambda {|flag_break: false|
             @parent.handle_request(
-              'NOTIFY', 'notify_other', @key,
+              :GET, :notify_other, @key,
               event, get_name(:default => ''),
               get_selfname(:default => ''),
               get_current_shell_name(),
@@ -1880,7 +1880,7 @@ module Sakura
           @wait_for_animation = nil
         end
       end
-      @parent.handle_request('NOTIFY', 'update_working', get_name())
+      @parent.handle_request(:GET, :update_working, get_name())
       unless @__temp_mode.zero?
         process_script()
         if not busy() and \
@@ -1890,13 +1890,13 @@ module Sakura
           if @__temp_mode == 1
             sleep(1.4)
             finalize()
-            @parent.handle_request('NOTIFY', 'close_ghost', self)
-            @parent.handle_request('NOTIFY', 'reset_sstp_flag')
-            @controller.handle_request('NOTIFY', 'reset_sstp_flag') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
+            @parent.handle_request(:GET, :close_ghost, self)
+            @parent.handle_request(:GET, :reset_sstp_flag)
+            @controller.handle_request(:GET, :reset_sstp_flag) unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
             return false
           else
-            @parent.handle_request('NOTIFY', 'reset_sstp_flag')
-            @controller.handle_request('NOTIFY', 'reset_sstp_flag') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
+            @parent.handle_request(:GET, :reset_sstp_flag)
+            @controller.handle_request(:GET, :reset_sstp_flag) unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
             leave_temp_mode()
             return true
           end
@@ -1911,9 +1911,9 @@ module Sakura
         @shiori.unload()
         @updateman.clean_up() # Don't call before unloading SHIORI
         @parent.handle_request(
-          'NOTIFY', 'stop_sakura', self,
+          :GET, :stop_sakura, self,
           starter = lambda {|a|
-            @parent.handle_request('NOTIFY', 'reload_current_sakura', a) },
+            @parent.handle_request(:GET, :reload_current_sakura, a) },
           self)
         load_settings()
         restart()
@@ -1946,14 +1946,14 @@ module Sakura
     end
 
     def quit()
-      @parent.handle_request('NOTIFY', 'remove_sakura_info', @uuid)
-      @parent.handle_request('NOTIFY', 'stop_sakura', self)
+      @parent.handle_request(:GET, :remove_sakura_info, @uuid)
+      @parent.handle_request(:GET, :stop_sakura, self)
     end
 
     ###   SCRIPT PLAYER   ###
     def start_script(script, origin: nil, embed: false)
       return if script.empty?
-      @parent.handle_request('NOTIFY', 'append_script_log', @desc.get('name'), script)
+      @parent.handle_request(:GET, :append_script_log, @desc.get('name'), script)
       @last_script = script
       if origin.nil?
         @script_origin = FROM_GHOST
@@ -2006,7 +2006,7 @@ module Sakura
       @balloon.set_balloon_default()
       @current_time = Time.new.to_a
       reset_idle_time()
-      unless @parent.handle_request('GET', 'get_preference', 'raise_before_talk').zero?
+      unless @parent.handle_request(:GET, :get_preference, 'raise_before_talk').zero?
         raise_all()
       end
     end
@@ -2225,7 +2225,7 @@ module Sakura
 
     def __yen_w(args)
       script_speed = @parent.handle_request(
-        'GET', 'get_preference', 'script_speed')
+        :GET, :get_preference, 'script_speed')
       if not @quick_session and script_speed >= 0
         __set_weight(args[0], 0.05) # 50[ms]
       end
@@ -2233,7 +2233,7 @@ module Sakura
 
     def __yen__w(args)
       script_speed = @parent.handle_request(
-        'GET', 'get_preference', 'script_speed')
+        :GET, :get_preference, 'script_speed')
       if not @quick_session and script_speed >= 0
         __set_weight(args[0], 0.001) # 1[ms]
       end
@@ -2381,11 +2381,11 @@ module Sakura
     end
 
     def __yen_plus(args)
-      @parent.handle_request('NOTIFY', 'select_ghost', self, true)
+      @parent.handle_request(:GET, :select_ghost, self, true)
     end
 
     def __yen__plus(args)
-      @parent.handle_request('NOTIFY', 'select_ghost', self, false)
+      @parent.handle_request(:GET, :select_ghost, self, false)
     end
 
     def __yen_m(args)
@@ -2477,7 +2477,7 @@ module Sakura
       if args[0] == 'raise' and argc >= 2
         notify_event(*args[1..])
       elsif args[0] == 'raiseother' and argc >= 3
-        @parent.handle_request('NOTIFY', 'raise_other', args[1], @key, *args[2..])
+        @parent.handle_request(:GET, :raise_other, args[1], @key, *args[2..])
       elsif args[0] == 'embed' and argc >= 2
         notify_event(*args[1..], embed: true)
       elsif args[0, 2] == ['open', 'readme']
@@ -2509,14 +2509,14 @@ module Sakura
           @balloon.open_passwordinputbox(args[2])
         end
       elsif args[0, 2] == ['open', 'configurationdialog']
-        @parent.handle_request('NOTIFY', 'edit_preferences')
+        @parent.handle_request(:GET, :edit_preferences)
       elsif args[0, 2] == ['close', 'inputbox'] and argc > 2
         @balloon.close_inputbox(args[2])
       elsif args[0, 2] == ['change', 'balloon'] and argc > 2
-        key = @parent.handle_request('GET', 'find_balloon_by_name', args[2])
+        key = @parent.handle_request(:GET, :find_balloon_by_name, args[2])
         unless key.nil?
           desc, balloon = @parent.handle_request(
-                  'GET', 'get_balloon_description', key)
+                  :GET, :get_balloon_description, key)
           select_balloon(key, desc, balloon)
         end
       elsif args[0, 2] == ['change', 'shell'] and argc > 2
@@ -2529,16 +2529,16 @@ module Sakura
         end
       elsif args[0, 2] == ['change', 'ghost'] and argc > 2
         if args[2] == 'random'
-          @parent.handle_request('NOTIFY', 'select_ghost', self, false, :event => 0)
+          @parent.handle_request(:GET, :select_ghost, self, false, :event => 0)
         else
           @parent.handle_request(
-            'NOTIFY', 'select_ghost_by_name', self, args[2], :event => 0)
+            :GET, :select_ghost_by_name, self, args[2], :event => 0)
         end
       elsif args[0, 2] == ['call', 'ghost'] and argc > 2
         ## FIXME: 'random', 'lastinstalled'対応
-        key = @parent.handle_request('GET', 'find_ghost_by_name', args[2])
+        key = @parent.handle_request(:GET, :find_ghost_by_name, args[2])
         unless key.nil?
-          @parent.handle_request('NOTIFY', 'start_sakura_cb', key, :caller => self)
+          @parent.handle_request(:GET, :start_sakura_cb, key, :caller => self)
         end
       elsif args[0, 1] == ['updatebymyself']
         unless busy(:check_updateman => false)
@@ -2568,14 +2568,14 @@ module Sakura
         if args[0, 1] == ['enter']
           if args[2, 1] == ['rect']
             @parent.handle_request(
-              'NOTIFY', 'set_collisionmode', true, :rect => true)
+              :GET, :set_collisionmode, true, :rect => true)
           else
             @parent.handle_request(
-              'NOTIFY', 'set_collisionmode', true)
+              :GET, :set_collisionmode, true)
           end
         elsif args[0, 1] == ['leave']
           @parent.handle_request(
-            'NOTIFY', 'set_collisionmode', false)
+            :GET, :set_collisionmode, false)
         end
       elsif args[0, 2] == ['set', 'alignmentondesktop'] and argc > 2
         case args[2]
@@ -3165,7 +3165,7 @@ module Sakura
           @balloon.reset_text_count(@script_side)
         end
         script_speed = @parent.handle_request(
-          'GET', 'get_preference', 'script_speed')
+          :GET, :get_preference, 'script_speed')
         if script_speed > 0
           @script_wait = (Time.new.to_f + script_speed * 0.02)
         end
@@ -3191,7 +3191,7 @@ module Sakura
           @choice[2] = [@choice[2], text].join('')
         end
         script_speed = @parent.handle_request(
-          'GET', 'get_preference', 'script_speed')
+          :GET, :get_preference, 'script_speed')
         if not @quick_session and script_speed >= 0
           @processed_text = text
         else
@@ -3394,7 +3394,7 @@ module Sakura
           return get_general_property(key)
         end
       else
-        return @parent.handle_request('GET', 'get_property', key)
+        return @parent.handle_request(:GET, :get_property, key)
       end
       return nil
     end
@@ -3446,13 +3446,13 @@ module Sakura
 
     def ok()
       @dialog.hide()
-      @parent.handle_request('NOTIFY', 'notify_vanish_selected')
+      @parent.handle_request(:GET, :notify_vanish_selected)
       return true
     end
 
     def cancel()
       @dialog.hide()
-      @parent.handle_request('NOTIFY', 'notify_vanish_canceled')
+      @parent.handle_request(:GET, :notify_vanish_canceled)
       return true
     end
 

@@ -35,7 +35,7 @@ module Balloon
     def initialize
       super("") # FIXME
       @handlers = {
-        'reset_user_interaction' => 'reset_user_interaction',
+        :reset_user_interaction => :reset_user_interaction,
       }
       @synchronized = []
       @user_interaction = false
@@ -209,7 +209,7 @@ module Balloon
     end
 
     def set_balloon_default(side: -1)
-      default_id = @parent.handle_request('GET', 'get_balloon_default_id')
+      default_id = @parent.handle_request(:GET, :get_balloon_default_id)
       begin
         default_id = Integer(default_id)
       rescue
@@ -469,7 +469,7 @@ module Balloon
     def open_teachbox
       return if @user_interaction
       @user_interaction = true
-      @parent.handle_request('NOTIFY', 'notify_event', 'OnTeachStart')
+      @parent.handle_request(:GET, :notify_event, 'OnTeachStart')
       @teachbox.show()
     end
 
@@ -600,8 +600,8 @@ module Balloon
 
     #@property
     def scale
-      scaling = (not @parent.handle_request('GET', 'get_preference', 'balloon_scaling').zero?)
-      scale = @parent.handle_request('GET', 'get_preference', 'surface_scale')
+      scaling = (not @parent.handle_request(:GET, :get_preference, 'balloon_scaling').zero?)
+      scale = @parent.handle_request(:GET, :get_preference, 'surface_scale')
       if scaling
         return scale
       else
@@ -630,7 +630,7 @@ module Balloon
       return nil unless @balloon.include?(balloon_id)
       begin
         path, config = @balloon[balloon_id]
-        use_pna = (not @parent.handle_request('GET', 'get_preference', 'use_pna').zero?)
+        use_pna = (not @parent.handle_request(:GET, :get_preference, 'use_pna').zero?)
         surface = @pix_cache.load(path, use_pna: use_pna)
       rescue
         return nil
@@ -640,7 +640,7 @@ module Balloon
 
     def reset_fonts
       unless @parent.nil?
-        font_name = @parent.handle_request('GET', 'get_preference', 'balloon_fonts')
+        font_name = @parent.handle_request(:GET, :get_preference, 'balloon_fonts')
       else
         font_name = nil
       end
@@ -805,7 +805,7 @@ module Balloon
       reset_arrow()
       reset_sstp_marker()
       reset_message_regions()
-      @parent.handle_request('NOTIFY', 'position_balloons')
+      @parent.handle_request(:GET, :position_balloons)
       @darea.queue_draw() if @__shown
       @reshape = true
     end
@@ -865,7 +865,7 @@ module Balloon
       w, h = get_balloon_size()
       x = (base_x + px)
       y = (base_y + py)
-      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       if (y + h) > scrn_h # XXX
         y = (scrn_h - h)
       end
@@ -889,7 +889,7 @@ module Balloon
     end
 
     def show
-      return if @parent.handle_request('GET', 'lock_repaint')
+      return if @parent.handle_request(:GET, :lock_repaint)
       return if @__shown
       @__shown = true
       # make sure window is in its position (call before showing the window)
@@ -1084,7 +1084,7 @@ module Balloon
     end
 
     def redraw(widget, cr)
-      return if @parent.handle_request('GET', 'lock_repaint')
+      return if @parent.handle_request(:GET, :lock_repaint)
       return true unless @__shown
       fail "assert" if @balloon_surface.nil?
       @window.set_surface(cr, @balloon_surface.surface(write: false), scale, @reshape)
@@ -1499,15 +1499,15 @@ module Balloon
       unless new_selection.nil?
         sl, sn, el, en, link_id, args, raw_text, text =
           @link_buffer[new_selection]
-        is_anchor = @parent.handle_request('GET', 'is_anchor', link_id)
+        is_anchor = @parent.handle_request(:GET, :is_anchor, link_id)
         if @selection != new_selection
           if is_anchor
             @parent.handle_request(
-              'NOTIFY', 'notify_event',
+              :GET, :notify_event,
               'OnAnchorEnter', raw_text, link_id[1], @selection)
           else
             @parent.handle_request(
-              'NOTIFY', 'notify_event',
+              :GET, :notify_event,
               'OnChoiceEnter', raw_text, link_id, @selection)
           end
         end
@@ -1515,11 +1515,11 @@ module Balloon
           @hover_id = nil
           if is_anchor
             @parent.handle_request(
-              'NOTIFY', 'notify_event',
+              :GET, :notify_event,
               'OnAnchorHover', raw_text, link_id[1], @selection)
           else
             @parent.handle_request(
-              'NOTIFY', 'notify_event',
+              :GET, :notify_event,
               'OnChoiceHover', raw_text, link_id, @selection)
           end
         end
@@ -1527,11 +1527,11 @@ module Balloon
         unless @selection.nil?
           sl, sn, el, en, link_id, args, raw_text, text =
             @link_buffer[@selection]
-          is_anchor = @parent.handle_request('GET', 'is_anchor', link_id)
+          is_anchor = @parent.handle_request(:GET, :is_anchor, link_id)
           if is_anchor
-            @parent.handle_request('NOTIFY', 'notify_event', 'OnAnchorEnter')
+            @parent.handle_request(:GET, :notify_event, 'OnAnchorEnter')
           else
-            @parent.handle_request('NOTIFY', 'notify_event', 'OnChoiceEnter')
+            @parent.handle_request(:GET, :notify_event, 'OnChoiceEnter')
           end
         end
       end
@@ -1551,7 +1551,7 @@ module Balloon
           widget.queue_draw()
         end
       end
-      unless @parent.handle_request('GET', 'busy')
+      unless @parent.handle_request(:GET, :busy)
         if (state & Gdk::ModifierType::BUTTON1_MASK).nonzero?
           unless @x_root.nil? or @y_root.nil?
             @dragged = true
@@ -1560,7 +1560,7 @@ module Balloon
             @x_fractions = (x_delta - x_delta.to_i)
             @y_fractions = (y_delta - y_delta.to_i)
             @parent.handle_request(
-              'NOTIFY', 'update_balloon_offset',
+              :GET, :update_balloon_offset,
               @side, x_delta.to_i, y_delta.to_i)
             @x_root = event.x_root
             @y_root = event.y_root
@@ -1592,10 +1592,10 @@ module Balloon
     end
 
     def button_press(darea, event)
-      @parent.handle_request('NOTIFY', 'reset_idle_time')
+      @parent.handle_request(:GET, :reset_idle_time)
       click = event.event_type == Gdk::EventType::BUTTON_PRESS ? 1 : 2
-      if @parent.handle_request('GET', 'is_paused')
-        @parent.handle_request('NOTIFY', 'notify_balloon_click',
+      if @parent.handle_request(:GET, :is_paused)
+        @parent.handle_request(:GET, :notify_balloon_click,
                                event.button, click, @side)
         return true
       end
@@ -1630,12 +1630,12 @@ module Balloon
       unless @selection.nil?
         sl, sn, el, en, link_id, args, raw_text, text = \
         @link_buffer[@selection]
-        @parent.handle_request('NOTIFY', 'notify_link_selection',
+        @parent.handle_request(:GET, :notify_link_selection,
                                link_id, raw_text, args, @selection)
         return true
       end
       # balloon's background
-      @parent.handle_request('NOTIFY', 'notify_balloon_click',
+      @parent.handle_request(:GET, :notify_balloon_click,
                              event.button, click, @side)
       @x_root = event.x_root
       @y_root = event.y_root
@@ -2056,7 +2056,7 @@ module Balloon
         Gtk::StateFlags::NORMAL, Gdk::RGBA.new(0, 0, 0, 0))
       w = desc.get('communicatebox.width', :default => 250).to_i
       h = desc.get('communicatebox.height', :default => -1).to_i
-      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       @__surface_position = [(scrn_w - w) / 2, (scrn_h - h) / 2] # XXX
       @entry = Gtk::Entry.new
       @entry.signal_connect('activate') do |w|
@@ -2236,7 +2236,7 @@ module Balloon
     def delete(widget, event)
       @window.hide()
       cancel()
-      @parent.handle_request('NOTIFY', 'reset_user_interaction')
+      @parent.handle_request(:GET, :reset_user_interaction)
       return true
     end
 
@@ -2244,7 +2244,7 @@ module Balloon
       if keyval == Gdk::Keyval::KEY_Escape
         @window.hide()
         cancel()
-        @parent.handle_request('NOTIFY', 'reset_user_interaction')
+        @parent.handle_request(:GET, :reset_user_interaction)
         return true
       end
       return false
@@ -2261,13 +2261,13 @@ module Balloon
     end
 
     def cancel
-      @parent.handle_request('NOTIFY', 'notify_event',
+      @parent.handle_request(:GET, :notify_event,
                              'OnCommunicateInputCancel', '', 'cancel')
     end
 
     def send(data)
       unless data.nil?
-        @parent.handle_request('NOTIFY', 'notify_event',
+        @parent.handle_request(:GET, :notify_event,
                                'OnCommunicate', 'user', data)
       end
     end
@@ -2283,14 +2283,14 @@ module Balloon
     end
 
     def cancel
-      @parent.handle_request('NOTIFY', 'notify_event',
+      @parent.handle_request(:GET, :notify_event,
                              'OnTeachInputCancel', '', 'cancel')
-      @parent.handle_request('NOTIFY', 'reset_user_interaction')
+      @parent.handle_request(:GET, :reset_user_interaction)
     end
 
     def send(data)
-      @parent.handle_request('NOTIFY', 'notify_user_teach', data)
-      @parent.handle_request('NOTIFY', 'reset_user_interaction')
+      @parent.handle_request(:GET, :notify_user_teach, data)
+      @parent.handle_request(:GET, :reset_user_interaction)
     end
   end
 
@@ -2362,23 +2362,23 @@ module Balloon
       data = '' if data.nil?
       ## CHECK: symbol
       if cancel
-        @parent.handle_request('NOTIFY', 'notify_event',
+        @parent.handle_request(:GET, :notify_event,
                                'OnUserInputCancel', '', 'cancel')
       elsif timeout and \
-        not @parent.handle_request('GET', 'notify_event',
+        not @parent.handle_request(:GET, :notify_event,
                                    'OnUserInputCancel', '', 'timeout').nil?
         # pass
       elsif @symbol == 'OnUserInput' and \
-            not @parent.handle_request('GET', 'notify_event', 'OnUserInput', data).nil?
+            not @parent.handle_request(:GET, :notify_event, 'OnUserInput', data).nil?
         # pass
-      elsif not @parent.handle_request('GET', 'notify_event', @symbol, data).nil?
+      elsif not @parent.handle_request(:GET, :notify_event, @symbol, data).nil?
         # pass
-      elsif not @parent.handle_request('GET', 'notify_event',
+      elsif not @parent.handle_request(:GET, :notify_event,
                                        'OnUserInput', @symbol, data).nil?
         # pass
       end
       @symbol = nil
-      @parent.handle_request('NOTIFY', 'reset_user_interaction')
+      @parent.handle_request(:GET, :reset_user_interaction)
     end
   end
 
@@ -2407,7 +2407,7 @@ module Balloon
     end
 
     def cancel
-      @parent.handle_request('NOTIFY', 'reset_user_interaction')
+      @parent.handle_request(:GET, :reset_user_interaction)
     end
 
     def enter
@@ -2416,8 +2416,8 @@ module Balloon
 
     def send(data)
       return if data.nil? or data.empty?
-      @parent.handle_request('NOTIFY', 'start_script', data)
-      @parent.handle_request('NOTIFY', 'reset_user_interaction')
+      @parent.handle_request(:GET, :start_script, data)
+      @parent.handle_request(:GET, :reset_user_interaction)
     end
   end
 end

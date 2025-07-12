@@ -97,7 +97,7 @@ module Update
     def interrupt
       @event_queue = []
       @parent.handel_request(
-                             'NOTIFY', 'enqueue_event',
+                             :GET, :enqueue_event,
                              'OnUpdateFailure', 'artificial', '', '',
                              'ghost') # XXX
       @state = nil
@@ -141,7 +141,7 @@ module Update
       len_state = 5
       len_pre = 5
       if @state.nil? or \
-        @parent.handle_request('GET', 'check_event_queue')
+        @parent.handle_request(:GET, :check_event_queue)
         return false
       elsif @state == 0
         start_updates()
@@ -179,7 +179,7 @@ module Update
 
     def start_updates
       enqueue_event('OnUpdateBegin',
-                    :ref0 => @parent.handle_request('GET', 'get_name', :default => ''),
+                    :ref0 => @parent.handle_request(:GET, :get_name, :default => ''),
                     :ref1 => @path,
                     :ref2 => '',
                     :ref3 => 'ghost') # XXX

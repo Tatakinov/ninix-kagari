@@ -90,7 +90,7 @@ module Seriko
     def update(window)
       ## FIXME: use GLib.get_monotonic_time
       current_tick = (Time.now.to_f * 1000000).to_i # [microsec]
-      quality = @parent.handle_request('GET', 'get_preference', 'animation_quality')
+      quality = @parent.handle_request(:GET, :get_preference, 'animation_quality')
       @fps = DEFAULT_FPS * quality
       if @prev_tick.zero? ## First time
         delta_tick = (1000.0 / @fps) # [msec]

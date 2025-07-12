@@ -124,7 +124,7 @@ module Http
       case type
       when :TYPE_ERROR
         if op[:event]
-          @parent.handle_request('NOTIFY', 'enqueue_event', event[:failure], op[:method], op[:event], op[:url], nil, data)
+          @parent.handle_request(:GET, :enqueue_event, event[:failure], op[:method], op[:event], op[:url], nil, data)
         end
       when :TYPE_DATA
         # type != ERRORなのでURI.parseは必ず成功する
@@ -135,9 +135,9 @@ module Http
           d = d.gsub(/\r\n/, "\x01")
           d = d.gsub(/\r/, "\x01")
           d = d.gsub(/\n/, "\x01")
-          @parent.handle_request('NOTIFY', 'enqueue_event', event[:complete], op[:method], op[:event], op[:url], d, '200')
+          @parent.handle_request(:GET, :enqueue_event, event[:complete], op[:method], op[:event], op[:url], d, '200')
         else
-          prefix = @parent.handle_request('GET', 'get_prefix')
+          prefix = @parent.handle_request(:GET, :get_prefix)
           dir = File.join(prefix, 'ghost/master/var')
           unless Dir.exist?(dir)
             begin
@@ -155,7 +155,7 @@ module Http
             Logging::Logging.info('cannot write ' + path)
           end
           # TODO mkdir error, write error
-          @parent.handle_request('NOTIFY', 'enqueue_event', event[:complete], op[:method], op[:event], op[:url], path, '200')
+          @parent.handle_request(:GET, :enqueue_event, event[:complete], op[:method], op[:event], op[:url], path, '200')
         end
       else
         # unreachable

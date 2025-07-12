@@ -350,7 +350,7 @@ module NGM
 
     def ok
       word = get_pattern()
-      @parent.handle_request('NOTIFY', 'search', word)
+      @parent.handle_request(:GET, :search, word)
       hide()
     end
 
@@ -377,6 +377,8 @@ module NGM
   class UI
   include GetText
 
+  HANDLERS = {}
+
     def initialize
       @parent = nil
       @opened = false
@@ -397,11 +399,9 @@ module NGM
     end
 
     def handle_request(event_type, event, *arglist)
-      #assert event_type in ['GET', 'NOTIFY']
-      handlers = {
-      }
-      if handlers.include?(event)
-        result = handlers[event].call #(*arglist)
+      #assert event_type in [:GET, :NOTIFY]
+      if HANDLERS.include?(event)
+        result = HANDLERS[event].call #(*arglist)
       else
         begin
           result = public_send(event, *arglist)
@@ -449,7 +449,7 @@ module NGM
       menu.add(item)
       item = Gtk::MenuItem.new(:label => _('Settings(_O)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'open_preference_dialog')
+        @parent.handle_request(:GET, :open_preference_dialog)
       end
       menu.add(item)
       item = Gtk::SeparatorMenuItem.new()
@@ -471,17 +471,17 @@ module NGM
       item.set_submenu(menu)
       item = Gtk::MenuItem.new(:label => _('Mask(_M)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'open_mask_dialog')
+        @parent.handle_request(:GET, :open_mask_dialog)
       end
       menu.add(item)
       item = Gtk::MenuItem.new(:label => _('Reset to Default(_Y)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'reset_to_default')
+        @parent.handle_request(:GET, :reset_to_default)
       end
       menu.add(item)
       item = Gtk::MenuItem.new(:label => _('Show All(_Z)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'show_all')
+        @parent.handle_request(:GET, :show_all)
       end
       menu.add(item)
       item = Gtk::MenuItem.new(:label => _('_Archive'), :use_underline => true)
@@ -532,7 +532,7 @@ module NGM
 
     def network_update
       @window.set_sensitive(false)
-      @parent.handle_request('NOTIFY', 'network_update')#, updatehook)
+      @parent.handle_request(:GET, :network_update)#, updatehook)
       update()
       @window.set_sensitive(true)
     end
@@ -544,7 +544,7 @@ module NGM
     def search(word)
       unless word.nil? or word.empty?
         @search_word = word
-        if @parent.handle_request('GET', 'search', word)
+        if @parent.handle_request(:GET, :search, word)
           update()
         else
           #pass ## FIXME
@@ -554,7 +554,7 @@ module NGM
 
     def search_forward
       unless @search_word.empty?
-        if @parent.handle_request('GET', 'search_forward', @search_word)
+        if @parent.handle_request(:GET, :search_forward, @search_word)
           update()
         else
           #pass ## FIXME
@@ -563,12 +563,12 @@ module NGM
     end
 
     def show_next
-      @parent.handle_request('NOTIFY', 'go_next')
+      @parent.handle_request(:GET, :go_next)
       update()
     end
 
     def show_previous
-      @parent.handle_request('NOTIFY', 'previous')
+      @parent.handle_request(:GET, :previous)
       update()
     end
 
@@ -612,10 +612,10 @@ module NGM
         else
           target = 'KeroName'
         end
-        name = @parent.handle_request('GET', 'get', target)
+        name = @parent.handle_request(:GET, :get, target)
         textbuffer = @textview[side].buffer
         textbuffer.set_text(name.to_s)
-        filename = @parent.handle_request('GET', 'get_image_filename', side)
+        filename = @parent.handle_request(:GET, :get_image_filename, side)
         darea = @darea[side]
         darea.realize()
         unless filename.nil? or filename.empty?
@@ -646,7 +646,7 @@ module NGM
       button = Gtk::Button.new(:label => _('Install'))
       button.signal_connect(
                      'clicked') do |b, w=self|
-        w.handle_request('NOTIFY', 'install_current')
+        w.handle_request(:GET, :install_current)
         next true
       end
       box.add(button)
@@ -655,7 +655,7 @@ module NGM
       button = Gtk::Button.new(:label => _('Update'))
       button.signal_connect(
                      'clicked') do |b, w=self|
-        w.handle_request('NOTIFY', 'update_current')
+        w.handle_request(:GET, :update_current)
         next true
       end
       box.add(button)
@@ -705,54 +705,54 @@ module NGM
                    [_('Version:'), 'Version'],
                    [_('AIName:'), 'AIName']]
       text = ''
-      text = [text, @parent.handle_request('GET', 'get', 'Name'), "\n"].join('')
+      text = [text, @parent.handle_request(:GET, :get, 'Name'), "\n"].join('')
       for item in info_list
         text = [text, item[0],
-                @parent.handle_request('GET', 'get', item[1]), "\n"].join('')
+                @parent.handle_request(:GET, :get, item[1]), "\n"].join('')
       end
       text = [text,
-              @parent.handle_request('GET', 'get', 'SakuraName'),
+              @parent.handle_request(:GET, :get, 'SakuraName'),
               _('SurfaceList:'),
-              @parent.handle_request('GET', 'get', 'SakuraSurfaceList'),
+              @parent.handle_request(:GET, :get, 'SakuraSurfaceList'),
               "\n"].join('')
       text = [text,
-              @parent.handle_request('GET', 'get', 'KeroName'),
+              @parent.handle_request(:GET, :get, 'KeroName'),
               _('SurfaceList:'),
-              @parent.handle_request('GET', 'get', 'KeroSurfaceList'),
+              @parent.handle_request(:GET, :get, 'KeroSurfaceList'),
               "\n"].join('')
       textbuffer = @info.buffer
       textbuffer.set_text(text)
-      url = @parent.handle_request('GET', 'get', 'HPUrl')
-      text = @parent.handle_request('GET', 'get', 'HPTitle')
+      url = @parent.handle_request(:GET, :get, 'HPUrl')
+      text = @parent.handle_request(:GET, :get, 'HPTitle')
       @url['HP'][0] = url
       label = @url['HP'][1]
       label.set_markup('<span foreground="blue">' + text.to_s + '</span>')
-      url = @parent.handle_request('GET', 'get', 'PublicUrl')
-      text = [@parent.handle_request('GET', 'get', 'Name'),
+      url = @parent.handle_request(:GET, :get, 'PublicUrl')
+      text = [@parent.handle_request(:GET, :get, 'Name'),
               _(' Web Page')].join('')
       @url['Public'][0] = url
       label = @url['Public'][1]
       label.set_markup('<span foreground="blue">' + text.to_s + '</span>')
       target_dir = File.join(
-                             @parent.handle_request('GET', 'get_home_dir'),
+                             @parent.handle_request(:GET, :get_home_dir),
                              'ghost',
-                             @parent.handle_request('GET', 'get', 'InstallDir'))
+                             @parent.handle_request(:GET, :get, 'InstallDir'))
       @button['install'].set_sensitive(
                                        (not File.directory?(target_dir) and
-                                       @parent.handle_request('GET', 'get', 'ArchiveUrl') != 'No data'))
+                                       @parent.handle_request(:GET, :get, 'ArchiveUrl') != 'No data'))
       @button['update'].set_sensitive(
                                       (File.directory?(target_dir) and
-                                       @parent.handle_request('GET', 'get', 'GhostType') == 'ゴースト' and
-                                       @parent.handle_request('GET', 'get', 'UpdateUrl') != 'No data'))
+                                       @parent.handle_request(:GET, :get, 'GhostType') == 'ゴースト' and
+                                       @parent.handle_request(:GET, :get, 'UpdateUrl') != 'No data'))
     end
 
     def update
       update_surface_area()
       update_info_area()
       @button['next'].set_sensitive(
-                                    @parent.handle_request('GET', 'exist_next'))
+                                    @parent.handle_request(:GET, :exist_next))
       @button['previous'].set_sensitive(
-                                        @parent.handle_request('GET', 'exist_previous'))
+                                        @parent.handle_request(:GET, :exist_previous))
     end
 
     def show
@@ -788,11 +788,11 @@ module NGM
     end
 
     def handle_request(event_type, event, *arglist)
-      #assert event_type in ['GET', 'NOTIFY']
+      #assert event_type in [:GET, :NOTIFY]
       handlers = {
-        'get_home_dir' => lambda {|*a| return  @home_dir },
-        'network_update' => lambda {|*a| return network_update },
-        'get' => lambda {|*a| return get(a[0]) }
+        :get_home_dir => lambda {|*a| return  @home_dir },
+        :network_update => lambda {|*a| return network_update },
+        :get => lambda {|*a| return get(a[0]) }
       }
       if handlers.include?(event)
         result = handlers[event].call(*arglist)
@@ -908,12 +908,12 @@ module NGM
       end
       assert filetype == 'ghost'
       unless target_dir.nil?
-        @parent.handle_request('NOTIFY', 'add_sakura', target_dir)
+        @parent.handle_request(:GET, :add_sakura, target_dir)
       end
     end
 
     def update_current
-      @parent.handle_request('NOTIFY', 'update_sakura', get('Name'), 'NGM')
+      @parent.handle_request(:GET, :update_sakura, get('Name'), 'NGM')
     end
   end
 end

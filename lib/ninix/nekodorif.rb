@@ -67,7 +67,7 @@ module Nekodorif
       @__popup_menu = Gtk::Menu.new
       item = Gtk::MenuItem.new(:label => _('Settings...(_O)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'edit_preferences')
+        @parent.handle_request(:GET, :edit_preferences)
       end
       @__popup_menu.add(item)
       @__menu_list['settings'] = item
@@ -76,7 +76,7 @@ module Nekodorif
       @__menu_list['katochan'] = item
       item = Gtk::MenuItem.new(:label => _('Exit(_Q)'), :use_underline => true)
       item.signal_connect('activate') do |a, b|
-        @parent.handle_request('NOTIFY', 'close')
+        @parent.handle_request(:GET, :close)
       end
       @__popup_menu.add(item)
       @__menu_list['exit'] = item
@@ -88,7 +88,7 @@ module Nekodorif
     end
 
     def popup()
-      katochan_list = @parent.handle_request('GET', 'get_katochan_list')
+      katochan_list = @parent.handle_request(:GET, :get_katochan_list)
       __set_katochan_menu(katochan_list)
       @__popup_menu.popup_at_pointer(nil)
     end
@@ -100,7 +100,7 @@ module Nekodorif
         for katochan in list
           item = Gtk::MenuItem.new(:label => katochan['name'])
           item.signal_connect('activate', katochan) do |a, k|
-            @parent.handle_request('NOTIFY', 'select_katochan', k)
+            @parent.handle_request(:GET, :select_katochan, k)
             next true
           end
           menu.add(item)
@@ -161,11 +161,11 @@ module Nekodorif
     end
 
     def handle_request(event_type, event, *arglist)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      fail "assert" unless [:GET, :NOTIFY].include?(event_type)
       handlers = {
-        'get_katochan_list' =>  lambda { return @katochan_list },
-        'get_mode' =>  lambda { return @mode },
-        'get_workarea' => lambda { return @target.get_workarea },
+        :get_katochan_list =>  lambda { return @katochan_list },
+        :get_mode =>  lambda { return @mode },
+        :get_workarea => lambda { return @target.get_workarea },
       }
       if handlers.include?(event)
         result = handlers[event].call # no argument
@@ -251,6 +251,8 @@ module Nekodorif
   end
 
   class Skin
+    HANDLERS = {
+    }
 
     def initialize(dir, accelgroup, scale)
       @dir = dir
@@ -311,10 +313,8 @@ module Nekodorif
     end
 
     def handle_request(event_type, event, *arglist)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
-      handlers = {
-      }
-      unless handlers.include?(event)
+      fail "assert" unless [:GET, :NOTIFY].include?(event_type)
+      unless HANDLERS.include?(event)
         result = @parent.handle_request(event_type, event, *arglist)
       else
         if Skin.method_defined?(event)
@@ -345,7 +345,7 @@ module Nekodorif
     end
 
     def delete(widget, event)
-      @parent.handle_request('NOTIFY', 'finalize')
+      @parent.handle_request(:GET, :finalize)
     end
 
     def key_press(window, event)
@@ -368,9 +368,9 @@ module Nekodorif
           @x_root = event.x_root
           @y_root = event.y_root
         elsif event.event_type == Gdk::EventType::DOUBLE_BUTTON_PRESS # double click
-          if @parent.handle_request('GET', 'has_katochan')
+          if @parent.handle_request(:GET, :has_katochan)
             start()
-            @parent.handle_request('NOTIFY', 'drop_katochan')
+            @parent.handle_request(:GET, :drop_katochan)
           end
         end
       elsif event.button == 3
@@ -397,7 +397,7 @@ module Nekodorif
         w = [8, (new_surface.width * @__scale / 100).to_i].max
         h = [8, (new_surface.height * @__scale / 100).to_i].max
       rescue
-        @parent.handle_request('NOTIFY', 'finalize')
+        @parent.handle_request(:GET, :finalize)
         return
       end
       @w, @h = w, h
@@ -407,7 +407,7 @@ module Nekodorif
     end
 
     def set_position(reset: 0)
-      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       unless reset.zero?
         @x = left
         @y = (top + scrn_h - @h)
@@ -626,7 +626,7 @@ module Nekodorif
       return if @settings['state'] != 'before'
       target_x, target_y = @target.get_surface_position(@side)
       target_w, target_h = @target.get_surface_size(@side)
-      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       @x = (target_x + target_w / 2 - @w / 2 + (@offset_x * @__scale / 100).to_i)
       @y = (top + (@offset_y * @__scale / 100).to_i)
       @window.move(@x, @y)
@@ -639,7 +639,7 @@ module Nekodorif
         w = [8, (new_surface.width * @__scale / 100).to_i].max
         h = [8, (new_surface.height * @__scale / 100).to_i].max
       rescue
-        @parent.handle_request('NOTIFY', 'finalize')
+        @parent.handle_request(:GET, :finalize)
         return
       end
       @w, @h = w, h
@@ -676,8 +676,8 @@ module Nekodorif
       else
         @side = 0 # XXX
       end
-      if @parent.handle_request('GET', 'get_mode') == 1
-        @parent.handle_request('NOTIFY', 'send_event', 'Emerge')
+      if @parent.handle_request(:GET, :get_mode) == 1
+        @parent.handle_request(:GET, :send_event, 'Emerge')
       else
         if @data.include?('before.script')
           #pass ## FIXME
@@ -787,7 +787,7 @@ module Nekodorif
     end
 
     def check_mikire
-      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       if (@x + @w - @w / 3) > (left + scrn_w) or \
         (@x + @w / 3) < left or \
         (@y + @h - @h / 3) > (top + scrn_h) or \
@@ -805,10 +805,10 @@ module Nekodorif
         unless check_collision().zero?
           set_state('hit')
           @hit = 1
-          if @parent.handle_request('GET', 'get_mode') == 1
+          if @parent.handle_request(:GET, :get_mode) == 1
             @id = 1
             set_surface()
-            @parent.handle_request('NOTIFY', 'send_event', 'Hit')
+            @parent.handle_request(:GET, :send_event, 'Hit')
           else
             #pass ## FIXME
           end
@@ -823,10 +823,10 @@ module Nekodorif
         if @hit_stop >= wait_time
           set_state('after')
           set_movement('after')
-          if @parent.handle_request('GET', 'get_mode') == 1
+          if @parent.handle_request(:GET, :get_mode) == 1
             @id = 2
             set_surface()
-            @parent.handle_request('NOTIFY', 'send_event', 'Drop')
+            @parent.handle_request(:GET, :send_event, 'Drop')
           else
             #pass ## FIXME
           end
@@ -839,20 +839,20 @@ module Nekodorif
         update_position()
         set_state('end') unless check_mikire().zero?
       elsif @settings['state'] == 'end'
-        if @parent.handle_request('GET', 'get_mode') == 1
-          @parent.handle_request('NOTIFY', 'send_event', 'Vanish')
+        if @parent.handle_request(:GET, :get_mode) == 1
+          @parent.handle_request(:GET, :send_event, 'Vanish')
         else
           #pass ## FIXME
         end
-        @parent.handle_request('NOTIFY', 'delete_katochan')
+        @parent.handle_request(:GET, :delete_katochan)
         return false
       elsif @settings['state'] == 'dodge'
-        if @parent.handle_request('GET', 'get_mode') == 1
-          @parent.handle_request('NOTIFY', 'send_event', 'Dodge')
+        if @parent.handle_request(:GET, :get_mode) == 1
+          @parent.handle_request(:GET, :send_event, 'Dodge')
         else
           #pass ## FIXME
         end
-        @parent.handle_request('NOTIFY', 'delete_katochan')
+        @parent.handle_request(:GET, :delete_katochan)
         return false
       else
         ## check collision and mikire

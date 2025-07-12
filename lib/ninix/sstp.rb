@@ -88,7 +88,7 @@ module SSTP
   class SSTPRequestHandler < SSTPLib::BaseSSTPRequestHandler
 
     def handle
-      unless @server.handle_request('GET', 'get_sakura_cantalk')
+      unless @server.handle_request(:GET, :get_sakura_cantalk)
         @error = nil
         return unless parse_request(@fp)
         send_error(512)
@@ -176,7 +176,7 @@ module SSTP
         send_response(200) # OK
         show_sstp_marker, use_translator = get_options()
         @server.handle_request(
-          'NOTIFY', 'enqueue_request',
+          :GET, :enqueue_request,
           event, script_odict, sender, handle,
           address, show_sstp_marker, use_translator,
           entry_db, nil)
@@ -185,7 +185,7 @@ module SSTP
       else
         show_sstp_marker, use_translator = get_options()
         @server.handle_request(
-          'NOTIFY', 'enqueue_request',
+          :GET, :enqueue_request,
           event, script_odict, sender, handle,
           address, show_sstp_marker, use_translator,
           entry_db, @server)
@@ -375,7 +375,7 @@ module SSTP
         return
       when 'getname'
         send_response(200)
-        name = @server.handle_request('GET', 'get_ghost_name')
+        name = @server.handle_request(:GET, :get_ghost_name)
         @fp.write(name.encode(
                     charset, :invalid => :replace, :undef => :replace))
         @fp.write("\r\n")
@@ -389,13 +389,13 @@ module SSTP
         @fp.write("\r\n")
       when 'quiet'
         send_response(200)
-        @server.handle_request('NOTIFY', 'keep_silence', true)
+        @server.handle_request(:GET, :keep_silence, true)
       when 'restore'
         send_response(200)
-        @server.handle_request('NOTIFY', 'keep_silence', false)
+        @server.handle_request(:GET, :keep_silence, false)
       when 'getnames'
         send_response(200)
-        for name in @server.handle_request('GET', 'get_ghost_names')
+        for name in @server.handle_request(:GET, :get_ghost_names)
           @fp.write(name.encode(
                       charset, :invalid => :replace, :undef => :replace))
           @fp.write("\r\n")
@@ -404,7 +404,7 @@ module SSTP
       when 'checkqueue'
         send_response(200)
         count, total = @server.handle_request(
-                 'GET', 'check_request_queue', sender)
+                 :GET, :check_request_queue, sender)
         @fp.write(count.to_s.encode(
                     charset, :invalid => :replace, :undef => :replace))
         @fp.write("\r\n")
@@ -436,7 +436,7 @@ module SSTP
       return if sentence.nil?
       send_response(200) # OK
       @server.handle_request(
-        'NOTIFY', 'enqueue_event', 'OnCommunicate', sender, sentence)
+        :GET, :enqueue_event, 'OnCommunicate', sender, sentence)
       return
     end
 

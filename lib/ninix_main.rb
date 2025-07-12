@@ -99,44 +99,44 @@ module Ninix_Main
                                  subdir, 'thumbnail.png')
       thumbnail_path = nil unless File.exist?(thumbnail_path)
       return handle_request(
-               'GET', 'create_balloon_menuitem', name, @key, thumbnail_path)
+               :GET, :create_balloon_menuitem, name, @key, thumbnail_path)
     end
 
     def delete_by_myself
-      handle_request('NOTIFY', 'delete_balloon', @key)
+      handle_request(:GET, :delete_balloon, @key)
     end
   end
 
   class Ghost < MetaMagic::Holon
 
     def create_menuitem(data)
-      @parent.handle_request('GET', 'create_menuitem', @key, data)
+      @parent.handle_request(:GET, :create_menuitem, @key, data)
     end
 
     def delete_by_myself
-      @parent.handle_request('NOTIFY', 'delete_ghost', @key)
+      @parent.handle_request(:GET, :delete_ghost, @key)
     end
 
     def create_instance(data)
-      @parent.handle_request('GET', 'create_ghost', data)
+      @parent.handle_request(:GET, :create_ghost, data)
     end
   end
 
   class Application
 
-    EVENT_TYPE = ['GET', 'NOTIFY']
+    EVENT_TYPE = [:GET, :NOTIFY]
 
     HANDLERS = {
-      'close_all' => 'close_all_ghosts',
-      'edit_preferences' => 'edit_preferences',
-      'get_preference' => 'prefs_get',
-      'get_otherghostname' => 'get_otherghostname',
-      'rebuild_ghostdb' =>  'rebuild_ghostdb',
-      'notify_other' => 'notify_other',
-      'reset_sstp_flag' => 'reset_sstp_flag',
-      'get_sstp_port' => 'get_sstp_port',
-      'get_prefix' => 'get_sakura_prefix',
-      'get_workarea' => 'get_workarea'
+      :close_all => :close_all_ghosts,
+      :edit_preferences => :edit_preferences,
+      :get_preference => :prefs_get,
+      :get_otherghostname => :get_otherghostname,
+      :rebuild_ghostdb =>  :rebuild_ghostdb,
+      :notify_other => :notify_other,
+      :reset_sstp_flag => :reset_sstp_flag,
+      :get_sstp_port => :get_sstp_port,
+      :get_prefix => :get_sakura_prefix,
+      :get_workarea => :get_workarea,
     }
 
     def initialize(lockfile, shm, sstp_port: [9801, 11000], ghost: nil, exit_if_not_found: false)
@@ -268,7 +268,7 @@ module Ninix_Main
       else
         result = send(HANDLERS[event], ...)
       end
-      return result if event_type == 'GET'
+      return result if event_type == :GET
     end
 
     def set_collisionmode(flag, rect: false)

@@ -93,11 +93,11 @@ module Surface
     end
 
     def window_state(window, event)
-      return unless @parent.handle_request('GET', 'is_running')
+      return unless @parent.handle_request(:GET, :is_running)
       return if (event.changed_mask & Gdk::WindowState::ICONIFIED).zero?
       if (event.new_window_state & Gdk::WindowState::ICONIFIED).nonzero?
         if window == @window[0].get_window
-          @parent.handle_request('NOTIFY', 'notify_iconified')
+          @parent.handle_request(:NOTIFY, :notify_iconified)
         end
         for surface_window in @window.values
           gtk_window = surface_window.get_window
@@ -117,7 +117,7 @@ module Surface
           end
         end
         if window == @window[0].window
-          @parent.handle_request('NOTIFY', 'notify_deiconified')
+          @parent.handle_request(:NOTIFY, :notify_deiconified)
         end
       end
       return
@@ -147,7 +147,7 @@ module Surface
       end
       unless name.nil? and keycode.nil?
         @parent.handle_request(
-          'NOTIFY', 'notify_event', 'OnKeyPress', name, keycode,
+          :NOTIFY, :notify_event, 'OnKeyPress', name, keycode,
           @key_press_count)
       end
       return true
@@ -432,11 +432,11 @@ module Surface
       case side
       when 0
         name = 'sakura'
-        title = @parent.handle_request('GET', 'get_selfname') or \
+        title = @parent.handle_request(:GET, :get_selfname) or \
         "surface.#{name}"
       when 1
         name = 'kero'
-        title = @parent.handle_request('GET', 'get_keroname') or \
+        title = @parent.handle_request(:GET, :get_keroname) or \
         "surface.#{name}"
       else
         name = ("char#{side}")
@@ -630,23 +630,23 @@ module Surface
         direction = @window[side].direction
         ox, oy = get_balloon_offset(side)
         @parent.handle_request(
-          'NOTIFY', 'set_balloon_direction', side, direction)
+          :NOTIFY, :set_balloon_direction, side, direction)
         if direction.zero? # left
           base_x = (x + ox)
         else
           sw, sh = get_surface_size(side)
           bw, bh = @parent.handle_request(
-              'GET', 'get_balloon_size', side)
+              :GET, :get_balloon_size, side)
           base_x = (x + sw + bw - ox)
         end
         base_y = (y + oy)
         @parent.handle_request(
-          'NOTIFY', 'set_balloon_position', side, base_x, base_y)
+          :NOTIFY, :set_balloon_position, side, base_x, base_y)
       end
     end
 
     def reset_position
-      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       s0x, s0y, s0w, s0h = 0, 0, 0, 0 # XXX
       for side in @window.keys
         align = get_alignment(side)
@@ -655,11 +655,11 @@ module Surface
           x = (left + scrn_w - w)
         else
           b0w, b0h = @parent.handle_request(
-                 'GET', 'get_balloon_size', side - 1)
+                 :GET, :get_balloon_size, side - 1)
           b1w, b1h = @parent.handle_request(
-                 'GET', 'get_balloon_size', side)
+                 :GET, :get_balloon_size, side)
           bpx, bpy = @parent.handle_request(
-                 'GET', 'get_balloon_windowposition', side)
+                 :GET, :get_balloon_windowposition, side)
           o0x, o0y = get_balloon_offset(side - 1)
           o1x, o1y = get_balloon_offset(side)
           offset = [0, b1w - (b0w - o0x)].max
@@ -873,7 +873,7 @@ module Surface
         @mikire = @kasanari = 0
         return
       end
-      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       x0, y0 = get_position(0)
       s0w, s0h = get_surface_size(0)
       if (x0 + s0w / 3) < left or (x0 + s0w * 2 / 3) > (left + scrn_w) or \
@@ -1011,10 +1011,10 @@ module Surface
     def display_changed(screen)
       return unless @side.zero?
       @reshape = true # XXX
-      @parent.handle_request('NOTIFY', 'reset_position') # XXX
-      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+      @parent.handle_request(:NOTIFY, :reset_position) # XXX
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       @parent.handle_request(
-        'NOTIFY', 'notify_event', 'OnDisplayChange',
+        :NOTIFY, :notify_event, 'OnDisplayChange',
         Gdk.Visual.get_best_depth(), scrn_w, scrn_h)
     end
 
@@ -1025,11 +1025,11 @@ module Surface
     def direction=(value)
       @__direction = value # 0: left, 1: right
       @parent.handle_request(
-        'NOTIFY', 'set_balloon_direction', @side, value)
+        :GET, :set_balloon_direction, @side, value)
     end
 
     def get_scale
-      @parent.handle_request('GET', 'get_preference', 'surface_scale')
+      @parent.handle_request(:GET, :get_preference, 'surface_scale')
     end
 
     def get_balloon_offset
@@ -1073,7 +1073,7 @@ module Surface
 
     def balloon_offset=(offset)
       @__balloon_offset = offset # (x, y)
-      @parent.handle_request('NOTIFY', 'reset_balloon_position')
+      @parent.handle_request(:GET, :reset_balloon_position)
     end
 
     def drag_data_received(widget, context, x, y, data, info, time)
@@ -1087,7 +1087,7 @@ module Surface
       end
       unless filelist.empty?
         @parent.handle_request(
-          'NOTIFY', 'enqueue_event',
+          :GET, :enqueue_event,
           'OnFileDrop2', filelist.join(1.chr), @side)
       end
     end
@@ -1165,7 +1165,7 @@ module Surface
       case get_alignment()
       when 0
         yoffset = (dh - h)
-        left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
         y = (top + scrn_h - dh)
       when 1
         yoffset = 0
@@ -1179,15 +1179,15 @@ module Surface
         set_position(x, y)
       end
       if @side < 2
-        @parent.handle_request('NOTIFY', 'notify_observer', 'set surface')
+        @parent.handle_request(:GET, :notify_observer, 'set surface')
       end
       w, h = get_surface_size(:surface_id => @surface_id)
       new_x, new_y = get_position()
       @parent.handle_request(
-        'NOTIFY', 'notify_event',
+        :GET, :notify_event,
         'OnSurfaceChange',
-        @parent.handle_request('GET', 'get_surface_id', 0),
-        @parent.handle_request('GET', 'get_surface_id', 1),
+        @parent.handle_request(:GET, :get_surface_id, 0),
+        @parent.handle_request(:GET, :get_surface_id, 1),
         [@side, @surface_id, w, h].join(','),
         prev_id.to_s,
         [new_x, new_y, new_x + w, new_y + h].join(','))
@@ -1240,7 +1240,7 @@ module Surface
         use_pna = false
         is_pnr = false
       else
-        use_pna = (not @parent.handle_request('GET', 'get_preference', 'use_pna').zero?)
+        use_pna = (not @parent.handle_request(:GET, :get_preference, 'use_pna').zero?)
         is_pnr = true
       end
       begin
@@ -1265,7 +1265,7 @@ module Surface
           else
             is_pnr = true
             use_pna = (not @parent.handle_request(
-                        'GET', 'get_preference', 'use_pna').zero?)
+                        :GET, :get_preference, 'use_pna').zero?)
           end
           overlay_pix = @pix_cache.load(element, is_pnr: is_pnr, use_pna: use_pna)
         rescue
@@ -1317,7 +1317,7 @@ module Surface
         case type
         when 'circle'
           cx, cy, cr = c
-          unless @parent.handle_request('GET', 'get_preference',
+          unless @parent.handle_request(:GET, :get_preference,
               'check_collision_name').zero?
             cr.save
             cr.set_operator(Cairo::OPERATOR_SOURCE)
@@ -1345,7 +1345,7 @@ module Surface
           xo = (x1 + x2) / 2
           yr = (y1 - y2).abs
           yo = (y1 + y2) / 2
-          unless @parent.handle_request('GET', 'get_preference',
+          unless @parent.handle_request(:GET, :get_preference,
               'check_collision_name').zero?
             cr.save
             cr.set_operator(Cairo::OPERATOR_SOURCE)
@@ -1378,7 +1378,7 @@ module Surface
           end
           lines = []
           func.call(func, lines, *c, c[0], c[1])
-          unless @parent.handle_request('GET', 'get_preference',
+          unless @parent.handle_request(:GET, :get_preference,
               'check_collision_name').zero?
             x, y = lines.min_by do |x, y|
               x
@@ -1476,7 +1476,7 @@ module Surface
     end
 
     def update_frame_buffer
-      return if @parent.handle_request('GET', 'lock_repaint')
+      return if @parent.handle_request(:GET, :lock_repaint)
       @reshape = true # FIXME: depends on Seriko
       new_pix = create_image_surface(@seriko.get_base_id)
       fail "assert" if new_pix.nil?
@@ -1527,7 +1527,7 @@ module Surface
     def redraw(darea, cr)
       return if @image_surface.nil? # XXX
       @window.set_surface(cr, @image_surface.surface(write: false), get_scale, @reshape)
-      unless @parent.handle_request('GET', 'get_preference', 'check_collision').zero?
+      unless @parent.handle_request(:GET, :get_preference, 'check_collision').zero?
         draw_region(cr)
       end
       @window.set_shape(cr, @reshape, @image_surface.region)
@@ -1543,13 +1543,13 @@ module Surface
     end
 
     def move_surface(xoffset, yoffset)
-      return if @parent.handle_request('GET', 'lock_repaint')
+      return if @parent.handle_request(:GET, :lock_repaint)
       x, y = get_position()
       @window.move(x + xoffset, y + yoffset)
       if @side < 2
         args = [@side, xoffset, yoffset]
         @parent.handle_request(
-          'NOTIFY', 'notify_observer', 'move surface', :args => args) # animation
+          :GET, :notify_observer, 'move surface', :args => args) # animation
       end
     end
 
@@ -1575,7 +1575,7 @@ module Surface
     end
 
     def get_max_size
-      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       w, h = @maxsize
       scale = get_scale
       w = [scrn_w, [8, (w * scale / 100).to_i].max].min
@@ -1708,17 +1708,17 @@ module Surface
     end
 
     def set_position(x, y)
-      return if @parent.handle_request('GET', 'lock_repaint')
+      return if @parent.handle_request(:GET, :lock_repaint)
       @position = [x, y]
       new_x, new_y = get_position()
       @window.move(new_x, new_y)
-      left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       ox, oy = get_balloon_offset # without scaling
       scale = get_scale
       ox = (ox * scale / 100).to_i
       oy = (oy * scale / 100).to_i
       bw, bh = @parent.handle_request(
-          'GET', 'get_balloon_size', @side)
+          :GET, :get_balloon_size, @side)
       sw, sh = get_surface_size()
       if @__direction.zero? # left
         if new_x - bw + ox < 0
@@ -1735,7 +1735,7 @@ module Surface
       end
       @__direction = new_direction
       @parent.handle_request(
-        'NOTIFY', 'set_balloon_direction', @side, direction)
+        :GET, :set_balloon_direction, @side, direction)
       if new_direction.zero? # left
         base_x = (new_x - bw + ox)
       else
@@ -1743,9 +1743,9 @@ module Surface
       end
       base_y = (new_y + oy)
       @parent.handle_request(
-        'NOTIFY', 'set_balloon_position', @side, base_x, base_y)
-      @parent.handle_request('NOTIFY', 'notify_observer', 'set position')
-      @parent.handle_request('NOTIFY', 'check_mikire_kasanari')
+        :GET, :set_balloon_position, @side, base_x, base_y)
+      @parent.handle_request(:GET, :notify_observer, 'set position')
+      @parent.handle_request(:GET, :check_mikire_kasanari)
     end
 
     def get_position ## FIXME: position with offset(property)
@@ -1761,13 +1761,13 @@ module Surface
       return if @dragged # XXX: position will be reset after button release event
       case align
       when 0
-        left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
         sw, sh = get_max_size()
         sx, sy = @position # XXX: without window_offset
         sy = (top + scrn_h - sh)
         set_position(sx, sy)
       when 1
-        left, top, scrn_w, scrn_h = @parent.handle_request('GET', 'get_workarea')
+        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
         sx, sy = @position # XXX: without window_offset
         sy = top
         set_position(sx, sy)
@@ -1790,15 +1790,15 @@ module Surface
     end
 
     def show
-      return if @parent.handle_request('GET', 'lock_repaint')
+      return if @parent.handle_request(:GET, :lock_repaint)
       return if @__shown
       @reshape = true
       @__shown = true
       x, y = get_position()
       @window.move(x, y) # XXX: call before showing the window
       @window.show()
-      @parent.handle_request('NOTIFY', 'notify_observer', 'show', :args => [@side])
-      @parent.handle_request('NOTIFY', 'notify_observer', 'raise', :args => [@side])
+      @parent.handle_request(:GET, :notify_observer, 'show', :args => [@side])
+      @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
     end
 
     def hide
@@ -1806,27 +1806,27 @@ module Surface
       @window.hide()
       @__shown = false
       @parent.handle_request(
-        'NOTIFY', 'notify_observer', 'hide', :args => [@side])
+        :GET, :notify_observer, 'hide', :args => [@side])
     end
 
     def raise
       @window.window.raise
-      @parent.handle_request('NOTIFY', 'notify_observer', 'raise', :args => [@side])
+      @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
     end
 
     def lower
       @window.window.lower()
-      @parent.handle_request('NOTIFY', 'notify_observer', 'lower', :args => [@side])
+      @parent.handle_request(:GET, :notify_observer, 'lower', :args => [@side])
     end
 
     def button_press(window, event)
-      @parent.handle_request('NOTIFY', 'reset_idle_time')
+      @parent.handle_request(:GET, :reset_idle_time)
       x, y = @window.winpos_to_surfacepos(
            event.x.to_i, event.y.to_i, get_scale)
       @x_root = event.x_root
       @y_root = event.y_root
       # automagical raise
-      @parent.handle_request('NOTIFY', 'notify_observer', 'raise', :args => [@side])
+      @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
       if event.event_type == Gdk::EventType::BUTTON2_PRESS
         @click_count = 2
       else # XXX
@@ -1834,7 +1834,7 @@ module Surface
       end
       if [1, 2, 3].include?(event.button)
         num_button = [0, 2, 1][event.button - 1]
-        @parent.handle_request('NOTIFY', 'notify_event', 'OnMouseDown',
+        @parent.handle_request(:GET, :notify_event, 'OnMouseDown',
                                x, y, 0, @side, @__current_part,
                                num_button,
                                'mouse') # FIXME
@@ -1845,7 +1845,7 @@ module Surface
           8 => 'xbutton1',
           9 => 'xbutton2'
         }[event.button]
-        @parent.handle_request('NOTIFY', 'notify_event', 'OnMouseDownEx',
+        @parent.handle_request(:GET, :notify_event, 'OnMouseDownEx',
                                x, y, 0, @side, @__current_part,
                                ex_button,
                                'mouse') # FIXME
@@ -1862,13 +1862,13 @@ module Surface
         @dragged = false
         set_alignment_current()
         @parent.handle_request(
-          'NOTIFY', 'notify_event',
+          :GET, :notify_event,
           'OnMouseDragEnd', x, y, '', @side, @__current_part, '')
       end
       @x_root = nil
       @y_root = nil
       if @click_count > 0
-        @parent.handle_request('NOTIFY', 'notify_surface_click',
+        @parent.handle_request(:GET, :notify_surface_click,
                                event.button, @click_count,
                                @side, x, y)
         @click_count = 0
@@ -1885,7 +1885,7 @@ module Surface
           @window.set_tooltip_text('')
           @darea.window.set_cursor(nil)
           @parent.handle_request(
-            'NOTIFY', 'notify_event',
+            :GET, :notify_event,
             'OnMouseLeave', x, y, '', @side, @__current_part)
         else
           if @tooltips.include?(part)
@@ -1896,17 +1896,17 @@ module Surface
           end
           @darea.window.set_cursor(CURSOR_HAND1)
           @parent.handle_request(
-            'NOTIFY', 'notify_event',
+            :GET, :notify_event,
             'OnMouseEnter', x, y, '', @side, part)
         end
       end
       @__current_part = part
-      unless @parent.handle_request('GET', 'busy')
+      unless @parent.handle_request(:GET, :busy)
         if (state & Gdk::ModifierType::BUTTON1_MASK).nonzero?
           unless @x_root.nil? or @y_root.nil?
             unless @dragged
               @parent.handle_request(
-                'NOTIFY', 'notify_event',
+                :GET, :notify_event,
                 'OnMouseDragStart', x, y, '',
                 @side, @__current_part, '')
             end
@@ -1922,7 +1922,7 @@ module Surface
              (state & Gdk::ModifierType::BUTTON3_MASK).nonzero?
           #pass
         else
-          @parent.handle_request('NOTIFY', 'notify_surface_mouse_motion',
+          @parent.handle_request(:GET, :notify_surface_mouse_motion,
                                  @side, x, y, part)
         end
       end
@@ -1943,7 +1943,7 @@ module Surface
       end
       unless count.zero?
         part = get_touched_region(x, y)
-        @parent.handle_request('NOTIFY', 'notify_event',
+        @parent.handle_request(:GET, :notify_event,
                                'OnMouseWheel', x, y, count, @side, part)
       end
       return true
@@ -1955,13 +1955,13 @@ module Surface
         @bind[bind_id][1] = (not current)
         group = @bind[bind_id][0].split(',', 2)
         if @bind[bind_id][1]
-          @parent.handle_request('NOTIFY', 'notify_event',
+          @parent.handle_request(:GET, :notify_event,
                                  'OnDressupChanged', @side,
                                  group[1],
                                  1,
                                  group[0])
         else
-          @parent.handle_request('NOTIFY', 'notify_event',
+          @parent.handle_request(:GET, :notify_event,
                                  'OnDressupChanged', @side,
                                  group[1],
                                  0,
@@ -1974,7 +1974,7 @@ module Surface
     def window_enter_notify(window, event)
       x, y, state = event.x, event.y, event.state
       x, y = @window.winpos_to_surfacepos(x, y, get_scale)
-      @parent.handle_request('NOTIFY', 'notify_event',
+      @parent.handle_request(:GET, :notify_event,
                              'OnMouseEnterAll', x, y, '', @side, '')
     end
 
@@ -1983,12 +1983,12 @@ module Surface
       x, y = @window.winpos_to_surfacepos(x, y, get_scale)
       if @__current_part != '' # XXX
         @parent.handle_request(
-          'NOTIFY', 'notify_event',
+          :GET, :notify_event,
           'OnMouseLeave', x, y, '', @side, @__current_part)
         @__current_part = ''
       end
       @parent.handle_request(
-        'NOTIFY', 'notify_event',
+        :GET, :notify_event,
         'OnMouseLeaveAll', x, y, '', @side, '')
       return true
     end
