@@ -1991,6 +1991,7 @@ module Sakura
         @time_critical_session = false
         @quick_session = false
         set_synchronized_session(:list => [], :reset => true)
+        @script_start_time = get_current_time
       end
       return if @processed_script.empty?
       node = @processed_script[0]
@@ -2238,6 +2239,31 @@ module Sakura
       end
     end
 
+    def __yen___w(args)
+      if args.length == 1
+        if args[0] == 'clear'
+          @script_start_time = get_current_time
+        else
+          now = get_current_time
+          diff = (now[0] - @script_start_time[0]) - (now[1] - @script_start_time[1]) / 1_000_000_000.0
+          time = args[0].to_i / 1_000.0
+        end
+        time = time - diff
+        if not @quick_session and script_speed >= 0 and time > 0
+          __set_weight(1, time) # 1[ms]
+        end
+      elsif args.length == 2 and args[0] == 'animation'
+        begin
+          id = Integer(args[1])
+          if @surface.is_playing_animation(@script_side, id)
+            @wait_for_animation = id
+          end
+        rescue ArgumentError
+          # nop
+        end
+      end
+    end
+
     def __yen_t(args)
       @time_critical_session = (not @time_critical_session)
     end
@@ -2322,6 +2348,7 @@ module Sakura
           @script_mode = PAUSE_MODE
         end
       end
+      @script_start_time = get_current_time
     end
 
     def __yen_a(args)
@@ -2331,13 +2358,12 @@ module Sakura
     def __yen_i(args)
       begin
         actor_id = Integer(args[0])
-      rescue ArgumentError
-        #pass
-      else
         @surface.invoke(@script_side, actor_id)
         if args[1] == 'wait'
           @wait_for_animation = actor_id
         end
+      rescue ArgumentError
+        # nop
       end
     end
 
@@ -3089,6 +3115,7 @@ module Sakura
       '\c' => "__yen_c",
       '\w' => "__yen_w",
       '\_w' => "__yen__w",
+      '\__w' => "__yen___w",
       '\t' => "__yen_t",
       '\_q' => "__yen__q",
       '\_s' => "__yen__s",
@@ -3370,6 +3397,11 @@ module Sakura
         return @parent.handle_request('GET', 'get_property', key)
       end
       return nil
+    end
+
+    def get_current_time
+      now = Time.now
+      return [now.to_i, now.nsec]
     end
   end
 

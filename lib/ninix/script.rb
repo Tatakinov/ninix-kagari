@@ -125,7 +125,7 @@ module Script
 
     def tokenize(s)
       patterns = [
-        [TOKEN_TAG, Regexp.new(/\\[Cehunjcxtqzy*v0123456789fmia!&+-]|\\[sbp][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|\\__[ctq]|\\URL/)],
+        [TOKEN_TAG, Regexp.new(/\\[Cehunjcxtqzy*v0123456789fmia!&+-]|\\[sbp][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|\\__[ctqw]|\\URL/)],
         [TOKEN_META, Regexp.new(/%month|%day|%hour|%minute|%second|%username|%selfname2?|%keroname|%friendname|%songname|%screen(width|height)|%exh|%et|%m[szlchtep?]|%dms|%j|%c|%wronghour|%\*|%property\[(\\\\|\\\]|(?!\\\\|\\\]).)+?\]/)],
         [TOKEN_NUMBER, Regexp.new(/[0-9]+/)],
         [TOKEN_OPENED_SBRA, Regexp.new(/\[/)],
@@ -249,6 +249,11 @@ module Script
         elsif ["\\_w"].include?(lexeme)
           argument = read_sbra_number()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
+        elsif ["\\__w"].include?(lexeme)
+          args = split_params(read_sbra_text())
+          @script << [SCRIPT_TAG, lexeme, *args.map do |arg|
+            arg[0][1]
+          end, @column]
         elsif ["\\j", "\\&", "\\_u", "\\_m"].include?(lexeme)
           argument = read_sbra_id()
           @script << [SCRIPT_TAG, lexeme, argument, @column]
