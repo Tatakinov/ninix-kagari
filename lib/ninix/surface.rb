@@ -1308,37 +1308,115 @@ module Surface
 
     def draw_region(cr)
       return if @collisions.nil?
-      cr.save()
+      cr.save
       # translate the user-space origin
-      cr.translate(*@window.get_draw_offset) # XXX
       scale = get_scale
       cr.scale(scale / 100.0, scale / 100.0)
-=begin
-# FIXME stub
       for part, type, c in @collisions
-        unless @parent.handle_request('GET', 'get_preference',
-                                      'check_collision_name').zero?
+        cr.save
+        case type
+        when 'circle'
+          cx, cy, cr = c
+          unless @parent.handle_request('GET', 'get_preference',
+              'check_collision_name').zero?
+            cr.save
+            cr.set_operator(Cairo::OPERATOR_SOURCE)
+            cr.set_source_rgba(0.4, 0.0, 0.0, 1.0) # XXX
+            cr.move_to(cx, cy)
+            font_desc = Pango::FontDescription.new
+            font_desc.set_size(8 * Pango::SCALE)
+            layout = cr.create_pango_layout
+            layout.set_font_description(font_desc)
+            layout.set_wrap(Pango::WrapMode::CHAR)
+            layout.set_text(part)
+            cr.show_pango_layout(layout)
+            cr.restore
+          end
+          cr.set_operator(Cairo::OPERATOR_ATOP)
+          cr.set_source_rgba(0.2, 0.0, 0.0, 0.4) # XXX
+          cr.arc(cx, cy, cr, 0, 2 * M_PI)
+          cr.fill_preserve()
           cr.set_operator(Cairo::OPERATOR_SOURCE)
-          cr.set_source_rgba(0.4, 0.0, 0.0, 1.0) # XXX
-          cr.move_to(x1 + 2, y1)
-          font_desc = Pango::FontDescription.new
-          font_desc.set_size(8 * Pango::SCALE)
-          layout = cr.create_pango_layout
-          layout.set_font_description(font_desc)
-          layout.set_wrap(Pango::WrapMode::CHAR)
-          layout.set_text(part)
-          cr.show_pango_layout(layout)
+          cr.set_source_rgba(0.4, 0.0, 0.0, 0.8) # XXX
+          cr.stroke()
+        when 'ellipse'
+          x1, y1, x2, y2 = c
+          xr = (x1 - x2).abs
+          xo = (x1 + x2) / 2
+          yr = (y1 - y2).abs
+          yo = (y1 + y2) / 2
+          unless @parent.handle_request('GET', 'get_preference',
+              'check_collision_name').zero?
+            cr.save
+            cr.set_operator(Cairo::OPERATOR_SOURCE)
+            cr.set_source_rgba(0.4, 0.0, 0.0, 1.0) # XXX
+            cr.move_to(xo, yo)
+            font_desc = Pango::FontDescription.new
+            font_desc.set_size(8 * Pango::SCALE)
+            layout = cr.create_pango_layout
+            layout.set_font_description(font_desc)
+            layout.set_wrap(Pango::WrapMode::CHAR)
+            layout.set_text(part)
+            cr.show_pango_layout(layout)
+            cr.restore
+          end
+          cr.translate(xo, yo)
+          cr.scale(xr, yr)
+          cr.set_operator(Cairo::OPERATOR_ATOP)
+          cr.set_source_rgba(0.2, 0.0, 0.0, 0.4) # XXX
+          cr.arc(0, 0, 1, 0, 2 * M_PI)
+          cr.fill_preserve()
+          cr.set_operator(Cairo::OPERATOR_SOURCE)
+          cr.set_source_rgba(0.4, 0.0, 0.0, 0.8) # XXX
+          cr.stroke()
+        when 'polygon'
+          func = proc do |f, output, x, y, *args|
+            output << [x, y]
+            unless args.empty?
+              f.call(f, output, *args)
+            end
+          end
+          lines = []
+          func.call(func, lines, *c, c[0], c[1])
+          unless @parent.handle_request('GET', 'get_preference',
+              'check_collision_name').zero?
+            x, y = lines.min_by do |x, y|
+              x
+            end
+            cr.save
+            cr.set_operator(Cairo::OPERATOR_SOURCE)
+            cr.set_source_rgba(0.4, 0.0, 0.0, 1.0) # XXX
+            cr.move_to(x, y)
+            font_desc = Pango::FontDescription.new
+            font_desc.set_size(8 * Pango::SCALE)
+            layout = cr.create_pango_layout
+            layout.set_font_description(font_desc)
+            layout.set_wrap(Pango::WrapMode::CHAR)
+            layout.set_text(part)
+            cr.show_pango_layout(layout)
+            cr.restore
+          end
+          once = true
+          lines.each do |x, y|
+            if once
+              cr.move_to(x, y)
+              once = false
+            else
+              cr.line_to(x, y)
+            end
+          end
+          cr.set_operator(Cairo::OPERATOR_ATOP)
+          cr.set_source_rgba(0.2, 0.0, 0.0, 0.4) # XXX
+          cr.fill_preserve()
+          cr.set_operator(Cairo::OPERATOR_SOURCE)
+          cr.set_source_rgba(0.4, 0.0, 0.0, 0.8) # XXX
+          cr.stroke()
+        when 'region'
+          # TODO stub
         end
-        cr.set_operator(Cairo::OPERATOR_ATOP)
-        cr.set_source_rgba(0.2, 0.0, 0.0, 0.4) # XXX
-        cr.rectangle(x1, y1, x2 - x1, y2 - y1)
-        cr.fill_preserve()
-        cr.set_operator(Cairo::OPERATOR_SOURCE)
-        cr.set_source_rgba(0.4, 0.0, 0.0, 0.8) # XXX
-        cr.stroke()
+        cr.restore
       end
-=end
-      cr.restore()
+      cr.restore
     end
 
     def create_image_surface(surface_id, done = [], is_asis: false)
