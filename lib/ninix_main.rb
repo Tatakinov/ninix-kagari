@@ -225,48 +225,48 @@ module Ninix_Main
       Logging::Logging.info("done.")
     end
 
-    def edit_preferences(*arglist)
-      @prefs.edit_preferences(*arglist)
+    def edit_preferences(...)
+      @prefs.edit_preferences(...)
     end
 
-    def prefs_get(*arglist)
-      @prefs.get(*arglist)
+    def prefs_get(...)
+      @prefs.get(...)
     end
 
-    def get_otherghostname(*arglist)
-      @communicate.get_otherghostname(*arglist)
+    def get_otherghostname(...)
+      @communicate.get_otherghostname(...)
     end
 
-    def rebuild_ghostdb(*arglist, **kwarg)
-      @communicate.rebuild_ghostdb(*arglist, **kwarg)
+    def rebuild_ghostdb(...)
+      @communicate.rebuild_ghostdb(...)
     end
 
-    def notify_other(*arglist)
-      @communicate.notify_other(*arglist)
+    def notify_other(...)
+      @communicate.notify_other(...)
     end
 
-    def raise_other(*arglist)
-      @communicate.raise_other(*arglist)
+    def raise_other(...)
+      @communicate.raise_other(...)
     end
 
-    def reset_sstp_flag(*arglist)
-      @sstp_controler.reset_sstp_flag(*arglist)
+    def reset_sstp_flag(...)
+      @sstp_controler.reset_sstp_flag(...)
     end
 
-    def get_sstp_port(*arglist)
-      @sstp_controler.get_sstp_port(*arglist)
+    def get_sstp_port(...)
+      @sstp_controler.get_sstp_port(...)
     end
 
-    def handle_request(event_type, event, *arglist, **kwarg)
+    def handle_request(event_type, event, ...)
       fail "assert" unless EVENT_TYPE.include?(event_type)
       unless HANDLERS.include?(event)
         if Application.method_defined?(event)
-          result = send(event, *arglist, **kwarg)
+          result = send(event, ...)
         else
           result = nil
         end
       else
-        result = send(HANDLERS[event], *arglist, **kwarg)
+        result = send(HANDLERS[event], ...)
       end
       return result if event_type == 'GET'
     end
@@ -919,10 +919,10 @@ module Ninix_Main
       end
     end
 
-    def stop_sakura(sakura, starter=nil, *args)
+    def stop_sakura(sakura, starter=nil, ...)
       sakura.finalize()
       unless starter.nil?
-        starter.call(*args)
+        starter.call(...)
       end
       set_menu_sensitive(sakura.key, true)
       close_ghost(sakura)
