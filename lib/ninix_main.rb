@@ -124,6 +124,21 @@ module Ninix_Main
 
   class Application
 
+    EVENT_TYPE = ['GET', 'NOTIFY']
+
+    HANDLERS = {
+      'close_all' => 'close_all_ghosts',
+      'edit_preferences' => 'edit_preferences',
+      'get_preference' => 'prefs_get',
+      'get_otherghostname' => 'get_otherghostname',
+      'rebuild_ghostdb' =>  'rebuild_ghostdb',
+      'notify_other' => 'notify_other',
+      'reset_sstp_flag' => 'reset_sstp_flag',
+      'get_sstp_port' => 'get_sstp_port',
+      'get_prefix' => 'get_sakura_prefix',
+      'get_workarea' => 'get_workarea'
+    }
+
     def initialize(lockfile, shm, sstp_port: [9801, 11000], ghost: nil, exit_if_not_found: false)
       @lockfile = lockfile
       @abend = nil
@@ -243,27 +258,15 @@ module Ninix_Main
     end
 
     def handle_request(event_type, event, *arglist, **kwarg)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
-      handlers = {
-        'close_all' => 'close_all_ghosts',
-        'edit_preferences' => 'edit_preferences',
-        'get_preference' => 'prefs_get',
-        'get_otherghostname' => 'get_otherghostname',
-        'rebuild_ghostdb' =>  'rebuild_ghostdb',
-        'notify_other' => 'notify_other',
-        'reset_sstp_flag' => 'reset_sstp_flag',
-        'get_sstp_port' => 'get_sstp_port',
-        'get_prefix' => 'get_sakura_prefix',
-        'get_workarea' => 'get_workarea'
-      }
-      unless handlers.include?(event)
+      fail "assert" unless EVENT_TYPE.include?(event_type)
+      unless HANDLERS.include?(event)
         if Application.method_defined?(event)
           result = method(event).call(*arglist, **kwarg)
         else
           result = nil
         end
       else
-        result = method(handlers[event]).call(*arglist, **kwarg)
+        result = method(HANDLERS[event]).call(*arglist, **kwarg)
       end
       return result if event_type == 'GET'
     end

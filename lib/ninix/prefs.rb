@@ -192,16 +192,20 @@ module Prefs
       @animation_quality_adjustment.set_value(get('animation_quality', :default => 1.0))
     end
 
-    def get(name, default: nil)
-      if ['sakura_name', # XXX: backward compat
-          'sakura_dir', 'default_balloon', 'balloon_fonts', 'menu_fonts'].include?(name)
-        value = @__prefs.get(name, default)
-      elsif ['ignore_default', 'script_speed', 'surface_scale',
+    NAME_S = ['sakura_name', # XXX: backward compat
+          'sakura_dir', 'default_balloon', 'balloon_fonts', 'menu_fonts']
+    NAME_I = ['ignore_default', 'script_speed', 'surface_scale',
              'balloon_scaling', 'allowembryo', 'check_collision',
              'check_collision_name', 'use_pna', 'sink_after_talk',
-             'raise_before_talk'].include?(name)
+             'raise_before_talk']
+    NAME_F = ['animation_quality']
+
+    def get(name, default: nil)
+      if NAME_S.include?(name)
+        value = @__prefs.get(name, default)
+      elsif NAME_I.include?(name)
         value = @__prefs.get(name, default).to_i
-      elsif ['animation_quality'].include?(name)
+      elsif NAME_F.include?(name)
         value = @__prefs.get(name, default).to_f
       else # should not reach here
         value = @__prefs.get(name, default)

@@ -78,6 +78,8 @@ module MetaMagic
   class Holon
     attr_reader :baseinfo, :instance
 
+    EVENT_TYPE = ['GET', 'NOTIFY']
+
     def initialize(key)
       @key = key
       @baseinfo = nil
@@ -92,7 +94,7 @@ module MetaMagic
     end
    
     def handle_request(event_type, event, *arglist, **kwargs)
-      fail "assert" unless ['GET', 'NOTIFY'].include?(event_type)
+      fail "assert" unless EVENT_TYPE.include?(event_type)
       unless @handlers.include?(event)
         if self.class.method_defined?(event)
           result = method(event).call(*arglist, **kwargs)
