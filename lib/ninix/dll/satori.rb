@@ -2233,7 +2233,7 @@ module Satori
       return buf.join('').strip()
     end
 
-    Re_random = Regexp.new('\A乱数((－|−|＋|[-+])?([[:digit:]])+)～((－|−|＋|[-+])?([[:digit:]])+)')
+    Re_random = Regexp.new('\A乱数((－|−|＋|[-+])?([[:digit:]])+)(?:～|〜)((－|−|＋|[-+])?([[:digit:]])+)')
     Re_is_empty = Regexp.new('\A(変数|文|単語群)「(.*)」の存在')
     Re_n_reserved = Regexp.new('\A次から(([[:digit:]])+)回目のトーク')
     Re_is_reserved = Regexp.new('\Aトーク「(.*)」の予約有無')
