@@ -682,8 +682,9 @@ module Balloon
     def reset_sstp_marker
       if @side.zero?
         fail "assert" if @balloon_surface.nil?
-        w = @balloon_surface.surface.width
-        h = @balloon_surface.surface.height
+        surface = @balloon_surface.surface(write: false)
+        w = surface.width
+        h = surface.height
         # sstp marker position
         @sstp = []
         x = config_adjust('sstpmarker.x', w,  30)
@@ -701,8 +702,9 @@ module Balloon
       # arrow positions
       @arrow = []
       fail "assert" if @balloon_surface.nil?
-      w = @balloon_surface.surface.width
-      h = @balloon_surface.surface.height
+      surface = @balloon_surface.surface(write: false)
+      w = surface.width
+      h = surface.height
       x = config_adjust('arrow0.x', w, -10)
       y = config_adjust('arrow0.y', h,  10)
       @arrow << [x, y]
@@ -797,8 +799,9 @@ module Balloon
       @balloon_id = balloon_id
       # change surface and window position
       x, y = @position
-      @width = @balloon_surface.surface.width
-      @height = @balloon_surface.surface.height
+      surface = @balloon_surface.surface(write: false)
+      @width = surface.width
+      @height = surface.height
       reset_arrow()
       reset_sstp_marker()
       reset_message_regions()
@@ -948,7 +951,7 @@ module Balloon
       # draw sstp marker
       unless @sstp_surface.nil?
         x, y = @sstp[0]            
-        cr.set_source(@sstp_surface.surface, x, y)
+        cr.set_source(@sstp_surface.surface(write: false), x, y)
         cr.paint()
       end
       # draw sstp message
@@ -964,7 +967,7 @@ module Balloon
       return if @lineno <= 0
       cr.save()
       x, y = @arrow[0]
-      cr.set_source(@arrow0_surface.surface, x, y)
+      cr.set_source(@arrow0_surface.surface(write: false), x, y)
       cr.paint()
       cr.restore()
     end
@@ -973,7 +976,7 @@ module Balloon
       return if get_bottom_position < @valid_height
       cr.save()
       x, y = @arrow[1]
-      cr.set_source(@arrow1_surface.surface, x, y)
+      cr.set_source(@arrow1_surface.surface(write: false), x, y)
       cr.paint()
       cr.restore()
     end
@@ -1084,7 +1087,7 @@ module Balloon
       return if @parent.handle_request('GET', 'lock_repaint')
       return true unless @__shown
       fail "assert" if @balloon_surface.nil?
-      @window.set_surface(cr, @balloon_surface.surface, scale, @reshape)
+      @window.set_surface(cr, @balloon_surface.surface(write: false), scale, @reshape)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX
       # FIXME: comment
@@ -1600,8 +1603,9 @@ module Balloon
       px, py = @window.winpos_to_surfacepos(
             event.x.to_i, event.y.to_i, scale)
       # up arrow
-      w = @arrow0_surface.surface.width
-      h = @arrow0_surface.surface.height
+      surface = @arraw0_surface.surface(write: false)
+      w = surface.width
+      h = surface.height
       x, y = @arrow[0]
       if x <= px and px <= (x + w) and y <= py and py <= (y + h)
         if @lineno > 0
@@ -1611,8 +1615,9 @@ module Balloon
         return true
       end
       # down arrow
-      w = @arrow1_surface.surface.width
-      h = @arrow1_surface.surface.height
+      surface = @arraw1_surface.surface(write: false)
+      w = surface.width
+      h = surface.height
       x, y = @arrow[1]
       if x <= px and px <= (x + w) and y <= py and py <= (y + h)
         if get_bottom_position > @valid_height
@@ -1857,10 +1862,10 @@ module Balloon
         new_buffer
       end
       data = @data_buffer[-1]
-      data[:pos][:w] = @sstp_surface.surface.width
+      data[:pos][:w] = @sstp_surface.surface(write: false).width
       data[:pos][:h] = @char_height
       data[:content][:type] = TYPE_IMAGE
-      data[:content][:data] = @sstp_surface.surface
+      data[:content][:data] = @sstp_surface.surface(write: false)
       data[:content][:attr] = {
         height: @font_height,
         color: '',
@@ -1974,14 +1979,14 @@ module Balloon
       end
       data = @data_buffer[-1]
       begin
-        image_surface = @pix_cache.load(path)
+        image_surface = @pix_cache.load(path).surface(write: false)
       rescue
         return
       end
-      data[:pos][:w] = image_surface.surface.width
-      data[:pos][:h] = image_surface.surface.height
+      data[:pos][:w] = image_surface.width
+      data[:pos][:h] = image_surface.height
       data[:content][:type] = TYPE_IMAGE
-      data[:content][:data] = image_surface.surface
+      data[:content][:data] = image_surface
       data[:content][:attr][:is_sstp_marker] = false
       unless kwargs[:x].nil? or kwargs[:y].nil?
         data[:pos][:x] = kwargs[:x]
@@ -2132,15 +2137,16 @@ module Balloon
     end
 
     def redraw(widget, cr, pix)
+      surface = pix.surface(write: false)
       cr.save()
       # clear
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.set_source_rgba(0, 0, 0, 0)
       cr.paint
-      cr.set_source(pix.surface, 0, 0)
+      cr.set_source(surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       # copy rectangle on the destination
-      cr.rectangle(0, 0, pix.surface.width, pix.surface.height)
+      cr.rectangle(0, 0, surface.width, surface.height)
       cr.fill()
       cr.restore()
       w, h = @window.size

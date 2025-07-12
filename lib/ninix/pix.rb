@@ -304,25 +304,36 @@ module Pix
       unless @data[path][is_pnr].include?(use_pna)
         s = Pix.create_surface_from_file(path, :is_pnr => is_pnr, :use_pna => use_pna)
         r = Pix.surface_to_region(s)
-        @data[path][is_pnr][use_pna] = Data.new(s, r)
+        @data[path][is_pnr][use_pna] = Data.new(s, r, true)
       end
       data = @data[path][is_pnr][use_pna]
       # regionは後々translate!してunion!する関係上
       # ここでcloneしておく
       region = Cairo::Region.new
       region.union!(data.region)
-      return Data.new(data.surface, region)
+      return Data.new(data.surface(write: false), region, true)
     end
   end
 
   class Data
-    def initialize(surface, region)
+    def initialize(surface, region, frozen = true)
       @surface = surface
       @region = region
+      @frozen = frozen
     end
 
-    def surface
-      @surface
+    def surface(write: true)
+      if @frozen and write
+        surface = Pix.create_blank_surface(@surface.width, @surface.height)
+        Cairo::Context.new(surface) do |cr|
+          cr.set_operator(Cairo::OPERATOR_SOURCE)
+          cr.set_source(@surface, 0, 0)
+          cr.paint()
+        end
+        return surface
+      else
+        return @surface
+      end
     end
 
     def region

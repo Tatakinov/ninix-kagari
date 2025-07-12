@@ -1247,14 +1247,14 @@ module Surface
         pix = @pix_cache.load(@surfaces[surface_id][0], is_pnr: is_pnr, use_pna: use_pna)
       rescue
         Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
-        return Pix::Data.new(Pix.create_blank_surface(100, 100), Cairo::Region.new)
+        return Pix::Data.new(Pix.create_blank_surface(100, 100), Cairo::Region.new, false)
       end
-      surface = Pix.create_blank_surface(pix.surface.width, pix.surface.height)
-      Cairo::Context.new(surface) do |cr|
-        cr.set_operator(Cairo::OPERATOR_SOURCE)
-        cr.set_source(pix.surface, 0, 0)
-        cr.paint()
+      if @surfaces[surface_id].length > 1
+        write = true
+      else
+        write = false
       end
+      surface = pix.surface(write: write)
       region = Cairo::Region.new
       region.union!(pix.region)
       for element, x, y, method in @surfaces[surface_id][1, @surfaces[surface_id].length - 1]
@@ -1283,9 +1283,9 @@ module Surface
             'asis' =>            Cairo::OPERATOR_OVER,
           }[method]
           cr.set_operator(op)
-          cr.set_source(overlay_pix.surface, x, y)
+          cr.set_source(overlay_pix.surface(write: false), x, y)
           if ['overlay', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
-            cr.mask(overlay_pix.surface, x, y)
+            cr.mask(overlay_pix.surface(write: false), x, y)
           else
             cr.paint()
           end
@@ -1295,13 +1295,13 @@ module Surface
         overlay_pix.region.translate!(x, y)
         region.union!(overlay_pix.region)
       end
-      return Pix::Data.new(surface, region)
+      return Pix::Data.new(surface, region, not(write))
     end
 
     def get_image_surface(surface_id, is_asis: false)
       unless @surfaces.include?(surface_id)
         Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
-        return Pix::Data.new(Pix.create_blank_surface(*@window.size), Cairo::Region.new)
+        return Pix::Data.new(Pix.create_blank_surface(*@window.size), Cairo::Region.new, false)
       end
       return create_surface_from_file(surface_id, :is_asis => is_asis)
     end
@@ -1423,18 +1423,24 @@ module Surface
       if surface_id.nil?
         surface_id = @surface_id
       end
-      if @mayuna.include?(surface_id) and @mayuna[surface_id]
+      if @mayuna.include?(surface_id) and not @mayuna[surface_id].empty?
         pix = get_image_surface(surface_id, is_asis: is_asis)
-        surface_width = pix.surface.width
-        surface_height = pix.surface.height
+        frozen = true
+        surface = pix.surface(write: false)
+        surface_width = surface.width
+        surface_height = surface.height
         for actor in @mayuna[surface_id]
           actor_id = actor.get_id()
           if @bind.include?(actor_id) and @bind[actor_id][1] and \
             not done.include?(actor_id)
             done << actor_id
+            if frozen
+              surface = pix.surface(write: true)
+              frozen = false
+            end
             for method, mayuna_id, dest_x, dest_y in iter_mayuna(surface_width, surface_height, actor, done)
               mayuna_overlay_pix = create_image_surface(mayuna_id, done, is_asis: method == 'asis')
-              Cairo::Context.new(pix.surface) do |cr|
+              Cairo::Context.new(surface) do |cr|
                 op = {
                   'base' =>            Cairo::OPERATOR_SOURCE, # XXX
                   'overlay' =>         Cairo::OPERATOR_OVER,
@@ -1448,9 +1454,9 @@ module Surface
                   'reduce' =>          Cairo::OPERATOR_DEST_IN,
                 }[method]
                 cr.set_operator(op)
-                cr.set_source(mayuna_overlay_pix.surface, dest_x, dest_y)
+                cr.set_source(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
                 if ['overlay', 'bind', 'add', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
-                  cr.mask(mayuna_overlay_pix.surface, dest_x, dest_y)
+                  cr.mask(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
                 elsif ['replace', 'asis', 'reduce'].include?(method)
                   cr.paint()
                 else
@@ -1464,10 +1470,9 @@ module Surface
             end
           end
         end
-      else
-        pix = get_image_surface(surface_id)
+        return Pix::Data.new(surface, pix.region, frozen)
       end
-      return pix
+      return get_image_surface(surface_id)
     end
 
     def update_frame_buffer
@@ -1475,6 +1480,8 @@ module Surface
       @reshape = true # FIXME: depends on Seriko
       new_pix = create_image_surface(@seriko.get_base_id)
       fail "assert" if new_pix.nil?
+      frozen = @seriko.iter_overlays.empty?
+      surface = new_pix.surface(write: not(frozen))
       region = Cairo::Region.new
       region.union!(new_pix.region)
       # update collision areas
@@ -1488,7 +1495,7 @@ module Surface
           next
         end
         # overlay surface
-        Cairo::Context.new(new_pix.surface) do |cr|
+        Cairo::Context.new(surface) do |cr|
           op = {
             'base' =>        Cairo::OPERATOR_SOURCE, # XXX
             'overlay' =>     Cairo::OPERATOR_OVER,
@@ -1501,9 +1508,9 @@ module Surface
             'asis' =>        Cairo::OPERATOR_OVER,
           }[method]
           cr.set_operator(op)
-          cr.set_source(overlay_pix.surface, x, y)
+          cr.set_source(overlay_pix.surface(write: false), x, y)
           if ['overlay', 'overlayfast'].include?(method)
-            cr.mask(overlay_pix.surface, x, y)
+            cr.mask(overlay_pix.surface(write: false), x, y)
           else
             cr.paint()
           end
@@ -1513,13 +1520,13 @@ module Surface
         overlay_pix.region.translate!(x, y)
         region.union!(overlay_pix.region)
       end
-      @image_surface = Pix::Data.new(new_pix.surface, region)
+      @image_surface = Pix::Data.new(surface, region, frozen)
       @window.queue_draw(@image_surface.region)
     end
 
     def redraw(darea, cr)
       return if @image_surface.nil? # XXX
-      @window.set_surface(cr, @image_surface.surface, get_scale, @reshape)
+      @window.set_surface(cr, @image_surface.surface(write: false), get_scale, @reshape)
       unless @parent.handle_request('GET', 'get_preference', 'check_collision').zero?
         draw_region(cr)
       end
