@@ -326,7 +326,7 @@ msgstr "当たり判定領域を表示する"
 
 #: ../lib/ninix/prefs.rb:474
 msgid "Display Collision Area Name"
-msgstr "当たり判定領域を表示する"
+msgstr "当たり判定名を表示する"
 
 #: ../lib/ninix/sakura.rb:506
 msgid "Network Update has begun."
