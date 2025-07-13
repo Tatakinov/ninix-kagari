@@ -674,7 +674,9 @@ module Seriko
 
     def update(window, base_frame, next_tick = nil)
       if @tick == next_tick
-        unless @is_looped
+        if next_tick.nil?
+          @is_looped = false
+        elsif not @is_looped
           @is_looped = (@render_start_at == @pattern)
         end
       else
