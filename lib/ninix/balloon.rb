@@ -1299,7 +1299,7 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
-      @window.set_shape(cr, @reshape, @balloon_surface.region)
+      @window.set_shape(cr, @reshape, @balloon_surface.region(write: false))
       @reshape = false
       return false
     end
@@ -2156,8 +2156,7 @@ module Balloon
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       s = cr.target.map_to_image
       s = surface if s.width < surface.width or s.height < surface.height
-      region = Cairo::Region.new
-      region.union!(pix.region)
+      region = pix.region(write: false)
       # XXX: to avoid losing focus in the text input region
       x = @entry.margin_left
       y = @entry.margin_top

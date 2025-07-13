@@ -1273,8 +1273,7 @@ module Surface
         write = false
       end
       surface = pix.surface(write: write)
-      region = Cairo::Region.new
-      region.union!(pix.region)
+      region = pix.region(write: write)
       for element, x, y, method in @surfaces[surface_id][1, @surfaces[surface_id].length - 1]
         begin
           if method == 'asis'
@@ -1301,8 +1300,13 @@ module Surface
         end
         # TODO
         # method毎のregion処理
-        overlay_pix.region.translate!(x, y)
-        region.union!(overlay_pix.region)
+        if x.zero? and y.zero?
+          r = overlay_pix.region(write: false)
+        else
+          r = overlay_pix.region(write: true)
+          r.translate!(x, y)
+        end
+        region.union!(r)
       end
       return Pix::Data.new(surface, region, not(write))
     end
@@ -1436,6 +1440,7 @@ module Surface
         pix = get_image_surface(surface_id, is_asis: is_asis)
         frozen = true
         surface = pix.surface(write: false)
+        region = pix.region(write: false)
         surface_width = surface.width
         surface_height = surface.height
         for actor in @mayuna[surface_id]
@@ -1445,6 +1450,7 @@ module Surface
             done << actor_id
             if frozen
               surface = pix.surface(write: true)
+              region = pix.region(write: true)
               frozen = false
             end
             for method, mayuna_id, dest_x, dest_y in iter_mayuna(surface_width, surface_height, actor, done)
@@ -1463,12 +1469,17 @@ module Surface
               end
               # TODO
               # method毎のregion処理
-              mayuna_overlay_pix.region.translate!(dest_x, dest_y)
-              pix.region.union!(mayuna_overlay_pix.region)
+              if dest_x.zero? and dest_y.zero?
+                r = mayuna_overlay_pix.region(write: false)
+              else
+                r = mayuna_overlay_pix.region(write: true)
+                r.translate!(dest_x, dest_y)
+              end
+              region.union!(r)
             end
           end
         end
-        return Pix::Data.new(surface, pix.region, frozen)
+        return Pix::Data.new(surface, region, frozen)
       end
       return get_image_surface(surface_id)
     end
@@ -1480,8 +1491,7 @@ module Surface
       fail "assert" if new_pix.nil?
       frozen = @seriko.iter_overlays.empty?
       surface = new_pix.surface(write: not(frozen))
-      region = Cairo::Region.new
-      region.union!(new_pix.region)
+      region = new_pix.region(write: not(frozen))
       # update collision areas
       @collisions = @region[@seriko.get_base_id]
       # draw overlays
@@ -1505,11 +1515,16 @@ module Surface
         end
         # TODO
         # method毎のregion処理
-        overlay_pix.region.translate!(x, y)
-        region.union!(overlay_pix.region)
+        if x.zero? and y.zero?
+          r = overlay_pix.region(write: false)
+        else
+          r = overlay_pix.region(write: true)
+          r.translate!(x, y)
+        end
+        region.union!(r)
       end
       @image_surface = Pix::Data.new(surface, region, frozen)
-      @window.queue_draw(@image_surface.region)
+      @window.queue_draw(@image_surface.region(write: false))
     end
 
     def redraw(darea, cr)
@@ -1518,7 +1533,7 @@ module Surface
       unless @parent.handle_request(:GET, :get_preference, 'check_collision').zero?
         draw_region(cr)
       end
-      @window.set_shape(cr, @reshape, @image_surface.region)
+      @window.set_shape(cr, @reshape, @image_surface.region(write: false))
       @reshape = false
     end
 

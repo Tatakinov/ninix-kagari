@@ -18,7 +18,6 @@ require "gtk3"
 require_relative "logging"
 
 module Pix
-
   def self.surface_to_region(surface)
     region = Cairo::Region.new()
     width = surface.width
@@ -306,12 +305,7 @@ module Pix
         r = Pix.surface_to_region(s)
         @data[path][is_pnr][use_pna] = Data.new(s, r, true)
       end
-      data = @data[path][is_pnr][use_pna]
-      # regionは後々translate!してunion!する関係上
-      # ここでcloneしておく
-      region = Cairo::Region.new
-      region.union!(data.region)
-      return Data.new(data.surface(write: false), region, true)
+      return @data[path][is_pnr][use_pna]
     end
   end
 
@@ -331,13 +325,17 @@ module Pix
           cr.paint()
         end
         return surface
-      else
-        return @surface
       end
+      return @surface
     end
 
-    def region
-      @region
+    def region(write: true)
+      if @frozen and write
+        region = Cairo::Region.new
+        region.union!(@region)
+        return region
+      end
+      return @region
     end
   end
 
