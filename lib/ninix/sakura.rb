@@ -1880,7 +1880,6 @@ module Sakura
           @wait_for_animation = nil
         end
       end
-      @parent.handle_request(:GET, :update_working, get_name())
       unless @__temp_mode.zero?
         process_script()
         if not busy() and \

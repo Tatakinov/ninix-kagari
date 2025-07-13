@@ -178,6 +178,7 @@ module Ninix_Main
       @init_ghost = ghost
       @exit_func = exit_if_not_found
       @sakura_info = {}
+      @current_working = []
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
         GLib::Timeout.add(10) do
           begin
@@ -965,11 +966,11 @@ module Ninix_Main
       set_menu_sensitive(key, false)
     end
 
-    def update_working(ghost_name)
+    def update_working()
       @lockfile.truncate(0)
       @lockfile.seek(0)
-      @lockfile.write(ghost_name)
-      @lockfile.flush()        
+      @lockfile.write(@current_working.last)
+      @lockfile.flush()
     end
 
     def notify_preference_changed
@@ -1229,6 +1230,8 @@ module Ninix_Main
 
     def add_sakura_info(uuid, *args)
       return false if @sakura_info.include?(uuid)
+      @current_working.append(args[3])
+      update_working()
       return update_sakura_info(uuid, *args, force: true)
     end
 
@@ -1242,7 +1245,9 @@ module Ninix_Main
 
     def remove_sakura_info(uuid)
       return false if not @sakura_info.include?(uuid)
-      @sakura_info.delete(uuid)
+      info = @sakura_info.delete(uuid)
+      @current_working.delete(info[:fullname])
+      update_working()
       return true
     end
 
