@@ -32,6 +32,17 @@ module NConfig
       end
     end
 
+    def merge(*others)
+      ret = super()
+      ret.merge!(self)
+      ret.merge!(*others)
+      return ret
+    end
+
+    def update(*others)
+      return merge!(*others)
+    end
+
     def set_child(child)
       @child = child
     end
@@ -42,6 +53,8 @@ module NConfig
     RE_ANIMATION_2 = Regexp.new('\Aanimation([0-9]+)')
     RE_ANIMATION_PATTERN = Regexp.new('\A[0-9]+pattern([0-9]+)')
     RE_ANIMATION_PATTERN_2 = Regexp.new('\Aanimation[0-9]+\.pattern([0-9]+)')
+
+    protected attr_reader :animation
 
     def initialize(ifnone = nil)
       super(ifnone)
@@ -84,17 +97,13 @@ module NConfig
       end
     end
 
-    def merge(*others)
+    def merge!(*others)
       others.each do |other|
-        for k, v in other.to_hash
-          self[k] = v
+        @animation.merge!(other.animation) do |k, sv, ov|
+          sv | ov
         end
       end
-      return self
-    end
-
-    def update(*others)
-      return self.merge(*others)
+      return super
     end
 
     def delete(key)
@@ -131,6 +140,8 @@ module NConfig
       menuex: Regexp.new('\A[^\.]+\.menuitemex([0-9]+)'),
     }
 
+    protected attr_reader :index
+
     def initialize(ifnone = nil)
       super(ifnone)
       @index = {}
@@ -156,17 +167,19 @@ module NConfig
       end
     end
 
-    def merge(*others)
+    def merge!(*others)
       others.each do |other|
-        for k, v in other.to_hash
-          self[k] = v
+        RE.keys.each do |k|
+          @index[k].merge!(other.index[k]) do |k, sv, ov|
+            sv | ov
+          end
         end
       end
-      return self
+      return super
     end
 
     def update(*others)
-      return merge(*others)
+      return merge!(*others)
     end
 
     def delete(key)
