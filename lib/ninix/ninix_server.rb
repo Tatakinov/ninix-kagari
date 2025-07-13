@@ -41,6 +41,10 @@ class NinixServer < MetaMagic::Holon
     ObjectSpace.define_finalizer(self, NinixServer.finalize(@socket, name))
   end
 
+  def accept
+    return @socket.accept
+  end
+
   def accept_nonblock
     return @socket.accept_nonblock
   end

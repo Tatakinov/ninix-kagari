@@ -180,25 +180,28 @@ module Ninix_Main
       @sakura_info = {}
       @current_working = []
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
-        GLib::Timeout.add(10) do
-          begin
-            soc = @socket.accept_nonblock
-          rescue IO::WaitReadable, Errno::EINTR
-            next true
-          end
-          buffer = []
-          for key, value in @sakura_info
-            for k, v in value
-              buffer << key + '.' + k.to_s + "\x01" + v.to_s
+        Thread.new(@socket) do |socket|
+          loop do
+            begin
+              soc = socket.accept
+            rescue IO::WaitReadable, Errno::EINTR
+              next
+            rescue
+              break
+            end
+            buffer = []
+            for key, value in @sakura_info
+              for k, v in value
+                buffer << key + '.' + k.to_s + "\x01" + v.to_s
+              end
+            end
+            data = buffer.join("\x0d\x0a") + "\x0d\x0a\x00"
+            Thread.start(soc, data) do |s, d|
+              s.write([d.bytesize].pack('L*'))
+              s.write([d].pack('a*'))
+              s.close
             end
           end
-          data = buffer.join("\x0d\x0a") + "\x0d\x0a\x00"
-          Thread.start(soc, data) do |s, d|
-            s.write([d.bytesize].pack('L*'))
-            s.write([d].pack('a*'))
-            s.close
-          end
-          next true
         end
       end
       @script_log = ScriptLog::Window.new
