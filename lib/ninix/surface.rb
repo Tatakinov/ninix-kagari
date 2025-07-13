@@ -906,6 +906,24 @@ module Surface
   class SurfaceWindow < MetaMagic::Holon
     attr_reader :bind
 
+    OPERATOR = {
+      'base' =>            Cairo::OPERATOR_SOURCE, # XXX
+      'overlay' =>         Cairo::OPERATOR_OVER,
+      'overlayfast' =>     Cairo::OPERATOR_ATOP,
+      'overlaymultiply' => Cairo::OPERATOR_ATOP, # FIXME
+      'replace' =>         Cairo::OPERATOR_SOURCE,
+      'interpolate' =>     Cairo::OPERATOR_SATURATE,
+      'asis' =>            Cairo::OPERATOR_OVER,
+      'bind' =>            Cairo::OPERATOR_OVER,
+      'add' =>             Cairo::OPERATOR_OVER,
+      'reduce' =>          Cairo::OPERATOR_DEST_IN,
+    }
+
+    OVERLAY_SET = [
+      'overlay', 'bind', 'add', 'overlayfast',
+      'overlaymultiply', 'interpolate',
+    ]
+
     def initialize(window, side, desc, surface_alias, surface_info, tooltips,
                    surfaces, seriko, region, mayuna, bind, default_id, maxsize)
       super("") # FIXME
@@ -1272,19 +1290,10 @@ module Surface
           next
         end
         Cairo::Context.new(surface) do |cr|
-          op = {
-            'base' =>            Cairo::OPERATOR_SOURCE, # XXX
-            'overlay' =>         Cairo::OPERATOR_OVER,
-            'overlayfast' =>     Cairo::OPERATOR_ATOP,
-            'overlaymultiply' => Cairo::OPERATOR_ATOP, # FIXME
-            'interpolate' =>     Cairo::OPERATOR_SATURATE,
-            'reduce' =>          Cairo::OPERATOR_DEST_IN,
-            'replace' =>         Cairo::OPERATOR_SOURCE,
-            'asis' =>            Cairo::OPERATOR_OVER,
-          }[method]
+          op = OPERATOR[method]
           cr.set_operator(op)
           cr.set_source(overlay_pix.surface(write: false), x, y)
-          if ['overlay', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
+          if OVERLAY_SET.include?(method)
             cr.mask(overlay_pix.surface(write: false), x, y)
           else
             cr.paint()
@@ -1441,21 +1450,10 @@ module Surface
             for method, mayuna_id, dest_x, dest_y in iter_mayuna(surface_width, surface_height, actor, done)
               mayuna_overlay_pix = create_image_surface(mayuna_id, done, is_asis: method == 'asis')
               Cairo::Context.new(surface) do |cr|
-                op = {
-                  'base' =>            Cairo::OPERATOR_SOURCE, # XXX
-                  'overlay' =>         Cairo::OPERATOR_OVER,
-                  'overlayfast' =>     Cairo::OPERATOR_ATOP,
-                  'overlaymultiply' => Cairo::OPERATOR_ATOP, # FIXME
-                  'replace' =>         Cairo::OPERATOR_SOURCE,
-                  'interpolate' =>     Cairo::OPERATOR_SATURATE,
-                  'asis' =>            Cairo::OPERATOR_OVER,
-                  'bind' =>            Cairo::OPERATOR_OVER,
-                  'add' =>             Cairo::OPERATOR_OVER,
-                  'reduce' =>          Cairo::OPERATOR_DEST_IN,
-                }[method]
+                op = OPERATOR[method]
                 cr.set_operator(op)
                 cr.set_source(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
-                if ['overlay', 'bind', 'add', 'overlayfast', 'overlaymultiply', 'interpolate'].include?(method)
+                if OVERLAY_SET.include?(method)
                   cr.mask(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
                 elsif ['replace', 'asis', 'reduce'].include?(method)
                   cr.paint()
@@ -1496,20 +1494,10 @@ module Surface
         end
         # overlay surface
         Cairo::Context.new(surface) do |cr|
-          op = {
-            'base' =>        Cairo::OPERATOR_SOURCE, # XXX
-            'overlay' =>     Cairo::OPERATOR_OVER,
-            'bind' =>        Cairo::OPERATOR_OVER,
-            'add' =>         Cairo::OPERATOR_OVER,
-            'overlayfast' => Cairo::OPERATOR_ATOP,
-            'interpolate' => Cairo::OPERATOR_SATURATE,
-            'reduce' =>      Cairo::OPERATOR_DEST_IN,
-            'replace' =>     Cairo::OPERATOR_SOURCE,
-            'asis' =>        Cairo::OPERATOR_OVER,
-          }[method]
+          op = OPERATOR[method]
           cr.set_operator(op)
           cr.set_source(overlay_pix.surface(write: false), x, y)
-          if ['overlay', 'overlayfast'].include?(method)
+          if OVERLAY_SET.include?(method)
             cr.mask(overlay_pix.surface(write: false), x, y)
           else
             cr.paint()
