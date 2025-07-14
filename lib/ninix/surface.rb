@@ -959,6 +959,7 @@ module Surface
       @click_count = 0
       @__balloon_offset = nil
       @reshape = true
+      @prev_render_info = []
       @pix_cache = Pix::Cache.new
       @window.signal_connect('leave_notify_event') do |w, e|
         next window_leave_notify(w, e) # XXX
@@ -1432,11 +1433,12 @@ module Surface
       cr.restore
     end
 
-    def create_image_surface(surface_id, done = [], is_asis: false)
+    def create_image_surface(surface_id, done = [], is_asis: false, check_only: false)
       if surface_id.nil?
         surface_id = @surface_id
       end
       if @mayuna.include?(surface_id) and not @mayuna[surface_id].empty?
+        render_info = []
         pix = get_image_surface(surface_id, is_asis: is_asis)
         frozen = true
         surface = pix.surface(write: false)
@@ -1448,45 +1450,62 @@ module Surface
           if @bind.include?(actor_id) and @bind[actor_id][1] and \
             not done.include?(actor_id)
             done << actor_id
-            if frozen
+            mayuna = iter_mayuna(surface_width, surface_height, actor, done)
+            if frozen and not(mayuna.empty?)
               surface = pix.surface(write: true)
               region = pix.region(write: true)
               frozen = false
             end
-            for method, mayuna_id, dest_x, dest_y in iter_mayuna(surface_width, surface_height, actor, done)
-              mayuna_overlay_pix = create_image_surface(mayuna_id, done, is_asis: method == 'asis')
-              Cairo::Context.new(surface) do |cr|
-                op = OPERATOR[method]
-                cr.set_operator(op)
-                cr.set_source(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
-                if OVERLAY_SET.include?(method)
-                  cr.mask(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
-                elsif ['replace', 'asis', 'reduce'].include?(method)
-                  cr.paint()
-                else
-                  fail RuntimeError('should not reach here')
+            unless check_only
+              for method, mayuna_id, dest_x, dest_y in mayuna
+                mayuna_overlay_pix = create_image_surface(mayuna_id, done, is_asis: method == 'asis')
+                Cairo::Context.new(surface) do |cr|
+                  op = OPERATOR[method]
+                  cr.set_operator(op)
+                  cr.set_source(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
+                  if OVERLAY_SET.include?(method)
+                    cr.mask(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
+                  elsif ['replace', 'asis', 'reduce'].include?(method)
+                    cr.paint()
+                  else
+                    fail RuntimeError('should not reach here')
+                  end
                 end
+                # TODO
+                # method毎のregion処理
+                if dest_x.zero? and dest_y.zero?
+                  r = mayuna_overlay_pix.region(write: false)
+                else
+                  r = mayuna_overlay_pix.region(write: true)
+                  r.translate!(dest_x, dest_y)
+                end
+                region.union!(r)
               end
-              # TODO
-              # method毎のregion処理
-              if dest_x.zero? and dest_y.zero?
-                r = mayuna_overlay_pix.region(write: false)
-              else
-                r = mayuna_overlay_pix.region(write: true)
-                r.translate!(dest_x, dest_y)
-              end
-              region.union!(r)
+            else
+              render_info += mayuna
             end
           end
         end
+        return render_info if check_only
         return Pix::Data.new(surface, region, frozen)
       end
+      return [] if check_only
       return get_image_surface(surface_id)
     end
 
     def update_frame_buffer
       return if @parent.handle_request(:GET, :lock_repaint)
+      seriko_overlays = @seriko.iter_overlays
+      render_info = [[@seriko.get_base_id, 0, 0, 'overlay']]
+      render_info += create_image_surface(@seriko.get_base_id, check_only: true)
+      render_info += seriko_overlays
+      for surface_id, x, y, method in seriko_overlays
+        render_info += create_image_surface(surface_id, is_asis: (method == 'asis'), check_only: true)
+      end
+      return if @prev_render_info == render_info
+      @prev_render_info = render_info
       @reshape = true # FIXME: depends on Seriko
+
       new_pix = create_image_surface(@seriko.get_base_id)
       fail "assert" if new_pix.nil?
       frozen = @seriko.iter_overlays.empty?
@@ -1495,7 +1514,7 @@ module Surface
       # update collision areas
       @collisions = @region[@seriko.get_base_id]
       # draw overlays
-      for surface_id, x, y, method in @seriko.iter_overlays()
+      for surface_id, x, y, method in seriko_overlays
         begin
           overlay_pix = create_image_surface(
             surface_id, :is_asis => (method == 'asis'))
