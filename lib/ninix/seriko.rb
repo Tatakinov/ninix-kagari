@@ -626,6 +626,18 @@ module Seriko
   end
 
   class MultipleActor < Actor
+
+    INTERVAL = {
+      bind: 'bind',
+      bind_only: ['bind'],
+      sometimes: 'sometimes',
+      rarely: 'rarely',
+      random: 'random',
+      periodic: 'periodic',
+      always: 'always',
+      oneshot: ['runonce', 'never', 'yen-e', 'talk'],
+    }
+
     def initialize(actor_id, interval, factor)
       super(actor_id, interval)
       @factor = factor
@@ -645,8 +657,8 @@ module Seriko
     end
 
     def enable
-      return true unless @interval.include?('bind')
-      return true if @interval.include?('bind') and @enable_bind
+      return true unless @interval.include?(INTERVAL[:bind])
+      return true if @interval.include?(INTERVAL[:bind]) and @enable_bind
       return false
     end
 
@@ -685,8 +697,8 @@ module Seriko
         @is_looped = false
       end
       return false if @terminate_flag
-      return false if @interval.include?('bind') and not @enable_bind
-      if @interval == ['bind']
+      return false if @interval.include?(INTERVAL[:bind]) and not @enable_bind
+      if @interval == INTERVAL[:bind_only]
         for surface, interval, method, args in @patterns
           if OVERLAY_SET.include?(method)
             x = args[0] + @offset[0]
@@ -710,17 +722,17 @@ module Seriko
             # random系の秒数決定の乱数(0 < x < 1)
             while (x = rand) == 0
             end
-            if @interval.include?('sometimes')
+            if @interval.include?(INTERVAL[:sometimes])
               wait = (-Math.log(2, x)).ceil * 1_000_000
-            elsif @interval.include?('rarely')
+            elsif @interval.include?(INTERVAL[:rarely])
               wait = (-Math.log(4, x)).ceil * 1_000_000
-            elsif @interval.include?('random')
+            elsif @interval.include?(INTERVAL[:random])
               wait = (-Math.log(@factor, x)).ceil * 1_000_000
-            elsif @interval.include?('periodic')
+            elsif @interval.include?(INTERVAL[:periodic])
               wait = @factor * 1_000_000
-            elsif @interval.include?('always')
+            elsif @interval.include?(INTERVAL[:always])
               # nop
-            elsif ['runonce', 'never', 'yen-e', 'talk'].any? do |e|
+            elsif INTERVAL[:oneshot].any? do |e|
                 @interval.include?(e)
               end
               wait = -1
@@ -752,7 +764,7 @@ module Seriko
             end
           end
           # wait0のみで構成されるalwaysなanimation対策
-          if zero and @pattern == 0 and @interval.include?('always') # wait0のみで構成されるanimation対策
+          if zero and @pattern == 0 and @interval.include?(INTERVAL[:always]) # wait0のみで構成されるanimation対策
             wait = 1
           end
           window.append_actor(base_frame + wait, self)
