@@ -49,52 +49,39 @@ module NConfig
   end
 
   class SurfaceConfig < Config
-    RE_ANIMATION = Regexp.new('\A([0-9]+)')
-    RE_ANIMATION_2 = Regexp.new('\Aanimation([0-9]+)')
-    RE_ANIMATION_PATTERN = Regexp.new('\A[0-9]+pattern([0-9]+)')
-    RE_ANIMATION_PATTERN_2 = Regexp.new('\Aanimation[0-9]+\.pattern([0-9]+)')
+    PREFIX_2 = 'animation'
+    RE_ANIMATION_PATTERN = Regexp.new('\A([0-9]+)pattern([0-9]+)')
+    RE_ANIMATION_PATTERN_2 = Regexp.new('\Aanimation([0-9]+)\.pattern([0-9]+)')
 
     protected attr_reader :animation
 
     def initialize(ifnone = nil)
       super(ifnone)
-      @animation = {}
+      @animation = Hash.new do |h, k|
+        h[k] = []
+      end
     end
 
     def []=(key, value)
-      super(key, value)
-      match = nil
-      [RE_ANIMATION, RE_ANIMATION_2].each do |r|
-        unless match.nil?
-          next
+      if key.start_with?(PREFIX_2)
+        match = RE_ANIMATION_PATTERN_2.match(key)
+      else
+        begin
+          Integer(key[0])
+          match = RE_ANIMATION_PATTERN.match(key)
+        rescue
+          match = nil
         end
-        match = r.match(key)
       end
       if match.nil?
-        return
+        return super(key, value)
       end
       id = match[1].to_i
-      if value.nil?
-        @animation.delete(id)
-        return
-      end
-      unless @animation.include?(id)
-        @animation[id] = []
-      end
-      match = nil
-      [RE_ANIMATION_PATTERN, RE_ANIMATION_PATTERN_2].each do |r|
-        unless match.nil?
-          next
-        end
-        match = r.match(key)
-      end
-      if match.nil?
-        return
-      end
-      pattern = match[1].to_i
+      pattern = match[2].to_i
       unless @animation[id].include?(pattern)
         @animation[id] << pattern
       end
+      return super(key, value)
     end
 
     def merge!(*others)
