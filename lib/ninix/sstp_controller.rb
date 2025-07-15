@@ -17,7 +17,7 @@ class BaseSSTPController < MetaMagic::Holon
   def initialize
     super("") ## FIXME
     @sstp_servers = []
-    @__sstp_queue = []
+    @__sstp_queue = Thread::Queue.new
     @__sstp_flag = false
     @__current_sender = nil
   end
@@ -105,27 +105,23 @@ class BaseSSTPController < MetaMagic::Holon
       :request_handler => request_handler, :temp_mode => true)
   end
 
-  def receive_sstp_request
-    for sstp_server in @sstp_servers
-      begin
-        socket = sstp_server.accept_nonblock
-      rescue
-        next
-      end
-      begin
-        buffer = socket.gets
-        handler = create(buffer, sstp_server, socket)
-        handler.handle
-      rescue SocketError => e
-        Logging::Logging.error("socket.error: #{e.message}")
-      rescue SystemCallError => e
-        Logging::Logging.error("socket.error: #{e.message} (#{e.errno})")
-      rescue => e # may happen when ninix is terminated
-        p e.message
-        p e.backtrace
-        return
-      end
+  def receive_sstp_request(server, socket)
+    begin
+      buffer = socket.gets
+      handler = create(buffer, server, socket)
+      handler.handle
+    rescue SocketError => e
+      Logging::Logging.error("socket.error: #{e.message}")
+      return false
+    rescue SystemCallError => e
+      Logging::Logging.error("socket.error: #{e.message} (#{e.errno})")
+      return false
+    rescue => e # may happen when ninix is terminated
+      p e.message
+      p e.backtrace
+      return false
     end
+    return true
   end
 
   def get_sstp_port
@@ -160,6 +156,16 @@ class TCPSSTPController < BaseSSTPController
       server.set_responsible(self)
       @sstp_servers << server
       Logging::Logging.info("Serving SSTP on port #{port}")
+      Thread.new(server) do |soc|
+        until soc.closed?
+          begin
+            client = soc.accept
+            receive_sstp_request(soc, client)
+          rescue
+            # TODO error handling
+          end
+        end
+      end
     end
   end
 
@@ -179,6 +185,16 @@ class UnixSSTPController < BaseSSTPController
     server.set_responsible(self)
     @sstp_servers << server
     Logging::Logging.info("Serving UnixSSTP on name #{@uuid}")
+    Thread.new(server) do |soc|
+      until soc.closed?
+        begin
+          client = soc.accept
+          receive_sstp_request(soc, client)
+        rescue
+          # TODO error handling
+        end
+      end
+    end
   end
 
   # HACK ninix_mainのget_event_response相当のことをここでやる

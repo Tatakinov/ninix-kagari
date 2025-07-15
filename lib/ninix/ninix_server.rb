@@ -52,4 +52,8 @@ class NinixServer < MetaMagic::Holon
   def close
     @socket.close
   end
+
+  def closed?
+    @socket.closed?
+  end
 end

@@ -1193,7 +1193,6 @@ module Ninix_Main
           @sstp_controler.start_servers()
           @loaded = true
         else
-          @sstp_controler.receive_sstp_request()
           @sstp_controler.handle_sstp_queue()
         end
       end

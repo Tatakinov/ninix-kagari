@@ -1938,7 +1938,6 @@ module Sakura
       #
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
         @controller.handle_sstp_queue
-        @controller.receive_sstp_request
       end
       process_script()
       return true
