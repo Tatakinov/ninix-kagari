@@ -202,7 +202,7 @@ module NConfig
 
   def self.create_from_file(path, klass = Config)
     has_bom = File.open(path) {|f| f.read(3) } == "\xEF\xBB\xBF"
-    charset = has_bom ? 'UTF-8' : 'CP932'
+    charset = has_bom ? Encoding::UTF_8 : Encoding::CP932
     buf = []
     File.open(path, has_bom ? 'rb:BOM|UTF-8' : 'rb') {|f|
       while line = f.gets
@@ -213,20 +213,20 @@ module NConfig
     return create_from_buffer(buf, klass = klass, charset: charset)
   end
 
-  def self.create_from_buffer(buf, klass = Config, charset: 'CP932')
+  def self.create_from_buffer(buf, klass = Config, charset: Encoding::CP932)
     dic = klass.new
     buf.each do |line|
-      line = line.force_encoding(charset).encode(
-        "UTF-8", :invalid => :replace, :undef => :replace)
+      line.force_encoding(charset).encode!(
+        Encoding::UTF_8, invalid: :replace, undef: :replace)
       key, value = line.split(",", 2)
       next if key.nil? or value.nil?
       key.strip!
       case key
       when 'charset'
         value.strip!
-        if Encoding.name_list.include?(value)
-          charset = value
-        else
+        begin
+          charset = Encoding.find(value)
+        rescue
           Logging::Logging.error('Unsupported charset ' + value)
         end
       when 'refreshundeletemask', 'icon', 'cursor', 'shiori', 'makoto'

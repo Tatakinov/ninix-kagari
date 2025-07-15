@@ -558,6 +558,11 @@ module Home
     return surface, alias_, tooltips, seriko_descript
   end
 
+  COMMENT = ['#', '//']
+  CHARSET = 'charset'
+  SCOPE_BEGIN = '{'
+  SCOPE_END = '}'
+
   def self.read_surfaces_txt(surface_dir)
     re_alias = Regexp.new('\A(sakura|kero|char[0-9]+)\.surface\.alias\z')
     config_list = []
@@ -570,44 +575,46 @@ module Home
           f = open(path, 'rb')
           alias_buffer = []
           tooltips = {}
-          charset = 'CP932'
+          charset = Encoding::CP932
           buf = []
           key = nil
           opened = false
           if f.read(3).bytes == [239, 187, 191] # "\xEF\xBB\xBF"
             f.close
             f = File.open(path, 'rb:BOM|UTF-8')
-            charset = 'UTF-8'
+            charset = Encoding::UTF_8
           else
             f.seek(0) # rewind
           end
-          for line in f
-            next if line.start_with?('#') or line.start_with?('//')
-            if charset == 'CP932'
-              # "\x81\x40": full-width space in CP932(Shift_JIS)
-              temp = line.gsub(0x81.chr + 0x40.chr, "").strip()
-            else
-              temp = line.strip()
+          f.each do |line|
+            next if COMMENT.any? do |v|
+              line.start_with?(v)
             end
+            if charset == Encoding::CP932
+              # "\x81\x40": full-width space in CP932(Shift_JIS)
+              line.gsub!(0x81.chr + 0x40.chr, "")
+            end
+            line.strip!()
+            temp = line
             next if temp.empty?
-            if temp.start_with?('charset')
+            if temp.start_with?(CHARSET)
               begin
-                charset = temp.split(',', 2)[1].strip().force_encoding('ascii')
+                charset = Encoding::find(temp.split(',', 2)[1].strip().force_encoding('ascii'))
               rescue
                 #pass
               end
               next
             end
             if key.nil?
-              if temp.end_with?('{')
-                key = temp[0, temp.length - 1].force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+              if temp.end_with?(SCOPE_BEGIN)
+                key = temp[0, temp.length - 1].force_encoding(charset).encode(Encoding::UTF_8, :invalid => :replace, :undef => :replace)
                 opened = true
               else
-                key = temp.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+                key = temp.force_encoding(charset).encode(Encoding::UTF_8, :invalid => :replace, :undef => :replace)
               end
-            elsif temp == '{'
+            elsif temp == SCOPE_BEGIN
               opened = true
-            elsif temp.end_with?('}')
+            elsif temp.end_with?(SCOPE_END)
               if temp[0, temp.length - 2]
                 buf << temp[0, temp.length - 2]
               end
@@ -615,11 +622,11 @@ module Home
               match = re_alias.match(key)
               if not match.nil?
                 alias_buffer << key
-                alias_buffer << '{'
+                alias_buffer << SCOPE_BEGIN
                 for line in buf
-                  alias_buffer << line.force_encoding(charset).encode("UTF-8", :invalid => :replace, :undef => :replace)
+                  alias_buffer << line.force_encoding(charset).encode(Encoding::UTF_8, :invalid => :replace, :undef => :replace)
                 end
-                alias_buffer << '}'
+                alias_buffer << SCOPE_END
               elsif key.end_with?('.tooltips')
                 begin
                   key = key[0, -10]
