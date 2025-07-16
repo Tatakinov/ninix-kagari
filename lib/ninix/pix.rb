@@ -27,7 +27,8 @@ module Pix
     start_x = nil
     end_x = nil
     pix_na[3, true].where.each {|i|
-      y, x = i.div(width), i.modulo(width)
+      y = i.div(width)
+      x = i.modulo(width)
       unless start_x.nil?
         if y != curr_y or x != (end_x + 1)
           region.union!(start_x, curr_y, end_x - start_x + 1, 1)

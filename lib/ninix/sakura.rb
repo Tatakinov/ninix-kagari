@@ -1741,9 +1741,10 @@ module Sakura
     end
 
     def process_script()
-      now = Time.new
+      now = Time.now.localtime
       idle = get_idle_time()
-      second, minute = now.localtime.to_a[0, 2]
+      second = now.sec
+      minute = now.min
       if @clock[0] != second
         @ghost_time += 1 if @__temp_mode.zero?
         @parent.handle_request(
