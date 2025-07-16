@@ -1566,11 +1566,11 @@ module Surface
 
     def redraw(darea, cr)
       return if @image_surface.nil? # XXX
-      @window.set_surface(cr, @image_surface.surface(write: false), get_scale, @reshape)
+      @window.set_surface(cr, @image_surface.surface(write: false), get_scale)
       unless @parent.handle_request(:GET, :get_preference, 'check_collision').zero?
         draw_region(cr)
       end
-      @window.set_shape(cr, @reshape, @image_surface.region(write: false))
+      @window.set_shape(cr, @image_surface.region(write: false))
       @reshape = false
     end
 

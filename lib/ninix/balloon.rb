@@ -1087,7 +1087,7 @@ module Balloon
       return if @parent.handle_request(:GET, :lock_repaint)
       return true unless @__shown
       fail "assert" if @balloon_surface.nil?
-      @window.set_surface(cr, @balloon_surface.surface(write: false), scale, @reshape)
+      @window.set_surface(cr, @balloon_surface.surface(write: false), scale)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
       cr.translate(*@window.get_draw_offset) # XXX
       # FIXME: comment
@@ -1299,7 +1299,7 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
-      @window.set_shape(cr, @reshape, @balloon_surface.region(write: false))
+      @window.set_shape(cr, @balloon_surface.region(write: false))
       @reshape = false
       return false
     end
