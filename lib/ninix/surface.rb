@@ -21,6 +21,7 @@ require_relative "pix"
 require_relative "seriko"
 require_relative "metamagic"
 require_relative "logging"
+require_relative 'cache'
 
 module Surface
 
@@ -961,6 +962,7 @@ module Surface
       @reshape = true
       @prev_render_info = []
       @pix_cache = Pix::Cache.new
+      @cache = Cache::ImageCache.new
       @window.signal_connect('leave_notify_event') do |w, e|
         next window_leave_notify(w, e) # XXX
       end
@@ -1213,7 +1215,7 @@ module Surface
       update_frame_buffer() #XXX
     end
 
-    def iter_mayuna(surface_width, surface_height, mayuna, done)
+    def iter_mayuna(mayuna, done)
       mayuna_list = [] # XXX: FIXME
       for surface_id, interval, method, args in mayuna.get_patterns
         case method
@@ -1238,7 +1240,7 @@ module Surface
               if @bind.include?(actor_id) and @bind[actor_id][1] and \
                 not done.include?(actor_id)
                 done << actor_id
-                for result in iter_mayuna(surface_width, surface_height, actor, done)
+                for result in iter_mayuna(actor, done)
                   mayuna_list << result
                 end
               else
@@ -1253,8 +1255,12 @@ module Surface
       return mayuna_list
     end
     
-    def create_surface_from_file(surface_id, is_asis: false)
+    def create_surface_from_file(surface_id, is_asis: false, check_only: false)
       fail "assert" unless @surfaces.include?(surface_id)
+      overlay = @surfaces[surface_id][1, @surfaces[surface_id].length - 1]
+      if check_only
+        return overlay
+      end
       if is_asis
         use_pna = false
         is_pnr = false
@@ -1268,14 +1274,14 @@ module Surface
         Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
         return Pix::Data.new(Pix.create_blank_surface(100, 100), Cairo::Region.new, false)
       end
-      if @surfaces[surface_id].length > 1
-        write = true
-      else
+      if overlay.empty?
         write = false
+      else
+        write = true
       end
       surface = pix.surface(write: write)
       region = pix.region(write: write)
-      for element, x, y, method in @surfaces[surface_id][1, @surfaces[surface_id].length - 1]
+      for element, x, y, method in overlay
         begin
           if method == 'asis'
             is_pnr = false
@@ -1312,12 +1318,13 @@ module Surface
       return Pix::Data.new(surface, region, not(write))
     end
 
-    def get_image_surface(surface_id, is_asis: false)
+    def get_image_surface(surface_id, is_asis: false, check_only: false)
       unless @surfaces.include?(surface_id)
+        return [] if check_only
         Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
         return Pix::Data.new(Pix.create_blank_surface(*@window.size), Cairo::Region.new, false)
       end
-      return create_surface_from_file(surface_id, :is_asis => is_asis)
+      return create_surface_from_file(surface_id, :is_asis => is_asis, check_only: check_only)
     end
 
     def draw_region(cr)
@@ -1437,60 +1444,62 @@ module Surface
       if surface_id.nil?
         surface_id = @surface_id
       end
-      if @mayuna.include?(surface_id) and not @mayuna[surface_id].empty?
-        render_info = []
-        pix = get_image_surface(surface_id, is_asis: is_asis)
-        frozen = true
-        surface = pix.surface(write: false)
-        region = pix.region(write: false)
-        surface_width = surface.width
-        surface_height = surface.height
-        for actor in @mayuna[surface_id]
-          actor_id = actor.get_id()
-          if @bind.include?(actor_id) and @bind[actor_id][1] and \
-            not done.include?(actor_id)
-            done << actor_id
-            mayuna = iter_mayuna(surface_width, surface_height, actor, done)
-            if frozen and not(mayuna.empty?)
-              surface = pix.surface(write: true)
-              region = pix.region(write: true)
-              frozen = false
-            end
-            unless check_only
-              for method, mayuna_id, dest_x, dest_y in mayuna
-                mayuna_overlay_pix = create_image_surface(mayuna_id, done, is_asis: method == 'asis')
-                Cairo::Context.new(surface) do |cr|
-                  op = OPERATOR[method]
-                  cr.set_operator(op)
-                  cr.set_source(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
-                  if OVERLAY_SET.include?(method)
-                    cr.mask(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
-                  elsif ['replace', 'asis', 'reduce'].include?(method)
-                    cr.paint()
-                  else
-                    fail RuntimeError('should not reach here')
-                  end
-                end
-                # TODO
-                # method毎のregion処理
-                if dest_x.zero? and dest_y.zero?
-                  r = mayuna_overlay_pix.region(write: false)
-                else
-                  r = mayuna_overlay_pix.region(write: true)
-                  r.translate!(dest_x, dest_y)
-                end
-                region.union!(r)
-              end
+      unless @mayuna.include?(surface_id) and not @mayuna[surface_id].empty?
+        return get_image_surface(surface_id, check_only: check_only)
+      end
+      render_info = []
+      frozen = true
+      pix = get_image_surface(surface_id, is_asis: is_asis, check_only: check_only)
+      if check_only
+        render_info += pix
+      end
+      surface = check_only ? nil : pix.surface(write: false)
+      region = check_only ? nil : pix.region(write: false)
+      for actor in @mayuna[surface_id]
+        actor_id = actor.get_id()
+        if @bind.include?(actor_id) and @bind[actor_id][1] and \
+          not done.include?(actor_id)
+          done << actor_id
+          mayuna = iter_mayuna(actor, done)
+          if frozen and not(mayuna.empty?) and not(check_only)
+            surface = pix.surface(write: true)
+            region = pix.region(write: true)
+            frozen = false
+          elsif check_only
+            render_info += mayuna
+          end
+          for method, mayuna_id, dest_x, dest_y in mayuna
+            mayuna_overlay_pix = create_image_surface(mayuna_id, done, is_asis: method == 'asis', check_only: check_only)
+            if check_only
+              render_info += mayuna_overlay_pix
             else
-              render_info += mayuna
+              Cairo::Context.new(surface) do |cr|
+                op = OPERATOR[method]
+                cr.set_operator(op)
+                cr.set_source(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
+                if OVERLAY_SET.include?(method)
+                  cr.mask(mayuna_overlay_pix.surface(write: false), dest_x, dest_y)
+                elsif ['replace', 'asis', 'reduce'].include?(method)
+                  cr.paint()
+                else
+                  fail RuntimeError('should not reach here')
+                end
+              end
+              # TODO
+              # method毎のregion処理
+              if dest_x.zero? and dest_y.zero?
+                r = mayuna_overlay_pix.region(write: false)
+              else
+                r = mayuna_overlay_pix.region(write: true)
+                r.translate!(dest_x, dest_y)
+              end
+              region.union!(r)
             end
           end
         end
-        return render_info if check_only
-        return Pix::Data.new(surface, region, frozen)
       end
-      return [] if check_only
-      return get_image_surface(surface_id)
+      return render_info if check_only
+      return Pix::Data.new(surface, region, frozen)
     end
 
     def update_frame_buffer
@@ -1503,7 +1512,16 @@ module Surface
         render_info += create_image_surface(surface_id, is_asis: (method == 'asis'), check_only: true)
       end
       return if @prev_render_info == render_info
+      unless @prev_render_info.nil? or @image_surface.nil?
+        @cache[@prev_render_info] = @image_surface
+      end
       @prev_render_info = render_info
+      image = @cache[render_info]
+      unless image.nil?
+        @image_surface = image
+        @window.queue_draw(@image_surface.region(write: false))
+        return
+      end
       @reshape = true # FIXME: depends on Seriko
 
       new_pix = create_image_surface(@seriko.get_base_id)
