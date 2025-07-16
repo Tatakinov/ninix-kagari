@@ -159,10 +159,10 @@ module Pix
     end
 
     def queue_draw(region)
-      # HACK region.rectangles == []だと
+      # HACK region.empty?だと
       # GTK君は賢いからqueue_drawされてもEXPOSURE_EVENTを発火しないので
       # regionを追加して無理矢理発火させる。
-      if (not region.nil?) and region.rectangles == []
+      if (not region.nil?) and region.empty?
         region.union!(0, 0, 1, 1)
         if @supports_alpha
           input_shape_combine_region(region)
