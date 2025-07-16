@@ -173,12 +173,13 @@ module Pix
       return super()
     end
 
-    def set_surface(cr, surface, scale, reshape)
+    def set_surface(cr, surface, scale)
       cr.save()
       # clear
       cr.set_operator(Cairo::OPERATOR_SOURCE)
       cr.set_source_rgba(0, 0, 0, 0)
       cr.paint
+=begin
       # HACK
       # ウィンドウの透過に非対応な環境ではcr.size <= surface.sizeとなり
       # surface_to_region(cr.target.map_to_image)では
@@ -190,6 +191,7 @@ module Pix
       if (@region.nil? or reshape) and not @supports_alpha and (s.width < surface.width or s.height < surface.height)
         @tmp_surface = surface
       end
+=end
       cr.scale(scale / 100.0, scale / 100.0)
       cr.set_source(surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)
@@ -212,8 +214,9 @@ module Pix
       end
     end
 
-    def set_shape(cr, reshape, region)
+    def set_shape(cr, region)
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+=begin
       if region.nil?
         if @tmp_surface.nil?
           if @device_extents.nil?
@@ -225,6 +228,7 @@ module Pix
           region = Pix.surface_to_region(@tmp_surface)
         end
       end
+=end
       @prev_position = @__surface_position
       if @supports_alpha
         input_shape_combine_region(nil)
