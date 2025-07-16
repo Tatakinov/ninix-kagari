@@ -43,7 +43,7 @@ module Cache
       @weak = WeakCache.new
     end
 
-    def pop
+    def pop(key)
       time = Time.now.to_i
       # 10秒以内に1回しか使われなかったオブジェクトを
       # WeakCache送りにする
@@ -52,7 +52,7 @@ module Cache
       end
       @prev_time = time
       delete_if do |k, v|
-        if @count[k] <= 1
+        if @count[k] <= 1 and k != key
           @count.delete(k)
           @weak[k] = v
           next true
@@ -64,13 +64,13 @@ module Cache
     end
 
     def []=(key, value)
-      pop
+      pop(key)
       @count[key] += 1
       return super
     end
 
     def [](key)
-      pop
+      pop(key)
       @count[key] += 1
       return super if include?(key)
       return @weak[key]
