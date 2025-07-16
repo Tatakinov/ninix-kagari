@@ -66,25 +66,19 @@ module Seriko
     end
 
     def update_frame(window)
-      frame, actor = get_actor_next(window)
-      last_actor = actor
-      while not actor.nil?
-        actor.update(window, frame, @next_tick)
-        last_actor = actor
-        frame, actor = get_actor_next(window)
+      last_actor = nil
+      loop do
+        break if @active.reject! do |frame, actor|
+          next false if frame > @next_tick
+          last_actor = actor
+          actor.update(window, frame, @next_tick)
+          next true
+        end.nil?
       end
       if not last_actor.nil? and last_actor.exclusive? and \
         last_actor.terminate? and @exclusive_actor.nil? # XXX
         invoke_restart(window)
       end
-    end
-
-    def get_actor_next(window)
-      unless @active.empty?
-        @active.sort_by! {|x| x[0]} # (key=lambda {|x| return x[0]})
-        return @active.shift if @active[0][0] <= @next_tick
-      end
-      return nil, nil
     end
 
     def update(window)
@@ -255,8 +249,8 @@ module Seriko
     end
 
     def clear_animation(actor_id)
-      @active.filter! do |_, actor|
-        next actor.get_id != actor_id
+      @active.delete_if do |_, actor|
+        next actor.get_id == actor_id
       end
     end
 
