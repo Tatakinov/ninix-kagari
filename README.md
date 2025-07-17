@@ -145,30 +145,23 @@ Windows版は10より前のバージョンでも動くようになります。
 
 ただし、Direct SSTPは*使用出来なくなります*。
 
-## Library
+### コマンドラインオプション
+
+- --sstp\_port `sstp_port`: 追加で1つSSTPポートをlistenします
+- --debug: デバッグ出力を有効にします
+- --logfile `logfile`: ログをファイル`logfile`に出力します
+- --ghost `ghost_name | ghost_dir`: 指定されたゴーストで起動します
+- --exit-if-not-found: 上記で指定したゴーストが存在しない場合、終了します
+
+## SHIORI
 
 ### Linux
 
-KAWARI(華和梨)は`/opt/ninix-kagari/lib/kawari8/libshiori.so`、
-YAYAは`/opt/ninix-kagari/lib/yaya/libaya5.so`が必要です。
-(デフォルトのインストール先の場合)
+ビルドの必要なSHIORIが存在します。
 
-KAWARIは[kawariのfork](https://github.com/Tatakinov/kawari)の
-`develop`ブランチを、
-YAYAは[yaya-shioriのfork](https://github.com/Tatakinov/yaya-shiori)の
-`feature/improve_posix_support`ブランチを
-それぞれコンパイルしてください。
-
-そして、出来上がったものを上記の場所にコピーしてから、
-ninix-kagariを起動してください。
-
-なお、YAYAで`Shift_JIS`な辞書を読み込みたい場合は
-`ja_JP.SJIS`ロケールをインストールする必要があります。
-
-#### SAORI
-
-ninix-kagariで使用できるSAORIは現状[ninix-saori](https://github.com/Tatakinov/ninix-saori)のみです。
-詳しい説明は上記URLから。
+詳しくは
+[Wiki](https://github.com/Tatakinov/ninix-kagari/wiki)
+を参照してください。
 
 ### Windows
 
@@ -179,6 +172,17 @@ ninix-kagariで使用できるSAORIは現状[ninix-saori](https://github.com/Tat
 #### ruby(64bit)
 
 現状ではKAWARIとYAYAを使ったゴーストは動作しないと思います。(未確認)
+
+## SAORI
+
+### Linux
+
+ninix-kagariで使用できるSAORIは現状[ninix-saori](https://github.com/Tatakinov/ninix-saori)のみです。
+詳しい説明は上記URLから。
+
+### Windows
+
+FMO/DirectSSTPを使用*しない*SAORIであれば動作するはずです。
 
 ## Caution
 
