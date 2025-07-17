@@ -192,13 +192,29 @@ module Prefs
       @animation_quality_adjustment.set_value(get('animation_quality', :default => 1.0))
     end
 
+=begin
+    NAME_S = Set.new(['sakura_name', # XXX: backward compat
+          'sakura_dir', 'default_balloon', 'balloon_fonts', 'menu_fonts'])
+    NAME_I = Set.new(['ignore_default', 'script_speed', 'surface_scale',
+             'balloon_scaling', 'allowembryo', 'check_collision',
+             'check_collision_name', 'use_pna', 'sink_after_talk',
+             'raise_before_talk'])
+    NAME_F = Set.new(['animation_quality'])
+=end
+    # NOTE: ruby v3.2では標準ライブラリにSetが無いのでHashで代用
     NAME_S = ['sakura_name', # XXX: backward compat
-          'sakura_dir', 'default_balloon', 'balloon_fonts', 'menu_fonts']
+              'sakura_dir', 'default_balloon', 'balloon_fonts', 'menu_fonts'].map do |x|
+      [x, true]
+    end.to_h
     NAME_I = ['ignore_default', 'script_speed', 'surface_scale',
              'balloon_scaling', 'allowembryo', 'check_collision',
              'check_collision_name', 'use_pna', 'sink_after_talk',
-             'raise_before_talk']
-    NAME_F = ['animation_quality']
+             'raise_before_talk'].map do |x|
+     [x, true]
+   end.to_h
+   NAME_F = ['animation_quality'].map do |x|
+     [x, true]
+   end.to_h
 
     def get(name, default: nil)
       if NAME_S.include?(name)
