@@ -19,7 +19,7 @@ module Http
 
     def initialize
       @parent = nil
-      @threads = []
+      @queue = Thread::Queue.new
     end
 
     def set_responsible(parent)
@@ -27,17 +27,16 @@ module Http
     end
 
     def enqueue(url, url_param, output_param, redirect: 5, blocking: nil)
-      queue = Thread::Queue.new
       if redirect < 0
-        queue.push([:TYPE_ERROR, 'too many redirect', output_param])
-        return nil
+        @queue.push([:TYPE_ERROR, 'too many redirect', url, url_param, output_param])
+        return
       end
 
       thread = Thread.new(url, url_param, output_param, redirect) do |url, up, op, redirect|
         begin
           uri = URI.parse(url)
         rescue
-          queue.push([:TYPE_ERROR, 'bad URL', op])
+          @queue.push([:TYPE_ERROR, 'bad URL', url, up, op])
           return nil
         end
         host = uri.host
@@ -66,9 +65,9 @@ module Http
           else
             # unreachable
           end
-        rescue
-          queue.push([:TYPE_ERROR, 'timeout', op])
-          return nil
+        rescue => e
+          @queue.push([:TYPE_ERROR, 'timeout', url, up, op])
+          next
         end
         case res.code
         when '200'
@@ -79,40 +78,27 @@ module Http
           if op[:filename].nil?
             op[:filename] = filename
           end
-          queue.push([:TYPE_DATA, res.body, op])
+          @queue.push([:TYPE_DATA, res.body, url, up, op])
         when '301'
           if res['location'].nil?
-            queue.push([:TYPE_ERROR, 'no location', op])
+            @queue.push([:TYPE_ERROR, 'no location', url, up, op])
           else
             enqueue(res['location'], up, op, blocking: true, redirect: redirect - 1)
-            run
           end
         else
-          queue.push([:TYPE_ERROR, res.code, op])
+          @queue.push([:TYPE_ERROR, res.code, url, up, op])
         end
       end
       if blocking
         thread.join
       end
-      return nil
     end
 
     def run
-      @threads.size.times do |i|
-        thread, queue = @threads[@threads.size - i - 1]
-        unless thread.alive?
-          @threads.delete_at(i)
-          thread.join
-          unless queue.empty?
-            __process(*queue.pop)
-            break
-          end
-        end
-      end
-      return nil
+      __process(*@queue.pop) unless @queue.empty?
     end
 
-    def __process(type, data, op)
+    def __process(type, data, url, up, op)
       event = {}
       if op[:event]&.start_with?('On')
         event[:complete] = op[:event]
@@ -154,8 +140,10 @@ module Http
           rescue
             Logging::Logging.info('cannot write ' + path)
           end
-          # TODO mkdir error, write error
-          @parent.handle_request(:GET, :enqueue_event, event[:complete], op[:method], op[:event], op[:url], path, '200')
+          if op[:event]
+            # TODO mkdir error, write error
+            @parent.handle_request(:GET, :enqueue_event, event[:complete], op[:method], op[:event], op[:url], path, '200')
+          end
         end
       else
         # unreachable
