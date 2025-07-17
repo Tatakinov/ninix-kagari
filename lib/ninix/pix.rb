@@ -312,6 +312,11 @@ module Pix
       end
       return @data[path][is_pnr][use_pna]
     end
+
+    def get_either(path)
+      return nil unless @data.include?(path)
+      return @data[path].each_value.first&.each_value.first
+    end
   end
 
   class Data

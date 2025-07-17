@@ -1630,7 +1630,13 @@ module Surface
       unless @surfaces.include?(surface_id)
         w, h = 100, 100 # XXX
       else
-        w, h = Pix.get_png_size(@surfaces[surface_id][0])
+        cache = @pix_cache.get_either(@surfaces[surface_id][0])
+        if cache.nil?
+          w, h = Pix.get_png_size(@surfaces[surface_id][0])
+        else
+          w = cache.surface(write: false).width
+          h = cache.surface(write: false).height
+        end
       end
       scale = get_scale
       w = [8, (w * scale / 100).to_i].max
