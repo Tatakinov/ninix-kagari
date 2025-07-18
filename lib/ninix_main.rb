@@ -1268,7 +1268,7 @@ module Ninix_Main
 
     def initialize(app)
       @app = app
-      @dialog = Gtk::Dialog.new(:parent => nil)
+      @dialog = Gtk::Window.new
       @dialog.signal_connect('delete_event') do |w, e|
         next true # XXX
       end
@@ -1304,13 +1304,27 @@ module Ninix_Main
       @sw.add(@tv)
       @tv.set_size_request(400, 250)
       @sw.set_size_request(400, 250)
-      content_area = @dialog.content_area
-      content_area.pack_start(@sw, :expand => true, :fill => true, :padding => 0)
-      @dialog.add_button('Install', 1)
-      @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
-      @dialog.signal_connect('response') do |w, e|
-        next response(w, e)
+      v = Gtk::Box.new(Gtk::Orientation::VERTICAL)
+      h = Gtk::Box.new(Gtk::Orientation::HORIZONTAL)
+      b = Gtk::Button.new
+      b.label=('Install')
+      b.hexpand=(true)
+      b.signal_connect('clicked') do |w, e|
+        next response(w, :install)
       end
+      h.add(b)
+      b = Gtk::Button.new
+      b.label=('Close')
+      b.hexpand=(true)
+      b.signal_connect('clicked') do |w, e|
+        next response(w, :close)
+      end
+      h.add(b)
+      h.hexpand=(true)
+      v.add(@sw)
+      v.add(h)
+      v.show_all
+      @dialog.add(v)
       @file_chooser = Gtk::FileChooserDialog.new(
         :title => "Install..",
         :action => Gtk::FileChooserAction::OPEN,
@@ -1412,12 +1426,13 @@ module Ninix_Main
       return true
     end
 
-    def response(widget, response)
-      func = {1 =>  'open_file_chooser',
-              Gtk::ResponseType::CLOSE.to_i => 'close',
-              Gtk::ResponseType::DELETE_EVENT.to_i => 'close',
-             }
-      send(func[response])
+    def response(widget, from)
+      func = {
+        :install =>  :open_file_chooser,
+        :close => :close,
+        :window => :close,
+      }
+      send(func[from])
       return true
     end
 
