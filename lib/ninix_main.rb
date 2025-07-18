@@ -1200,7 +1200,10 @@ module Ninix_Main
     end
 
     def get_workarea
-      [0, 0, *@app_window.get_size]
+      display = Gdk::Display.default
+      _, x, y = display.default_seat.pointer.position_double
+      geometry = display.get_monitor_at_point(x, y).geometry
+      return [geometry.x, geometry.y, geometry.width, geometry.height]
     end
 
     def get_property(key)
