@@ -245,51 +245,15 @@ module Pix
 
     def initialize(application)
       super(application)
-      @size = [0, 0]
-      init_size = size
-      geometry = display.primary_monitor.geometry
       set_decorated(false)
       set_app_paintable(true)
       set_focus_on_map(false)
       if composited?
         input_shape_combine_region(Cairo::Region.new) # empty region
       end
-      signal_connect("screen-changed") do |widget, old_screen|
-        screen_changed(widget, :old_screen => old_screen)
-        next true
-      end
-      signal_connect('size-allocate') do |widget, allocation, data|
-        @size = size
-        if maximized?
-          # HACK 最大化しても初期サイズと一緒ならタイル型WMとして扱う。
-          # スクリーンサイズはこのwindowではなく別途取得したものを使う。
-          if init_size == @size
-            @size = [geometry.width, geometry.height]
-          end
-          hide
-        end
-        next false
-      end
       set_keep_below(true)
       set_skip_pager_hint(true)
       set_skip_taskbar_hint(true)
-      screen_changed(self)
-    end
-
-    def get_size
-      return @size
-    end
-
-    def screen_changed(widget, old_screen: nil)
-      if composited?
-        set_visual(screen.rgba_visual)
-      else
-        set_visual(screen.system_visual)
-        Logging::Logging.debug("screen does NOT support alpha.\n")
-      end
-      fail "assert" unless not visual.nil?
-      maximize # not fullscreen
-      show
     end
   end
 
