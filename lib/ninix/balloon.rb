@@ -1603,7 +1603,7 @@ module Balloon
       px, py = @window.winpos_to_surfacepos(
             event.x.to_i, event.y.to_i, scale)
       # up arrow
-      surface = @arraw0_surface.surface(write: false)
+      surface = @arrow0_surface.surface(write: false)
       w = surface.width
       h = surface.height
       x, y = @arrow[0]
@@ -1615,7 +1615,7 @@ module Balloon
         return true
       end
       # down arrow
-      surface = @arraw1_surface.surface(write: false)
+      surface = @arrow1_surface.surface(write: false)
       w = surface.width
       h = surface.height
       x, y = @arrow[1]
