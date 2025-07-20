@@ -1690,10 +1690,14 @@ module Satori
       else
         @current_reset_surface = [false, false]
       end
-      script = get(name, :default => nil)
+      script, is_talk = get(name, default: nil)
       if not script.nil? and not script.empty? and script != "\\n"
-        ##Logging::Logging.debug('make("' + script.encode('utf-8', :invalid => :replace, :undef => :replace) + '")')
-        return make([head, script, tail].join(''))
+        if is_talk
+          ##Logging::Logging.debug('make("' + script.encode('utf-8', :invalid => :replace, :undef => :replace) + '")')
+          return make([head, script, tail].join(''))
+        else
+          return script
+        end
       end
       return nil
     end
@@ -1955,14 +1959,23 @@ module Satori
     end
 
     def get(name, default: '')
-      return default unless @talk.include?(name)
-      result = @talk[name].filter do |_, cond|
-        next not(['0', '０'].include?(expand(cond)))
-      end.map do |talk, _|
-        next talk
+      talk = []
+      if @talk.include?(name)
+        talk += @talk[name].map do |talk, cond|
+          [talk, cond, true]
+        end
       end
-      return default if result.empty?
-      return expand(result.sample)
+      if @word.include?(name)
+        talk += @word[name].map do |talk, cond|
+          [talk, cond, false]
+        end
+      end
+      talk.delete_if do |_, cond|
+        next ['0', '０'].include?(expand(cond))
+      end
+      return default, true if talk.empty?
+      sample = talk.sample
+      return expand(sample[0]), sample[1]
     end
 
     def expand(nodelist, caller_history: nil, side: 1)
