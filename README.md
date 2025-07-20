@@ -106,12 +106,17 @@ Requirementsに書かれているものをインストールします。
 以下は最小構成の場合。
 
 ```
-> gem install gettext gio2 gtk3 narray rubyzip rake rake-compiler
+> gem install gettext gio2 gtk3 rubyzip rake rake-compiler
+> gem install narray -- --with-cflags=-std=c99
 > git clone https://github.com/Tatakinov/ninix-fmo
 > cd ninix-fmo
 > rake install
-> cd ..
 ```
+
+narrayはそのままだと最近のCコンパイラでは
+コンパイルエラーになるため、
+`--with-cflags=-std=c99`を指定してやる必要があります。
+その前の`--`も必要なので省略しないでください。
 
 適当な場所にninix-kagariをgit cloneします。
 
@@ -207,7 +212,7 @@ Copyright (C) 2002, 2003 by ABE Hideaki
 
 Copyright (C) 2003-2005 by Shun-ichi TAHARA
 
-Copyright (C) 2024 by Tatakinov
+Copyright (C) 2024, 2025 by Tatakinov
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License (version 2) as
