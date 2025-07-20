@@ -250,6 +250,10 @@ module Pix
       set_focus_on_map(false)
       if composited?
         input_shape_combine_region(Cairo::Region.new) # empty region
+        set_visual(screen.rgba_visual)
+      else
+        shape_combine_region(Cairo::Region.new)
+        set_visual(system_visual)
       end
       set_keep_below(true)
       set_skip_pager_hint(true)
