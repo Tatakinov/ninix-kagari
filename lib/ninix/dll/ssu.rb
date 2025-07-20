@@ -21,35 +21,36 @@ require_relative "../logging"
 module Ssu
 
   class Saori < DLL::SAORI
+    FUNCTION = {'is_empty' =>      ['ssu_is_empty',      [0, 1]],
+                 'is_digit' =>      ['ssu_is_digit',      [1]],
+                 'is_alpha' =>      ['ssu_is_alpha',      [1]],
+                 'iflist' =>        ['ssu_iflist',        [nil]],
+                 'length' =>        ['ssu_length',        [1]],
+                 'zen2han' =>       ['ssu_zen2han',       [1]],
+                 'han2zen' =>       ['ssu_han2zen',       [1]],
+                 'kata2hira,' =>    ['ssu_kata2hira',     [1]],
+                 'hira2kata' =>     ['ssu_hira2kata',     [1]],
+                 'sprintf' =>       ['ssu_sprintf',       [nil]],
+                 'calc' =>          ['ssu_calc',          [1]],
+                 'calc_float' =>    ['ssu_calc_float',    [1]],
+                 'compare_tail' =>  ['ssu_compare_tail',  [2]],
+                 'compare_head' =>  ['ssu_compare_head',  [2]],
+                 'compare' =>       ['ssu_compare',       [2]],
+                 'count' =>         ['ssu_count',         [2]],
+                 'erase_first' =>   ['ssu_erase_first',   [2]],
+                 'erase' =>         ['ssu_erase',         [2]],
+                 'replace' =>       ['ssu_replace',       [3]],
+                 'replace_first' => ['ssu_replace_first', [3]],
+                 'split' =>         ['ssu_split',         [1, 2, 3]],
+                 'substr' =>        ['ssu_substr',        [2, 3]],
+                 'nswitch' =>       ['ssu_nswitch',       [nil]],
+                 'switch' =>        ['ssu_switch',        [nil]],
+                 'if' =>            ['ssu_if',            [2, 3]],
+                 'unless' =>        ['ssu_unless',        [2, 3]],}
+    FUNC_NAME = FUNCTION.keys
 
     def initialize
       super()
-      @function = {'is_empty' =>      ['ssu_is_empty',      [0, 1]],
-                   'is_digit' =>      ['ssu_is_digit',      [1]],
-                   'is_alpha' =>      ['ssu_is_alpha',      [1]],
-                   'iflist' =>        ['ssu_iflist',        [nil]],
-                   'length' =>        ['ssu_length',        [1]],
-                   'zen2han' =>       ['ssu_zen2han',       [1]],
-                   'han2zen' =>       ['ssu_han2zen',       [1]],
-                   'kata2hira,' =>    ['ssu_kata2hira',     [1]],
-                   'hira2kata' =>     ['ssu_hira2kata',     [1]],
-                   'sprintf' =>       ['ssu_sprintf',       [nil]],
-                   'calc' =>          ['ssu_calc',          [1]],
-                   'calc_float' =>    ['ssu_calc_float',    [1]],
-                   'compare_tail' =>  ['ssu_compare_tail',  [2]],
-                   'compare_head' =>  ['ssu_compare_head',  [2]],
-                   'compare' =>       ['ssu_compare',       [2]],
-                   'count' =>         ['ssu_count',         [2]],
-                   'erase_first' =>   ['ssu_erase_first',   [2]],
-                   'erase' =>         ['ssu_erase',         [2]],
-                   'replace' =>       ['ssu_replace',       [3]],
-                   'replace_first' => ['ssu_replace_first', [3]],
-                   'split' =>         ['ssu_split',         [1, 2, 3]],
-                   'substr' =>        ['ssu_substr',        [2, 3]],
-                   'nswitch' =>       ['ssu_nswitch',       [nil]],
-                   'switch' =>        ['ssu_switch',        [nil]],
-                   'if' =>            ['ssu_if',            [2, 3]],
-                   'unless' =>        ['ssu_unless',        [2, 3]],}
     end
 
     def request(req)
@@ -70,16 +71,16 @@ module Ssu
 
     def execute(args, charset)
       return RESPONSE[400] if args.nil? or args.empty?
-      return RESPONSE[400] unless @function.include?(args[0])
+      return RESPONSE[400] unless FUNCTION.include?(args[0])
       name = args[0]
       args = args[1..-1]
-      if @function[name][1] == [nil]
+      if FUNCTION[name][1] == [nil]
         #pass
-      elsif not @function[name][1].include?(args.length)
+      elsif not FUNCTION[name][1].include?(args.length)
         return RESPONSE[400]
       end
       @value = []
-      result = method(@function[name][0]).call(args)
+      result = method(FUNCTION[name][0]).call(args)
       return RESPONSE[204] if result.nil? or result.to_s.empty?
       s = "SAORI/1.0 200 OK\r\nResult: #{result}\r\n"
       unless @value.empty?

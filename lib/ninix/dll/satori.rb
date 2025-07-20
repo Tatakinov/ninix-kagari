@@ -717,6 +717,10 @@ module Satori
           end
           buf << [NODE_CALL, function, args]
           return line
+        elsif Ssu::Saori::FUNC_NAME.include?(list_[0])
+          buf << [NODE_SAORI, 'ssu', list_.map do |x|
+            parse_word(x)
+          end]
         elsif @saori.include?(list_[0])
           function = list_[0]
           args = []
@@ -2766,6 +2770,13 @@ module Satori
               ##Logging::Logging.error('satori.py: cannot load ' + list_[1].to_s)
             end
           end
+        end
+      end
+      # ssuはsatoriに取り込まれているが
+      # 別モジュールなので読み込むことで代替する
+      unless @saori_library.load('ssu.dll', @satori_dir).zero?
+        Ssu::Saori::FUNC_NAME.each do |x|
+          @saori_function[x] = ['ssu.dll', x]
         end
       end
       @parser.set_saori(@saori_function.keys())
