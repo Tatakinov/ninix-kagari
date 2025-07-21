@@ -803,7 +803,7 @@ module Sakura
       if result.include?('Reference0')
         to = result['Reference0']
       end
-      if result.include?('Value')
+      if result.include?('Value') and not result['Value'].empty?
         return result['Value'], to
       else
         return nil, to
