@@ -287,8 +287,6 @@ module Seriko
     end
 
     def start(window, bind)
-      invoke_runonce(window)
-      invoke_always(window)
       if @seriko.include?(@base_id)
         @seriko[@base_id].each do |actor|
           if bind.include?(actor.get_id)
@@ -297,6 +295,8 @@ module Seriko
           end
         end
       end
+      invoke_runonce(window)
+      invoke_always(window)
       invoke_bind(window)
       GLib::Source.remove(@timeout_id) if not @timeout_id.nil?
       @timeout_id = GLib::Timeout.add((1000.0 / @fps).to_i) { update(window) } # [msec]
