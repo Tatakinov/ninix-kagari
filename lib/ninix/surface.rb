@@ -852,8 +852,7 @@ module Surface
       @window[side].balloon_offset = offset
     end
 
-    def toggle_bind(args)
-      side, bind_id = args
+    def toggle_bind(side, bind_id)
       @window[side].toggle_bind(bind_id)
     end
 

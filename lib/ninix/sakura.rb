@@ -1300,8 +1300,8 @@ module Sakura
       @surface.window_stick(flag)
     end
 
-    def toggle_bind(args)
-      @surface.toggle_bind(args)
+    def toggle_bind(side, bind_id)
+      @surface.toggle_bind(side, bind_id)
     end
 
     def get_menu_pixmap()
@@ -2786,7 +2786,7 @@ module Sakura
           else # 'toggle'
             #pass
           end
-          @surface.toggle_bind([@script_side, key])
+          @surface.toggle_bind(@script_side, key)
         end
       elsif args[0] == 'execute'
         case args[1]
