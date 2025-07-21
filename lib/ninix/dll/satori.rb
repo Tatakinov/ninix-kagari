@@ -2824,7 +2824,7 @@ module Satori
         "        Copyright (C) 2002, 2003 by MATSUMURA Namihiko\n" \
         "        Copyright (C) 2002-2019 by Shyouzou Sugitani\n" \
         "        Copyright (C) 2003, 2004 by Shun-ichi TAHARA\n" \
-        "        Copyright (C) 2024 by Tatakinov")
+        "        Copyright (C) 2024, 2025 by Tatakinov")
     end
 
     def request(req_string)
