@@ -3219,6 +3219,7 @@ module Sakura
       @time_critical_session = false
       @quick_session = false
       @lock_repaint = false # SSP compat
+      @defer_show = []
       set_synchronized_session(:list => [], :reset => true)
       @balloon.set_autoscroll(true)
       reset_idle_time()
