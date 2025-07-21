@@ -718,7 +718,7 @@ module Satori
           buf << [NODE_CALL, function, args]
           return line
         elsif Ssu::Saori::FUNC_NAME.include?(list_[0])
-          buf << [NODE_SAORI, 'ssu', list_.map do |x|
+          buf << [NODE_SAORI, list_[0], list_[1 ..].map do |x|
             parse_word(x)
           end]
         elsif @saori.include?(list_[0])
@@ -748,7 +748,7 @@ module Satori
           end
         end
       end
-      buf << [NODE_TEXT, ['']] # XXX
+      #buf << [NODE_TEXT, ['']] # XXX
       return line
     end
 
@@ -1974,15 +1974,26 @@ module Satori
           [talk, cond, false]
         end
       end
-      talk.delete_if do |_, cond|
-        next ['0', '０'].include?(expand(cond))
+      talk.delete_if do |_, cond, _|
+        ['0', '０'].include?(expand(cond))
       end
       return default, true if talk.empty?
       sample = talk.sample
-      return expand(sample[0]), sample[1]
+      return expand(sample[0]), sample[2]
     end
 
-    def expand(nodelist, caller_history: nil, side: 1)
+    def expand_internal(nodelist, caller_history: nil, side: 1)
+      buffer = []
+      src = expand(nodelist, caller_history: caller_history, side: side, is_in_ref: true)
+      @parser.parse_parenthesis(src, buffer)
+      dest = expand(buffer, caller_history: caller_history, side: side, is_in_ref: true)
+      if src == dest
+        return false, nil
+      end
+      return true, dest
+    end
+
+    def expand(nodelist, caller_history: nil, side: 1, is_in_ref: false)
       return '' if nodelist.nil?
       buf = []
       history = []
@@ -1991,10 +2002,15 @@ module Satori
       for node in nodelist
         case node[0]
         when NODE_REF
-          unless caller_history.nil?
-            value = get_reference(node[1], caller_history, side)
+          h = caller_history.nil? ? history : caller_history
+          unless is_in_ref
+            expanded, value = expand_internal(node[1], caller_history: h, side: side)
           else
-            value = get_reference(node[1], history, side)
+            expanded = false
+            value = nil
+          end
+          unless expanded
+            value = get_reference(node[1], h, side, is_in_ref)
           end
           unless value.nil? or value.empty?
             talk = true
@@ -2087,7 +2103,7 @@ module Satori
                 @reference[0] = to_zenkaku(0)
               end
             end
-            script = get(target, :default => nil)
+            script, is_talk = get(target, :default => nil)
             if not script.nil? and not script.empty? and script != "\\n"
               buf << ['\1', script].join('')
               break
@@ -2255,8 +2271,8 @@ module Satori
     Re_n_reserved = Regexp.new('\A次から(([[:digit:]])+)回目のトーク')
     Re_is_reserved = Regexp.new('\Aトーク「(.*)」の予約有無')
 
-    def get_reference(nodelist, history, side)
-      key = expand(nodelist[1..-2], :caller_history => history)
+    def get_reference(nodelist, history, side, is_in_ref = false)
+      key = expand(nodelist[1..-2], :caller_history => history, is_in_ref: is_in_ref)
       if key == 'SenderType' or key == 'ＳｅｎｄｅｒＴｙｐｅ'
         return @sender_type
       elsif not key.nil? and ['Ｒ', 'R'].include?(key[0])
@@ -2294,7 +2310,7 @@ module Satori
           word.concat(l)
         end
         return expand(word.sample, :caller_history => history,
-                      :side => side)
+                      :side => side, is_in_ref: is_in_ref)
       elsif @talk.include?(key) and not (list = @talk[key].filter do |_, cond|
           next not(['0', '０'].include?(expand(cond)))
         end).empty?
@@ -2302,7 +2318,7 @@ module Satori
         talk = list.map do |t, _|
           next t
         end
-        return expand(talk.sample, :side => 1)
+        return expand(talk.sample, :side => 1, is_in_ref: is_in_ref)
       elsif @variable.include?(key)
         Logging::Logging.debug('Var ' + key + ': ' + @variable[key].to_s)
         return @variable[key]
