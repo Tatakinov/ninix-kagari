@@ -1211,7 +1211,9 @@ module Surface
         @parent.handle_request(:GET, :get_surface_id, 1),
         [@side, @surface_id, w, h].join(','),
         prev_id.to_s,
-        [new_x, new_y, new_x + w, new_y + h].join(','))
+        [new_x, new_y, new_x + w, new_y + h].join(','),
+        event_type: 'NOTIFY'
+      )
       update_frame_buffer() #XXX
     end
 
@@ -2001,13 +2003,13 @@ module Surface
         @bind[bind_id][1] = (not current)
         group = @bind[bind_id][0].split(',', 2)
         if @bind[bind_id][1]
-          @parent.handle_request(:GET, :notify_event,
+          @parent.handle_request(:GET, :enqueue_event,
                                  'OnDressupChanged', @side,
                                  group[1],
                                  1,
                                  group[0])
         else
-          @parent.handle_request(:GET, :notify_event,
+          @parent.handle_request(:GET, :enqueue_event,
                                  'OnDressupChanged', @side,
                                  group[1],
                                  0,
