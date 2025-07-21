@@ -3,7 +3,7 @@
 #  Copyright (C) 2002 by Tamito KAJIYAMA
 #  Copyright (C) 2002, 2003 by MATSUMURA Namihiko <nie@counterghost.net>
 #  Copyright (C) 2002-2019 by Shyouzou Sugitani <shy@users.osdn.me>
-#  Copyright (C) 2024 by Tatakinov
+#  Copyright (C) 2024, 2025 by Tatakinov
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
