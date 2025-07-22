@@ -1759,7 +1759,7 @@ gtk_app.signal_connect 'activate' do |application|
   Gdk.set_program_class('Ninix')
   app_window = Pix::TransparentApplicationWindow.new(application)
   app_window.set_title("Ninix-kagari")
-  app_window.show_all
+  #app_window.show_all
   # start
   app = Ninix_Main::Application.new(lock, shm, **option)
   app.run(abend, app_window, application)
