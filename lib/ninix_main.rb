@@ -139,12 +139,12 @@ module Ninix_Main
       :get_workarea => :get_workarea,
     }
 
-    def initialize(lockfile, shm, sstp_port: [9801, 11000], ghost: nil, exit_if_not_found: false)
+    def initialize(lockfile, shm, sstp_port: [9801, 11000], ghost: nil, exit_if_not_found: false, show_console: false)
       @lockfile = lockfile
       @abend = nil
       @loaded = false
       @confirmed = false
-      @console = Console.new(self)
+      @console = Console.new(self, show_console)
       Logging::Logging.info("loading...")
       # create preference dialog
       @prefs = Prefs::PreferenceDialog.new
@@ -1269,8 +1269,9 @@ module Ninix_Main
     include GetText
     attr_writer :level
 
-    def initialize(app)
+    def initialize(app, show_console)
       @app = app
+      @show_console = show_console
       @dialog = Gtk::Window.new
       @dialog.signal_connect('delete_event') do |w, e|
         next true # XXX
@@ -1398,6 +1399,7 @@ module Ninix_Main
         @dialog.set_title(_('Console'))
         Logging::Logging.info('Ghosts: ' + ghosts.to_s)
         Logging::Logging.info('Balloons: ' + balloons.to_s)
+        return true
       else
         @dialog.set_title(_("Nanntokashitekudasai."))
         if ghosts > 0
@@ -1410,14 +1412,17 @@ module Ninix_Main
         else
           Logging::Logging.warning('Balloons: ' + balloons.to_s)
         end
+        return false
       end
     end
 
     def open
       return if @opened
-      update()
-      @dialog.show()
-      @opened = true
+      if not update or @show_console
+        @dialog.show
+      end
+      @opened = @show_console
+      @show_console = true
     end
 
     def close
@@ -1722,6 +1727,9 @@ gtk_app.signal_connect 'activate' do |application|
       end
     end
   end
+  opt.on('--show-console', 'show console window on boot') do |v|
+    option[:show_console] = v
+  end
   opt.parse!(ARGV)
   Logging::Logging.add_logger(Logger.new(option[:logfile])) unless option[:logfile].nil?
   # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
@@ -1745,6 +1753,7 @@ gtk_app.signal_connect 'activate' do |application|
     sstp_port: sstp_port,
     ghost: option[:ghost],
     exit_if_not_found: option[:exit_if_not_found],
+    show_console: option[:show_console],
   }
 
   Gdk.set_program_class('Ninix')
