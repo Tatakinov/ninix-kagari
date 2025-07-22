@@ -52,6 +52,7 @@ module Satori
   NODE_MUL_EXPR   = 24
   NODE_POW_EXPR   = 25
   NODE_UNARY_EXPR = 26
+  NODE_TAG_JUMP   = 50
 
   def self.encrypt(s)
     buf = []
@@ -397,6 +398,11 @@ module Satori
           unless node.nil?
             buf << node
           end
+        elsif not line.empty? and line[0] == '≧' and not phi_escape[current_lineno].include?(0)
+          node = parse_tag_jump(line)
+          unless node.nil?
+            buf << node
+          end
         elsif not line.empty? and line[0] == '≫' and not phi_escape[current_lineno].include?(0)
           node = parse_search(line)
           unless node.nil?
@@ -541,6 +547,15 @@ module Satori
       return [NODE_JUMP, target, condition]
     end
 
+    def parse_tag_jump(line)
+      fail "assert" unless line[0] == '≧'
+      line = line[1 ..]
+      a = line.split('　').map do |x|
+        parse_word(x)
+      end
+      return [NODE_TAG_JUMP, a.shift, a]
+    end
+
     def parse_search(line)
       return [NODE_SEARCH]
     end
@@ -668,8 +683,9 @@ module Satori
       line = line[1..-1] ## FIXME
       depth = 1
       count = 1
+      phi = false
       while not line.nil? and not line.empty?
-        if line[0] == '）' ### FIXME: φ
+        if line[0] == '）' and not phi
           depth -= 1
           if text_.length != count # （）
             text_ << ''
@@ -680,12 +696,16 @@ module Satori
           end
           text_ << line[0]
           line = line[1..-1]
-        elsif line[0] == '（' ### FIXME: φ
+        elsif line[0] == '（' and not phi
           depth += 1
           count += 1
           text_ << line[0]
           line = line[1..-1]
+        elsif line[0] == 'φ'
+          phi = true
+          line = line[1..-1]
         else
+          phi = false
           text_ << line[0]
           line = line[1..-1]
         end
@@ -964,6 +984,7 @@ module Satori
           print_nodelist(node[1], :depth => depth + 1)
         when NODE_CALL
           print([indent, 'NODE_CALL'].join(''), "\n")
+          print([indent, node[1]].join, "\n")
           for i in 0..node[2].length-1
             print_nodelist(node[2][i], :depth => depth + 1)
           end
@@ -987,6 +1008,16 @@ module Satori
           unless node[2].nil?
             print([indent, 'condition'].join(''), "\n")
             print_nodelist(node[2], :depth => depth + 1)
+          end
+        when NODE_TAG_JUMP
+          print([indent, 'NODE_TAG_JUMP'].join(''), "\n")
+          print([indent, 'name'].join(''), "\n")
+          print_nodelist(node[1], :depth => depth + 1)
+          unless node[2].nil?
+            print([indent, 'tags'].join(''), "\n")
+            node[2].each do |x|
+              print_nodelist(x, :depth => depth + 1)
+            end
           end
         when NODE_SEARCH
           print([indent, 'NODE_SEARCH'].join(''), "\n")
@@ -1982,6 +2013,34 @@ module Satori
       return expand(sample[0]), sample[2]
     end
 
+    def get_tag_jump(prefix, list)
+      talk = []
+      @talk.each do |k, v|
+        a = k.split('　')
+        if a.shift == prefix
+          v.each do |t, _|
+            talk << [t, a]
+          end
+        end
+      end
+      @word.each do |k, v|
+        a = k.split('　')
+        if a.shift == prefix
+          v.each do |t, _|
+            talk << [t, a]
+          end
+        end
+      end
+      talk.keep_if do |_, tags|
+        list.all? do |x|
+          tags.include?(x)
+        end
+      end
+      return nil if talk.empty?
+      sample = talk.sample
+      return expand(sample[0])
+    end
+
     def expand_internal(nodelist, caller_history: nil, side: 1)
       buffer = []
       src = expand(nodelist, caller_history: caller_history, side: side, is_in_ref: true)
@@ -2108,6 +2167,15 @@ module Satori
               buf << ['\1', script].join('')
               break
             end
+          end
+        when NODE_TAG_JUMP
+          target = expand(node[1])
+          tag_list = node[2].map do |x|
+            expand(x)
+          end
+          script = get_tag_jump(target, tag_list)
+          unless script.nil?
+            buf << ['\1', script].join
           end
         when NODE_SEARCH ## FIXME
           buf << ''
