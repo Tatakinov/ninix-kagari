@@ -262,6 +262,7 @@ module Satori
           line = [line_buffer, line].join('')
           line_buffer = nil
         end
+=begin
         pos = 0
         while line[pos..-1].count('φ') >0
           pos = line.index('φ', pos)
@@ -278,6 +279,7 @@ module Satori
           end
         end
         next unless line_buffer.nil?
+=end
         pos = 0
         while line[pos..-1].count('＃') > 0
           pos = line.index('＃', pos)
