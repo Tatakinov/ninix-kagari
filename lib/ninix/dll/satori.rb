@@ -262,7 +262,6 @@ module Satori
           line = [line_buffer, line].join('')
           line_buffer = nil
         end
-=begin
         pos = 0
         while line[pos..-1].count('φ') >0
           pos = line.index('φ', pos)
@@ -271,19 +270,21 @@ module Satori
             break
           else
             phi_escape[lineno] << pos
+=begin
             if pos.zero?
               line = line[1..-1]
             else
               line = [line[0..pos-1], line[pos + 1..-1]].join('')
             end
+=end
           end
+          pos += 1
         end
         next unless line_buffer.nil?
-=end
         pos = 0
         while line[pos..-1].count('＃') > 0
           pos = line.index('＃', pos)
-          unless phi_escape[lineno].include?(pos) ## FIXME
+          unless phi_escape[lineno].include?(pos - 1) ## FIXME
             if pos.zero?
               line = ""
             else
