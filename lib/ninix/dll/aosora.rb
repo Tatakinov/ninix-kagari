@@ -19,7 +19,7 @@ module Aosora
 
   extend Fiddle::Importer
   begin
-    dlload 'libaosora.so'
+    dlload "libaosora.#{RbConfig::CONFIG['SOEXT']}"
     extern 'long aosora_load(char *, long)'
     extern 'int aosora_unload(long)'
     extern 'char *aosora_request(long, char *, long *)'

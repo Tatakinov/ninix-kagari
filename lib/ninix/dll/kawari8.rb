@@ -22,7 +22,7 @@ $_kawari8 = nil
 module Kawari8
   extend Fiddle::Importer
   begin
-    dlload "libshiori.so" # "_kawari8.so"
+    dlload "libshiori.#{RbConfig::CONFIG['SOEXT']}" # "_kawari8.so"
     extern "int so_library_init()"
     extern "int so_library_cleanup()"
     extern "unsigned int so_create(const char *, long)"

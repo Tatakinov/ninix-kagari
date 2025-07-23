@@ -23,7 +23,7 @@ $_yaya = nil
 module Yaya
   extend Fiddle::Importer
   begin
-    dlload "libaya5.so"
+    dlload "libaya5.#{RbConfig::CONFIG['SOEXT']}"
     extern "long multi_load(char *, long)"
     extern "int multi_unload(long)"
     extern "char *multi_request(long, char *, long *)"
