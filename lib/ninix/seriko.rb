@@ -71,7 +71,7 @@ module Seriko
         break if @active.reject! do |frame, actor|
           next false if frame > @next_tick
           last_actor = actor
-          actor.update(window, frame, @next_tick)
+          actor.update(window, frame)
           next true
         end.nil?
       end
@@ -662,7 +662,6 @@ module Seriko
       @pattern = 0
       @resume = true
       @offset = [0, 0]
-      @is_looped = true
       update(window, base_frame)
     end
 
@@ -678,18 +677,7 @@ module Seriko
       @offset = [x, y]
     end
 
-    def update(window, base_frame, next_tick = nil)
-      if @tick == next_tick
-        if next_tick.nil?
-          @is_looped = false
-        elsif not @is_looped
-          @is_looped = (@render_start_at == @pattern)
-        end
-      else
-        @tick = next_tick
-        @render_start_at = @pattern
-        @is_looped = false
-      end
+    def update(window, base_frame)
       return false if @terminate_flag
       return false if @interval.include?(INTERVAL[:bind]) and not @enable_bind
       if @interval == INTERVAL[:bind_only]
@@ -746,9 +734,7 @@ module Seriko
         else
           wait = 1
         end
-        unless @is_looped
-          show_pattern(window, surface, method, args)
-        end
+        show_pattern(window, surface, method, args)
         if wait >= 0
           zero = true
           for _, interval, _, _ in @patterns
