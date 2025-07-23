@@ -140,7 +140,7 @@ module Seriko
       @dirty = true
     end
 
-    def invoke_actor(window, actor)
+    def invoke_actor(window, actor, force = true)
       if not @exclusive_actor.nil?
         interval = actor.get_interval()
         return if interval.include?('talk') or interval.include?('yen-e')
@@ -148,7 +148,9 @@ module Seriko
         return
       end
       lock_exclusive(window, actor) if actor.exclusive?
-      actor.invoke(window, @next_tick)
+      actor.invoke(window, @next_tick) if force or @active.none? do |_, a|
+        a.get_id == actor.get_id
+      end
     end
 
     def invoke(window, actor_id, update: 0)
@@ -183,7 +185,8 @@ module Seriko
         end
       end
       if not interval_count.nil? and count >= interval_count
-        invoke_actor(window, actor)
+        # talkはanimationが実行中ならinvokeしない
+        invoke_actor(window, actor, false)
         return true
       else
         return false
