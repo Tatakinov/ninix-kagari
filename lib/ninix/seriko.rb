@@ -437,6 +437,8 @@ module Seriko
         window.add_overlay(self, surface, args[0], args[1], method)
       when 'base'
         window.get_seriko.set_base_id(window, surface)
+      # FIXME 1回のupdate_frameで同じsurface_idに対して
+      # startが複数回行われるとその回数-1だけanimationがskipされてしまう
       when 'start'
         window.invoke(args[0], :update => 1)
       when 'alternativestart'
