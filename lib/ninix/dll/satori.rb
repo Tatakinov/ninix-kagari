@@ -284,7 +284,7 @@ module Satori
         pos = 0
         while line[pos..-1].count('＃') > 0
           pos = line.index('＃', pos)
-          unless phi_escape[lineno].include?(pos - 1) ## FIXME
+          unless phi_escape[lineno].include?(pos - 1)
             if pos.zero?
               line = ""
             else
@@ -374,8 +374,16 @@ module Satori
       num_close = 0
       for n in 2..linelist.length-1
         line = linelist[n]
-        num_open += line.count('（') ### FIXME: φ
-        num_close += line.count('）') ### FIXME: φ
+        offset = 0
+        while pos = (line[offset ..] =~ /(?<=^|[^φ])(?:φφ)*（/)
+          num_open += 1
+          offset += pos + 1
+        end
+        offset = 0
+        while pos = (line[offset ..] =~ /(?<=^|[^φ])(?:φφ)*（/)
+          num_close += 1
+          offset += pos + 1
+        end
         if num_open > 0 and num_open != num_close
           if n == (linelist.length - 1)
             Logging::Logging.debug(
@@ -452,8 +460,16 @@ module Satori
       num_close = 0
       for n in 2..linelist.length-1
         line = linelist[n]
-        num_open += line.count('（') ### FIXME: φ
-        num_close += line.count('）') ### FIXME: φ
+        offset = 0
+        while pos = (line[offset ..] =~ /(?<=^|[^φ])(?:φφ)*（/)
+          num_open += 1
+          offset += pos + 1
+        end
+        offset = 0
+        while pos = (line[offset ..] =~ /(?<=^|[^φ])(?:φφ)*（/)
+          num_close += 1
+          offset += pos + 1
+        end
         if num_open > 0 and num_open != num_close
           if n == (linelist.length - 1)
             Logging::Logging.debug(
@@ -484,12 +500,11 @@ module Satori
 
     def parse_assignment(line)
       fail "assert" unless line[0] == '＄'
-      break_flag = false
-      for n in 1..line.length-1
-        if ["\t", ' ', '　', '＝'].include?(line[n]) ### FIXME: φ
-          break_flag = true
-          break
-        end
+      n = line =~ /(?<=^|[^φ])(?:φφ)*[\t 　＝]/
+      if n.nil?
+        break_flag = false
+      else
+        break_flag = true
       end
       unless break_flag
         Logging::Logging.debug('satori.py: syntax error (expected a tab or equal)')
@@ -497,7 +512,7 @@ module Satori
       end
       name_str = line[1..n-1] #.join('') # XXX
       name = parse_word(line[1..n-1])
-      if line[n] == '＝' ### FIXME: φ
+      if line[n] == '＝'
         n += 1
         value = parse_expression(line[n..-1])
       else
@@ -528,18 +543,17 @@ module Satori
 
     def parse_jump(line)
       fail "assert" unless line[0] == '＞'
-      break_flag = false
-      for n in 1..line.length-1
-        if line[n] == "\t" ### FIXME: φ
-          break_flag = true
-          break
-        end
+      n = line =~ /(?<=^|[^φ])(?:φφ)*\t/
+      if n.nil?
+        break_flag = false
+      else
+        break_flag = true
       end
       unless break_flag
         n = line.length
       end
       target = parse_word(line[1..n-1])
-      while n < line.length and line[n] == "\t" ### FIXME: φ
+      while n < line.length and line[n] == "\t"
         n += 1
       end
       if n < line.length
@@ -565,18 +579,17 @@ module Satori
 
     def parse_choice(line)
       fail "assert" unless line[0] == '＿'
-      break_flag = false
-      for n in 1..line.length-1
-        if line[n] == "\t" ### FIXME: φ
-          break_flag = true
-          break
-        end
+      n = line =~ /(?<=^|[^φ])(?:φφ)*\t/
+      if n.nil?
+        break_flag = false
+      else
+        break_flag = true
       end
       unless break_flag
         n = line.length
       end
       label = parse_word(line[1..n-1])
-      while n < line.length and line[n] == "\t" ### FIXME: φ
+      while n < line.length and line[n] == "\t"
         n += 1
       end
       if n < line.length
@@ -597,14 +610,14 @@ module Satori
       buffer_ = []
       text = []
       while not line.nil? and not line.empty?
-        if line[0] == '：' ### FIXME: φ
+        if line[0] == '：'
           unless text.empty?
             buffer_ << [NODE_TEXT, text]
             text = []
           end
           buffer_ << [NODE_SIDE, [line[0]]]
           line = line[1..-1]
-        elsif line[0] == '（' ### FIXME: φ
+        elsif line[0] == '（'
           @parenthesis += 1
           unless text.empty?
             buffer_ << [NODE_TEXT, text]
@@ -715,14 +728,9 @@ module Satori
       end
       unless text_.empty?
         sep = nil
-        pos = text_.length
-        for c in @separator ### FIXME: φ
-          next if text_.count(c).zero?
-          if text_.index(c) < pos
-            pos = text_.index(c)
-            sep = c
-          end
-        end
+        s = (text_.is_a?(Array)) ? (text_.join) : (text_)
+        pos = s =~ /(?<=^|[^φ])(?:φφ)*(?:#{@separator.join('|')})/
+        sep = text_[pos] unless pos.nil?
         unless sep.nil?
           list_ = split_(text_.join(''), sep) ## FIXME
         else
@@ -792,9 +800,9 @@ module Satori
     def get_or_expr(line)
       line, and_expr = get_and_expr(line)
       buf = [NODE_OR_EXPR, and_expr]
-      while not line.nil? and not line.empty? and ['|', '｜'].include?(line[0]) ### FIXME: φ
+      while not line.nil? and not line.empty? and ['|', '｜'].include?(line[0])
         line = line[1..-1]
-        if not line.nil? and not line.empty? and ['|', '｜'].include?(line[0]) ### FIXME: φ
+        if not line.nil? and not line.empty? and ['|', '｜'].include?(line[0])
           line = line[1..-1]
         else
           fail ValueError, 'broken OR operator: ' + line
@@ -811,9 +819,9 @@ module Satori
     def get_and_expr(line)
       line, comp_expr = get_comp_expr(line)
       buf = [NODE_AND_EXPR, comp_expr]
-      while not line.nil? and not line.empty? and ['&', '＆'].include?(line[0]) ### FIXME: φ
+      while not line.nil? and not line.empty? and ['&', '＆'].include?(line[0])
         line = line[1..-1]
-        if not line.nil? and not line.empty? and ['&', '＆'].include?(line[0]) ### FIXME: φ
+        if not line.nil? and not line.empty? and ['&', '＆'].include?(line[0])
           line = line[1..-1]
         else
           fail ValueError, 'broken AND operator: ' + line
@@ -829,36 +837,36 @@ module Satori
 
     def get_comp_expr(line)
       line, buf = get_add_expr(line)
-      if not line.nil? and not line.empty? and ['<', '＜'].include?(line[0]) ### FIXME: φ
+      if not line.nil? and not line.empty? and ['<', '＜'].include?(line[0])
         line = line[1..-1]
         op = '<'
-        if not line.nil? and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if not line.nil? and not line.empty? and ['=', '＝'].include?(line[0])
           line = line[1..-1]
           op = '<='
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, op, add_expr]]
-      elsif not line.nil? and not line.empty? and ['>', '＞'].include?(line[0]) ### FIXME: φ
+      elsif not line.nil? and not line.empty? and ['>', '＞'].include?(line[0])
         line = line[1..-1]
         op = '>'
-        if not line.nil? and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if not line.nil? and not line.empty? and ['=', '＝'].include?(line[0])
           line = line[1..-1]
           op = '>='
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, op, add_expr]]
-      elsif not line.nil? and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
+      elsif not line.nil? and not line.empty? and ['=', '＝'].include?(line[0])
         line = line[1..-1]
-        if not line.nil? and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if not line.nil? and not line.empty? and ['=', '＝'].include?(line[0])
           line = line[1..-1]
         else
           fail ValueError, 'broken EQUAL operator: ' + line
         end
         line, add_expr = get_add_expr(line)
         return line, [[NODE_COMP_EXPR, buf, '==', add_expr]]
-      elsif not line.nil? and not line.empty? and ['!', '！'].include?(line[0]) ### FIXME: φ
+      elsif not line.nil? and not line.empty? and ['!', '！'].include?(line[0])
         line = line[1..-1]
-        if not line.nil? and not line.empty? and ['=', '＝'].include?(line[0]) ### FIXME: φ
+        if not line.nil? and not line.empty? and ['=', '＝'].include?(line[0])
           line = line[1..-1]
         else
           fail ValueError, 'broken NOT EQUAL operator: ' + line
@@ -872,7 +880,7 @@ module Satori
     def get_add_expr(line)
       line, mul_expr = get_mul_expr(line)
       buf = [NODE_ADD_EXPR, mul_expr]
-      while not line.nil? and not line.empty? and ['+', '＋', '-', '−', '－'].include?(line[0]) ### FIXME: φ
+      while not line.nil? and not line.empty? and ['+', '＋', '-', '−', '－'].include?(line[0])
         if ['+', '＋'].include?(line[0])
           buf << '+'
         else
@@ -892,7 +900,7 @@ module Satori
       line, pow_expr = get_pow_expr(line)
       buf = [NODE_MUL_EXPR, pow_expr]
       while not line.nil? and not line.empty? and \
-           ['*', '＊', '×', '/', '／', '÷', '%', '％'].include?(line[0]) ### FIXME: φ
+           ['*', '＊', '×', '/', '／', '÷', '%', '％'].include?(line[0])
         if ['*', '＊', '×'].include?(line[0])
           buf << '*'
         elsif ['/', '／', '÷'].include?(line[0])
@@ -913,7 +921,7 @@ module Satori
     def get_pow_expr(line)
       line, unary_expr = get_unary_expr(line)
       buf = [NODE_POW_EXPR, unary_expr]
-      while not line.nil? and not line.empty? and ['^', '＾'].include?(line[0]) ### FIXME: φ
+      while not line.nil? and not line.empty? and ['^', '＾'].include?(line[0])
         line = line[1..-1]
         line, unary_expr = get_unary_expr(line)
         buf << unary_expr
@@ -925,20 +933,20 @@ module Satori
     end
 
     def get_unary_expr(line)
-      if not line.nil? and not line.empty? and ['-', '−', '－'].include?(line[0]) ### FIXME: φ
+      if not line.nil? and not line.empty? and ['-', '−', '－'].include?(line[0])
         line = line[1..-1]
         line, unary_expr = get_unary_expr(line)
         return line, [[NODE_UNARY_EXPR, '-', unary_expr]]
       end
-      if not line.nil? and not line.empty? and ['!', '！'].include?(line[0]) ### FIXME: φ
+      if not line.nil? and not line.empty? and ['!', '！'].include?(line[0])
         line = line[1..-1]
         line, unary_expr = get_unary_expr(line)
         return line, [[NODE_UNARY_EXPR, '!', unary_expr]]
       end
-      if not line.nil? and not line.empty? and line[0] == '(' ### FIXME: φ
+      if not line.nil? and not line.empty? and line[0] == '('
         line = line[1..-1]
         line, buf = get_or_expr(line)
-        if not line.nil? and not line.empty? and line[0] == ')' ### FIXME: φ
+        if not line.nil? and not line.empty? and line[0] == ')'
           line = line[1..-1]
         else
           fail ValueError, 'expected a close paren: ' + line
@@ -956,12 +964,12 @@ module Satori
     def get_factor(line)
       buf = []
       while not line.nil? and not line.empty? and not Operators.include?(line[0])
-        if not line.nil? and not line.empty? and line[0] == '（' ### FIXME: φ
+        if not line.nil? and not line.empty? and line[0] == '（'
           line = parse_parenthesis(line, buf)
           next
         end
         text = []
-        while not line.nil? and not line.empty? and not Operators.include?(line[0]) and line[0] != '（' ### FIXME: φ
+        while not line.nil? and not line.empty? and not Operators.include?(line[0]) and line[0] != '（'
           text << line[0]
           line = line[1..-1]
         end
@@ -2123,7 +2131,21 @@ module Satori
             end
           end
         when NODE_TEXT
-          buf.concat([node[1]])
+          phi = false
+          if node[1].is_a?(Array)
+            buf.concat([node[1].filter do |x|
+              if phi
+                phi = false
+                next true
+              elsif x == 'φ'
+                phi = true
+                next false
+              end
+              next true
+            end])
+          else
+            buf.concat([node[1].gsub(/φ(.)/, '\1')])
+          end
           talk = true
         when NODE_SIDE
           if talk
