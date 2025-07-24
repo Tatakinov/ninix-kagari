@@ -2089,7 +2089,8 @@ module Balloon
         path, config = balloon
         # load pixbuf
         begin
-          surface = @pix_cache.load(path)
+          cache = Pix::Cache.new
+          surface = cache.load(path)
         rescue
           surface = nil
         end
