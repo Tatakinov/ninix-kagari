@@ -2154,8 +2154,6 @@ module Balloon
         @window.resize(surface.width, surface.height)
       end
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
-      s = cr.target.map_to_image
-      s = surface if s.width < surface.width or s.height < surface.height
       region = pix.region(write: false)
       # XXX: to avoid losing focus in the text input region
       x = @entry.margin_left
