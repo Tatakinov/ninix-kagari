@@ -47,18 +47,35 @@ module Balloon
       @teachbox = TeachBox.new()
       @teachbox.set_responsible(self)
       # create inputbox
-      @inputbox = InputBox.new()
-      @inputbox.set_responsible(self)
+      @inputbox = Hash.new do |h, k|
+        # configure inputbox
+        i = InputBox.new
+        i.set_responsible(self)
+        h[k] = i
+      end
       # create passwordinputbox
-      @passwordinputbox = PasswordInputBox.new()
-      @passwordinputbox.set_responsible(self)
+      @passwordinputbox = Hash.new do |h, k|
+        # configure passwordinputbox
+        p = PasswordInputBox.new
+        p.set_responsible(self)
+        h[k] = p
+      end
       # create scriptbox
       @scriptinputbox = ScriptInputBox.new()
       @scriptinputbox.set_responsible(self)
     end
 
     def reset_user_interaction
-      @user_interaction = false
+      visible = true
+      visible &&= @communicatebox.visible?
+      visible &&= @teachbox.visible?
+      visible &&= @inputbox.all? do |k, v|
+        v.visible?
+      end
+      visible &&= @passwordinputbox.all? do |k, v|
+        v.visible?
+      end
+      @user_interaction = visible
     end
 
     def get_text_count(side)
@@ -109,8 +126,12 @@ module Balloon
       @window = {}
       @communicatebox.destroy()
       @teachbox.destroy()
-      @inputbox.destroy()
-      @passwordinputbox.destroy()
+      @inputbox.each.to_a.each do |k, v|
+        v.close(k)
+      end
+      @passwordinputbox.each.to_a.each do |k, v|
+        v.close(k)
+      end
     end
 
     def new_(desc, balloon)
@@ -118,10 +139,11 @@ module Balloon
       @directory = balloon['balloon_dir'][0]
       balloon0 = {}
       balloon1 = {}
-      communicate0 = nil
-      communicate1 = nil
-      communicate2 = nil
-      communicate3 = nil
+      @communicate = []
+      0.upto(3) do |i|
+        key = 'c' + i.to_s
+        @communicate[i] = balloon[key] if balloon.include?(key) 
+      end
       for key in balloon.keys
         value = balloon[key]
         if ['arrow0', 'arrow1'].include?(key)
@@ -133,14 +155,6 @@ module Balloon
           balloon0[key] = value  # Sakura
         elsif key.start_with?('k')
           balloon1[key] = value  # Unyuu
-        elsif key == 'c0'
-          communicate0 = value # send box
-        elsif key == 'c1'
-          communicate1 = value # communicate box
-        elsif key == 'c2'
-          communicate2 = value # teach box
-        elsif key == 'c3'
-          communicate3 = value # input box
         end
       end
       @balloon0 = balloon0
@@ -155,15 +169,11 @@ module Balloon
       add_window(0)
       add_window(1)
       # configure communicatebox
-      @communicatebox.new_(desc, communicate1)
+      @communicatebox.new_(desc, @communicate[1])
       # configure teachbox
-      @teachbox.new_(desc, communicate2)
-      # configure inputbox
-      @inputbox.new_(desc, communicate3)
-      # configure passwordinputbox
-      @passwordinputbox.new_(desc, communicate3)
+      @teachbox.new_(desc, @communicate[2])
       # configure scriptinputbox
-      @scriptinputbox.new_(desc, communicate3)
+      @scriptinputbox.new_(desc, @communicate[3])
     end
 
     def add_window(side)
@@ -461,54 +471,61 @@ module Balloon
     end
 
     def open_communicatebox
-      return if @user_interaction
+      #return if @user_interaction
       @user_interaction = true
       @communicatebox.show()
     end
 
     def open_teachbox
-      return if @user_interaction
+      #return if @user_interaction
       @user_interaction = true
       @parent.handle_request(:GET, :notify_event, 'OnTeachStart')
       @teachbox.show()
     end
 
     def open_inputbox(symbol, limittime: -1, default: nil)
-      return if @user_interaction
+      #return if @user_interaction
       @user_interaction = true
-      @inputbox.set_symbol(symbol)
-      @inputbox.set_limittime(limittime)
-      @inputbox.show(default)
+      @inputbox[symbol].new_(@desc, @communicate[3])
+      @inputbox[symbol].set_symbol(symbol)
+      @inputbox[symbol].set_limittime(limittime)
+      @inputbox[symbol].show(default)
     end
 
     def open_passwordinputbox(symbol, limittime: -1, default: nil)
-      return if @user_interaction
+      #return if @user_interaction
       @user_interaction = true
-      @passwordinputbox.set_symbol(symbol)
-      @passwordinputbox.set_limittime(limittime)
-      @passwordinputbox.show(default)
+      @passwordinputbox[symbol].new_(desc, @communicate[3])
+      @passwordinputbox[symbol].set_symbol(symbol)
+      @passwordinputbox[symbol].set_limittime(limittime)
+      @passwordinputbox[symbol].show(default)
     end
 
     def open_scriptinputbox()
-      return if @user_interaction
+      #return if @user_interaction
       @user_interaction = true
       @scriptinputbox.show
     end
 
     def close_inputbox(symbol)
-      return unless @user_interaction
-      @inputbox.close(symbol)
-      @passwordinputbox.close(symbol)
+      #return unless @user_interaction
+      @inputbox[symbol].close(symbol) if @inputbox.include?(symbol)
+      @passwordinputbox[symbol].close(symbol) if @passwordinputbox.include?(symbol)
     end
 
     def close_communicatebox
-      return unless @user_interaction
+      #return unless @user_interaction
       @communicatebox.close
     end
 
     def close_teachbox
-      return unless @user_interaction
+      #return unless @user_interaction
       @teachbox.close
+    end
+
+    def destroy_inputbox(symbol)
+      @inputbox.delete(symbol) if @inputbox.include?(symbol)
+      @passwordinputbox.delete(symbol) if @passwordinputbox.include?(symbol)
     end
   end
 
@@ -2187,15 +2204,15 @@ module Balloon
     end
 
     def delete(widget, event)
-      @window.hide()
-      cancel()
+      close(nil)
+      cancel
       return true
     end
 
     def key_press(widget, ctrl, keyval, keycode, state)
       if keyval == Gdk::Keyval::KEY_Escape
-        @window.hide()
-        cancel()
+        close(nil)
+        cancel
         return true
       end
       return false
@@ -2211,8 +2228,8 @@ module Balloon
     end
 
     def activate(widget)
-      @window.hide()
-      enter()
+      enter
+      close(nil)
       return true
     end
 
@@ -2228,6 +2245,15 @@ module Balloon
     def cancel
       #pass
     end
+
+    def close(symbol)
+      @window.hide
+      @parent.handle_request(:GET, :reset_user_interaction)
+    end
+
+    def visible?
+      @window.visible?
+    end
   end
 
 
@@ -2239,29 +2265,6 @@ module Balloon
     def new_(desc, balloon)
       super
       @window.set_modal(false)
-    end
-
-    def delete(widget, event)
-      @window.hide()
-      cancel()
-      @parent.handle_request(:GET, :reset_user_interaction)
-      return true
-    end
-
-    def key_press(widget, ctrl, keyval, keycode, state)
-      if keyval == Gdk::Keyval::KEY_Escape
-        @window.hide()
-        cancel()
-        @parent.handle_request(:GET, :reset_user_interaction)
-        return true
-      end
-      return false
-    end
-
-    def activate(widget)
-      enter()
-      @entry.set_text('')
-      return true
     end
 
     def enter
@@ -2359,10 +2362,9 @@ module Balloon
     end
 
     def close(symbol)
-      return if @symbol.nil?
       return if symbol != '__SYSTEM_ALL_INPUT__' and @symbol != symbol
-      @window.hide()
-      cancel()
+      destroy
+      @parent.handle_request(:NOTIFY, :destroy_inputbox, @symbol)
     end
 
     def send(data, cancel: false, timeout: false)
