@@ -2428,6 +2428,8 @@ module Balloon
 
     def send(data)
       return if data.nil? or data.empty?
+      @parent.handle_request(:GET, :reset_script, reset_all: true)
+      @parent.handle_request(:GET, :stand_by, false)
       @parent.handle_request(:GET, :start_script, data)
       @parent.handle_request(:GET, :reset_user_interaction)
     end
