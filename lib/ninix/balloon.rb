@@ -66,6 +66,7 @@ module Balloon
     end
 
     def reset_user_interaction
+=begin
       visible = true
       visible &&= @communicatebox.visible?
       visible &&= @teachbox.visible?
@@ -76,6 +77,7 @@ module Balloon
         v.visible?
       end
       @user_interaction = visible
+=end
     end
 
     def get_text_count(side)
@@ -472,20 +474,20 @@ module Balloon
 
     def open_communicatebox
       #return if @user_interaction
-      @user_interaction = true
+      #@user_interaction = true
       @communicatebox.show()
     end
 
     def open_teachbox
       #return if @user_interaction
-      @user_interaction = true
+      #@user_interaction = true
       @parent.handle_request(:GET, :notify_event, 'OnTeachStart')
       @teachbox.show()
     end
 
     def open_inputbox(symbol, limittime: -1, default: nil)
       #return if @user_interaction
-      @user_interaction = true
+      #@user_interaction = true
       @inputbox[symbol].new_(@desc, @communicate[3])
       @inputbox[symbol].set_symbol(symbol)
       @inputbox[symbol].set_limittime(limittime)
@@ -494,7 +496,7 @@ module Balloon
 
     def open_passwordinputbox(symbol, limittime: -1, default: nil)
       #return if @user_interaction
-      @user_interaction = true
+      #@user_interaction = true
       @passwordinputbox[symbol].new_(desc, @communicate[3])
       @passwordinputbox[symbol].set_symbol(symbol)
       @passwordinputbox[symbol].set_limittime(limittime)
@@ -503,7 +505,7 @@ module Balloon
 
     def open_scriptinputbox()
       #return if @user_interaction
-      @user_interaction = true
+      #@user_interaction = true
       @scriptinputbox.show
     end
 
