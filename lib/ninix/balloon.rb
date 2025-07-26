@@ -500,6 +500,16 @@ module Balloon
       @inputbox.close(symbol)
       @passwordinputbox.close(symbol)
     end
+
+    def close_communicatebox
+      return unless @user_interaction
+      @communicatebox.close
+    end
+
+    def close_teachbox
+      return unless @user_interaction
+      @teachbox.close
+    end
   end
 
 

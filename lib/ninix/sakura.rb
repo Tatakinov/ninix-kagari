@@ -2511,6 +2511,10 @@ module Sakura
         @parent.handle_request(:GET, :edit_preferences)
       elsif args[0, 2] == ['close', 'inputbox'] and argc > 2
         @balloon.close_inputbox(args[2])
+      elsif args[0, 2] == ['close', 'communicatebox']
+        @balloon.close_communicatebox
+      elsif args[0, 2] == ['close', 'teachbox']
+        @balloon.close_teachbox
       elsif args[0, 2] == ['change', 'balloon'] and argc > 2
         key = @parent.handle_request(:GET, :find_balloon_by_name, args[2])
         unless key.nil?
