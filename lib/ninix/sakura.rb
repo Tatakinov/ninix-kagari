@@ -110,7 +110,7 @@ module Sakura
       @__boot = [false, false]
       @surface_mouse_motion = nil
       @time_critical_session = false
-      @lock_repaint = false
+      @lock_repaint = [false, false]
       @passivemode = false
       @__running = false
       @anchor = nil
@@ -170,7 +170,7 @@ module Sakura
     end
 
     def get_lock_repaint(*args)
-      @lock_repaint
+      @lock_repaint[0]
     end
 
     def attach_observer(observer)
@@ -2553,9 +2553,9 @@ module Sakura
         vanish_by_myself(next_ghost)
       elsif args[1, 1] == ['repaint']
         if args[0, 1] == ['lock']
-          @lock_repaint = true
+          @lock_repaint = [true, args[2] == 'manual']
         elsif args[0, 1] == ['unlock']
-          @lock_repaint = false
+          @lock_repaint = [false, false]
         end
       elsif args[1, 1] == ['passivemode']
         if args[0, 1] == ['enter']
@@ -3218,7 +3218,7 @@ module Sakura
       @script_position = 0
       @time_critical_session = false
       @quick_session = false
-      @lock_repaint = false # SSP compat
+      @lock_repaint = [false, false] unless @lock_repaint[1] # SSP compat
       @defer_show = []
       set_synchronized_session(:list => [], :reset => true)
       @balloon.set_autoscroll(true)
