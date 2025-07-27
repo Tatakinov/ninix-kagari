@@ -1795,7 +1795,8 @@ module Sakura
             @sstp_request_handler.send_timeout()
             @sstp_request_handler = nil
           end
-          unless notify_event('OnChoiceTimeout')
+          # FIXME embedを処理するとlast_scriptが上書きされてしまう
+          unless notify_event('OnChoiceTimeout', @last_script)
             stand_by(false)
           end
         end
