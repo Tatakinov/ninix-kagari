@@ -157,6 +157,7 @@ Windows版は10より前のバージョンでも動くようになります。
 - --logfile `logfile`: ログをファイル`logfile`に出力します
 - --ghost `ghost_name | ghost_dir`: 指定されたゴーストで起動します
 - --exit-if-not-found: 上記で指定したゴーストが存在しない場合、終了します
+- --show-console: ゴーストが起動する場合でも`Console`ウィンドウを表示します
 
 ## SHIORI
 
