@@ -1108,20 +1108,20 @@ module Surface
       dirlist = []
       for uri in data.uris
         uri_parsed = URI.parse(uri)
-        pathname = URI.unescape(uri_parsed.path)
+        pathname = URI.decode_www_form_component(uri_parsed.path)
         if uri_parsed.scheme == 'file'
           filelist << pathname if File.exist?(pathname)
           dirlist << pathname if File.directory?(pathname)
         end
       end
-      if not filelist.empty?
-        @parent.handle_request(
-          :GET, :enqueue_event,
-          'OnFileDrop2', filelist.join(1.chr), @side)
-      elsif dirlist.length == 1
+      if dirlist.length == 1
         @parent.handle_request(
           :GET, :enqueue_event,
           'OnDirectoryDrop', dirlist[0], @side)
+      elsif not filelist.empty?
+        @parent.handle_request(
+          :GET, :enqueue_event,
+          'OnFileDrop2', filelist.join(1.chr), @side)
       end
     end
 
