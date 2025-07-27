@@ -310,7 +310,7 @@ module Menu
               item.set_name('popup menu item')
               item.set_active(state)
               item.signal_connect('activate', [index, key]) do |a, ik|
-                @parent.handle_request(:GET, :toggle_bind, ik)
+                @parent.handle_request(:GET, :toggle_bind, ik, 'user')
                 next true
               end
               provider = create_css_provider_for(item)

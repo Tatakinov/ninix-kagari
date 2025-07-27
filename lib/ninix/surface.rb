@@ -852,8 +852,8 @@ module Surface
       @window[side].balloon_offset = offset
     end
 
-    def toggle_bind(side, bind_id)
-      @window[side].toggle_bind(bind_id)
+    def toggle_bind(side, bind_id, from)
+      @window[side].toggle_bind(bind_id, from)
     end
 
     def get_collision_area(side, part)
@@ -1996,7 +1996,7 @@ module Surface
       return true
     end
 
-    def toggle_bind(bind_id)
+    def toggle_bind(bind_id, from)
       if @bind.include?(bind_id)
         current = @bind[bind_id][1]
         @bind[bind_id][1] = (not current)
@@ -2006,13 +2006,15 @@ module Surface
                                  'OnDressupChanged', @side,
                                  group[1],
                                  1,
-                                 group[0])
+                                 group[0],
+                                 from)
         else
           @parent.handle_request(:GET, :enqueue_event,
                                  'OnDressupChanged', @side,
                                  group[1],
                                  0,
-                                 group[0])
+                                 group[0],
+                                 from)
         end
         reset_surface()
       end
