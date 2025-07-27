@@ -761,7 +761,7 @@ module Sakura
     end
 
     def translate(s, event, embed: false)
-      unless s.nil?
+      unless s.nil? or s.empty?
         if @use_makoto
           s = Makoto.execute(s)
         else
@@ -811,7 +811,7 @@ module Sakura
     end
 
     def get_event_response_with_communication(event, *arglist,
-        event_type: 'GET', translate: 1, embed: false)
+        event_type: 'GET', translate: 1, embed: false, fallback: nil)
       return '' if @__temp_mode == 1
       ref = arglist
       header = [event_type.to_s, " SHIORI/3.0\r\n",
@@ -847,6 +847,9 @@ module Sakura
       else
         communication = nil
       end
+      if result.empty? and not fallback.nil?
+        return get_event_response(fallback[0], *fallback[1], event_type: event_type, translate: translate, embed: embed)
+      end
       return result, communication
     end
 
@@ -866,11 +869,16 @@ module Sakura
       else
         default = Version.VERSION_INFO
       end
+      if abend.nil?
+        on_boot = ['OnBoot', [@surface.name]]
+      else
+        on_boot = ['OnBoot', [@surface.name, nil, nil, nil, nil, nil, 'halt', abend]]
+      end
       if init
         if @ghost_time.zero?
           unless notify_event('OnFirstBoot', @vanished_count,
                               nil, nil, nil, nil, nil, nil,
-                              @surface.name)
+                              @surface.name, fallback: on_boot)
             unless abend.nil?
               notify_event('OnBoot', @surface.name,
                            nil, nil, nil, nil, nil,
@@ -898,14 +906,14 @@ module Sakura
         if @ghost_time.zero?
           if notify_event('OnFirstBoot', @vanished_count,
                           nil, nil, nil, nil, nil, nil,
-                          @surface.name)
+                          @surface.name, fallback: on_boot)
             return
           end
-        elsif notify_event('OnVanished', name)
+        elsif notify_event('OnVanished', name, fallback: on_boot)
           return
         elsif notify_event('OnGhostChanged', name, last_script,
                            prev_name, nil, nil, nil, nil,
-                           pref_shell)
+                           pref_shell, fallback: on_boot)
           return
         end
         unless abend.nil?
@@ -919,12 +927,12 @@ module Sakura
         if @ghost_time.zero?
           if notify_event('OnFirstBoot', @vanished_count,
                           nil, nil, nil, nil, nil, nil,
-                          @surface.name)
+                          @surface.name, fallback: on_boot)
             return
           end
         elsif notify_event('OnGhostChanged', name, last_script,
                            prev_name, nil, nil, nil, nil,
-                           prev_shell)
+                           prev_shell, fallback: on_boot)
           return
         end
         unless abend.nil?
@@ -1199,7 +1207,7 @@ module Sakura
                   'OnUpdateComplete']
     RESET_NOTIFY_EVENT = ['OnVanishSelecting', 'OnVanishCancel']
 
-    def notify_event(event, *arglist, event_type: 'GET', default: nil, embed: false)
+    def notify_event(event, *arglist, event_type: 'GET', default: nil, embed: false, fallback: nil)
       return false if @time_critical_session and event.start_with?('OnMouse')
       if RESET_NOTIFY_EVENT.include?(event)
         reset_script(:reset_all => true)
