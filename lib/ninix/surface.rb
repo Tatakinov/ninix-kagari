@@ -146,10 +146,17 @@ module Surface
           end
         end
       end
+      modifier = []
+      modifier << 'shift' unless (state & Gdk::ModifierType::SHIFT_MASK).zero?
+      modifier << 'ctrl' unless (state & Gdk::ModifierType::CONTROL_MASK).zero?
+      modifier << 'alt' unless (state & Gdk::ModifierType::MOD1_MASK).zero?
+      #GDK4: modifier << 'alt' unless (state & Gdk::ModifierType::ALT_MASK).zero?
+      modifier << 'meta' unless (state & Gdk::ModifierType::META_MASK).zero?
       unless name.nil? and keycode.nil?
+        # NOTE Reference3はninixでは意味を成さないのでnil
         @parent.handle_request(
           :NOTIFY, :notify_event, 'OnKeyPress', name, keycode,
-          @key_press_count)
+          @key_press_count, nil, modifier.join(','))
       end
       return true
     end
