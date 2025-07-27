@@ -996,7 +996,8 @@ module Sakura
           notify_event(link_id[1], *args)
         else
           if args.empty?
-            notify_event('OnAnchorSelect', link_id[1])
+            on_anchor_select = ['OnAnchorSelect', [link_id[1]]]
+            notify_event('OnAnchorSelectEx', text, link_id[1], *args, fallback: on_anchor_select)
           else
             # TODO: not implemented
           end
@@ -1013,12 +1014,8 @@ module Sakura
         if link_id.start_with?('On')
           ret = notify_event(link_id, *args)
         else
-          if args.empty?
-            ret = notify_event('OnChoiceSelect', link_id, text, number)
-          else
-            # TODO: not implemented
-            ret = false
-          end
+          on_choice_select = ['OnChoiceSelect', [link_id]]
+          ret = notify_event('OnChoiceSelectEx', text, link_id, *args, fallback: on_choice_select)
         end
         if not ret
           reset_script(:reset_all => true)
@@ -1213,7 +1210,7 @@ module Sakura
         reset_script(:reset_all => true)
       end
       result = get_event_response_with_communication(event, *arglist,
-          event_type: event_type, embed: embed)
+          event_type: event_type, embed: embed, fallback: fallback)
       unless result.nil?
         script, communication = result
       else
