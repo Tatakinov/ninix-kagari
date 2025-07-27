@@ -39,7 +39,9 @@ module Cache
     def initialize(...)
       super
       @prev_time = Time.now.to_i
-      @count = Hash.new(0)
+      @info = Hash.new do |h, k|
+        h[k] = {count: 0, time: Time.now.to_i}
+      end
       @weak = WeakCache.new
     end
 
@@ -47,17 +49,18 @@ module Cache
       time = Time.now.to_i
       # 10秒以内に1回しか使われなかったオブジェクトを
       # WeakCache送りにする
-      if time <= @prev_time + 10
+      if time <= @prev_time + 1
         return
       end
       @prev_time = time
       delete_if do |k, v|
-        if @count[k] <= 1 and k != key
-          @count.delete(k)
+        if @info[k][:count] <= 1 and time - @info[k][:time] > 10 and k != key
+          @info.delete(k)
           @weak[k] = v
           next true
         else
-          @count[k] = 0
+          @info[k][:count] = 0
+          @info[k][:time] = time
           next false
         end
       end
@@ -65,13 +68,13 @@ module Cache
 
     def []=(key, value)
       pop(key)
-      @count[key] += 1
+      @info[key][:count] += 1
       return super
     end
 
     def [](key)
       pop(key)
-      @count[key] += 1
+      @info[key][:count] += 1
       return super if include?(key)
       return @weak[key]
     end
