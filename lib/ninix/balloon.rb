@@ -1533,11 +1533,11 @@ module Balloon
           if is_anchor
             @parent.handle_request(
               :GET, :notify_event,
-              'OnAnchorEnter', raw_text, link_id[1], @selection)
+              'OnAnchorEnter', raw_text, link_id[1], *args)
           else
             @parent.handle_request(
               :GET, :notify_event,
-              'OnChoiceEnter', raw_text, link_id, @selection)
+              'OnChoiceEnter', raw_text, link_id, *args)
           end
         end
         @hover_id = GLib::Timeout.add(1000) do
@@ -1545,11 +1545,11 @@ module Balloon
           if is_anchor
             @parent.handle_request(
               :GET, :notify_event,
-              'OnAnchorHover', raw_text, link_id[1], @selection)
+              'OnAnchorHover', raw_text, link_id[1], *args)
           else
             @parent.handle_request(
               :GET, :notify_event,
-              'OnChoiceHover', raw_text, link_id, @selection)
+              'OnChoiceHover', raw_text, link_id, *args)
           end
         end
       else
