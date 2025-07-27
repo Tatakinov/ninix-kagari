@@ -21,6 +21,7 @@ rescue LoadError
   Gst = nil
 end
 require "cgi"
+require 'etc'
 require "uri"
 require "pathname"
 require "securerandom"
@@ -365,12 +366,15 @@ module Sakura
         Logging::Logging.error(get_selfname + ' cannot load SHIORI(' + @shiori_name + ')')
       end
       @__charset = 'UTF-8' # default
-      get_event_response('OnInitialize', :event_type => 'NOTIFY')
+      get_event_response('OnInitialize', event_type: 'NOTIFY')
       get_event_response('basewareversion',
-                         Version.VERSION,
-                         'ninix-kagari',
                          Version.NUMBER,
-                         :event_type => 'NOTIFY')
+                         'ninix-kagari',
+                         Version.VERSION,
+                         event_type: 'NOTIFY')
+      uname = Etc.uname
+      os = "#{uname[:sysname]},#{uname[:release]},#{uname[:version]}"
+      get_event_response('OnNotifyOSInfo', os, event_type: 'NOTIFY')
     end
 
     def finalize()
