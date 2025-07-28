@@ -34,11 +34,12 @@ module SSTPLib
         512 => 'Invisible',
         }
 
-    def initialize(server, fp, command, version)
+    def initialize(server, fp, command, version, uuid = nil)
       @server = server
       @fp = fp
       @command = command
       @version = version
+      @uuid = uuid
     end
 
     def parse_headers(fp)
@@ -113,6 +114,10 @@ module SSTPLib
 
     def timestamp
       Time.now.localtime.strftime("%d/%b/%Y:%H:%M:%S %z")
+    end
+
+    def is_owned
+      false
     end
   end
 end

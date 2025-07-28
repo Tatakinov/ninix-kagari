@@ -203,6 +203,6 @@ class UnixSSTPController < BaseSSTPController
   end
 
   def create(buffer, sstp_server, socket)
-    return SSTP::RequestHandler.create(buffer, sstp_server, socket)
+    return SSTP::RequestHandler.create(buffer, sstp_server, socket, @uuid)
   end
 end

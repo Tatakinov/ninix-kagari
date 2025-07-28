@@ -211,7 +211,7 @@ module SSTP
         end
         nodes.each do |node|
           next unless node[0] == Script::SCRIPT_TAG
-          if PROHIBITED_TAGS.include?(node[1])
+          if PROHIBITED_TAGS.include?(node[1]) and not is_owned
             send_response(400) # Bad Request
             log_error("Script: tag #{node[1]} not allowed")
             return true
@@ -219,6 +219,13 @@ module SSTP
         end
       end
       return false
+    end
+
+    def is_owned
+      return false if @uuid.nil? or @uuid.empty?
+      @headers.lazy.filter_map do |k, v|
+        v if k == 'ID'
+      end.first == @uuid
     end
 
     def get_script_odict
@@ -542,14 +549,14 @@ module SSTP
       return create(line, server, fp)
     end
 
-    def self.create(line, server, fp)
+    def self.create(line, server, fp, uuid)
       return NilRequestHandler.new(server, fp) if line.nil?
       line = line.encode('UTF-8', :invalid => :replace, :undef => :replace).chomp
       re_req_sstp_syntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
       match = re_req_sstp_syntax.match(line)
       unless match.nil?
         command, version = match[1, 2]
-        return SSTPRequestHandler.new(server, fp, command, version)
+        return SSTPRequestHandler.new(server, fp, command, version, uuid)
       end
       return NilRequestHandler.new(server, fp)
     end
