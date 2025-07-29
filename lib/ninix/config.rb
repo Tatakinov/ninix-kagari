@@ -225,7 +225,7 @@ module NConfig
       when 'charset'
         value.strip!
         begin
-          charset = Encoding.find(value)
+          charset = (charset == 'Shift_JIS') ? (Encoding::CP932) : (Encoding.find(value))
         rescue
           Logging::Logging.error('Unsupported charset ' + value)
         end
