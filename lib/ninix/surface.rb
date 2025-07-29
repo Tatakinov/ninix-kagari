@@ -847,9 +847,9 @@ module Surface
       end
     end
 
-    def get_balloon_offset(side)
+    def get_balloon_offset(side, scaling = true)
       x, y = @window[side].get_balloon_offset
-      scale = @window[side].get_scale
+      scale = (scaling) ? (@window[side].get_scale) : (1)
       x = (x * scale / 100).to_i
       y = (y * scale / 100).to_i
       return x, y
@@ -907,6 +907,10 @@ module Surface
       else
         @kasanari = 0
       end
+    end
+
+    def bind(side)
+      @window[side].bind
     end
   end
 

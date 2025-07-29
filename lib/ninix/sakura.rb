@@ -459,7 +459,7 @@ module Sakura
 
     def update_balloon_offset(side, x_delta, y_delta)
       return if side >= @char
-      ox, oy = @surface.window[side].get_balloon_offset # without scaling
+      ox, oy = @surface.get_balloon_offset(side, false) # without scaling
       direction = @balloon.window[side].direction
       sx, sy = get_surface_position(side)
       if direction.zero? # left
@@ -2788,7 +2788,7 @@ module Sakura
         else
           flag = args[3]
         end
-        bind = @surface.window[@script_side].bind # XXX
+        bind = @surface.bind(@script_side) # XXX
         for key in bind.keys
           group = bind[key][0].split(',', 2)
           next if category != group[0]
