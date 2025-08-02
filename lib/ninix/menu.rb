@@ -457,7 +457,16 @@ module Menu
           end
         end
       end
-      @__popup_menu.popup_at_pointer(nil)
+      # HACK
+      # AYUを利用しているとPopupするためのWindowが無いので
+      # 無理やりウィンドウを用意する
+      w = Pix::TransparentWindow.new
+      display = Gdk::Display.default
+      _, x, y = display.default_seat.pointer.position_double
+      w.move(x, y)
+      w.show_all
+      @__popup_menu.popup_at_rect(w.window, Gdk::Rectangle.new(0, 0, 1, 1), Gdk::Gravity::NORTH_WEST, Gdk::Gravity::NORTH_WEST)
+      w.hide
     end
 
     def __set_caption(name, caption)
