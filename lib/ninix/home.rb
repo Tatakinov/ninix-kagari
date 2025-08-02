@@ -18,7 +18,6 @@ require_relative "alias"
 require_relative "dll"
 require_relative "logging"
 
-
 module Home
 
   def self.get_ninix_home()
