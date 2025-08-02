@@ -24,7 +24,6 @@ require_relative "metamagic"
 require_relative "logging"
 require_relative 'cache'
 require_relative 'version'
-require_relative 'ninix_server'
 
 module Surface
 
@@ -67,6 +66,7 @@ module Surface
     end
 
     def new_(desc, surface_alias, surface, name, surface_dir, tooltips, seriko_descript, default_sakura, default_kero)
+      @desc = desc
       @ayu = desc.get('ayu')
       fail if @ayu.nil?
       if ENV['AYU_PATH'].nil?
@@ -82,11 +82,9 @@ module Surface
         p e
         return
       end
-      p NinixServer.sockdir
-      p @parent.handle_request(:GET, :uuid)
       send_event('Initialize', File.join(surface_dir, ''))
       send_event('BasewareVersion', 'ninix', Version.NUMBER)
-      send_event('Endpoint', File.join(NinixServer.sockdir, @parent.handle_request(:GET, :uuid)))
+      send_event('Endpoint', *@parent.handle_request(:GET, :endpoint))
     end
 
     def is_internal
@@ -209,9 +207,34 @@ module Surface
     end
 
     def get_menu_fontcolor
+      fontcolor_r = @desc.get('menu.background.font.color.r', :default => -1).to_i
+      fontcolor_g = @desc.get('menu.background.font.color.g', :default => -1).to_i
+      fontcolor_b = @desc.get('menu.background.font.color.b', :default => -1).to_i
+      if fontcolor_r == -1 || fontcolor_g == -1 || fontcolor_b == -1
+        background = [-1, -1, -1]
+      else
+        fontcolor_r = [0, [255, fontcolor_r].min].max
+        fontcolor_g = [0, [255, fontcolor_g].min].max
+        fontcolor_b = [0, [255, fontcolor_b].min].max
+        background = [fontcolor_r, fontcolor_g, fontcolor_b]
+      end
+      fontcolor_r = @desc.get('menu.foreground.font.color.r', :default => -1).to_i
+      fontcolor_g = @desc.get('menu.foreground.font.color.g', :default => -1).to_i
+      fontcolor_b = @desc.get('menu.foreground.font.color.b', :default => -1).to_i
+      if fontcolor_r == -1 || fontcolor_g == -1 || fontcolor_b == -1
+        foreground = [-1, -1, -1]
+      else
+        fontcolor_r = [0, [255, fontcolor_r].min].max
+        fontcolor_g = [0, [255, fontcolor_g].min].max
+        fontcolor_b = [0, [255, fontcolor_b].min].max
+        foreground = [fontcolor_r, fontcolor_g, fontcolor_b]
+      end
+      return background, foreground
     end
 
     def get_mayuna_menu
+      # TODO stub
+      return {}
     end
 
     def reset_alignment

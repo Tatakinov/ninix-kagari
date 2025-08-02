@@ -87,6 +87,11 @@ module SSTP
 
   class SSTPRequestHandler < SSTPLib::BaseSSTPRequestHandler
 
+    def initialize(...)
+      super
+      @response_queue = Thread::Queue.new
+    end
+
     def handle
       unless @server.handle_request(:GET, :get_sakura_cantalk)
         @error = nil
@@ -150,6 +155,18 @@ module SSTP
       handle_notify(1.1)
     end
 
+    def do_NOTIFY_1_2
+      handle_notify(1.2)
+    end
+
+    def do_NOTIFY_1_3
+      handle_notify(1.3)
+    end
+
+    def do_NOTIFY_1_4
+      handle_notify(1.4)
+    end
+
     def handle_notify(version)
       script_odict = {}
       return unless check_decoder()
@@ -173,13 +190,20 @@ module SSTP
       sock_domain, remote_port, remote_hostname, remote_ip = @fp.peeraddr
       address = remote_hostname # XXX
       if entry_db.nil? or entry_db.is_empty()
-        send_response(200) # OK
         show_sstp_marker, use_translator = get_options()
         @server.handle_request(
           :GET, :enqueue_request,
           event, script_odict, sender, handle,
           address, show_sstp_marker, use_translator,
-          entry_db, nil)
+          entry_db, nil, from_ayu, proc do |script|
+            @response_queue.push(script)
+          end)
+        script = @response_queue.pop
+        if script.nil? or script.empty?
+          send_response(204, ['Charset: UTF-8']) # No Content
+        else
+          send_response(200, ['Charset: UTF-8', "Script: #{script}"]) # OK
+        end
       elsif @server.has_request_handler
         send_response(409) # Conflict
       else
@@ -226,6 +250,13 @@ module SSTP
       @headers.lazy.filter_map do |k, v|
         v if k == 'ID'
       end.first == @uuid
+    end
+
+    def from_ayu
+      return false if @ayu_uuid.nil? or @ayu_uuid.empty?
+      @headers.lazy.filter_map do |k, v|
+        v if k == 'Ayu'
+      end.first == @ayu_uuid
     end
 
     def get_script_odict
@@ -339,6 +370,7 @@ module SSTP
     end
 
     def local_request
+      return true if @fp.is_a?(UNIXSocket)
       sock_domain, remote_port, remote_hostname, remote_ip = @fp.peeraddr
       remote_ip == "127.0.0.1"
     end
@@ -554,14 +586,14 @@ module SSTP
       return create(line, server, fp)
     end
 
-    def self.create(line, server, fp, uuid)
+    def self.create(line, server, fp, uuid, ayu_uuid)
       return NilRequestHandler.new(server, fp) if line.nil?
       line = line.encode('UTF-8', :invalid => :replace, :undef => :replace).chomp
       re_req_sstp_syntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
       match = re_req_sstp_syntax.match(line)
       unless match.nil?
         command, version = match[1, 2]
-        return SSTPRequestHandler.new(server, fp, command, version, uuid)
+        return SSTPRequestHandler.new(server, fp, command, version, uuid, ayu_uuid)
       end
       return NilRequestHandler.new(server, fp)
     end

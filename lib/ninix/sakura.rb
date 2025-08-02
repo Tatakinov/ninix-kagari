@@ -39,6 +39,7 @@ require_relative "metamagic"
 require_relative "logging"
 require_relative "case_insensitive_file"
 require_relative "http"
+require_relative 'ninix_server'
 
 module Sakura
 
@@ -432,8 +433,7 @@ module Sakura
     def set_surface(desc, surface_alias, surface, name, surface_dir, tooltips, seriko_descript)
       default_sakura = @desc.get('sakura.seriko.defaultsurface', :default => '0')
       default_kero = @desc.get('kero.seriko.defaultsurface', :default => '10')
-      @surface.new_(desc, surface_alias, surface, name, surface_dir, tooltips, seriko_descript,
-                   default_sakura, default_kero)
+      @surface.new_(desc, surface_alias, surface, name, surface_dir, tooltips, seriko_descript, default_sakura, default_kero)
       for side in 2..@char-1
         default = @desc.get('char' + side.to_s + '.seriko.defaultsurface')
         @surface.add_window(side, default)
@@ -1208,8 +1208,11 @@ module Sakura
                   'OnUpdateComplete']
     RESET_NOTIFY_EVENT = ['OnVanishSelecting', 'OnVanishCancel']
 
-    def notify_event(event, *arglist, event_type: 'GET', default: nil, embed: false, fallback: nil)
-      return false if @time_critical_session and event.start_with?('OnMouse')
+    def notify_event(event, *arglist, event_type: 'GET', default: nil, embed: false, fallback: nil, return_script: false)
+      if @time_critical_session and event.start_with?('OnMouse')
+        return nil if return_script
+        return false
+      end
       if RESET_NOTIFY_EVENT.include?(event)
         reset_script(:reset_all => true)
       end
@@ -1251,6 +1254,7 @@ module Sakura
           start_script(script)
           @balloon.hide_sstp_message()
         end
+        return script if return_script
         return true
       end
       if event == 'OnClose' and arglist[0] == 'shutdown' # XXX
@@ -1260,9 +1264,9 @@ module Sakura
         if BOOT_EVENT.include?(event)
           surface_bootup()
         end
-        if event == 'OnMouseClick' and arglist[5] == 1
+        if event == 'OnMouseClick' and arglist[5].to_i == 1
           @parent.handle_request(
-            :GET, :open_popup_menu, self, arglist[3])
+            :GET, :open_popup_menu, self, arglist[3].to_i)
         end
         @parent.handle_request(
           :GET, :notify_other, @key,
@@ -1271,6 +1275,7 @@ module Sakura
           get_current_shell_name(),
           false, communication,
           nil, false, script, arglist)
+        return script if return_script
         return false
       end
       Logging::Logging.debug('=> "' + script + '"')
@@ -1281,9 +1286,10 @@ module Sakura
       end
       if @passivemode and \
         (event == 'OnSecondChange' or event == 'OnMinuteChange')
+        return script if return_script
         return false
       end
-      start_script(script, embed: embed)
+      start_script(script, embed: embed) unless script.nil?
       @balloon.hide_sstp_message()
       if BOOT_EVENT.include?(event)
         @script_finally << lambda {|flag_break: false| @surface_bootup }
@@ -1298,6 +1304,7 @@ module Sakura
           nil, false, script, arglist)
       }
       @script_finally << proc_obj
+      return script if return_script
       return true
     end
 
@@ -1664,8 +1671,9 @@ module Sakura
           break
         end
       end
+      @ayu_uuid = SecureRandom.uuid
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
-        @controller = UnixSSTPController.new(@uuid)
+        @controller = UnixSSTPController.new(@uuid, @ayu_uuid)
         @controller.set_responsible(self)
         @controller.start_servers
       end
@@ -1884,6 +1892,12 @@ module Sakura
       if @force_quit and not busy() and @processed_script.empty? and @processed_text.empty?
         quit()
       end
+      # process async http
+      @client.run
+      #
+      unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
+        @controller.handle_sstp_queue
+      end
       unless @wait_for_animation.nil?
         if @surface.is_playing_animation(@script_side, @wait_for_animation)
           return true
@@ -1943,12 +1957,6 @@ module Sakura
             enqueue_event(*event)
           end
         end
-      end
-      # process async http
-      @client.run
-      #
-      unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
-        @controller.handle_sstp_queue
       end
       process_script()
       return true
@@ -3424,8 +3432,8 @@ module Sakura
       return [now.to_i, now.nsec]
     end
 
-    def uuid
-      @uuid
+    def endpoint
+      return [File.join(NinixServer.sockdir, @uuid), @ayu_uuid]
     end
   end
 

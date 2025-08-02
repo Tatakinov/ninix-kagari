@@ -25,10 +25,10 @@ class BaseSSTPController < MetaMagic::Holon
 
   def enqueue_request(event, script_odict, sender, handle,
                       address, show_sstp_marker, use_translator,
-                      entry_db, request_handler)
+                      entry_db, request_handler, from_ayu = false, push_script = nil)
     @__sstp_queue <<
       [event, script_odict, sender, handle, address, show_sstp_marker,
-       use_translator, entry_db, request_handler]
+       use_translator, entry_db, request_handler, from_ayu, push_script]
   end
 
   def check_request_queue(sender)
@@ -59,7 +59,7 @@ class BaseSSTPController < MetaMagic::Holon
     return if @__sstp_flag or @__sstp_queue.empty?
     event, script_odict, sender, handle, address, \
     show_sstp_marker, use_translator, \
-    entry_db, request_handler = @__sstp_queue.shift
+    entry_db, request_handler, from_ayu, push_script= @__sstp_queue.shift
     working = (not event.nil?)
     break_flag = false
     for if_ghost in script_odict.keys()
@@ -74,6 +74,9 @@ class BaseSSTPController < MetaMagic::Holon
       if @parent.handle_request(:GET, :get_preference, 'allowembryo').zero?
         if event.nil?
           request_handler.send_response(420) unless request_handler.nil? # Refuse
+          unless push_script.nil?
+            push_script.call(nil)
+          end
           return
         else
           default_script = nil
@@ -94,11 +97,14 @@ class BaseSSTPController < MetaMagic::Holon
     if script.nil?
       script = default_script
     end
+    unless push_script.nil?
+      push_script.call(script)
+    end
     if script.nil?
       request_handler.send_response(204) unless request_handler.nil? # No Content
       return
     end
-    set_sstp_flag(sender)
+    set_sstp_flag(sender) unless from_ayu
     @parent.handle_request(
       :GET, :enqueue_script,
       event, script, sender, handle, address,
@@ -176,9 +182,11 @@ class TCPSSTPController < BaseSSTPController
 end
 
 class UnixSSTPController < BaseSSTPController
-  def initialize(uuid)
+  def initialize(uuid, ayu_uuid)
     super()
     @uuid = uuid
+    @ayu_uuid = ayu_uuid
+    @client_threads = []
   end
 
   def start_servers
@@ -189,9 +197,19 @@ class UnixSSTPController < BaseSSTPController
     Thread.new(server) do |soc|
       until soc.closed?
         begin
+          threads = []
+          @client_threads.keep_if do |v|
+            threads << v unless v.alive?
+            v.alive?
+          end
+          threads.each do |v|
+            v.join
+          end
           client = soc.accept
-          receive_sstp_request(soc, client)
-          client.shutdown(Socket::SHUT_WR)
+          @client_threads << Thread.new(soc, client) do |s, c|
+            receive_sstp_request(s, c)
+            c.shutdown(Socket::SHUT_WR)
+          end
         rescue
           # TODO error handling
         end
@@ -200,11 +218,11 @@ class UnixSSTPController < BaseSSTPController
   end
 
   # HACK ninix_mainのget_event_response相当のことをここでやる
-  def get_event_response(event, *args)
-    return @parent.handle_request(:GET, :get_event_response, *event)
+  def get_event_response(event)
+    return @parent.handle_request(:GET, :notify_event, *event, return_script: true)
   end
 
   def create(buffer, sstp_server, socket)
-    return SSTP::RequestHandler.create(buffer, sstp_server, socket, @uuid)
+    return SSTP::RequestHandler.create(buffer, sstp_server, socket, @uuid, @ayu_uuid)
   end
 end

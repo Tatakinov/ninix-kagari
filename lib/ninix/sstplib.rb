@@ -34,12 +34,13 @@ module SSTPLib
         512 => 'Invisible',
         }
 
-    def initialize(server, fp, command, version, uuid = nil)
+    def initialize(server, fp, command, version, uuid = nil, ayu_uuid = nil)
       @server = server
       @fp = fp
       @command = command
       @version = version
       @uuid = uuid
+      @ayu_uuid = ayu_uuid
     end
 
     def parse_headers(fp)
@@ -83,13 +84,17 @@ module SSTPLib
       send_response(code, :message => RESPONSES[code])
     end
 
-    def send_response(code, message: nil)
+    def send_response(code, data = [], message: nil)
       log_request(code, :message => message)
       @fp.write(response(code))
+      data.each do |v|
+        @fp.write("#{v}\r\n")
+      end
+      @fp.write("\r\n")
     end
 
     def response(code)
-      return "SSTP/#{(@version or "1.0")} #{code} #{RESPONSES[code]}\r\n\r\n"
+      return "SSTP/#{(@version or "1.0")} #{code} #{RESPONSES[code]}\r\n"
     end
 
     def log_error(message)
