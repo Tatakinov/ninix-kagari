@@ -11,6 +11,7 @@
 #
 
 require_relative "metamagic"
+require_relative "ninix_server"
 
 class BaseSSTPController < MetaMagic::Holon
 
@@ -190,6 +191,7 @@ class UnixSSTPController < BaseSSTPController
         begin
           client = soc.accept
           receive_sstp_request(soc, client)
+          client.shutdown(Socket::SHUT_WR)
         rescue
           # TODO error handling
         end

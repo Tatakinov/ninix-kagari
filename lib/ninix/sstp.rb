@@ -263,8 +263,8 @@ module SSTP
       return entry_db
     end
 
-    def get_event
-      event = @headers.reverse.assoc("Event")&.at(1)
+    def get_event(key = "Event")
+      event = @headers.reverse.assoc(key)&.at(1)
       if event.nil?
         send_response(400) # Bad Request
         log_error('Event: header field not found')
@@ -362,6 +362,10 @@ module SSTP
       handle_command()
     end
 
+    def do_EXECUTE_1_4
+      handle_command()
+    end
+
     def shutdown(how)
       @fp.shutdown(how)
     end
@@ -374,7 +378,7 @@ module SSTP
       return unless check_decoder()
       sender = get_sender()
       return if sender.nil?
-      command = get_command()
+      command, *args = get_event("Command")
       charset = get_charset
       charset = charset.to_s
       case command
@@ -419,20 +423,21 @@ module SSTP
                     charset, :invalid => :replace, :undef => :replace))
         @fp.write("\r\n")
         @fp.write("\r\n")
+      when 'GetBalloonSize'
+        x, y = @server.handle_request(:GET, :get_balloon_size, args[0].to_i)
+        send_response(200)
+        @fp.write("#{x},#{y}")
+        @fp.write("\r\n")
+        @fp.write("\r\n")
+      when 'SetBalloonPosition'
+        @server.handle_request(:GET, :set_balloon_position, *args.map do |v|
+          v.to_i
+        end.take(3))
+        send_response(204)
       else
         send_response(501) # Not Implemented
         log_error("Not Implemented (#{command})")
       end
-    end
-
-    def get_command
-      command = @headers.reverse.assoc('Command')&.at(1)
-      if command.nil?
-        send_response(400) # Bad Request
-        log_error('Command: header field not found')
-        return nil
-      end
-      return command.downcase
     end
 
     def do_COMMUNICATE_1_1

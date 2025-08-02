@@ -66,8 +66,10 @@ module SSTPLib
       return unless parse_request(@fp)
       name = ("do_#{@command}_#{@version[0]}_#{@version[2]}")
       begin
-        method(name).call
-      rescue
+        send(name)
+      rescue => e
+        p e
+        pp e.backtrace
         send_error(
           501,
           :message => "Not Implemented (#{@command}/#{@version})")
