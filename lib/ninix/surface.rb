@@ -15,6 +15,7 @@
 #
 
 require "gtk3"
+require 'open3'
 
 require_relative "keymap"
 require_relative "pix"
@@ -22,8 +23,297 @@ require_relative "seriko"
 require_relative "metamagic"
 require_relative "logging"
 require_relative 'cache'
+require_relative 'version'
+require_relative 'ninix_server'
 
 module Surface
+
+  class SurfaceProxy < MetaMagic::Holon
+    def initialize
+      super("")
+      @internal = Surface.new
+      @internal.set_responsible(self)
+      @external = Ayu.new
+      @external.set_responsible(self)
+      @current = @internal
+    end
+
+    def new_(desc, *args)
+      ayu = desc.get('ayu')
+      if ayu.nil?
+        @current = @internal
+      else
+        @current = @external
+      end
+      @current.new_(desc, *args)
+    end
+
+    def set_responsible(parent)
+      @parent = parent
+    end
+
+    def respond_to_missing?(symbol, include_private)
+      @current.class.method_defined?(symbol)
+    end
+
+    def method_missing(name, *args)
+      #p [:missing, name, *args]
+      @current.send(name, *args)
+    end
+  end
+
+  class Ayu
+    def initialize
+    end
+
+    def new_(desc, surface_alias, surface, name, surface_dir, tooltips, seriko_descript, default_sakura, default_kero)
+      @ayu = desc.get('ayu')
+      fail if @ayu.nil?
+      if ENV['AYU_PATH'].nil?
+        command = @ayu
+      else
+        command = ENV['AYU_PATH'] + @ayu
+      end
+      begin
+        @ayu_write, @ayu_read, @ayu_err, @ayu_thread = Open3.popen3(command)
+      rescue
+        # TODO error
+        p command
+        p e
+        return
+      end
+      p NinixServer.sockdir
+      p @parent.handle_request(:GET, :uuid)
+      send_event('Initialize', File.join(surface_dir, ''))
+      send_event('BasewareVersion', 'ninix', Version.NUMBER)
+      send_event('Endpoint', File.join(NinixServer.sockdir, @parent.handle_request(:GET, :uuid)))
+    end
+
+    def is_internal
+      false
+    end
+
+    def set_responsible(parent)
+      @parent = parent
+    end
+
+    def send_event(event, *args, method: 'NOTIFY')
+      request = [
+        "#{method} AYU/0.9",
+        'Charset: UTF-8',
+        "Event: #{event}",
+      ].join("\r\n")
+      args.each_with_index do |v, i|
+        request = [request, "Argument#{i}: #{v}"].join("\r\n")
+      end
+      request = [request, "\r\n\r\n"].join
+      request = [[request.bytesize].pack('L'), request].join
+      @ayu_write.write(request)
+      len = nil
+      begin
+        len = @ayu_read.read(4).unpack('L').first
+      rescue => e
+        p e
+        p @ayu_err.readlines
+      end
+      if len.nil?
+        # TODO error
+        return
+      end
+      response = @ayu_read.read(len)
+      #p [:debug, request, response]
+      iss = StringIO.new(response, 'r')
+      protocol, code, status = iss.readline.split(' ', 3)
+      headers = {}
+      encoding = Encoding::UTF_8
+      iss.each_line do |line|
+        k, _, v = line.partition(': ')
+        next if _ != ':='
+        headers[k] = v
+      end
+      return {proto: protocol, code: code.to_i, status: status, headers: headers}
+    end
+
+    def add_window(side, default)
+      send_event('Create', side)
+    end
+
+    def set_icon(path)
+    end
+
+    def get_balloon_offset(side, scaling)
+    end
+
+    def set_balloon_offset(side, offset)
+    end
+
+    def get_surface_size(side)
+      response = send_event('Size', side, method: 'GET')
+      headers = response[:headers]
+      unless headers.include?('Value0') and headers.include?('Value1')
+        return [0, 0]
+      end
+      x = headers['Value0'].to_i
+      y = headers['Value0'].to_i
+      return [x, y]
+    end
+
+    def reset_surface
+    end
+
+    def get_position(side)
+      response = send_event('Position', side, method: 'GET')
+      headers = response[:headers]
+      unless headers.include?('Value0') and headers.include?('Value1')
+        return [0, 0]
+      end
+      x = headers['Value0'].to_i
+      y = headers['Value0'].to_i
+      return [x, y]
+    end
+
+    def is_shown(side)
+    end
+
+    def get_username
+    end
+
+    def get_selfname
+    end
+
+    def get_selfname2
+    end
+
+    def get_keroname
+    end
+
+    def get_friendname
+    end
+
+    def name
+    end
+
+    def get_touched_region(side, x, y)
+    end
+
+    def window_stick(flag)
+    end
+
+    def toggle_bind(side, bind_id, from)
+    end
+
+    def get_menu_pixmap
+    end
+
+    def prefix
+    end
+
+    def get_menu_fontcolor
+    end
+
+    def get_mayuna_menu
+    end
+
+    def reset_alignment
+    end
+
+    def reset_position
+    end
+
+    def reset_balloon_position
+      send_event('ResetBalloonPosition')
+    end
+
+    def show(side)
+      send_event('Show', side)
+    end
+
+    def hide(side)
+      send_event('Hide', side)
+    end
+
+    def hide_all
+    end
+
+    def set_alignment(side, flag)
+    end
+
+    def set_alignment_current
+    end
+
+    def identify_window(window)
+    end
+
+    def set_surface_default(side)
+    end
+
+    def set_position(side, x, y)
+    end
+
+    def set_surface(side, id)
+      send_event('Surface', side, id)
+    end
+
+    def get_surface(side)
+    end
+
+    def get_collision_area(side, name)
+    end
+
+    def get_center(side)
+    end
+
+    def get_kinoko_center(side)
+    end
+
+    def raise_(side)
+    end
+
+    def lower(side)
+    end
+
+    def raise_all
+    end
+
+    def lower_all
+    end
+
+    def finalize
+    end
+
+    def get_mikire
+    end
+
+    def get_kasanari
+    end
+
+    def get_mikire
+    end
+
+    def get_kasanari
+    end
+
+    def is_playing_animation(side, id)
+    end
+
+    def invoke_yen_e(side, id)
+    end
+
+    def invoke_talk(side, id, count)
+    end
+
+    def invoke(side, id)
+    end
+
+    def window_iconify(flag)
+    end
+
+    def window_stayontop(flag)
+    end
+
+    def change_animation_state(side, id, command, *args)
+    end
+  end
 
   class Surface < MetaMagic::Holon
     attr_reader :name, :prefix, :window
@@ -640,12 +930,12 @@ module Surface
         @parent.handle_request(
           :NOTIFY, :set_balloon_direction, side, direction)
         if direction.zero? # left
-          base_x = (x + ox)
-        else
-          sw, sh = get_surface_size(side)
           bw, bh = @parent.handle_request(
               :GET, :get_balloon_size, side)
-          base_x = (x + sw + bw - ox)
+          base_x = (x - bw + ox)
+        else
+          sw, sh = get_surface_size(side)
+          base_x = (x + sw - ox)
         end
         base_y = (y + oy)
         @parent.handle_request(
@@ -911,6 +1201,10 @@ module Surface
 
     def bind(side)
       @window[side].bind
+    end
+
+    def is_internal
+      true
     end
   end
 

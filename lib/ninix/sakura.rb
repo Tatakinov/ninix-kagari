@@ -143,7 +143,7 @@ module Sakura
       }
       @balloon = Balloon::Balloon.new
       @balloon.set_responsible(self)
-      @surface = Surface::Surface.new
+      @surface = Surface::SurfaceProxy.new
       @surface.set_responsible(self)
       keep_silence(false)
       @updateman = Update::NetworkUpdate.new()
@@ -1653,6 +1653,22 @@ module Sakura
       @__temp_mode = temp
       @key = key
       @force_quit = false
+      loop do
+        @uuid = SecureRandom.uuid
+        if @parent.handle_request(:GET, :add_sakura_info, @uuid,
+            @desc.get('sakura.name'),
+            @desc.get('kero.name'),
+            File.join(get_prefix(), ''),
+            @desc.get('name')
+                                 )
+          break
+        end
+      end
+      unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
+        @controller = UnixSSTPController.new(@uuid)
+        @controller.set_responsible(self)
+        @controller.start_servers
+      end
       Logging::Logging.info('ghost ' + key)
       load_settings()
       shell_key = get_default_shell()
@@ -1699,22 +1715,6 @@ module Sakura
       notify_start(
         init, vanished, ghost_changed,
         name, prev_name, prev_shell, surface_dir, last_script, :abend => abend)
-      loop do
-        @uuid = SecureRandom.uuid
-        if @parent.handle_request(:GET, :add_sakura_info, @uuid,
-            @desc.get('sakura.name'),
-            @desc.get('kero.name'),
-            File.join(get_prefix(), ''),
-            @desc.get('name')
-                                 )
-          break
-        end
-      end
-      unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
-        @controller = UnixSSTPController.new(@uuid)
-        @controller.set_responsible(self)
-        @controller.start_servers
-      end
       GLib::Timeout.add(10) { do_idle_tasks } # 10[ms]
     end
 
@@ -2034,12 +2034,16 @@ module Sakura
 
     def __yen_0(args)
       ##@balloon.show(0)
+      default = @desc.get('sakura.seriko.defaultsurface')
+      @surface.add_window(0, default)
       @script_side = 0
     end
 
     def __yen_1(args)
       ##@balloon.show(1)
       @script_side = 1
+      default = @desc.get('kero.seriko.defaultsurface')
+      @surface.add_window(1, default)
     end
 
     def __yen_p(args)
@@ -3167,9 +3171,11 @@ module Sakura
       end
       unless @processed_text.empty?
         @balloon.show(@script_side)
-        balloon_win = @balloon.get_window(@script_side)
-        surface_win = @surface.get_window(@script_side)
-        balloon_win.window.restack(surface_win.window, true)
+        if @surface.is_internal
+          balloon_win = @balloon.get_window(@script_side)
+          surface_win = @surface.get_window(@script_side)
+          balloon_win.window.restack(surface_win.window, true)
+        end
         @balloon.append_text(@script_side, @processed_text[0])
         @processed_text = @processed_text[1..-1]
         surface_id = get_surface_id(@script_side)
@@ -3416,6 +3422,10 @@ module Sakura
     def get_current_time
       now = Time.now
       return [now.to_i, now.nsec]
+    end
+
+    def uuid
+      @uuid
     end
   end
 
