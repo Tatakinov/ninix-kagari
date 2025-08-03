@@ -99,7 +99,7 @@ module Surface
       request = [
         "#{method} AYU/0.9",
         'Charset: UTF-8',
-        "Event: #{event}",
+        "Command: #{event}",
       ].join("\r\n")
       args.each_with_index do |v, i|
         request = [request, "Argument#{i}: #{v}"].join("\r\n")
@@ -302,6 +302,9 @@ module Surface
     end
 
     def finalize
+      @ayu_write.write([0].pack('L'))
+      @ayu_write.close
+      @ayu_thread.join
     end
 
     def get_mikire
