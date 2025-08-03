@@ -72,7 +72,7 @@ module Surface
       if ENV['AYU_PATH'].nil?
         command = @ayu
       else
-        command = ENV['AYU_PATH'] + @ayu
+        command = File.join(ENV['AYU_PATH'], @ayu)
       end
       begin
         @ayu_write, @ayu_read, @ayu_err, @ayu_thread = Open3.popen3(command)
