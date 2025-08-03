@@ -98,6 +98,12 @@ module Balloon
       end
     end
 
+    def raise
+      @window.each_value do |v|
+        v.raise
+      end
+    end
+
     def create_gtk_window(title)
       window = Pix::TransparentWindow.new()
       window.set_title(title)
@@ -625,6 +631,10 @@ module Balloon
 
     def set_responsible(parent)
       @parent = parent
+    end
+
+    def raise
+      @window.window.raise
     end
 
     #@property

@@ -466,6 +466,9 @@ module SSTP
           v.to_i
         end.take(3))
         send_response(204)
+      when 'RaiseBalloon'
+        @server.handle_request(:NOTIFY, :raise_balloon)
+        send_response(204)
       else
         send_response(501) # Not Implemented
         log_error("Not Implemented (#{command})")

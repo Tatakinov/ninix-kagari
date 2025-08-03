@@ -465,7 +465,6 @@ module Sakura
       if direction.zero? # left
         nx = (ox + x_delta)
       else
-        w, h = @surface.get_surface_size(side)
         nx = (ox - x_delta)
       end
       ny = (oy + y_delta)
@@ -3434,6 +3433,10 @@ module Sakura
 
     def endpoint
       return [File.join(NinixServer.sockdir, @uuid), @ayu_uuid]
+    end
+
+    def raise_balloon
+      @balloon.raise
     end
   end
 

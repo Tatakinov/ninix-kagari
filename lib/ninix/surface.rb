@@ -109,10 +109,7 @@ module Surface
       @ayu_write.write(request)
       len = nil
       begin
-        len = @ayu_read.read(4).unpack('L').first
-      rescue => e
-        p e
-        p @ayu_err.readlines
+        len = @ayu_read.read(4)&.unpack('L').first
       end
       if len.nil?
         # TODO error
@@ -123,10 +120,9 @@ module Surface
       iss = StringIO.new(response, 'r')
       protocol, code, status = iss.readline.split(' ', 3)
       headers = {}
-      encoding = Encoding::UTF_8
       iss.each_line do |line|
-        k, _, v = line.partition(': ')
-        next if _ != ':='
+        k, sep, v = line.partition(': ')
+        next if sep != ': '
         headers[k] = v
       end
       return {proto: protocol, code: code.to_i, status: status, headers: headers}
@@ -140,9 +136,18 @@ module Surface
     end
 
     def get_balloon_offset(side, scaling)
+      response = send_event('GetBalloonOffset', side, method: 'GET')
+      headers = response[:headers]
+      unless headers.include?('Value0') and headers.include?('Value1')
+        return [0, 0]
+      end
+      x = headers['Value0'].to_i
+      y = headers['Value1'].to_i
+      return [x, y]
     end
 
     def set_balloon_offset(side, offset)
+      send_event('SetBalloonOffset', side, *offset)
     end
 
     def get_surface_size(side)
@@ -152,7 +157,7 @@ module Surface
         return [0, 0]
       end
       x = headers['Value0'].to_i
-      y = headers['Value0'].to_i
+      y = headers['Value1'].to_i
       return [x, y]
     end
 
