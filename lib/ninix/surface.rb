@@ -1918,7 +1918,7 @@ module Surface
       unless @parent.handle_request(:GET, :get_preference, 'check_collision').zero?
         draw_region(cr)
       end
-      @window.set_shape(cr, @image_surface.region(write: false), get_position)
+      @window.set_shape(@image_surface.region(write: false), get_position)
       @reshape = false
     end
 

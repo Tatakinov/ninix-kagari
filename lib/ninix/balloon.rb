@@ -1342,7 +1342,7 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
-      @window.set_shape(cr, @balloon_surface.region(write: false), get_position)
+      @window.set_shape(@balloon_surface.region(write: false), get_position)
       @reshape = false
       return false
     end

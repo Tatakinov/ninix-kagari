@@ -213,7 +213,7 @@ module Pix
       end
     end
 
-    def set_shape(cr, region, pos)
+    def set_shape(region, pos)
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
 =begin
       if region.nil?
