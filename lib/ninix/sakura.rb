@@ -594,10 +594,6 @@ module Sakura
       @balloon.reset_balloon()
     end
 
-    def get_workarea
-      @parent.handle_request(:GET, :get_workarea)
-    end
-
     def get_surface_position(side)
       result = @surface.get_position(side)
       unless result.nil?
@@ -901,7 +897,13 @@ module Sakura
                          :default => default)
           end
         end
-        left, top, scrn_w, scrn_h = get_workarea
+        # HACK
+        # 透明なウィンドウを生成してGdkWindowを作り出す
+        w = Pix::TransparentWindow.new
+        w.show
+        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, w.window)
+        w.hide
+        w.destroy
         notify_event('OnDisplayChange',
                      Gdk::Visual.best_depth,
                      scrn_w, scrn_h, :event_type => 'NOTIFY')

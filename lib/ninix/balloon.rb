@@ -898,13 +898,17 @@ module Balloon
       @window.move(x, y)
     end
 
+    def get_gdk_window
+      @window.window
+    end
+
     def set_position(base_x, base_y)
       return if @balloon_id.nil?
       px, py = get_balloon_windowposition()
       w, h = get_balloon_size()
       x = (base_x + px)
       y = (base_y + py)
-      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
       if (y + h) > top + scrn_h # XXX
         y = (scrn_h - h)
       end
@@ -1126,9 +1130,9 @@ module Balloon
       return if @parent.handle_request(:GET, :lock_repaint)
       return true unless @__shown
       fail "assert" if @balloon_surface.nil?
-      @window.set_surface(cr, @balloon_surface.surface(write: false), scale)
+      @window.set_surface(cr, @balloon_surface.surface(write: false), scale, @position)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
-      cr.translate(*@window.get_draw_offset) # XXX
+      cr.translate(*@position) # XXX
       # FIXME: comment
       cr.rectangle(@origin_x, 0, @valid_width, @origin_y + @valid_height)
       cr.clip
@@ -2095,7 +2099,7 @@ module Balloon
         Gtk::StateFlags::NORMAL, Gdk::RGBA.new(0, 0, 0, 0))
       w = desc.get('communicatebox.width', :default => 250).to_i
       h = desc.get('communicatebox.height', :default => -1).to_i
-      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
       @__surface_position = [(scrn_w - w) / 2, (scrn_h - h) / 2] # XXX
       @entry = Gtk::Entry.new
       @entry.signal_connect('activate') do |w|
@@ -2166,6 +2170,10 @@ module Balloon
         @window.add(box)
         box.show()
       end
+    end
+
+    def get_gdk_window
+      @window.window
     end
 
     def drag_data_received(widget, context, x, y, data, info, time)

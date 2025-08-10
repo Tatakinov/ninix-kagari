@@ -108,9 +108,7 @@ module Pix
         screen_changed(widget, :old_screen => old_screen)
         next true
       end
-      # set to minimum
-      set_size_request(1, 1)
-      resize(@width, @height)
+      maximize
       screen_changed(self)
     end
 
@@ -173,7 +171,7 @@ module Pix
       return super()
     end
 
-    def set_surface(cr, surface, scale)
+    def set_surface(cr, surface, scale, pos)
       cr.save()
       # clear
       cr.set_operator(Cairo::OPERATOR_SOURCE)
@@ -192,6 +190,7 @@ module Pix
         @tmp_surface = surface
       end
 =end
+      cr.translate(*pos)
       cr.scale(scale / 100.0, scale / 100.0)
       cr.set_source(surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)

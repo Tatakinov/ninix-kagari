@@ -975,9 +975,9 @@ module Surface
     end
 
     def reset_position
-      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
       s0x, s0y, s0w, s0h = 0, 0, 0, 0 # XXX
       for side in @window.keys
+        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window(side))
         align = get_alignment(side)
         w, h = get_max_size(side)
         if side.zero? # sakura
@@ -1006,6 +1006,10 @@ module Surface
         set_position(side, x, y)
         s0x, s0y, s0w, s0h = x, y, w, h # for next loop
       end
+    end
+
+    def get_gdk_window(side)
+      @window[side].get_gdk_window
     end
 
     def set_position(side, x, y)
@@ -1201,7 +1205,7 @@ module Surface
         @mikire = @kasanari = 0
         return
       end
-      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window(0))
       x0, y0 = get_position(0)
       s0w, s0h = get_surface_size(0)
       if (x0 + s0w / 3) < left or (x0 + s0w * 2 / 3) > (left + scrn_w) or \
@@ -1368,7 +1372,7 @@ module Surface
       return unless @side.zero?
       @reshape = true # XXX
       @parent.handle_request(:NOTIFY, :reset_position) # XXX
-      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
       @parent.handle_request(
         :NOTIFY, :notify_event, 'OnDisplayChange',
         Gdk.Visual.get_best_depth(), scrn_w, scrn_h)
@@ -1527,7 +1531,7 @@ module Surface
       case get_alignment()
       when 0
         yoffset = (dh - h)
-        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
+        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
         y = (top + scrn_h - dh)
       when 1
         yoffset = 0
@@ -1909,7 +1913,7 @@ module Surface
 
     def redraw(darea, cr)
       return if @image_surface.nil? # XXX
-      @window.set_surface(cr, @image_surface.surface(write: false), get_scale)
+      @window.set_surface(cr, @image_surface.surface(write: false), get_scale, @position)
       unless @parent.handle_request(:GET, :get_preference, 'check_collision').zero?
         draw_region(cr)
       end
@@ -1928,7 +1932,7 @@ module Surface
     def move_surface(xoffset, yoffset)
       return if @parent.handle_request(:GET, :lock_repaint)
       x, y = get_position()
-      @window.move(x + xoffset, y + yoffset)
+      set_positioin(x + xoffset, y + yoffset)
       if @side < 2
         args = [@side, xoffset, yoffset]
         @parent.handle_request(
@@ -1957,8 +1961,12 @@ module Surface
       @surface_id
     end
 
+    def get_gdk_window
+      @window.window
+    end
+
     def get_max_size
-      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
       w, h = @maxsize
       scale = get_scale
       w = [scrn_w, [8, (w * scale / 100).to_i].max].min
@@ -2100,8 +2108,9 @@ module Surface
       return if @parent.handle_request(:GET, :lock_repaint)
       @position = [x, y]
       new_x, new_y = get_position()
-      @window.move(new_x, new_y)
-      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
+      #@window.move(new_x, new_y)
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
+      p [:debug, left, top, scrn_w, scrn_h]
       ox, oy = get_balloon_offset # without scaling
       scale = get_scale
       ox = (ox * scale / 100).to_i
@@ -2150,13 +2159,13 @@ module Surface
       return if @dragged # XXX: position will be reset after button release event
       case align
       when 0
-        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
+        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
         sw, sh = get_max_size()
         sx, sy = @position # XXX: without window_offset
         sy = (top + scrn_h - sh)
         set_position(sx, sy)
       when 1
-        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea)
+        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
         sx, sy = @position # XXX: without window_offset
         sy = top
         set_position(sx, sy)
