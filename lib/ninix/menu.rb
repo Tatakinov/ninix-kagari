@@ -408,7 +408,7 @@ module Menu
       end
     end
 
-    def popup(side)
+    def popup(side, x, y)
       @__popup_menu.unrealize()
       for key in @__menu_list.keys
         item = @__menu_list[key][:entry]
@@ -460,13 +460,13 @@ module Menu
       # HACK
       # AYUを利用しているとPopupするためのWindowが無いので
       # 無理やりウィンドウを用意する
-      w = Pix::TransparentWindow.new
-      display = Gdk::Display.default
-      _, x, y = display.default_seat.pointer.position_double
-      w.move(x, y)
-      w.show_all
-      @__popup_menu.popup_at_rect(w.window, Gdk::Rectangle.new(0, 0, 1, 1), Gdk::Gravity::NORTH_WEST, Gdk::Gravity::NORTH_WEST)
-      w.hide
+      @win = Pix::TransparentWindow.new
+      @win.maximize
+      region = Cairo::Region.new
+      region.union!(x, y, 1, 1)
+      @win.set_shape(region, [0, 0])
+      @win.show_all
+      @__popup_menu.popup_at_rect(@win.window, Gdk::Rectangle.new(x, y, 1, 1), Gdk::Gravity::NORTH_WEST, Gdk::Gravity::NORTH_WEST)
     end
 
     def __set_caption(name, caption)

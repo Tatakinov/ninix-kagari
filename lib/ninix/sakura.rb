@@ -1266,8 +1266,11 @@ module Sakura
           surface_bootup()
         end
         if event == 'OnMouseClick' and arglist[5].to_i == 1
+          side = arglist[3].to_i
+          x = arglist[0].to_i
+          y = arglist[1].to_i
           @parent.handle_request(
-            :GET, :open_popup_menu, self, arglist[3].to_i)
+            :GET, :open_popup_menu, self, side, x, y)
         end
         @parent.handle_request(
           :GET, :notify_other, @key,

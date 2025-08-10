@@ -542,7 +542,7 @@ module Ninix_Main
       @__menu_owner.network_update()
     end
 
-    def open_popup_menu(sakura, side)
+    def open_popup_menu(sakura, side, x, y)
       @__menu_owner = sakura
       path_background, path_sidebar, path_foreground, \
       align_background, align_sidebar, align_foreground = \
@@ -560,7 +560,7 @@ module Ninix_Main
       @__menu.set_fontcolor(background, foreground)
       mayuna_menu = @__menu_owner.get_mayuna_menu()
       @__menu.create_mayuna_menu(mayuna_menu)
-      @__menu.popup(side)
+      @__menu.popup(side, x, y)
     end
 
     def get_ghost_menus
