@@ -2147,6 +2147,9 @@ module Surface
         :GET, :set_balloon_position, @side, base_x, base_y)
       @parent.handle_request(:GET, :notify_observer, 'set position')
       @parent.handle_request(:GET, :check_mikire_kasanari)
+      unless @image_surface.nil?
+        @window.queue_draw(@image_surface.region(write: false))
+      end
     end
 
     def get_position ## FIXME: position with offset(property)
