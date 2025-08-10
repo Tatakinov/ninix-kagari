@@ -1132,7 +1132,7 @@ module Balloon
       fail "assert" if @balloon_surface.nil?
       @window.set_surface(cr, @balloon_surface.surface(write: false), scale, @position)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
-      cr.translate(*@position) # XXX
+      cr.translate(*get_position) # XXX
       # FIXME: comment
       cr.rectangle(@origin_x, 0, @valid_width, @origin_y + @valid_height)
       cr.clip
@@ -1342,7 +1342,7 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
-      @window.set_shape(cr, @balloon_surface.region(write: false))
+      @window.set_shape(cr, @balloon_surface.region(write: false), get_position)
       @reshape = false
       return false
     end
@@ -1440,6 +1440,9 @@ module Balloon
     end
 
     def check_link_region(px, py)
+      pos = get_position
+      px -= pos[0]
+      py -= pos[1]
       new_selection = nil
       for index in 0..(@link_buffer.length - 1)
         sl = @link_buffer[index][0]

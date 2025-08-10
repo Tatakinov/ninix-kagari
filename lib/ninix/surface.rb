@@ -1679,6 +1679,7 @@ module Surface
       cr.save
       # translate the user-space origin
       scale = get_scale
+      cr.translate(get_position)
       cr.scale(scale / 100.0, scale / 100.0)
       for part, type, c in @collisions
         cr.save
@@ -1913,11 +1914,11 @@ module Surface
 
     def redraw(darea, cr)
       return if @image_surface.nil? # XXX
-      @window.set_surface(cr, @image_surface.surface(write: false), get_scale, @position)
+      @window.set_surface(cr, @image_surface.surface(write: false), get_scale, get_position)
       unless @parent.handle_request(:GET, :get_preference, 'check_collision').zero?
         draw_region(cr)
       end
-      @window.set_shape(cr, @image_surface.region(write: false))
+      @window.set_shape(cr, @image_surface.region(write: false), get_position)
       @reshape = false
     end
 
@@ -2000,6 +2001,9 @@ module Surface
     end
 
     def get_touched_region(x, y)
+      pos = get_position
+      x -= pos[0]
+      y -= pos[1]
       return '' if @collisions.nil?
       for part, type, c in @collisions
         case type
@@ -2110,7 +2114,6 @@ module Surface
       new_x, new_y = get_position()
       #@window.move(new_x, new_y)
       left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
-      p [:debug, left, top, scrn_w, scrn_h]
       ox, oy = get_balloon_offset # without scaling
       scale = get_scale
       ox = (ox * scale / 100).to_i

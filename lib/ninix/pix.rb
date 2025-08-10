@@ -213,7 +213,7 @@ module Pix
       end
     end
 
-    def set_shape(cr, region)
+    def set_shape(cr, region, pos)
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
 =begin
       if region.nil?
@@ -229,12 +229,15 @@ module Pix
       end
 =end
       @prev_position = @__surface_position
+      r = Cairo::Region.new
+      r.union!(region)
+      r.translate!(*pos)
       if @supports_alpha
         input_shape_combine_region(nil)
-        input_shape_combine_region(region)
+        input_shape_combine_region(r)
       else
         shape_combine_region(nil)
-        shape_combine_region(region)
+        shape_combine_region(r)
       end
     end
   end
