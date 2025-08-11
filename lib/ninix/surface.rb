@@ -2240,14 +2240,11 @@ module Surface
       end
       # automagical raise
       @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
-=begin FIXME
-      if event.event_type == Gdk::EventType::BUTTON2_PRESS
+      if (n % 2).zero?
         @click_count = 2
       else # XXX
         @click_count = 1
       end
-=end
-      @click_count = 1
       if [1, 2, 3].include?(w.button)
         num_button = [0, 2, 1][w.button - 1]
         @parent.handle_request(:GET, :notify_event, 'OnMouseDown',
