@@ -897,13 +897,7 @@ module Sakura
                          :default => default)
           end
         end
-        # HACK
-        # 透明なウィンドウを生成してGdkWindowを作り出す
-        w = Pix::TransparentWindow.new
-        w.show
-        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, w.window)
-        w.hide
-        w.destroy
+        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, nil)
         notify_event('OnDisplayChange',
                      Gdk::Visual.best_depth,
                      scrn_w, scrn_h, :event_type => 'NOTIFY')

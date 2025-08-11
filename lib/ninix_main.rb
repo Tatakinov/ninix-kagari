@@ -1201,8 +1201,23 @@ module Ninix_Main
 
     def get_workarea(window)
       display = Gdk::Display.default
-      geometry = display.get_monitor_at_window(window).geometry
-      return [geometry.x, geometry.y, geometry.width, geometry.height]
+      if window.nil?
+        n = display.n_monitors
+        rect = nil
+        n.times do |i|
+          geo = display.get_monitor(i).geometry
+          if rect.nil?
+            rect = [0, 0, geo.width, geo.height]
+          else
+            rect[2] = [rect[2], geo.width].min
+            rect[3] = [rect[3], geo.height].min
+          end
+        end
+        return rect
+      else
+        geometry = display.get_monitor_at_window(window).geometry
+        return [0, 0, geometry.width, geometry.height]
+      end
     end
 
     def get_property(key)
