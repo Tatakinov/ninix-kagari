@@ -581,8 +581,8 @@ module Balloon
         next motion_notify(@darea, e)
       end
       scroll_controller = Gtk::EventControllerScroll.new(Gtk::EventControllerScrollFlags::VERTICAL)
-      scroll_controller.signal_connect('scroll') do |w, e|
-        next scroll(@darea, e)
+      scroll_controller.signal_connect('scroll') do |w, dx, dy|
+        next scroll(@darea, dx, dy)
       end
       @darea.add_controller(scroll_controller)
       @layout = Pango::Layout.new(@darea.pango_context)
@@ -1329,6 +1329,10 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
+      #@window.set_shape(@balloon_surface.region(write: false), get_position)
+      r = Cairo::Region.new
+      r.union!(0, 0, 1, 1)
+      @window.set_shape(r, get_position)
       @reshape = false
       return false
     end
@@ -1603,9 +1607,9 @@ module Balloon
       return true
     end
 
-    def scroll(darea, event)
+    def scroll(darea, dx, dy)
       px, py = @window.winpos_to_surfacepos(
-            event.x.to_i, event.y.to_i, scale)
+            dx, dy, scale)
       case event.direction
       when Gdk::ScrollDirection::UP
         if @lineno > 0
@@ -1623,11 +1627,11 @@ module Balloon
       return true
     end
 
-    def button_press(darea, w, n, x, y)
+    def button_press(darea, ctrl, n, x, y)
       @parent.handle_request(:GET, :reset_idle_time)
       if @parent.handle_request(:GET, :is_paused)
         @parent.handle_request(:GET, :notify_balloon_click,
-                               event.button, true, @side)
+                               ctrl.button, 1, @side)
         return true
       end
       # arrows
@@ -1667,9 +1671,9 @@ module Balloon
       end
       # balloon's background
       @parent.handle_request(:GET, :notify_balloon_click,
-                             event.button, click, @side)
-      @x_root = event.x_root
-      @y_root = event.y_root
+                             ctrl.button, 1, @side)
+      #@x_root = event.x_root
+      #@y_root = event.y_root
       return true
     end
 
@@ -2065,14 +2069,11 @@ module Balloon
         next delete(w, e)
       end
       button_controller = Gtk::GestureClick.new
-      button_controller.signal_connect('pressed') do |w, e|
-        next button_press(@window, e)
+      button_controller.signal_connect('pressed') do |w, n, x, y|
+        next button_press(@window, w, n, x, y)
       end
-      button_controller.signal_connect('released') do |w, e|
-        next button_release(@window, e)
-      end
-      button_controller.signal_connect('released') do |w, e|
-        next button_release(@window, e)
+      button_controller.signal_connect('released') do |w, n, x, y|
+        next button_release(@window, w, n, x, y)
       end
       @window.add_controller(button_controller)
       dad_controller = Gtk::DropTarget.new(GLib::Type::INVALID, 0)
@@ -2247,11 +2248,13 @@ module Balloon
       return false
     end
 
-    def button_press(widget, event)
-      if [1, 2].include?(event.button)
+    def button_press(widget, w, n, x, y)
+      if [1, 2].include?(w.button)
+=begin TODO stub
         @window.begin_move_drag(
-          event.button, event.x_root.to_i, event.y_root.to_i,
+          event.button, w.x_root.to_i, event.y_root.to_i,
           Gtk.current_event_time())
+=end
       end
       return true
     end

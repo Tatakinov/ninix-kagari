@@ -1335,6 +1335,7 @@ module Ninix_Main
       v.append(h)
       @dialog.set_child(v)
       @dialog.show
+      @dialog.hide
       @file_chooser = Gtk::FileChooserDialog.new(
         :title => "Install..",
         :action => Gtk::FileChooserAction::OPEN,

@@ -171,6 +171,14 @@ module Pix
       end
 =end
     end
+    def set_shape(region, pos)
+      return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+      @prev_position = @__surface_position
+      r = Cairo::Region.new
+      r.union!(region)
+      r.translate!(*pos)
+      surface.set_input_region(r)
+    end
   end
 
 
