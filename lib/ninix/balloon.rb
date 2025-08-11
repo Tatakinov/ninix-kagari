@@ -574,6 +574,8 @@ module Balloon
         next true
       end
       button_controller = Gtk::GestureClick.new
+      # 全てのボタンをlisten
+      button_controller.set_button(0)
       button_controller.signal_connect('pressed') do |w, n, x, y|
         next button_press(@darea, w, n, x, y)
       end

@@ -1321,6 +1321,8 @@ module Surface
         next true
       end
       button_controller = Gtk::GestureClick.new
+      # 全てのボタンをlisten
+      button_controller.set_button(0)
       button_controller.signal_connect('pressed') do |w, n, x, y|
         next button_press(@darea, w, n, x, y)
       end
@@ -2234,7 +2236,7 @@ module Surface
       @parent.handle_request(:GET, :reset_idle_time)
       x, y = @window.winpos_to_surfacepos(
            x, y, get_scale)
-      if w.button == 1
+      if w.current_button == 1
         @x_root = x
         @y_root = y
       end
@@ -2245,19 +2247,19 @@ module Surface
       else # XXX
         @click_count = 1
       end
-      if [1, 2, 3].include?(w.button)
-        num_button = [0, 2, 1][w.button - 1]
+      if [1, 2, 3].include?(w.current_button)
+        num_button = [0, 2, 1][w.current_button - 1]
         @parent.handle_request(:GET, :notify_event, 'OnMouseDown',
                                x, y, 0, @side, @__current_part,
                                num_button,
                                'mouse') # FIXME
       end
-      if [2, 8, 9].include?(w.button)
+      if [2, 8, 9].include?(w.current_button)
         ex_button = {
           2 => 'middle',
           8 => 'xbutton1',
           9 => 'xbutton2'
-        }[w.button]
+        }[w.current_button]
         @parent.handle_request(:GET, :notify_event, 'OnMouseDownEx',
                                x, y, 0, @side, @__current_part,
                                ex_button,
@@ -2272,7 +2274,7 @@ module Surface
     def button_release(window, w, n, x, y)
       x, y = @window.winpos_to_surfacepos(
            x, y, get_scale)
-      if w.button == 1
+      if w.current_button == 1
         @x_root = nil
         @y_root = nil
       end
@@ -2285,7 +2287,7 @@ module Surface
       end
       if @click_count > 0
         @parent.handle_request(:GET, :notify_surface_click,
-                               w.button, @click_count,
+                               w.current_button, @click_count,
                                @side, x, y)
         @click_count = 0
       end
@@ -2346,10 +2348,9 @@ module Surface
     def scroll(darea, dx, dy)
       x, y = @window.winpos_to_surfacepos(
            dx, dy, get_scale)
-      case event.direction
-      when Gdk::ScrollDirection::UP
+      if y > 0
         count = 1
-      when Gdk::ScrollDirection::DOWN
+      elsif y < 0
         count = -1
       else
         count = 0
