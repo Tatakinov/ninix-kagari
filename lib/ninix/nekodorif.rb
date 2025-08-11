@@ -47,7 +47,7 @@
 # - 透明ウィンドウ
 
 require "gettext"
-require "gtk3"
+require "gtk4"
 
 require_relative "pix"
 require_relative "home"

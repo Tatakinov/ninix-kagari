@@ -20,7 +20,7 @@ require "open-uri"
 require "fileutils"
 require 'nkf'
 
-require "gtk3"
+require "gtk4"
 
 require_relative "home"
 require_relative "logging"
@@ -56,15 +56,15 @@ module Install
       sw = Gtk::ScrolledWindow.new()
       sw.set_vexpand(true)
       sw.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC)
-      sw.add(tv)
-      sw.show_all() # XXX
+      sw.set_child(tv)
+      sw.show() # XXX
       @treeview = tv
       label = Gtk::Label.new(label='Multiple candidates found.\nSelect the path name of the supplement target.') ## FIXME: gettext
       ##label.set_use_markup(True)
       content_area = @select_dialog.content_area
-      content_area.add(label)
+      content_area.append(label)
       label.show()
-      content_area.add(sw)
+      content_area.append(sw)
       @select_dialog.set_title('Select the target') ## FIXME: gettext
       @select_dialog.set_default_size(-1, 200)
     end

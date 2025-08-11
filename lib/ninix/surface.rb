@@ -14,7 +14,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "gtk3"
+require "gtk4"
 require 'open3'
 
 require_relative "keymap"
@@ -371,21 +371,26 @@ module Surface
     def create_gtk_window(title)
       window = Pix::TransparentWindow.new()
       window.set_title(title)
-      window.signal_connect('delete_event') do |w, e|
+      window.signal_connect('close-request') do |w, e|
         next delete(w, e)
       end
+=begin
       window.signal_connect('window_state_event') do |w, e|
         window_state(w, e)
         next true
       end
-      key_controller = Gtk::EventControllerKey.new(window)
+=end
+      key_controller = Gtk::EventControllerKey.new
       key_controller.signal_connect('key-pressed') do |ctrl, keyval, keycode, state|
         next key_press(ctrl.widget, ctrl, keyval, keycode, state)
       end
       key_controller.signal_connect('key-released') do |ctrl, keyval, keycode, state|
         next key_release(ctrl.widget, ctrl, keyval, keycode, state)
       end
-      window.realize()
+      window.add_controller(key_controller)
+      # FIXME window.realize()
+      window.show
+      window.hide
       return window
     end
 
@@ -470,8 +475,7 @@ module Surface
       modifier = []
       modifier << 'shift' unless (state & Gdk::ModifierType::SHIFT_MASK).zero?
       modifier << 'ctrl' unless (state & Gdk::ModifierType::CONTROL_MASK).zero?
-      modifier << 'alt' unless (state & Gdk::ModifierType::MOD1_MASK).zero?
-      #GDK4: modifier << 'alt' unless (state & Gdk::ModifierType::ALT_MASK).zero?
+      modifier << 'alt' unless (state & Gdk::ModifierType::ALT_MASK).zero?
       modifier << 'meta' unless (state & Gdk::ModifierType::META_MASK).zero?
       unless name.nil? and keycode.nil?
         # NOTE Reference3はninixでは意味を成さないのでnil
@@ -1116,7 +1120,7 @@ module Surface
     def set_icon(path)
       return if path.nil? or not File.exist?(path)
       for window in @window.values
-        window.get_window.set_icon(path) # XXX
+        window.get_window.set_icon_name(path) # XXX
       end
     end
 
@@ -1302,46 +1306,44 @@ module Surface
       @prev_render_info = []
       @pix_cache = Pix::Cache.new
       @cache = Cache::ImageCache.new
-      @window.signal_connect('leave_notify_event') do |w, e|
-        next window_leave_notify(w, e) # XXX
+      motion_controller = Gtk::EventControllerMotion.new
+      motion_controller.signal_connect('leave') do |w, e|
+        next window_leave_notify(@window, e) # XXX
       end
-      @window.signal_connect('enter_notify_event') do |w, e|
-        window_enter_notify(w, e) # XXX
+      motion_controller.signal_connect('enter') do |w, e|
+        window_enter_notify(@window, e) # XXX
         next true
       end
+      @window.add_controller(motion_controller)
       @darea = @window.darea
-      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
-                        Gdk::EventMask::BUTTON_PRESS_MASK|
-                        Gdk::EventMask::BUTTON_RELEASE_MASK|
-                        Gdk::EventMask::POINTER_MOTION_MASK|
-                        Gdk::EventMask::POINTER_MOTION_HINT_MASK|
-                        Gdk::EventMask::SCROLL_MASK)
-      @darea.signal_connect('size-allocate') do |w, allocation, data|
-        # XXX DrawingAreaのsizeが変わったらreshapeしないと
-        # マウスやキーボードのイベントを拾わない。
-        @reshape = true
-        next false
-      end
-      @darea.signal_connect('draw') do |w, e|
+      @darea.set_draw_func do |w, e|
         redraw(w, e)
         next true
       end
-      @darea.signal_connect('button_press_event') do |w, e|
-        next button_press(w, e)
+      button_controller = Gtk::GestureClick.new
+      button_controller.signal_connect('pressed') do |w, n, x, y|
+        next button_press(@darea, w, n, x, y)
       end
-      @darea.signal_connect('button_release_event') do |w, e|
-        next button_release(w, e)
+      button_controller.signal_connect('released') do |w, n, x, y|
+        next button_release(@darea, w, n, x, y)
       end
-      @darea.signal_connect('motion_notify_event') do |w, e|
-        next motion_notify(w, e)
+      @darea.add_controller(button_controller)
+      motion_controller = Gtk::EventControllerMotion.new
+      motion_controller.signal_connect('motion') do |w, e|
+        next motion_notify(@darea, e)
       end
-      @darea.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
-        drag_data_received(widget, context, x, y, data, info, time)
+      dad_controller = Gtk::DropTarget.new(GLib::Type::INVALID, 0)
+      dad_controller.signal_connect('drop') do |widget, context, x, y, data, info, time|
+        drag_data_received(@darea, context, x, y, data, info, time)
         next true
       end
-      @darea.signal_connect('scroll_event') do |w, e|
-        next scroll(w, e)
+      @darea.add_controller(dad_controller)
+      scroll_controller = Gtk::EventControllerScroll.new(Gtk::EventControllerScrollFlags::VERTICAL)
+      scroll_controller.signal_connect('scroll') do |w, dx, dy|
+        next scroll(@darea, dx, dy)
       end
+      @darea.add_controller(scroll_controller)
+=begin TODO delete?
       if @side.zero?
         screen = @window.screen
         screen.signal_connect('size-changed') do |scr|
@@ -1349,11 +1351,14 @@ module Surface
           next true
         end
       end
+=end
+=begin
       # DnD data types
       dnd_targets = [['text/uri-list', 0, 0]]
       @darea.drag_dest_set(Gtk::DestDefaults::ALL, dnd_targets,
                            Gdk::DragAction::COPY)
       @darea.drag_dest_add_uri_targets()
+=end
     end
 
     def get_seriko
@@ -1867,7 +1872,7 @@ module Surface
       image = @cache[render_info]
       unless image.nil?
         @image_surface = image
-        @window.queue_draw(@image_surface.region(write: false))
+        @window.queue_draw
         return
       end
       @reshape = true # FIXME: depends on Seriko
@@ -1909,7 +1914,7 @@ module Surface
         region.union!(r)
       end
       @image_surface = Pix::Data.new(surface, region, frozen)
-      @window.queue_draw(@image_surface.region(write: false))
+      @window.queue_draw
     end
 
     def redraw(darea, cr)
@@ -1918,7 +1923,7 @@ module Surface
       unless @parent.handle_request(:GET, :get_preference, 'check_collision').zero?
         draw_region(cr)
       end
-      @window.set_shape(@image_surface.region(write: false), get_position)
+      #@window.set_shape(@image_surface.region(write: false), get_position)
       @reshape = false
     end
 
@@ -1963,7 +1968,7 @@ module Surface
     end
 
     def get_gdk_window
-      @window.window
+      #@window.window
     end
 
     def get_max_size
@@ -2148,7 +2153,7 @@ module Surface
       @parent.handle_request(:GET, :notify_observer, 'set position')
       @parent.handle_request(:GET, :check_mikire_kasanari)
       unless @image_surface.nil?
-        @window.queue_draw(@image_surface.region(write: false))
+        @window.queue_draw
       end
     end
 
@@ -2199,7 +2204,7 @@ module Surface
       @reshape = true
       @__shown = true
       x, y = get_position()
-      @window.move(x, y) # XXX: call before showing the window
+      @window.queue_draw
       @window.show()
       @parent.handle_request(:GET, :notify_observer, 'show', :args => [@side])
       @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
@@ -2214,7 +2219,8 @@ module Surface
     end
 
     def raise
-      @window.window.raise
+      # TODO delete?
+      #@window.window.raise
       @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
     end
 
@@ -2223,32 +2229,33 @@ module Surface
       @parent.handle_request(:GET, :notify_observer, 'lower', :args => [@side])
     end
 
-    def button_press(window, event)
+    def button_press(window, w, n, x, y)
       @parent.handle_request(:GET, :reset_idle_time)
       x, y = @window.winpos_to_surfacepos(
-           event.x.to_i, event.y.to_i, get_scale)
-      @x_root = event.x_root
-      @y_root = event.y_root
+           x, y, get_scale)
       # automagical raise
       @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
+=begin FIXME
       if event.event_type == Gdk::EventType::BUTTON2_PRESS
         @click_count = 2
       else # XXX
         @click_count = 1
       end
-      if [1, 2, 3].include?(event.button)
-        num_button = [0, 2, 1][event.button - 1]
+=end
+      @click_count = 1
+      if [1, 2, 3].include?(w.button)
+        num_button = [0, 2, 1][w.button - 1]
         @parent.handle_request(:GET, :notify_event, 'OnMouseDown',
                                x, y, 0, @side, @__current_part,
                                num_button,
                                'mouse') # FIXME
       end
-      if [2, 8, 9].include?(event.button)
+      if [2, 8, 9].include?(w.button)
         ex_button = {
           2 => 'middle',
           8 => 'xbutton1',
           9 => 'xbutton2'
-        }[event.button]
+        }[w.button]
         @parent.handle_request(:GET, :notify_event, 'OnMouseDownEx',
                                x, y, 0, @side, @__current_part,
                                ex_button,
@@ -2257,11 +2264,12 @@ module Surface
       return true
     end
 
-    CURSOR_HAND1 = Gdk::Cursor.new(Gdk::CursorType::HAND1)
+    #CURSOR_HAND1 = Gdk::Cursor.new(name: 'grab')
+    CURSOR_HAND1 = Gdk::Cursor.new()
 
-    def button_release(window, event)
+    def button_release(window, w, n, x, y)
       x, y = @window.winpos_to_surfacepos(
-           event.x.to_i, event.y.to_i, get_scale)
+           x, y, get_scale)
       if @dragged
         @dragged = false
         set_alignment_current()
@@ -2273,7 +2281,7 @@ module Surface
       @y_root = nil
       if @click_count > 0
         @parent.handle_request(:GET, :notify_surface_click,
-                               event.button, @click_count,
+                               w.button, @click_count,
                                @side, x, y)
         @click_count = 0
       end
@@ -2334,9 +2342,9 @@ module Surface
       return true
     end
 
-    def scroll(darea, event)
+    def scroll(darea, dx, dy)
       x, y = @window.winpos_to_surfacepos(
-           event.x.to_i, event.y.to_i, get_scale)
+           dx, dy, get_scale)
       case event.direction
       when Gdk::ScrollDirection::UP
         count = 1

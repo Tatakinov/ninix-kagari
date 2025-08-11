@@ -13,11 +13,12 @@
 
 require "narray"
 require "digest/md5"
-require "gtk3"
+require "gtk4"
 
 require_relative "logging"
 
 module Pix
+  TRANSPARENT_CSS = 'window { background-color: rgba(0, 0, 0, 0); }'
   def self.surface_to_region(surface)
     region = Cairo::Region.new()
     width = surface.width
@@ -83,44 +84,18 @@ module Pix
   end
 
   class BaseTransparentWindow < Gtk::Window
-    alias :base_move :move
     attr_reader :supports_alpha
 
-    def initialize(type: Gtk::WindowType::TOPLEVEL)
+    def initialize(...)
       @width, @height = 1, 1
-      super(type)
+      super()
       set_decorated(false)
+      provider = Gtk::CssProvider.new()
+      provider.load_from_data(TRANSPARENT_CSS)
+      sc = style_context
+      sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
       #set_resizable(false)
-      signal_connect('size-allocate') do |w, alloc, data|
-        unless @width == alloc.width and @height == alloc.height
-          @width, @height = alloc.width, alloc.height
-          # XXX draw中にresizeすると
-          # Assertion failed: CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count)
-          # で落ちる(Windowsのみ)が、サイズが変わるタイミングで
-          # GCすると*なぜか*落ちなくなる。
-          if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
-            GC.start
-          end
-        end
-        next false
-      end
-      signal_connect("screen-changed") do |widget, old_screen|
-        screen_changed(widget, :old_screen => old_screen)
-        next true
-      end
       maximize
-      screen_changed(self)
-    end
-
-    def screen_changed(widget, old_screen: nil)
-      if composited?
-        set_visual(screen.rgba_visual)
-      else
-        set_visual(screen.system_visual)
-        Logging::Logging.debug("screen does NOT support alpha.\n")
-      end
-      @supports_alpha = composited?
-      fail "assert" unless not visual.nil?
     end
   end
 
@@ -131,15 +106,12 @@ module Pix
 
     def initialize
       super()
-      set_app_paintable(true)
-      set_focus_on_map(false)
       @__surface_position = [0, 0]
       @prev_position = [0, 0]
       # create drawing area
       @darea = Gtk::DrawingArea.new
-      @darea.set_size_request(*size) # XXX
+      set_child(@darea)
       @darea.show()
-      add(@darea)
       @region = nil
       @device_extents = nil
       @tmp_surface = nil
@@ -154,21 +126,6 @@ module Pix
       new_x = ((x - surface_x) * 100 / scale).to_i
       new_y = ((y - surface_y) * 100 / scale).to_i
       return new_x, new_y
-    end
-
-    def queue_draw(region)
-      # HACK region.empty?だと
-      # GTK君は賢いからqueue_drawされてもEXPOSURE_EVENTを発火しないので
-      # regionを追加して無理矢理発火させる。
-      if (not region.nil?) and region.empty?
-        region.union!(0, 0, 1, 1)
-        if @supports_alpha
-          input_shape_combine_region(region)
-        else
-          shape_combine_region(region)
-        end
-      end
-      return super()
     end
 
     def set_surface(cr, surface, scale, pos)
@@ -208,37 +165,11 @@ module Pix
       cr.restore()
       # resize window
       x, y, w, h = @device_extents
+=begin TODO delete?
       unless @width == w and @height == h
         resize(w, h)
       end
-    end
-
-    def set_shape(region, pos)
-      return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
-=begin
-      if region.nil?
-        if @tmp_surface.nil?
-          if @device_extents.nil?
-            region = Pix.surface_to_region(cr.target.map_to_image)
-          else
-            region = Pix.surface_to_region_with_hints(cr.target.map_to_image, @device_extents)
-          end
-        else
-          region = Pix.surface_to_region(@tmp_surface)
-        end
-      end
 =end
-      @prev_position = @__surface_position
-      r = Cairo::Region.new
-      r.union!(region)
-      r.translate!(*pos)
-      if @supports_alpha
-        input_shape_combine_region(nil)
-        input_shape_combine_region(r)
-      else
-        shape_combine_region(nil)
-        shape_combine_region(r)
-      end
     end
   end
 
@@ -248,18 +179,6 @@ module Pix
     def initialize(application)
       super(application)
       set_decorated(false)
-      set_app_paintable(true)
-      set_focus_on_map(false)
-      if composited?
-        input_shape_combine_region(Cairo::Region.new) # empty region
-        set_visual(screen.rgba_visual)
-      else
-        shape_combine_region(Cairo::Region.new)
-        set_visual(system_visual)
-      end
-      set_keep_below(true)
-      set_skip_pager_hint(true)
-      set_skip_taskbar_hint(true)
     end
   end
 

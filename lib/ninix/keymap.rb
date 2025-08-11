@@ -11,7 +11,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "gtk3"
+require "gtk4"
 
 module Keymap
 

@@ -14,7 +14,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "gtk3"
+require "gtk4"
 begin
   require "gst"
 rescue LoadError
@@ -254,9 +254,11 @@ module Sakura
         set_SSP_mode(false)
       end
       @last_script = nil
+=begin TODO stub
       @status_icon = Gtk::StatusIcon.new
       @status_icon.set_title(get_name(:default => ''))
       @status_icon.set_visible(false)
+=end
     end
 
     def set_SSP_mode(flag) # XXX
@@ -899,7 +901,8 @@ module Sakura
         end
         left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, nil)
         notify_event('OnDisplayChange',
-                     Gdk::Visual.best_depth,
+                     # FIXME magic number
+                     32,
                      scrn_w, scrn_h, :event_type => 'NOTIFY')
       elsif vanished
         if @ghost_time.zero?
@@ -3177,11 +3180,13 @@ module Sakura
       end
       unless @processed_text.empty?
         @balloon.show(@script_side)
+=begin TODO delete?
         if @surface.is_internal
           balloon_win = @balloon.get_window(@script_side)
           surface_win = @surface.get_window(@script_side)
           balloon_win.window.restack(surface_win.window, true)
         end
+=end
         @balloon.append_text(@script_side, @processed_text[0])
         @processed_text = @processed_text[1..-1]
         surface_id = get_surface_id(@script_side)
@@ -3448,16 +3453,16 @@ module Sakura
     def initialize
       @parent = nil # dummy
       @dialog = Gtk::Dialog.new
-      @dialog.signal_connect('delete_event') do |a|
+      @dialog.signal_connect('close-request') do |a|
         next true # XXX
       end
       @dialog.set_title('Vanish')
       @dialog.set_modal(true)
       @dialog.set_resizable(false)
-      @dialog.set_window_position(Gtk::WindowPosition::CENTER)
+      #@dialog.set_window_position(Gtk::WindowPosition::CENTER)
       @label = Gtk::Label.new(label=_('Vanish'))
       content_area = @dialog.content_area
-      content_area.add(@label)
+      content_area.append(@label)
       @label.show()
       @dialog.add_button("_Yes", Gtk::ResponseType::YES)
       @dialog.add_button("_No", Gtk::ResponseType::NO)
@@ -3505,7 +3510,7 @@ module Sakura
     def initialize
       @parent = nil # dummy
       @dialog = Gtk::Dialog.new
-      @dialog.signal_connect('delete_event') do |a|
+      @dialog.signal_connect('close-request') do |a|
         next true # XXX
       end
       @dialog.set_title('Readme.txt')

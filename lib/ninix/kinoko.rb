@@ -16,7 +16,7 @@
 # - 透明度の設定
 
 require 'gettext'
-require "gtk3"
+require "gtk4"
 
 require_relative "config"
 require_relative "seriko"

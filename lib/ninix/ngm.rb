@@ -17,7 +17,7 @@ require "open-uri"
 require "fileutils"
 
 require 'gettext'
-require "gtk3"
+require "gtk4"
 
 require_relative "home"
 require_relative "pix"
@@ -308,18 +308,18 @@ module NGM
     def initialize
       @parent = nil
       @dialog = Gtk::Dialog.new
-      @dialog.signal_connect('delete_event') do |a|
+      @dialog.signal_connect('close-request') do |a|
         next true # XXX
       end
       @dialog.set_modal(true)
-      @dialog.set_window_position(Gtk::WindowPosition::CENTER)
+      #@dialog.set_window_position(Gtk::WindowPosition::CENTER)
       label = Gtk::Label.new(label=_('Search for'))
       content_area = @dialog.content_area
-      content_area.add(label)
+      content_area.append(label)
       @pattern_entry = Gtk::Entry.new()
       @pattern_entry.set_size_request(300, -1)
-      content_area.add(@pattern_entry)
-      content_area.show_all()
+      content_area.append(@pattern_entry)
+      content_area.show()
       @dialog.add_button("_OK", Gtk::ResponseType::OK)
       @dialog.add_button("_Cancel", Gtk::ResponseType::CANCEL)
       @dialog.signal_connect('response') do |w, r|
@@ -417,16 +417,19 @@ module NGM
       @window = Gtk::Window.new()
       @window.set_title(_('Ghost Manager'))
       @window.set_resizable(false)
-      @window.signal_connect('delete_event') do |a|
+      @window.signal_connect('close-request') do |a|
         next close()
       end
-      @window.set_window_position(Gtk::WindowPosition::CENTER)
-      @window.gravity = Gdk::Gravity::CENTER
+      #@window.set_window_position(Gtk::WindowPosition::CENTER)
+      #@window.gravity = Gdk::Gravity::CENTER
+=begin
       accelgroup = Gtk::AccelGroup.new()
       @window.add_accel_group(accelgroup)
-      menubar = Gtk::MenuBar.new()
+=end
+=begin TODO delete or update
+      menubar = Gtk::PopoverMenuBar.new()
       item = Gtk::MenuItem.new(:label => _('_File'), :use_underline => true)
-      menubar.add(item)
+      menubar.add_child(item)
       menu = Gtk::Menu.new()
       item.set_submenu(menu)
       item = Gtk::MenuItem.new(:label => _('Search(_F)'), :use_underline => true)
@@ -528,6 +531,7 @@ module NGM
       @statusbar = Gtk::Statusbar.new()
       vbox.pack_start(@statusbar, :expand => false, :fill => true, :padding => 0)
       @statusbar.show()
+=end
     end
 
     def network_update

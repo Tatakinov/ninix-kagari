@@ -14,7 +14,7 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "gtk3"
+require "gtk4"
 require "cgi"
 
 require_relative "pix"
@@ -107,12 +107,10 @@ module Balloon
     def create_gtk_window(title)
       window = Pix::TransparentWindow.new()
       window.set_title(title)
-      window.set_skip_pager_hint(false)
-      window.set_skip_taskbar_hint(true)
-      window.signal_connect('delete_event') do |w, e|
+      window.signal_connect('close-request') do |w, e|
         next delete(w, e)
       end
-      window.realize()
+      window.show()
       return window
     end
 
@@ -569,35 +567,24 @@ module Balloon
       @reshape = true
       @pix_cache = Pix::Cache.new
       @darea = @window.darea
-      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
-                        Gdk::EventMask::BUTTON_PRESS_MASK|
-                        Gdk::EventMask::BUTTON_RELEASE_MASK|
-                        Gdk::EventMask::POINTER_MOTION_MASK|
-                        Gdk::EventMask::POINTER_MOTION_HINT_MASK|
-                        Gdk::EventMask::SCROLL_MASK)
-      @darea.signal_connect('size-allocate') do |w, allocation, data|
-        # XXX DrawingAreaのsizeが変わったらreshapeしないと
-        # マウスやキーボードのイベントを拾わない。
-        @reshape = true
-        next false
-      end
-      @darea.signal_connect('draw') do |w, e|
+      @darea.set_draw_func do |w, e|
         redraw(w, e)
         next true
       end
-      @darea.signal_connect('button_press_event') do |w, e|
-        next button_press(w, e)
+      button_controller = Gtk::GestureClick.new
+      button_controller.signal_connect('pressed') do |w, n, x, y|
+        next button_press(@darea, w, n, x, y)
       end
-      @darea.signal_connect('button_release_event') do |w, e|
-        #button_release(w, e)
-        next true
+      @darea.add_controller(button_controller)
+      motion_controller = Gtk::EventControllerMotion.new
+      motion_controller.signal_connect('motion') do |w, e|
+        next motion_notify(@darea, e)
       end
-      @darea.signal_connect('motion_notify_event') do |w, e|
-        next motion_notify(w, e)
+      scroll_controller = Gtk::EventControllerScroll.new(Gtk::EventControllerScrollFlags::VERTICAL)
+      scroll_controller.signal_connect('scroll') do |w, e|
+        next scroll(@darea, e)
       end
-      @darea.signal_connect('scroll_event') do |w, e|
-        next scroll(w, e)
-      end
+      @darea.add_controller(scroll_controller)
       @layout = Pango::Layout.new(@darea.pango_context)
       @sstp_layout = Pango::Layout.new(@darea.pango_context())
       mask_r = desc.get('maskcolor.r', :default => 128).to_i
@@ -898,7 +885,7 @@ module Balloon
     end
 
     def get_gdk_window
-      @window.window
+      #@window.window
     end
 
     def set_position(base_x, base_y)
@@ -952,7 +939,8 @@ module Balloon
 
     def raise_
       return unless @__shown
-      @window.window.raise
+      # TODO delete?
+      #@window.window.raise
     end
 
     def lower
@@ -1341,7 +1329,6 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
-      @window.set_shape(@balloon_surface.region(write: false), get_position)
       @reshape = false
       return false
     end
@@ -1636,17 +1623,16 @@ module Balloon
       return true
     end
 
-    def button_press(darea, event)
+    def button_press(darea, w, n, x, y)
       @parent.handle_request(:GET, :reset_idle_time)
-      click = event.event_type == Gdk::EventType::BUTTON_PRESS ? 1 : 2
       if @parent.handle_request(:GET, :is_paused)
         @parent.handle_request(:GET, :notify_balloon_click,
-                               event.button, click, @side)
+                               event.button, true, @side)
         return true
       end
       # arrows
       px, py = @window.winpos_to_surfacepos(
-            event.x.to_i, event.y.to_i, scale)
+            x, y, scale)
       # up arrow
       surface = @arrow0_surface.surface(write: false)
       w = surface.width
@@ -1687,7 +1673,7 @@ module Balloon
       return true
     end
 
-    def button_release(window, event)
+    def button_release(window, w, n, x, y)
       x, y = @window.winpos_to_surfacepos(
            event.x.to_i, event.y.to_i, scale)
       @dragged = false if @dragged
@@ -2075,30 +2061,46 @@ module Balloon
       @window = Pix::BaseTransparentWindow.new()
       @__surface_position = [0, 0]
       @window.set_title('communicate')
-      @window.signal_connect('delete_event') do |w ,e|
+      @window.signal_connect('close-request') do |w ,e|
         next delete(w, e)
       end
-      @window.signal_connect('button_press_event') do |w, e|
-        next button_press(w, e)
+      button_controller = Gtk::GestureClick.new
+      button_controller.signal_connect('pressed') do |w, e|
+        next button_press(@window, e)
       end
-      @window.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
-        drag_data_received(widget, context, x, y, data, info, time)
+      button_controller.signal_connect('released') do |w, e|
+        next button_release(@window, e)
+      end
+      button_controller.signal_connect('released') do |w, e|
+        next button_release(@window, e)
+      end
+      @window.add_controller(button_controller)
+      dad_controller = Gtk::DropTarget.new(GLib::Type::INVALID, 0)
+      dad_controller.signal_connect('drop') do |widget, context, x, y, data, info, time|
+        drag_data_received(@window, context, x, y, data, info, time)
         next true
       end
-      key_controller = Gtk::EventControllerKey.new(@window)
+      @window.add_controller(dad_controller)
+      key_controller = Gtk::EventControllerKey.new
       key_controller.signal_connect('key-pressed') do |ctrl, keyval, keycode, state|
         next key_press(ctrl.widget, ctrl, keyval, keycode, state)
       end
       # DnD data types
       dnd_targets = [['text/plain', 0, 0]]
+=begin
       @window.drag_dest_set(Gtk::DestDefaults::ALL, dnd_targets,
                             Gdk::DragAction::COPY)
       @window.drag_dest_add_text_targets()
-      @window.set_events(Gdk::EventMask::BUTTON_PRESS_MASK)
+=end
+      #@window.set_events(Gdk::EventMask::BUTTON_PRESS_MASK)
       #@window.set_window_position(Gtk::WindowPosition::CENTER)
-      @window.realize()
+      # FIXME @window.realize()
+      @window.show
+      @window.hide
+=begin TODO delete?
       @window.override_background_color(
         Gtk::StateFlags::NORMAL, Gdk::RGBA.new(0, 0, 0, 0))
+=end
       w = desc.get('communicatebox.width', :default => 250).to_i
       h = desc.get('communicatebox.height', :default => -1).to_i
       left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
@@ -2107,11 +2109,11 @@ module Balloon
       @entry.signal_connect('activate') do |w|
         next activate(w)
       end
-      @entry.set_inner_border(nil)
+      #@entry.set_inner_border(nil)
       @entry.set_has_frame(false)
       font_desc = Pango::FontDescription.new()
       font_desc.set_size(9 * 3 / 4 * Pango::SCALE) # XXX
-      @entry.override_font(font_desc)
+      #@entry.override_font(font_desc)
       @entry.set_size_request(w, h)
       text_r = desc.get(['font.color.r', 'fontcolor.r'], :default => 0).to_i
       text_g = desc.get(['font.color.g', 'fontcolor.g'], :default => 0).to_i
@@ -2142,8 +2144,8 @@ module Balloon
       end
       unless surface.nil?
         darea = Gtk::DrawingArea.new()
-        darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
-        darea.signal_connect('draw') do |w, e|
+        #darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
+        darea.set_draw_func do |w, e|
           redraw(w, e, surface)
           next true
         end
@@ -2151,15 +2153,16 @@ module Balloon
         x = desc.get('communicatebox.x', :default => 10).to_i
         y = desc.get('communicatebox.y', :default => 20).to_i
         overlay = Gtk::Overlay.new()
-        @entry.set_margin_left(x)
-        @entry.set_margin_top(y)
+        #@entry.set_margin_left(x)
+        #@entry.set_margin_top(y)
         @entry.set_halign(Gtk::Align::START)
         @entry.set_valign(Gtk::Align::START)
         overlay.add_overlay(@entry)
-        overlay.add(darea)
+        overlay.set_child(darea)
         overlay.show()
-        @window.add(overlay)
-        darea.set_size_request(*@window.size) # XXX
+        @window.set_child(overlay)
+        # FIXME
+        #darea.set_size_request(*@window.size) # XXX
       else
         box = Gtk::Box.new(orientation=Gtk::Orientation::HORIZONTAL, spacing=10)
         box.set_border_width(10)
@@ -2175,7 +2178,7 @@ module Balloon
     end
 
     def get_gdk_window
-      @window.window
+      #@window.window
     end
 
     def drag_data_received(widget, context, x, y, data, info, time)
@@ -2199,17 +2202,20 @@ module Balloon
       cr.rectangle(0, 0, surface.width, surface.height)
       cr.fill()
       cr.restore()
+=begin
       w, h = @window.size
       unless w == surface.width and h == surface.height
         @window.resize(surface.width, surface.height)
       end
+=end
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       region = pix.region(write: false)
       # XXX: to avoid losing focus in the text input region
-      x = @entry.margin_left
-      y = @entry.margin_top
+      #x = @entry.margin_left
+      #y = @entry.margin_top
       w = @entry.allocated_width
       h = @entry.allocated_height
+=begin TODO delete?
       region.union!(x, y, w, h)
       if @window.supports_alpha
         @window.input_shape_combine_region(nil)
@@ -2218,6 +2224,7 @@ module Balloon
         @window.shape_combine_region(nil)
         @window.shape_combine_region(region)
       end
+=end
     end
 
     def destroy

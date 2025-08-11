@@ -17,7 +17,7 @@
 require 'optparse'
 require 'uri'
 require 'gettext'
-require 'gtk3'
+require 'gtk4'
 require 'ninix-fmo'
 
 require_relative "ninix/pix"
@@ -55,34 +55,27 @@ module Ninix_Main
       :buttons => Gtk::ButtonsType::NONE,
       :message => _("A ninix-kagari error has been detected."))
     dialog.set_title(_("Bug Detected"))
-    dialog.set_window_position(Gtk::WindowPosition::CENTER)
-    dialog.gravity = Gdk::Gravity::CENTER
     button = dialog.add_button(_("Show Details"), response_id)
     dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
     textview = Gtk::TextView.new
     textview.set_editable(false)
-    scrn = Gdk::Screen.default
-    width = (scrn.width / 2).to_i
-    height = (scrn.height / 4).to_i
-    textview.set_size_request(width, height)
     textview.show()
     sw = Gtk::ScrolledWindow.new
     sw.show()
     sw.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC)
-    sw.add(textview)
+    sw.set_child(textview)
     frame = Gtk::Frame.new
-    frame.set_shadow_type(Gtk::ShadowType::IN)
-    frame.add(sw)
-    frame.set_border_width(7)
+    frame.set_child(sw)
     frame.set_size_request(480, 320) # XXX
     content_area = dialog.content_area
-    content_area.add(frame)
+    content_area.append(frame)
     textbuffer = textview.buffer
     textbuffer.set_text(message)
     while true
-      break unless dialog.run() == response_id # close button
+      # TODO stub break unless dialog.run() == response_id # close button
       frame.show()
       button.set_sensitive(false)
+      fail
     end
     dialog.destroy()
     fail SystemExit
@@ -1202,10 +1195,11 @@ module Ninix_Main
     def get_workarea(window)
       display = Gdk::Display.default
       if window.nil?
-        n = display.n_monitors
+        list = display.monitors
+        n = list.n_items
         rect = nil
         n.times do |i|
-          geo = display.get_monitor(i).geometry
+          geo = list.get_item(i).geometry
           if rect.nil?
             rect = [0, 0, geo.width, geo.height]
           else
@@ -1287,7 +1281,7 @@ module Ninix_Main
       @app = app
       @show_console = show_console
       @dialog = Gtk::Window.new
-      @dialog.signal_connect('delete_event') do |w, e|
+      @dialog.signal_connect('close-request') do |w, e|
         next true # XXX
       end
       @level = Logger::WARN # XXX
@@ -1297,8 +1291,6 @@ module Ninix_Main
       @sw.show()
       @tv = Gtk::TextView.new
       @tv.set_wrap_mode(Gtk::WrapMode::CHAR)
-      @tv.override_background_color(
-        Gtk::StateFlags::NORMAL, Gdk::RGBA.new(0, 0, 0, 255))
       @tv.set_cursor_visible(true)
       @tv.set_editable(true) # important
       @tb = @tv.buffer
@@ -1312,14 +1304,14 @@ module Ninix_Main
       ##dnd_targets = [['text/uri-list', 0, 0]]
       ##@tv.drag_dest_set(Gtk::DestDefaults::ALL, dnd_targets,
       ##                  Gdk::DragAction::COPY)
-      @tv.drag_dest_set_target_list(nil) # important
-      @tv.drag_dest_add_uri_targets()
+=begin TODO GtkDropTarget
       @tv.signal_connect('drag_data_received') do |widget, context, x, y, data, info, time|
         drag_data_received(widget, context, x, y, data, info, time)
         next true
       end
+=end
       @tv.show()
-      @sw.add(@tv)
+      @sw.set_child(@tv)
       @tv.set_size_request(400, 250)
       @sw.set_size_request(400, 250)
       v = Gtk::Box.new(Gtk::Orientation::VERTICAL)
@@ -1330,19 +1322,19 @@ module Ninix_Main
       b.signal_connect('clicked') do |w, e|
         next response(w, :install)
       end
-      h.add(b)
+      h.append(b)
       b = Gtk::Button.new
       b.label=('Close')
       b.hexpand=(true)
       b.signal_connect('clicked') do |w, e|
         next response(w, :close)
       end
-      h.add(b)
+      h.append(b)
       h.hexpand=(true)
-      v.add(@sw)
-      v.add(h)
-      v.show_all
-      @dialog.add(v)
+      v.append(@sw)
+      v.append(h)
+      @dialog.set_child(v)
+      @dialog.show
       @file_chooser = Gtk::FileChooserDialog.new(
         :title => "Install..",
         :action => Gtk::FileChooserAction::OPEN,
@@ -1496,23 +1488,19 @@ module Ninix_Main
     def initialize
       @dialog = Gtk::Dialog.new
       @dialog.set_title('Usage')
-      @dialog.signal_connect('delete_event') do |w, e|
+      @dialog.signal_connect('close-request') do |w, e|
         next true # XXX
       end
       @darea = Gtk::DrawingArea.new
-      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK)
       @size = [550, 330]
       @darea.set_size_request(*@size)
-      @darea.signal_connect('configure_event') do |w, e|
-        configure(w, e)
-        next true
-      end
-      @darea.signal_connect('draw') do |w, e|
+      @darea.set_draw_func do |w, e|
         redraw(w, e)
         next true
       end
       content_area = @dialog.content_area
-      content_area.pack_start(@darea, :expand => true, :fill => true, :padding => 0)
+      #content_area.pack_start(@darea, :expand => true, :fill => true, :padding => 0)
+      content_area.append(@darea)
       @darea.show()
       @dialog.add_button("_Close", Gtk::ResponseType::CLOSE)
       @dialog.signal_connect('response') do |w, e|
@@ -1558,11 +1546,6 @@ module Ninix_Main
              }
       send(func[response])
       return true
-    end
-
-    def configure(darea, event)
-      alloc = darea.allocation
-      @size = [alloc.width, alloc.height]
     end
 
     def redraw(widget, cr)
@@ -1770,7 +1753,6 @@ gtk_app.signal_connect 'activate' do |application|
     show_console: option[:show_console],
   }
 
-  Gdk.set_program_class('Ninix')
   app_window = Pix::TransparentApplicationWindow.new(application)
   app_window.set_title("Ninix-kagari")
   #app_window.show_all

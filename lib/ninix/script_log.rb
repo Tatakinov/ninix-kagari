@@ -11,7 +11,7 @@
 #
 
 require 'gettext'
-require 'gtk3'
+require 'gtk4'
 
 module ScriptLog
   include GetText
@@ -20,13 +20,14 @@ module ScriptLog
 
   class Window < Gtk::Window
     def initialize
-      super('Script Log')
-      self.set_default_size(640, 360)
+      super
+      set_default_size(640, 360)
       box = Gtk::Box.new(:vertical, 0)
-      self.add(box)
+      set_child(box)
       scroll = Gtk::ScrolledWindow.new
       scroll.set_policy(:automatic, :automatic)
-      box.pack_start(scroll, expand: true, fill: true, padding: 0)
+      #box.pack_start(scroll, expand: true, fill: true, padding: 0)
+      box.append(scroll)
       @model = Gtk::ListStore.new(String, String, String)
       tree = Gtk::TreeView.new(@model)
       tree.selection.set_mode(:single)
@@ -37,11 +38,11 @@ module ScriptLog
       tree.append_column(column)
       column = Gtk::TreeViewColumn.new('Script', Gtk::CellRendererText.new, { text: 2 })
       tree.append_column(column)
-      scroll.add(tree)
-      signal_connect('delete_event') do |w, e|
+      scroll.set_child(tree)
+      signal_connect('close-request') do |w, e|
         w.hide
       end
-      box.show_all
+      box.show
     end
 
     def append_data(name, script)

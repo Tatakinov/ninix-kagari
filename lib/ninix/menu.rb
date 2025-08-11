@@ -12,11 +12,14 @@
 #
 
 require 'gettext'
-require "gtk3"
+require "gtk4"
 
 require_relative "pix"
 
 module Menu
+
+  class MenuItem < Gio::MenuItem
+  end
 
   class Menu
     include GetText
@@ -41,7 +44,8 @@ module Menu
         'sidebar' => nil
       }
       @__menu_list = {}
-      @__popup_menu = Gtk::Menu.new
+      @__popup_menu = Gtk::PopoverMenu.new
+=begin TODO stub
       item = Gtk::MenuItem.new(:label => _('Recommend sites(_R)'), :use_underline => true)
       @__popup_menu.add(item)
       @__menu_list['Recommend'] = {:entry => item, :visible => true}
@@ -184,6 +188,7 @@ module Menu
           end
         end
       end
+=end
     end
 
     def create_css_provider_for(item)
@@ -650,26 +655,27 @@ module Menu
     end
 
     def create_ghost_menuitem(name, icon, key, handler, thumbnail)
-      item = Gtk::MenuItem.new()
+      item = Gtk::Button.new
       box = Gtk::Box.new(Gtk::Orientation::HORIZONTAL, 6)
       unless icon.nil?
         pixbuf = Pix.create_icon_pixbuf(icon)
         unless pixbuf.nil?
-          image = Gtk::Image.new
-          image.pixbuf = pixbuf
+          image = Gtk::Image.new(filename: icon)
           image.show
-          box.pack_start(image, :expand => false, :fill => false, :padding => 0)
+          #box.pack_start(image, :expand => false, :fill => false, :padding => 0)
+          box.append(image)
         end
       end
       label = Gtk::Label.new(name)
       label.xalign = 0.0
       label.show
-      box.pack_end(label, :expand => true, :fill => true, :padding => 0)
+      #box.pack_end(label, :expand => true, :fill => true, :padding => 0)
+      box.append(label)
       box.show
-      item.add(box)
+      item.set_child(box)
       item.set_name('popup menu item')
       item.show()
-      item.signal_connect('activate') do |a, v|
+      item.signal_connect('clicked') do |a, v|
         handler.call(key)
         next true
       end
@@ -682,10 +688,12 @@ module Menu
       else
         item.set_has_tooltip(false)
       end
+=begin TODO stub
       provider = create_css_provider_for(item)
       item.signal_connect('draw', provider) do |i, *a, provider|
         next set_stylecontext(i, *a, :provider => provider)
       end
+=end
       return item
     end
 
@@ -834,12 +842,12 @@ module Menu
     end
 
     def create_meme_menu(menuitem)
-      menu = Gtk::Menu.new()
+      menu = Gtk::PopoverMenu.new()
       for item in menuitem.values()
         unless item.parent.nil?
           item.reparent(menu)
         else
-          menu << item
+          menu.add_child(item, item.label)
         end
       end
       provider = create_css_provider_for(menu)
@@ -850,10 +858,10 @@ module Menu
     end
 
     def create_meme_menuitem(name, value, handler, thumbnail)
-      item = Gtk::MenuItem.new(:label => name)
-      item.set_name('popup menu item')
-      item.show()
-      item.signal_connect('activate') do |a, v|
+      #item = Gtk::ImageMenuItem.new(:label => name)
+      item = Gtk::Button.new
+      item.label = 'popup menu item'
+      item.signal_connect('clicked') do |a, v|
         handler.call(value)
         next true
       end
@@ -866,10 +874,12 @@ module Menu
       else
         item.set_has_tooltip(false)
       end
+=begin TODO stub
       provider = create_css_provider_for(item)
       item.signal_connect('draw', provider) do |i, *a, provider|
         next set_stylecontext(i, *a, :provider => provider)
       end
+=end
       return item
     end
 
