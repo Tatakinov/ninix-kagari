@@ -110,7 +110,9 @@ module Balloon
       window.signal_connect('close-request') do |w, e|
         next delete(w, e)
       end
-      window.show()
+      # FIXME window.realize
+      window.show
+      window.hide
       return window
     end
 
@@ -1329,10 +1331,7 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
-      #@window.set_shape(@balloon_surface.region(write: false), get_position)
-      r = Cairo::Region.new
-      r.union!(0, 0, 1, 1)
-      @window.set_shape(r, get_position)
+      @window.set_shape(@balloon_surface.region(write: false), get_position)
       @reshape = false
       return false
     end
