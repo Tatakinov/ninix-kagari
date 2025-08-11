@@ -894,8 +894,7 @@ module Balloon
     end
 
     def __move
-      x, y = get_position()
-      @window.move(x, y)
+      @darea.queue_draw
     end
 
     def get_gdk_window
