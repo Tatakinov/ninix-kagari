@@ -1329,9 +1329,10 @@ module Surface
       end
       @darea.add_controller(button_controller)
       motion_controller = Gtk::EventControllerMotion.new
-      motion_controller.signal_connect('motion') do |w, e|
-        next motion_notify(@darea, e)
+      motion_controller.signal_connect('motion') do |w, x, y|
+        next motion_notify(@darea, w, x, y)
       end
+      @darea.add_controller(motion_controller)
       dad_controller = Gtk::DropTarget.new(GLib::Type::INVALID, 0)
       dad_controller.signal_connect('drop') do |widget, context, x, y, data, info, time|
         drag_data_received(@darea, context, x, y, data, info, time)
@@ -2153,7 +2154,7 @@ module Surface
       @parent.handle_request(:GET, :notify_observer, 'set position')
       @parent.handle_request(:GET, :check_mikire_kasanari)
       unless @image_surface.nil?
-        @window.queue_draw
+        @darea.queue_draw
       end
     end
 
@@ -2233,6 +2234,10 @@ module Surface
       @parent.handle_request(:GET, :reset_idle_time)
       x, y = @window.winpos_to_surfacepos(
            x, y, get_scale)
+      if w.button == 1
+        @x_root = x
+        @y_root = y
+      end
       # automagical raise
       @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
 =begin FIXME
@@ -2264,12 +2269,16 @@ module Surface
       return true
     end
 
-    #CURSOR_HAND1 = Gdk::Cursor.new(name: 'grab')
-    CURSOR_HAND1 = Gdk::Cursor.new()
+    CURSOR_DEFAULT = Gdk::Cursor.new('default')
+    CURSOR_HAND1 = Gdk::Cursor.new('grab')
 
     def button_release(window, w, n, x, y)
       x, y = @window.winpos_to_surfacepos(
            x, y, get_scale)
+      if w.button == 1
+        @x_root = nil
+        @y_root = nil
+      end
       if @dragged
         @dragged = false
         set_alignment_current()
@@ -2277,8 +2286,6 @@ module Surface
           :GET, :notify_event,
           'OnMouseDragEnd', x, y, '', @side, @__current_part, '')
       end
-      @x_root = nil
-      @y_root = nil
       if @click_count > 0
         @parent.handle_request(:GET, :notify_surface_click,
                                w.button, @click_count,
@@ -2288,14 +2295,14 @@ module Surface
       return true
     end
 
-    def motion_notify(darea, event)
-      x, y, state = event.x, event.y, event.state
+    def motion_notify(darea, ctrl, x, y)
+      state = nil
       x, y = @window.winpos_to_surfacepos(x, y, get_scale)
       part = get_touched_region(x, y)
       if part != @__current_part
         if part == ''
           @window.set_tooltip_text('')
-          @darea.window.set_cursor(nil)
+          @window.surface.set_cursor(CURSOR_DEFAULT)
           @parent.handle_request(
             :GET, :notify_event,
             'OnMouseLeave', x, y, '', @side, @__current_part)
@@ -2306,7 +2313,7 @@ module Surface
           else
             @window.set_tooltip_text('')
           end
-          @darea.window.set_cursor(CURSOR_HAND1)
+          @window.surface.set_cursor(CURSOR_HAND1) unless @window.surface.nil?
           @parent.handle_request(
             :GET, :notify_event,
             'OnMouseEnter', x, y, '', @side, part)
@@ -2314,31 +2321,28 @@ module Surface
       end
       @__current_part = part
       unless @parent.handle_request(:GET, :busy)
-        if (state & Gdk::ModifierType::BUTTON1_MASK).nonzero?
-          unless @x_root.nil? or @y_root.nil?
-            unless @dragged
-              @parent.handle_request(
-                :GET, :notify_event,
-                'OnMouseDragStart', x, y, '',
-                @side, @__current_part, '')
-            end
-            @dragged = true
-            x_delta = (event.x_root - @x_root).to_i
-            y_delta = (event.y_root - @y_root).to_i
-            x, y = @position # XXX: without window_offset
-            set_position(x + x_delta, y + y_delta)
-            @x_root = event.x_root
-            @y_root = event.y_root
+        unless @x_root.nil? or @y_root.nil?
+          unless @dragged
+            @parent.handle_request(
+              :GET, :notify_event,
+              'OnMouseDragStart', x, y, '',
+              @side, @__current_part, '')
           end
-        elsif (state & Gdk::ModifierType::BUTTON2_MASK).nonzero? or \
-             (state & Gdk::ModifierType::BUTTON3_MASK).nonzero?
-          #pass
-        else
+          @dragged = true
+          x_delta = (x - @x_root).to_i
+          y_delta = (y - @y_root).to_i
+          px, py = @position # XXX: without window_offset
+          set_position(px + x_delta, py + y_delta)
+          @x_root = x
+          @y_root = y
+        end
+=begin FIXME implement
           @parent.handle_request(:GET, :notify_surface_mouse_motion,
                                  @side, x, y, part)
-        end
+=end
       end
-      Gdk::Event.request_motions(event) if event.is_hint == 1
+      # TODO delete?
+      #Gdk::Event.request_motions(event) if event.is_hint == 1
       return true
     end
 

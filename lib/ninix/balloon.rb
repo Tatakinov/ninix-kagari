@@ -579,9 +579,10 @@ module Balloon
       end
       @darea.add_controller(button_controller)
       motion_controller = Gtk::EventControllerMotion.new
-      motion_controller.signal_connect('motion') do |w, e|
-        next motion_notify(@darea, e)
+      motion_controller.signal_connect('motion') do |w, x, y|
+        next motion_notify(@darea, w, x, y)
       end
+      @darea.add_controller(motion_controller)
       scroll_controller = Gtk::EventControllerScroll.new(Gtk::EventControllerScrollFlags::VERTICAL)
       scroll_controller.signal_connect('scroll') do |w, dx, dy|
         next scroll(@darea, dx, dy)
@@ -1578,8 +1579,8 @@ module Balloon
       end
     end
 
-    def motion_notify(widget, event)
-      x, y, state = event.x, event.y, event.state
+    def motion_notify(widget, ctrl, x, y)
+      state = nil
       px, py = @window.winpos_to_surfacepos(x, y, scale)
       unless @link_buffer.empty?
         if check_link_region(px, py)
@@ -1587,22 +1588,21 @@ module Balloon
         end
       end
       unless @parent.handle_request(:GET, :busy)
-        if (state & Gdk::ModifierType::BUTTON1_MASK).nonzero?
-          unless @x_root.nil? or @y_root.nil?
-            @dragged = true
-            x_delta = ((event.x_root - @x_root) * 100 / scale + @x_fractions)
-            y_delta = ((event.y_root - @y_root) * 100 / scale + @y_fractions)
-            @x_fractions = (x_delta - x_delta.to_i)
-            @y_fractions = (y_delta - y_delta.to_i)
-            @parent.handle_request(
-              :GET, :update_balloon_offset,
-              @side, x_delta.to_i, y_delta.to_i)
-            @x_root = event.x_root
-            @y_root = event.y_root
-          end
+        unless @x_root.nil? or @y_root.nil?
+          @dragged = true
+          x_delta = ((px - @x_root) * 100 / scale + @x_fractions)
+          y_delta = ((py - @y_root) * 100 / scale + @y_fractions)
+          @x_fractions = (x_delta - x_delta.to_i)
+          @y_fractions = (y_delta - y_delta.to_i)
+          @parent.handle_request(
+            :GET, :update_balloon_offset,
+            @side, x_delta.to_i, y_delta.to_i)
+          @x_root = px
+          @y_root = py
         end
       end
-      Gdk::Event.request_motions(event) if event.is_hint == 1
+      # TODO delete?
+      #Gdk::Event.request_motions(event) if event.is_hint == 1
       return true
     end
 
@@ -1636,6 +1636,10 @@ module Balloon
       # arrows
       px, py = @window.winpos_to_surfacepos(
             x, y, scale)
+      if ctrl.button == 1
+        @x_root = x
+        @y_root = y
+      end
       # up arrow
       surface = @arrow0_surface.surface(write: false)
       w = surface.width
