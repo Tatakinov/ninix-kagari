@@ -187,6 +187,13 @@ module Pix
     def initialize(application)
       super(application)
       set_decorated(false)
+      provider = Gtk::CssProvider.new()
+      provider.load_from_data(TRANSPARENT_CSS)
+      sc = style_context
+      sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
+      maximize
+      show
+      surface.set_input_region(Cairo::Region.new)
     end
   end
 

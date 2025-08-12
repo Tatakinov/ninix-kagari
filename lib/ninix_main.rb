@@ -130,11 +130,14 @@ module Ninix_Main
       :get_sstp_port => :get_sstp_port,
       :get_prefix => :get_sakura_prefix,
       :get_workarea => :get_workarea,
+      :add_action => :add_action,
     }
 
-    def initialize(lockfile, shm, sstp_port: [9801, 11000], ghost: nil, exit_if_not_found: false, show_console: false)
+    def initialize(lockfile, shm, abend, app_window, application, sstp_port: [9801, 11000], ghost: nil, exit_if_not_found: false, show_console: false)
       @lockfile = lockfile
-      @abend = nil
+      @abend = abend
+      @app_window = app_window
+      @gtk_app = application
       @loaded = false
       @confirmed = false
       @console = Console.new(self, show_console)
@@ -154,8 +157,8 @@ module Ninix_Main
       # create installer
       @installer = Install::Installer.new
       # create popup menu
-      @__menu = Menu::Menu.new
-      @__menu.set_responsible(self)
+      @__menu = Menu::Menu.new(self, @app_window)
+      #@__menu.set_responsible(self)
       @__menu_owner = nil
       @socket = NinixServer.new('ninix') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
       @shm = shm
@@ -535,7 +538,7 @@ module Ninix_Main
       @__menu_owner.network_update()
     end
 
-    def open_popup_menu(sakura, side, x, y)
+    def open_popup_menu(sakura, side, x, y, upper)
       @__menu_owner = sakura
       path_background, path_sidebar, path_foreground, \
       align_background, align_sidebar, align_foreground = \
@@ -553,7 +556,7 @@ module Ninix_Main
       @__menu.set_fontcolor(background, foreground)
       mayuna_menu = @__menu_owner.get_mayuna_menu()
       @__menu.create_mayuna_menu(mayuna_menu)
-      @__menu.popup(side, x, y)
+      @__menu.popup(side, x, y, upper)
     end
 
     def get_ghost_menus
@@ -758,10 +761,7 @@ module Ninix_Main
       return nil
     end
 
-    def run(abend, app_window, gtk_app)
-      @abend = abend
-      @app_window = app_window
-      @gtk_app = gtk_app
+    def run
       if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
         # The SIGTERM signal is not generated under Windows NT.
         # Win32::Console::API.SetConsoleCtrlHandler will probably not be implemented.
@@ -1212,6 +1212,10 @@ module Ninix_Main
         geometry = display.get_monitor_at_window(window).geometry
         return [0, 0, geometry.width, geometry.height]
       end
+    end
+
+    def add_action(action)
+      @app_window.add_action(action)
     end
 
     def get_property(key)
@@ -1758,8 +1762,8 @@ gtk_app.signal_connect 'activate' do |application|
   app_window.set_title("Ninix-kagari")
   #app_window.show_all
   # start
-  app = Ninix_Main::Application.new(lock, shm, **option)
-  app.run(abend, app_window, application)
+  app = Ninix_Main::Application.new(lock, shm, abend, app_window, application, **option)
+  app.run
   # end
   lock.truncate(0)
   begin

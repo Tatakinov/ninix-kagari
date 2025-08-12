@@ -18,16 +18,13 @@ require_relative "pix"
 
 module Menu
 
-  class MenuItem < Gio::MenuItem
-  end
-
   class Menu
     include GetText
 
     bindtextdomain("ninix-kagari")
 
-    def initialize
-      @parent = nil
+    def initialize(parent, window)
+      set_responsible(parent)
       @__fontcolor = {
         'normal' => [],
         'hover' => []
@@ -44,133 +41,166 @@ module Menu
         'sidebar' => nil
       }
       @__menu_list = {}
-      @__popup_menu = Gtk::PopoverMenu.new
-=begin TODO stub
-      item = Gtk::MenuItem.new(:label => _('Recommend sites(_R)'), :use_underline => true)
-      @__popup_menu.add(item)
+      model = Gio::Menu.new
+      @__popup_menu = Gtk::PopoverMenu.new(model)
+      window.set_child(@__popup_menu)
+      item = Gio::Menu.new
+      model.append_submenu(_('Recommend sites(_R)'), item)
       @__menu_list['Recommend'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Portal sites(_P)'), :use_underline => true)
-      @__popup_menu.add(item)
+      item = Gio::Menu.new
+      model.append_submenu(_('Portal sites(_P)'), item)
       @__menu_list['Portal'] = {:entry => item, :visible => true}
-      item = Gtk::SeparatorMenuItem.new()
+=begin FIXME separate
+      #item = Gtk::SeparatorMenuItem.new()
       @__popup_menu.add(item)
-      item = Gtk::CheckMenuItem.new(:label => _('Stick(_Y)'), :use_underline => true)
-      item.set_active(false)
-      item.signal_connect('activate') do |a, b|
-        @parent.handle_request(:GET, :stick_window)
+=end
+      model.append(_('Stick(_Y)'), 'win.stick')
+      action = Gio::SimpleAction.new('stick')
+      action.signal_connect('activate') do |a, param|
+        @parent.handle_request(:NOTIFY, :stick_window)
       end
-      @__popup_menu.add(item)
-      @__menu_list['Stick'] = {:entry => item, :visible => true}
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Stick'] = {:entry => item, :visible => true}
+=begin FIXME separate
       item = Gtk::SeparatorMenuItem.new()
       @__popup_menu.add(item)
-      item = Gtk::MenuItem.new(:label => _('Options(_F)'), :use_underline => true)
-      @__popup_menu.add(item)
+=end
+      item = Gio::Menu.new
+      model.append_submenu(_('Options(_F)'), item)
       @__menu_list['Options'] = {:entry => item, :visible => true}
-      menu = Gtk::Menu.new()
-      item.set_submenu(menu)
-
-      item = Gtk::MenuItem.new(:label => _('Network Update(_U)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
-        @parent.handle_request(:GET, :network_update)
+      item.append(_('Network Update(_U)'), 'win.update')
+      action = Gio::SimpleAction.new('update')
+      action.signal_connect('activate') do |a, param|
+        a.state = not(a.state)
+        @parent.handle_request(:NOTIFY, :network_update)
       end
-      menu.add(item)
-      @__menu_list['Options/Update'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Vanish(_F)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Options/Update'] = {:entry => item, :visible => true}
+      item.append(_('Vanish(_F)'), 'win.vanish')
+      action = Gio::SimpleAction.new('vanish')
+      action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :vanish)
       end
-      menu.add(item)
-      @__menu_list['Options/Vanish'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Preferences...(_O)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Options/Vanish'] = {:entry => item, :visible => true}
+      item.append(_('Preferences...(_O)'), 'win.edit_preference')
+      action = Gio::SimpleAction.new('edit_preference')
+      action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :edit_preferences)
       end
-      menu.add(item)
-      @__menu_list['Options/Preferences'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Console(_C)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Options/Preferences'] = {:entry => item, :visible => true}
+      item.append(_('Console(_C)'), 'win.open_console')
+      action = Gio::SimpleAction.new('open_console')
+      action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :open_console)
       end
-      menu.add(item)
-      @__menu_list['Options/Console'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Ghost Manager(_M)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Options/Console'] = {:entry => item, :visible => true}
+      item.append(_('Ghost Manager(_M)'), 'win.ghost_manager')
+      action = Gio::SimpleAction.new('ghost_manager')
+      action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :open_ghost_manager)
       end
-      menu.add(item)
-      @__menu_list['Options/Manager'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(label: _('Script Log(_L)'), use_underline: true)
-      item.signal_connect('activate') do |a, b|
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Options/Manager'] = {:entry => item, :visible => true}
+      item.append(_('Script Log(_L)'), 'win.script_log')
+      action = Gio::SimpleAction.new('script_log')
+      action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :open_script_log)
       end
-      menu.add(item)
-      @__menu_list['Options/ScriptLog'] = {entry: item, visible: true}
-      item = Gtk::MenuItem.new(label: _('Input Script(_S)'), use_underline: true)
-      item.signal_connect('activate') do |a, b|
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Options/ScriptLog'] = {entry: item, visible: true}
+      item.append(_('Input Script(_L)'), 'win.scriptinputbox')
+      action = Gio::SimpleAction.new('scriptinputbox')
+      action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :open_scriptinputbox)
       end
-      menu.add(item)
-      @__menu_list['Options/ScriptLog'] = {entry: item, visible: true}
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Options/ScriptLog'] = {entry: item, visible: true}
+=begin FIXME alternative
       item = Gtk::SeparatorMenuItem.new()
       @__popup_menu.add(item)
-      item = Gtk::MenuItem.new(:label => _('Change(_G)'), :use_underline => true)
-      @__popup_menu.add(item)
+=end
+      item = Gio::Menu.new
+      model.append_submenu(_('Change(_G)'), item)
       @__menu_list['Change'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Summon(_X)'), :use_underline => true)
-      @__popup_menu.add(item)
+      item = Gio::Menu.new
+      model.append_submenu(_('Summon(_X)'), item)
       @__menu_list['Summon'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Shell(_S)'), :use_underline => true)
-      @__popup_menu.add(item)
+      item = Gio::Menu.new
+      model.append_submenu(_('Shell(_S)'), item)
       @__menu_list['Shell'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Costume(_C)'), :use_underline => true)
-      @__popup_menu.add(item)
+      item = Gio::Menu.new
+      model.append_submenu(_('Costume(_C)'), item)
       @__menu_list['Costume'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Balloon(_B)'), :use_underline => true)
-      @__popup_menu.add(item)
+      item = Gio::Menu.new
+      model.append_submenu(_('Balloon(_B)'), item)
       @__menu_list['Balloon'] = {:entry => item, :visible => true}
+=begin FIXME alternative
       item = Gtk::SeparatorMenuItem.new()
       @__popup_menu.add(item)
-      item = Gtk::MenuItem.new(:label => _('Information(_I)'), :use_underline => true)
-      @__popup_menu.add(item)
+=end
+      item = Gio::Menu.new
+      model.append_submenu(_('Information(_I)'), item)
       @__menu_list['Information'] = {:entry => item, :visible => true}
-      menu = Gtk::Menu.new()
-      item.set_submenu(menu)
-      item = Gtk::MenuItem.new(:label => _('Usage graph(_A)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
+      item.append(_('Usage graph(_A)'), 'win.usage')
+      action = Gio::SimpleAction.new('usage')
+      action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :show_usage)
       end
-      menu.add(item)
-      @__menu_list['Information/Usage'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Version(_V)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Information/Usage'] = {:entry => item, :visible => true}
+      item.append(_('Version(_V)'), 'win.version')
+      action = Gio::SimpleAction.new('version')
+      action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :about)
       end
-      menu.add(item)
-      @__menu_list['Information/Version'] = {:entry => item, :visible => true}
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Information/Version'] = {:entry => item, :visible => true}
+=begin FIXME alternative
       item = Gtk::SeparatorMenuItem.new()
       @__popup_menu.add(item)
-      item = Gtk::MenuItem.new(:label => _('Nekodorif(_N)'), :use_underline => true)
-      @__popup_menu.add(item)
+=end
+      item = Gio::Menu.new
+      model.append_submenu(_('Nekodorif(_N)'), item)
       @__menu_list['Nekodorif'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Kinoko(_K)'), :use_underline => true)
-      @__popup_menu.add(item)
+      item = Gio::Menu.new
+      model.append_submenu(_('Kinoko(_K)'), item)
       @__menu_list['Kinoko'] = {:entry => item, :visible => true}
+=begin FIXME alternative
       item = Gtk::SeparatorMenuItem.new()
       @__popup_menu.add(item)
-      item = Gtk::MenuItem.new(:label => _('Close(_W)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
-        @parent.handle_request(:GET, :close_sakura)
+=end
+      model.append(_('Close(_W)'), 'win.close')
+      action = Gio::SimpleAction.new('close')
+      action.signal_connect('activate') do |a, param|
+        @parent.handle_request(:NOTIFY, :close_sakura)
       end
-      @__popup_menu.add(item)
-      @__menu_list['Close'] = {:entry => item, :visible => true}
-      item = Gtk::MenuItem.new(:label => _('Quit(_Q)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
-        @parent.handle_request(:GET, :close_all)
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Close'] = {:entry => item, :visible => true}
+      model.append(_('Quit(_Q)'), 'win.quit')
+      action = Gio::SimpleAction.new('quit')
+      action.signal_connect('activate') do |a, param|
+        @parent.handle_request(:NOTIFY, :close_all)
       end
-      @__popup_menu.add(item)
-      @__menu_list['Quit'] = {:entry => item, :visible => true}
-      @__popup_menu.show_all
+      @parent.handle_request(:NOTIFY, :add_action, action)
+      # FIXME alternative
+      #@__menu_list['Quit'] = {:entry => item, :visible => true}
+      #@__popup_menu.show
       provider = create_css_provider_for(@__popup_menu)
+=begin FIXME implement
       @__popup_menu.signal_connect('realize', provider) do |i, *a, provider|
         next set_stylecontext_with_sidebar(i, *a, :provider => provider)
       end
@@ -307,31 +337,36 @@ module Menu
           @__mayuna_menu << nil
         end
         unless mayuna_menu[side].nil?
-          @__mayuna_menu[index] = Gtk::Menu.new()
+          @__mayuna_menu[index] = Gio::Menu.new
           for j in 0..mayuna_menu[side].length-1
             key, name, state = mayuna_menu[side][j]
             if key != '-'
-              item = Gtk::CheckMenuItem.new(:label => name)
-              item.set_name('popup menu item')
-              item.set_active(state)
-              item.signal_connect('activate', [index, key]) do |a, ik|
-                @parent.handle_request(:GET, :toggle_bind, ik, 'user')
-                next true
+              # FIXME conflict
+              action = Gio::SimpleAction.new('toggle_bind')
+              action.signal_connect('activate', [index, key]) do |a, param, ik|
+                @parent.handle_request(:NOTIFY, :toggle_bind, ik, 'user')
               end
+              @parent.handle_request(:NOTIFY, :add_action, action)
+=begin TODO delete?
               provider = create_css_provider_for(item)
               item.signal_connect('draw', provider) do |i, *a, provider|
                 next set_stylecontext(i, *a, :provider => provider)
               end
+=end
+=begin FIXME alternative
             else
               item = Gtk::SeparatorMenuItem.new()
+=end
             end
-            item.show()
-            @__mayuna_menu[index] << item
+            #item.show()
+            @__mayuna_menu[index] << item unless item.nil?
           end
+=begin TODO delete?
           provider = create_css_provider_for(@__mayuna_menu[index])
           @__mayuna_menu[index].signal_connect('realize', provider) do |i, *a, provider|
             next set_stylecontext(i, *a, :provider => provider)
           end
+=end
         end
       end
     end
@@ -367,7 +402,8 @@ module Menu
                          ['kero.recommendbuttoncaption']], '(_R)', [[], []]],
       }
       for key in @__ui.keys
-        rasie "assert" unless @__menu_list.include?(key)
+        #raise "assert" unless @__menu_list.include?(key)
+        next unless @__menu_list.include?(key)
         if side > 1
           if ['Options/Update', 'Options/Vanish'].include?(key)
             name_list = @__ui[key][0][1] # same as 'kero'
@@ -413,13 +449,16 @@ module Menu
       end
     end
 
-    def popup(side, x, y)
+    def popup(side, x, y, upper)
+      #@__popup_menu.popdown
+=begin TODO delete?
       @__popup_menu.unrealize()
       for key in @__menu_list.keys
         item = @__menu_list[key][:entry]
         submenu = item.submenu
         submenu.unrealize() unless submenu.nil?
       end
+=end
       if side > 1
         string = 'char' + side.to_s
       else
@@ -435,7 +474,8 @@ module Menu
       else
         portal = nil
       end
-      __set_portal_menu(side, portal)
+      # FIXME implement
+      #__set_portal_menu(side, portal)
       if side > 1
         string = 'char' + side.to_s
       else
@@ -444,6 +484,7 @@ module Menu
       end
       string = [string, '.recommendsites'].join('')
       recommend = @parent.handle_request(:GET, :getstring, string)
+=begin FIXME implement
       __set_recommend_menu(recommend)
       __set_ghost_menu()
       __set_shell_menu()
@@ -451,6 +492,8 @@ module Menu
       __set_mayuna_menu(side)
       __set_nekodorif_menu()
       __set_kinoko_menu()
+=end
+=begin FIXME alternative
       for key in @__menu_list.keys
         item = @__menu_list[key][:entry]
         visible = @__menu_list[key][:visible]
@@ -462,16 +505,14 @@ module Menu
           end
         end
       end
-      # HACK
-      # AYUを利用しているとPopupするためのWindowが無いので
-      # 無理やりウィンドウを用意する
-      @win = Pix::TransparentWindow.new
-      @win.maximize
-      region = Cairo::Region.new
-      region.union!(x, y, 1, 1)
-      @win.set_shape(region, [0, 0])
-      @win.show_all
-      @__popup_menu.popup_at_rect(@win.window, Gdk::Rectangle.new(x, y, 1, 1), Gdk::Gravity::NORTH_WEST, Gdk::Gravity::NORTH_WEST)
+=end
+      @__popup_menu.set_pointing_to(Gdk::Rectangle.new(x, y, 1, 1))
+      if upper
+        @__popup_menu.set_position(Gtk::PositionType::BOTTOM)
+      else
+        @__popup_menu.set_position(Gtk::PositionType::TOP)
+      end
+      @__popup_menu.popup
     end
 
     def __set_caption(name, caption)
@@ -495,7 +536,7 @@ module Menu
         __set_visible('Portal', false)
       else
         unless portal.nil? or portal.empty?
-          menu = Gtk::Menu.new()
+          menu = Gio::Menu.new
           portal_list = portal.split(2.chr, 0)
           for site in portal_list
             entry = site.split(1.chr, 0)
@@ -559,7 +600,7 @@ module Menu
               next set_stylecontext(i, *a, :provider => provider)
             end
             menu.add(item)
-            item.show()
+            #item.show()
           end
           menuitem = @__menu_list['Portal'][:entry]
           menuitem.set_submenu(menu)
@@ -567,7 +608,7 @@ module Menu
           menu.signal_connect('realize', provider) do |i, *a, provider|
             next set_stylecontext(i, *a, :provider => provider)
           end
-          menu.show()
+          #menu.show()
           __set_visible('Portal', true)
         else
           __set_visible('Portal', false)
@@ -639,7 +680,7 @@ module Menu
             next set_stylecontext(i, *a, :provider => provider)
           end
           menu.add(item)
-          item.show()
+          #item.show()
         end
         menuitem =  @__menu_list['Recommend'][:entry]
         menuitem.set_submenu(menu)
@@ -647,7 +688,7 @@ module Menu
         menu.signal_connect('realize', provider) do |i, *a, provider|
           next set_stylecontext(i, *a, :provider => provider)
         end
-        menu.show()
+        #menu.show()
         __set_visible('Recommend', true)
       else
         __set_visible('Recommend', false)
@@ -661,20 +702,20 @@ module Menu
         pixbuf = Pix.create_icon_pixbuf(icon)
         unless pixbuf.nil?
           image = Gtk::Image.new(filename: icon)
-          image.show
+          #image.show
           #box.pack_start(image, :expand => false, :fill => false, :padding => 0)
           box.append(image)
         end
       end
       label = Gtk::Label.new(name)
       label.xalign = 0.0
-      label.show
+      #label.show
       #box.pack_end(label, :expand => true, :fill => true, :padding => 0)
       box.append(label)
-      box.show
+      #box.show
       item.set_child(box)
       item.set_name('popup menu item')
-      item.show()
+      #item.show()
       item.signal_connect('clicked') do |a, v|
         handler.call(key)
         next true
@@ -890,7 +931,7 @@ module Menu
         name = nekodorif_list[i]['name']
         item = Gtk::MenuItem.new(:label => name)
         item.set_name('popup menu item')
-        item.show()
+        #item.show()
         nekodorif_menu << item
         item.signal_connect('activate', nekodorif_list[i]['dir']) do |a, dir|
           @parent.handle_request(:GET, :select_nekodorif, dir)
@@ -918,7 +959,7 @@ module Menu
         name = kinoko_list[i]['title']
         item = Gtk::MenuItem.new(:label => name)
         item.set_name('popup menu item')
-        item.show()
+        #item.show()
         kinoko_menu << item
         item.signal_connect('activate', kinoko_list[i]) do |a, k|
           @parent.handle_request(:GET, :select_kinoko, k)
