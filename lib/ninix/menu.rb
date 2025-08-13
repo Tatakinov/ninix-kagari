@@ -44,6 +44,10 @@ module Menu
       model = Gio::Menu.new
       @__popup_menu = Gtk::PopoverMenu.new(model)
       window.set_child(@__popup_menu)
+      provider = create_css_provider_for(@__popup_menu)
+      @__popup_menu.signal_connect('realize', provider) do |i, *a, provider|
+        next set_stylecontext_with_sidebar(i, *a, :provider => provider)
+      end
       @__popup_menu.set_flags(Gtk::PopoverMenuFlags::NESTED)
       item = Gio::Menu.new
       model.append_submenu(_('Recommend sites(_R)'), item)
@@ -199,11 +203,7 @@ module Menu
       # FIXME alternative
       #@__menu_list['Quit'] = {:entry => item, :visible => true}
       #@__popup_menu.show
-      provider = create_css_provider_for(@__popup_menu)
 =begin FIXME implement
-      @__popup_menu.signal_connect('realize', provider) do |i, *a, provider|
-        next set_stylecontext_with_sidebar(i, *a, :provider => provider)
-      end
       for key in @__menu_list.keys
         item = @__menu_list[key][:entry]
         provider = create_css_provider_for(item)
@@ -808,7 +808,8 @@ module Menu
         set_stylecontext(item, *args, :provider => provider)
         return false
       end
-      _, offset_y = item.translate_coordinates(item.parent, 0, 0)
+      #_, offset_y = item.translate_coordinates(item.parent, 0, 0)
+      offset_y = 0
       color_normal = ""
       unless @__fontcolor['normal'].empty?
         color_normal = [
