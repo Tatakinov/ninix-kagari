@@ -310,70 +310,37 @@ module Menu
     end
 
     def __set_mayuna_menu(side)
-      if @__mayuna_menu.length > side and not @__mayuna_menu[side].nil?
-        menuitem = @__menu_list['Costume'][:entry]
-        # FIXME conflict
-        menuitem.append_submenu('Costume', @__mayuna_menu[side])
-        __set_visible('Costume', true)
-      else
-        __set_visible('Costume', false)
+      index = side
+      side = if index == 0
+              'sakura'
+            elsif index == 1
+              'kero'
+            else
+              "char#{index}"
+            end
+      menuitem = @__menu_list['Costume'][:entry]
+      menuitem.remove_all
+      if @__mayuna_menu.include?(side)
+        @__mayuna_menu[side].length.times do |j|
+          key, name, state = @__mayuna_menu[side][j]
+          if key != '-'
+            action = Gio::SimpleAction.new("toggle_bind#{j}")
+            action.signal_connect('activate', [index, key]) do |a, param, ik|
+              @parent.handle_request(:NOTIFY, :toggle_bind, ik, 'user')
+            end
+            @parent.handle_request(:NOTIFY, :add_action, action)
+            menuitem.append(name, "win.toggle_bind#{j}")
+          else
+=begin FIXME alternative
+            item = Gtk::SeparatorMenuItem.new()
+=end
+          end
+        end
       end
     end
 
     def create_mayuna_menu(mayuna_menu)
-      @__mayuna_menu = []
-      for side in mayuna_menu.keys
-        if side == 'sakura'
-          index = 0
-        elsif side == 'kero'
-          index = 1
-        elsif side.start_with?('char')
-          begin
-            index = Integer(side[4, side.length])
-          rescue
-            next
-          end
-        else
-          next
-        end
-        for _ in @__mayuna_menu.length..index 
-          @__mayuna_menu << nil
-        end
-        unless mayuna_menu[side].nil?
-          @__mayuna_menu[index] = Gio::Menu.new
-          mayuna_menu[side].length.times do |j|
-            key, name, state = mayuna_menu[side][j]
-            if key != '-'
-              # FIXME conflict
-              action = Gio::SimpleAction.new("toggle_bind#{j}")
-              action.signal_connect('activate', [index, key]) do |a, param, ik|
-                @parent.handle_request(:NOTIFY, :toggle_bind, ik, 'user')
-              end
-              @parent.handle_request(:NOTIFY, :add_action, action)
-=begin TODO delete?
-              provider = create_css_provider_for(item)
-              item.signal_connect('draw', provider) do |i, *a, provider|
-                next set_stylecontext(i, *a, :provider => provider)
-              end
-=end
-            else
-=begin FIXME alternative
-              item = Gtk::SeparatorMenuItem.new()
-=end
-              item = nil
-            end
-            #item.show()
-            #@__mayuna_menu[index] << item unless item.nil?
-            @__mayuna_menu[index].append(name, "win.toggle_bind#{j}")
-          end
-=begin TODO delete?
-          provider = create_css_provider_for(@__mayuna_menu[index])
-          @__mayuna_menu[index].signal_connect('realize', provider) do |i, *a, provider|
-            next set_stylecontext(i, *a, :provider => provider)
-          end
-=end
-        end
-      end
+      @__mayuna_menu = mayuna_menu
     end
 
     @@__re_shortcut = Regexp.new('&(?=[\x21-\x7e])')
@@ -757,7 +724,8 @@ module Menu
     end
 
     def set_stylecontext(item, *args, provider: nil)
-      _, offset_y = item.translate_coordinates(item.parent, 0, 0)
+      #_, offset_y = item.translate_coordinates(item.parent, 0, 0)
+      offset_y = 0
       color_normal = ""
       unless @__fontcolor['normal'].empty?
         color_normal = [
