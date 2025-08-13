@@ -44,6 +44,7 @@ module Menu
       model = Gio::Menu.new
       @__popup_menu = Gtk::PopoverMenu.new(model)
       window.set_child(@__popup_menu)
+      @__popup_menu.set_flags(Gtk::PopoverMenuFlags::NESTED)
       item = Gio::Menu.new
       model.append_submenu(_('Recommend sites(_R)'), item)
       @__menu_list['Recommend'] = {:entry => item, :visible => true}
