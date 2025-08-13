@@ -582,7 +582,7 @@ module Ninix_Main
 
     def create_balloon_menuitem(balloon_name, balloon_key, thumbnail)
       @__menu.create_meme_menuitem(
-        balloon_name, balloon_key, lambda {|v| select_balloon(v) }, thumbnail)
+        balloon_name, balloon_key, lambda {|v| select_balloon(v) }, thumbnail, 'Balloon')
     end
 
     def create_balloon_menu
@@ -590,17 +590,17 @@ module Ninix_Main
       for key in @balloons.keys
         balloon_menuitems[key] = @balloons[key].menuitem
       end
-      return @__menu.create_meme_menu(balloon_menuitems)
+      return @__menu.create_meme_menu(balloon_menuitems, 'Balloon')
     end
 
     def create_shell_menu(menuitems)
-      @__menu.create_meme_menu(menuitems)
+      @__menu.create_meme_menu(menuitems, 'Shell')
     end
 
     def create_shell_menuitem(shell_name, shell_key, thumbnail)
       @__menu.create_meme_menuitem(
         shell_name, shell_key,
-        lambda {|key| select_shell(key) }, thumbnail)
+        lambda {|key| select_shell(key) }, thumbnail, 'Shell')
     end
 
     def create_menuitem(key, baseinfo)
@@ -622,10 +622,10 @@ module Ninix_Main
       end
       start_menuitem = @__menu.create_ghost_menuitem(
         name, icon_path, key, lambda {|key| start_sakura_cb(key) }, # XXX
-        thumbnail_path)
+        thumbnail_path, 'Summon')
       select_menuitem = @__menu.create_ghost_menuitem(
         name, icon_path, key, lambda {|key| select_sakura(key) },
-        thumbnail_path)
+        thumbnail_path, 'Change')
       menuitem = {
         'Summon' => start_menuitem,
         'Change' => select_menuitem,
@@ -837,9 +837,11 @@ module Ninix_Main
 
     def set_menu_sensitive(key, flag)
       menuitems = @ghosts[key].menuitem
+=begin FIXME alternative
       for item in menuitems.values()
         item.set_sensitive(flag)
       end
+=end
     end
 
     def close_ghost(sakura)

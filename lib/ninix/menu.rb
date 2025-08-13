@@ -72,7 +72,6 @@ module Menu
       item.append(_('Network Update(_U)'), 'win.update')
       action = Gio::SimpleAction.new('update')
       action.signal_connect('activate') do |a, param|
-        a.state = not(a.state)
         @parent.handle_request(:NOTIFY, :network_update)
       end
       @parent.handle_request(:NOTIFY, :add_action, action)
@@ -310,7 +309,8 @@ module Menu
     def __set_mayuna_menu(side)
       if @__mayuna_menu.length > side and not @__mayuna_menu[side].nil?
         menuitem = @__menu_list['Costume'][:entry]
-        menuitem.set_submenu(@__mayuna_menu[side])
+        # FIXME conflict
+        menuitem.append_submenu('Costume', @__mayuna_menu[side])
         __set_visible('Costume', true)
       else
         __set_visible('Costume', false)
@@ -338,11 +338,11 @@ module Menu
         end
         unless mayuna_menu[side].nil?
           @__mayuna_menu[index] = Gio::Menu.new
-          for j in 0..mayuna_menu[side].length-1
+          mayuna_menu[side].length.times do |j|
             key, name, state = mayuna_menu[side][j]
             if key != '-'
               # FIXME conflict
-              action = Gio::SimpleAction.new('toggle_bind')
+              action = Gio::SimpleAction.new("toggle_bind#{j}")
               action.signal_connect('activate', [index, key]) do |a, param, ik|
                 @parent.handle_request(:NOTIFY, :toggle_bind, ik, 'user')
               end
@@ -353,13 +353,15 @@ module Menu
                 next set_stylecontext(i, *a, :provider => provider)
               end
 =end
-=begin FIXME alternative
             else
+=begin FIXME alternative
               item = Gtk::SeparatorMenuItem.new()
 =end
+              item = nil
             end
             #item.show()
-            @__mayuna_menu[index] << item unless item.nil?
+            #@__mayuna_menu[index] << item unless item.nil?
+            @__mayuna_menu[index].append(name, "win.toggle_bind#{j}")
           end
 =begin TODO delete?
           provider = create_css_provider_for(@__mayuna_menu[index])
@@ -450,7 +452,7 @@ module Menu
     end
 
     def popup(side, x, y, upper)
-      #@__popup_menu.popdown
+      @__popup_menu.popdown
 =begin TODO delete?
       @__popup_menu.unrealize()
       for key in @__menu_list.keys
@@ -475,7 +477,7 @@ module Menu
         portal = nil
       end
       # FIXME implement
-      #__set_portal_menu(side, portal)
+      __set_portal_menu(side, portal)
       if side > 1
         string = 'char' + side.to_s
       else
@@ -484,7 +486,6 @@ module Menu
       end
       string = [string, '.recommendsites'].join('')
       recommend = @parent.handle_request(:GET, :getstring, string)
-=begin FIXME implement
       __set_recommend_menu(recommend)
       __set_ghost_menu()
       __set_shell_menu()
@@ -492,7 +493,6 @@ module Menu
       __set_mayuna_menu(side)
       __set_nekodorif_menu()
       __set_kinoko_menu()
-=end
 =begin FIXME alternative
       for key in @__menu_list.keys
         item = @__menu_list[key][:entry]
@@ -507,11 +507,13 @@ module Menu
       end
 =end
       @__popup_menu.set_pointing_to(Gdk::Rectangle.new(x, y, 1, 1))
+=begin
       if upper
         @__popup_menu.set_position(Gtk::PositionType::BOTTOM)
       else
         @__popup_menu.set_position(Gtk::PositionType::TOP)
       end
+=end
       @__popup_menu.popup
     end
 
@@ -536,19 +538,23 @@ module Menu
         __set_visible('Portal', false)
       else
         unless portal.nil? or portal.empty?
-          menu = Gio::Menu.new
+          menu = @__menu_list['Portal'][:entry]
+          menu.remove_all
           portal_list = portal.split(2.chr, 0)
-          for site in portal_list
+          portal_list.each_with_index do |site, i|
             entry = site.split(1.chr, 0)
             next if entry.empty?
             title = entry[0]
             if title == '-'
-              item = Gtk::SeparatorMenuItem.new()
+              #item = Gtk::SeparatorMenuItem.new()
+              item = nil
             else
-              item = Gtk::MenuItem.new(:label => title)
+              item = Gio::SimpleAction.new("open_portal#{i}")
+=begin FIXME implement
               if entry.length < 2
                 item.set_sensitive(false)
               end
+=end
               if entry.length > 1    
                 url = entry[1]
               end
@@ -579,11 +585,12 @@ module Menu
                 banner = nil
               end
               if entry.length > 1    
-                item.signal_connect('activate', title, url) do |a, title, url|
+                item.signal_connect('activate', title, url) do |a, param, title, url|
                   @parent.handle_request(
                     :GET, :notify_site_selection, title, url)
                   next true
                 end
+=begin FIXME implement
                 unless banner.nil?
                   item.set_has_tooltip(true)
                   pixbuf = Pix.create_pixbuf_from_file(banner)
@@ -593,15 +600,21 @@ module Menu
                 else
                   item.set_has_tooltip(false)
                 end
+=end
+                @parent.handle_request(:NOTIFY, :add_action, item)
+                menu.append(title, "win.open_portal#{i}")
               end
             end
+=begin TODO delete?
             provider = create_css_provider_for(item)
             item.signal_connect('draw', provider) do |i, *a, provider|
               next set_stylecontext(i, *a, :provider => provider)
             end
             menu.add(item)
             #item.show()
+=end
           end
+=begin TODO elete?
           menuitem = @__menu_list['Portal'][:entry]
           menuitem.set_submenu(menu)
           provider = create_css_provider_for(menu)
@@ -609,6 +622,7 @@ module Menu
             next set_stylecontext(i, *a, :provider => provider)
           end
           #menu.show()
+=end
           __set_visible('Portal', true)
         else
           __set_visible('Portal', false)
@@ -618,18 +632,20 @@ module Menu
 
     def __set_recommend_menu(recommend)
       unless recommend.nil? or recommend.empty?
-        menu = Gtk::Menu.new()
+        menu =  @__menu_list['Recommend'][:entry]
+        menu.remove_all
         recommend_list = recommend.split(2.chr, 0)
-        for site in recommend_list
+        recommend_list.each_with_index do |site, i|
           entry = site.split(1.chr, 0)
           next if entry.empty?
           title = entry[0]
           if title == '-'
-            item = Gtk::SeparatorMenuItem.new()
+            #item = Gtk::SeparatorMenuItem.new()
+            item = nil
           else
-            item = Gtk::MenuItem.new(:label => title)
+            item = Gio::SimpleAction.new("open_recommend#{i}")
             if entry.length < 2
-              item.set_sensitive(false)
+              #item.set_sensitive(false)
             end
             if entry.length > 1
               url = entry[1]
@@ -660,10 +676,11 @@ module Menu
               banner = nil
             end
             if entry.length > 1
-              item.signal_connect('activate', title, url) do |a, title, url|
+              item.signal_connect('activate', title, url) do |a, param, title, url|
                 @parent.handle_request(:GET, :notify_site_selection, title, url)
                 next true
               end
+=begin FIXME implement
               unless banner.nil?
                 item.set_has_tooltip(true)
                 pixbuf = Pix.create_pixbuf_from_file(banner)
@@ -673,53 +690,50 @@ module Menu
               else
                 item.set_has_tooltip(false)
               end
+=end
+              menu.append(title, "win.open_recommend#{i}")
+              @parent.handle_request(:GET, :add_action, item)
             end
           end
+=begin FIXME implement
           provider = create_css_provider_for(item)
           item.signal_connect('draw', provider) do |i, *a, provider|
             next set_stylecontext(i, *a, :provider => provider)
           end
           menu.add(item)
           #item.show()
+=end
         end
+=begin TODO delete?
         menuitem =  @__menu_list['Recommend'][:entry]
         menuitem.set_submenu(menu)
+=end
+=begin FIXME implement
         provider = create_css_provider_for(menu)
         menu.signal_connect('realize', provider) do |i, *a, provider|
           next set_stylecontext(i, *a, :provider => provider)
         end
         #menu.show()
-        __set_visible('Recommend', true)
+=end
+        #__set_visible('Recommend', true)
       else
-        __set_visible('Recommend', false)
+        #__set_visible('Recommend', false)
       end
     end
 
-    def create_ghost_menuitem(name, icon, key, handler, thumbnail)
-      item = Gtk::Button.new
-      box = Gtk::Box.new(Gtk::Orientation::HORIZONTAL, 6)
+    def create_ghost_menuitem(name, icon, key, handler, thumbnail, menu)
+      item = Gio::MenuItem.new(name, "win.#{menu.downcase}#{key}")
       unless icon.nil?
-        pixbuf = Pix.create_icon_pixbuf(icon)
-        unless pixbuf.nil?
-          image = Gtk::Image.new(filename: icon)
-          #image.show
-          #box.pack_start(image, :expand => false, :fill => false, :padding => 0)
-          box.append(image)
-        end
+        fileicon = Gio::FileIcon.new(Gio::File.new_for_path(icon))
+        item.set_icon(fileicon)
       end
-      label = Gtk::Label.new(name)
-      label.xalign = 0.0
-      #label.show
-      #box.pack_end(label, :expand => true, :fill => true, :padding => 0)
-      box.append(label)
-      #box.show
-      item.set_child(box)
-      item.set_name('popup menu item')
-      #item.show()
-      item.signal_connect('clicked') do |a, v|
+      action = Gio::SimpleAction.new("#{menu.downcase}#{key}")
+      action.signal_connect('activate') do |a, v|
         handler.call(key)
         next true
       end
+      @parent.handle_request(:NOTIFY, :add_action, action)
+=begin TODO delete?
       unless thumbnail.nil?
         item.set_has_tooltip(true)
         pixbuf = Pix.create_pixbuf_from_file(thumbnail)
@@ -729,6 +743,7 @@ module Menu
       else
         item.set_has_tooltip(false)
       end
+=end
 =begin TODO stub
       provider = create_css_provider_for(item)
       item.signal_connect('draw', provider) do |i, *a, provider|
@@ -852,68 +867,89 @@ module Menu
 
     def __set_ghost_menu
       for path in ['Summon', 'Change']
-        ghost_menu = Gtk::Menu.new()
-        for items in @parent.handle_request(:GET, :get_ghost_menus)
+        ghost_menu = @__menu_list[path][:entry]
+        ghost_menu.remove_all
+        @parent.handle_request(:GET, :get_ghost_menus).each_with_index do |items, i|
           item = items[path]
+=begin FIXME implement
           unless item.parent.nil?
             item.reparent(ghost_menu)
           else
             ghost_menu << item
           end
+=end
+          ghost_menu.append_item(items[path])
         end
+=begin TODO delete?
         menuitem = @__menu_list[path][:entry]
         menuitem.set_submenu(ghost_menu)
+=end
+=begin FIXME implement
         provider = create_css_provider_for(ghost_menu)
         ghost_menu.signal_connect('realize', provider) do |i, *a, provider|
           next set_stylecontext(i, *a, :provider => provider)
         end
+=end
       end
     end
 
     def __set_shell_menu
+=begin TODO delete?
       shell_menu = @parent.handle_request(:GET, :get_shell_menu)
       menuitem = @__menu_list['Shell'][:entry]
       menuitem.set_submenu(shell_menu)
+=end
     end
 
     def __set_balloon_menu
+=begin TODO delete?
       balloon_menu = @parent.handle_request(:GET, :get_balloon_menu)
       menuitem = @__menu_list['Balloon'][:entry]
       menuitem.set_submenu(balloon_menu)
+=end
     end
 
-    def create_meme_menu(menuitem)
-      menu = Gtk::PopoverMenu.new()
+    def create_meme_menu(menuitem, menu)
+      menu = @__menu_list[menu][:entry]
+      menu.remove_all
       for item in menuitem.values()
+=begin TODO delete?
         unless item.parent.nil?
           item.reparent(menu)
         else
           menu.add_child(item, item.label)
         end
+=end
+        menu.append_item(item)
       end
+=begin FIXME implement
       provider = create_css_provider_for(menu)
       menu.signal_connect('realize', provider) do |i, *a, provider|
         next set_stylecontext(i, *a, :provider => provider)
       end
+=end
       return menu
     end
 
-    def create_meme_menuitem(name, value, handler, thumbnail)
+    def create_meme_menuitem(name, value, handler, thumbnail, menu)
       #item = Gtk::ImageMenuItem.new(:label => name)
-      item = Gtk::Button.new
-      item.label = 'popup menu item'
-      item.signal_connect('clicked') do |a, v|
+      item = Gio::MenuItem.new(name, "win.#{menu.downcase}#{value}")
+      action = Gio::SimpleAction.new("#{menu.downcase}#{value}")
+      action.signal_connect('activate') do |a, param|
         handler.call(value)
-        next true
       end
       unless thumbnail.nil?
+        fileicon = Gio::FileIcon.new(Gio::File.new_for_path(thumbnail))
+        item.set_icon(fileicon)
+=begin FIXME implement
         item.set_has_tooltip(true)
         pixbuf = Pix.create_pixbuf_from_file(thumbnail)
         item.signal_connect('query-tooltip') do |widget, x, y, keyboard_mode, tooltip|
           next on_tooltip(widget, x, y, keyboard_mode, tooltip, pixbuf)
         end
+=end
       else
-        item.set_has_tooltip(false)
+        #item.set_has_tooltip(false)
       end
 =begin TODO stub
       provider = create_css_provider_for(item)
@@ -926,58 +962,64 @@ module Menu
 
     def __set_nekodorif_menu
       nekodorif_list = @parent.handle_request(:GET, :get_nekodorif_list)
-      nekodorif_menu = Gtk::Menu.new()
-      for i in 0..(nekodorif_list.length - 1)
+      nekodorif_menu = @__menu_list['Nekodorif'][:entry]
+      nekodorif_menu.remove_all
+      nekodorif_list.length.times do |i|
         name = nekodorif_list[i]['name']
-        item = Gtk::MenuItem.new(:label => name)
-        item.set_name('popup menu item')
-        #item.show()
-        nekodorif_menu << item
-        item.signal_connect('activate', nekodorif_list[i]['dir']) do |a, dir|
+        item = Gio::MenuItem(name, "win.nekodorif#{i}")
+        nekodorif_menu.append_item(item)
+        action = Gio::SimpleAction("nekodorif#{i}")
+        action.signal_connect('activate', nekodorif_list[i]['dir']) do |a, dir|
           @parent.handle_request(:GET, :select_nekodorif, dir)
           next true
         end
+        @parent.handle_request(:NOTIFY, :add_action, action)
+=begin FIXME implement
         provider = create_css_provider_for(item)
         item.signal_connect('draw', provider) do |i, *a, provider|
           next set_stylecontext(i, *a, :provider => provider)
         end
         ##if working
         ##  item.set_sensitive(false)
+=end
       end
-      menuitem = @__menu_list['Nekodorif'][:entry]
-      menuitem.set_submenu(nekodorif_menu)
+=begin FIXME implement
       provider = create_css_provider_for(nekodorif_menu)
       nekodorif_menu.signal_connect('realize', provider) do |i, *a, provider|
         next set_stylecontext(i, *a, :provider => provider)
       end
+=end
     end
 
     def __set_kinoko_menu
       kinoko_list = @parent.handle_request(:GET, :get_kinoko_list)
-      kinoko_menu = Gtk::Menu.new()
-      for i in 0..(kinoko_list.length - 1)
+      kinoko_menu = @__menu_list['Kinoko'][:entry]
+      kinoko_menu.remove_all
+      kinoko_list.length.times do |i|
         name = kinoko_list[i]['title']
-        item = Gtk::MenuItem.new(:label => name)
-        item.set_name('popup menu item')
-        #item.show()
-        kinoko_menu << item
-        item.signal_connect('activate', kinoko_list[i]) do |a, k|
+        item = Gio::MenuItem(name, "win.kinoko#{i}")
+        kinoko_menu.append_item(item)
+        action = Gio::SimpleAction("kinoko#{i}")
+        action.signal_connect('activate', kinoko_list[i]) do |a, k|
           @parent.handle_request(:GET, :select_kinoko, k)
           next true
         end
+        @parent.handle_request(:NOTIFY, :add_action, action)
+=begin FIXME implement
         provider = create_css_provider_for(item)
         item.signal_connect('draw', provider) do |i, *a, provider|
           next set_stylecontext(i, *a, :provider => provider)
         end
         ##if working
         ##  item.set_sensitive(false)
+=end
       end
-      menuitem = @__menu_list['Kinoko'][:entry]
-      menuitem.set_submenu(kinoko_menu)
+=begin FIXME implement
       provider = create_css_provider_for(kinoko_menu)
       kinoko_menu.signal_connect('realize', provider) do |i, *a, provider|
         next set_stylecontext(i, *a, :provider => provider)
       end
+=end
     end
 
     def get_stick

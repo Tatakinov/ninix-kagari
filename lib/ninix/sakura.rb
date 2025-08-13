@@ -213,7 +213,8 @@ module Sakura
       current_key = get_current_shell()
       for key in @shells.keys
         menuitem = @shells[key].menuitem
-        menuitem.set_sensitive(key != current_key) # not working
+        # FIXME alternative
+        #menuitem.set_sensitive(key != current_key) # not working
       end
       return @shell_menu
     end
