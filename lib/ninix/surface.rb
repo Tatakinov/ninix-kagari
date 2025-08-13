@@ -1307,11 +1307,11 @@ module Surface
       @pix_cache = Pix::Cache.new
       @cache = Cache::ImageCache.new
       motion_controller = Gtk::EventControllerMotion.new
-      motion_controller.signal_connect('leave') do |w, e|
-        next window_leave_notify(@window, e) # XXX
+      motion_controller.signal_connect('leave') do |w|
+        next window_leave_notify(@window, w, @motion_x, @motion_y)
       end
-      motion_controller.signal_connect('enter') do |w, e|
-        window_enter_notify(@window, e) # XXX
+      motion_controller.signal_connect('enter') do |w, x, y|
+        window_enter_notify(@window, w, x, y) # XXX
         next true
       end
       @window.add_controller(motion_controller)
@@ -1627,7 +1627,12 @@ module Surface
         pix = @pix_cache.load(@surfaces[surface_id][0], is_pnr: is_pnr, use_pna: use_pna)
       rescue
         Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
-        return Pix::Data.new(Pix.create_blank_surface(100, 100), Cairo::Region.new, false)
+        if @image_surface.nil?
+          return Pix::Data.new(Pix.create_blank_surface(200, 200), Cairo::Region.new, false)
+        else
+          surface = @image_surface.surface(write: false)
+          return Pix::Data.new(Pix.create_blank_surface(surface.width, surface.height), Cairo::Region.new, false)
+        end
       end
       if overlay.empty?
         write = false
@@ -1677,7 +1682,12 @@ module Surface
       unless @surfaces.include?(surface_id)
         return [] if check_only
         Logging::Logging.debug('cannot load surface #' + surface_id.to_s)
-        return Pix::Data.new(Pix.create_blank_surface(*@window.size), Cairo::Region.new, false)
+        if @image_surface.nil?
+          return Pix::Data.new(Pix.create_blank_surface(100, 100), Cairo::Region.new, false)
+        else
+          surface = @image_surface.surface(write: false)
+          return Pix::Data.new(Pix.create_blank_surface(surface.width, surface.height), Cairo::Region.new, false)
+        end
       end
       return create_surface_from_file(surface_id, :is_asis => is_asis, check_only: check_only)
     end
@@ -1875,7 +1885,7 @@ module Surface
       image = @cache[render_info]
       unless image.nil?
         @image_surface = image
-        @window.queue_draw
+        @darea.queue_draw
         return
       end
       @reshape = true # FIXME: depends on Seriko
@@ -1917,7 +1927,7 @@ module Surface
         region.union!(r)
       end
       @image_surface = Pix::Data.new(surface, region, frozen)
-      @window.queue_draw
+      @darea.queue_draw
     end
 
     def redraw(darea, cr)
@@ -1941,7 +1951,7 @@ module Surface
     def move_surface(xoffset, yoffset)
       return if @parent.handle_request(:GET, :lock_repaint)
       x, y = get_position()
-      set_positioin(x + xoffset, y + yoffset)
+      set_position(x + xoffset, y + yoffset)
       if @side < 2
         args = [@side, xoffset, yoffset]
         @parent.handle_request(
@@ -2207,7 +2217,7 @@ module Surface
       @reshape = true
       @__shown = true
       x, y = get_position()
-      @window.queue_draw
+      @darea.queue_draw
       @window.show()
       @parent.handle_request(:GET, :notify_observer, 'show', :args => [@side])
       @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
@@ -2295,6 +2305,8 @@ module Surface
     end
 
     def motion_notify(darea, ctrl, x, y)
+      @motion_x = x
+      @motion_y = y
       state = nil
       x, y = @window.winpos_to_surfacepos(x, y, get_scale)
       part = get_touched_region(x, y)
@@ -2387,15 +2399,15 @@ module Surface
       end
     end
 
-    def window_enter_notify(window, event)
-      x, y, state = event.x, event.y, event.state
+    def window_enter_notify(window, ctrl, x, y)
+      #x, y, state = event.x, event.y, event.state
       x, y = @window.winpos_to_surfacepos(x, y, get_scale)
       @parent.handle_request(:GET, :notify_event,
                              'OnMouseEnterAll', x, y, '', @side, '')
     end
 
-    def window_leave_notify(window, event)
-      x, y, state = event.x, event.y, event.state
+    def window_leave_notify(window, ctrl, x, y)
+      #x, y, state = event.x, event.y, event.state
       x, y = @window.winpos_to_surfacepos(x, y, get_scale)
       if @__current_part != '' # XXX
         @parent.handle_request(
