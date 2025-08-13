@@ -44,6 +44,7 @@ module Menu
       model = Gio::Menu.new
       @__popup_menu = Gtk::PopoverMenu.new(model)
       window.set_child(@__popup_menu)
+      @__popup_menu.set_has_arrow(false)
       provider = create_css_provider_for(@__popup_menu)
       @__popup_menu.signal_connect('realize', provider) do |i, *a, provider|
         next set_stylecontext_with_sidebar(i, *a, :provider => provider)

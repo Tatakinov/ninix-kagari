@@ -771,11 +771,6 @@ module Ninix_Main
       provider = Gtk::CssProvider.new
       Gtk::StyleContext.add_provider_for_display(Gdk::Display.default, provider, Gtk::StyleProvider::PRIORITY_USER)
       provider.load(data: %{
-                      popover arrow {
-                        background: transparent;
-                        border: none;
-                        box-shadow: none;
-                      }
                       popover contents {
                         border-radius: 0 0 0 0;
                         border: none;
