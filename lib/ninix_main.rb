@@ -768,6 +768,20 @@ module Ninix_Main
       else
         Signal.trap(:TERM) {|signo| close_all_ghosts(:reason => 'shutdown') }
       end
+      provider = Gtk::CssProvider.new
+      Gtk::StyleContext.add_provider_for_display(Gdk::Display.default, provider, Gtk::StyleProvider::PRIORITY_USER)
+      provider.load(data: %{
+                      popover arrow {
+                        background: transparent;
+                        border: none;
+                        box-shadow: none;
+                      }
+                      popover contents {
+                        border-radius: 0 0 0 0;
+                        border: none;
+                        box-shadow: none;
+                      }
+                    })
       @timeout_id = GLib::Timeout.add(100) { do_idle_tasks } # 100[ms]
     end
 

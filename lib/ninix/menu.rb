@@ -224,7 +224,8 @@ module Menu
     def create_css_provider_for(item)
       provider = Gtk::CssProvider.new()
       style_context = item.style_context
-      style_context.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
+      #style_context.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
+      Gtk::StyleContext.add_provider_for_display(Gdk::Display.default, provider, Gtk::StyleProvider::PRIORITY_USER)
       return provider
     end
 
@@ -778,20 +779,20 @@ module Menu
             ";\n"
         ].join("")
       end
-      provider.load(data: ["menu {\n",
+      provider.load(data: ["popover contents {\n",
                            @__imagepath['background'],
                            "background-repeat: repeat-y;\n",
                            color_normal,
                            ["background-position: ", @__align['background'], " ", (-offset_y).to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "menu :disabled {\n",
+                           "popover contents:disabled {\n",
                            @__imagepath['background'],
                            "background-repeat: repeat-y;\n",
                            ["background-position: ", @__align['background'], " ", (-offset_y).to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "menu :hover {\n",
+                           "popover contents:hover {\n",
                            @__imagepath['foreground'],
                            "background-repeat: repeat-y;\n",
                            color_hover,
@@ -832,30 +833,30 @@ module Menu
             ";\n"
         ].join("")
       end
-      provider.load(data: ["menu {\n",
+      provider.load(data: ["popover contents {\n",
                            @__imagepath['background_with_sidebar'],
                            "background-repeat: repeat-y;\n",
                            color_normal,
                            ["background-position: ", "0px ", (-offset_y).to_s, "px", ", ",
                             @sidebar_width.to_s, "px", " ", (-offset_y).to_s, "px;\n"].join(''),
-                           ["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
+                           #["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "menu :disabled {\n",
+                           "popover contents:disabled {\n",
                            @__imagepath['background_with_sidebar'],
                            "background-repeat: repeat-y;\n",
                            ["background-position: ", "0px ", (-offset_y).to_s, "px", ", ",
                             @sidebar_width.to_s, "px", " ", (-offset_y).to_s, "px;\n"].join(''),
-                           ["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
+                           #["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
                            "}\n",
                            "\n",
-                           "menu :hover {\n",
+                           "popover contents:hover {\n",
                            @__imagepath['foreground_with_sidebar'],
                            "background-repeat: repeat-y;\n",
                            color_hover,
                            ["background-position: ", "0px ", (-offset_y).to_s, "px", ", ",
                             @sidebar_width.to_s, "px", " ", (-offset_y).to_s, "px;\n"].join(''),
-                           ["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
+                           #["padding-left: ", @sidebar_width.to_s, "px;\n"].join(''),
                            "}"
                           ].join(''))
       return false
