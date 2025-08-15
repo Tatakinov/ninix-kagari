@@ -1697,7 +1697,7 @@ module Surface
       cr.save
       # translate the user-space origin
       scale = get_scale
-      cr.translate(get_position)
+      cr.translate(*get_position)
       cr.scale(scale / 100.0, scale / 100.0)
       for part, type, c in @collisions
         cr.save
