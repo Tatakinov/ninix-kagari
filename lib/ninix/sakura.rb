@@ -3182,13 +3182,6 @@ module Sakura
       end
       unless @processed_text.empty?
         @balloon.show(@script_side)
-=begin TODO delete?
-        if @surface.is_internal
-          balloon_win = @balloon.get_window(@script_side)
-          surface_win = @surface.get_window(@script_side)
-          balloon_win.window.restack(surface_win.window, true)
-        end
-=end
         @balloon.append_text(@script_side, @processed_text[0])
         @processed_text = @processed_text[1..-1]
         surface_id = get_surface_id(@script_side)

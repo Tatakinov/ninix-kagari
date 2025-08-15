@@ -84,9 +84,9 @@ module Pix
   end
 
   class BaseTransparentWindow < Gtk::Window
-    attr_reader :supports_alpha
+    attr_reader :supports_alpha, :rect
 
-    def initialize(...)
+    def initialize(monitor = nil)
       @width, @height = 1, 1
       super()
       set_decorated(false)
@@ -95,7 +95,12 @@ module Pix
       sc = style_context
       sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
       #set_resizable(false)
-      maximize
+      if monitor.nil?
+        maximize
+      else
+        @rect = monitor.geometry
+        fullscreen_on_monitor(monitor)
+      end
     end
   end
 
@@ -104,8 +109,8 @@ module Pix
 
     attr_accessor :darea
 
-    def initialize
-      super()
+    def initialize(...)
+      super
       @__surface_position = [0, 0]
       @prev_position = [0, 0]
       # create drawing area
@@ -147,7 +152,11 @@ module Pix
         @tmp_surface = surface
       end
 =end
-      cr.translate(*pos)
+      if @rect.nil?
+        cr.translate(*pos)
+      else
+        cr.translate(pos[0] - @rect.x, pos[1] - @rect.y)
+      end
       cr.scale(scale / 100.0, scale / 100.0)
       cr.set_source(surface, 0, 0)
       cr.set_operator(Cairo::OPERATOR_SOURCE)
@@ -171,12 +180,17 @@ module Pix
       end
 =end
     end
+
     def set_shape(region, pos)
       return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       @prev_position = @__surface_position
       r = Cairo::Region.new
       r.union!(region)
-      r.translate!(*pos)
+      if @rect.nil?
+        r.translate!(*pos)
+      else
+        r.translate!(pos[0] - @rect.x, pos[1] - @rect.y)
+      end
       surface.set_input_region(r)
     end
   end

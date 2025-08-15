@@ -104,8 +104,8 @@ module Balloon
       end
     end
 
-    def create_gtk_window(title)
-      window = Pix::TransparentWindow.new()
+    def create_gtk_window(title, monitor)
+      window = Pix::TransparentWindow.new(monitor)
       window.set_title(title)
       window.signal_connect('close-request') do |w, e|
         next delete(w, e)
@@ -200,9 +200,13 @@ module Balloon
         id_format = 'k'
         balloon = @balloon1
       end
-      gtk_window = create_gtk_window(name)
+      gtk_windows = []
+      monitors = Gdk::Display.default.monitors
+      monitors.n_items.times do |i|
+        gtk_windows << create_gtk_window(name, monitors.get_item(i))
+      end
       balloon_window = BalloonWindow.new(
-        gtk_window, side, @desc, balloon, id_format)
+        gtk_windows, side, @desc, balloon, id_format)
       balloon_window.set_responsible(self)
       balloon_window.reset_fonts()
       @window[side] = balloon_window
@@ -541,8 +545,8 @@ module Balloon
   class BalloonWindow
     attr_accessor :direction
 
-    def initialize(window, side, desc, balloon, id_format)
-      @window = window
+    def initialize(windows, side, desc, balloon, id_format)
+      @windows = windows
       @side = side
       @parent = nil
       @desc = desc
@@ -568,30 +572,33 @@ module Balloon
       @y_fractions = 0
       @reshape = true
       @pix_cache = Pix::Cache.new
-      @darea = @window.darea
-      @darea.set_draw_func do |w, e|
-        redraw(w, e)
-        next true
+      @windows.each do |window|
+        darea = window.darea
+        darea.set_draw_func do |w, e|
+          redraw(window, w, e)
+          next true
+        end
+        button_controller = Gtk::GestureClick.new
+        # 全てのボタンをlisten
+        button_controller.set_button(0)
+        button_controller.signal_connect('pressed') do |w, n, x, y|
+          next button_press(window, darea, w, n, x, y)
+        end
+        darea.add_controller(button_controller)
+        motion_controller = Gtk::EventControllerMotion.new
+        motion_controller.signal_connect('motion') do |w, x, y|
+          next motion_notify(window, darea, w, x, y)
+        end
+        darea.add_controller(motion_controller)
+        scroll_controller = Gtk::EventControllerScroll.new(Gtk::EventControllerScrollFlags::VERTICAL)
+        scroll_controller.signal_connect('scroll') do |w, dx, dy|
+          next scroll(window, darea, dx, dy)
+        end
+        darea.add_controller(scroll_controller)
       end
-      button_controller = Gtk::GestureClick.new
-      # 全てのボタンをlisten
-      button_controller.set_button(0)
-      button_controller.signal_connect('pressed') do |w, n, x, y|
-        next button_press(@darea, w, n, x, y)
-      end
-      @darea.add_controller(button_controller)
-      motion_controller = Gtk::EventControllerMotion.new
-      motion_controller.signal_connect('motion') do |w, x, y|
-        next motion_notify(@darea, w, x, y)
-      end
-      @darea.add_controller(motion_controller)
-      scroll_controller = Gtk::EventControllerScroll.new(Gtk::EventControllerScrollFlags::VERTICAL)
-      scroll_controller.signal_connect('scroll') do |w, dx, dy|
-        next scroll(@darea, dx, dy)
-      end
-      @darea.add_controller(scroll_controller)
-      @layout = Pango::Layout.new(@darea.pango_context)
-      @sstp_layout = Pango::Layout.new(@darea.pango_context())
+      pango_context = Gtk::DrawingArea.new.pango_context
+      @layout = Pango::Layout.new(pango_context)
+      @sstp_layout = Pango::Layout.new(pango_context)
       mask_r = desc.get('maskcolor.r', :default => 128).to_i
       mask_g = desc.get('maskcolor.g', :default => 128).to_i
       mask_b = desc.get('maskcolor.b', :default => 128).to_i
@@ -617,16 +624,12 @@ module Balloon
       clear_text()
     end
 
-    def get_window
-      @window
-    end
-
     def set_responsible(parent)
       @parent = parent
     end
 
     def raise
-      @window.window.raise
+      #@window.window.raise
     end
 
     #@property
@@ -705,7 +708,9 @@ module Balloon
       unless @balloon_id.nil?
         reset_message_regions()
         if @__shown
-          @darea.queue_draw()
+          @windows.each do |window|
+            window.darea.queue_draw()
+          end
         end
       end
     end
@@ -837,7 +842,9 @@ module Balloon
       reset_sstp_marker()
       reset_message_regions()
       @parent.handle_request(:GET, :position_balloons)
-      @darea.queue_draw() if @__shown
+      @windows.each do |window|
+        window.darea.queue_draw()
+      end if @__shown
       @reshape = true
     end
 
@@ -886,11 +893,9 @@ module Balloon
     end
 
     def __move
-      @darea.queue_draw
-    end
-
-    def get_gdk_window
-      #@window.window
+      @windows.each do |window|
+        window.darea.queue_draw
+      end
     end
 
     def set_position(base_x, base_y)
@@ -899,13 +904,15 @@ module Balloon
       w, h = get_balloon_size()
       x = (base_x + px)
       y = (base_y + py)
-      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
+=begin TODO implement
+      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, nil)
       if (y + h) > top + scrn_h # XXX
         y = (scrn_h - h)
       end
       if y < top # XXX
         y = top
       end
+=end
       @position = [x, y]
       __move()
     end
@@ -915,7 +922,9 @@ module Balloon
     end
 
     def destroy(finalize: 0)
-      @window.destroy()
+      @windows.each do |window|
+        window.destroy()
+      end
     end
 
     def is_shown
@@ -928,7 +937,9 @@ module Balloon
       @__shown = true
       # make sure window is in its position (call before showing the window)
       __move()
-      @window.show()
+      @windows.each do |window|
+        window.show()
+      end
       # make sure window is in its position (call after showing the window)
       __move()
       raise_()
@@ -937,7 +948,9 @@ module Balloon
 
     def hide
       return unless @__shown
-      @window.hide()
+      @windows.each do |window|
+        window.hide()
+      end
       @__shown = false
       @images = []
     end
@@ -950,7 +963,7 @@ module Balloon
 
     def lower
       return unless @__shown
-      @window.get_window().lower()
+      #@window.get_window().lower()
     end
 
     def show_sstp_message(message, sender)
@@ -972,12 +985,16 @@ module Balloon
           @sstp_message = s
         end
       end
-      @darea.queue_draw()
+      @windows.each do |window|
+        window.darea.queue_draw()
+      end
     end
 
     def hide_sstp_message
       @sstp_message = nil
-      @darea.queue_draw()
+      @windows.each do |window|
+        window.darea.queue_draw()
+      end
     end
 
     def redraw_sstp_message(widget, cr)
@@ -1118,13 +1135,14 @@ module Balloon
       return h - @lineno * @line_height
     end
 
-    def redraw(widget, cr)
+    def redraw(window, widget, cr)
       return if @parent.handle_request(:GET, :lock_repaint)
       return true unless @__shown
       fail "assert" if @balloon_surface.nil?
-      @window.set_surface(cr, @balloon_surface.surface(write: false), scale, @position)
+      window.set_surface(cr, @balloon_surface.surface(write: false), scale, @position)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
-      cr.translate(*get_position) # XXX
+      pos = get_position
+      cr.translate(pos[0] - window.rect.x, pos[1] - window.rect.y)
       # FIXME: comment
       cr.rectangle(@origin_x, 0, @valid_width, @origin_y + @valid_height)
       cr.clip
@@ -1334,7 +1352,7 @@ module Balloon
       update_link_region(widget, cr, @selection) unless @selection.nil?
       redraw_arrow0(widget, cr)
       redraw_arrow1(widget, cr)
-      @window.set_shape(@balloon_surface.region(write: false), get_position)
+      window.set_shape(@balloon_surface.region(write: false), get_position)
       @reshape = false
       return false
     end
@@ -1581,9 +1599,9 @@ module Balloon
       end
     end
 
-    def motion_notify(widget, ctrl, x, y)
+    def motion_notify(window, widget, ctrl, x, y)
       state = nil
-      px, py = @window.winpos_to_surfacepos(x, y, scale)
+      px, py = window.winpos_to_surfacepos(x, y, scale)
       unless @link_buffer.empty?
         if check_link_region(px, py)
           widget.queue_draw()
@@ -1608,27 +1626,27 @@ module Balloon
       return true
     end
 
-    def scroll(darea, dx, dy)
-      px, py = @window.winpos_to_surfacepos(
+    def scroll(window, darea, dx, dy)
+      px, py = window.winpos_to_surfacepos(
             dx, dy, scale)
       case event.direction
       when Gdk::ScrollDirection::UP
         if @lineno > 0
           @lineno = @lineno - 1
           check_link_region(px, py)
-          @darea.queue_draw()
+          darea.queue_draw()
         end
       when Gdk::ScrollDirection::DOWN
         if get_bottom_position > @valid_height
           @lineno += 1
           check_link_region(px, py)
-          @darea.queue_draw()
+          darea.queue_draw()
         end
       end
       return true
     end
 
-    def button_press(darea, ctrl, n, x, y)
+    def button_press(window, darea, ctrl, n, x, y)
       @parent.handle_request(:GET, :reset_idle_time)
       if @parent.handle_request(:GET, :is_paused)
         @parent.handle_request(:GET, :notify_balloon_click,
@@ -1636,7 +1654,7 @@ module Balloon
         return true
       end
       # arrows
-      px, py = @window.winpos_to_surfacepos(
+      px, py = window.winpos_to_surfacepos(
             x, y, scale)
       if ctrl.button == 1
         @x_root = x
@@ -1650,7 +1668,7 @@ module Balloon
       if x <= px and px <= (x + w) and y <= py and py <= (y + h)
         if @lineno > 0
           @lineno = @lineno - 1
-          @darea.queue_draw()
+          darea.queue_draw()
         end
         return true
       end
@@ -1662,7 +1680,7 @@ module Balloon
       if x <= px and px <= (x + w) and y <= py and py <= (y + h)
         if get_bottom_position > @valid_height
           @lineno += 1
-          @darea.queue_draw()
+          darea.queue_draw()
         end
         return true
       end
@@ -1683,7 +1701,7 @@ module Balloon
     end
 
     def button_release(window, w, n, x, y)
-      x, y = @window.winpos_to_surfacepos(
+      x, y = window.winpos_to_surfacepos(
            event.x.to_i, event.y.to_i, scale)
       @dragged = false if @dragged
       @x_root = nil
@@ -1728,7 +1746,9 @@ module Balloon
       @newline_required = false
       @images = []
       @sstp_marker = []
-      @darea.queue_draw()
+      @windows.each do |window|
+        window.darea.queue_draw
+      end
     end
 
     def get_text_count
@@ -1923,7 +1943,9 @@ module Balloon
         is_sstp_marker: true,
       }
       show
-      @darea.queue_draw
+      @windows.each do |window|
+        window.darea.queue_draw
+      end
     end
 
     def append_link_in(link_id, args)
@@ -2038,7 +2060,9 @@ module Balloon
         end
       end
       show
-      @darea.queue_draw
+      @windows.each do |window|
+        window.darea.queue_draw
+      end
     end
 
     def draw_last_line(column: 0)
@@ -2046,7 +2070,9 @@ module Balloon
       while get_bottom_position > @valid_height
         @lineno += 1
       end
-      @darea.queue_draw()
+      @windows.each do |window|
+        window.darea.queue_draw
+      end
     end
   end
 
