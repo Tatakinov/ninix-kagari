@@ -910,6 +910,7 @@ module Menu
       action.signal_connect('activate') do |a, param|
         handler.call(value)
       end
+      @parent.handle_request(:NOTIFY, :add_action, action)
       unless thumbnail.nil?
         fileicon = Gio::FileIcon.new(Gio::File.new_for_path(thumbnail))
         item.set_icon(fileicon)
