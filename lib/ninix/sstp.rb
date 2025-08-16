@@ -455,6 +455,12 @@ module SSTP
                     charset, :invalid => :replace, :undef => :replace))
         @fp.write("\r\n")
         @fp.write("\r\n")
+      when 'GetSurfaceInfo'
+        value = @server.handle_request(:GET, :get_surface_info, args[0])
+        send_response(200)
+        @fp.write(value)
+        @fp.write("\r\n")
+        @fp.write("\r\n")
       when 'GetBalloonSize'
         x, y = @server.handle_request(:GET, :get_balloon_size, args[0].to_i)
         send_response(200)
