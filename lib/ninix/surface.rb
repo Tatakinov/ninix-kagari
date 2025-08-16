@@ -85,6 +85,21 @@ module Surface
       send_event('Initialize', File.join(surface_dir, ''))
       send_event('BasewareVersion', 'ninix', Version.NUMBER)
       send_event('Endpoint', *@parent.handle_request(:GET, :endpoint))
+      info = []
+      char = Regexp.new(/^char\d+/)
+      char_menu = Regexp.new(/^char\d+\.menu/)
+      @desc.each do |k, v|
+        if k.start_with?('seriko')
+          info << [k, v].join(',')
+        elsif k.start_with?('sakura') and not k.start_with?('sakura.menu')
+          info << [k, v].join(',')
+        elsif k.start_with?('kero') and not k.start_with?('kero.menu')
+          info << [k, v].join(',')
+        elsif k =~ char and not k =~ char_menu
+          info << [k, v].join(',')
+        end
+      end
+      send_event('UpdateInfo', info.size, *info)
     end
 
     def is_internal
@@ -126,6 +141,11 @@ module Surface
         headers[k] = v
       end
       return {proto: protocol, code: code.to_i, status: status, headers: headers}
+    end
+
+    def get_info(key)
+      # TODO seriko.alignmenttodesktop系のSSP準拠
+      @desc.get(key, fallback: true)
     end
 
     def add_window(side, default)

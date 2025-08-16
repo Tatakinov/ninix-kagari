@@ -3437,6 +3437,10 @@ module Sakura
     def raise_balloon
       @balloon.raise
     end
+
+    def get_surface_info(key)
+      @surface.get_info(key)
+    end
   end
 
   class VanishDialog
