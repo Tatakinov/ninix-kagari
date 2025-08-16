@@ -112,9 +112,8 @@ class BaseSSTPController < MetaMagic::Holon
       :request_handler => request_handler, :temp_mode => true)
   end
 
-  def receive_sstp_request(server, socket)
+  def receive_sstp_request(buffer, server, socket)
     begin
-      buffer = socket.gets
       handler = create(buffer, server, socket)
       handler.handle
     rescue SocketError => e
@@ -167,7 +166,8 @@ class TCPSSTPController < BaseSSTPController
         until soc.closed?
           begin
             client = soc.accept
-            receive_sstp_request(soc, client)
+            buffer = client.gets
+            receive_sstp_request(buffer, soc, client)
           rescue
             # TODO error handling
           end
@@ -206,9 +206,15 @@ class UnixSSTPController < BaseSSTPController
             v.join
           end
           client = soc.accept
-          @client_threads << Thread.new(soc, client) do |s, c|
-            receive_sstp_request(s, c)
-            c.shutdown(Socket::SHUT_WR)
+          buffer = client.gets
+          if buffer.start_with?('EXECUTE ')
+            receive_sstp_request(buffer, soc, client)
+            client.shutdown(Socket::SHUT_WR)
+          else
+            @client_threads << Thread.new(buffer, soc, client) do |b, s, c|
+              receive_sstp_request(b, s, c)
+              c.shutdown(Socket::SHUT_WR)
+            end
           end
         rescue
           # TODO error handling
