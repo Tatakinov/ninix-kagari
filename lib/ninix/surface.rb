@@ -120,7 +120,7 @@ module Surface
         request = [request, "Argument#{i}: #{v}"].join("\r\n")
       end
       request = [request, "\r\n\r\n"].join
-      request = [[request.bytesize].pack('L'), request].join
+      request = [[request.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
       @ayu_write.write(request)
       len = nil
       begin
