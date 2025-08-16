@@ -18,11 +18,11 @@ module NConfig
 
   class Config < Hash
 
-    def get(name, default: nil)
+    def get(name, default: nil, fallback: false)
       keylist = (name.is_a?(Array) ? name : [name])
       key = keylist.find {|x| keys.include?(x) }
       if key.nil?
-        if @child.nil?
+        if @child.nil? or not fallback
           default
         else
           @child.get(name, default: default)
