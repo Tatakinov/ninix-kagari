@@ -14,7 +14,7 @@
 
 # TODO: MOVE, NOCLIP, FIX, etc.
 
-require "gtk3"
+require "gtk4"
 
 require_relative "../dll"
 require_relative "../pix"

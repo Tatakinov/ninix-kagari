@@ -16,7 +16,7 @@
 # - usetime, line, radar 以外の形式のグラフへの対応.
 
 
-require "gtk3"
+require "gtk4"
 
 require_relative "../pix"
 require_relative "../dll"

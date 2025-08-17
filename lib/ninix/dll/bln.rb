@@ -14,7 +14,7 @@
 # TODO:
 # - font.face
 
-require "gtk3"
+require "gtk4"
 
 require_relative "../pix"
 require_relative "../script"

@@ -14,7 +14,7 @@
 require "uri"
 require "open-uri"
 
-require "gtk3"
+require "gtk4"
 
 require_relative "../dll"
 
