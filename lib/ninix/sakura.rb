@@ -612,7 +612,13 @@ module Sakura
 
     def set_balloon_direction(side, direction)
       return if side >= @char
-      @balloon.window[side].direction = direction
+      # AYU経由で呼ばれた時に即時returnしたい
+      # (direction代入すると内部でreset_position等を呼び出す)ので
+      # Idleで処理するようにする
+      GLib::Idle.add do
+        @balloon.window[side].direction = direction
+        next false
+      end
     end
 
     def get_balloon_size(side)

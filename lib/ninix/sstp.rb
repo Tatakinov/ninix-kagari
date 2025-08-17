@@ -468,10 +468,14 @@ module SSTP
         @fp.write("\r\n")
         @fp.write("\r\n")
       when 'SetBalloonPosition'
-        @server.handle_request(:GET, :set_balloon_position, *args.map do |v|
+        @server.handle_request(:GET, :set_balloon_position, *args.take(3).map do |v|
           v.to_i
-        end.take(3))
+        end)
         send_response(204)
+      when 'SetBalloonDirection'
+        @server.handle_request(:NOTIFY, :set_balloon_direction, *args.take(2).map do |v|
+          v.to_i
+        end)
       when 'RaiseBalloon'
         @server.handle_request(:NOTIFY, :raise_balloon)
         send_response(204)
