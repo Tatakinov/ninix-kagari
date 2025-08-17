@@ -477,7 +477,7 @@ module SSTP
           v.to_i
         end)
       when 'RaiseBalloon'
-        @server.handle_request(:NOTIFY, :raise_balloon)
+        @server.handle_request(:NOTIFY, :raise_balloon, args[0].to_i)
         send_response(204)
       else
         send_response(501) # Not Implemented

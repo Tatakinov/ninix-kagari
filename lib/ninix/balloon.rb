@@ -98,12 +98,6 @@ module Balloon
       end
     end
 
-    def raise
-      @window.each_value do |v|
-        v.raise
-      end
-    end
-
     def create_gtk_window(title, monitor)
       window = Pix::TransparentWindow.new(monitor)
       window.set_title(title)
@@ -572,6 +566,7 @@ module Balloon
       @y_fractions = 0
       @reshape = true
       @pix_cache = Pix::Cache.new
+      @raise_id = {}
       @windows.each do |window|
         darea = window.darea
         darea.set_draw_func do |w, e|
@@ -959,6 +954,14 @@ module Balloon
       return unless @__shown
       # TODO delete?
       #@window.window.raise
+      @windows.each do |window|
+        @raise_id[window] = window.signal_connect('hide') do |w|
+          w.show
+          w.signal_handler_disconnect(@raise_id[w])
+          @raise_id.delete(w)
+        end
+        window.hide
+      end
     end
 
     def lower

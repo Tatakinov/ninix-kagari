@@ -3440,8 +3440,8 @@ module Sakura
       return [File.join(NinixServer.sockdir, @uuid), @ayu_uuid]
     end
 
-    def raise_balloon
-      @balloon.raise
+    def raise_balloon(side)
+      @balloon.raise_(side)
     end
 
     def get_surface_info(key)
