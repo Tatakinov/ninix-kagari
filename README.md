@@ -36,7 +36,7 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - ruby-gio2
 
-- ruby-gtk3
+- ruby-gtk4
 
 - ruby-narray
 
@@ -79,14 +79,6 @@ PATH=/opt/ninix-kagari/bin:$PATH
 $ ninix
 ```
 
-#### In Tiling Window Manager
-
-タイル型WMではウィンドウをfloatingにするための設定が必要です。
-例えばi3では`~/.config/i3/config`に次のような設定を記述します。
-```
-for_window [class="Ninix"] floating enable
-```
-
 ### Windows
 
 #### Releasesのninix-kagari.zipを利用する場合
@@ -98,15 +90,13 @@ Windows10より前のバージョンを使っている方は`run_lower_version_1
 
 #### 自分でruby環境を用意する場合
 
-rubyinstallerのRuby+Devkitの*x86*をインストールしてください。
-x64でも動くと思いますが、動作するゴーストが減ります。
+rubyinstallerのRuby+Devkitの**x64**をインストールしてください。
 
-Start Command Prompt with Rubyをメニューから実行して、
-Requirementsに書かれているものをインストールします。
+cmd/powershellでRequirementsに書かれているものをインストールします。
 以下は最小構成の場合。
 
 ```
-> gem install gettext gio2 gtk3 rubyzip rake rake-compiler
+> gem install gettext gio2 gtk4 rubyzip rake rake-compiler
 > gem install narray -- --with-cflags=-std=c99
 > git clone https://github.com/Tatakinov/ninix-fmo
 > cd ninix-fmo
@@ -171,13 +161,7 @@ Windows版は10より前のバージョンでも動くようになります。
 
 ### Windows
 
-#### 32bit OS or ruby(32bit)
-
-ゴースト内蔵のSHIORIを使うため、特に何もする必要はありません。
-
-#### ruby(64bit)
-
-現状ではKAWARIとYAYAを使ったゴーストは動作しないと思います。(未確認)
+未検証
 
 ## SAORI
 
@@ -188,12 +172,14 @@ ninix-kagariで使用できるSAORIは現状[ninix-saori](https://github.com/Tat
 
 ### Windows
 
-FMO/DirectSSTPを使用*しない*SAORIであれば動作するはずです。
+未検証
 
 ## Caution
 
 エンバグ・デグレーション上等で作っているので、必ずしも最新版が
 一番良いとは限りません。
+
+Windowsは今のところv1.xの方が動きます。
 
 ## SSP
 
