@@ -345,6 +345,13 @@ module Surface
     end
 
     def is_playing_animation(side, id)
+      response = send_event('IsPlayingAnimation', side, id, method: 'GET')
+      headers = response[:headers]
+      unless headers.include?('Value0')
+        return false
+      end
+      x = headers['Value0'].to_i
+      return x != 0
     end
 
     def invoke_yen_e(side, id)
@@ -354,6 +361,7 @@ module Surface
     end
 
     def invoke(side, id)
+      send_event('StartAnimation', side, id)
     end
 
     def window_iconify(flag)
