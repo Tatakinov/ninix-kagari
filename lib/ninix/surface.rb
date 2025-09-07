@@ -100,6 +100,7 @@ module Surface
         end
       end
       send_event('UpdateInfo', info.size, *info)
+      reset_surface
     end
 
     def is_internal
@@ -182,6 +183,11 @@ module Surface
     end
 
     def reset_surface
+      scale = @parent.handle_request(:GET, :get_preference, 'surface_scale')
+      if scale != @scale
+        @scale = scale
+        send_event('Scale', @scale)
+      end
     end
 
     def get_position(side)
