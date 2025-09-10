@@ -402,8 +402,8 @@ module Surface
       @window = {}
     end
 
-    def create_gtk_window(title)
-      window = Pix::TransparentWindow.new()
+    def create_gtk_window(title, monitor)
+      window = Pix::TransparentWindow.new(monitor)
       window.set_title(title)
       window.signal_connect('close-request') do |w, e|
         next delete(w, e)
@@ -856,7 +856,11 @@ module Surface
           end
         end
       end
-      gtk_window = create_gtk_window(title)
+      gtk_windows = []
+      monitors = Gdk::Display.default.monitors
+      monitors.n_items.times do |i|
+        gtk_windows << create_gtk_window(title, monitors.get_item(i))
+      end
       seriko = get_seriko(@__surface)
       tooltips = {}
       if @__tooltips.include?(name)
@@ -867,7 +871,7 @@ module Surface
         default_id = 10
       end
       surface_window = SurfaceWindow.new(
-        gtk_window, side, @desc, surface_alias, @__surface, tooltips,
+        gtk_windows, side, @desc, surface_alias, @__surface, tooltips,
         @__surfaces, seriko, @__region, mayuna, bind,
         default_id, @maxsize)
       surface_window.set_responsible(self)
@@ -1154,7 +1158,7 @@ module Surface
     def set_icon(path)
       return if path.nil? or not File.exist?(path)
       for window in @window.values
-        window.get_window.set_icon_name(path) # XXX
+        window.set_icon_name(path) # XXX
       end
     end
 
@@ -1302,11 +1306,11 @@ module Surface
       'overlaymultiply', 'interpolate',
     ]
 
-    def initialize(window, side, desc, surface_alias, surface_info, tooltips,
+    def initialize(windows, side, desc, surface_alias, surface_info, tooltips,
                    surfaces, seriko, region, mayuna, bind, default_id, maxsize)
       super("") # FIXME
       @handlers = {}
-      @window = window
+      @windows = windows
       @maxsize = maxsize
       @side = side
       @desc = desc
@@ -1340,46 +1344,48 @@ module Surface
       @prev_render_info = []
       @pix_cache = Pix::Cache.new
       @cache = Cache::ImageCache.new
-      motion_controller = Gtk::EventControllerMotion.new
-      motion_controller.signal_connect('leave') do |w|
-        next window_leave_notify(@window, w, @motion_x, @motion_y)
+      @windows.each do |window|
+        motion_controller = Gtk::EventControllerMotion.new
+        motion_controller.signal_connect('leave') do |w|
+          next window_leave_notify(window, w, @motion_x, @motion_y)
+        end
+        motion_controller.signal_connect('enter') do |w, x, y|
+          window_enter_notify(window, w, x, y) # XXX
+          next true
+        end
+        window.add_controller(motion_controller)
+        darea = window.darea
+        darea.set_draw_func do |w, e|
+          redraw(window, darea, e)
+          next true
+        end
+        button_controller = Gtk::GestureClick.new
+        # 全てのボタンをlisten
+        button_controller.set_button(0)
+        button_controller.signal_connect('pressed') do |w, n, x, y|
+          next button_press(window, darea, w, n, x, y)
+        end
+        button_controller.signal_connect('released') do |w, n, x, y|
+          next button_release(window, darea, w, n, x, y)
+        end
+        darea.add_controller(button_controller)
+        motion_controller = Gtk::EventControllerMotion.new
+        motion_controller.signal_connect('motion') do |w, x, y|
+          next motion_notify(window, darea, w, x, y)
+        end
+        darea.add_controller(motion_controller)
+        dad_controller = Gtk::DropTarget.new(GLib::Type::INVALID, 0)
+        dad_controller.signal_connect('drop') do |widget, context, x, y, data, info, time|
+          drag_data_received(window, darea, context, x, y, data, info, time)
+          next true
+        end
+        darea.add_controller(dad_controller)
+        scroll_controller = Gtk::EventControllerScroll.new(Gtk::EventControllerScrollFlags::VERTICAL)
+        scroll_controller.signal_connect('scroll') do |w, dx, dy|
+          next scroll(window, darea, dx, dy)
+        end
+        darea.add_controller(scroll_controller)
       end
-      motion_controller.signal_connect('enter') do |w, x, y|
-        window_enter_notify(@window, w, x, y) # XXX
-        next true
-      end
-      @window.add_controller(motion_controller)
-      @darea = @window.darea
-      @darea.set_draw_func do |w, e|
-        redraw(w, e)
-        next true
-      end
-      button_controller = Gtk::GestureClick.new
-      # 全てのボタンをlisten
-      button_controller.set_button(0)
-      button_controller.signal_connect('pressed') do |w, n, x, y|
-        next button_press(@darea, w, n, x, y)
-      end
-      button_controller.signal_connect('released') do |w, n, x, y|
-        next button_release(@darea, w, n, x, y)
-      end
-      @darea.add_controller(button_controller)
-      motion_controller = Gtk::EventControllerMotion.new
-      motion_controller.signal_connect('motion') do |w, x, y|
-        next motion_notify(@darea, w, x, y)
-      end
-      @darea.add_controller(motion_controller)
-      dad_controller = Gtk::DropTarget.new(GLib::Type::INVALID, 0)
-      dad_controller.signal_connect('drop') do |widget, context, x, y, data, info, time|
-        drag_data_received(@darea, context, x, y, data, info, time)
-        next true
-      end
-      @darea.add_controller(dad_controller)
-      scroll_controller = Gtk::EventControllerScroll.new(Gtk::EventControllerScrollFlags::VERTICAL)
-      scroll_controller.signal_connect('scroll') do |w, dx, dy|
-        next scroll(@darea, dx, dy)
-      end
-      @darea.add_controller(scroll_controller)
 =begin TODO delete?
       if @side.zero?
         screen = @window.screen
@@ -1402,8 +1408,10 @@ module Surface
       @seriko
     end
 
-    def get_window
-      @window
+    def set_icon_name(name)
+      @windows.each do |window|
+        window.set_icon_name(name)
+      end
     end
 
     def get_surface_id
@@ -1919,7 +1927,9 @@ module Surface
       image = @cache[render_info]
       unless image.nil?
         @image_surface = image
-        @darea.queue_draw
+        @windows.each do |window|
+          window.darea.queue_draw
+        end
         return
       end
       @reshape = true # FIXME: depends on Seriko
@@ -1961,16 +1971,18 @@ module Surface
         region.union!(r)
       end
       @image_surface = Pix::Data.new(surface, region, frozen)
-      @darea.queue_draw
+      @windows.each do |window|
+        window.darea.queue_draw
+      end
     end
 
-    def redraw(darea, cr)
+    def redraw(window, darea, cr)
       return if @image_surface.nil? # XXX
-      @window.set_surface(cr, @image_surface.surface(write: false), get_scale, get_position)
+      window.set_surface(cr, @image_surface.surface(write: false), get_scale, get_position)
       unless @parent.handle_request(:GET, :get_preference, 'check_collision').zero?
         draw_region(cr)
       end
-      @window.set_shape(@image_surface.region(write: false), get_position)
+      window.set_shape(@image_surface.region(write: false), get_position)
       @reshape = false
     end
 
@@ -2163,44 +2175,44 @@ module Surface
     def set_position(x, y)
       return if @parent.handle_request(:GET, :lock_repaint)
       @position = [x, y]
-      new_x, new_y = get_position()
-      #@window.move(new_x, new_y)
-      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
-      ox, oy = get_balloon_offset # without scaling
-      scale = get_scale
-      ox = (ox * scale / 100).to_i
-      oy = (oy * scale / 100).to_i
-      bw, bh = @parent.handle_request(
-          :GET, :get_balloon_size, @side)
-      sw, sh = get_surface_size()
-      if @__direction.zero? # left
-        if new_x - bw + ox < 0
-          new_direction = 1
+      monitor = nil
+      distance = -1
+      monitors = Gdk::Display.default.monitors
+      monitors.n_items.times do |i|
+        m = monitors.get_item(i)
+        r = m.geometry
+        if r.x <= x and r.x + r.width >= x and r.y <= y and r.y + r.height >= y
+          d = 0
+        elsif r.x <= x and r.x + r.width >= x
+          d = [(r.x - x).abs, (r.x + r.width - x).abs].min
+        elsif r.y <= y and r.y + r.height >= y
+          d = [(r.y - y).abs, (r.y + r.height - y).abs].min
         else
-          new_direction = 0
+          dx = r.x - x
+          dy = r.y - y
+          d = Math.sqrt(dx * dx + dy * dy)
+          dx = r.x + r.width - x
+          dy = r.y - y
+          d = [d, Math.sqrt(dx * dx + dy * dy)].min
+          dx = r.x + r.width - x
+          dy = r.y + r.height - y
+          d = [d, Math.sqrt(dx * dx + dy * dy)].min
+          dx = r.x + - x
+          dy = r.y + r.height - y
+          d = [d, Math.sqrt(dx * dx + dy * dy)].min
         end
-      else
-        if new_x + sw + bw - ox > scrn_w
-          new_direction = 0
-        else
-          new_direction = 1
+        if d < distance or distance == -1
+          distance = d
+          monitor = m
         end
       end
-      @__direction = new_direction
-      @parent.handle_request(
-        :GET, :set_balloon_direction, @side, direction)
-      if new_direction.zero? # left
-        base_x = (new_x - bw + ox)
-      else
-        base_x = (new_x + sw - ox)
-      end
-      base_y = (new_y + oy)
-      @parent.handle_request(
-        :GET, :set_balloon_position, @side, base_x, base_y)
-      @parent.handle_request(:GET, :notify_observer, 'set position')
-      @parent.handle_request(:GET, :check_mikire_kasanari)
+      r = monitor.geometry
+      @parent.handle_request(:NOTIFY, :update_monitor_rect, @side, r.x, r.y, r.width, r.height)
+      @parent.handle_request(:NOTIFY, :update_surface_rect, @side, x, y, *get_surface_size)
       unless @image_surface.nil?
-        @darea.queue_draw
+        @windows.each do |window|
+          window.darea.queue_draw
+        end
       end
     end
 
@@ -2238,7 +2250,9 @@ module Surface
 
     def destroy
       @seriko.destroy()
-      @window.destroy()
+      @windows.each do |window|
+        window.destroy()
+      end
     end
 
     def is_shown
@@ -2251,15 +2265,19 @@ module Surface
       @reshape = true
       @__shown = true
       x, y = get_position()
-      @darea.queue_draw
-      @window.show()
+      @windows.each do |window|
+        window.darea.queue_draw
+        window.show()
+      end
       @parent.handle_request(:GET, :notify_observer, 'show', :args => [@side])
       @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
     end
 
     def hide
       return unless @__shown
-      @window.hide()
+      @windows.each do |window|
+        window.hide
+      end
       @__shown = false
       @parent.handle_request(
         :GET, :notify_observer, 'hide', :args => [@side])
@@ -2272,13 +2290,13 @@ module Surface
     end
 
     def lower
-      @window.window.lower()
+      #@window.window.lower()
       @parent.handle_request(:GET, :notify_observer, 'lower', :args => [@side])
     end
 
-    def button_press(window, w, n, x, y)
+    def button_press(window, darea, w, n, x, y)
       @parent.handle_request(:GET, :reset_idle_time)
-      x, y = @window.winpos_to_surfacepos(
+      x, y = window.winpos_to_surfacepos(
            x, y, get_scale)
       if w.current_button == 1
         @x_root = x
@@ -2315,8 +2333,8 @@ module Surface
     CURSOR_DEFAULT = Gdk::Cursor.new('default')
     CURSOR_HAND1 = Gdk::Cursor.new('grab')
 
-    def button_release(window, w, n, x, y)
-      x, y = @window.winpos_to_surfacepos(
+    def button_release(window, darea, w, n, x, y)
+      x, y = window.winpos_to_surfacepos(
            x, y, get_scale)
       if w.current_button == 1
         @x_root = nil
@@ -2338,27 +2356,27 @@ module Surface
       return true
     end
 
-    def motion_notify(darea, ctrl, x, y)
+    def motion_notify(window, darea, ctrl, x, y)
       @motion_x = x
       @motion_y = y
       state = nil
-      x, y = @window.winpos_to_surfacepos(x, y, get_scale)
+      x, y = window.winpos_to_surfacepos(x, y, get_scale)
       part = get_touched_region(x, y)
       if part != @__current_part
         if part == ''
-          @window.set_tooltip_text('')
-          @window.surface.set_cursor(CURSOR_DEFAULT)
+          window.set_tooltip_text('')
+          window.surface.set_cursor(CURSOR_DEFAULT)
           @parent.handle_request(
             :GET, :notify_event,
             'OnMouseLeave', x, y, '', @side, @__current_part)
         else
           if @tooltips.include?(part)
             tooltip = @tooltips[part]
-            @window.set_tooltip_text(tooltip)
+            window.set_tooltip_text(tooltip)
           else
-            @window.set_tooltip_text('')
+            window.set_tooltip_text('')
           end
-          @window.surface.set_cursor(CURSOR_HAND1) unless @window.surface.nil?
+          window.set_cursor(CURSOR_HAND1)
           @parent.handle_request(
             :GET, :notify_event,
             'OnMouseEnter', x, y, '', @side, part)
@@ -2391,8 +2409,8 @@ module Surface
       return true
     end
 
-    def scroll(darea, dx, dy)
-      x, y = @window.winpos_to_surfacepos(
+    def scroll(window, darea, dx, dy)
+      x, y = window.winpos_to_surfacepos(
            dx, dy, get_scale)
       if y > 0
         count = 1
@@ -2435,14 +2453,14 @@ module Surface
 
     def window_enter_notify(window, ctrl, x, y)
       #x, y, state = event.x, event.y, event.state
-      x, y = @window.winpos_to_surfacepos(x, y, get_scale)
+      x, y = window.winpos_to_surfacepos(x, y, get_scale)
       @parent.handle_request(:GET, :notify_event,
                              'OnMouseEnterAll', x, y, '', @side, '')
     end
 
     def window_leave_notify(window, ctrl, x, y)
       #x, y, state = event.x, event.y, event.state
-      x, y = @window.winpos_to_surfacepos(x, y, get_scale)
+      x, y = window.winpos_to_surfacepos(x, y, get_scale)
       if @__current_part != '' # XXX
         @parent.handle_request(
           :GET, :notify_event,

@@ -99,7 +99,15 @@ module Sakura
       @sstp_request_handler = nil
       # error = 'loose'(default) or 'strict'
       @script_parser = Script::Parser.new(:error => 'loose')
-      @char = 2 # 'sakura' and 'kero'
+      @char = Hash.new do |h, k|
+        h[k] = {
+          surface_rect: [0, 0, 0, 0],
+          balloon_direction: 0,
+          balloon_size: [0, 0],
+          balloon_offset: [0, 0],
+          monitor_rect: [0, 0, 0, 0],
+        }
+      end
       @script_queue = []
       @script_mode = BROWSE_MODE
       @script_post_proc = []
@@ -241,13 +249,6 @@ module Sakura
       @shiori_name = shiori_name
       name = [shiori_dll, shiori_name]
       @shiori = @__dll.request(name)
-      char = 2
-      while not @desc.get(sprintf('char%d.seriko.defaultsurface', char)).nil?
-        char += 1
-      end
-      if char > 2
-        @char = char
-      end
       # XXX
       if @desc.get('name') == 'BTH小っちゃいってことは便利だねっ'
         set_SSP_mode(true)
@@ -437,7 +438,9 @@ module Sakura
       default_sakura = @desc.get('sakura.seriko.defaultsurface', :default => '0')
       default_kero = @desc.get('kero.seriko.defaultsurface', :default => '10')
       @surface.new_(desc, surface_alias, surface, name, surface_dir, tooltips, seriko_descript, default_sakura, default_kero)
-      for side in 2..@char-1
+      @char.keys.filter do |side|
+        side >= 2
+      end.each do |side|
         default = @desc.get('char' + side.to_s + '.seriko.defaultsurface')
         @surface.add_window(side, default)
       end
@@ -455,23 +458,25 @@ module Sakura
 
     def set_balloon(desc, balloon)
       @balloon.new_(desc, balloon)
-      for side in 2..@char-1
+      @char.keys.filter do |side|
+        side >= 2
+      end.each do |side|
         @balloon.add_window(side)
       end
     end
 
     def update_balloon_offset(side, x_delta, y_delta)
-      return if side >= @char
-      ox, oy = @surface.get_balloon_offset(side, false) # without scaling
-      direction = @balloon.window[side].direction
-      sx, sy = get_surface_position(side)
+      return unless @char.include?(side)
+      ox, oy = @char[side][:balloon_offset]
+      direction = @char[side][:balloon_direction]
+      sx, sy, _sw, _sh = @char[side][:surface_rect]
       if direction.zero? # left
         nx = (ox + x_delta)
       else
         nx = (ox - x_delta)
       end
       ny = (oy + y_delta)
-      @surface.set_balloon_offset(side, [nx, ny])
+      @char[side][:balloon_offset] = [nx, ny]
     end
 
     def enqueue_script(event, script, sender, handle,
@@ -611,7 +616,7 @@ module Sakura
     end
 
     def set_balloon_direction(side, direction)
-      return if side >= @char
+      return unless @char.include?(side)
       # AYU経由で呼ばれた時に即時returnしたい
       # (direction代入すると内部でreset_position等を呼び出す)ので
       # Idleで処理するようにする
@@ -1481,7 +1486,7 @@ module Sakura
       @balloon.hide_all()
       set_balloon(desc, balloon)
       @balloon.set_balloon_default()
-      position_balloons()
+      position_balloons
       name = desc.get('name', :default => '')
       Logging::Logging.info('balloon ' + name + ' ' + path)
       notify_event('OnBalloonChange', name, path)
@@ -1510,8 +1515,71 @@ module Sakura
       @balloon.hide_all()
     end
 
-    def position_balloons()
-      @surface.reset_balloon_position()
+    def update_balloon_size(side, w, h)
+      @char[side][:balloon_size] = [w, h]
+    end
+
+    def update_monitor_rect(side, x, y, w, h)
+      @char[side][:monitor_rect] = [x, y, w, h]
+    end
+
+    def update_surface_rect(side, sx, sy, sw, sh)
+      @char[side][:surface_rect] = [sx, sy, sw, sh]
+      reset_balloon_position(side)
+    end
+
+    def position_balloons
+      @char.each_key do |side|
+        x, y, w, h = @surface.get_rect(side)
+        reset_balloon_position(side)
+      end
+    end
+
+    def reset_balloon_position(side)
+      mx, my, mw, mh = @char[side][:monitor_rect]
+      ox, oy = @char[side][:balloon_offset]
+=begin
+      scale = @parent.handle_request(:GET, :get_preference, 'surface_scale')
+      ox = (ox * scale / 100).to_i
+      oy = (oy * scale / 100).to_i
+=end
+      bw, bh = @char[side][:balloon_size]
+      sx, sy, sw, sh = @char[side][:surface_rect]
+      lx = sx - bw + ox
+      rx = sx + sw - ox
+      direction = @char[side][:balloon_direction]
+      if direction.zero?
+        if lx < mx
+          if rx + bw <= mx + mw
+            direction = 1 - direction
+          end
+        end
+      else
+        if rx + bw > mx + mw
+          if lx >= mx
+            direction = 1 - direction
+          end
+        end
+      end
+      if direction.zero?
+        if lx < mx
+          lx = mx
+        end
+        x = lx
+      else
+        if rx + bw > mx + mw
+          rx = mx + mw - bw
+        end
+        x = rx
+      end
+      y = sy + oy
+      @char[side][:balloon_direction] = direction
+      notify_observer('set position')
+      # TODO implement
+      #check_mikire_kasanari
+      ox, oy = @char[side][:balloon_offset]
+      set_balloon_direction(side, direction)
+      set_balloon_position(side, x, y)
     end
 
     def align_top(side)
@@ -1827,7 +1895,7 @@ module Sakura
         #pass
       elsif idle > @__balloon_life and @__balloon_life > 0 and not @passivemode
         @__balloon_life = 0
-        for side in 0..@char-1
+        @char.keys.each do |side|
           if balloon_is_shown(side)
             notify_event('OnBalloonTimeout',
                          @__current_script)
@@ -2051,6 +2119,7 @@ module Sakura
 
     def __yen_0(args)
       ##@balloon.show(0)
+      @char[0]
       default = @desc.get('sakura.seriko.defaultsurface')
       @surface.add_window(0, default)
       @script_side = 0
@@ -2058,9 +2127,10 @@ module Sakura
 
     def __yen_1(args)
       ##@balloon.show(1)
-      @script_side = 1
+      @char[1]
       default = @desc.get('kero.seriko.defaultsurface')
       @surface.add_window(1, default)
+      @script_side = 1
     end
 
     def __yen_p(args)
@@ -2070,7 +2140,16 @@ module Sakura
         return
       end
       if chr_id >= 0
+        @char[chr_id]
+        if chr_id == 0
+          default = @desc.get('sakura.seriko.defaultsurface')
+        elsif chr_id == 1
+          default = @desc.get('kero.seriko.defaultsurface')
+        else
+          default = @desc.get("char#{chr_id}.seriko.defaultsurface")
+        end
         @script_side = chr_id
+        @surface.add_window(@script_side, default)
         @balloon.add_window(@script_side)
         @balloon.set_balloon_default(side: @script_side)
       end

@@ -479,6 +479,16 @@ module SSTP
       when 'RaiseBalloon'
         @server.handle_request(:NOTIFY, :raise_balloon, args[0].to_i)
         send_response(204)
+      when 'UpdateMonitorRect'
+        @server.handle_request(:NOTIFY, :update_monitor_rect, *args.take(5).map do |v|
+          v.to_i
+        end)
+        send_response(204)
+      when 'UpdateSurfaceRect'
+        @server.handle_request(:NOTIFY, :update_surface_rect, *args.take(5).map do |v|
+          v.to_i
+        end)
+        send_response(204)
       else
         send_response(501) # Not Implemented
         log_error("Not Implemented (#{command})")

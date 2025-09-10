@@ -833,10 +833,11 @@ module Balloon
       surface = @balloon_surface.surface(write: false)
       @width = surface.width
       @height = surface.height
+      @parent.handle_request(:NOTIFY, :update_balloon_size, @side, @width, @height)
       reset_arrow()
       reset_sstp_marker()
       reset_message_regions()
-      @parent.handle_request(:GET, :position_balloons)
+      @parent.handle_request(:NOTIFY, :reset_balloon_position, @side)
       @windows.each do |window|
         window.darea.queue_draw()
       end if @__shown
@@ -1622,6 +1623,7 @@ module Balloon
             @side, x_delta.to_i, y_delta.to_i)
           @x_root = px
           @y_root = py
+          set_position(px, py)
         end
       end
       # TODO delete?
@@ -1705,6 +1707,7 @@ module Balloon
     def button_release(window, w, n, x, y)
       x, y = window.winpos_to_surfacepos(
            event.x.to_i, event.y.to_i, scale)
+      set_position(x, y) if @dragged
       @dragged = false if @dragged
       @x_root = nil
       @y_root = nil
