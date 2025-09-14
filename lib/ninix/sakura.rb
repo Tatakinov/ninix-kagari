@@ -1278,9 +1278,10 @@ module Sakura
           side = arglist[3].to_i
           x = arglist[0].to_i
           y = arglist[1].to_i
-          _, _, w, h = @parent.handle_request(:GET, :get_workarea, nil)
+          sx, sy, sw, sh = @char[side][:surface_rect]
+          mx, my, mw, mh = @char[side][:monitor_rect]
           @parent.handle_request(
-            :GET, :open_popup_menu, self, side, x, y, (y < (h / 2)))
+            :GET, :open_popup_menu, self, side, sx + x, sy + y, (sy - my + y < (mh / 2)))
         end
         @parent.handle_request(
           :GET, :notify_other, @key,
