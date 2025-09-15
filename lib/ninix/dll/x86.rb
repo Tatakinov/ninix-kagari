@@ -17,6 +17,8 @@ require_relative '../logging'
 
 module X86
 
+  PROGRAM = (ENV.include?('X86_PROXY') and File.join(ENV['X86_PROXY'], 'ninix-proxy.exe') or 'ninix-proxy.exe')
+
   class Shiori
 
     def initialize(dll_name)
@@ -27,7 +29,7 @@ module X86
       result = 0
       begin
         dll_path = File.join(topdir, dll_name)
-        Open3.popen3('ninix-proxy.exe', dll_path) do |_write, read, _err, _th|
+        Open3.popen3(PROGRAM, dll_path) do |_write, read, _err, _th|
           result = 800 if read.read == 'true'
         end
       rescue
@@ -48,7 +50,7 @@ module X86
       end
       dll_path = File.join(dir, @dll_name)
       dll_dir = File.dirname(dll_path)
-      @write, @read, @err, @thread = Open3.popen3('ninix-proxy.exe', dll_path, dll_dir)
+      @write, @read, @err, @thread = Open3.popen3(PROGRAM, dll_path, dll_dir)
       return ret
     end
 
