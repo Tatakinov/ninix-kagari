@@ -51,7 +51,7 @@ module X86
       dll_path = File.join(dir, @dll_name)
       dll_dir = File.dirname(dll_path)
       @write, @read, @err, @thread = Open3.popen3(PROGRAM, dll_path, dll_dir)
-      return ret
+      return 1
     end
 
     def unload
@@ -65,27 +65,23 @@ module X86
     end
 
     def request(req)
-      req = [[req.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
+      req = [[req.bytesize].pack('L'), req.force_encoding(Encoding::BINARY)].join
       begin
         @write.write(req)
-      rescue
-        return ''
-      end
-      len = nil
-      begin
         len = @read.read(4)&.unpack('L').first
-      rescue
-        return ''
-      end
-      if len.nil?
+        if len.nil?
+          # TODO error
+          return
+        end
+        if len.zero?
+          return ''
+        end
+        res = @read.read(len)
+        return res
+      rescue => e
         # TODO error
-        return
-      end
-      if len.zero?
         return ''
       end
-      res = @ayu_read.read(len)
-      return res
     end
   end
 end
