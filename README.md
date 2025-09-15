@@ -161,7 +161,7 @@ Windows版は10より前のバージョンでも動くようになります。
 
 ### Windows
 
-未検証
+ほとんどのSHIORIが動くはずです。
 
 ## SAORI
 
@@ -172,14 +172,12 @@ ninix-kagariで使用できるSAORIは現状[ninix-saori](https://github.com/Tat
 
 ### Windows
 
-未検証
+HWND/FMO/DirectSSTPを使わないSAORIであれば動くはずです。
 
 ## Caution
 
 エンバグ・デグレーション上等で作っているので、必ずしも最新版が
 一番良いとは限りません。
-
-Windowsは今のところv1.xの方が動きます。
 
 ## SSP
 
