@@ -791,9 +791,9 @@ module Sakura
     def get_value(response) # FIXME: check return code
       result = {}
       to = nil
-      for line in response.force_encoding(@__charset).split(/\r?\n/, 0)
+      charset = nil
+      response.split(/\r?\n/).each do |line|
         line = line.encode("UTF-8", :invalid => :replace, :undef => :replace).strip().gsub(/¥/, '\\')
-        next if line.empty?
         next unless line.include?(':')
         key, value = line.split(':', 2)
         key = key.strip()
@@ -808,6 +808,16 @@ module Sakura
             end
           end
         end
+      end
+      if charset.nil?
+        @__charset = 'CP932'
+      end
+      for line in response.force_encoding(@__charset).split(/\r?\n/, 0)
+        line = line.encode("UTF-8", :invalid => :replace, :undef => :replace).strip().gsub(/¥/, '\\')
+        next if line.empty?
+        next unless line.include?(':')
+        key, value = line.split(':', 2)
+        key = key.strip()
         result[key] = value
       end
       for key in result.keys
