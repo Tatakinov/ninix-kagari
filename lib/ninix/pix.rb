@@ -127,6 +127,8 @@ module Pix
     end
 
     def winpos_to_surfacepos(x, y, scale)
+      x ||= 0
+      y ||= 0
       surface_x, surface_y = @__surface_position
       new_x = ((x - surface_x) * 100 / scale).to_i
       new_y = ((y - surface_y) * 100 / scale).to_i
@@ -182,7 +184,7 @@ module Pix
     end
 
     def set_shape(region, pos)
-      return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+      #return if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       @prev_position = @__surface_position
       r = Cairo::Region.new
       r.union!(region)
