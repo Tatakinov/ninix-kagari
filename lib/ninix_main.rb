@@ -1386,22 +1386,6 @@ module Ninix_Main
       @dialog.set_child(v)
       @dialog.show
       @dialog.hide
-      @file_chooser = Gtk::FileChooserDialog.new(
-        :title => "Install..",
-        :action => Gtk::FileChooserAction::OPEN,
-        :buttons => [["_Open", Gtk::ResponseType::OK],
-                    ["_Cancel", Gtk::ResponseType::CANCEL]])
-      @file_chooser.set_default_response(Gtk::ResponseType::CANCEL)
-      filter = Gtk::FileFilter.new
-      filter.set_name("All files")
-      filter.add_pattern("*")
-      @file_chooser.add_filter(filter)
-      filter = Gtk::FileFilter.new
-      filter.set_name("nar/zip")
-      filter.add_mime_type("application/zip")
-      filter.add_pattern("*.nar")
-      filter.add_pattern("*.zip")
-      @file_chooser.add_filter(filter)
       @opened = false
     end
 
@@ -1502,16 +1486,30 @@ module Ninix_Main
     end
 
     def open_file_chooser
-      response = @file_chooser.run()
-      case response
-      when Gtk::ResponseType::OK
-        filename = @file_chooser.filename
-        @app.do_install(filename)
-        update()
-      when Gtk::ResponseType::CANCEL
-        #pass
+      dialog = Gtk::FileDialog.new
+      dialog.set_title('Install..')
+      filters = Gio::ListStore.new(Gtk::FileFilter.gtype)
+      filter = Gtk::FileFilter.new
+      filter.set_name("All files")
+      filter.add_pattern("*")
+      filters.append(filter)
+      filter = Gtk::FileFilter.new
+      filter.set_name("nar/zip")
+      filter.add_mime_type("application/zip")
+      filter.add_pattern("*.nar")
+      filter.add_pattern("*.zip")
+      filters.append(filter)
+      dialog.set_filters(filters)
+      dialog.set_modal(true)
+      dialog.open_multiple(@dialog) do |obj, result, data|
+        files = dialog.open_multiple_finish(result)
+        files.n_items.times do |i|
+          file = files.get_item(i)
+          uri = URI.parse(file.uri)
+          @app.do_install(uri.path)
+          update
+        end
       end
-      @file_chooser.hide()
     end
 
     def drag_data_received(widget, context, x, y, data, info, time)
