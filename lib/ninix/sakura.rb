@@ -3611,7 +3611,7 @@ module Sakura
       @dialog.set_title('Readme.txt')
       @dialog.set_modal(false)
       @dialog.set_resizable(false)
-      @dialog.set_window_position(Gtk::WindowPosition::CENTER)
+      #@dialog.set_window_position(Gtk::WindowPosition::CENTER)
       @label = Gtk::Label.new
       @label.show()
       @textview = Gtk::TextView.new
