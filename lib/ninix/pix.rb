@@ -84,10 +84,11 @@ module Pix
   end
 
   class BaseTransparentWindow < Gtk::Window
-    attr_reader :supports_alpha, :rect
+    attr_reader :supports_alpha, :rect, :monitor
 
     def initialize(monitor = nil)
       @width, @height = 1, 1
+      @monitor = monitor
       super()
       set_decorated(false)
       provider = Gtk::CssProvider.new()
@@ -95,11 +96,11 @@ module Pix
       sc = style_context
       sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
       #set_resizable(false)
-      if monitor.nil?
+      if @monitor.nil?
         maximize
       else
-        @rect = monitor.geometry
-        fullscreen_on_monitor(monitor)
+        @rect = @monitor.geometry
+        fullscreen_on_monitor(@monitor)
       end
     end
   end

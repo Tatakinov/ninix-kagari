@@ -556,7 +556,42 @@ module Ninix_Main
       @__menu.set_fontcolor(background, foreground)
       mayuna_menu = @__menu_owner.get_mayuna_menu()
       @__menu.create_mayuna_menu(mayuna_menu)
-      @__menu.popup(side, x, y, upper)
+
+      monitor = nil
+      distance = -1
+      monitors = Gdk::Display.default.monitors
+      monitors.n_items.times do |i|
+        m = monitors.get_item(i)
+        r = m.geometry
+        if r.x <= x and r.x + r.width >= x and r.y <= y and r.y + r.height >= y
+          d = 0
+        elsif r.x <= x and r.x + r.width >= x
+          d = [(r.x - x).abs, (r.x + r.width - x).abs].min
+        elsif r.y <= y and r.y + r.height >= y
+          d = [(r.y - y).abs, (r.y + r.height - y).abs].min
+        else
+          dx = r.x - x
+          dy = r.y - y
+          d = Math.sqrt(dx * dx + dy * dy)
+          dx = r.x + r.width - x
+          dy = r.y - y
+          d = [d, Math.sqrt(dx * dx + dy * dy)].min
+          dx = r.x + r.width - x
+          dy = r.y + r.height - y
+          d = [d, Math.sqrt(dx * dx + dy * dy)].min
+          dx = r.x + - x
+          dy = r.y + r.height - y
+          d = [d, Math.sqrt(dx * dx + dy * dy)].min
+        end
+        if d < distance or distance == -1
+          distance = d
+          monitor = m
+        end
+      end
+      r = monitor.geometry
+      @app_window.unfullscreen
+      @app_window.fullscreen_on_monitor(monitor)
+      @__menu.popup(side, x - r.x, y - r.y, upper)
     end
 
     def get_ghost_menus

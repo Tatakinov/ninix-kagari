@@ -2227,17 +2227,48 @@ module Surface
     def set_alignment(align)
       @align = align if [0, 1, 2].include?(align)
       return if @dragged # XXX: position will be reset after button release event
+      x, y = @position # XXX: without window_offset
+      monitor = nil
+      distance = -1
+      monitors = Gdk::Display.default.monitors
+      monitors.n_items.times do |i|
+        m = monitors.get_item(i)
+        r = m.geometry
+        if r.x <= x and r.x + r.width >= x and r.y <= y and r.y + r.height >= y
+          d = 0
+        elsif r.x <= x and r.x + r.width >= x
+          d = [(r.x - x).abs, (r.x + r.width - x).abs].min
+        elsif r.y <= y and r.y + r.height >= y
+          d = [(r.y - y).abs, (r.y + r.height - y).abs].min
+        else
+          dx = r.x - x
+          dy = r.y - y
+          d = Math.sqrt(dx * dx + dy * dy)
+          dx = r.x + r.width - x
+          dy = r.y - y
+          d = [d, Math.sqrt(dx * dx + dy * dy)].min
+          dx = r.x + r.width - x
+          dy = r.y + r.height - y
+          d = [d, Math.sqrt(dx * dx + dy * dy)].min
+          dx = r.x + - x
+          dy = r.y + r.height - y
+          d = [d, Math.sqrt(dx * dx + dy * dy)].min
+        end
+        if d < distance or distance == -1
+          distance = d
+          monitor = m
+        end
+      end
+      r = monitor.geometry
       case align
       when 0
-        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
         sw, sh = get_max_size()
         sx, sy = @position # XXX: without window_offset
-        sy = (top + scrn_h - sh)
+        sy = (r.y + r.height - sh)
         set_position(sx, sy)
       when 1
-        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
         sx, sy = @position # XXX: without window_offset
-        sy = top
+        sy = r.y
         set_position(sx, sy)
       else # free
         #pass
@@ -2298,9 +2329,13 @@ module Surface
       @parent.handle_request(:GET, :reset_idle_time)
       x, y = window.winpos_to_surfacepos(
            x, y, get_scale)
+      orig_x, orig_y = x, y
+      r = window.monitor.geometry
+      x = x + r.x - @position[0]
+      y = y + r.y - @position[1]
       if w.current_button == 1
-        @x_root = x
-        @y_root = y
+        @x_root = orig_x
+        @y_root = orig_y
       end
       # automagical raise
       @parent.handle_request(:GET, :notify_observer, 'raise', :args => [@side])
@@ -2336,6 +2371,9 @@ module Surface
     def button_release(window, darea, w, n, x, y)
       x, y = window.winpos_to_surfacepos(
            x, y, get_scale)
+      r = window.monitor.geometry
+      x = x + r.x - @position[0]
+      y = y + r.y - @position[1]
       if w.current_button == 1
         @x_root = nil
         @y_root = nil
@@ -2361,6 +2399,10 @@ module Surface
       @motion_y = y
       state = nil
       x, y = window.winpos_to_surfacepos(x, y, get_scale)
+      orig_x, orig_y = x, y
+      r = window.monitor.geometry
+      x = x + r.x - @position[0]
+      y = y + r.y - @position[1]
       part = get_touched_region(x, y)
       if part != @__current_part
         if part == ''
@@ -2392,12 +2434,12 @@ module Surface
               @side, @__current_part, '')
           end
           @dragged = true
-          x_delta = (x - @x_root).to_i
-          y_delta = (y - @y_root).to_i
+          x_delta = (orig_x - @x_root).to_i
+          y_delta = (orig_y - @y_root).to_i
           px, py = @position # XXX: without window_offset
           set_position(px + x_delta, py + y_delta)
-          @x_root = x
-          @y_root = y
+          @x_root = orig_x
+          @y_root = orig_y
         end
 =begin FIXME implement
           @parent.handle_request(:GET, :notify_surface_mouse_motion,
