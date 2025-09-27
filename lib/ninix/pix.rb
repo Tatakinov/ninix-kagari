@@ -208,9 +208,9 @@ module Pix
       provider.load_from_data(TRANSPARENT_CSS)
       sc = style_context
       sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
-      maximize
       show
       surface.set_input_region(Cairo::Region.new)
+      hide
     end
   end
 

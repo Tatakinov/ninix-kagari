@@ -589,9 +589,14 @@ module Ninix_Main
         end
       end
       r = monitor.geometry
-      @app_window.unfullscreen
+      id = @app_window.signal_connect('notify') do
+        if @app_window.fullscreened?
+          @app_window.signal_handler_disconnect(id)
+          @__menu.popup(side, x - r.x, y - r.y, upper)
+        end
+      end
+      @app_window.show
       @app_window.fullscreen_on_monitor(monitor)
-      @__menu.popup(side, x - r.x, y - r.y, upper)
     end
 
     def get_ghost_menus
