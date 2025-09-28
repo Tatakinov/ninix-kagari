@@ -1609,6 +1609,7 @@ module Surface
         [new_x, new_y, new_x + w, new_y + h].join(','),
         event_type: 'NOTIFY'
       )
+      set_alignment_current
       update_frame_buffer() #XXX
     end
 
