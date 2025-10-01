@@ -14,11 +14,12 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
-require "gtk4"
-require "cgi"
+require 'gtk4'
+require 'cgi'
 
-require_relative "pix"
-require_relative "metamagic"
+require_relative 'home'
+require_relative 'pix'
+require_relative 'metamagic'
 
 module Balloon
 
@@ -28,6 +29,1618 @@ module Balloon
 
   TYPE_ABSOLUTE = 0
   TYPE_RELATIVE = 1
+
+  Position = Struct.new(:x, :y, :w, :h)
+  Content = Struct.new(:type, :data, :attr)
+  Attribute = Struct.new(:height, :color, :bold, :italic, :strike,
+                         :underline, :sup, :sub, :inline, :opaque,
+                         :use_self_alpha, :clipping, :fixed, :foreground, 
+                         :is_sstp_marker)
+  Head = Struct.new(:valid, :x, :y)
+  Point = Struct.new(:type, :value)
+  Data = Struct.new(:pos, :content, :head)
+  Link = Struct.new(:buffer_index, :begin_index, :begin_offset, :end_index, :end_offset, :link_id, :args, :raw_text, :text)
+
+  class Post < Array
+    attr_reader :name
+    def initialize(name)
+      @name = name
+      super(1) do
+        yield
+      end
+    end
+  end
+
+  class BalloonProxy < MetaMagic::Holon
+    def initialize
+      super("")
+      @normal = Balloon.new
+      @normal.set_responsible(self)
+      @sns = SNSBalloon.new
+      @sns.set_responsible(self)
+      @current = @normal
+    end
+
+    def new_(desc, *args)
+      sns = desc.get('display')
+      if sns.nil?
+        @current = @normal
+      elsif sns == 'sns'
+        @current = @sns
+      end
+      @current.new_(desc, *args)
+    end
+
+    def set_responsible(parent)
+      @parent = parent
+    end
+
+    def respond_to_missing?(symbol, include_private)
+      @current.class.method_defined?(symbol)
+    end
+
+    def method_missing(name, *args, **kwarg)
+      @current.send(name, *args, **kwarg)
+    end
+  end
+
+  class SNSBalloon < MetaMagic::Holon
+    attr_reader :user_interaction
+    def initialize
+      super("") # FIXME
+      @handlers = {
+        :reset_user_interaction => :reset_user_interaction,
+      }
+      @user_interaction = false
+      @window = nil
+      # create communicatebox
+      @communicatebox = CommunicateBox.new()
+      @communicatebox.set_responsible(self)
+      # create teachbox
+      @teachbox = TeachBox.new()
+      @teachbox.set_responsible(self)
+      # create inputbox
+      @inputbox = Hash.new do |h, k|
+        # configure inputbox
+        i = InputBox.new
+        i.set_responsible(self)
+        h[k] = i
+      end
+      # create passwordinputbox
+      @passwordinputbox = Hash.new do |h, k|
+        # configure passwordinputbox
+        p = PasswordInputBox.new
+        p.set_responsible(self)
+        h[k] = p
+      end
+      # create scriptbox
+      @scriptinputbox = ScriptInputBox.new()
+      @scriptinputbox.set_responsible(self)
+      @text_count = Hash.new do |h, k|
+        h[k] = 0
+      end
+      @side = 0
+    end
+
+    def reset_user_interaction
+      # TODO stub
+    end
+
+    def get_text_count(side)
+      @text_count[side]
+    end
+
+    def get_window(side)
+      # TODO stub
+    end
+
+    def reset_text_count(side)
+      @text_count[side] = 0
+    end
+
+    def reset_balloon
+      reset_arrow
+      reset_sstp_marker
+      reset_message_regions
+    end
+
+    def identify_window(win)
+      # TODO stub
+    end
+
+    def finalize
+      @window.destroy
+      @window = nil
+      @communicatebox.destroy
+      @teachbox.destroy
+      @inputbox.each.to_a.each do |k, v|
+        v.close(k)
+      end
+      @passwordinputbox.each.to_a.each do |k, v|
+        v.close(k)
+      end
+    end
+
+    def new_(desc, balloon)
+      @desc = desc
+      @directory = balloon['balloon_dir'][0]
+      @balloon = balloon
+      @communicate = []
+      0.upto(3) do |i|
+        key = 'c' + i.to_s
+        @communicate[i] = balloon[key] if balloon.include?(key) 
+      end
+
+      # create balloon windows
+      @cache = Pix::Cache.new
+      directory = File.join(Home.get_ninix_home, 'balloon', @directory)
+      path = File.join(directory, 'balloon_bg.png')
+      begin
+        @bg_surface = Pix.surface_new_from_file(path)
+      rescue
+        Logging::Logging.debug('cannot load balloon bg image')
+        @bg_surface = Pix.create_blank_surface(200, 200)
+      end
+      path = File.join(directory, 'post_top.png')
+      begin
+        pix = @cache.load(path)
+      rescue
+        Logging::Logging.debug('cannot load post top image')
+        pix = Pix::Data.new(Pix.create_blank_surface(200, 40), Cairo::Region.new, false)
+      end
+      @post_top_surface = pix.surface(write: false)
+      path = File.join(directory, 'post_content.png')
+      begin
+        pix = @cache.load(path)
+      rescue
+        Logging::Logging.debug('cannot load post content image')
+        pix = Pix::Data.new(Pix.create_blank_surface(200, 200), Cairo::Region.new, false)
+      end
+      @post_content_surface = pix.surface(write: false)
+      path = File.join(directory, 'post_bottom.png')
+      begin
+        pix = @cache.load(path)
+      rescue
+        Logging::Logging.debug('cannot load post bottom image')
+        pix = Pix::Data.new(Pix.create_blank_surface(200, 20), Cairo::Region.new, false)
+      end
+      @post_bottom_surface = pix.surface(write: false)
+      @window = Gtk::Window.new
+      @window.set_focusable(false)
+      @window.signal_connect('close-request') do
+        hide_all
+      end
+      @window.set_decorated(true)
+      @window.set_title(@parent.handle_request(:GET, :get_descript, 'name'))
+      @width, @height = @bg_surface.width, @bg_surface.height
+      @window.set_default_size(@width, @height)
+      @darea = Gtk::DrawingArea.new
+      @window.set_child(@darea)
+      @darea.set_draw_func do |widget, cr, w, h|
+        redraw(@window, widget, cr)
+        next true
+      end
+      @darea.show
+      button_controller = Gtk::GestureClick.new
+      # 全てのボタンをlisten
+      button_controller.set_button(0)
+      button_controller.signal_connect('pressed') do |w, n, x, y|
+        next button_press(@window, @darea, w, n, x, y)
+      end
+      @darea.add_controller(button_controller)
+      motion_controller = Gtk::EventControllerMotion.new
+      motion_controller.signal_connect('motion') do |w, x, y|
+        next motion_notify(@window, @darea, w, x, y)
+      end
+      @darea.add_controller(motion_controller)
+      scroll_controller = Gtk::EventControllerScroll.new(Gtk::EventControllerScrollFlags::VERTICAL)
+      scroll_controller.signal_connect('scroll') do |w, dx, dy|
+        next scroll(@window, @darea, dx, dy)
+      end
+      @darea.add_controller(scroll_controller)
+
+      # configure communicatebox
+      @communicatebox.new_(desc, @communicate[1])
+      # configure teachbox
+      @teachbox.new_(desc, @communicate[2])
+      # configure scriptinputbox
+      @scriptinputbox.new_(desc, @communicate[3])
+
+      pango_context = Gtk::DrawingArea.new.pango_context
+      @layout = Pango::Layout.new(pango_context)
+      @sstp_layout = Pango::Layout.new(pango_context)
+      mask_r = desc.get('maskcolor.r', :default => 128).to_i
+      mask_g = desc.get('maskcolor.g', :default => 128).to_i
+      mask_b = desc.get('maskcolor.b', :default => 128).to_i
+      @cursor_color = [mask_r / 255.0, mask_g / 255.0, mask_b / 255.0]
+      text_r = desc.get(['font.color.r', 'fontcolor.r'], :default => 0).to_i
+      text_g = desc.get(['font.color.g', 'fontcolor.g'], :default => 0).to_i
+      text_b = desc.get(['font.color.b', 'fontcolor.b'], :default => 0).to_i
+      @text_normal_color = [text_r / 255.0, text_g / 255.0, text_b / 255.0]
+      if desc.get('maskmethod').to_i == 1
+        text_r = (255 - text_r)
+        text_g = (255 - text_g)
+        text_b = (255 - text_b)
+      end
+      @text_active_color = [text_r / 255.0, text_g / 255.0, text_b / 255.0]
+      sstp_r = desc.get('sstpmessage.font.color.r', :default => text_r).to_i
+      sstp_g = desc.get('sstpmessage.font.color.g', :default => text_g).to_i
+      sstp_b = desc.get('sstpmessage.font.color.b', :default => text_b).to_i
+      @sstp_message_color = [sstp_r / 255.0, sstp_g / 255.0, sstp_b / 255.0]
+      # initialize
+      reset_fonts
+      clear_text_all
+    end
+
+    def motion_notify(window, widget, ctrl, x, y)
+=begin FIXME
+      px, py = window.winpos_to_surfacepos(x, y, scale)
+=end
+      px, py = x, y
+      unless @link_buffer.empty?
+        if check_link_region(px, py)
+          widget.queue_draw
+        end
+      end
+      return true
+    end
+
+    def scroll(window, darea, dx, dy)
+=begin FIXME
+      px, py = window.winpos_to_surfacepos(
+            dx, dy, scale)
+=end
+      px, py = dx, dy
+      if py < 0
+        if @lineno > 0
+          @lineno -= 1
+          check_link_region(px, py)
+          darea.queue_draw
+        end
+      elsif py > 0
+        if get_bottom_position - @lineno * @line_height > @bg_surface.height * scale / 100.0
+          @lineno += 1
+          check_link_region(px, py)
+          darea.queue_draw
+        end
+      end
+      return true
+    end
+
+    def button_press(window, darea, ctrl, n, x, y)
+      @parent.handle_request(:GET, :reset_idle_time)
+      if @parent.handle_request(:GET, :is_paused)
+        @parent.handle_request(:GET, :notify_balloon_click,
+                               ctrl.button, 1, @side)
+        return true
+      end
+      # arrows
+=begin FIXME
+      px, py = window.winpos_to_surfacepos(
+            x, y, scale)
+=end
+      px, py = x, y
+      # up arrow
+      surface = @arrow0_surface
+      w = surface.width
+      h = surface.height
+      x, y = @arrow[0]
+      if x <= px and px <= (x + w) and y <= py and py <= (y + h)
+        if @lineno > 0
+          @lineno = @lineno - 1
+          darea.queue_draw()
+        end
+        return true
+      end
+      # down arrow
+      surface = @arrow1_surface
+      w = surface.width
+      h = surface.height
+      x, y = @arrow[1]
+      if x <= px and px <= (x + w) and y <= py and py <= (y + h)
+        if get_bottom_position - @lineno * @line_height > @bg_surface.height * scale / 100.0
+          @lineno += 1
+          darea.queue_draw
+        end
+        return true
+      end
+      # links
+      unless @selection.nil?
+        link = @link_buffer[@selection]
+        @parent.handle_request(:GET, :notify_link_selection,
+                               link.link_id, link.raw_text, link.args, @selection)
+        return true
+      end
+      # balloon's background
+      @parent.handle_request(:GET, :notify_balloon_click,
+                             ctrl.button, 1, @side)
+      return true
+    end
+
+    def button_release(window, w, n, x, y)
+      # nop
+      return true
+    end
+
+    def get_image_surface(id)
+      return nil unless @balloon.include?(id)
+      begin
+        path, config = @balloon[id]
+        use_pna = (not @parent.handle_request(:GET, :get_preference, 'use_pna').zero?)
+        surface = @cache.load(path, use_pna: use_pna).surface(write: false)
+      rescue
+        return nil
+      end
+      return surface
+    end
+
+    def reset_fonts
+      unless @parent.nil?
+        font_name = @parent.handle_request(:GET, :get_preference, 'balloon_fonts')
+      else
+        font_name = nil
+      end
+      return if @__font_name == font_name
+      @font_desc = Pango::FontDescription.new(font_name)
+      pango_size = @font_desc.size
+      if pango_size.zero?
+        default_size = 12 # for Windows environment
+        size = @desc.get(['font.height', 'font.size'], :default => default_size).to_i
+        pango_size = (size * 3 / 4) # convert from Windows to GTK+
+        pango_size *= Pango::SCALE
+      end
+      @font_desc.set_size(pango_size)
+      @__font_name = font_name
+      @layout.set_font_description(@font_desc)
+      @layout.set_wrap(Pango::WrapMode::CHAR)
+      # font for sstp message
+      if @side.zero?
+        @sstp_font_desc = Pango::FontDescription.new(font_name)
+        pango_size = @sstp_font_desc.size
+        if pango_size.zero?
+          default_size = 10 # for Windows environment
+          size = @desc.get('sstpmessage.font.height', :default => default_size).to_i
+          pango_size = (size * 3 / 4) # convert from Windows to GTK+
+          pango_size *= Pango::SCALE
+        end
+        @sstp_font_desc.set_size(pango_size)
+        @sstp_layout.set_font_description(@sstp_font_desc)
+        @sstp_layout.set_wrap(Pango::WrapMode::CHAR)
+      end
+      reset_arrow
+      reset_sstp_marker
+      reset_message_regions
+      @darea.queue_draw if @__shown
+    end
+
+    def config_adjust(name, base, default_value)
+      value = @desc.get(name)
+      if value.nil?
+        value = default_value
+      end
+      value = value.to_i
+      if value < 0
+        value = (base + value)
+      end
+      return value.to_i
+    end
+
+    def reset_sstp_marker
+      if @side.zero?
+        # sstp marker position
+        w = @bg_surface.width
+        h = @bg_surface.height
+        @sstp = []
+        x = config_adjust('sstpmarker.x', w,  30)
+        y = config_adjust('sstpmarker.y', h, -20)
+        @sstp << [x, y] # sstp marker
+        x = config_adjust('sstpmessage.x', w,  50)
+        y = config_adjust('sstpmessage.y', h, -20)
+        @sstp << [x, y] # sstp message
+      end
+      # sstp marker surface (not only for @side.zero?)
+      @sstp_surface = get_image_surface('sstp')
+    end
+
+    def reset_arrow
+      # arrow positions
+      @arrow = []
+      fail "assert" if @bg_surface.nil?
+      w = @bg_surface.width
+      h = @bg_surface.height
+      x = config_adjust('arrow0.x', w, -10)
+      y = config_adjust('arrow0.y', h,  10)
+      @arrow << [x, y]
+      x = config_adjust('arrow1.x', w, -10)
+      y = config_adjust('arrow1.y', h, -20)
+      @arrow << [x, y]
+      # arrow surfaces and sizes
+      @arrow0_surface = get_image_surface('arrow0')
+      @arrow1_surface = get_image_surface('arrow1')
+    end
+
+    def reset_message_regions
+      w, h = @layout.pixel_size
+      @char_width = w
+      @char_height = h
+      fd = @layout.font_description
+      if fd.size_is_absolute?
+        @font_height = fd.size
+      else
+        @font_height = (fd.size / Pango::SCALE).to_i
+      end
+      @line_space = 0
+      @layout.set_spacing(@line_space)
+      @name_x = @desc.get('sns.name.x', default: 0).to_i
+      @name_y = @desc.get('sns.name.y', default: 0).to_i
+      # font metrics
+      @origin_x = @desc.get('origin.x',
+          default: @desc.get('zeropoint.x',
+              default: @desc.get('validrect.left',
+                  default: 14).to_i).to_i).to_i
+      @origin_y = 0
+      wpx = @desc.get('wordwrappoint.x',
+          default: @desc.get('validrect.right',
+              default: 14).to_i).to_i
+      @valid_rect_bottom = @desc.get('validrect.bottom', default: -14).to_i
+      if wpx > 0
+        line_width = (wpx - @origin_x)
+      elsif wpx < 0
+        line_width = (@width - @origin_x + wpx)
+      else
+        line_width = (@width - @origin_x * 2)
+      end
+      vrb = @valid_rect_bottom
+      if vrb > 0
+        text_height = ([vrb, @height].min - @origin_y)
+      elsif vrb < 0
+        text_height = (@height - @origin_y + vrb)
+      else
+        text_height = (@height - @origin_y * 2)
+      end
+      @line_height = (@char_height + @line_space)
+      @layout.set_width(line_width * Pango::SCALE)
+      @valid_width = line_width
+      @valid_height = text_height
+      @lines = (text_height / @line_height).to_i
+      y = @origin_y
+      @line_width = line_width
+      # sstp message region
+      if @side.zero?
+        w, h = @sstp_layout.pixel_size
+        x, y = @sstp[1]
+        w = (line_width + @origin_x - x)
+        @sstp_region = [x, y, w, h]
+      end
+    end
+
+    def get_balloon_directory
+      @directory
+    end
+
+    def get_balloon_size(side)
+      [@width, @height]
+    end
+
+    def add_window(side)
+      # nop
+    end
+
+    def get_balloon_windowposition(side)
+    end
+
+    def set_balloon_default(side: -1)
+      # nop
+    end
+
+    def set_balloon(side, num)
+      # nop
+    end
+
+    def set_position(side, base_x, base_y)
+      # nop
+    end
+
+    def get_position(side)
+      [0, 0]
+    end
+
+    def set_autoscroll(flag)
+      # TODO stub
+    end
+
+    def is_shown(side)
+      @__shown
+    end
+
+    # HACK
+    # waylandではshow-hideだとウィンドウの位置がリセットされてしまうので
+    # minimize-unminimizeで代用する
+
+    def show(side)
+      return if @__shown
+      @__shown = true
+      @window.show
+      @window.unminimize
+      @window.present
+    end
+
+    def hide_all
+      return unless @__shown
+      @__shown = false
+      @window.minimize
+    end
+
+    def hide(side)
+      # TODO stub
+    end
+
+    def raise_all
+      # TODO stub
+    end
+
+    def raise_(side)
+      # TODO stub
+    end
+
+    def lower_all
+      # TODO stub
+    end
+
+    def lower(side)
+      # TODO stub
+    end
+
+    def synchronize(list)
+      if list.empty?
+        @side, @prev_side = @prev_side, @side
+      else
+        @side, @prev_side = list, @side
+        new_buffer
+      end
+    end
+
+    def clear_text_all
+      @side = 0
+      @selection = nil
+      @lineno = 0
+      @text_buffer = ['']
+      @text_count.clear
+      @line_regions = [[0, 0]]
+      @data_buffer = []
+      new_buffer
+      @meta_buffer = []
+      @link_buffer = []
+      @images = []
+      @sstp_marker = []
+      @darea.queue_draw
+    end
+
+    def clear_text(side)
+      @data_buffer.append
+    end
+
+    def new_buffer
+      side2key = proc do |x|
+        if x == 0
+          key = 'sakura.name'
+        elsif x == 1
+          key = 'kero.name'
+        else
+          key = "char#{x}.name"
+        end
+        next key
+      end
+      if @side.instance_of?(Array)
+        name = @side.map do |x|
+          @parent.handle_request(:GET, :get_descript, side2key.call(x), default: 'unknown')
+        end.join('&')
+      else
+        name = @parent.handle_request(:GET, :get_descript, side2key.call(@side))
+      end
+      name = 'unknown' if name.nil?
+      @data_buffer << Post.new(name) do
+        Data.new(
+          pos: Position.new(x: 0, y: 0, w: 0, h: 0),
+          content: Content.new(type: TYPE_UNKNOWN,
+            data: nil,
+            attr: Attribute.new(
+              height: @font_height,
+              color: '',
+              bold: false,
+              italic: false,
+              strike: false,
+              underline: false,
+              sup: false,
+              sub: false,
+              inline: false,
+              opaque: false,
+              use_self_alpha: false,
+              clipping: [0, 0, -1, -1],
+              fixed: false,
+              foreground: false,
+              is_sstp_marker: false,
+            )),
+          head: Head.new(valid: true,
+                         x: Point.new(type: TYPE_ABSOLUTE, value: 0),
+                         y: Point.new(type: TYPE_ABSOLUTE, value: 0)
+                        )
+        )
+      end
+    end
+
+    def append_data(head = Head.new(valid: true, x: Point.new, y: Point.new), side = nil)
+      last = @data_buffer.last
+      x, y, h = get_last_cursor_position(last)
+      last = last.last
+      a = last.content.attr.dup
+      # 画像のattrはすべて未指定の状態にする
+      a.opaque = false
+      a.inline = false
+      a.clipping = [0, 0, -1, -1]
+      a.fixed = false
+      a.foreground = false
+      a.is_sstp_marker = false
+      @data_buffer.last << Data.new(
+        pos: Position.new(x: x, y: y, w: 0, h: 0),
+        content: Content.new(type: TYPE_UNKNOWN, attr: a),
+        head: head,
+      )
+    end
+
+    def new_buffer_with_cond(side)
+      unless @side.instance_of?(Array)
+        if @side != side
+          @side = side
+          last = @data_buffer.last
+          unless last.length == 1 and last.last.content.type == TYPE_UNKNOWN
+            new_buffer
+          end
+        end
+      end
+    end
+
+    def new_line(side)
+      new_buffer_with_cond(side)
+      append_data(Head.new(valid: true, x: Point.new, y: Point.new), side)
+    end
+
+    def set_draw_absolute_x(side, pos)
+      last = @data_buffer.last.last
+      last.pos.x = pos
+      last.head.x = Point.new(type: TYPE_ABSOLUTE, value: pos)
+    end
+
+    def set_draw_absolute_x_char(side, rate)
+      set_draw_absolute_x(side, @char_width * rate)
+    end
+
+    def set_draw_relative_x(side, pos)
+      last = @data_buffer.last.last
+      last.pos.x += pos
+      last.head.x = Point.new(type: TYPE_RELATIVE, value: pos)
+    end
+
+    def set_draw_relative_x_char(side, rate)
+      set_draw_relative_x(side, @char_width * rate)
+    end
+
+    def set_draw_absolute_y(side, pos)
+      last = @data_buffer.last.last
+      last.pos.y = pos
+      last.head.y = Point.new(type: TYPE_ABSOLUTE, value: pos)
+    end
+
+    def set_draw_absolute_y_char(side, rate, use_default_height: true)
+      rx, ry, rh = get_last_cursor_position(@data_buffer.last)
+      # 最初に\n系が呼ばれたときの処理
+      if rh == 0 || use_default_height
+        rh = @line_height
+      end
+      set_draw_absolute_y(side, (rh * rate).to_i)
+    end
+
+    def set_draw_relative_y(side, pos)
+      last = @data_buffer.last.last
+      last.pos.y += pos
+      last.head.y = Point.new(type: TYPE_RELATIVE, value: pos)
+    end
+
+    def set_draw_relative_y_char(side, rate, use_default_height: true)
+      rx, ry, rh = get_last_cursor_position(@data_buffer.last)
+      # 最初に\n系が呼ばれたときの処理
+      if rh == 0 || use_default_height
+        rh = @line_height
+      end
+      set_draw_relative_y(side, (rh * rate).to_i)
+    end
+
+    def append_text(side, text)
+      new_buffer_with_cond(side)
+      @text_count[side] += text.length
+      data = @data_buffer.last.last
+      case data[:content][:type]
+      when TYPE_UNKNOWN
+        @layout.set_width(-1)
+        @layout.set_indent(data[:pos][:x] * Pango::SCALE)
+        w, h = 0, 0
+        # XXX: 空白だけのmarkupだとなぜかlayoutの幅が半分になるので
+        # 適当な文字を足して空白のみの状況を避ける
+        if text =~ /\A *\z/
+          markup = set_markup([text, 'o'].join, data[:content][:attr])
+          @layout.set_markup(markup)
+          w1, h = @layout.pixel_size
+          markup = set_markup('-', data[:content][:attr])
+          @layout.set_markup(markup)
+          w2, _ = @layout.pixel_size
+          w = w1 - w2
+        else
+          markup = set_markup(text, data[:content][:attr])
+          @layout.set_markup(markup)
+          w, h = @layout.pixel_size
+        end
+        data[:pos][:w] = w
+        data[:pos][:h] = h
+        data[:content][:type] = TYPE_TEXT
+        data[:content][:data] = text
+      when TYPE_TEXT
+        @layout.set_width(@valid_width * Pango::SCALE)
+        @layout.set_indent(data[:pos][:x] * Pango::SCALE)
+        concat = [data[:content][:data], text].join('')
+        markup = set_markup(concat, data[:content][:attr])
+        @layout.set_markup(markup)
+        t = @layout.text
+        strong, weak = @layout.get_cursor_pos(t.bytesize)
+        x = (strong.x / Pango::SCALE).to_i
+        prev_x = x
+        t.bytesize.downto(0) do |i|
+          strong, weak = @layout.get_cursor_pos(i)
+          x = (strong.x / Pango::SCALE).to_i
+          if prev_x < x
+            append_data
+            set_draw_absolute_x(@side, 0)
+            set_draw_relative_y_char(@side, 1.0, use_default_height: false)
+            return append_text(@side, text)
+          end
+        end
+        w, h = @layout.pixel_size
+        data[:pos][:w] = w
+        data[:pos][:h] = h
+        data[:content][:data] = concat
+      when TYPE_IMAGE
+        # \nや\_lなどが行われていない場合にここに来るのでheadはfalse
+        append_data
+        return append_text(@side, text)
+      end
+      draw_last_line(:column => 0)
+    end
+
+    def append_sstp_marker(side)
+      return if @sstp_surface.nil?
+      unless @data_buffer.last.last[:content][:type] == TYPE_UNKNOWN
+        append_data
+      end
+      data = @data_buffer.last.last
+      data[:pos][:w] = @sstp_surface.width
+      data[:pos][:h] = @char_height
+      data[:content][:type] = TYPE_IMAGE
+      data[:content][:data] = @sstp_surface
+      data[:content][:attr] = Attribute.new(
+        height: @font_height,
+        color: '',
+        bold: false,
+        italic: false,
+        strike: false,
+        underline: false,
+        sub: false,
+        sup: false,
+        opaque: false,
+        inline: true,
+        clipping: [0, 0, -1, -1],
+        fixed: false,
+        foreground: false,
+        is_sstp_marker: true,
+      )
+      @window.show
+      @darea.queue_draw
+    end
+
+    def append_link_in(side, link_id, args)
+      new_buffer_with_cond(side)
+      data = @data_buffer.last
+      sl = data.length - 1
+      sn = if data[-1][:content][:type] == TYPE_TEXT
+             data[-1][:content][:data].length
+           else
+             0
+           end
+      @link_buffer << Link.new(
+        buffer_index: @data_buffer.length - 1,
+        begin_index: sl,
+        begin_offset: sn,
+        end_index: sl,
+        end_offset: sn,
+        link_id: link_id,
+        args: args,
+        raw_text: '',
+        text: ''
+      )
+    end
+
+    def append_link_out(side, link_id, text, args)
+      return unless text
+      raw_text = text
+      data = @data_buffer.last
+      el = data.length - 1
+      data = data.last
+      en = if data[:content][:type] == TYPE_TEXT
+             data[:content][:data].length
+           else
+             0
+           end
+      link = @link_buffer.last
+      link.end_index = el
+      link.end_offset = en
+      link.raw_text = raw_text
+      link.text = text
+    end
+
+    def append_link(side, label, value, args)
+      append_link_in(side, label, args)
+      append_text(side, value)
+      append_link_out(side, label, value, args)
+    end
+
+    def append_meta(side, **kwargs)
+      new_buffer_with_cond(side)
+      data = @data_buffer.last.last
+      # default -> 数値へ変更。
+      kwargs.each do |k, v|
+        if v == 'default'
+          case k
+          when :height
+            kwargs[k] = [@font_height, false, false]
+          when :color
+            kwargs[k] = ''
+          when :bold
+            kwargs[k] = false
+          when :italic
+            kwargs[k] = false
+          when :strike
+            kwargs[k] = false
+          when :underline
+            kwargs[k] = false
+          when :sub
+            kwargs[k] = false
+          when :sup
+            kwargs[k] = false
+          end
+        elsif v == "disable"
+          # TODO stub
+        end
+      end
+      # heightは特殊な処理が必要。
+      unless kwargs[:height].nil?
+        v, relative, rate = kwargs[:height]
+        if rate
+          v = (data[:content][:attr][:height] * v / 100.0).to_i
+        end
+        if relative
+          v = data[:content][:attr][:height] + v
+        end
+        kwargs[:height] = v
+      end
+      case data[:content][:type]
+      when TYPE_UNKNOWN
+        # nop
+      when TYPE_TEXT
+      is_changed = false
+      kwargs.each do |k, v|
+        unless data[:content][:attr][k] == v
+          is_changed = true
+          break
+        end
+      end
+      if is_changed
+        append_data
+      end
+      when TYPE_IMAGE
+        append_data
+      end
+      data = @data_buffer.last.last
+      a = data[:content][:attr].dup
+      kwargs.each do |k, v|
+        a[k] = v
+      end
+      data[:content][:attr] = a
+    end
+
+    def append_image(side, path, **kwargs)
+      new_buffer_with_cond(side)
+      data = @data_buffer.last
+      unless data.last[:content][:type] == TYPE_UNKNOWN
+        append_data
+      end
+      data = data.last
+      begin
+        image_surface = @cache.load(path).surface(write: false)
+      rescue
+        return
+      end
+      data[:pos][:w] = image_surface.width
+      data[:pos][:h] = image_surface.height
+      data[:content][:type] = TYPE_IMAGE
+      data[:content][:data] = image_surface
+      data[:content][:attr][:is_sstp_marker] = false
+      unless kwargs[:x].nil? or kwargs[:y].nil?
+        data[:pos][:x] = kwargs[:x]
+        data[:pos][:y] = kwargs[:y]
+      end
+      kwargs.each do |k, v|
+        if [:opaque, :inline, :clipping, :fixed, :foreground].include?(k)
+          data[:content][:attr][k] = v
+        end
+      end
+      @window.show
+      @darea.queue_draw
+    end
+
+    def draw_last_line(column: 0)
+      return unless @__shown
+      while get_bottom_position - @lineno * @line_height > @bg_surface.height * scale / 100.0
+        @lineno += 1
+      end
+      @darea.queue_draw
+    end
+
+    def show_sstp_message(message, sender)
+      # TODO stub
+    end
+
+    def hide_sstp_message
+      # TODO stub
+    end
+
+    def open_communicatebox
+      @communicatebox.show()
+    end
+
+    def open_teachbox
+      @parent.handle_request(:GET, :notify_event, 'OnTeachStart')
+      @teachbox.show()
+    end
+
+    def open_inputbox(symbol, limittime: -1, default: nil)
+      @inputbox[symbol].new_(@desc, @communicate[3])
+      @inputbox[symbol].set_symbol(symbol)
+      @inputbox[symbol].set_limittime(limittime)
+      @inputbox[symbol].show(default)
+    end
+
+    def open_passwordinputbox(symbol, limittime: -1, default: nil)
+      @passwordinputbox[symbol].new_(desc, @communicate[3])
+      @passwordinputbox[symbol].set_symbol(symbol)
+      @passwordinputbox[symbol].set_limittime(limittime)
+      @passwordinputbox[symbol].show(default)
+    end
+
+    def open_scriptinputbox()
+      @scriptinputbox.show
+    end
+
+    def close_inputbox(symbol)
+      @inputbox[symbol].close(symbol) if @inputbox.include?(symbol)
+      @passwordinputbox[symbol].close(symbol) if @passwordinputbox.include?(symbol)
+    end
+
+    def close_communicatebox
+      @communicatebox.close
+    end
+
+    def close_teachbox
+      @teachbox.close
+    end
+
+    def destroy_inputbox(symbol)
+      @inputbox.delete(symbol) if @inputbox.include?(symbol)
+      @passwordinputbox.delete(symbol) if @passwordinputbox.include?(symbol)
+    end
+
+    def set_markup(text, a)
+      text = CGI.escapeHTML(text)
+      unless a[:height].nil? or a[:height] == @font_height
+        text = ['<span size="', a[:height], 'pt">', text, '</span>'].join
+      end
+      unless a[:color].empty?
+        text = ['<span color="', a[:color], '">', text, '</span>'].join
+      end
+      {bold: 'b', italic: 'i', strike: 's', underline: 'u', sub: 'sub', sup: 'sup'}.each do |k, v|
+        if a[k]
+          text = ['<', v, '>', text, '</', v, '>'].join
+        end
+      end
+      return text
+    end
+
+    def get_last_cursor_position(data)
+      x, y, h = 0, 0, 0
+      data.reverse_each do |data|
+        if data[:content][:type] == TYPE_IMAGE and
+            not data[:content][:attr][:inline]
+          next
+        end
+        case data[:content][:type]
+        when TYPE_UNKNOWN
+          x = data[:pos][:x]
+        when TYPE_TEXT
+          x = data[:pos][:x] + data[:pos][:w]
+        when TYPE_IMAGE
+          x = data[:pos][:x] + data[:pos][:w]
+        else
+          fail "unreachable"
+        end
+        y = data[:pos][:y]
+        break
+      end
+      data.reverse_each do |data|
+        if data[:content][:type] == TYPE_IMAGE and
+            not data[:content][:attr][:inline]
+          next
+        end
+        case data[:content][:type]
+        when TYPE_UNKNOWN
+          h = [h, 0].max
+        when TYPE_TEXT
+          @layout.set_indent(data[:pos][:x] * Pango::SCALE)
+          markup = set_markup(data[:content][:data], data[:content][:attr])
+          @layout.set_markup(markup)
+          _, h1 = @layout.pixel_size
+          h = [h, h1].max
+        when TYPE_IMAGE
+          if data[:content][:attr][:is_sstp_marker]
+            h = [h, @char_height].max
+          else
+            h = [h, data[:content][:data].height].max
+          end
+        else
+          fail "unreachable"
+        end
+        if data[:head][:valid]
+          break
+        end
+      end
+      return [x, y, h]
+    end
+
+    def get_post_height(data)
+      h_max = 0
+      data.each do |data|
+        case data[:content][:type]
+        when TYPE_TEXT
+          h_max = [h_max, data[:pos][:y] + data[:pos][:h]].max
+        when TYPE_IMAGE
+          y = data[:pos][:y]
+          unless data[:content][:attr][:inline]
+            y -= @origin_y
+          end
+          h_max = [h_max, y + data[:pos][:h]].max
+        end
+      end
+      h_min = h_max
+      data.each do |data|
+        case data[:content][:type]
+        when TYPE_TEXT
+          h_min = [h_min, data[:pos][:y]].min
+        when TYPE_IMAGE
+          y = data[:pos][:y]
+          unless data[:content][:attr][:inline]
+            y -= @origin_y
+          end
+          h_min = [h_min, y + data[:pos][:h]].min
+        end
+      end
+      return h_min, h_max
+    end
+
+    def get_bottom_position
+      h = 0
+      @data_buffer.each do |data|
+        h += @post_top_surface.height
+        h_min, h_max = get_post_height(data)
+        h += ((h_max - h_min).to_f / @post_content_surface.height).ceil * @post_content_surface.height
+        h += @post_bottom_surface.height
+      end
+      return h
+    end
+
+    def redraw(window, widget, cr)
+      return if @parent.handle_request(:GET, :lock_repaint)
+      return true unless @__shown
+      fail "assert" if @bg_surface.nil?
+      # draw bg
+      cr.save
+      cr.set_operator(Cairo::OPERATOR_SOURCE)
+      cr.set_source(@bg_surface, 0, 0)
+      cr.rectangle(0, 0, @bg_surface.width, @bg_surface.height)
+      cr.fill
+      cr.restore
+
+      cr.translate(0, -@lineno * @line_height)
+
+      cr.save
+      @data_buffer.each do |data|
+        # post top image
+        cr.set_operator(Cairo::OPERATOR_OVER) # restore default
+        cr.set_source(@post_top_surface, 0, 0)
+        cr.mask(@post_top_surface, 0, 0)
+        translate_h = @post_top_surface.height
+
+        # post name
+        cr.save
+        cr.rectangle(@name_x, @name_y, @post_top_surface.width - @name_x, @post_top_surface.height - @name_y)
+        cr.clip
+        cr.move_to(@name_x, @name_y)
+        @layout.set_width(-1)
+        @layout.set_indent(0)
+        name = CGI.escapeHTML(data.name)
+        @layout.set_markup(name)
+        cr.set_source_rgb(@text_normal_color)
+        cr.show_pango_layout(@layout)
+        cr.reset_clip
+        cr.restore
+
+        cr.translate(0, translate_h)
+
+        # post content image
+        cr.save
+        h_min, h_max = get_post_height(data)
+        loop_n = ((h_max - h_min).to_f / @post_content_surface.height).ceil
+        translate_h = loop_n * @post_content_surface.height
+        loop_n.times do |i|
+          cr.set_operator(Cairo::OPERATOR_OVER) # restore default
+          cr.set_source(@post_content_surface, 0, 0)
+          cr.mask(@post_content_surface, 0, 0)
+          cr.translate(0, @post_content_surface.height)
+        end
+        cr.restore
+
+        # post content
+        cr.save
+        cr.rectangle(@origin_x, 0, @valid_width, @origin_y + @valid_height)
+        cr.clip
+        # draw background image
+        data.each do |data|
+          x = data[:pos][:x]
+          y = data[:pos][:y] - h_min
+          w = data[:pos][:w]
+          h = data[:pos][:h]
+          unless data[:content][:type] == TYPE_IMAGE and
+              not data[:content][:attr][:foreground]
+            next
+          end
+          if data[:content][:attr][:fixed]
+            if y + h < 0 or y > @origin_y + @valid_height
+              next
+            end
+          else
+            y1 = y
+            if data[:content][:attr][:inline]
+              y1 += @origin_y
+            end
+            if y1 + h < 0 or y > @origin_y + @valid_height
+              next
+            end
+          end
+          if x == 'centerx'
+            bw, bh = get_balloon_size(:scaling => false)
+            x = ((bw - w) / 2)
+          else
+            begin
+              x = Integer(x)
+            rescue
+              next
+            end
+          end
+          if y == 'centery'
+            bw, bh = get_balloon_size(:scaling => false)
+            y = ((bh - h) / 2)
+          else
+            begin
+              y = Integer(y)
+            rescue
+              next
+            end
+          end
+          if data[:content][:attr][:fixed]
+            cr.set_source(data[:content][:data], x, y)
+          else
+            if data[:content][:attr][:inline]
+              if data[:content][:attr][:is_sstp_marker]
+                cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y + ((@char_height - data[:content][:data].height) / 2).to_i)
+              else
+                cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y)
+              end
+            else
+              cr.set_source(data[:content][:data], x, y)
+            end
+          end
+          cr.paint
+        end
+        cr.reset_clip
+        # draw text
+        cr.rectangle(@origin_x, @origin_y, @valid_width, @origin_y + @valid_height)
+        cr.clip
+        @layout.set_width(-1)
+        data.each do |data|
+          x = data[:pos][:x]
+          y = data[:pos][:y] - h_min
+          w = data[:pos][:w]
+          h = data[:pos][:h]
+          unless data[:content][:type] == TYPE_TEXT
+            next
+          end
+          y1 = y + @origin_y
+          if y1 + h < 0 or y1 > @origin_y + @valid_height
+            next
+          end
+          @layout.set_indent(x * Pango::SCALE)
+          markup = set_markup(data[:content][:data], data[:content][:attr])
+          @layout.set_markup(markup)
+          cr.set_source_rgb(@text_normal_color)
+          cr.move_to(@origin_x, @origin_y + y)
+          cr.show_pango_layout(@layout)
+        end
+        cr.reset_clip
+        # draw foreground image
+        cr.rectangle(@origin_x, 0, @valid_width, @origin_y + @valid_height)
+        cr.clip
+        data.each do |data|
+          x = data[:pos][:x]
+          y = data[:pos][:y] - h_min
+          w = data[:pos][:w]
+          h = data[:pos][:h]
+          unless data[:content][:type] == TYPE_IMAGE and
+              data[:content][:attr][:foreground]
+            next
+          end
+          if data[:content][:attr][:fixed]
+            if y + h < 0 or y > @origin_y + @valid_height
+              next
+            end
+          else
+            y1 = y
+            if data[:content][:attr][:inline]
+              y1 += @origin_y
+            end
+            if y1 + h < 0 or y > @origin_y + @valid_height
+              next
+            end
+          end
+          if x == 'centerx'
+            bw, bh = get_balloon_size(:scaling => false)
+            x = ((bw - w) / 2)
+          else
+            begin
+              x = Integer(x)
+            rescue
+              next
+            end
+          end
+          if y == 'centery'
+            bw, bh = get_balloon_size(:scaling => false)
+            y = ((bh - h) / 2)
+          else
+            begin
+              y = Integer(y)
+            rescue
+              next
+            end
+          end
+          if data[:content][:attr][:inline]
+            cr.set_source(data[:content][:data], @origin_x + x, @origin_y + y)
+          else
+            cr.set_source(data[:content][:data], x, y)
+          end
+          cr.paint()
+        end
+        cr.reset_clip
+        cr.restore
+
+        cr.translate(0, translate_h)
+
+        # post bottom image
+        cr.set_operator(Cairo::OPERATOR_OVER) # restore default
+        cr.set_source(@post_bottom_surface, 0, 0)
+        cr.mask(@post_bottom_surface, 0, 0)
+        translate_h = @post_bottom_surface.height
+
+        cr.translate(0, translate_h)
+      end
+      cr.restore
+      update_link_region(widget, cr, @selection) unless @selection.nil?
+    end
+
+    def redraw2(window, widget, cr)
+      redraw_sstp_message(widget, cr) if @side.zero? and not @sstp_message.nil?
+      update_link_region(widget, cr, @selection) unless @selection.nil?
+      redraw_arrow0(widget, cr)
+      redraw_arrow1(widget, cr)
+      return true
+    end
+
+    def check_link_region(px, py)
+      new_selection = nil
+      @link_buffer.each_with_index do |link, selection|
+        index = link.buffer_index
+        offset_h = -@lineno * @line_height
+        index.times do |i|
+          data = @data_buffer[i]
+          offset_h += @post_top_surface.height
+          h_min, h_max = get_post_height(data)
+          offset_h += ((h_max - h_min).to_f / @post_content_surface.height).ceil * @post_content_surface.height
+          offset_h += @post_bottom_surface.height
+        end
+        offset_h += @post_top_surface.height
+        sl = link.begin_index
+        el = link.end_index
+        sn = link.begin_offset
+        en = link.end_offset
+        for n in sl .. el
+          data = @data_buffer[index][n]
+          case data[:content][:type]
+          when TYPE_TEXT
+            x, y = data[:pos][:x], data[:pos][:y]
+            if n == sl
+              @layout.set_indent(x * Pango::SCALE)
+              markup = set_markup(data[:content][:data][0, sn], data[:content][:attr])
+              @layout.set_markup(markup)
+              t = @layout.text
+              strong, weak = @layout.get_cursor_pos(t.bytesize)
+              x = (strong.x / Pango::SCALE).to_i
+            end
+            text = ''
+            if sl == el
+              text = data[:content][:data][sn, en - sn]
+            elsif n == sl
+              text = data[:content][:data][sn .. -1]
+            elsif n == el
+              text = data[:content][:data][0, en]
+            else
+              text = data[:content][:data]
+            end
+            @layout.set_indent(x * Pango::SCALE)
+            markup = set_markup(text, data[:content][:attr])
+            @layout.set_markup(markup)
+            t = @layout.text
+            for i in 0 .. t.bytesize
+              strong, weak = @layout.get_cursor_pos(i)
+              nx = (strong.x / Pango::SCALE).to_i
+              ny = (strong.y / Pango::SCALE).to_i
+              nh = (strong.height / Pango::SCALE).to_i
+              if @origin_x + x <= px and px < @origin_x + nx and offset_h + @origin_y + y <= py and py < offset_h + @origin_y + y + nh
+                new_selection = selection
+                break
+              end
+              x = nx
+            end
+          when TYPE_IMAGE
+            # FIXME
+            x = data[:pos][:x]
+            y = data[:pos][:y]
+            w = data[:content][:data].width
+            h = data[:content][:data].height
+            if x == 'centerx'
+              bw, bh = get_balloon_size(:scaling => false)
+              x = ((bw - w) / 2)
+            else
+              begin
+                x = Integer(x)
+              rescue
+                next
+              end
+            end
+            if y == 'centery'
+              bw, bh = get_balloon_size(:scaling => false)
+              y = ((bh - h) / 2)
+            else
+              begin
+                y = Integer(y)
+              rescue
+                next
+              end
+            end
+            unless data[:content][:attr][:fixed]
+              y = y
+            end
+            y1 = [y, 0].max
+            y2 = [y + h, @origin_y + @valid_height].min
+            if data[:content][:attr][:inline]
+              y2 = [y + h, @valid_height].min
+              x += @origin_x
+              y1 += @origin_y
+              y2 += @origin_y
+            end
+            if x <= px and px < x + w and offset_h + y1 <= py and py < offset_h + y2
+              new_selection = selection
+            end
+          else
+            # nop
+          end
+          if new_selection == selection
+            break
+          end
+        end
+        if new_selection == selection
+          break
+        end
+      end
+      unless @hover_id.nil?
+        GLib::Source.remove(@hover_id)
+        @hover_id = nil
+      end
+      unless new_selection.nil?
+        link = @link_buffer[new_selection]
+        is_anchor = @parent.handle_request(:GET, :is_anchor, link.link_id)
+        if @selection != new_selection
+          if is_anchor
+            @parent.handle_request(
+              :GET, :notify_event,
+              'OnAnchorEnter', link.raw_text, link.link_id[1], *link.args)
+          else
+            @parent.handle_request(
+              :GET, :notify_event,
+              'OnChoiceEnter', link.raw_text, link.link_id, *link.args)
+          end
+        end
+        @hover_id = GLib::Timeout.add(1000) do
+          @hover_id = nil
+          if is_anchor
+            @parent.handle_request(
+              :GET, :notify_event,
+              'OnAnchorHover', link.raw_text, link.link_id[1], *link.args)
+          else
+            @parent.handle_request(
+              :GET, :notify_event,
+              'OnChoiceHover', link.raw_text, link.link_id, *link.args)
+          end
+        end
+      else
+        unless @selection.nil?
+          link = @link_buffer[@selection]
+          is_anchor = @parent.handle_request(:GET, :is_anchor, link.link_id)
+          if is_anchor
+            @parent.handle_request(:GET, :notify_event, 'OnAnchorEnter')
+          else
+            @parent.handle_request(:GET, :notify_event, 'OnChoiceEnter')
+          end
+        end
+      end
+      if new_selection == @selection
+        return false
+      else
+        @selection = new_selection
+        return true # dirty flag
+      end
+    end
+
+    def update_link_region(widget, cr, index)
+      cr.save()
+      link = @link_buffer[index]
+      sl = link.begin_index
+      el = link.end_index
+      sn = link.begin_offset
+      en = link.end_offset
+      offset_h = -@lineno * @line_height
+      link.buffer_index.times do |i|
+        data = @data_buffer[i]
+        offset_h += @post_top_surface.height
+        h_min, h_max = get_post_height(data)
+        offset_h += ((h_max - h_min).to_f / @post_content_surface.height).ceil * @post_content_surface.height
+        offset_h += @post_bottom_surface.height
+      end
+      offset_h += @post_top_surface.height
+      cr.translate(0, offset_h)
+      cr.rectangle(@origin_x, 0, @valid_width, @origin_y + @valid_height)
+      cr.clip
+      for n in sl .. el
+        data = @data_buffer[link.buffer_index][n]
+        case data[:content][:type]
+        when TYPE_TEXT
+          x, y = data[:pos][:x], data[:pos][:y]
+          if n == sl
+            @layout.set_indent(x * Pango::SCALE)
+            markup = set_markup(data[:content][:data][0, sn], data[:content][:attr])
+            @layout.set_markup(markup)
+            t = @layout.text
+            strong, weak = @layout.get_cursor_pos(t.bytesize)
+            x = (strong.x / Pango::SCALE).to_i
+          end
+          text = ''
+          if sl == el
+            text = data[:content][:data][sn, en - sn]
+          elsif n == sl
+            text = data[:content][:data][sn .. -1]
+          elsif n == el
+            text = data[:content][:data][0, en]
+          else
+            text = data[:content][:data]
+          end
+          @layout.set_indent(x * Pango::SCALE)
+          markup = set_markup(text, data[:content][:attr])
+          @layout.set_markup(markup)
+          cr.set_source_rgb(@cursor_color)
+          t = @layout.text
+          x_bak = x
+          for i in 0 .. t.bytesize
+            strong, weak = @layout.get_cursor_pos(i)
+            nx = (strong.x / Pango::SCALE).to_i
+            ny = (strong.y / Pango::SCALE).to_i
+            nh = (strong.height / Pango::SCALE).to_i
+            if nx > x
+              cr.rectangle(@origin_x + x, @origin_y + y, nx - x, nh)
+              cr.fill()
+            end
+            x = nx
+          end
+          x = x_bak
+          cr.move_to(@origin_x, @origin_y + y)
+          cr.set_source_rgb(@text_active_color)
+          cr.show_pango_layout(@layout)
+        when TYPE_IMAGE
+          x = data[:pos][:x]
+          y = data[:pos][:y]
+          w = data[:content][:data].width
+          h = data[:content][:data].height
+          if x == 'centerx'
+            bw, bh = get_balloon_size(:scaling => false)
+            x = ((bw - w) / 2)
+          else
+            begin
+              x = Integer(x)
+            rescue
+              next
+            end
+          end
+          if y == 'centery'
+            bw, bh = get_balloon_size(:scaling => false)
+            y = ((bh - h) / 2)
+          else
+            begin
+              y = Integer(y)
+            rescue
+              next
+            end
+          end
+          if data[:content][:attr][:inline]
+            x += @origin_x
+            y += @origin_y
+          end
+          y = y
+          cr.rectangle(x, y, w, h)
+          cr.stroke
+        else
+          # nop
+        end
+      end
+      cr.reset_clip
+      cr.restore()
+    end
+
+    def scale
+      scaling = (not @parent.handle_request(:GET, :get_preference, 'balloon_scaling').zero?)
+      scale = @parent.handle_request(:GET, :get_preference, 'surface_scale')
+      if scaling
+        return scale
+      else
+        return 100 # [%]
+      end
+    end
+
+    def set_balloon_direction(side, direction)
+      # nop
+    end
+  end
+
 
   class Balloon < MetaMagic::Holon
     attr_accessor :window, :user_interaction
@@ -298,6 +1911,10 @@ module Balloon
 
     def synchronize(list)
       @synchronized = list
+    end
+
+    def set_balloon_direction(side, direction)
+      @window[side].direction = direction
     end
 
     def clear_text_all
@@ -1029,7 +2646,7 @@ module Balloon
     end
 
     def redraw_arrow1(widget, cr)
-      return if get_bottom_position < @valid_height
+      return if get_bottom_position > @valid_height
       cr.save()
       x, y = @arrow[1]
       cr.set_source(@arrow1_surface.surface(write: false), x, y)
@@ -1711,7 +3328,7 @@ module Balloon
       @dragged = false if @dragged
       @x_root = nil
       @y_root = nil
-      @y_fractions = 0
+      @x_fractions = 0
       @y_fractions = 0
       return true
     end

@@ -150,7 +150,7 @@ module Sakura
         'OnOtherOverlap' => true,
         'OnOtherOffscreen' => true
       }
-      @balloon = Balloon::Balloon.new
+      @balloon = Balloon::BalloonProxy.new
       @balloon.set_responsible(self)
       @surface = Surface::SurfaceProxy.new
       @surface.set_responsible(self)
@@ -617,11 +617,12 @@ module Sakura
 
     def set_balloon_direction(side, direction)
       return unless @char.include?(side)
+      @char[side][:balloon_direction] = direction
       # AYU経由で呼ばれた時に即時returnしたい
       # (direction代入すると内部でreset_position等を呼び出す)ので
       # Idleで処理するようにする
       GLib::Idle.add do
-        @balloon.window[side].direction = direction
+        @balloon.set_balloon_direction(side, direction)
         next false
       end
     end
@@ -705,6 +706,10 @@ module Sakura
       names = get_ifghost()
       name = get_selfname()
       return [name, names].include?(ifghost)
+    end
+
+    def get_descript(key, default: nil)
+      @desc.get(key, default: default)
     end
 
     def get_name(default: _('Sakura&Unyuu'))
@@ -1541,7 +1546,8 @@ module Sakura
 
     def position_balloons
       @char.each_key do |side|
-        x, y, w, h = @surface.get_rect(side)
+        # FIXME delete?
+        #x, y, w, h = @surface.get_rect(side)
         reset_balloon_position(side)
       end
     end
