@@ -3626,7 +3626,7 @@ module Sakura
       @textview.show()
       scroll = Gtk::ScrolledWindow.new(nil, nil)
       scroll.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC)
-      scroll.add(@textview)
+      scroll.set_child(@textview)
       scroll.show()
       vbox = Gtk::Box.new(orientation=Gtk::Orientation::VERTICAL)
       vbox.set_size_request(720, 460)
