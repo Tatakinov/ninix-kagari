@@ -1169,6 +1169,9 @@ module Balloon
 
       cr.save
       @data_buffer.each do |data|
+        next if data.all? do |x|
+          x.content.type == TYPE_UNKNOWN
+        end
         # post top image
         cr.set_operator(Cairo::OPERATOR_OVER) # restore default
         cr.set_source(@post_top_surface, 0, 0)
