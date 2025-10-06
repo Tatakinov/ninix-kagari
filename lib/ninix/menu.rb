@@ -23,7 +23,7 @@ module Menu
 
     bindtextdomain("ninix-kagari")
 
-    def initialize(parent, window)
+    def initialize(parent)
       set_responsible(parent)
       @__fontcolor = {
         'normal' => [],
@@ -43,11 +43,6 @@ module Menu
       @__menu_list = {}
       model = Gio::Menu.new
       @__popup_menu = Gtk::PopoverMenu.new(model)
-      window.set_child(@__popup_menu)
-      @__popup_menu.signal_connect('closed') do
-        window.unfullscreen
-        window.hide
-      end
       @__popup_menu.set_has_arrow(false)
       provider = create_css_provider_for(@__popup_menu)
       @__popup_menu.signal_connect('realize', provider) do |i, *a, provider|
@@ -488,7 +483,31 @@ module Menu
         @__popup_menu.set_position(Gtk::PositionType::TOP)
       end
 =end
-      @__popup_menu.popup
+      window = Pix::BaseTransparentWindow.new
+      window.set_child(@__popup_menu)
+      window.signal_connect('realize') do
+        window.surface.set_input_region(Cairo::Region.new)
+      end
+      id = window.signal_connect('notify') do
+        next unless window.fullscreened?
+        window.signal_handler_disconnect(id)
+        id = @__popup_menu.signal_connect('closed') do
+          @__popup_menu.unparent
+          window.unfullscreen
+          window.hide
+          @__popup_menu.signal_handler_disconnect(id)
+        end
+        # HACK
+        # メニューに紐付けられたウィンドウの表示が終わってすぐに
+        # メニューの表示を行うとメニューが(0, 0)に表示されてしまうので
+        # Idleで時間を空けてから表示を行うようにする
+        GLib::Idle.add do
+          @__popup_menu.popup
+          next false
+        end
+      end
+      window.show
+      window.fullscreen
     end
 
     def __set_caption(name, caption)

@@ -157,7 +157,7 @@ module Ninix_Main
       # create installer
       @installer = Install::Installer.new
       # create popup menu
-      @__menu = Menu::Menu.new(self, @app_window)
+      @__menu = Menu::Menu.new(self)
       #@__menu.set_responsible(self)
       @__menu_owner = nil
       @socket = NinixServer.new('ninix') unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
@@ -589,14 +589,7 @@ module Ninix_Main
         end
       end
       r = monitor.geometry
-      id = @app_window.signal_connect('notify') do
-        if @app_window.fullscreened?
-          @app_window.signal_handler_disconnect(id)
-          @__menu.popup(side, x - r.x, y - r.y, upper)
-        end
-      end
-      @app_window.show
-      @app_window.fullscreen_on_monitor(monitor)
+      @__menu.popup(side, x - r.x, y - r.y, upper)
     end
 
     def get_ghost_menus
