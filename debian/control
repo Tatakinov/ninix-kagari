@@ -3,7 +3,7 @@ Version: @version
 Architecture: amd64
 Maintainer: Tatakinov <tatakinov@gmail.com>
 Installed-Size: @installed_size
-Depends: ruby | ruby-interpreter, ruby-gettext, ruby-gio2, ruby-gstreamer, ruby-gtk3 (>= 3.0.9), ruby-narray, ruby-zip, ninix-fmo
+Depends: ruby | ruby-interpreter, ruby-gettext, ruby-gio2, ruby-gstreamer, ruby-gtk4, ruby-narray, ruby-zip, ninix-fmo
 Recommends: ruby-charlock-holmes
 Suggests: kawari8
 Section: games
