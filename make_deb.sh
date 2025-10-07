@@ -13,6 +13,7 @@ VERSION=$(ruby -r './lib/ninix/version.rb' -e 'print(Version.NUMBER)')
 mkdir -p ${WORKDIR}/${BINDIR} ${WORKDIR}/${LIBDIR} ${WORKDIR}/${LOCALEDIR}
 cp -r debian ${WORKDIR}/DEBIAN
 sed -e "s,@ruby,${RUBY},g" -e "s,@libdir,/${LIBDIR},g" -e "s,@so_path,${SOPATH},g" -e "s,@saori_path,${SAORIPATH},g" < bin/ninix.in > ${WORKDIR}/usr/games/ninix
+chmod +x ${WORKDIR}/usr/games/ninix
 cp -r lib/* ${WORKDIR}/usr/lib/games/ninix-kagari/
 pushd po
 for i in *; do
