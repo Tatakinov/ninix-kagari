@@ -1259,7 +1259,7 @@ module Ninix_Main
     end
 
     def add_action(action)
-      @app_window.add_action(action)
+      @gtk_app.add_action(action)
     end
 
     def get_property(key)

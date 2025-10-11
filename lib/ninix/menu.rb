@@ -59,7 +59,7 @@ module Menu
       #item = Gtk::SeparatorMenuItem.new()
       @__popup_menu.add(item)
 =end
-      model.append(_('Stick(_Y)'), 'win.stick')
+      model.append(_('Stick(_Y)'), 'app.stick')
       action = Gio::SimpleAction.new('stick')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:NOTIFY, :stick_window)
@@ -74,7 +74,7 @@ module Menu
       item = Gio::Menu.new
       model.append_submenu(_('Options(_F)'), item)
       @__menu_list['Options'] = {:entry => item, :visible => true}
-      item.append(_('Network Update(_U)'), 'win.update')
+      item.append(_('Network Update(_U)'), 'app.update')
       action = Gio::SimpleAction.new('update')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:NOTIFY, :network_update)
@@ -82,7 +82,7 @@ module Menu
       @parent.handle_request(:NOTIFY, :add_action, action)
       # FIXME alternative
       #@__menu_list['Options/Update'] = {:entry => item, :visible => true}
-      item.append(_('Vanish(_F)'), 'win.vanish')
+      item.append(_('Vanish(_F)'), 'app.vanish')
       action = Gio::SimpleAction.new('vanish')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :vanish)
@@ -90,7 +90,7 @@ module Menu
       @parent.handle_request(:NOTIFY, :add_action, action)
       # FIXME alternative
       #@__menu_list['Options/Vanish'] = {:entry => item, :visible => true}
-      item.append(_('Preferences...(_O)'), 'win.edit_preference')
+      item.append(_('Preferences...(_O)'), 'app.edit_preference')
       action = Gio::SimpleAction.new('edit_preference')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :edit_preferences)
@@ -98,7 +98,7 @@ module Menu
       @parent.handle_request(:NOTIFY, :add_action, action)
       # FIXME alternative
       #@__menu_list['Options/Preferences'] = {:entry => item, :visible => true}
-      item.append(_('Console(_C)'), 'win.open_console')
+      item.append(_('Console(_C)'), 'app.open_console')
       action = Gio::SimpleAction.new('open_console')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :open_console)
@@ -106,7 +106,7 @@ module Menu
       @parent.handle_request(:NOTIFY, :add_action, action)
       # FIXME alternative
       #@__menu_list['Options/Console'] = {:entry => item, :visible => true}
-      item.append(_('Ghost Manager(_M)'), 'win.ghost_manager')
+      item.append(_('Ghost Manager(_M)'), 'app.ghost_manager')
       action = Gio::SimpleAction.new('ghost_manager')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :open_ghost_manager)
@@ -114,7 +114,7 @@ module Menu
       @parent.handle_request(:NOTIFY, :add_action, action)
       # FIXME alternative
       #@__menu_list['Options/Manager'] = {:entry => item, :visible => true}
-      item.append(_('Script Log(_L)'), 'win.script_log')
+      item.append(_('Script Log(_L)'), 'app.script_log')
       action = Gio::SimpleAction.new('script_log')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :open_script_log)
@@ -122,7 +122,7 @@ module Menu
       @parent.handle_request(:NOTIFY, :add_action, action)
       # FIXME alternative
       #@__menu_list['Options/ScriptLog'] = {entry: item, visible: true}
-      item.append(_('Input Script(_L)'), 'win.scriptinputbox')
+      item.append(_('Input Script(_L)'), 'app.scriptinputbox')
       action = Gio::SimpleAction.new('scriptinputbox')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :open_scriptinputbox)
@@ -156,7 +156,7 @@ module Menu
       item = Gio::Menu.new
       model.append_submenu(_('Information(_I)'), item)
       @__menu_list['Information'] = {:entry => item, :visible => true}
-      item.append(_('Usage graph(_A)'), 'win.usage')
+      item.append(_('Usage graph(_A)'), 'app.usage')
       action = Gio::SimpleAction.new('usage')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :show_usage)
@@ -164,7 +164,7 @@ module Menu
       @parent.handle_request(:NOTIFY, :add_action, action)
       # FIXME alternative
       #@__menu_list['Information/Usage'] = {:entry => item, :visible => true}
-      item.append(_('Version(_V)'), 'win.version')
+      item.append(_('Version(_V)'), 'app.version')
       action = Gio::SimpleAction.new('version')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:GET, :about)
@@ -186,7 +186,7 @@ module Menu
       item = Gtk::SeparatorMenuItem.new()
       @__popup_menu.add(item)
 =end
-      model.append(_('Close(_W)'), 'win.close')
+      model.append(_('Close(_W)'), 'app.close')
       action = Gio::SimpleAction.new('close')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:NOTIFY, :close_sakura)
@@ -194,7 +194,7 @@ module Menu
       @parent.handle_request(:NOTIFY, :add_action, action)
       # FIXME alternative
       #@__menu_list['Close'] = {:entry => item, :visible => true}
-      model.append(_('Quit(_Q)'), 'win.quit')
+      model.append(_('Quit(_Q)'), 'app.quit')
       action = Gio::SimpleAction.new('quit')
       action.signal_connect('activate') do |a, param|
         @parent.handle_request(:NOTIFY, :close_all)
@@ -328,7 +328,7 @@ module Menu
               @parent.handle_request(:NOTIFY, :toggle_bind, ik, 'user')
             end
             @parent.handle_request(:NOTIFY, :add_action, action)
-            menuitem.append(name, "win.toggle_bind#{j}")
+            menuitem.append(name, "app.toggle_bind#{j}")
           else
 =begin FIXME alternative
             item = Gtk::SeparatorMenuItem.new()
@@ -485,6 +485,7 @@ module Menu
 =end
       window = Pix::BaseTransparentWindow.new
       window.set_child(@__popup_menu)
+      @parent.handle_request(:NOTIFY, :associate_application, window)
       window.signal_connect('realize') do
         window.surface.set_input_region(Cairo::Region.new)
       end
@@ -492,9 +493,11 @@ module Menu
         next unless window.fullscreened?
         window.signal_handler_disconnect(id)
         id = @__popup_menu.signal_connect('closed') do
-          @__popup_menu.unparent
-          window.unfullscreen
-          window.hide
+          GLib::Idle.add do
+            @__popup_menu.unparent
+            window.unfullscreen
+            window.hide
+          end
           @__popup_menu.signal_handler_disconnect(id)
         end
         # HACK
@@ -595,7 +598,7 @@ module Menu
                 end
 =end
                 @parent.handle_request(:NOTIFY, :add_action, item)
-                menu.append(title, "win.open_portal#{i}")
+                menu.append(title, "app.open_portal#{i}")
               end
             end
 =begin TODO delete?
@@ -684,7 +687,7 @@ module Menu
                 item.set_has_tooltip(false)
               end
 =end
-              menu.append(title, "win.open_recommend#{i}")
+              menu.append(title, "app.open_recommend#{i}")
               @parent.handle_request(:GET, :add_action, item)
             end
           end
@@ -715,7 +718,7 @@ module Menu
     end
 
     def create_ghost_menuitem(name, icon, key, handler, thumbnail, menu)
-      item = Gio::MenuItem.new(name, "win.#{menu.downcase}#{key}")
+      item = Gio::MenuItem.new(name, "app.#{menu.downcase}#{key}")
       unless icon.nil?
         fileicon = Gio::FileIcon.new(Gio::File.new_for_path(icon))
         item.set_icon(fileicon)
@@ -928,7 +931,7 @@ module Menu
 
     def create_meme_menuitem(name, value, handler, thumbnail, menu)
       #item = Gtk::ImageMenuItem.new(:label => name)
-      item = Gio::MenuItem.new(name, "win.#{menu.downcase}#{value}")
+      item = Gio::MenuItem.new(name, "app.#{menu.downcase}#{value}")
       action = Gio::SimpleAction.new("#{menu.downcase}#{value}")
       action.signal_connect('activate') do |a, param|
         handler.call(value)
@@ -962,7 +965,7 @@ module Menu
       nekodorif_menu.remove_all
       nekodorif_list.length.times do |i|
         name = nekodorif_list[i]['name']
-        item = Gio::MenuItem(name, "win.nekodorif#{i}")
+        item = Gio::MenuItem(name, "app.nekodorif#{i}")
         nekodorif_menu.append_item(item)
         action = Gio::SimpleAction("nekodorif#{i}")
         action.signal_connect('activate', nekodorif_list[i]['dir']) do |a, dir|
@@ -993,7 +996,7 @@ module Menu
       kinoko_menu.remove_all
       kinoko_list.length.times do |i|
         name = kinoko_list[i]['title']
-        item = Gio::MenuItem(name, "win.kinoko#{i}")
+        item = Gio::MenuItem(name, "app.kinoko#{i}")
         kinoko_menu.append_item(item)
         action = Gio::SimpleAction("kinoko#{i}")
         action.signal_connect('activate', kinoko_list[i]) do |a, k|
