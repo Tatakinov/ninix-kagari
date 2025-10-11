@@ -1319,6 +1319,10 @@ module Ninix_Main
     def append_script_log(name, script)
       @script_log.append_data(name, script)
     end
+
+    def associate_application(window)
+      window.application = @gtk_app
+    end
   end
 
   class Console

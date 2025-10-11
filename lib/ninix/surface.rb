@@ -405,6 +405,7 @@ module Surface
     def create_gtk_window(title, monitor)
       window = Pix::TransparentWindow.new(monitor)
       window.set_title(title)
+      @parent.handle_request(:NOTIFY, :associate_application, window)
       window.signal_connect('close-request') do |w, e|
         next delete(w, e)
       end

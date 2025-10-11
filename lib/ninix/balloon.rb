@@ -206,6 +206,7 @@ module Balloon
       end
       @post_bottom_surface = pix.surface(write: false)
       @window = Gtk::Window.new
+      @parent.handle_request(:NOTIFY, :associate_application, @window)
       @window.set_focusable(false)
       @window.signal_connect('close-request') do
         hide_all
@@ -1717,6 +1718,7 @@ module Balloon
     def create_gtk_window(title, monitor)
       window = Pix::TransparentWindow.new(monitor)
       window.set_title(title)
+      @parent.handle_request(:NOTIFY, :associate_application, window)
       window.signal_connect('close-request') do |w, e|
         next delete(w, e)
       end
@@ -3719,6 +3721,7 @@ module Balloon
     def new_(desc, balloon)
       @window.destroy unless @window.nil?
       @window = Pix::BaseTransparentWindow.new()
+      @parent.handle_request(:NOTIFY, :associate_application, @window)
       @__surface_position = [0, 0]
       @window.set_title('communicate')
       @window.signal_connect('close-request') do |w ,e|
