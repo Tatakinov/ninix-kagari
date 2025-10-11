@@ -1019,11 +1019,12 @@ module Surface
     def reset_position
       s0x, s0y, s0w, s0h = 0, 0, 0, 0 # XXX
       for side in @window.keys
-        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window(side))
+        monitor = current_monitor(side)
+        r = monitor.geometry
         align = get_alignment(side)
         w, h = get_max_size(side)
         if side.zero? # sakura
-          x = (left + scrn_w - w)
+          x = (r.x + r.width - w)
         else
           b0w, b0h = @parent.handle_request(
                  :GET, :get_balloon_size, side - 1)
@@ -1034,20 +1035,24 @@ module Surface
           o0x, o0y = get_balloon_offset(side - 1)
           o1x, o1y = get_balloon_offset(side)
           offset = [0, b1w - (b0w - o0x)].max
-          if ((s0x + o0x - b0w) - offset - w + o1x) < left
-            x = left
+          if ((s0x + o0x - b0w) - offset - w + o1x) < r.x
+            x = r.x
           else
             x = ((s0x + o0x - b0w) - offset - w + o1x)
           end
         end
         if align == 1 # top
-          y = top
+          y = r.y
         else
-          y = (top + scrn_h - h)
+          y = (r.y + r.height - h)
         end
         set_position(side, x, y)
         s0x, s0y, s0w, s0h = x, y, w, h # for next loop
       end
+    end
+
+    def current_monitor(side)
+      @window[side].current_monitor
     end
 
     def get_gdk_window(side)
@@ -1581,8 +1586,9 @@ module Surface
       case get_alignment()
       when 0
         yoffset = (dh - h)
-        left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
-        y = (top + scrn_h - dh)
+        monitor = current_monitor
+        r = monitor.geometry
+        y = (r.y + r.height - dh)
       when 1
         yoffset = 0
       else
@@ -2032,11 +2038,12 @@ module Surface
     end
 
     def get_max_size
-      left, top, scrn_w, scrn_h = @parent.handle_request(:GET, :get_workarea, get_gdk_window)
+      monitor = current_monitor
+      r = monitor.geometry
       w, h = @maxsize
       scale = get_scale
-      w = [scrn_w, [8, (w * scale / 100).to_i].max].min
-      h = [scrn_h, [8, (h * scale / 100).to_i].max].min
+      w = [r.width, [8, (w * scale / 100).to_i].max].min
+      h = [r.height, [8, (h * scale / 100).to_i].max].min
       return w, h
     end
 
@@ -2173,9 +2180,8 @@ module Surface
       return centerx, centery
     end
 
-    def set_position(x, y)
-      return if @parent.handle_request(:GET, :lock_repaint)
-      @position = [x, y]
+    def current_monitor
+      x, y = @position
       monitor = nil
       distance = -1
       monitors = Gdk::Display.default.monitors
@@ -2207,6 +2213,13 @@ module Surface
           monitor = m
         end
       end
+      return monitor
+    end
+
+    def set_position(x, y)
+      return if @parent.handle_request(:GET, :lock_repaint)
+      @position = [x, y]
+      monitor = current_monitor
       r = monitor.geometry
       @parent.handle_request(:NOTIFY, :update_monitor_rect, @side, r.x, r.y, r.width, r.height)
       @parent.handle_request(:NOTIFY, :update_surface_rect, @side, x, y, *get_surface_size)
@@ -2229,41 +2242,11 @@ module Surface
       @align = align if [0, 1, 2].include?(align)
       return if @dragged # XXX: position will be reset after button release event
       x, y = @position # XXX: without window_offset
-      monitor = nil
-      distance = -1
-      monitors = Gdk::Display.default.monitors
-      monitors.n_items.times do |i|
-        m = monitors.get_item(i)
-        r = m.geometry
-        if r.x <= x and r.x + r.width >= x and r.y <= y and r.y + r.height >= y
-          d = 0
-        elsif r.x <= x and r.x + r.width >= x
-          d = [(r.x - x).abs, (r.x + r.width - x).abs].min
-        elsif r.y <= y and r.y + r.height >= y
-          d = [(r.y - y).abs, (r.y + r.height - y).abs].min
-        else
-          dx = r.x - x
-          dy = r.y - y
-          d = Math.sqrt(dx * dx + dy * dy)
-          dx = r.x + r.width - x
-          dy = r.y - y
-          d = [d, Math.sqrt(dx * dx + dy * dy)].min
-          dx = r.x + r.width - x
-          dy = r.y + r.height - y
-          d = [d, Math.sqrt(dx * dx + dy * dy)].min
-          dx = r.x + - x
-          dy = r.y + r.height - y
-          d = [d, Math.sqrt(dx * dx + dy * dy)].min
-        end
-        if d < distance or distance == -1
-          distance = d
-          monitor = m
-        end
-      end
+      monitor = current_monitor
       r = monitor.geometry
       case align
       when 0
-        sw, sh = get_max_size()
+        sw, sh = get_max_size
         sx, sy = @position # XXX: without window_offset
         sy = (r.y + r.height - sh)
         set_position(sx, sy)
