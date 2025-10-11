@@ -1800,6 +1800,10 @@ gtk_app.signal_connect 'activate' do |application|
     show_console: option[:show_console],
   }
 
+  if Gdk::Display.method_defined?(:set_program_class)
+    Gdk::Display.default.set_program_class('io.github.tatakinov.ninix-kagari')
+  end
+
   app_window = Pix::TransparentApplicationWindow.new(application)
   app_window.set_title("Ninix-kagari")
   #app_window.show_all
