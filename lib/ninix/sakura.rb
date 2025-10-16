@@ -1541,7 +1541,6 @@ module Sakura
 
     def update_surface_rect(side, sx, sy, sw, sh)
       @char[side][:surface_rect] = [sx, sy, sw, sh]
-      reset_balloon_position(side)
     end
 
     def position_balloons
@@ -1590,7 +1589,6 @@ module Sakura
         x = rx
       end
       y = sy + oy
-      @char[side][:balloon_direction] = direction
       notify_observer('set position')
       # TODO implement
       #check_mikire_kasanari

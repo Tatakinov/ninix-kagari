@@ -274,10 +274,6 @@ module Surface
     def reset_position
     end
 
-    def reset_balloon_position
-      send_event('ResetBalloonPosition')
-    end
-
     def show(side)
       send_event('Show', side)
     end
@@ -994,27 +990,6 @@ module Surface
 
     def get_kinoko_center(side)
       return @window[side].get_kinoko_center()
-    end
-
-    def reset_balloon_position
-      for side in @window.keys
-        x, y = get_position(side)
-        direction = @window[side].direction
-        ox, oy = get_balloon_offset(side)
-        @parent.handle_request(
-          :NOTIFY, :set_balloon_direction, side, direction)
-        if direction.zero? # left
-          bw, bh = @parent.handle_request(
-              :GET, :get_balloon_size, side)
-          base_x = (x - bw + ox)
-        else
-          sw, sh = get_surface_size(side)
-          base_x = (x + sw - ox)
-        end
-        base_y = (y + oy)
-        @parent.handle_request(
-          :NOTIFY, :set_balloon_position, side, base_x, base_y)
-      end
     end
 
     def reset_position
@@ -2224,6 +2199,7 @@ module Surface
       r = monitor.geometry
       @parent.handle_request(:NOTIFY, :update_monitor_rect, @side, r.x, r.y, r.width, r.height)
       @parent.handle_request(:NOTIFY, :update_surface_rect, @side, x, y, *get_surface_size)
+      @parent.handle_request(:NOTIFY, :reset_balloon_position, @side)
       unless @image_surface.nil?
         @windows.each do |window|
           window.darea.queue_draw

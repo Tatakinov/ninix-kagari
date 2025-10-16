@@ -489,6 +489,11 @@ module SSTP
           v.to_i
         end)
         send_response(204)
+      when 'ResetBalloonPosition'
+        @server.handle_request(:NOTIFY, :reset_balloon_position, *args.take(1).map do |v|
+          v.to_i
+        end)
+        send_response(204)
       else
         send_response(501) # Not Implemented
         log_error("Not Implemented (#{command})")
