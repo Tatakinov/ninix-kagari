@@ -140,7 +140,7 @@ module Ninix_Main
       @gtk_app = application
       @loaded = false
       @confirmed = false
-      @console = Console.new(self, show_console)
+      @console = Console.new(self, show_console, application)
       Logging::Logging.info("loading...")
       # create preference dialog
       @prefs = Prefs::PreferenceDialog.new
@@ -1329,10 +1329,11 @@ module Ninix_Main
     include GetText
     attr_writer :level
 
-    def initialize(app, show_console)
+    def initialize(app, show_console, application)
       @app = app
       @show_console = show_console
       @dialog = Gtk::Window.new
+      @dialog.application = application
       @dialog.signal_connect('close-request') do |w, e|
         next true # XXX
       end
