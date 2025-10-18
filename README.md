@@ -22,11 +22,12 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - Linux
 
-- Windows[^1]
+- Windows[^1][^2]
 
 - BSD
 
 [^1]: Windows10より前のバージョンでは[設定が必要](#UNIXソケットの使用)
+[^2]: Windows10より前のバージョンでは`ucrt`が必要になります。
 
 ## Requirements
 
@@ -56,7 +57,54 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 は音声を再生する場合に必要になります。ただし、現状Windowsでは動作しません。
 
+### Install Requirements with gem
+
+依存するモジュールをインストールするのに`gem`を使う場合は、
+以下の様にしてください。
+
+```
+gem install gettext gio2 gtk4 rubyzip rake rake-compiler bundler
+gem install narray -- --with-cflags=-std=c99
+git clone https://github.com/Tatakinov/ninix-fmo
+cd ninix-fmo
+rake install
+```
+
+narrayはそのままだと最近のCコンパイラでは
+コンパイルエラーになるため、
+`--with-cflags=-std=c99`を指定してやる必要があります。
+その前の`--`も必要なので省略しないでください。
+
 ## Install
+
+### .deb package
+
+Debian 13 (trixie)及びそれ以降のバージョンをupstreamとする
+ディストリビューションでは、debパッケージを用いたインストールが
+可能となっています。
+
+Releaseページから`ninix-kagari_x.y.z_amd64.deb`をダウンロードして
+次のコマンドを実行します。
+
+```
+# apt install /path/to/ninix-kagari_x.y.z_amd64.deb
+```
+
+カレントディレクトリにdebパッケージがある場合は
+
+```
+# apt install ./ninix-kagari_x.y.z_amd64.deb
+```
+
+のように`./`を付けるのを忘れないでください。
+
+なお、この方法でインストールを行うと、
+インストールされるスクリプト群が存在するディレクトリは
+`/opt/ninix-kagari`*ではなく*、
+`/usr/game/ninix-kagari`や`/usr/lib/game/ninix-kagari`等になることに
+注意してください。
+ファイルが具体的にどこに配置されるかは、
+debパッケージを展開して中身を見てください。
 
 ### Linux
 
@@ -92,21 +140,7 @@ Windows10より前のバージョンを使っている方は`run_lower_version_1
 
 rubyinstallerのRuby+Devkitの**x64**をインストールしてください。
 
-cmd/powershellでRequirementsに書かれているものをインストールします。
-以下は最小構成の場合。
-
-```
-> gem install gettext gio2 gtk4 rubyzip rake rake-compiler
-> gem install narray -- --with-cflags=-std=c99
-> git clone https://github.com/Tatakinov/ninix-fmo
-> cd ninix-fmo
-> rake install
-```
-
-narrayはそのままだと最近のCコンパイラでは
-コンパイルエラーになるため、
-`--with-cflags=-std=c99`を指定してやる必要があります。
-その前の`--`も必要なので省略しないでください。
+[Requirementsをインストールします](#Install_Requirements_with_gem)。
 
 適当な場所にninix-kagariをgit cloneします。
 
