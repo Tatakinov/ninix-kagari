@@ -140,7 +140,7 @@ Windows10より前のバージョンを使っている方は`run_lower_version_1
 
 rubyinstallerのRuby+Devkitの**x64**をインストールしてください。
 
-[Requirementsをインストールします](#Install_Requirements_with_gem)。
+[Requirementsをインストールします](#install-requirements-with-gem)。
 
 適当な場所にninix-kagariをgit cloneします。
 
