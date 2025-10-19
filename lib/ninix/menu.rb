@@ -484,19 +484,21 @@ module Menu
       end
 =end
       window = Pix::BaseTransparentWindow.new
-      window.set_child(@__popup_menu)
       @parent.handle_request(:NOTIFY, :associate_application, window)
       window.signal_connect('realize') do
         window.surface.set_input_region(Cairo::Region.new)
       end
+      @popup_in_progress = true
       id = window.signal_connect('notify') do
         next unless window.fullscreened?
         window.signal_handler_disconnect(id)
         id = @__popup_menu.signal_connect('closed') do
           GLib::Idle.add do
-            @__popup_menu.unparent
-            window.unfullscreen
-            window.hide
+            unless @popup_in_progress
+              @__popup_menu.unparent
+              window.unfullscreen
+              window.hide
+            end
           end
           @__popup_menu.signal_handler_disconnect(id)
         end
@@ -505,7 +507,11 @@ module Menu
         # メニューの表示を行うとメニューが(0, 0)に表示されてしまうので
         # Idleで時間を空けてから表示を行うようにする
         GLib::Idle.add do
-          @__popup_menu.popup
+          if @popup_in_progress
+            @popup_in_progress = false
+            window.set_child(@__popup_menu)
+            @__popup_menu.popup
+          end
           next false
         end
       end
