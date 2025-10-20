@@ -559,6 +559,10 @@ module Surface
       @name = name
       @prefix = prefix
       @surface_alias = surface_alias
+      @initialized = false
+      @window_queue = Hash.new do |h, k|
+        h[k] = []
+      end
       # load surface
       surfaces = {}
       elements = {}
@@ -854,9 +858,13 @@ module Surface
         end
       end
       gtk_windows = []
-      monitors = Gdk::Display.default.monitors
-      monitors.n_items.times do |i|
-        gtk_windows << create_gtk_window(title, monitors.get_item(i))
+      if ENV['XDG_SESSION_TYPE'] != 'wayland' or ENV.include?('NINIX_COMPATIBLE_RENDERING')
+        monitors = Gdk::Display.default.monitors
+        monitors.n_items.times do |i|
+          gtk_windows << create_gtk_window(title, monitors.get_item(i))
+        end
+      else
+        gtk_windows << create_gtk_window(title, nil)
       end
       seriko = get_seriko(@__surface)
       tooltips = {}
@@ -873,6 +881,16 @@ module Surface
         default_id, @maxsize)
       surface_window.set_responsible(self)
       @window[side] = surface_window
+      if @window[side].loading?
+        GLib::Idle.add do
+          next true if @window[side].loading?
+          @window_queue[side].each do |f|
+            f.call
+          end
+          @window_queue.delete(side)
+          next false
+        end
+      end
     end
 
     def get_mayuna_menu
@@ -952,16 +970,28 @@ module Surface
 
     def set_surface_default(side)
       if side.nil?
-        for side in @window.keys
-          @window[side].set_surface_default()
+        @window.each_key do |side|
+          set_surface_default(side)
         end
       elsif 0 <= side
-        @window[side].set_surface_default()
+        if @window[side].loading?
+          @window_queue[side] << proc do
+            set_surface_default(side)
+          end
+        else
+          @window[side].set_surface_default()
+        end
       end
     end
 
     def set_surface(side, surface_id)
-      @window[side].set_surface(surface_id)
+      if @window[side].loading?
+        @window_queue[side] << proc do
+          set_surface(side, surface_id)
+        end
+      else
+        @window[side].set_surface(surface_id)
+      end
     end
 
     def get_surface(side)
@@ -992,11 +1022,20 @@ module Surface
       return @window[side].get_kinoko_center()
     end
 
-    def reset_position
+    def reset_position(side = nil)
       s0x, s0y, s0w, s0h = 0, 0, 0, 0 # XXX
-      for side in @window.keys
-        monitor = current_monitor(side)
-        r = monitor.geometry
+      if side.nil?
+        for side in @window.keys
+          reset_position(side)
+        end
+      else
+        r = current_monitor_rect(side)
+        if r.nil?
+          @window_queue[side] << proc do
+            reset_position(side)
+          end
+          return
+        end
         align = get_alignment(side)
         w, h = get_max_size(side)
         if side.zero? # sakura
@@ -1027,8 +1066,8 @@ module Surface
       end
     end
 
-    def current_monitor(side)
-      @window[side].current_monitor
+    def current_monitor_rect(side)
+      @window[side].current_monitor_rect
     end
 
     def get_gdk_window(side)
@@ -1050,7 +1089,13 @@ module Surface
     end
 
     def set_alignment(side, align)
-      @window[side].set_alignment(align)
+      if @window[side].loading?
+        @window_queue[side] << proc do
+          set_alignment(side, align)
+        end
+      else
+        @window[side].set_alignment(align)
+      end
     end
 
     def get_alignment(side)
@@ -1063,7 +1108,7 @@ module Surface
       else
         align = 0
       end
-      for side in @window.keys
+      @window.each_key do |side|
         case side
         when 0
           key = 'sakura.seriko.alignmenttodesktop'
@@ -1138,7 +1183,7 @@ module Surface
 
     def set_icon(path)
       return if path.nil? or not File.exist?(path)
-      for window in @window.values
+      @window.each_value do |window|
         window.set_icon_name(path) # XXX
       end
     end
@@ -1385,6 +1430,12 @@ module Surface
 =end
     end
 
+    def loading?
+      @windows.any? do |window|
+        window.rect.nil?
+      end
+    end
+
     def get_seriko
       @seriko
     end
@@ -1562,8 +1613,7 @@ module Surface
       case get_alignment()
       when 0
         yoffset = (dh - h)
-        monitor = current_monitor
-        r = monitor.geometry
+        r = current_monitor_rect
         y = (r.y + r.height - dh)
       when 1
         yoffset = 0
@@ -2014,8 +2064,7 @@ module Surface
     end
 
     def get_max_size
-      monitor = current_monitor
-      r = monitor.geometry
+      r = current_monitor_rect
       w, h = @maxsize
       scale = get_scale
       w = [r.width, [8, (w * scale / 100).to_i].max].min
@@ -2156,14 +2205,13 @@ module Surface
       return centerx, centery
     end
 
-    def current_monitor
+    def current_monitor_rect
       x, y = @position
-      monitor = nil
+      rect = nil
       distance = -1
-      monitors = Gdk::Display.default.monitors
-      monitors.n_items.times do |i|
-        m = monitors.get_item(i)
-        r = m.geometry
+      @windows.each do |w|
+        r = w.rect
+        next if r.nil?
         if r.x <= x and r.x + r.width >= x and r.y <= y and r.y + r.height >= y
           d = 0
         elsif r.x <= x and r.x + r.width >= x
@@ -2186,17 +2234,16 @@ module Surface
         end
         if d < distance or distance == -1
           distance = d
-          monitor = m
+          rect = r
         end
       end
-      return monitor
+      return rect
     end
 
     def set_position(x, y)
       return if @parent.handle_request(:GET, :lock_repaint)
       @position = [x, y]
-      monitor = current_monitor
-      r = monitor.geometry
+      r = current_monitor_rect
       @parent.handle_request(:NOTIFY, :update_monitor_rect, @side, r.x, r.y, r.width, r.height)
       @parent.handle_request(:NOTIFY, :update_surface_rect, @side, x, y, *get_surface_size)
       @parent.handle_request(:NOTIFY, :reset_balloon_position, @side)
@@ -2219,8 +2266,7 @@ module Surface
       @align = align if [0, 1, 2].include?(align)
       return if @dragged # XXX: position will be reset after button release event
       x, y = @position # XXX: without window_offset
-      monitor = current_monitor
-      r = monitor.geometry
+      r = current_monitor_rect
       case align
       when 0
         sw, sh = get_max_size
@@ -2291,7 +2337,7 @@ module Surface
       x, y = window.winpos_to_surfacepos(
            x, y, get_scale)
       orig_x, orig_y = x, y
-      r = window.monitor.geometry
+      r = window.rect
       x = x + r.x - @position[0]
       y = y + r.y - @position[1]
       if w.current_button == 1
@@ -2332,7 +2378,7 @@ module Surface
     def button_release(window, darea, w, n, x, y)
       x, y = window.winpos_to_surfacepos(
            x, y, get_scale)
-      r = window.monitor.geometry
+      r = window.rect
       x = x + r.x - @position[0]
       y = y + r.y - @position[1]
       if w.current_button == 1
@@ -2361,7 +2407,7 @@ module Surface
       state = nil
       x, y = window.winpos_to_surfacepos(x, y, get_scale)
       orig_x, orig_y = x, y
-      r = window.monitor.geometry
+      r = window.rect
       x = x + r.x - @position[0]
       y = y + r.y - @position[1]
       part = get_touched_region(x, y)

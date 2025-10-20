@@ -1815,7 +1815,9 @@ module Sakura
       notify_start(
         init, vanished, ghost_changed,
         name, prev_name, prev_shell, surface_dir, last_script, :abend => abend)
-      GLib::Timeout.add(10) { do_idle_tasks } # 10[ms]
+      GLib::Timeout.add(10) do
+        do_idle_tasks
+      end # 10[ms]
     end
 
     def restart()

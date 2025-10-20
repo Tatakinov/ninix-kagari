@@ -19,6 +19,8 @@ require_relative "logging"
 
 module Pix
   TRANSPARENT_CSS = 'window { background-color: rgba(0, 0, 0, 0); }'
+  Rect = Struct.new(:x, :y, :width, :height)
+
   def self.surface_to_region(surface)
     region = Cairo::Region.new()
     width = surface.width
@@ -84,11 +86,10 @@ module Pix
   end
 
   class BaseTransparentWindow < Gtk::Window
-    attr_reader :supports_alpha, :rect, :monitor
+    attr_reader :supports_alpha, :rect
 
     def initialize(monitor = nil)
       @width, @height = 1, 1
-      @monitor = monitor
       super()
       set_decorated(false)
       provider = Gtk::CssProvider.new()
@@ -96,11 +97,22 @@ module Pix
       sc = style_context
       sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
       #set_resizable(false)
-      if @monitor.nil?
+      if monitor.nil?
+        id = signal_connect('notify') do |obj, spec|
+          next unless maximized?
+          signal_handler_disconnect(id)
+          GLib::Idle.add do
+            unless width > 0 and height > 0
+              next true
+            end
+            @rect = Rect.new(x: 0, y: 0, width: width, height: height)
+            next false
+          end
+        end
         maximize
       else
-        @rect = @monitor.geometry
-        fullscreen_on_monitor(@monitor)
+        @rect = monitor.geometry
+        fullscreen_on_monitor(monitor)
       end
     end
   end

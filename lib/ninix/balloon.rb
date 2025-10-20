@@ -1813,9 +1813,13 @@ module Balloon
         balloon = @balloon1
       end
       gtk_windows = []
-      monitors = Gdk::Display.default.monitors
-      monitors.n_items.times do |i|
-        gtk_windows << create_gtk_window(name, monitors.get_item(i))
+      if ENV['XDG_SESSION_TYPE'] != 'wayland' or ENV.include?('NINIX_COMPATIBLE_RENDERING')
+        monitors = Gdk::Display.default.monitors
+        monitors.n_items.times do |i|
+          gtk_windows << create_gtk_window(name, monitors.get_item(i))
+        end
+      else
+        gtk_windows << create_gtk_window(name, nil)
       end
       balloon_window = BalloonWindow.new(
         gtk_windows, side, @desc, balloon, id_format)
@@ -2764,6 +2768,7 @@ module Balloon
     def redraw(window, widget, cr)
       return if @parent.handle_request(:GET, :lock_repaint)
       return true unless @__shown
+      return true if window.rect.nil?
       fail "assert" if @balloon_surface.nil?
       window.set_surface(cr, @balloon_surface.surface(write: false), scale, @position)
       cr.set_operator(Cairo::OPERATOR_OVER) # restore default
