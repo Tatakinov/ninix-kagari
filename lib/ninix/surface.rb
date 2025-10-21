@@ -2348,6 +2348,7 @@ module Surface
            x, y, get_scale)
       orig_x, orig_y = x, y
       r = window.rect
+      return true if r.nil?
       x = x + r.x - @position[0]
       y = y + r.y - @position[1]
       if w.current_button == 1
@@ -2389,6 +2390,7 @@ module Surface
       x, y = window.winpos_to_surfacepos(
            x, y, get_scale)
       r = window.rect
+      return true if r.nil?
       x = x + r.x - @position[0]
       y = y + r.y - @position[1]
       if w.current_button == 1
@@ -2418,6 +2420,7 @@ module Surface
       x, y = window.winpos_to_surfacepos(x, y, get_scale)
       orig_x, orig_y = x, y
       r = window.rect
+      return true if r.nil?
       x = x + r.x - @position[0]
       y = y + r.y - @position[1]
       part = get_touched_region(x, y)
