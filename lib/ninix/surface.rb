@@ -962,9 +962,19 @@ module Surface
       return @window[side].get_window
     end
 
-    def reset_surface
-      @window.each do |k, v|
-        v.reset_surface
+    def reset_surface(side = nil)
+      if side.nil?
+        @window.each_key do |side|
+          reset_surface(side)
+        end
+      else
+        if @window[side].loading?
+          @window_queue[side] << proc do
+            set_surface_default(side)
+          end
+        else
+          @window[side].reset_surface
+        end
       end
     end
 
