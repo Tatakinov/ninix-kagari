@@ -490,13 +490,21 @@ module Menu
       end
       @popup_in_progress = true
       id = window.signal_connect('notify') do
-        next unless window.fullscreened?
+        if ENV.include?('NINIX_COMPATIBLE_RENDERING')
+          next unless window.fullscreened?
+        else
+          next unless window.maximized?
+        end
         window.signal_handler_disconnect(id)
         id = @__popup_menu.signal_connect('closed') do
           GLib::Idle.add do
             unless @popup_in_progress
               @__popup_menu.unparent
-              window.unfullscreen
+              if ENV.include?('NINIX_COMPATIBLE_RENDERING')
+                window.unfullscreen
+              else
+                window.unmaximize
+              end
               window.hide
             end
           end
@@ -516,7 +524,11 @@ module Menu
         end
       end
       window.show
-      window.fullscreen
+      if ENV.include?('NINIX_COMPATIBLE_RENDERING')
+        window.fullscreen
+      else
+        window.maximize
+      end
     end
 
     def __set_caption(name, caption)
