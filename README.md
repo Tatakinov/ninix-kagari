@@ -6,7 +6,7 @@ ninix-kagariはデスクトップマスコットの1つ、伺かの互換アプ�
 
 [ninix-aya](https://ja.osdn.net/projects/ninix-aya/)
 が長らく更新されていないので
-私の環境(Debian stable)でいい感じに動作するようにしたものになります。
+私の環境(Debian stable / Labwc)でいい感じに動作するようにしたものになります。
 
 ついでにninix-aya自体もosdn.netの存続が怪しいのでその保存の意味もあります。
 v0.0.0がninix-aya 5.0.9に対応しているので
@@ -20,14 +20,15 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 ## Supported OS
 
-- Linux
+- Linux[^1]
 
-- Windows[^1][^2]
+- Windows[^2][^3]
 
 - BSD
 
-[^1]: Windows10より前のバージョンでは[設定が必要](#UNIXソケットの使用)
-[^2]: Windows10より前のバージョンでは`ucrt`が必要になります。
+[^1]: Waylandを使用している場合、おそらくStacking型のコンポジタでないと正しく動作しません。
+[^2]: Windows10より前のバージョンでは[設定が必要](#UNIXソケットの使用)
+[^3]: Windows10より前のバージョンでは`ucrt`が必要になります。
 
 ## Requirements
 
@@ -45,6 +46,8 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - ninix-fmo
 
+- compositor (only X11)
+
 が最低限必要なものになります。
 [ninix-fmo](https://github.com/Tatakinov/ninix-fmo)は
 リンク先からインストールする必要があります。
@@ -56,6 +59,8 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 - ruby-gstreamer
 
 は音声を再生する場合に必要になります。ただし、現状Windowsでは動作しません。
+
+X11環境では事前にコンポジタを起動して透過を有効にする必要があります。
 
 ### Install Requirements with gem
 
@@ -157,7 +162,27 @@ rubyinstallerのRuby+Devkitの**x64**をインストールしてください。
 
 ## Option
 
-### インストールフォルダの変更(v1.4.0以降)
+### ゴーストをマルチモニタで表示
+
+Wayland環境下では、アクティブなモニタにしかゴーストは表示できません。
+環境変数`NINIX_ENABLE_MULTI_MONITOR`を設定することで、
+ゴーストがモニタ間を移動出来るようになります。
+ただし、多くのWaylandコンポジタでは動作しないでしょう。
+また、今後のコンポジタのアップデートにより、動作するようになる/動作しなくなることがあることに注意してください。
+
+#### 動作するもの
+
+- Labwc (Debian trixie)
+
+- KDE (Kubuntu 25.04)
+
+#### 動作しないもの
+
+- GNOME (Ubuntu 24.04)
+
+- Sway (Arch v20251001.429539)
+
+### インストールフォルダの変更
 
 環境変数`NINIX_HOME`を設定することで、
 ゴーストやバルーン等をインストールするフォルダを変更することができます。
@@ -215,9 +240,8 @@ HWND/FMO/DirectSSTPを使わないSAORIであれば動くはずです。
 
 ## SSP
 
-[SSP](https://ssp.shillest.net/)と比べてninix-kagariが優れている点は
-今のところ*ありません*。
-SSPを使える環境であればそちらを使うことを推奨します。
+[SSP](https://ssp.shillest.net/)がうまく動作する環境であれば
+そちらを使うことを推奨します。
 
 ## License
 
