@@ -490,7 +490,7 @@ module Menu
       end
       @popup_in_progress = true
       id = window.signal_connect('notify') do
-        if ENV.include?('NINIX_COMPATIBLE_RENDERING')
+        if ENV.include?('NINIX_ENABLE_MULTI_MONITOR')
           next unless window.fullscreened?
         else
           next unless window.maximized?
@@ -500,7 +500,7 @@ module Menu
           GLib::Idle.add do
             unless @popup_in_progress
               @__popup_menu.unparent
-              if ENV.include?('NINIX_COMPATIBLE_RENDERING')
+              if ENV.include?('NINIX_ENABLE_MULTI_MONITOR')
                 window.unfullscreen
               else
                 window.unmaximize
@@ -524,7 +524,7 @@ module Menu
         end
       end
       window.show
-      if ENV.include?('NINIX_COMPATIBLE_RENDERING')
+      if ENV.include?('NINIX_ENABLE_MULTI_MONITOR')
         window.fullscreen
       else
         window.maximize
