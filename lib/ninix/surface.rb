@@ -858,7 +858,7 @@ module Surface
         end
       end
       gtk_windows = []
-      if ENV['XDG_SESSION_TYPE'] != 'wayland' or ENV.include?('NINIX_ENABLE_MULTI_MONITOR')
+      if ENV.include?('NINIX_ENABLE_MULTI_MONITOR')
         monitors = Gdk::Display.default.monitors
         monitors.n_items.times do |i|
           gtk_windows << create_gtk_window(title, monitors.get_item(i))
