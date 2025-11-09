@@ -97,7 +97,7 @@ module Pix
       sc = style_context
       sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
       #set_resizable(false)
-      if monitor.nil?
+      if monitor.nil? and not ENV.include?('NINIX_MONITOR_SIZE')
         id = signal_connect('notify') do |obj, spec|
           next unless maximized?
           signal_handler_disconnect(id)
@@ -110,6 +110,12 @@ module Pix
           end
         end
         maximize
+      elsif ENV.include?('NINIX_MONITOR_SIZE')
+        w, sep, h = ENV['NINIX_MONITOR_SIZE'].partition('x')
+        w = w.to_i
+        h = h.to_i
+        set_default_size(w, h)
+        @rect = Rect.new(x: 0, y: 0, width: w, height: h)
       else
         @rect = monitor.geometry
         fullscreen_on_monitor(monitor)
