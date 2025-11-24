@@ -27,6 +27,27 @@ module Seriko
     def initialize(seriko)
       super("") # FIXME
       @seriko = seriko
+      @seriko_link = Hash.new do |h, k|
+        h[k] = {
+          periodic: [],
+          runonce: [],
+          talk: [],
+          yen_e: [],
+        }
+      end
+      @seriko.each do |k, v|
+        v.each do |actor|
+          interval = actor.get_interval
+          @seriko_link[k][:yen_e] << actor if interval.include?('yen-e')
+          @seriko_link[k][:talk] << actor if interval.include?('talk')
+          @seriko_link[k][:runonce] << actor if interval.include?('runonce')
+          if ['always', 'sometimes', 'rarely', 'random', 'periodic'].any? do |e|
+            interval.include?(e)
+          end
+            @seriko_link[k][:periodic] << actor
+          end
+        end
+      end
       @exclusive_actor = nil
       @base_id = nil
       @timeout_id = nil
@@ -165,56 +186,39 @@ module Seriko
 
     def invoke_yen_e(window, surface_id)
       return unless @seriko.include?(surface_id)
-      for actor in @seriko[surface_id]
-        interval = actor.get_interval
-        if interval.include?('yen-e') and actor.enable
-          invoke_actor(window, actor)
-          break
-        end
+      @seriko_link[surface_id][:yen_e].each do |actor|
+        invoke_actor(window, actor)
       end
     end
 
     def invoke_talk(window, surface_id, count)
       return false unless @seriko.include?(surface_id)
-      interval_count = nil
-      for actor in @seriko[surface_id]
-        interval = actor.get_interval()
-        if interval.include?('talk')
-          interval_count = actor.get_factor # XXX
-          break
+      @seriko_link[surface_id][:talk].each do |actor|
+        interval_count = actor.get_factor
+        if count < interval_count
+          invoke_actor(window, actor)
+          return true
+        else
+          return false
         end
-      end
-      if not interval_count.nil? and count >= interval_count
-        # talkはanimationが実行中ならinvokeしない
-        invoke_actor(window, actor, false)
-        return true
-      else
-        return false
       end
     end
 
     def invoke_runonce(window)
       return unless @seriko.include?(@base_id)
-      for actor in @seriko[@base_id]
-        interval = actor.get_interval
-        if interval.include?('runonce') and actor.enable
-          invoke_actor(window, actor)
-        end
+      @seriko_link[@base_id][:runonce].each do |actor|
+        invoke_actor(window, actor) if actor.enable
       end
     end
 
     def invoke_always(window)
       return unless @seriko.include?(@base_id)
-      for actor in @seriko[@base_id]
-        interval = actor.get_interval
-        if ['always', 'sometimes', 'rarely', 'random', 'periodic'].any? do |e|
-            interval.include?(e)
-          end
-          invoke_actor(window, actor)
-        end
+      @seriko_link[@base_id][:periodic].each do |actor|
+        invoke_actor(window, actor)
       end
     end
 
+=begin TODO delete?
     def invoke_bind(window)
       return unless @seriko.include?(@base_id)
       @seriko[@base_id].each do |actor|
@@ -224,6 +228,7 @@ module Seriko
         end
       end
     end
+=end
 
     def invoke_restart(window)
       return unless @seriko.include?(@base_id)
@@ -300,7 +305,7 @@ module Seriko
       end
       invoke_runonce(window)
       invoke_always(window)
-      invoke_bind(window)
+      #invoke_bind(window)
       GLib::Source.remove(@timeout_id) if not @timeout_id.nil?
       @timeout_id = GLib::Timeout.add((1000.0 / @fps).to_i) { update(window) } # [msec]
     end
