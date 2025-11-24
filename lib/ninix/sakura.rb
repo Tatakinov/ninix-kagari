@@ -74,7 +74,7 @@ module Sakura
     include GetText
 
     bindtextdomain("ninix-kagari")
-    
+
     BALLOON_LIFE   = 10  # [sec] (0: never closed automatically)
     SELECT_TIMEOUT = 15  # [sec]
     PAUSE_TIMEOUT  = 30  # [sec]
@@ -88,6 +88,8 @@ module Sakura
     # script origins
     FROM_SSTP_CLIENT = 1
     FROM_GHOST       = 2
+    # whether continue script interpretation
+    CONTINUING_INTERPRETATION = :continuing_interpretation
  
     def initialize
       super("") # FIXME
@@ -1881,7 +1883,8 @@ module Sakura
       elsif @script_mode == WAIT_MODE
         #pass
       elsif not @processed_script.empty? or not @processed_text.empty?
-        interpret_script()
+        while interpret_script == CONTINUING_INTERPRETATION do
+        end
       elsif not @script_post_proc.empty?
         for proc_obj in @script_post_proc
           proc_obj.call()
@@ -2919,6 +2922,7 @@ module Sakura
           end
           @surface.toggle_bind(@script_side, key, 'script')
         end
+        return CONTINUING_INTERPRETATION
       elsif args[0] == 'execute'
         case args[1]
         when 'http-get', 'http-post', 'http-head', 'http-put', 'http-delete'
@@ -3305,7 +3309,7 @@ module Sakura
         name, args = node[1], node[2..-2]
         if SCRIPT_TAG.include?(name) and \
            Sakura.method_defined?(SCRIPT_TAG[name])
-          method(SCRIPT_TAG[name]).call(args)
+          return send(SCRIPT_TAG[name], args)
         else
           #pass ## FIMXE
         end
