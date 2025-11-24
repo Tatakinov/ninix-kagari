@@ -851,7 +851,7 @@ module Surface
             #pass
           else
             if bind.include?(key)
-              group = bind[key][0].split(',', 2)
+              group = bind[key][0].split(',', 3)
               @mayuna[name] << [key, group[1], bind[key][1], bind[key][2]]
             end
           end
@@ -1263,7 +1263,13 @@ module Surface
     end
 
     def toggle_bind(side, bind_id, from)
-      @window[side].toggle_bind(bind_id, from)
+      if @window[side].loading?
+        @window_queue[side] << proc do
+          toggle_bind(side, bind_id, from)
+        end
+      else
+        @window[side].toggle_bind(bind_id, from)
+      end
     end
 
     def get_collision_area(side, part)
@@ -1706,7 +1712,7 @@ module Surface
         is_pnr = false
       else
         use_pna = (not @parent.handle_request(:GET, :get_preference, 'use_pna').zero?)
-        is_pnr = true
+        is_pnr = not(@desc.get('seriko.use_self_alpha') == '1')
       end
       begin
         pix = @pix_cache.load(@surfaces[surface_id][0], is_pnr: is_pnr, use_pna: use_pna)
@@ -1732,7 +1738,7 @@ module Surface
             is_pnr = false
             use_pna = false
           else
-            is_pnr = true
+            is_pnr = not(@desc.get('seriko.use_self_alpha') == '1')
             use_pna = (not @parent.handle_request(
                         :GET, :get_preference, 'use_pna').zero?)
           end
@@ -2493,7 +2499,7 @@ module Surface
       if @bind.include?(bind_id)
         current = @bind[bind_id][1]
         @bind[bind_id][1] = (not current)
-        group = @bind[bind_id][0].split(',', 2)
+        group = @bind[bind_id][0].split(',', 3)
         if @bind[bind_id][1]
           @parent.handle_request(:GET, :enqueue_event,
                                  'OnDressupChanged', @side,
