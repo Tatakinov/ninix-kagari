@@ -1322,6 +1322,10 @@ module Surface
       @window[side].bind
     end
 
+    def bind_key(side, category, part)
+      @window[side].bind_key(category, part)
+    end
+
     def is_internal
       true
     end
@@ -1372,6 +1376,9 @@ module Surface
       @region = region
       @mayuna = mayuna
       @bind = bind
+      @bind_invert = @bind.to_h do |k, v|
+        [v[0].split(',', 3).take(2).join(','), k]
+      end
       @default_id = default_id
       @__shown = false
       @window_offset = [0, 0]
@@ -1444,6 +1451,12 @@ module Surface
                            Gdk::DragAction::COPY)
       @darea.drag_dest_add_uri_targets()
 =end
+    end
+
+    def bind_key(category, part)
+      k = "#{category},#{part}"
+      return unless @bind_invert.include?(k)
+      return @bind_invert[k]
     end
 
     def loading?

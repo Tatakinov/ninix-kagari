@@ -2909,18 +2909,17 @@ module Sakura
           flag = args[3]
         end
         bind = @surface.bind(@script_side) # XXX
-        for key in bind.keys
-          group = bind[key][0].split(',', 3)
-          next if category != group[0]
-          next if not name.empty? and name != group[1]
+        key = @surface.bind_key(@script_side, category, name)
+        until key.nil? do
           if ['true', '1'].include?(flag)
-            next if bind[key][1]
+            break if bind[key][1]
           elsif ['false', '0'].include?(flag)
-            next unless bind[key][1]
+            break unless bind[key][1]
           else # 'toggle'
             #pass
           end
           @surface.toggle_bind(@script_side, key, 'script')
+          break
         end
         return CONTINUING_INTERPRETATION
       elsif args[0] == 'execute'
