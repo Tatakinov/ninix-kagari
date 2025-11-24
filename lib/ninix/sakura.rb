@@ -2907,7 +2907,7 @@ module Sakura
         end
         bind = @surface.bind(@script_side) # XXX
         for key in bind.keys
-          group = bind[key][0].split(',', 2)
+          group = bind[key][0].split(',', 3)
           next if category != group[0]
           next if not name.empty? and name != group[1]
           if ['true', '1'].include?(flag)
