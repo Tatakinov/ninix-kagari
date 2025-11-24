@@ -2690,6 +2690,7 @@ module Sakura
           @lock_repaint = [true, args[2] == 'manual']
         elsif args[0, 1] == ['unlock']
           @lock_repaint = [false, false]
+          @surface.repaint
         end
       elsif args[1, 1] == ['passivemode']
         if args[0, 1] == ['enter']

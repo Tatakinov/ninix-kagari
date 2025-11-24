@@ -978,6 +978,12 @@ module Surface
       end
     end
 
+    def repaint
+        @window.each_value do |window|
+          window.update_frame_buffer
+        end
+    end
+
     def set_surface_default(side)
       if side.nil?
         @window.each_key do |side|
