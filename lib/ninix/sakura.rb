@@ -2905,23 +2905,15 @@ module Sakura
         category = args[1]
         name = args[2]
         if argc < 4
-          flag = 'toggle'
+          flag = :toggle
+        elsif ['true', '1'].include?(args[3])
+          flag = true
+        elsif ['false', '0'].include?(args[3])
+          flag = false
         else
-          flag = args[3]
+          flag = :toggle
         end
-        bind = @surface.bind(@script_side) # XXX
-        key = @surface.bind_key(@script_side, category, name)
-        until key.nil? do
-          if ['true', '1'].include?(flag)
-            break if bind[key][1]
-          elsif ['false', '0'].include?(flag)
-            break unless bind[key][1]
-          else # 'toggle'
-            #pass
-          end
-          @surface.toggle_bind(@script_side, key, 'script')
-          break
-        end
+        @surface.toggle_bind(@script_side, category, name, 'script', flag)
         return CONTINUING_INTERPRETATION
       elsif args[0] == 'execute'
         case args[1]

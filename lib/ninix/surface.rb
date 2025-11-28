@@ -228,7 +228,7 @@ module Surface
     def window_stick(flag)
     end
 
-    def toggle_bind(side, bind_id, from)
+    def toggle_bind(side, category, part, from, flag)
     end
 
     def get_menu_pixmap
@@ -373,6 +373,9 @@ module Surface
     end
 
     def change_animation_state(side, id, command, *args)
+    end
+
+    def repaint
     end
   end
 
@@ -1268,13 +1271,13 @@ module Surface
       @window[side].balloon_offset = offset
     end
 
-    def toggle_bind(side, bind_id, from)
+    def toggle_bind(side, category, part, from, flag)
       if @window[side].loading?
         @window_queue[side] << proc do
-          toggle_bind(side, bind_id, from)
+          toggle_bind(side, category, part, from, flag)
         end
       else
-        @window[side].toggle_bind(bind_id, from)
+        @window[side].toggle_bind(category, part, from, flag)
       end
     end
 
@@ -1326,10 +1329,6 @@ module Surface
 
     def bind(side)
       @window[side].bind
-    end
-
-    def bind_key(side, category, part)
-      @window[side].bind_key(category, part)
     end
 
     def is_internal
@@ -1457,12 +1456,6 @@ module Surface
                            Gdk::DragAction::COPY)
       @darea.drag_dest_add_uri_targets()
 =end
-    end
-
-    def bind_key(category, part)
-      k = "#{category},#{part}"
-      return unless @bind_invert.include?(k)
-      return @bind_invert[k]
     end
 
     def loading?
@@ -2514,9 +2507,13 @@ module Surface
       return true
     end
 
-    def toggle_bind(bind_id, from)
+    def toggle_bind(category, part, from, flag)
+      k = "#{category},#{part}"
+      return unless @bind_invert.include?(k)
+      bind_id = @bind_invert[k]
       if @bind.include?(bind_id)
         current = @bind[bind_id][1]
+        return if current == flag
         @bind[bind_id][1] = (not current)
         group = @bind[bind_id][0].split(',', 3)
         if @bind[bind_id][1]
