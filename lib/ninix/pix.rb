@@ -99,7 +99,7 @@ module Pix
       #set_resizable(false)
       if monitor.nil? and not ENV.include?('NINIX_MONITOR_SIZE')
         id = signal_connect('notify') do |obj, spec|
-          next unless maximized?
+          next unless maximized? and visible?
           signal_handler_disconnect(id)
           GLib::Idle.add do
             unless width > 0 and height > 0
