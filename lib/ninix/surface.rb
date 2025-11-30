@@ -229,6 +229,7 @@ module Surface
     end
 
     def toggle_bind(side, category, part, from, flag)
+      send_event('Bind', side, category, part, from, flag, method: 'NOTIFY')
     end
 
     def get_menu_pixmap
