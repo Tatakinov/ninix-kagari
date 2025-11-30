@@ -424,8 +424,9 @@ module Surface
       end
       window.add_controller(key_controller)
       # FIXME window.realize()
-      window.show
-      window.hide
+      # FIXME delete?
+      #window.show
+      #window.hide
       return window
     end
 

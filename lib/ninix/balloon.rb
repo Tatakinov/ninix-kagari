@@ -1723,8 +1723,9 @@ module Balloon
         next delete(w, e)
       end
       # FIXME window.realize
-      window.show
-      window.hide
+      # FIXME delete?
+      #window.show
+      #window.hide
       return window
     end
 
@@ -3760,8 +3761,9 @@ module Balloon
       #@window.set_events(Gdk::EventMask::BUTTON_PRESS_MASK)
       #@window.set_window_position(Gtk::WindowPosition::CENTER)
       # FIXME @window.realize()
-      @window.show
-      @window.hide
+      # FIXME delete?
+      #@window.show
+      #@window.hide
 =begin TODO delete?
       @window.override_background_color(
         Gtk::StateFlags::NORMAL, Gdk::RGBA.new(0, 0, 0, 0))
