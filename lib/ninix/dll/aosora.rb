@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#  native.rb - a Real SHIORI loader for ninix
+#  aosora.rb - a (Real) Aosora SHIORI loader for ninix
 #  Copyright (C) 2025 by Tatakinov
 #
 #  This program is free software; you can redistribute it and/or modify it
