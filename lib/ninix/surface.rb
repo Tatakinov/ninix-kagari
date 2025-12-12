@@ -32,14 +32,14 @@ module Surface
       super("")
       @internal = Surface.new
       @internal.set_responsible(self)
-      @external = Ayu.new
+      @external = Ao.new
       @external.set_responsible(self)
       @current = @internal
     end
 
     def new_(desc, *args)
-      ayu = desc.get('ayu')
-      if ayu.nil?
+      ao = desc.get('ao')
+      if ao.nil?
         @current = @internal
       else
         @current = @external
@@ -61,21 +61,21 @@ module Surface
     end
   end
 
-  class Ayu
+  class Ao
     def initialize
     end
 
     def new_(desc, surface_alias, surface, name, surface_dir, tooltips, seriko_descript, default_sakura, default_kero)
       @desc = desc
-      @ayu = desc.get('ayu')
-      fail if @ayu.nil?
-      if ENV['AYU_PATH'].nil?
-        command = @ayu
+      @ao = desc.get('ao')
+      fail if @ao.nil?
+      if ENV['AO_PATH'].nil?
+        command = @ao
       else
-        command = File.join(ENV['AYU_PATH'], @ayu)
+        command = File.join(ENV['AO_PATH'], @ao)
       end
       begin
-        @ayu_write, @ayu_read, @ayu_err, @ayu_thread = Open3.popen3(command)
+        @ao_write, @ao_read, @ao_err, @ao_thread = Open3.popen3(command)
       rescue
         # TODO error
         p command
@@ -89,17 +89,9 @@ module Surface
       char = Regexp.new(/^char\d+/)
       char_menu = Regexp.new(/^char\d+\.menu/)
       @desc.each do |k, v|
-        if k.start_with?('seriko')
-          info << [k, v].join(',')
-        elsif k.start_with?('sakura') and not k.start_with?('sakura.menu')
-          info << [k, v].join(',')
-        elsif k.start_with?('kero') and not k.start_with?('kero.menu')
-          info << [k, v].join(',')
-        elsif k =~ char and not k =~ char_menu
-          info << [k, v].join(',')
-        end
+        info << [k, v].join(',')
       end
-      send_event('UpdateInfo', info.size, *info)
+      send_event('Description', info.size, *info)
       reset_surface
     end
 
@@ -113,7 +105,7 @@ module Surface
 
     def send_event(event, *args, method: 'NOTIFY')
       request = [
-        "#{method} AYU/0.9",
+        "#{method} SORAKADO/0.1",
         'Charset: UTF-8',
         "Command: #{event}",
       ].join("\r\n")
@@ -122,16 +114,16 @@ module Surface
       end
       request = [request, "\r\n\r\n"].join
       request = [[request.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
-      @ayu_write.write(request)
+      @ao_write.write(request)
       len = nil
       begin
-        len = @ayu_read.read(4)&.unpack('L').first
+        len = @ao_read.read(4)&.unpack('L').first
       end
       if len.nil?
         # TODO error
         return
       end
-      response = @ayu_read.read(len)
+      response = @ao_read.read(len)
       #p [:debug, request, response]
       iss = StringIO.new(response, 'r')
       protocol, code, status = iss.readline.split(' ', 3)
@@ -330,9 +322,9 @@ module Surface
     end
 
     def finalize
-      @ayu_write.write([0].pack('L'))
-      @ayu_write.close
-      @ayu_thread.join
+      @ao_write.write([0].pack('L'))
+      @ao_write.close
+      @ao_thread.join
     end
 
     def get_mikire
