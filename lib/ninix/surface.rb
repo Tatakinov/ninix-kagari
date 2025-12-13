@@ -76,9 +76,8 @@ module Surface
       end
       begin
         @ao_write, @ao_read, @ao_err, @ao_thread = Open3.popen3(command)
-      rescue
+      rescue => e
         # TODO error
-        p command
         p e
         return
       end
