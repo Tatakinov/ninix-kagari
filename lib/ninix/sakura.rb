@@ -1765,9 +1765,10 @@ module Sakura
           break
         end
       end
-      @ayu_uuid = SecureRandom.uuid
+      @ao_uuid = SecureRandom.uuid
+      @ai_uuid = SecureRandom.uuid
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
-        @controller = UnixSSTPController.new(@uuid, @ayu_uuid)
+        @controller = UnixSSTPController.new(@uuid, @ao_uuid, @ai_uuid)
         @controller.set_responsible(self)
         @controller.start_servers
       end
@@ -3529,7 +3530,7 @@ module Sakura
     end
 
     def endpoint
-      return [File.join(NinixServer.sockdir, @uuid), @ayu_uuid]
+      return [File.join(NinixServer.sockdir, @uuid), @ao_uuid, @ai_uuid]
     end
 
     def raise_balloon(side)

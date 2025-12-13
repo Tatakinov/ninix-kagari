@@ -83,7 +83,8 @@ module Surface
       end
       send_event('Initialize', File.join(surface_dir, ''))
       send_event('BasewareVersion', 'ninix', Version.NUMBER)
-      send_event('Endpoint', *@parent.handle_request(:GET, :endpoint))
+      path, ao_uuid, _ai_uuid = @parent.handle_request(:GET, :endpoint)
+      send_event('Endpoint', path, ao_uuid)
       info = []
       char = Regexp.new(/^char\d+/)
       char_menu = Regexp.new(/^char\d+\.menu/)

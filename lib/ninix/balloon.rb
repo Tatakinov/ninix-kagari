@@ -62,7 +62,7 @@ module Balloon
     end
 
     def new_(desc, *args)
-      sns = desc.get('display')
+      sns = desc.get('ai')
       if sns.nil?
         @current = @normal
       elsif sns == 'sns'
@@ -81,6 +81,207 @@ module Balloon
 
     def method_missing(name, *args, **kwarg)
       @current.send(name, *args, **kwarg)
+    end
+  end
+
+  class Ai < MetaMagic::Holon
+    def initialize
+      super("") # FIXME
+    end
+
+    def reset_user_interaction
+    end
+
+    def get_text_count(side)
+    end
+
+    def get_window(side)
+    end
+
+    def reset_text_count(side)
+    end
+
+    def reset_balloon
+    end
+
+    def identify_window(win)
+    end
+
+    def finalize
+    end
+
+    def new_(desc, balloon)
+      @desc = desc
+      @ai = desc.get('ai')
+      fail if @ai.nil?
+      if ENV['AI_PATH'].nil?
+        command = @ai
+      else
+        command = File.join(ENV['AI_PATH'], @ai)
+      end
+      begin
+        @ai_write, @ai_read, @ai_err, @ai_thread = Open3.popen3(command)
+      rescue => e
+        # TODO error
+        p e
+        return
+      end
+      send_event('Initialize', File.join(surface_dir, ''))
+      send_event('BasewareVersion', 'ninix', Version.NUMBER)
+      path, _ao_uuid, ai_uuid = @parent.handle_request(:GET, :endpoint)
+      send_event('Endpoint', path, ai_uuid)
+      info = []
+      char = Regexp.new(/^char\d+/)
+      char_menu = Regexp.new(/^char\d+\.menu/)
+      @desc.each do |k, v|
+        info << [k, v].join(',')
+      end
+      send_event('Description', info.size, *info)
+      reset_surface
+    end
+
+    def reset_fonts
+    end
+
+    def get_balloon_directory
+    end
+
+    def get_balloon_size(side)
+    end
+
+    def get_balloon_windowposition(side)
+    end
+
+    def set_balloon_default(side: -1)
+    end
+
+    def set_balloon(side, num)
+    end
+
+    def set_position(side, base_x, base_y)
+    end
+
+    def get_position(side)
+    end
+
+    def set_autoscroll(flag)
+    end
+
+    def is_shown(side)
+    end
+
+    def show(side)
+    end
+
+    def hide_all
+    end
+
+    def hide(side)
+    end
+
+    def raise_all
+    end
+
+    def raise_(side)
+    end
+
+    def lower_all
+    end
+
+    def lower(side)
+    end
+
+    def synchronize(list)
+    end
+
+    def set_balloon_direction(side, direction)
+    end
+
+    def clear_text_all
+    end
+
+    def clear_text(side)
+    end
+
+    def new_line(side)
+    end
+
+    def set_draw_absolute_x(side, pos)
+    end
+
+    def set_draw_absolute_x_char(side, rate)
+    end
+
+    def set_draw_relative_x(side, pos)
+    end
+
+    def set_draw_relative_x_char(side, rate)
+    end
+
+    def set_draw_absolute_y(side, pos)
+    end
+
+    def set_draw_absolute_y_char(side, rate, **kwarg)
+    end
+
+    def set_draw_relative_y(side, pos)
+    end
+
+    def set_draw_relative_y_char(side, rate, **kwarg)
+    end
+
+    def append_text(side, text)
+    end
+
+    def append_sstp_marker(side)
+    end
+
+    def append_link_in(side, label, args)
+    end
+
+    def append_link_out(side, label, value, args)
+    end
+
+    def append_link(side, label, value, args)
+    end
+
+    def append_meta(side, **kwargs)
+    end
+
+    def append_image(side, path, **kwargs)
+    end
+
+    def show_sstp_message(message, sender)
+    end
+
+    def hide_sstp_message
+    end
+
+    def open_communicatebox
+    end
+
+    def open_teachbox
+    end
+
+    def open_inputbox(symbol, limittime: -1, default: nil)
+    end
+
+    def open_passwordinputbox(symbol, limittime: -1, default: nil)
+    end
+
+    def open_scriptinputbox()
+    end
+
+    def close_inputbox(symbol)
+    end
+
+    def close_communicatebox
+    end
+
+    def close_teachbox
+    end
+
+    def destroy_inputbox(symbol)
     end
   end
 

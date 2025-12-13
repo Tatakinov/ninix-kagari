@@ -25,10 +25,10 @@ class BaseSSTPController < MetaMagic::Holon
 
   def enqueue_request(event, script_odict, sender, handle,
                       address, show_sstp_marker, use_translator,
-                      entry_db, request_handler, from_ayu = false, push_script = nil)
+                      entry_db, request_handler, from_ao = false, from_ai = false, push_script = nil)
     @__sstp_queue <<
       [event, script_odict, sender, handle, address, show_sstp_marker,
-       use_translator, entry_db, request_handler, from_ayu, push_script]
+       use_translator, entry_db, request_handler, from_ao, from_ai, push_script]
   end
 
   def check_request_queue(sender)
@@ -59,7 +59,7 @@ class BaseSSTPController < MetaMagic::Holon
     return if @__sstp_flag or @__sstp_queue.empty?
     event, script_odict, sender, handle, address, \
     show_sstp_marker, use_translator, \
-    entry_db, request_handler, from_ayu, push_script= @__sstp_queue.shift
+    entry_db, request_handler, from_ao, from_ai, push_script= @__sstp_queue.shift
     working = (not event.nil?)
     break_flag = false
     for if_ghost in script_odict.keys()
@@ -104,7 +104,7 @@ class BaseSSTPController < MetaMagic::Holon
       request_handler.send_response(204) unless request_handler.nil? # No Content
       return
     end
-    set_sstp_flag(sender) unless from_ayu
+    set_sstp_flag(sender) unless from_ao or from_ai
     @parent.handle_request(
       :GET, :enqueue_script,
       event, script, sender, handle, address,
@@ -182,10 +182,11 @@ class TCPSSTPController < BaseSSTPController
 end
 
 class UnixSSTPController < BaseSSTPController
-  def initialize(uuid, ayu_uuid)
+  def initialize(uuid, ao_uuid, ai_uuid)
     super()
     @uuid = uuid
-    @ayu_uuid = ayu_uuid
+    @ao_uuid = ao_uuid
+    @ai_uuid = ai_uuid
     @client_threads = []
   end
 
@@ -229,6 +230,6 @@ class UnixSSTPController < BaseSSTPController
   end
 
   def create(buffer, sstp_server, socket)
-    return SSTP::RequestHandler.create(buffer, sstp_server, socket, @uuid, @ayu_uuid)
+    return SSTP::RequestHandler.create(buffer, sstp_server, socket, @uuid, @ao_uuid, @ai_uuid)
   end
 end

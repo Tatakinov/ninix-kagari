@@ -195,7 +195,7 @@ module SSTP
           :GET, :enqueue_request,
           event, script_odict, sender, handle,
           address, show_sstp_marker, use_translator,
-          entry_db, nil, from_ayu, proc do |script|
+          entry_db, nil, from_ao, from_ai, proc do |script|
             @response_queue.push(script)
           end)
         script = @response_queue.pop
@@ -252,11 +252,18 @@ module SSTP
       end.first == @uuid
     end
 
-    def from_ayu
-      return false if @ayu_uuid.nil? or @ayu_uuid.empty?
+    def from_ao
+      return false if @ao_uuid.nil? or @ao_uuid.empty?
+      @headers.lazy.filter_map do |k, v|
+        v if k == 'Ao'
+      end.first == @ao_uuid
+    end
+
+    def from_ai
+      return false if @ai_uuid.nil? or @ai_uuid.empty?
       @headers.lazy.filter_map do |k, v|
         v if k == 'Ayu'
-      end.first == @ayu_uuid
+      end.first == @ai_uuid
     end
 
     def get_script_odict
@@ -614,14 +621,14 @@ module SSTP
       return create(line, server, fp)
     end
 
-    def self.create(line, server, fp, uuid, ayu_uuid)
+    def self.create(line, server, fp, uuid, ao_uuid, ai_uuid)
       return NilRequestHandler.new(server, fp) if line.nil?
       line = line.encode('UTF-8', :invalid => :replace, :undef => :replace).chomp
       re_req_sstp_syntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
       match = re_req_sstp_syntax.match(line)
       unless match.nil?
         command, version = match[1, 2]
-        return SSTPRequestHandler.new(server, fp, command, version, uuid, ayu_uuid)
+        return SSTPRequestHandler.new(server, fp, command, version, uuid, ao_uuid, ai_uuid)
       end
       return NilRequestHandler.new(server, fp)
     end

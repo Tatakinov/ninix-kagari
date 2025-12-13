@@ -34,13 +34,14 @@ module SSTPLib
         512 => 'Invisible',
         }
 
-    def initialize(server, fp, command, version, uuid = nil, ayu_uuid = nil)
+    def initialize(server, fp, command, version, uuid = nil, ao_uuid = nil, ai_uuid)
       @server = server
       @fp = fp
       @command = command
       @version = version
       @uuid = uuid
-      @ayu_uuid = ayu_uuid
+      @ao_uuid = ao_uuid
+      @ai_uuid = ai_uuid
     end
 
     def parse_headers(fp)
