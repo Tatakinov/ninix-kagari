@@ -86,8 +86,6 @@ module Surface
       path, ao_uuid, _ai_uuid = @parent.handle_request(:GET, :endpoint)
       send_event('Endpoint', path, ao_uuid)
       info = []
-      char = Regexp.new(/^char\d+/)
-      char_menu = Regexp.new(/^char\d+\.menu/)
       @desc.each do |k, v|
         info << [k, v].join(',')
       end
