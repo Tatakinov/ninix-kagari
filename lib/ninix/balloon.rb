@@ -58,14 +58,16 @@ module Balloon
       @normal.set_responsible(self)
       @sns = SNSBalloon.new
       @sns.set_responsible(self)
+      @ai = Ai.new
+      @ai.set_responsible(self)
       @current = @normal
     end
 
     def new_(desc, *args)
-      sns = desc.get('ai')
-      if sns.nil?
+      ai = desc.get('ai')
+      if ai.nil?
         @current = @normal
-      elsif sns == 'sns'
+      elsif ai == 'sns'
         @current = @sns
       end
       @current.new_(desc, *args)
@@ -112,6 +114,7 @@ module Balloon
 
     def new_(desc, balloon)
       @desc = desc
+      directory = balloon['balloon_dir'][0]
       @ai = desc.get('ai')
       fail if @ai.nil?
       if ENV['AI_PATH'].nil?
@@ -126,21 +129,65 @@ module Balloon
         p e
         return
       end
-      send_event('Initialize', File.join(surface_dir, ''))
+      send_event('Initialize', File.join(Home.get_ninix_home, 'balloon', directory, ''))
       send_event('BasewareVersion', 'ninix', Version.NUMBER)
       path, _ao_uuid, ai_uuid = @parent.handle_request(:GET, :endpoint)
       send_event('Endpoint', path, ai_uuid)
       info = []
-      char = Regexp.new(/^char\d+/)
-      char_menu = Regexp.new(/^char\d+\.menu/)
       @desc.each do |k, v|
         info << [k, v].join(',')
       end
       send_event('Description', info.size, *info)
-      reset_surface
+      reset_fonts
+    end
+
+    def send_event(event, *args, method: 'NOTIFY')
+      request = [
+        "#{method} SORAKADO/0.1",
+        'Charset: UTF-8',
+        "Command: #{event}",
+      ].join("\r\n")
+      args.each_with_index do |v, i|
+        request = [request, "Argument#{i}: #{v}"].join("\r\n")
+      end
+      request = [request, "\r\n\r\n"].join
+      request = [[request.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
+      @ai_write.write(request)
+      len = nil
+      begin
+        len = @ai_read.read(4)&.unpack('L').first
+      end
+      if len.nil?
+        # TODO error
+        return
+      end
+      response = @ai_read.read(len)
+      #p [:debug, request, response]
+      iss = StringIO.new(response, 'r')
+      protocol, code, status = iss.readline.split(' ', 3)
+      headers = {}
+      iss.each_line do |line|
+        k, sep, v = line.partition(': ')
+        next if sep != ': '
+        headers[k] = v
+      end
+      return {proto: protocol, code: code.to_i, status: status, headers: headers}
+    end
+
+    def add_window(side)
+      send_event('Create', side)
+    end
+
+    def user_interaction
+      false
     end
 
     def reset_fonts
+      unless @parent.nil?
+        font_name = @parent.handle_request(:GET, :get_preference, 'balloon_fonts')
+      else
+        font_name = 'Monospace'
+      end
     end
 
     def get_balloon_directory
@@ -156,9 +203,11 @@ module Balloon
     end
 
     def set_balloon(side, num)
+      send_event('SetBalloon', side, num)
     end
 
     def set_position(side, base_x, base_y)
+      send_event('Position', side, base_x, base_y)
     end
 
     def get_position(side)
@@ -171,12 +220,14 @@ module Balloon
     end
 
     def show(side)
+      send_event('Show', side)
     end
 
     def hide_all
     end
 
     def hide(side)
+      send_event('Hide', side)
     end
 
     def raise_all
@@ -195,6 +246,7 @@ module Balloon
     end
 
     def set_balloon_direction(side, direction)
+      send_event('Direction', side, direction)
     end
 
     def clear_text_all
@@ -2392,6 +2444,7 @@ module Balloon
       @y_root = nil
       @x_fractions = 0
       @y_fractions = 0
+      @offset = [0, 0]
       @reshape = true
       @pix_cache = Pix::Cache.new
       @raise_id = {}
@@ -2661,7 +2714,8 @@ module Balloon
       surface = @balloon_surface.surface(write: false)
       @width = surface.width
       @height = surface.height
-      @parent.handle_request(:NOTIFY, :update_balloon_size, @side, @width, @height)
+      @parent.handle_request(:NOTIFY, :update_balloon_rect, @side, x, y, @width, @height)
+      @parent.handle_request(:NOTIFY, :update_balloon_offset, @side, *@offset)
       reset_arrow()
       reset_sstp_marker()
       reset_message_regions()
@@ -3445,11 +3499,13 @@ module Balloon
           @dragged = true
           x_delta = ((px - @x_root) * 100 / scale + @x_fractions)
           y_delta = ((py - @y_root) * 100 / scale + @y_fractions)
+          @offset[0] += x_delta.to_i
+          @offset[1] += y_delta.to_i
           @x_fractions = (x_delta - x_delta.to_i)
           @y_fractions = (y_delta - y_delta.to_i)
           @parent.handle_request(
             :GET, :update_balloon_offset,
-            @side, x_delta.to_i, y_delta.to_i)
+            @side, *@offset)
           @x_root = px
           @y_root = py
           set_position(px, py)

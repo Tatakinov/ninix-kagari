@@ -105,7 +105,7 @@ module Sakura
         h[k] = {
           surface_rect: [0, 0, 0, 0],
           balloon_direction: 0,
-          balloon_size: [0, 0],
+          balloon_rect: [0, 0, 0, 0],
           balloon_offset: [0, 0],
           monitor_rect: [0, 0, 0, 0],
         }
@@ -467,18 +467,9 @@ module Sakura
       end
     end
 
-    def update_balloon_offset(side, x_delta, y_delta)
+    def update_balloon_offset(side, offset_x, offset_y)
       return unless @char.include?(side)
-      ox, oy = @char[side][:balloon_offset]
-      direction = @char[side][:balloon_direction]
-      sx, sy, _sw, _sh = @char[side][:surface_rect]
-      if direction.zero? # left
-        nx = (ox + x_delta)
-      else
-        nx = (ox - x_delta)
-      end
-      ny = (oy + y_delta)
-      @char[side][:balloon_offset] = [nx, ny]
+      @char[side][:balloon_offset] = [offset_x, offset_y]
     end
 
     def enqueue_script(event, script, sender, handle,
@@ -1533,8 +1524,8 @@ module Sakura
       @balloon.hide_all()
     end
 
-    def update_balloon_size(side, w, h)
-      @char[side][:balloon_size] = [w, h]
+    def update_balloon_rect(side, x, y, w, h)
+      @char[side][:balloon_rect] = [x, y, w, h]
     end
 
     def update_monitor_rect(side, x, y, w, h)
@@ -1561,7 +1552,7 @@ module Sakura
       ox = (ox * scale / 100).to_i
       oy = (oy * scale / 100).to_i
 =end
-      bw, bh = @char[side][:balloon_size]
+      bx, by, bw, bh = @char[side][:balloon_rect]
       sx, sy, sw, sh = @char[side][:surface_rect]
       lx = sx - bw + ox
       rx = sx + sw - ox
@@ -1594,7 +1585,6 @@ module Sakura
       notify_observer('set position')
       # TODO implement
       #check_mikire_kasanari
-      ox, oy = @char[side][:balloon_offset]
       set_balloon_direction(side, direction)
       set_balloon_position(side, x, y)
     end
@@ -2143,6 +2133,7 @@ module Sakura
       @char[0]
       default = @desc.get('sakura.seriko.defaultsurface')
       @surface.add_window(0, default)
+      @balloon.add_window(0)
       @script_side = 0
     end
 
@@ -2151,6 +2142,7 @@ module Sakura
       @char[1]
       default = @desc.get('kero.seriko.defaultsurface')
       @surface.add_window(1, default)
+      @balloon.add_window(1)
       @script_side = 1
     end
 

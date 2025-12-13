@@ -497,6 +497,25 @@ module SSTP
         end)
         send_response(204)
       when 'ResetBalloonPosition'
+        # 時間が掛かるのでIdleで処理して早くSSTP通信を終わらせる
+        GLib::Idle.add do
+          @server.handle_request(:NOTIFY, :reset_balloon_position, *args.take(1).map do |v|
+            v.to_i
+          end)
+          next false
+        end
+        send_response(204)
+      when 'UpdateBalloonRect'
+        @server.handle_request(:NOTIFY, :update_balloon_rect, *args.take(5).map do |v|
+          v.to_i
+        end)
+        send_response(204)
+      when 'UpdateBalloonOffset'
+        @server.handle_request(:NOTIFY, :update_balloon_offset, *args.take(3).map do |v|
+          v.to_i
+        end)
+        send_response(204)
+      when 'ResetBalloonPosition'
         @server.handle_request(:NOTIFY, :reset_balloon_position, *args.take(1).map do |v|
           v.to_i
         end)
