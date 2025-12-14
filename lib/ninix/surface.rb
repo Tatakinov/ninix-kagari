@@ -39,7 +39,7 @@ module Surface
 
     def new_(desc, *args)
       ao = desc.get('ao')
-      if ao.nil?
+      if ao.nil? or ao.empty?
         @current = @internal
       else
         @current = @external
@@ -89,7 +89,7 @@ module Surface
       @desc.each do |k, v|
         info << [k, v].join(',')
       end
-      send_event('Description', info.size, *info)
+      send_event('Description', *info)
       reset_surface
     end
 
@@ -173,11 +173,8 @@ module Surface
     end
 
     def reset_surface
-      scale = @parent.handle_request(:GET, :get_preference, 'surface_scale')
-      if scale != @scale
-        @scale = scale
-        send_event('Scale', @scale)
-      end
+      @scale = @parent.handle_request(:GET, :get_preference, 'surface_scale')
+      send_event('ConfigurationChanged', "scale,#{@scale}")
     end
 
     def get_position(side)

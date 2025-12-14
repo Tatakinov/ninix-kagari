@@ -65,10 +65,12 @@ module Balloon
 
     def new_(desc, *args)
       ai = desc.get('ai')
-      if ai.nil?
+      if ai.nil? or ai.empty?
         @current = @normal
       elsif ai == 'sns'
         @current = @sns
+      else
+        @current = @ai
       end
       @current.new_(desc, *args)
     end
@@ -137,7 +139,7 @@ module Balloon
       @desc.each do |k, v|
         info << [k, v].join(',')
       end
-      send_event('Description', info.size, *info)
+      send_event('Description', *info)
       reset_fonts
     end
 
