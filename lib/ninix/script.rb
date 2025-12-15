@@ -125,7 +125,7 @@ module Script
 
     def tokenize(s)
       patterns = [
-        [TOKEN_TAG, Regexp.new(/\\[Cehunjcxtqzy*v0123456789fmia!&+-]|\\[sbp][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna]|\\__[ctqw]|\\URL/)],
+        [TOKEN_TAG, Regexp.new(/\\[Cehunjcxtqzy*v0123456789fmia!&+-]|\\[sbp][0-9]?|\\w[0-9]|\\_[wqslvVbe+cumna?]|\\__[ctqw]|\\URL/)],
         [TOKEN_META, Regexp.new(/%month|%day|%hour|%minute|%second|%username|%selfname2?|%keroname|%friendname|%songname|%screen(width|height)|%exh|%et|%m[szlchtep?]|%dms|%j|%c|%wronghour|%\*|%property\[(\\\\|\\\]|(?!\\\\|\\\]).)+?\]/)],
         [TOKEN_NUMBER, Regexp.new(/[0-9]+/)],
         [TOKEN_OPENED_SBRA, Regexp.new(/\[/)],
@@ -174,8 +174,17 @@ module Script
       scope = 0
       anchor = nil
       choice = nil
+      raw = false
       while not @tokens.empty?
         token, lexeme = next_token()
+        if raw
+          if token == TOKEN_TAG and lexeme == '\_?'
+            raw = false
+          else
+            string_chunks << lexeme
+          end
+          next
+        end
         if token == TOKEN_STRING and lexeme == '\\'
           unless string_chunks.empty?
             text << [TEXT_STRING, string_chunks.join('')]
@@ -361,6 +370,9 @@ module Script
             args << arg[0][1]
           end
           @script << [SCRIPT_TAG, lexeme] + args + [@column, ]
+        elsif ["\\_?"].include?(lexeme)
+          @script << [SCRIPT_TAG, lexeme, @column]
+          raw = true
         else
           fail perror(:skip => 'length'), 'unknown tag (' + lexeme + ')'
           return []
