@@ -185,11 +185,9 @@ module Balloon
     end
 
     def reset_fonts
-      unless @parent.nil?
-        font_name = @parent.handle_request(:GET, :get_preference, 'balloon_fonts')
-      else
-        font_name = 'Monospace'
-      end
+      font_name = @parent.handle_request(:GET, :get_preference, 'balloon_fonts')
+      scale = @parent.handle_request(:GET, :get_preference, 'surface_scale')
+      send_event('ConfigurationChanged', "font,#{font_name}", "scale,#{scale}")
     end
 
     def get_balloon_directory
