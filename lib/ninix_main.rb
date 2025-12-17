@@ -1509,7 +1509,10 @@ module Ninix_Main
         files.n_items.times do |i|
           file = files.get_item(i)
           uri = URI.parse(file.uri)
-          @app.do_install(uri.path)
+          path = URI.decode_www_form_component(uri.path)
+          # Windowsではドライブ名の前の"/"は取り除く
+          path = path[1 ..] if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+          @app.do_install(path)
           update
         end
       end
@@ -1731,8 +1734,8 @@ begin
   shm = NinixFMO::NinixFMO.new('/ninix', NinixFMO::O_RDWR ^ NinixFMO::O_CREAT)
   path = [NinixServer.sockdir, File::SEPARATOR].join
   shm.write([path].pack('a*'))
-  if shm.read != path
-    raise SystemExit, "ninix-kagari is already running" if not Lock.lockfile(lock)
+  if shm.read.force_encoding(Encoding::UTF_8) != path
+    raise SystemExit, "ninix-kagari is already running"
   end
   home_dir = Home.get_ninix_home()
   unless File.exist?(home_dir)
