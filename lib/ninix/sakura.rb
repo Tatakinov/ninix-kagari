@@ -2321,12 +2321,12 @@ module Sakura
     def __yen_n(args)
       if not args.empty? and expand_meta(args[0]) == 'half'
         @balloon.new_line(@script_side)
-        @balloon.set_draw_absolute_x(@script_side, 0)
-        @balloon.set_draw_relative_y_char(@script_side, 0.5, use_default_height: false)
+        @balloon.set_cursor_position_x(@script_side, 0, true, :px)
+        @balloon.set_cursor_position_y(@script_side, 0.5, false, :lh)
       else
         @balloon.new_line(@script_side)
-        @balloon.set_draw_absolute_x(@script_side, 0)
-        @balloon.set_draw_relative_y_char(@script_side, 1, use_default_height: false)
+        @balloon.set_cursor_position_x(@script_side, 0, true, :px)
+        @balloon.set_cursor_position_y(@script_side, 1, false, :lh)
       end
     end
 
@@ -3150,58 +3150,35 @@ module Sakura
       is_pixel = true
       pos = expand_meta(args[0]).split(',', 2)
       @balloon.new_line(@script_side)
-      for i in 0..1
-        x = pos[i]
-        if x.empty?
-          func = 'set_draw_relative_'
-          if i == 0
-            func += 'x'
-          elsif i == 1
-            func += 'y'
-          end
-          @balloon.method(func).call(@script_side, 0)
-        else
-          if x.start_with?('@')
-            is_absolute = false
-            x = x[1..-1]
-          end
-          begin
-            if x.end_with?('em')
-              is_pixel = false
-              v = Float(x[0..-3])
-            elsif x.end_with?('%')
-              is_pixel = false
-              v = Float(x[0..-2]) / 100
-            else
-              v = Float(x)
-            end
-            func = 'set_draw_'
-            if is_absolute
-              func += 'absolute_'
-            else
-              func += 'relative_'
-            end
-            if i == 0
-              func += 'x'
-            elsif i == 1
-              func += 'y'
-            end
-            if not(is_pixel)
-              func += '_char'
-            end
-            @balloon.method(func).call(@script_side, v)
-          rescue
-            # nop
-            func = 'set_draw_relative_'
-            if i == 0
-              func += 'x'
-            elsif i == 1
-              func += 'y'
-            end
-            @balloon.method(func).call(@script_side, 0)
-          end
+      f = proc do |value, func_name|
+        next if value.nil? or value.empty?
+        is_absolute = true
+        unit = :px
+        if value.start_with?('@')
+          is_absolute = false
+          value = value[1 ..]
         end
+        [['em', :em], ['%', :em], ['lh', :lh]].any? do |suffix, u|
+          if value.end_with?(suffix)
+            unit = u
+            value = value[0 ... -suffix.length]
+            next true
+          end
+          next false
+        end
+        begin
+          if unit == :px
+            value = Integer(value)
+          else
+            value = Float(value)
+          end
+        rescue
+          value = 0
+        end
+        @balloon.method(func_name).call(@script_side, value, is_absolute, unit)
       end
+      f.call(pos[0], :set_cursor_position_x)
+      f.call(pos[1], :set_cursor_position_y)
     end
 
     def __yen___q(args)

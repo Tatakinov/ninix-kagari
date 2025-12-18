@@ -959,6 +959,22 @@ module Balloon
       append_data(Head.new(valid: true, x: Point.new, y: Point.new), side)
     end
 
+    def set_cursor_position_x(side, value, is_absolute, unit)
+      if is_absolute and unit == :px
+        set_draw_absolute_x(side, value)
+      elsif is_absolute and unit == :em
+        set_draw_absolute_x_char(side, value)
+      elsif is_absolute and unit == :lh
+        set_draw_absolute_x_char(side, value)
+      elsif not(is_absolute) and unit == :px
+        set_draw_relative_x(side, value)
+      elsif not(is_absolute) and unit == :em
+        set_draw_relative_x_char(side, value)
+      elsif not(is_absolute) and unit == :lh
+        set_draw_relative_x_char(side, value)
+      end
+    end
+
     def set_draw_absolute_x(side, pos)
       last = @data_buffer.last.last
       last.pos.x = pos
@@ -977,6 +993,22 @@ module Balloon
 
     def set_draw_relative_x_char(side, rate)
       set_draw_relative_x(side, @char_width * rate)
+    end
+
+    def set_cursor_position_y(side, value, is_absolute, unit)
+      if is_absolute and unit == :px
+        set_draw_absolute_y(side, value)
+      elsif is_absolute and unit == :em
+        set_draw_absolute_y_char(side, value)
+      elsif is_absolute and unit == :lh
+        set_draw_absolute_y_char(side, value)
+      elsif not(is_absolute) and unit == :px
+        set_draw_relative_y(side, value)
+      elsif not(is_absolute) and unit == :em
+        set_draw_relative_y_char(side, value)
+      elsif not(is_absolute) and unit == :lh
+        set_draw_relative_y_char(side, value)
+      end
     end
 
     def set_draw_absolute_y(side, pos)
@@ -2206,6 +2238,22 @@ module Balloon
       end
     end
 
+    def set_cursor_position_x(side, value, is_absolute, unit)
+      if is_absolute and unit == :px
+        set_draw_absolute_x(side, value)
+      elsif is_absolute and unit == :em
+        set_draw_absolute_x_char(side, value)
+      elsif is_absolute and unit == :lh
+        set_draw_absolute_x_char(side, value)
+      elsif not(is_absolute) and unit == :px
+        set_draw_relative_x(side, value)
+      elsif not(is_absolute) and unit == :em
+        set_draw_relative_x_char(side, value)
+      elsif not(is_absolute) and unit == :lh
+        set_draw_relative_x_char(side, value)
+      end
+    end
+
     def set_draw_absolute_x(side, pos)
       unless @synchronized.empty?
         for side in @synchronized
@@ -2243,6 +2291,22 @@ module Balloon
         end
       else
         @window[side].set_draw_relative_x(rate)
+      end
+    end
+
+    def set_cursor_position_y(side, value, is_absolute, unit)
+      if is_absolute and unit == :px
+        set_draw_absolute_y(side, value)
+      elsif is_absolute and unit == :em
+        set_draw_absolute_y_char(side, value)
+      elsif is_absolute and unit == :lh
+        set_draw_absolute_y_char(side, value)
+      elsif not(is_absolute) and unit == :px
+        set_draw_relative_y(side, value)
+      elsif not(is_absolute) and unit == :em
+        set_draw_relative_y_char(side, value)
+      elsif not(is_absolute) and unit == :lh
+        set_draw_relative_y_char(side, value)
       end
     end
 
