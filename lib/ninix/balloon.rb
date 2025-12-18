@@ -203,7 +203,7 @@ module Balloon
     end
 
     def set_balloon(side, num)
-      send_event('SetBalloon', side, num)
+      send_event('SetBalloonID', side, num)
     end
 
     def set_position(side, base_x, base_y)
@@ -258,31 +258,14 @@ module Balloon
     def new_line(side)
     end
 
-    def set_draw_absolute_x(side, pos)
+    def set_cursor_position_x(side, value, is_absolute, unit)
     end
 
-    def set_draw_absolute_x_char(side, rate)
-    end
-
-    def set_draw_relative_x(side, pos)
-    end
-
-    def set_draw_relative_x_char(side, rate)
-    end
-
-    def set_draw_absolute_y(side, pos)
-    end
-
-    def set_draw_absolute_y_char(side, rate, **kwarg)
-    end
-
-    def set_draw_relative_y(side, pos)
-    end
-
-    def set_draw_relative_y_char(side, rate, **kwarg)
+    def set_cursor_position_y(side, value, is_absolute, unit)
     end
 
     def append_text(side, text)
+      send_event('AppendText', side, text)
     end
 
     def append_sstp_marker(side)
