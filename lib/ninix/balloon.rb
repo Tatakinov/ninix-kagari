@@ -256,9 +256,11 @@ module Balloon
     end
 
     def new_line(side)
+      send_event('NewLine', side)
     end
 
     def set_cursor_position(side, axis, value, is_absolute, unit)
+      send_event('SetCursorPosition', side, axis, value, is_absolute, unit)
     end
 
     def append_text(side, text)
