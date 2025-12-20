@@ -3158,7 +3158,7 @@ module Sakura
           is_absolute = false
           value = value[1 ..]
         end
-        [['em', :em], ['%', :em], ['lh', :lh]].any? do |suffix, u|
+        {em: 'em', per: '%', lh: 'lh'}.any? do |u, suffix|
           if value.end_with?(suffix)
             unit = u
             value = value[0 ... -suffix.length]
@@ -3171,9 +3171,14 @@ module Sakura
             value = Integer(value)
           else
             value = Float(value)
+            if unit == :per
+              unit = :em
+              value = value / 100.0
+            end
           end
         rescue
           value = 0
+          unit = :em if unit == :per
         end
         @balloon.set_cursor_position(@script_side, axis, value, is_absolute, unit)
       end
