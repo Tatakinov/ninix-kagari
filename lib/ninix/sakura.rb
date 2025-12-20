@@ -2321,12 +2321,12 @@ module Sakura
     def __yen_n(args)
       if not args.empty? and expand_meta(args[0]) == 'half'
         @balloon.new_line(@script_side)
-        @balloon.set_cursor_position_x(@script_side, 0, true, :px)
-        @balloon.set_cursor_position_y(@script_side, 0.5, false, :lh)
+        @balloon.set_cursor_position(@script_side, :x, 0, true, :px)
+        @balloon.set_cursor_position(@script_side, :y, 0.5, false, :lh)
       else
         @balloon.new_line(@script_side)
-        @balloon.set_cursor_position_x(@script_side, 0, true, :px)
-        @balloon.set_cursor_position_y(@script_side, 1, false, :lh)
+        @balloon.set_cursor_position(@script_side, :x, 0, true, :px)
+        @balloon.set_cursor_position(@script_side, :y, 1, false, :lh)
       end
     end
 
@@ -3150,7 +3150,7 @@ module Sakura
       is_pixel = true
       pos = expand_meta(args[0]).split(',', 2)
       @balloon.new_line(@script_side)
-      f = proc do |value, func_name|
+      f = proc do |value, axis|
         next if value.nil? or value.empty?
         is_absolute = true
         unit = :px
@@ -3175,10 +3175,10 @@ module Sakura
         rescue
           value = 0
         end
-        @balloon.method(func_name).call(@script_side, value, is_absolute, unit)
+        @balloon.set_cursor_position(@script_side, axis, value, is_absolute, unit)
       end
-      f.call(pos[0], :set_cursor_position_x)
-      f.call(pos[1], :set_cursor_position_y)
+      f.call(pos[0], :x)
+      f.call(pos[1], :y)
     end
 
     def __yen___q(args)
