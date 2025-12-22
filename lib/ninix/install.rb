@@ -113,6 +113,17 @@ module Install
         FileUtils.remove_entry_secure(tmpdir)
         Install.fatal('cannot extract files from the archive')
       end
+      list = Dir.glob(File.join(tmpdir, '*'))
+      # ./install.txt, ./ghost…とならずに./hoge/install.txt, ./hoge/ghost
+      # となっている場合への簡易的な対処
+      if list.length == 1
+        Dir.chdir(list.first) do
+          Dir.glob('*') do |file|
+            File.rename(file, "../#{file}")
+          end
+        end
+        Dir.rmdir(list.first)
+      end
       Dir.glob(tmpdir) { |path|
         if File.directory?(path)
           st_mode = File.stat(path).mode
