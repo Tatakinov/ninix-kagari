@@ -26,7 +26,6 @@ module Satori_native
 
     $_satori = self
   rescue => e
-    p [:debug, e]
     $_satori = nil
   end
 
