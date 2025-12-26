@@ -94,13 +94,13 @@ class BaseSSTPController < MetaMagic::Holon
     else
       script = nil
     end
-    if script.nil?
+    if script.nil? or script.empty?
       script = default_script
     end
     unless push_script.nil?
       push_script.call(script)
     end
-    if script.nil?
+    if script.nil? or script.empty?
       request_handler.send_response(204) unless request_handler.nil? # No Content
       return
     end
