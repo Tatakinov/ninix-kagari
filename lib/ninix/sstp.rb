@@ -262,7 +262,7 @@ module SSTP
     def from_ai
       return false if @ai_uuid.nil? or @ai_uuid.empty?
       @headers.lazy.filter_map do |k, v|
-        v if k == 'Ayu'
+        v if k == 'Ai'
       end.first == @ai_uuid
     end
 
@@ -462,41 +462,27 @@ module SSTP
                     charset, :invalid => :replace, :undef => :replace))
         @fp.write("\r\n")
         @fp.write("\r\n")
-      when 'GetSurfaceInfo'
-        value = @server.handle_request(:GET, :get_surface_info, args[0])
+      when 'GetDescript'
+        return send_response(204) unless from_ao
+        value = @server.handle_request(:GET, :get_descript, *args.take(1))
         send_response(200)
         @fp.write(value)
         @fp.write("\r\n")
         @fp.write("\r\n")
-      when 'GetBalloonSize'
-        x, y = @server.handle_request(:GET, :get_balloon_size, args[0].to_i)
-        send_response(200)
-        @fp.write("#{x},#{y}")
-        @fp.write("\r\n")
-        @fp.write("\r\n")
-      when 'SetBalloonPosition'
-        @server.handle_request(:GET, :set_balloon_position, *args.take(3).map do |v|
-          v.to_i
-        end)
-        send_response(204)
-      when 'SetBalloonDirection'
-        @server.handle_request(:NOTIFY, :set_balloon_direction, *args.take(2).map do |v|
-          v.to_i
-        end)
-      when 'RaiseBalloon'
-        @server.handle_request(:NOTIFY, :raise_balloon, args[0].to_i)
-        send_response(204)
       when 'UpdateMonitorRect'
+        return send_response(204) unless from_ao
         @server.handle_request(:NOTIFY, :update_monitor_rect, *args.take(5).map do |v|
           v.to_i
         end)
         send_response(204)
       when 'UpdateSurfaceRect'
+        return send_response(204) unless from_ao
         @server.handle_request(:NOTIFY, :update_surface_rect, *args.take(5).map do |v|
           v.to_i
         end)
         send_response(204)
       when 'ResetBalloonPosition'
+        return send_response(204) unless from_ao or from_ai
         # 時間が掛かるのでIdleで処理して早くSSTP通信を終わらせる
         GLib::Idle.add do
           @server.handle_request(:NOTIFY, :reset_balloon_position, *args.take(1).map do |v|
@@ -506,17 +492,14 @@ module SSTP
         end
         send_response(204)
       when 'UpdateBalloonRect'
+        return send_response(204) unless from_ai
         @server.handle_request(:NOTIFY, :update_balloon_rect, *args.take(5).map do |v|
           v.to_i
         end)
         send_response(204)
       when 'UpdateBalloonOffset'
+        return send_response(204) unless from_ai
         @server.handle_request(:NOTIFY, :update_balloon_offset, *args.take(3).map do |v|
-          v.to_i
-        end)
-        send_response(204)
-      when 'ResetBalloonPosition'
-        @server.handle_request(:NOTIFY, :reset_balloon_position, *args.take(1).map do |v|
           v.to_i
         end)
         send_response(204)
