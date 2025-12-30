@@ -14,6 +14,21 @@
 #  PURPOSE.  See the GNU General Public License for more details.
 #
 
+# HACK: Windows環境下でパスに日本語が含まれているとrequire_relativeが
+# 失敗することへの対処
+module Kernel
+  require_relative_original = method(:require_relative)
+  define_method(:require_relative) do |filename|
+    c = caller.first
+    if /^(.+?):\d+(?::in '.*')?/ =~ c and $1 != '-'
+      return require_relative_original.call(File.join(File.dirname($1), filename)) if File.absolute_path?($1)
+      require File.expand_path(filename, File.dirname($1))
+    else
+      require File.expand_path(filename, File.dirname(__FILE__))
+    end
+  end
+end
+
 require 'optparse'
 require 'uri'
 require 'gettext'
