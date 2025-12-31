@@ -64,6 +64,7 @@ module Balloon
     end
 
     def new_(desc, *args)
+      desc["ai"] = "ai_builtin.exe" if ENV.include?('NINIX_ENABLE_SORAKADO')
       ai = desc.get('ai')
       if ai.nil? or ai.empty?
         @current = @normal

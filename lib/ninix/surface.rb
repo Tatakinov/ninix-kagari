@@ -38,6 +38,7 @@ module Surface
     end
 
     def new_(desc, *args)
+      desc["ao"] = "ao_builtin.exe" if ENV.include?('NINIX_ENABLE_SORAKADO')
       ao = desc.get('ao')
       if ao.nil? or ao.empty?
         @current = @internal
@@ -132,6 +133,10 @@ module Surface
         headers[k] = v
       end
       return {proto: protocol, code: code.to_i, status: status, headers: headers}
+    end
+
+    def open_menu(json)
+      send_event('NotifyMenuInfo', json)
     end
 
     def get_info(key)
@@ -387,6 +392,10 @@ module Surface
         surface_window.destroy
       end
       @window = {}
+    end
+
+    def open_menu(json)
+      # nop
     end
 
     def create_gtk_window(title, monitor)

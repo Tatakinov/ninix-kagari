@@ -686,6 +686,16 @@ module Ninix_Main
       @ghosts.delete(key)
     end
 
+    def get_ghost_list
+      ghost_list = []
+      @ghosts.each do |k, v|
+        desc, _ghost = v.baseinfo
+        name = desc.get('name', :default => k)
+        ghost_list << [name, k]
+      end
+      return ghost_list
+    end
+
     def get_balloon_list
       balloon_list = []
       for key in @balloons.keys

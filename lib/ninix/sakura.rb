@@ -25,6 +25,7 @@ require 'etc'
 require "uri"
 require "pathname"
 require "securerandom"
+require 'json'
 
 require_relative "surface"
 require_relative "balloon"
@@ -1288,8 +1289,15 @@ module Sakura
           y = arglist[1].to_i
           sx, sy, sw, sh = @char[side][:surface_rect]
           mx, my, mw, mh = @char[side][:monitor_rect]
-          @parent.handle_request(
-            :GET, :open_popup_menu, self, side, sx + x, sy + y, (sy - my + y < (mh / 2)))
+          unless ENV.include?('NINIX_ENABLE_SORAKADO')
+            @parent.handle_request(
+              :GET, :open_popup_menu, self, side, sx + x, sy + y, (sy - my + y < (mh / 2)))
+          else
+            GLib::Idle.add do
+              open_ao_menu(side)
+              next false
+            end
+          end
         end
         @parent.handle_request(
           :GET, :notify_other, @key,
@@ -1329,6 +1337,129 @@ module Sakura
       @script_finally << proc_obj
       return script if return_script
       return true
+    end
+
+    def open_ao_menu(side)
+      # FIXME: ちゃんとしたメニュー名にする
+      side2s = proc do |side|
+        next "sakura" if side == 0
+        next "kero" if side == 1
+        next "char#{side}"
+      end
+      caption = proc do |event, default|
+        result = get_event_response(event)
+        next default if result.nil? or result.empty?
+        next result
+      end
+      sites = proc do |event|
+        result = get_event_response(event)
+        next [] if result.nil? or result.empty?
+        data = result.split("\x02").map do |x|
+          name, url, banner, script = x.split("\x01")
+          next {
+            type: 'site',
+            caption: name,
+            list: [url, banner, script],
+          }
+        end
+        next data
+      end
+      data = []
+      data << {
+        type: 'submenu',
+        caption: caption.call("#{side2s.call(side)}.recommendbuttoncaption", 'OSUSUME'),
+        list: sites.call("#{side2s.call(side)}.recommendsites"),
+      }
+      data << {
+        type: 'submenu',
+        caption: caption.call("#{side2s.call(side)}.recommendbuttoncaption", 'OSUSUME'),
+        list: sites.call("#{side2s.call(side)}.recommendsites"),
+      }
+      data << {
+        type: 'check',
+        caption: caption.call('alwaysstayontopbutton.caption', 'ISUWARU'),
+        valid: true,
+        state: false,
+      }
+      data << {
+        type: 'preferences',
+        caption: caption.call('configurationubutton.caption', 'SETTEI'),
+        valid: true,
+      }
+      data << {
+        type: 'submenu',
+        caption: caption.call('switchghostbutton.caption', 'KOUTAI'),
+        list: @parent.handle_request(:GET, :get_ghost_list).map do |x|
+          next {
+            type: 'switch',
+            caption: x[0],
+            valid: x[1] != @key,
+            list: [@key],
+          }
+        end
+      }
+      data << {
+        type: 'submenu',
+        caption: caption.call('callghostbutton.caption', 'YOBIDASHI'),
+        list: @parent.handle_request(:GET, :get_ghost_list).map do |x|
+          next {
+            type: 'switch',
+            caption: x[0],
+            valid: x[1] != @key,
+            list: [@key],
+          }
+        end
+      }
+      data << {
+        type: 'submenu',
+        caption: caption.call('shellrootbutton.caption', 'SHERU'),
+        list: @shells.map do |k, v|
+          name, path, desc, _ = v.baseinfo
+          next {
+            type: 'shell',
+            caption: desc.get('name', default: k),
+            list: [k],
+          }
+        end
+      }
+      data << {
+        type: 'dressup',
+        caption: caption.call('dressuprootbutton.caption', 'KISEKAE'),
+      }
+      data << {
+        type: 'submenu',
+        caption: caption.call('balloonrootbutton.caption', 'BARUUN'),
+        list: @parent.handle_request(:GET, :get_balloon_list).map do |x|
+          next {
+            type: 'action',
+            action: 'balloon',
+            caption: x.class,
+          }
+        end,
+      }
+      data << {
+        type: 'submenu',
+        caption: caption.call('dressuprootbutton.caption', 'JOUHOU'),
+        list: [
+          {
+            type: 'action',
+            action: 'basewareversion',
+            valid: true,
+            caption: caption.call('inforootbutton.caption', 'BEESUWEA'),
+          },
+        ],
+      }
+      data << {
+        type: 'close',
+        valid: true,
+        caption: caption.call('closebutton.caption', 'TOJIRU'),
+      }
+      data << {
+        type: 'close_all',
+        valid: true,
+        caption: caption.call('closeallbutton.caption', 'SUBETETOJIRU'),
+      }
+      @surface.open_menu(JSON.generate(data))
     end
 
     def get_prefix()

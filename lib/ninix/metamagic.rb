@@ -127,8 +127,8 @@ module MetaMagic
       @key
     end
 
-    def baseinfo # forbidden
-      nil
+    def baseinfo
+      @baseinfo
     end
 
     def baseinfo=(data)
