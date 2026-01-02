@@ -1431,8 +1431,8 @@ module Sakura
         caption: caption.call('balloonrootbutton.caption', 'BARUUN'),
         list: @parent.handle_request(:GET, :get_balloon_list).map do |x|
           next {
-            type: 'action',
-            action: 'balloon',
+            type: 'balloon',
+            valid: true, # FIXME false if current selected
             caption: x.class,
           }
         end,
@@ -1442,8 +1442,7 @@ module Sakura
         caption: caption.call('dressuprootbutton.caption', 'JOUHOU'),
         list: [
           {
-            type: 'action',
-            action: 'basewareversion',
+            type: 'basewareversion',
             valid: true,
             caption: caption.call('inforootbutton.caption', 'BEESUWEA'),
           },
