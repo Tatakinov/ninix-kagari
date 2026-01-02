@@ -204,7 +204,8 @@ module Balloon
     end
 
     def set_balloon(side, num)
-      send_event('SetBalloonID', side, num)
+      # (id / 2).to_iしたものが渡されるので2倍する
+      send_event('SetBalloonID', side, num * 2)
     end
 
     def set_position(side, base_x, base_y)
@@ -225,6 +226,7 @@ module Balloon
     end
 
     def hide_all
+      send_event('HideAll')
     end
 
     def hide(side)
@@ -251,9 +253,11 @@ module Balloon
     end
 
     def clear_text_all
+      send_event('ClearTextAll')
     end
 
     def clear_text(side)
+      send_event('ClearText', side)
     end
 
     def new_line(side)
@@ -272,12 +276,18 @@ module Balloon
     end
 
     def append_link_in(side, label, args)
+      is_anchor = @parent.handle_request(:GET, :is_anchor, label)
+      send_event('AppendLinkBegin', side, is_anchor, label, *args)
     end
 
     def append_link_out(side, label, value, args)
+      send_event('AppendLinkEnd', side)
     end
 
     def append_link(side, label, value, args)
+      append_link_in(side, label, args)
+      append_text(side, value)
+      append_link_out(side, label, value, args)
     end
 
     def append_meta(side, **kwargs)
