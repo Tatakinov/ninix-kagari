@@ -315,6 +315,7 @@ module Balloon
     end
 
     def open_scriptinputbox()
+      send_event('OpenScriptInputBox')
     end
 
     def close_inputbox(symbol)

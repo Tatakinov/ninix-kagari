@@ -481,6 +481,13 @@ module SSTP
           v.to_i
         end)
         send_response(204)
+      when 'OpenScriptInputBox'
+        return send_response(204) unless from_ao
+        # 時間が掛かるのでIdleで処理して早くSSTP通信を終わらせる
+        GLib::Idle.add do
+          @server.handle_request(:NOTIFY, :open_scriptinputbox)
+        end
+        send_response(204)
       when 'ResetBalloonPosition'
         return send_response(204) unless from_ao or from_ai
         # 時間が掛かるのでIdleで処理して早くSSTP通信を終わらせる
