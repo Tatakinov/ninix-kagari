@@ -1382,9 +1382,20 @@ module Sakura
         state: false,
       }
       data << {
-        type: 'preferences',
-        caption: caption.call('configurationubutton.caption', 'SETTEI'),
-        valid: true,
+        type: 'submenu',
+        caption: caption.call('configurationbutton.caption', 'SETTEI'),
+        list: [
+          {
+            type: 'preferences',
+            caption: caption.call('configurationbutton.caption', 'SETTEI'),
+            valid: true,
+          },
+          {
+            type: 'scriptinputbox',
+            caption: caption.call('scriptinputboxbutton.caption', 'SUKURIPUTO'),
+            valid: true,
+          },
+        ],
       }
       data << {
         type: 'submenu',
