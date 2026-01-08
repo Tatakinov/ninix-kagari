@@ -309,6 +309,7 @@ module Balloon
     end
 
     def open_inputbox(symbol, limittime: -1, default: nil)
+      send_event('OpenInputBox', symbol, "--timeout=#{limittime}", "--text=#{default}")
     end
 
     def open_passwordinputbox(symbol, limittime: -1, default: nil)
