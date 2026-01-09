@@ -26,6 +26,7 @@ require "uri"
 require "pathname"
 require "securerandom"
 require 'json'
+require 'locale'
 
 require_relative "surface"
 require_relative "balloon"
@@ -383,6 +384,7 @@ module Sakura
       uname = Etc.uname
       os = "#{uname[:sysname]},#{uname[:release]},#{uname[:version]}"
       get_event_response('OnNotifyOSInfo', os, event_type: 'NOTIFY')
+      get_event_response('OnLanguageChange', Locale.candidates.language, event_type: 'NOTIFY')
     end
 
     def finalize()
