@@ -463,33 +463,85 @@ module SSTP
         @fp.write("\r\n")
         @fp.write("\r\n")
       when 'GetDescript'
-        return send_response(204) unless from_ao
+        return send_response(400) unless from_ao
         value = @server.handle_request(:GET, :get_descript, *args.take(1))
         send_response(200)
         @fp.write(value)
         @fp.write("\r\n")
         @fp.write("\r\n")
       when 'UpdateMonitorRect'
-        return send_response(204) unless from_ao
+        return send_response(400) unless from_ao
         @server.handle_request(:NOTIFY, :update_monitor_rect, *args.take(5).map do |v|
           v.to_i
         end)
         send_response(204)
       when 'UpdateSurfaceRect'
-        return send_response(204) unless from_ao
+        return send_response(400) unless from_ao
         @server.handle_request(:NOTIFY, :update_surface_rect, *args.take(5).map do |v|
           v.to_i
         end)
         send_response(204)
+      when 'UpdateGhost'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :network_update, args.first)
+        send_response(204)
+      when 'VanishGhost'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :vanish, args.first)
+        send_response(204)
+      when 'ChangeGhost'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :select_sakura, args.first)
+        send_response(204)
+      when 'SummonGhost'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :start_sakura_cb, args.first)
+        send_response(204)
+      when 'ChangeShell'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :select_shell, args.first)
+        send_response(204)
+      when 'ChangeBalloon'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :select_balloon, args.first)
+        send_response(204)
+      when 'VisitSite'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :notify_site_selection, args.first)
+        send_response(204)
+      when 'OpenPreferences'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :edit_preferences)
+        send_response(204)
+      when 'OpenConsole'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :open_console)
+        send_response(204)
+      when 'ShowUsage'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :show_usage)
+        send_response(204)
+      when 'ShowBasewareVersion'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :about)
+        send_response(204)
+      when 'CloseGhost'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :close_sakura)
+        send_response(204)
+      when 'CloseAllGhost'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :close_all)
+        send_response(204)
       when 'OpenScriptInputBox'
-        return send_response(204) unless from_ao
+        return send_response(400) unless from_ao
         # 時間が掛かるのでIdleで処理して早くSSTP通信を終わらせる
         GLib::Idle.add do
           @server.handle_request(:NOTIFY, :open_scriptinputbox)
         end
         send_response(204)
       when 'ResetBalloonPosition'
-        return send_response(204) unless from_ao or from_ai
+        return send_response(400) unless from_ao or from_ai
         # 時間が掛かるのでIdleで処理して早くSSTP通信を終わらせる
         GLib::Idle.add do
           @server.handle_request(:NOTIFY, :reset_balloon_position, *args.take(1).map do |v|
@@ -499,13 +551,13 @@ module SSTP
         end
         send_response(204)
       when 'UpdateBalloonRect'
-        return send_response(204) unless from_ai
+        return send_response(400) unless from_ai
         @server.handle_request(:NOTIFY, :update_balloon_rect, *args.take(5).map do |v|
           v.to_i
         end)
         send_response(204)
       when 'UpdateBalloonOffset'
-        return send_response(204) unless from_ai
+        return send_response(400) unless from_ai
         @server.handle_request(:NOTIFY, :update_balloon_offset, *args.take(3).map do |v|
           v.to_i
         end)

@@ -1407,7 +1407,7 @@ module Sakura
             type: 'switch',
             caption: x[0],
             valid: x[1] != @key,
-            list: [@key],
+            list: [x[1]],
           }
         end
       }
@@ -1419,7 +1419,7 @@ module Sakura
             type: 'switch',
             caption: x[0],
             valid: x[1] != @key,
-            list: [@key],
+            list: [x[1]],
           }
         end
       }
@@ -1446,7 +1446,8 @@ module Sakura
           next {
             type: 'balloon',
             valid: true, # FIXME false if current selected
-            caption: x.class,
+            caption: x[0],
+            list: [x[1]],
           }
         end,
       }
@@ -3656,6 +3657,13 @@ module Sakura
 
     def get_surface_info(key)
       @surface.get_info(key)
+    end
+
+    [:select_sakura, :start_sakura_cb, :select_balloon, :select_shell, :close_sakura].each do |x|
+      define_method(x) do |*args|
+        @parent.handle_request(:NOTIFY, :change_owner, self)
+        @parent.handle_request(:NOTIFY, x, *args)
+      end
     end
   end
 

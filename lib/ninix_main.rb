@@ -521,6 +521,10 @@ module Ninix_Main
       start_sakura(key, :init => true) # XXX
     end
 
+    def change_owner(sakura)
+      @__menu_owner = sakura
+    end
+
     def select_sakura(key)
       if @__menu_owner.busy()
         Gdk.beep()
