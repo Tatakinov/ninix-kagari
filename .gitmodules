@@ -1,0 +1,12 @@
+[submodule "shiori/yaya"]
+	path = shiori/yaya
+	url = https://github.com/Tatakinov/yaya-shiori
+[submodule "shiori/aosora"]
+	path = shiori/aosora
+	url = https://github.com/Tatakinov/aosora-shiori
+[submodule "shiori/satori"]
+	path = shiori/satori
+	url = https://github.com/Tatakinov/satoriya-shiori
+[submodule "shiori/kawari"]
+	path = shiori/kawari
+	url = https://github.com/Tatakinov/kawari
