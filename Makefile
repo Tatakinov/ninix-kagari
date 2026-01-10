@@ -41,6 +41,7 @@ $(YAYA):
 install-all: install $(SHIORI)
 	mkdir -p $(libdir)/aosora
 	cp $(AOSORA) $(libdir)/aosora/libaosora.so
+	mkdir -p $(bindir)
 	cp shiori/aosora/ninix/aosora* $(bindir)
 	mkdir -p $(libdir)/kawari
 	cp $(KAWARI) $(libdir)/kawari/libshiori.so
