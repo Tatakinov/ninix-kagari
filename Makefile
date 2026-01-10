@@ -18,7 +18,36 @@ ruby = ruby
 
 NINIX = ninix
 
-all:
+AOSORA = shiori/aosora/ninix/libaosora.so
+KAWARI = shiori/kawari/build/mach/linux/libshiori.so
+SATORI = shiori/satori/satoriya/satori/libsatori.so
+YAYA   = shiori/yaya/libaya5.so
+SHIORI = $(AOSORA) $(KAWARI) $(SATORI) $(YAYA)
+
+all: $(SHIORI)
+
+$(AOSORA):
+	cd shiori/aosora && $(MAKE) -j
+
+$(KAWARI):
+	cd shiori/kawari/build/src && $(MAKE) -f gcc.mak -j
+
+$(SATORI):
+	cd shiori/satori/satoriya/satori && $(MAKE) -f makefile.posix -j
+
+$(YAYA):
+	cd shiori/yaya && $(MAKE) -f makefile.linux -j
+
+install-all: install $(SHIORI)
+	mkdir -p $(libdir)/aosora
+	cp $(AOSORA) $(libdir)/aosora/libaosora.so
+	cp shiori/aosora/ninix/aosora* $(bindir)
+	mkdir -p $(libdir)/kawari
+	cp $(KAWARI) $(libdir)/kawari/libshiori.so
+	mkdir -p $(libdir)/satori
+	cp $(SATORI) $(libdir)/satori/libsatori.so
+	mkdir -p $(libdir)/yaya
+	cp $(YAYA) $(libdir)/yaya/libaya5.so
 
 install: install-lib install-bin install-doc
 
@@ -41,3 +70,7 @@ install-doc:
 
 clean:
 	$(RM) bin/ninix *~
+	cd shiori/aosora && $(MAKE) clean
+	cd shiori/kawari/build/src && $(MAKE) -f gcc.mak clean
+	cd shiori/satori/satoriya/satori && $(MAKE) -f makefile.posix clean
+	cd shiori/yaya && $(MAKE) -f makefile.linux clean
