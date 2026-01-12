@@ -122,16 +122,17 @@ module Prefs
 
     def initialize
       @parent = nil
-      @dialog = Gtk::Dialog.new()
+      @dialog = Gtk::Window.new
       @dialog.signal_connect('close-request') do |i, *a|
-        next true
+        next response(i, Gtk::ResponseType::DELETE_EVENT)
       end
       @dialog.set_title('Preferences')
       @dialog.set_default_size(-1, 600)
+      vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL)
+      @dialog.set_child(vbox)
       @notebook = Gtk::Notebook.new()
       @notebook.set_tab_pos(Gtk::PositionType::TOP)
-      content_area = @dialog.content_area
-      content_area.append(@notebook)
+      vbox.append(@notebook)
       @notebook.show()
       @notebook.append_page(make_page_surface_n_balloon(),
                             Gtk::Label.new(_('Surface&Balloon')))
@@ -139,12 +140,23 @@ module Prefs
                             Gtk::Label.new(_('Misc')))
       @notebook.append_page(make_page_debug(),
                             Gtk::Label.new(_('Debug')))
-      @dialog.add_button("_OK", Gtk::ResponseType::OK)
-      @dialog.add_button("_Apply", Gtk::ResponseType::APPLY)
-      @dialog.add_button("_Cancel", Gtk::ResponseType::CANCEL)
-      @dialog.signal_connect('response') do |i, *a|
-        next response(i, *a)
+      hbox = Gtk::Box.new(Gtk::Orientation::HORIZONTAL)
+      button = Gtk::Button.new(label: 'OK')
+      button.signal_connect('clicked') do
+        next response(button, Gtk::ResponseType::OK)
       end
+      hbox.append(button)
+      button = Gtk::Button.new(label: 'Apply')
+      button.signal_connect('clicked') do
+        next response(button, Gtk::ResponseType::APPLY)
+      end
+      hbox.append(button)
+      button = Gtk::Button.new(label: 'Cancel')
+      button.signal_connect('clicked') do
+        next response(button, Gtk::ResponseType::CANCEL)
+      end
+      hbox.append(button)
+      vbox.append(hbox)
     end
 
     def set_responsible(parent)
