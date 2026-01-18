@@ -294,7 +294,7 @@ module Surface
     end
 
     def set_surface(side, id)
-      send_event('Surface', side, id)
+      send_event('SetSurfaceID', side, id)
     end
 
     def get_surface(side)
