@@ -342,10 +342,10 @@ module Surface
     def is_playing_animation(side, id)
       response = send_event('IsPlayingAnimation', side, id, method: 'GET')
       headers = response[:headers]
-      unless headers.include?('Value0')
+      unless headers.include?('Result')
         return false
       end
-      x = headers['Value0'].to_i
+      x = headers['Result'].to_i
       return x != 0
     end
 
