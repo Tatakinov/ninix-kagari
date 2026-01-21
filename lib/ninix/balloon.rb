@@ -177,6 +177,14 @@ module Balloon
       return {proto: protocol, code: code.to_i, status: status, headers: headers}
     end
 
+    def notify_script_begin
+      send_event('ScriptBegin')
+    end
+
+    def notify_script_end
+      send_event('ScriptEnd')
+    end
+
     def add_window(side)
       send_event('Create', side)
     end
@@ -407,6 +415,12 @@ module Balloon
       @passwordinputbox.each.to_a.each do |k, v|
         v.close(k)
       end
+    end
+
+    def notify_script_begin
+    end
+
+    def notify_script_end
     end
 
     def new_(desc, balloon)
@@ -2033,6 +2047,12 @@ module Balloon
       @passwordinputbox.each.to_a.each do |k, v|
         v.close(k)
       end
+    end
+
+    def notify_script_begin
+    end
+
+    def notify_script_end
     end
 
     def new_(desc, balloon)

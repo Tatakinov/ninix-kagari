@@ -135,6 +135,14 @@ module Surface
       return {proto: protocol, code: code.to_i, status: status, headers: headers}
     end
 
+    def notify_script_begin
+      send_event('ScriptBegin')
+    end
+
+    def notify_script_end
+      send_event('ScriptEnd')
+    end
+
     def open_menu(json)
       send_event('NotifyMenuInfo', json)
     end
@@ -738,6 +746,12 @@ module Surface
       @maxsize = [maxwidth, maxheight]
       add_window(0, default_sakura, :config_alias => @surface_alias, :mayuna => @__mayuna)
       add_window(1, default_kero, :config_alias => @surface_alias, :mayuna => @__mayuna)
+    end
+
+    def notify_script_begin
+    end
+
+    def notify_script_end
     end
 
     def get_menu_pixmap

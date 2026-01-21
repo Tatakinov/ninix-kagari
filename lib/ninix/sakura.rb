@@ -2241,6 +2241,8 @@ module Sakura
         @quick_session = false
         set_synchronized_session(:list => [], :reset => true)
         @script_start_time = get_current_time
+        @surface.notify_script_begin
+        @balloon.notify_script_begin
       end
       return if @processed_script.empty?
       node = @processed_script[0]
@@ -2268,6 +2270,8 @@ module Sakura
       end
       surface_id = get_surface_id(@script_side)
       @surface.invoke_yen_e(@script_side, surface_id)
+      @surface.notify_script_end
+      @balloon.notify_script_end
       reset_script()
       @__balloon_life = BALLOON_LIFE
     end
