@@ -108,7 +108,11 @@ module SSTPLib
       else
         request = "\"#{@requestline}\""
       end
-      Logging::Logging.info("#{client_hostname} [#{timestamp}] #{request} #{code} #{(message or RESPONSES[code])}\n")
+      if code == 200 or code == 204
+        Logging::Logging.debug("#{client_hostname} [#{timestamp}] #{request} #{code} #{(message or RESPONSES[code])}\n")
+      else
+        Logging::Logging.info("#{client_hostname} [#{timestamp}] #{request} #{code} #{(message or RESPONSES[code])}\n")
+      end
     end
 
     def client_hostname
