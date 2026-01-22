@@ -209,6 +209,11 @@ module Balloon
     end
 
     def set_balloon_default(side: -1)
+      if side == -1
+        send_event('ResetBalloonID')
+      else
+        send_event('ResetBalloonID', side)
+      end
     end
 
     def set_balloon(side, num)
