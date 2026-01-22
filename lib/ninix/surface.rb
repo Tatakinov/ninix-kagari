@@ -364,7 +364,7 @@ module Surface
     end
 
     def invoke(side, id)
-      send_event('StartAnimation', side, id)
+      send_event('InvokeAnimation', side, id, 'start')
     end
 
     def window_iconify(flag)
