@@ -34,7 +34,7 @@ module SSTPLib
         512 => 'Invisible',
         }
 
-    def initialize(server, fp, command, version, uuid = nil, ao_uuid = nil, ai_uuid)
+    def initialize(server, fp, command, version, uuid = nil, ao_uuid = nil, ai_uuid = nil)
       @server = server
       @fp = fp
       @command = command
