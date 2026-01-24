@@ -483,72 +483,110 @@ module SSTP
         send_response(204)
       when 'UpdateGhost'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :network_update, args.first)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :network_update, args.first)
+        end)
         send_response(204)
       when 'VanishGhost'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :vanish, args.first)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :vanish, args.first)
+        end)
         send_response(204)
       when 'ChangeGhost'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :select_sakura, args.first)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :select_sakura, args.first)
+        end)
         send_response(204)
       when 'SummonGhost'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :start_sakura_cb, args.first)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :start_sakura_cb, args.first)
+        end)
         send_response(204)
       when 'ChangeShell'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :select_shell, args.first)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :select_shell, args.first)
+        end)
         send_response(204)
       when 'ChangeBalloon'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :select_balloon, args.first)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :select_balloon, args.first)
+        end)
         send_response(204)
       when 'VisitSite'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :notify_site_selection, args.first)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :notify_site_selection, args.first)
+        end)
         send_response(204)
       when 'OpenPreferences'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :edit_preferences)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :edit_preferences)
+        end)
         send_response(204)
       when 'OpenConsole'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :open_console)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :open_console)
+        end)
         send_response(204)
       when 'ShowUsage'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :show_usage)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :show_usage)
+        end)
         send_response(204)
       when 'ShowBasewareVersion'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :about)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :about)
+        end)
         send_response(204)
       when 'CloseGhost'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :close_sakura)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :close_sakura)
+        end)
         send_response(204)
       when 'CloseAllGhost'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :close_all)
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :close_all)
+        end)
         send_response(204)
       when 'OpenScriptInputBox'
         return send_response(400) unless from_ao
-        # 時間が掛かるのでIdleで処理して早くSSTP通信を終わらせる
-        GLib::Idle.add do
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
           @server.handle_request(:NOTIFY, :open_scriptinputbox)
-        end
+        end)
         send_response(204)
       when 'ResetBalloonPosition'
         return send_response(400) unless from_ao or from_ai
-        # 時間が掛かるのでIdleで処理して早くSSTP通信を終わらせる
-        GLib::Idle.add do
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
           @server.handle_request(:NOTIFY, :reset_balloon_position, *args.take(1).map do |v|
             v.to_i
           end)
-          next false
-        end
+        end)
         send_response(204)
       when 'UpdateBalloonRect'
         return send_response(400) unless from_ai

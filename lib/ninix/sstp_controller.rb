@@ -21,6 +21,7 @@ class BaseSSTPController < MetaMagic::Holon
     @__sstp_queue = Thread::Queue.new
     @__sstp_flag = false
     @__current_sender = nil
+    @__execute_queue = Thread::Queue.new
   end
 
   def enqueue_request(event, script_odict, sender, handle,
@@ -110,6 +111,19 @@ class BaseSSTPController < MetaMagic::Holon
       event, script, sender, handle, address,
       show_sstp_marker, use_translator, :db => entry_db,
       :request_handler => request_handler, :temp_mode => true)
+  end
+
+  def enqueue_execute_command(f)
+    @__execute_queue << f
+  end
+
+  def handle_execute_command
+    return if @__execute_queue.empty?
+    loop do
+      f = @__execute_queue.shift
+      f.call
+      break if @__execute_queue.empty?
+    end
   end
 
   def receive_sstp_request(buffer, server, socket)
