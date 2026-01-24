@@ -1369,39 +1369,39 @@ module Sakura
       data = []
       data << {
         type: 'submenu',
-        caption: caption.call("#{side2s.call(side)}.recommendbuttoncaption", 'OSUSUME'),
+        caption: caption.call("#{side2s.call(side)}.recommendbuttoncaption", _('Recommend sites(_R)')),
         list: sites.call("#{side2s.call(side)}.recommendsites"),
       }
       data << {
         type: 'submenu',
-        caption: caption.call("#{side2s.call(side)}.recommendbuttoncaption", 'OSUSUME'),
+        caption: caption.call("#{side2s.call(side)}.portalbuttoncaption", _('Portal sites(_P)')),
         list: sites.call("#{side2s.call(side)}.recommendsites"),
       }
       data << {
         type: 'check',
-        caption: caption.call('alwaysstayontopbutton.caption', 'ISUWARU'),
+        caption: caption.call('alwaysstayontopbutton.caption', _('Stick(_Y)')),
         valid: true,
         state: false,
       }
       data << {
         type: 'submenu',
-        caption: caption.call('configurationbutton.caption', 'SETTEI'),
+        caption: caption.call('configurationbutton.caption', _('Options(_F)')),
         list: [
           {
             type: 'preferences',
-            caption: caption.call('configurationbutton.caption', 'SETTEI'),
+            caption: caption.call('configurationbutton.caption', _('Preferences...(_O)')),
             valid: true,
           },
           {
             type: 'scriptinputbox',
-            caption: caption.call('scriptinputboxbutton.caption', 'SUKURIPUTO'),
+            caption: caption.call('scriptinputboxbutton.caption', _('Input Script(_L)')),
             valid: true,
           },
         ],
       }
       data << {
         type: 'submenu',
-        caption: caption.call('switchghostbutton.caption', 'KOUTAI'),
+        caption: caption.call('switchghostbutton.caption', _('Change(_G)')),
         list: @parent.handle_request(:GET, :get_ghost_list).map do |x|
           next {
             type: 'switch',
@@ -1413,7 +1413,7 @@ module Sakura
       }
       data << {
         type: 'submenu',
-        caption: caption.call('callghostbutton.caption', 'YOBIDASHI'),
+        caption: caption.call('callghostbutton.caption', _('Summon(_X)')),
         list: @parent.handle_request(:GET, :get_ghost_list).map do |x|
           next {
             type: 'switch',
@@ -1425,7 +1425,7 @@ module Sakura
       }
       data << {
         type: 'submenu',
-        caption: caption.call('shellrootbutton.caption', 'SHERU'),
+        caption: caption.call('shellrootbutton.caption', _('Shell(_S)')),
         list: @shells.map do |k, v|
           name, path, desc, _ = v.baseinfo
           next {
@@ -1437,11 +1437,11 @@ module Sakura
       }
       data << {
         type: 'dressup',
-        caption: caption.call('dressuprootbutton.caption', 'KISEKAE'),
+        caption: caption.call('dressuprootbutton.caption', _('Costume(_C)')),
       }
       data << {
         type: 'submenu',
-        caption: caption.call('balloonrootbutton.caption', 'BARUUN'),
+        caption: caption.call('balloonrootbutton.caption', _('Balloon(_B)')),
         list: @parent.handle_request(:GET, :get_balloon_list).map do |x|
           next {
             type: 'balloon',
@@ -1453,24 +1453,24 @@ module Sakura
       }
       data << {
         type: 'submenu',
-        caption: caption.call('dressuprootbutton.caption', 'JOUHOU'),
+        caption: caption.call('inforootbutton.caption', _('Information(_I)')),
         list: [
           {
             type: 'basewareversion',
             valid: true,
-            caption: caption.call('inforootbutton.caption', 'BEESUWEA'),
+            caption: caption.call('systeminfobutton.caption', _('Version(_V)')),
           },
         ],
       }
       data << {
         type: 'close',
         valid: true,
-        caption: caption.call('closebutton.caption', 'TOJIRU'),
+        caption: caption.call('closebutton.caption', _('Close(_W)')),
       }
       data << {
         type: 'close_all',
         valid: true,
-        caption: caption.call('closeallbutton.caption', 'SUBETETOJIRU'),
+        caption: caption.call('closeallbutton.caption', _('Quit(_Q)')),
       }
       @surface.open_menu(JSON.generate(data))
     end
@@ -2129,6 +2129,7 @@ module Sakura
       #
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
         @controller.handle_sstp_queue
+        @controller.handle_execute_command
       end
       unless @wait_for_animation.nil?
         if @surface.is_playing_animation(@script_side, @wait_for_animation)
