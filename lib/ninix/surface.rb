@@ -136,11 +136,11 @@ module Surface
     end
 
     def notify_script_begin
-      send_event('ScriptBegin')
+      send_event('OnScriptBegin')
     end
 
     def notify_script_end
-      send_event('ScriptEnd')
+      send_event('OnScriptEnd')
     end
 
     def open_menu(json)
