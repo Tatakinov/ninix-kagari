@@ -178,11 +178,11 @@ module Balloon
     end
 
     def notify_script_begin
-      send_event('ScriptBegin')
+      send_event('OnScriptBegin')
     end
 
     def notify_script_end
-      send_event('ScriptEnd')
+      send_event('OnScriptEnd')
     end
 
     def add_window(side)
@@ -222,7 +222,7 @@ module Balloon
     end
 
     def set_position(side, base_x, base_y)
-      send_event('Position', side, base_x, base_y)
+      send_event('SetPosition', side, base_x, base_y)
     end
 
     def get_position(side)
@@ -262,7 +262,7 @@ module Balloon
     end
 
     def set_balloon_direction(side, direction)
-      send_event('Direction', side, direction)
+      send_event('SetDirection', side, direction)
     end
 
     def clear_text_all
