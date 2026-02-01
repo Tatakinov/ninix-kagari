@@ -70,17 +70,19 @@ module Surface
       @desc = desc
       @ao = desc.get('ao')
       fail if @ao.nil?
-      if ENV['AO_PATH'].nil?
-        command = @ao
-      else
-        command = File.join(ENV['AO_PATH'], @ao)
-      end
+      command = File.join(surface_dir, @ao)
       begin
         @ao_write, @ao_read, @ao_err, @ao_thread = Open3.popen3(command)
-      rescue => e
-        # TODO error
-        p e
-        return
+      rescue
+        Logging::Logging.info('fallback to default Ao') unless ENV.include?('NINIX_ENABLE_SORAKADO')
+        fail if ENV['AO_PATH'].nil?
+        command = File.join(ENV['AO_PATH'], @ao)
+        begin
+          @ao_write, @ao_read, @ao_err, @ao_thread = Open3.popen3(command)
+        rescue => e
+          Logging::Logging.error(e.message)
+          return
+        end
       end
       send_event('Initialize', File.join(surface_dir, ''))
       send_event('BasewareVersion', 'ninix', Version.NUMBER)

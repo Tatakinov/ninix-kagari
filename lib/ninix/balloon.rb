@@ -117,22 +117,24 @@ module Balloon
 
     def new_(desc, balloon)
       @desc = desc
-      directory = balloon['balloon_dir'][0]
+      directory = File.join(Home.get_ninix_home, 'balloon', balloon['balloon_dir'][0])
       @ai = desc.get('ai')
       fail if @ai.nil?
-      if ENV['AI_PATH'].nil?
-        command = @ai
-      else
-        command = File.join(ENV['AI_PATH'], @ai)
-      end
+      command = File.join(directory, @ai)
       begin
         @ai_write, @ai_read, @ai_err, @ai_thread = Open3.popen3(command)
-      rescue => e
-        # TODO error
-        p e
-        return
+      rescue
+        Logging::Logging.info('fallback to default Ai') unless ENV.include?('NINIX_ENABLE_SORAKADO')
+        fail if ENV['AI_PATH'].nil?
+        command = File.join(ENV['AI_PATH'], @ai)
+        begin
+          @ai_write, @ai_read, @ai_err, @ai_thread = Open3.popen3(command)
+        rescue => e
+          Logging::Logging.error(e.message)
+          return
+        end
       end
-      send_event('Initialize', File.join(Home.get_ninix_home, 'balloon', directory, ''))
+      send_event('Initialize', File.join(directory, ''))
       send_event('BasewareVersion', 'ninix', Version.NUMBER)
       path, _ao_uuid, ai_uuid = @parent.handle_request(:GET, :endpoint)
       send_event('Endpoint', path, ai_uuid)
