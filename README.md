@@ -20,15 +20,11 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 ## Supported OS
 
-- Linux[^1]
+- Linux
 
-- Windows[^2][^3]
+- Windows (10 or later)
 
 - BSD
-
-[^1]: Waylandを使用している場合、おそらくStacking型のコンポジタでないと正しく動作しません。
-[^2]: Windows10より前のバージョンでは[設定が必要](#UNIXソケットの使用)
-[^3]: Windows10より前のバージョンでは`ucrt`が必要になります。
 
 ## Requirements
 
@@ -46,7 +42,7 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - ninix-fmo
 
-- compositor (only X11)
+- X11 compositor (only X11)
 
 が最低限必要なものになります。
 [ninix-fmo](https://github.com/Tatakinov/ninix-fmo)は
@@ -161,7 +157,26 @@ rubyinstallerのRuby+Devkitの**x64**をインストールしてください。
 > ruby lib/ninix_main.rb
 ```
 
+## Build with SHIORI/AO/AI
+
+```
+$ make
+# make install-all
+```
+
+をすることで、メジャーなSHIORIとAO/AIを一緒にビルド/インストールすることが出来ます。
+
+別途openssl(aosora-shiori)とsdl3,sdl3-image,sdl3-ttf(ao\_builtin/ai\_builtin)が必要になります。
+
 ## Option
+
+### 描画処理を外部プログラムに移譲する
+
+`NINIX_ENABLE_SORAKADO=1`を指定することで、描画処理を
+外部プログラムに移譲出来ます。
+
+動作には別途AO/AIに準拠したプログラムが必要です。
+ビルド方法は`Build with SHIORI/AO/AI`を参照してください。
 
 ### ゴーストをマルチモニタで表示
 
