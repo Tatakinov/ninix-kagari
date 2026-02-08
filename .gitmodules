@@ -10,3 +10,9 @@
 [submodule "shiori/kawari"]
 	path = shiori/kawari
 	url = https://github.com/Tatakinov/kawari
+[submodule "sorakado/ao_builtin"]
+	path = sorakado/ao_builtin
+	url = https://github.com/Tatakinov/ao_builtin
+[submodule "sorakado/ai_builtin"]
+	path = sorakado/ai_builtin
+	url = https://github.com/Tatakinov/ai_builtin
