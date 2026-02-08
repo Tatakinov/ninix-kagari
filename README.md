@@ -160,6 +160,8 @@ rubyinstallerのRuby+Devkitの**x64**をインストールしてください。
 ## Build with SHIORI/AO/AI
 
 ```
+$ git clone --recursive https://github.com/Tatakinov/ninix-kagari
+$ cd ninix-kagari
 $ make
 # make install-all
 ```
