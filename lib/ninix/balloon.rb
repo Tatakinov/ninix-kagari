@@ -138,11 +138,6 @@ module Balloon
       send_event('BasewareVersion', 'ninix', Version.NUMBER)
       path, _ao_uuid, ai_uuid = @parent.handle_request(:GET, :endpoint)
       send_event('Endpoint', path, ai_uuid)
-      info = []
-      @desc.each do |k, v|
-        info << [k, v].join(',')
-      end
-      send_event('Description', *info)
       reset_fonts
     end
 

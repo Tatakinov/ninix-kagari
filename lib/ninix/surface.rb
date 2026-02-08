@@ -88,11 +88,6 @@ module Surface
       send_event('BasewareVersion', 'ninix', Version.NUMBER)
       path, ao_uuid, _ai_uuid = @parent.handle_request(:GET, :endpoint)
       send_event('Endpoint', path, ao_uuid)
-      info = []
-      @desc.each do |k, v|
-        info << [k, v].join(',')
-      end
-      send_event('Description', *info)
       reset_surface
     end
 
