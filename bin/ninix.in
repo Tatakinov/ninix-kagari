@@ -1,9 +1,9 @@
 #!/bin/sh
 
 export SAORI_FALLBACK_ALWAYS=1
-
 export SAORI_FALLBACK_PATH=@saori_path
-
 export LD_LIBRARY_PATH=@so_path:${LD_LIBRARY_PATH}
+export AO_PATH=@ao_path
+export AI_PATH=@ai_path
 
 exec @ruby @libdir/ninix_main.rb ${1+"$@"}
