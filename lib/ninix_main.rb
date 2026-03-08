@@ -200,18 +200,25 @@ module Ninix_Main
             rescue
               break
             end
-            buffer = []
-            for key, value in @sakura_info
-              for k, v in value
-                buffer << key + '.' + k.to_s + "\x01" + v.to_s
+            line = soc.gets(chomp: true)
+            command, sep, args = line.partition(':')
+            case command
+            when 'GetFMO'
+              buffer = []
+              for key, value in @sakura_info
+                for k, v in value
+                  buffer << key + '.' + k.to_s + "\x01" + v.to_s
+                end
               end
+              data = buffer.join("\x0d\x0a") + "\x0d\x0a\x00"
+            else
+              data = nil
             end
-            data = buffer.join("\x0d\x0a") + "\x0d\x0a\x00"
-            Thread.start(soc, data) do |s, d|
-              s.write([d.bytesize].pack('L*'))
-              s.write([d].pack('a*'))
-              s.close
+            unless data.nil?
+              soc.write([data.bytesize].pack('L*'))
+              soc.write([data].pack('a*'))
             end
+            soc.close
           end
         end
       end
