@@ -201,6 +201,10 @@ module Ninix_Main
               break
             end
             line = soc.gets(chomp: true)
+            if line.nil?
+              soc.close
+              next
+            end
             command, sep, args = line.partition(':')
             case command
             when 'GetFMO'
@@ -211,8 +215,15 @@ module Ninix_Main
                 end
               end
               data = buffer.join("\x0d\x0a") + "\x0d\x0a\x00"
+            when 'CallGhost'
+              key = find_ghost_by_dir(args)
+              if key.nil?
+                key = find_ghost_by_name(args)
+              end
+              next if key.nil?
+              start_sakura_cb(key)
             else
-              data = nil
+              # nop
             end
             unless data.nil?
               soc.write([data.bytesize].pack('L*'))
@@ -518,13 +529,10 @@ module Ninix_Main
       @__menu_owner.get_current_balloon_directory()
     end
 
-    def start_sakura_cb(key, caller: nil)
+    def start_sakura_cb(key, caller: @__menu_owner)
       sakura_name = @ghosts[key].instance.get_selfname(:default => '')
       name = @ghosts[key].instance.get_name(:default => '')
-      if caller.nil?
-        caller = @__menu_owner
-      end
-      caller.notify_event('OnGhostCalling', sakura_name, 'manual', name, key)
+      caller.notify_event('OnGhostCalling', sakura_name, 'manual', name, key) unless caller.nil?
       start_sakura(key, :init => true) # XXX
     end
 
@@ -1751,6 +1759,27 @@ end
 
 Logging::Logging.set_level(Logger::INFO)
 
+# parse command line arguments
+opt = OptionParser.new
+option = {}
+opt.on('--sstp-port sstp_port', 'additional port for listening SSTP requests') {|v| option[:sstp_port] = v}
+opt.on('--debug', 'debug') {|v| option[:debug] = v}
+opt.on('--logfile logfile_name', 'logfile name') {|v| option[:logfile] = v}
+opt.on('--ghost ghost_name', 'ghost name') do |v|
+  option[:ghost] = v
+end
+opt.on('--exit-if-not-found', 'exit if not found') do |v|
+  if v
+    option[:exit_if_not_found] = Proc.new do
+      application.quit
+    end
+  end
+end
+opt.on('--show-console', 'show console window on boot') do |v|
+  option[:show_console] = v
+end
+opt.parse!(ARGV)
+
 # Homeの確認と2重起動防止はGtk::Applicationの外でやらないと
 # 起動中のninix-kagariが落ちる。
 begin
@@ -1760,12 +1789,17 @@ begin
     path_running = shm.read
     UNIXSocket.open(File.join(path_running, 'ninix')) do |soc|
       is_running = true
+      if option.include?(:ghost)
+        soc.write("CallGhost:#{option[:ghost]}\r\n")
+      end
+      soc.shutdown(Socket::SHUT_WR)
       # 起動中のninix側がBroken Pipeしないように全部読み込む
       soc.read
     end
   rescue
     # 起動中のninixが存在しない場合にここに来るのでnop
   end
+  raise SystemExit, '' if is_running and option.include?(:ghost)
   raise SystemExit, 'ninix-kagari is already running' if is_running
   shm = NinixFMO::NinixFMO.new('/ninix', NinixFMO::O_RDWR ^ NinixFMO::O_CREAT)
   path = [NinixServer.sockdir, File::SEPARATOR].join
@@ -1792,33 +1826,13 @@ begin
   lock = open(lockfile_path, 'w')
   raise SystemExit, 'ninix-kagari is already running' if not Lock.lockfile(lock)
 rescue SystemExit => e
-  p e.message
+  puts e.message unless e.message.empty?
   exit false
 end
 
 gtk_app = Gtk::Application.new('io.github.tatakinov.ninix-kagari', :flags_none)
 
 gtk_app.signal_connect 'activate' do |application|
-  # parse command line arguments
-  opt = OptionParser.new
-  option = {}
-  opt.on('--sstp-port sstp_port', 'additional port for listening SSTP requests') {|v| option[:sstp_port] = v}
-  opt.on('--debug', 'debug') {|v| option[:debug] = v}
-  opt.on('--logfile logfile_name', 'logfile name') {|v| option[:logfile] = v}
-  opt.on('--ghost ghost_name', 'ghost name') do |v|
-    option[:ghost] = v
-  end
-  opt.on('--exit-if-not-found', 'exit if not found') do |v|
-    if v
-      option[:exit_if_not_found] = Proc.new do
-        application.quit
-      end
-    end
-  end
-  opt.on('--show-console', 'show console window on boot') do |v|
-    option[:show_console] = v
-  end
-  opt.parse!(ARGV)
   Logging::Logging.add_logger(Logger.new(option[:logfile])) unless option[:logfile].nil?
   # TCP 7743：伺か（未使用）(IANA Registered Port for SSTP)
   # UDP 7743：伺か（未使用）(IANA Registered Port for SSTP)
