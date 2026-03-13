@@ -2542,6 +2542,14 @@ module Balloon
           next button_press(window, darea, w, n, x, y)
         end
         darea.add_controller(button_controller)
+        key_controller = Gtk::EventControllerKey.new
+        key_controller.signal_connect('key-pressed') do |ctrl, keyval, keycode, state|
+          next key_press(ctrl.widget, ctrl, keyval, keycode, state)
+        end
+        key_controller.signal_connect('key-released') do |ctrl, keyval, keycode, state|
+          next key_release(ctrl.widget, ctrl, keyval, keycode, state)
+        end
+        window.add_controller(key_controller)
         motion_controller = Gtk::EventControllerMotion.new
         motion_controller.signal_connect('motion') do |w, x, y|
           next motion_notify(window, darea, w, x, y)
@@ -3717,10 +3725,45 @@ module Balloon
       @newline_required = false
       @images = []
       @sstp_marker = []
+      @key_press_count = 0
       @windows.each do |window|
         window.darea.queue_draw
       end
     end
+
+    def key_press(window, event, keyval, keycode, state)
+      name = Keymap::Keymap_old[keyval]
+      keycode = Keymap::Keymap_new[keyval]
+      @key_press_count += 1
+      if (state & \
+          (Gdk::ModifierType::CONTROL_MASK | \
+           Gdk::ModifierType::SHIFT_MASK)).nonzero?
+        if name == 'f12'
+          # TODO stub
+        end
+        if name == 'f10'
+          # TODO stub
+        end
+      end
+      modifier = []
+      modifier << 'shift' unless (state & Gdk::ModifierType::SHIFT_MASK).zero?
+      modifier << 'ctrl' unless (state & Gdk::ModifierType::CONTROL_MASK).zero?
+      modifier << 'alt' unless (state & Gdk::ModifierType::ALT_MASK).zero?
+      modifier << 'meta' unless (state & Gdk::ModifierType::META_MASK).zero?
+      unless name.nil? and keycode.nil?
+        # NOTE Reference3はninixでは意味を成さないのでnil
+        @parent.handle_request(
+          :NOTIFY, :notify_event, 'OnKeyPress', name, keycode,
+          @key_press_count, nil, modifier.join(','))
+      end
+      return true
+    end
+
+    def key_release(window, event, keyval, keycode, state)
+      @key_press_count = 0
+      return true
+    end
+
 
     def get_text_count
       @text_count
