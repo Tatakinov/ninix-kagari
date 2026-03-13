@@ -2252,8 +2252,8 @@ module Sakura
         @script_position = node[-1]
       elsif not embed
         @balloon.clear_text_all()
+        @balloon.hide_all()
       else
-        #@balloon.hide_all()
       end
       @balloon.set_balloon_default()
       @current_time = Time.new.to_a
