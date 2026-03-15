@@ -2540,7 +2540,7 @@ module Surface
                                  group[0],
                                  from)
         end
-        reset_surface()
+        #reset_surface()
       end
     end
 

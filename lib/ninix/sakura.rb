@@ -181,6 +181,7 @@ module Sakura
       @client = Http::Client.new
       @client.set_responsible(self)
       @defer_show = []
+      @defer_update_bind = []
     end
 
     def get_lock_repaint(*args)
@@ -2020,6 +2021,10 @@ module Sakura
       elsif not @processed_script.empty? or not @processed_text.empty?
         while interpret_script == CONTINUING_INTERPRETATION do
         end
+        @defer_update_bind.each do |side|
+          @surface.reset_surface(side)
+        end
+        @defer_update_bind = []
       elsif not @script_post_proc.empty?
         for proc_obj in @script_post_proc
           proc_obj.call()
@@ -3056,6 +3061,7 @@ module Sakura
           flag = :toggle
         end
         @surface.toggle_bind(@script_side, category, name, 'script', flag)
+        @defer_update_bind << @script_side unless @defer_update_bind.include?(@script_side)
         return CONTINUING_INTERPRETATION
       elsif args[0] == 'execute'
         case args[1]
