@@ -80,33 +80,9 @@ narrayはそのままだと最近のCコンパイラでは
 
 ### .deb package
 
-Debian 13 (trixie)及びそれ以降のバージョンをupstreamとする
-ディストリビューションでは、debパッケージを用いたインストールが
-可能となっています。
-(ruby-gtk4がパッケージとして存在し、Rubyのバージョンが3.3のもの)
-
-Releaseページから`ninix-kagari_x.y.z_amd64.deb`をダウンロードして
-次のコマンドを実行します。
-
-```
-# apt install /path/to/ninix-kagari_x.y.z_amd64.deb
-```
-
-カレントディレクトリにdebパッケージがある場合は
-
-```
-# apt install ./ninix-kagari_x.y.z_amd64.deb
-```
-
-のように`./`を付けるのを忘れないでください。
-
-なお、この方法でインストールを行うと、
-インストールされるスクリプト群が存在するディレクトリは
-`/opt/ninix-kagari`*ではなく*、
-`/usr/game/ninix-kagari`や`/usr/lib/game/ninix-kagari`等になることに
-注意してください。
-ファイルが具体的にどこに配置されるかは、
-debパッケージを展開して中身を見てください。
+Debianの公式リポジトリにninix-kagariが登録された関係で、
+v3.0.0以降のdebパッケージは*ありません*。
+最新版を導入したい場合は、以下の方法を使用してください。
 
 ### Linux
 
