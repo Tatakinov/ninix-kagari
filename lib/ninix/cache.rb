@@ -60,7 +60,7 @@ module Cache
           next true
         else
           @info[k][:count] = 0
-          @info[k][:time] = time
+          @info[k][:time] = time if k == key
           next false
         end
       end
