@@ -2,6 +2,7 @@
 #
 #  metamagic.rb - unknown unknowns
 #  Copyright (C) 2011-2019 by Shyouzou Sugitani <shy@users.osdn.me>
+#  Copyright (C) 2024, 2025 by Tatakinov
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License (version 2) as
