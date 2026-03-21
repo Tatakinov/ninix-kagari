@@ -42,6 +42,8 @@ module Menu
         'sidebar' => nil
       }
       @__menu_list = {}
+      @__popup_window = nil  # initialized lazily on first popup call
+      @popup_in_progress = false
       model = Gio::Menu.new
       @__popup_menu = Gtk::PopoverMenu.new(model)
       @__popup_menu.set_has_arrow(false)
@@ -224,8 +226,7 @@ module Menu
 
     def create_css_provider_for(item)
       provider = Gtk::CssProvider.new()
-      style_context = item.style_context
-      #style_context.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
+      # GTK4: style_context is gone; register at display level instead
       Gtk::StyleContext.add_provider_for_display(Gdk::Display.default, provider, Gtk::StyleProvider::PRIORITY_USER)
       return provider
     end
@@ -421,16 +422,13 @@ module Menu
       end
     end
 
-    def popup(side, x, y, upper)
-      @__popup_menu.popdown
-=begin TODO delete?
-      @__popup_menu.unrealize()
-      for key in @__menu_list.keys
-        item = @__menu_list[key][:entry]
-        submenu = item.submenu
-        submenu.unrealize() unless submenu.nil?
+    def popup(side, x, y, upper, parent_window = nil)
+      # Dismiss any in-progress popup before starting a new one
+      if @popup_in_progress
+        @popup_in_progress = false
+        @__popup_menu.popdown
       end
-=end
+
       if side > 1
         string = 'char' + side.to_s
       else
@@ -446,14 +444,12 @@ module Menu
       else
         portal = nil
       end
-      # FIXME implement
       __set_portal_menu(side, portal)
-      if side > 1
-        string = 'char' + side.to_s
-      else
-        fail "assert" unless [0, 1].include?(side)
-        string = ['sakura', 'kero'][side]
-      end
+      string = if side > 1
+                 'char' + side.to_s
+               else
+                 ['sakura', 'kero'][side]
+               end
       string = [string, '.recommendsites'].join('')
       recommend = @parent.handle_request(:GET, :getstring, string)
       __set_recommend_menu(recommend)
@@ -463,19 +459,38 @@ module Menu
       __set_mayuna_menu(side)
       __set_nekodorif_menu()
       __set_kinoko_menu()
-=begin FIXME alternative
-      for key in @__menu_list.keys
-        item = @__menu_list[key][:entry]
-        visible = @__menu_list[key][:visible]
-        unless item.nil?
-          if visible
-            item.show()
-          else
-            item.hide()
-          end
+
+      # Parent the popover to the ghost's own window — it's already realized
+      # and visible, so no race condition on Wayland.
+      # Re-parent if the window changed (e.g. after a shell switch).
+      if parent_window && parent_window != @__popup_window
+        @__popup_menu.unparent if @__popup_window
+        @__popup_menu.set_parent(parent_window)
+        @__popup_window = parent_window
+        @__popup_menu.signal_connect('closed') do
+          @popup_in_progress = false
         end
+      elsif @__popup_window.nil?
+        # Fallback: ghost window unavailable, use a minimal 1x1 dummy
+        orig = ENV['NINIX_MONITOR_SIZE']
+        ENV['NINIX_MONITOR_SIZE'] = '1x1'
+        @__popup_window = Pix::BaseTransparentWindow.new
+        if orig.nil?
+          ENV.delete('NINIX_MONITOR_SIZE')
+        else
+          ENV['NINIX_MONITOR_SIZE'] = orig
+        end
+        @parent.handle_request(:NOTIFY, :associate_application, @__popup_window)
+        @__popup_window.signal_connect('realize') do
+          @__popup_window.surface.set_input_region(Cairo::Region.new) rescue nil
+        end
+        @__popup_menu.set_parent(@__popup_window)
+        @__popup_menu.signal_connect('closed') do
+          @popup_in_progress = false
+        end
+        @__popup_window.show
       end
-=end
+
       @__popup_menu.set_pointing_to(Gdk::Rectangle.new(x, y, 1, 1))
 =begin
       if upper
@@ -535,11 +550,9 @@ module Menu
     def __set_caption(name, caption)
       fail "assert" unless @__menu_list.include?(name)
       fail "assert" unless caption.is_a?(String)
-      item = @__menu_list[name][:entry]
-      unless item.nil?
-        label = item.children[0]
-        label.set_text_with_mnemonic(caption)
-      end
+      # GTK4/Gio::Menu items are immutable after insertion — dynamic relabeling
+      # requires rebuilding the menu item. Stubbed until that is implemented.
+      # item = @__menu_list[name][:entry]
     end
 
     def __set_visible(name, visible)
@@ -570,7 +583,7 @@ module Menu
                 item.set_sensitive(false)
               end
 =end
-              if entry.length > 1    
+              if entry.length > 1
                 url = entry[1]
               end
               if entry.length > 2
@@ -599,7 +612,7 @@ module Menu
               else
                 banner = nil
               end
-              if entry.length > 1    
+              if entry.length > 1
                 item.signal_connect('activate', title, url) do |a, param, title, url|
                   @parent.handle_request(
                     :GET, :notify_site_selection, title, url)
@@ -984,9 +997,9 @@ module Menu
       nekodorif_menu.remove_all
       nekodorif_list.length.times do |i|
         name = nekodorif_list[i]['name']
-        item = Gio::MenuItem(name, "app.nekodorif#{i}")
+        item = Gio::MenuItem.new(name, "app.nekodorif#{i}")
         nekodorif_menu.append_item(item)
-        action = Gio::SimpleAction("nekodorif#{i}")
+        action = Gio::SimpleAction.new("nekodorif#{i}")
         action.signal_connect('activate', nekodorif_list[i]['dir']) do |a, dir|
           @parent.handle_request(:GET, :select_nekodorif, dir)
           next true
@@ -1015,9 +1028,9 @@ module Menu
       kinoko_menu.remove_all
       kinoko_list.length.times do |i|
         name = kinoko_list[i]['title']
-        item = Gio::MenuItem(name, "app.kinoko#{i}")
+        item = Gio::MenuItem.new(name, "app.kinoko#{i}")
         kinoko_menu.append_item(item)
-        action = Gio::SimpleAction("kinoko#{i}")
+        action = Gio::SimpleAction.new("kinoko#{i}")
         action.signal_connect('activate', kinoko_list[i]) do |a, k|
           @parent.handle_request(:GET, :select_kinoko, k)
           next true
@@ -1041,12 +1054,9 @@ module Menu
     end
 
     def get_stick
-      item = @__menu_list['Stick'][:entry]
-      if not item.nil? and item.active?
-        return true
-      else
-        return false
-      end
+      # 'Stick' is registered as an action but not tracked in @__menu_list
+      # (no toggle state available via Gio::SimpleAction without extra bookkeeping)
+      return false
     end
   end
 end

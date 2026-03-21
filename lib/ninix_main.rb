@@ -241,7 +241,7 @@ module Ninix_Main
       for key, value in odict_baseinfo
         holon = Ghost.new(key)
         holon.set_responsible(self)
-        @ghosts[key] = holon 
+        @ghosts[key] = holon
         holon.baseinfo = value
       end
       @balloons = {} # Ordered Hash
@@ -624,7 +624,8 @@ module Ninix_Main
         end
       end
       r = monitor.geometry
-      @__menu.popup(side, x - r.x, y - r.y, upper)
+      parent_window = @__menu_owner.get_popup_parent_window(side)
+      @__menu.popup(side, x - r.x, y - r.y, upper, parent_window)
     end
 
     def get_ghost_menus
@@ -1103,7 +1104,7 @@ module Ninix_Main
         @ghosts.delete(key)
         return ## FIXME
       end
-      start_sakura(key, :prev => key, :init => true) 
+      start_sakura(key, :prev => key, :init => true)
     end
 
     def add_sakura(ghost_dir)

@@ -456,7 +456,7 @@ module Surface
         gtk_window.set_keep_above(flag)
       end
     end
-         
+
     def window_iconify(flag)
       gtk_window = @window[0].window
       iconified = (gtk_window.window.state & \
@@ -1361,7 +1361,7 @@ module Surface
   end
 
   class SurfaceWindow < MetaMagic::Holon
-    attr_reader :bind
+    attr_reader :bind, :windows
 
     OPERATOR = {
       'base' =>            Cairo::OPERATOR_SOURCE, # XXX
@@ -1736,7 +1736,7 @@ module Surface
       end
       return mayuna_list
     end
-    
+
     def create_surface_from_file(surface_id, is_asis: false, check_only: false)
       fail "assert" unless @surfaces.include?(surface_id)
       overlay = @surfaces[surface_id][1, @surfaces[surface_id].length - 1]

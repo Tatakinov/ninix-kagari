@@ -93,9 +93,10 @@ module Pix
       super()
       set_decorated(false)
       provider = Gtk::CssProvider.new()
-      provider.load_from_data(TRANSPARENT_CSS)
-      sc = style_context
-      sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
+      provider.load_from_string(TRANSPARENT_CSS)
+      # GTK4: style_context/add_provider gone; register at display level
+      Gtk::StyleContext.add_provider_for_display(
+        Gdk::Display.default, provider, Gtk::StyleProvider::PRIORITY_USER)
       #set_resizable(false)
       if monitor.nil? and not ENV.include?('NINIX_MONITOR_SIZE')
         id = signal_connect('notify') do |obj, spec|
@@ -223,9 +224,10 @@ module Pix
       super(application)
       set_decorated(false)
       provider = Gtk::CssProvider.new()
-      provider.load_from_data(TRANSPARENT_CSS)
-      sc = style_context
-      sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
+      provider.load_from_string(TRANSPARENT_CSS)
+      # GTK4: style_context/add_provider gone; register at display level
+      Gtk::StyleContext.add_provider_for_display(
+        Gdk::Display.default, provider, Gtk::StyleProvider::PRIORITY_USER)
       show
       surface.set_input_region(Cairo::Region.new)
       hide
