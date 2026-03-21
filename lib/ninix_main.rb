@@ -522,7 +522,7 @@ module Ninix_Main
       @__menu_owner.select_shell(key)
     end
 
-    def select_balloon(key)
+    def select_balloon(key, *args)
       desc, balloon = get_balloon_description(key)
       @__menu_owner.select_balloon(key, desc, balloon)
     end

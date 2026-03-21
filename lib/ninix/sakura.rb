@@ -3739,12 +3739,11 @@ module Sakura
       @surface.get_info(key)
     end
 
-    def select_shell_from_ao(key)
-      @parent.handle_request(:GET, :select_shell, key)
-    end
-
-    def select_balloon_from_ao(key)
-      @parent.handle_request(:GET, :select_balloon, key)
+    [:select_sakura, :start_sakura_cb, :select_shell, :close_sakura].each do |x|
+      define_method(x) do |*args|
+        @parent.handle_request(:NOTIFY, :change_owner, self)
+        @parent.handle_request(:NOTIFY, x, *args)
+      end
     end
   end
 

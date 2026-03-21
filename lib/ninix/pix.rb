@@ -18,9 +18,8 @@ require "gtk4"
 require_relative "logging"
 
 module Pix
-  TRANSPARENT_CSS = 'window { background-color: rgba(0, 0, 0, 0); }'
+  TRANSPARENT_CSS = '.ninix-transparent { background-color: rgba(0, 0, 0, 0); }'
   Rect = Struct.new(:x, :y, :width, :height)
-
   def self.surface_to_region(surface)
     region = Cairo::Region.new()
     width = surface.width
@@ -91,6 +90,7 @@ module Pix
     def initialize(monitor = nil)
       @width, @height = 1, 1
       super()
+      add_css_class('ninix-transparent')
       set_decorated(false)
       provider = Gtk::CssProvider.new()
       provider.load_from_string(TRANSPARENT_CSS)
@@ -222,6 +222,7 @@ module Pix
 
     def initialize(application)
       super(application)
+      add_css_class('ninix-transparent')
       set_decorated(false)
       provider = Gtk::CssProvider.new()
       provider.load_from_string(TRANSPARENT_CSS)
