@@ -910,6 +910,7 @@ module Surface
       @window[side] = surface_window
       if @window[side].loading?
         GLib::Idle.add do
+          next false if @window[side].nil?
           next true if @window[side].loading?
           @window_queue[side].each do |f|
             f.call

@@ -116,7 +116,7 @@ module Ninix_Main
   end
 
   class Ghost < MetaMagic::Holon
-
+    attr_accessor :menuitem
     def create_menuitem(data)
       @parent.handle_request(:GET, :create_menuitem, @key, data)
     end
@@ -243,6 +243,7 @@ module Ninix_Main
         holon.set_responsible(self)
         @ghosts[key] = holon
         holon.baseinfo = value
+        holon.create_menuitem(value)
       end
       @balloons = {} # Ordered Hash
       odict_baseinfo = Home.search_balloons()
@@ -542,6 +543,8 @@ module Ninix_Main
     end
 
     def select_sakura(key)
+      Logging::Logging.info("select_sakura called with key=#{key}")
+      @__menu.reset_popup_window
       if @__menu_owner.busy()
         Gdk.beep()
         return
@@ -1012,11 +1015,15 @@ module Ninix_Main
       elsif event.zero?
         proc_obj.call()
       else
-        sakura_name = @ghosts[key].instance.get_selfname(:default => '')
-        name = @ghosts[key].instance.get_name(:default => '')
-        sakura.enqueue_event(
-          'OnGhostChanging', sakura_name, method, name, key,
-          :proc_obj => proc_obj)
+        if @ghosts[key].instance
+          sakura_name = @ghosts[key].instance.get_selfname(:default => '')
+          name = @ghosts[key].instance.get_name(:default => '')
+          sakura.enqueue_event(
+           'OnGhostChanging', sakura_name, method, name, key,
+           :proc_obj => proc_obj)
+        else
+          proc_obj.call()
+        end
       end
     end
 

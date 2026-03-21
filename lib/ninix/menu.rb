@@ -460,15 +460,15 @@ module Menu
       __set_nekodorif_menu()
       __set_kinoko_menu()
 
-      # Parent the popover to the ghost's own window — it's already realized
-      # and visible, so no race condition on Wayland.
-      # Re-parent if the window changed (e.g. after a shell switch).
-      if parent_window && parent_window != @__popup_window
-        @__popup_menu.unparent if @__popup_window
-        @__popup_menu.set_parent(parent_window)
-        @__popup_window = parent_window
-        @__popup_menu.signal_connect('closed') do
-          @popup_in_progress = false
+      # Re-parent the popover to the current ghost's DrawingArea when it changes.
+      if parent_window
+        if parent_window != @__popup_window
+          @__popup_menu.unparent rescue nil
+          @__popup_menu.set_parent(parent_window)
+          @__popup_window = parent_window
+          @__popup_menu.signal_connect('closed') do
+            @popup_in_progress = false
+          end
         end
       elsif @__popup_window.nil?
         # Fallback: ghost window unavailable, use a minimal 1x1 dummy
@@ -545,6 +545,11 @@ module Menu
       else
         window.maximize
       end
+    end
+
+    def reset_popup_window
+      @__popup_menu.unparent rescue nil
+      @__popup_window = nil
     end
 
     def __set_caption(name, caption)
