@@ -601,6 +601,14 @@ module SSTP
           v.to_i
         end)
         send_response(204)
+      when 'NotifyBalloonClick'
+        return send_response(400) unless from_ai
+        if @server.handle_request(:GET, :is_paused)
+          @server.handle_request(:NOTIFY, :notify_balloon_click, *args.take(3).map do |v|
+            v.to_i
+          end)
+        end
+        send_response(204)
       else
         send_response(501) # Not Implemented
         log_error("Not Implemented (#{command})")
