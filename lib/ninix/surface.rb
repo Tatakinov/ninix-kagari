@@ -182,7 +182,9 @@ module Surface
       return [x, y]
     end
 
-    def reset_surface
+    def reset_surface(side = nil)
+      # NOTE: return if reset after toggle_bind
+      return unless side.nil?
       @scale = @parent.handle_request(:GET, :get_preference, 'surface_scale')
       send_event('ConfigurationChanged', "scale,#{@scale}")
     end
