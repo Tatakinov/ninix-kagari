@@ -3608,13 +3608,13 @@ module Balloon
     def scroll(window, darea, dx, dy)
       px, py = window.winpos_to_surfacepos(
             dx, dy, scale)
-      if dy > 0
+      if dy < 0
         if @lineno > 0
-          @lineno = @lineno - 1
+          @lineno -= 1
           check_link_region(px, py)
           darea.queue_draw()
         end
-      elsif dy < 0
+      elsif dy > 0
         if get_bottom_position > @valid_height
           @lineno += 1
           check_link_region(px, py)
