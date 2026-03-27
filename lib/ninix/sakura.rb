@@ -3452,7 +3452,9 @@ module Sakura
         if not @quick_session and script_speed >= 0
           @processed_text = text
         else
-          @balloon.append_text(@script_side, text)
+          text.each_char do |c|
+            @balloon.append_text(@script_side, c)
+          end
           @defer_show << @script_side if @quick_session and
             not @defer_show.include?(@script_side)
         end
