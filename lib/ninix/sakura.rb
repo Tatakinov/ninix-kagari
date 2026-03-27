@@ -2623,6 +2623,10 @@ module Sakura
         else
           @script_mode = PAUSE_MODE
         end
+        for side in @defer_show
+          @balloon.show(side)
+        end
+        @defer_show = []
       end
       @script_start_time = get_current_time
     end
