@@ -800,6 +800,20 @@ module Ninix_Main
       return nil
     end
 
+    def find_ghost_by_sakura_name(name)
+      for key in @ghosts.keys
+        sakura = @ghosts[key].instance
+        begin
+          if sakura.get_selfname(default: nil) == name
+            return key
+          end
+        rescue # old preferences(EUC-JP)
+          #pass
+        end
+      end
+      return nil
+    end
+
     def choose_default_sakura
       return @ghosts.keys[0]
     end
@@ -1306,8 +1320,40 @@ module Ninix_Main
       @gtk_app.add_action(action)
     end
 
-    def get_property(key)
+    ExtractKeyRegexp = Regexp.new('(?<=\().*(?=\))')
+
+    def property(key, value = nil)
       now = Time.new
+      if key.start_with?('ghostlist.index')
+        # TODO stub
+      elsif key.start_with?('ghostlist')
+        key = key[9 ..]
+        k = ExtractKeyRegexp.match(key)
+        k = k[0]
+        key = key[3 + k.length ..]
+        ghost = find_ghost_by_dir(k)
+        ghost = find_ghost_by_name(k) if ghost.nil?
+        ghost = find_ghost_by_sakura_name(k) if ghost.nil?
+        # TODO stub
+        return @ghosts[ghost].instance.general_property(key, value)
+      elsif key.start_with?('activeghostlist')
+        key = key[15 ..]
+        k = ExtractKeyRegexp.match(key)
+        return if k.nil?
+        k = k[0]
+        key = key[3 + k.length ..]
+        ghost = find_ghost_by_dir(k)
+        ghost = find_ghost_by_name(k) if ghost.nil?
+        ghost = find_ghost_by_sakura_name(k) if ghost.nil?
+        sakura = @ghosts[ghost].instance
+        return unless sakura.is_running
+        if key.start_with?('ext')
+          key = key[4 ..]
+          return sakura.ext_property(key, value)
+        else
+          return sakura.general_property(key, value)
+        end
+      end
       case key
       when 'system.year'
         return now.year.to_s

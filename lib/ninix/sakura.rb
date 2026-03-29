@@ -3168,9 +3168,14 @@ module Sakura
           keys = args[3 .. ]
           values = []
           keys.each do |key|
-            values << get_property(key)
+            values << property(key)
           end
           enqueue_event(event, *values)
+        elsif args[0] == 'set'
+          key = args[2]
+          # non-nil required
+          value = args[3] or ''
+          property(key, value)
         end
       elsif args[0] == 'anim' and not args[2].nil?
         id = args[2].to_i
@@ -3546,7 +3551,7 @@ module Sakura
           buf << getdms()
         elsif property_regexp.match?(chunk[1])
           key = property_regexp.match(chunk[1])[1]
-          buf << (get_property(key) or '')
+          buf << (property(key) or '')
         else # %c, %songname
           buf << chunk[1]
         end
@@ -3634,7 +3639,7 @@ module Sakura
       __update()
     end
 
-    def get_general_property(key)
+    def general_property(key, value = nil)
       case key
       when 'name'
       when 'sakuraname'
@@ -3645,16 +3650,24 @@ module Sakura
       return nil
     end
 
-    def get_property(key)
+    def ext_property(key, value = nil)
+      if value.nil?
+        translate(get_event_response('property.get', key))
+      else
+        get_event_response('property.set', key, value)
+      end
+    end
+
+    def property(key, value = nil)
       if key.start_with?('currentghost.')
         key = key[13 .. ]
         if false
           # TODO stub
         else
-          return get_general_property(key)
+          return general_property(key, value)
         end
       else
-        return @parent.handle_request(:GET, :get_property, key)
+        return @parent.handle_request(:GET, :property, key, value)
       end
       return nil
     end
