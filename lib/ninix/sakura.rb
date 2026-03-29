@@ -3652,7 +3652,7 @@ module Sakura
 
     def ext_property(key, value = nil)
       if value.nil?
-        translate(get_event_response('property.get', key))
+        translate(get_event_response('property.get', key), 'property.get')
       else
         get_event_response('property.set', key, value)
       end
