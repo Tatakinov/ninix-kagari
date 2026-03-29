@@ -386,6 +386,8 @@ module Sakura
       os = "#{uname[:sysname]},#{uname[:release]},#{uname[:version]}"
       get_event_response('OnNotifyOSInfo', os, event_type: 'NOTIFY')
       get_event_response('OnLanguageChange', Locale.candidates.language, event_type: 'NOTIFY')
+      get_event_response('uniqueid', @uuid, event_type: 'NOTIFY') unless @uuid.nil?
+      get_event_response('hwnd', @hwnd, @hwnd, event_type: 'NOTIFY') unless @hwnd.nil?
     end
 
     def finalize()
@@ -1889,13 +1891,15 @@ module Sakura
       @__temp_mode = temp
       @key = key
       @force_quit = false
+      @hwnd = @parent.handle_request(:GET, :generate_hwnd, @key)
       loop do
         @uuid = SecureRandom.uuid
         if @parent.handle_request(:GET, :add_sakura_info, @uuid,
             @desc.get('sakura.name'),
             @desc.get('kero.name'),
             File.join(get_prefix(), ''),
-            @desc.get('name')
+            @desc.get('name'),
+            @hwnd
                                  )
           break
         end
@@ -1974,6 +1978,7 @@ module Sakura
 
     def stop()
       return unless @__running
+      @parent.handle_request(:NOTIFY, :destroy_hwnd, @key)
       @controller.quit unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
       notify_observer('finalize')
       @__running = false

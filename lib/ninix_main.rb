@@ -190,6 +190,7 @@ module Ninix_Main
       @exit_func = exit_if_not_found
       @sakura_info = {}
       @current_working = []
+      @hwnd = {}
       unless ENV.include?('NINIX_DISABLE_UNIX_SOCKET')
         Thread.new(@socket) do |socket|
           loop do
@@ -1379,6 +1380,21 @@ module Ninix_Main
       return nil
     end
 
+    def generate_hwnd(key)
+      return if @hwnd.include?(key)
+      values = @hwnd.values.sort
+      cnt = 0
+      values.each do |v|
+        break if v != cnt
+        cnt += 1
+      end
+      @hwnd[key] = cnt
+    end
+
+    def destroy_hwnd(key)
+      @hwnd.delete(key)
+    end
+
     def add_sakura_info(uuid, *args)
       return false if @sakura_info.include?(uuid)
       @current_working.append(args[3])
@@ -1386,11 +1402,12 @@ module Ninix_Main
       return update_sakura_info(uuid, *args, force: true)
     end
 
-    def update_sakura_info(uuid, sakura_name, kero_name, ghost_path, ghost_name, force: false)
+    def update_sakura_info(uuid, sakura_name, kero_name, ghost_path, ghost_name, hwnd, force: false)
       return false if not force and not @sakura_info.include?(uuid)
       @sakura_info[uuid] = {
         name: sakura_name, keroname: kero_name,
         ghostpath: ghost_path, fullname: ghost_name,
+        hwnd: hwnd,
       }
     end
 
