@@ -388,6 +388,10 @@ module SSTP
       handle_command()
     end
 
+    def do_EXECUTE_1_1
+      handle_command()
+    end
+
     def do_EXECUTE_1_2
       handle_command()
     end
@@ -609,6 +613,15 @@ module SSTP
           end)
         end
         send_response(204)
+      when 'SetProperty'
+        @server.handle_request(:NOTIFY, :property, *args.take(2))
+        send_response(204)
+      when 'GetProperty'
+        value = @server.handle_request(:GET, :property, *args.take(1))
+        send_response(200)
+        @fp.write(value) unless value.nil?
+        @fp.write("\r\n")
+        @fp.write("\r\n")
       else
         send_response(501) # Not Implemented
         log_error("Not Implemented (#{command})")
