@@ -2906,6 +2906,14 @@ module Balloon
       __move()
       @windows.each do |window|
         window.show()
+        # HACK
+        if window.rect.nil?
+          GLib::Idle.add do
+            next true if window.rect.nil?
+            window.darea.queue_draw
+            next false
+          end
+        end
       end
       # make sure window is in its position (call after showing the window)
       __move()
