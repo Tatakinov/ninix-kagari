@@ -618,10 +618,14 @@ module SSTP
         send_response(204)
       when 'GetProperty'
         value = @server.handle_request(:GET, :property, *args.take(1))
-        send_response(200)
-        @fp.write(value) unless value.nil?
-        @fp.write("\r\n")
-        @fp.write("\r\n")
+        if value.nil? or value.empty?
+          send_response(204)
+        else
+          send_response(200)
+          @fp.write(value)
+          @fp.write("\r\n")
+          @fp.write("\r\n")
+        end
       else
         send_response(501) # Not Implemented
         log_error("Not Implemented (#{command})")
