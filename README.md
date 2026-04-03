@@ -144,7 +144,7 @@ $ make
 
 をすることで、メジャーなSHIORIとAO/AIを一緒にビルド/インストールすることが出来ます。
 
-別途openssl(aosora-shiori)とsdl3,sdl3-image,sdl3-ttf(ao\_builtin/ai\_builtin)が必要になります。
+別途openssl(aosora-shiori)とsdl3,sdl3-image,sdl3-ttf(ao\_builtin/ai\_builtin),jsoncpp(ao\_builtin)が必要になります。
 
 ## Option
 
