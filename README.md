@@ -264,7 +264,7 @@ Copyright (C) 2002, 2003 by ABE Hideaki
 
 Copyright (C) 2003-2005 by Shun-ichi TAHARA
 
-Copyright (C) 2024, 2025 by Tatakinov
+Copyright (C) 2024-2026 by Tatakinov
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License (version 2) as
