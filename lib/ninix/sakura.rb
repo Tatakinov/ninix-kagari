@@ -2724,7 +2724,7 @@ module Sakura
       if File.file?(path)
         @audio_player.set_state(Gst::State::NULL)
         @audio_player.set_property(
-          'uri', 'file://' + URI.encode_www_form_component(path))
+          'uri', 'file://' + URI.encode_www_form_component(path).gsub(/%2[Ff]/, File::SEPARATOR))
         @audio_loop = false
         @audio_player.set_state(Gst::State::PLAYING)
       end
@@ -2742,7 +2742,7 @@ module Sakura
       if File.file?(path)
         @audio_player.set_state(Gst::State::NULL)
         @audio_player.set_property(
-          'uri', 'file://' + URI.encode_www_form_component(path))
+          'uri', 'file://' + URI.encode_www_form_component(path).gsub(/%2[Ff]/, File::SEPARATOR))
         @audio_loop = false
         @audio_player.set_state(Gst::State::PLAYING)
       end
@@ -3004,7 +3004,7 @@ module Sakura
           if File.file?(path)
             @audio_player.set_state(Gst::State::NULL)
             @audio_player.set_property(
-              'uri', 'file://' + URI.encode_www_form_component(path))
+              'uri', 'file://' + URI.encode_www_form_component(path).gsub(/%2[Ff]/, File::SEPARATOR))
             @audio_loop = false
             @audio_player.set_state(Gst::State::PLAYING)
           end
@@ -3027,7 +3027,7 @@ module Sakura
           if File.file?(path)
             @audio_player.set_state(Gst::State::NULL)
             @audio_player.set_property(
-              'uri', 'file://' + URI.encode_www_form_component(path))
+              'uri', 'file://' + URI.encode_www_form_component(path).gsub(/%2[Ff]/, File::SEPARATOR))
             @audio_loop = true
             @audio_player.set_state(Gst::State::PLAYING)
           end
