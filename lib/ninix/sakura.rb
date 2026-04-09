@@ -437,7 +437,7 @@ module Sakura
       elsif t == Gst::MessageType::ERROR
         @audio_player.set_state(Gst::State::NULL)
         err, debug = message.parse_error()
-        Logging::Logging.error('Error: ' + err + ', ' + debug)
+        Logging::Logging.error("Error: #{err}, #{debug}")
         @audio_loop = false
       end
     end
