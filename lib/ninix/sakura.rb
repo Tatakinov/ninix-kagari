@@ -1345,6 +1345,7 @@ module Sakura
     end
 
     def open_ao_menu(side)
+      @parent.handle_request(:NOTIFY, :change_owner, self)
       # FIXME: ちゃんとしたメニュー名にする
       side2s = proc do |side|
         next "sakura" if side == 0
@@ -3694,11 +3695,12 @@ module Sakura
       @surface.get_info(key)
     end
 
-    [:select_sakura, :start_sakura_cb, :select_balloon, :select_shell, :close_sakura].each do |x|
-      define_method(x) do |*args|
-        @parent.handle_request(:NOTIFY, :change_owner, self)
-        @parent.handle_request(:NOTIFY, x, *args)
-      end
+    def select_shell_from_ao(key)
+      @parent.handle_request(:GET, :select_shell, key)
+    end
+
+    def select_balloon_from_ao(key)
+      @parent.handle_request(:GET, :select_balloon, key)
     end
   end
 
