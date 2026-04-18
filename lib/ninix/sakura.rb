@@ -1420,7 +1420,7 @@ module Sakura
         caption: caption.call('callghostbutton.caption', _('Summon(_X)')),
         list: @parent.handle_request(:GET, :get_ghost_list).map do |x|
           next {
-            type: 'switch',
+            type: 'call',
             caption: x[0],
             valid: x[1] != @key,
             list: [x[1]],
