@@ -64,6 +64,7 @@ module Surface
 
   class Ao
     def initialize
+      @bind_queue = []
     end
 
     def new_(desc, surface_alias, surface, name, surface_dir, tooltips, seriko_descript, default_sakura, default_kero)
@@ -105,9 +106,9 @@ module Surface
         'Charset: UTF-8',
         "Command: #{event}",
       ].join("\r\n")
-      args.each_with_index do |v, i|
-        request = [request, "Argument#{i}: #{v}"].join("\r\n")
-      end
+      request = [request, args.size.times.zip(args).map do |i, a|
+        "Argument#{i}: #{a}"
+      end].join("\r\n")
       request = [request, "\r\n\r\n"].join
       request = [[request.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
       @ao_write.write(request)
@@ -227,8 +228,12 @@ module Surface
     def window_stick(flag)
     end
 
-    def toggle_bind(side, category, part, from, flag)
-      send_event('Bind', side, category, part, from, flag, method: 'NOTIFY')
+    def toggle_bind(side, category, part, from, flag, is_continuous)
+      @bind_queue << side << category << part << from << flag
+      unless is_continuous
+        send_event('Bind', *@bind_queue, method: 'NOTIFY')
+        @bind_queue = []
+      end
     end
 
     def get_menu_pixmap
@@ -1282,7 +1287,7 @@ module Surface
       @window[side].balloon_offset = offset
     end
 
-    def toggle_bind(side, category, part, from, flag)
+    def toggle_bind(side, category, part, from, flag, is_continuous)
       if @window[side].loading?
         @window_queue[side] << proc do
           toggle_bind(side, category, part, from, flag)

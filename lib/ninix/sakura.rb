@@ -3070,7 +3070,19 @@ module Sakura
         else
           flag = :toggle
         end
-        @surface.toggle_bind(@script_side, category, name, 'script', flag)
+        is_continuous_bind = false
+        unless @processed_script.empty?
+          node = @processed_script[0]
+          if node[0] == Script::SCRIPT_TAG
+            n, a = node[1], node[2..-2].map do |s|
+              expand_meta(s)
+            end
+            if n == '\!' and not(a.empty?) and a[0] == 'bind'
+              is_continuous_bind = true
+            end
+          end
+        end
+        @surface.toggle_bind(@script_side, category, name, 'script', flag, is_continuous_bind)
         @defer_update_bind << @script_side unless @defer_update_bind.include?(@script_side)
         return CONTINUING_INTERPRETATION
       elsif args[0] == 'execute'
