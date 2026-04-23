@@ -2294,6 +2294,8 @@ module Sakura
       default = @desc.get('sakura.seriko.defaultsurface')
       @surface.add_window(0, default)
       @balloon.add_window(0)
+      @surface.notify_scope_change(0)
+      @balloon.notify_scope_change(0)
       @script_side = 0
     end
 
@@ -2303,6 +2305,8 @@ module Sakura
       default = @desc.get('kero.seriko.defaultsurface')
       @surface.add_window(1, default)
       @balloon.add_window(1)
+      @surface.notify_scope_change(1)
+      @balloon.notify_scope_change(1)
       @script_side = 1
     end
 
@@ -2324,6 +2328,8 @@ module Sakura
         @script_side = chr_id
         @surface.add_window(@script_side, default)
         @balloon.add_window(@script_side)
+        @surface.notify_scope_change(@script_side)
+        @balloon.notify_scope_change(@script_side)
         @balloon.set_balloon_default(side: @script_side)
       end
     end

@@ -133,6 +133,10 @@ module Surface
       return {proto: protocol, code: code.to_i, status: status, headers: headers}
     end
 
+    def notify_scope_change(side)
+      send_event('OnScopeChange', side)
+    end
+
     def notify_script_begin
       send_event('OnScriptBegin')
     end
@@ -322,6 +326,7 @@ module Surface
     end
 
     def raise_(side)
+      send_event('Raise', side)
     end
 
     def lower(side)
@@ -750,6 +755,9 @@ module Surface
       @maxsize = [maxwidth, maxheight]
       add_window(0, default_sakura, :config_alias => @surface_alias, :mayuna => @__mayuna)
       add_window(1, default_kero, :config_alias => @surface_alias, :mayuna => @__mayuna)
+    end
+
+    def notify_scope_change(side)
     end
 
     def notify_script_begin
