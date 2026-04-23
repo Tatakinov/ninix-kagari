@@ -147,9 +147,9 @@ module Balloon
         'Charset: UTF-8',
         "Command: #{event}",
       ].join("\r\n")
-      args.each_with_index do |v, i|
-        request = [request, "Argument#{i}: #{v}"].join("\r\n")
-      end
+      request = [request, args.size.times.zip(args).map do |i, a|
+        "Argument#{i}: #{a}"
+      end].join("\r\n")
       request = [request, "\r\n\r\n"].join
       request = [[request.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
       @ai_write.write(request)
