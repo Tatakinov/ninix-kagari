@@ -1298,7 +1298,7 @@ module Surface
     def toggle_bind(side, category, part, from, flag, is_continuous)
       if @window[side].loading?
         @window_queue[side] << proc do
-          toggle_bind(side, category, part, from, flag)
+          toggle_bind(side, category, part, from, flag, is_continuous)
         end
       else
         @window[side].toggle_bind(category, part, from, flag)
