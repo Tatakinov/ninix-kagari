@@ -92,6 +92,19 @@ module Sakura
     FROM_GHOST       = 2
     # whether continue script interpretation
     CONTINUING_INTERPRETATION = :continuing_interpretation
+    PAUSE_INTERPRETATION = [
+      '\e',
+      '\y',
+      '\z',
+      '\w',
+      '\_w',
+      '\__w',
+      '\x',
+      '\a',
+      '\-',
+      '\+',
+      '\_+',
+    ]
  
     def initialize
       super("") # FIXME
@@ -3459,12 +3472,13 @@ module Sakura
       end
       node = @processed_script.shift
       @script_position = node[-1]
+      ret = nil
       case node[0]
       when Script::SCRIPT_TAG
         name, args = node[1], node[2..-2]
         if SCRIPT_TAG.include?(name) and \
            Sakura.method_defined?(SCRIPT_TAG[name])
-          return send(SCRIPT_TAG[name], args)
+          ret = send(SCRIPT_TAG[name], args)
         else
           #pass ## FIMXE
         end
@@ -3488,6 +3502,10 @@ module Sakura
             not @defer_show.include?(@script_side)
         end
       end
+      if @quick_session and not(PAUSE_INTERPRETATION.include?(node[1]))
+        return CONTINUING_INTERPRETATION
+      end
+      return ret
     end
 
     def reset_script(reset_all: false)
