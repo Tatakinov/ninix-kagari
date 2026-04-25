@@ -586,8 +586,11 @@ module SSTP
         send_response(204)
       when 'RaiseBalloon'
         return send_response(400) unless from_ao
-        @server.handle_request(:NOTIFY, :raise_balloon, *args.take(1).map do |v|
-          v.to_i
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :raise_balloon, *args.take(1).map do |v|
+            v.to_i
+          end)
         end)
         send_response(204)
       when 'ResetBalloonPosition'
@@ -621,8 +624,11 @@ module SSTP
         send_response(204)
       when 'RaiseSurface'
         return send_response(400) unless from_ai
-        @server.handle_request(:NOTIFY, :raise_surface, *args.take(1).map do |v|
-          v.to_i
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :raise_surface, *args.take(1).map do |v|
+            v.to_i
+          end)
         end)
         send_response(204)
       when 'SetProperty'
