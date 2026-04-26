@@ -18,7 +18,7 @@ module Version
   bindtextdomain("ninix-kagari")
 
   def self.NUMBER
-    '3.1.1'
+    '3.1.2'
   end
 
   def self.CODENAME
