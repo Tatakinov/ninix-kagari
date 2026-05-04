@@ -508,6 +508,7 @@ module Menu
               end
               window.hide
             end
+            next false
           end
           @__popup_menu.signal_handler_disconnect(id)
         end
