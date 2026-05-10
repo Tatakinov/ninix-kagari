@@ -116,7 +116,7 @@ module Ninix_Main
   end
 
   class Ghost < MetaMagic::Holon
-
+    attr_accessor :menuitem
     def create_menuitem(data)
       @parent.handle_request(:GET, :create_menuitem, @key, data)
     end
@@ -241,8 +241,9 @@ module Ninix_Main
       for key, value in odict_baseinfo
         holon = Ghost.new(key)
         holon.set_responsible(self)
-        @ghosts[key] = holon 
+        @ghosts[key] = holon
         holon.baseinfo = value
+        holon.create_menuitem(value)
       end
       @balloons = {} # Ordered Hash
       odict_baseinfo = Home.search_balloons()
@@ -521,7 +522,7 @@ module Ninix_Main
       @__menu_owner.select_shell(key)
     end
 
-    def select_balloon(key)
+    def select_balloon(key, *args)
       desc, balloon = get_balloon_description(key)
       @__menu_owner.select_balloon(key, desc, balloon)
     end
@@ -542,6 +543,8 @@ module Ninix_Main
     end
 
     def select_sakura(key)
+      Logging::Logging.info("select_sakura called with key=#{key}")
+      @__menu.reset_popup_window
       if @__menu_owner.busy()
         Gdk.beep()
         return
@@ -624,7 +627,8 @@ module Ninix_Main
         end
       end
       r = monitor.geometry
-      @__menu.popup(side, x - r.x, y - r.y, upper)
+      parent_window = @__menu_owner.get_popup_parent_window(side)
+      @__menu.popup(side, x - r.x, y - r.y, upper, parent_window)
     end
 
     def get_ghost_menus
@@ -1011,11 +1015,15 @@ module Ninix_Main
       elsif event.zero?
         proc_obj.call()
       else
-        sakura_name = @ghosts[key].instance.get_selfname(:default => '')
-        name = @ghosts[key].instance.get_name(:default => '')
-        sakura.enqueue_event(
-          'OnGhostChanging', sakura_name, method, name, key,
-          :proc_obj => proc_obj)
+        if @ghosts[key].instance
+          sakura_name = @ghosts[key].instance.get_selfname(:default => '')
+          name = @ghosts[key].instance.get_name(:default => '')
+          sakura.enqueue_event(
+           'OnGhostChanging', sakura_name, method, name, key,
+           :proc_obj => proc_obj)
+        else
+          proc_obj.call()
+        end
       end
     end
 
@@ -1103,7 +1111,7 @@ module Ninix_Main
         @ghosts.delete(key)
         return ## FIXME
       end
-      start_sakura(key, :prev => key, :init => true) 
+      start_sakura(key, :prev => key, :init => true)
     end
 
     def add_sakura(ghost_dir)

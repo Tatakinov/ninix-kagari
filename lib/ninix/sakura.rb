@@ -85,7 +85,7 @@ module Sakura
     BROWSE_MODE        = 1
     SELECT_MODE        = 2
     PAUSE_MODE         = 3
-    WAIT_MODE          = 4 
+    WAIT_MODE          = 4
     PAUSE_NOCLEAR_MODE = 5
     # script origins
     FROM_SSTP_CLIENT = 1
@@ -105,7 +105,7 @@ module Sakura
       '\+',
       '\_+',
     ]
- 
+
     def initialize
       super("") # FIXME
       @handlers = {
@@ -351,7 +351,7 @@ module Sakura
         @vanished_count = ghost_vanished_count
       end
     end
- 
+
     def load_settings()
       path = File.join(get_prefix(), 'SETTINGS')
       if File.exist?(path)
@@ -1502,6 +1502,14 @@ module Sakura
 
     def toggle_bind(side, bind_id, from)
       @surface.toggle_bind(side, bind_id, from)
+    end
+
+    def get_popup_parent_window(side)
+        surface_window = @surface.window[side]
+        return nil if surface_window.nil?
+        surface_window.windows&.first&.darea
+    rescue
+        nil
     end
 
     def get_menu_pixmap()
@@ -3441,7 +3449,7 @@ module Sakura
       '\_V' => "__yen__V",
       '\!' => "__yen_exclamation",
       '\__c' => "__yen___c",
-      '\__t' => "__yen___t", 
+      '\__t' => "__yen___t",
       '\v' => "__yen_v",
       '\f' => "__yen_f",
       '\C' => nil, # dummy
@@ -3731,12 +3739,11 @@ module Sakura
       @surface.get_info(key)
     end
 
-    def select_shell_from_ao(key)
-      @parent.handle_request(:GET, :select_shell, key)
-    end
-
-    def select_balloon_from_ao(key)
-      @parent.handle_request(:GET, :select_balloon, key)
+    [:select_sakura, :start_sakura_cb, :select_shell, :close_sakura].each do |x|
+      define_method(x) do |*args|
+        @parent.handle_request(:NOTIFY, :change_owner, self)
+        @parent.handle_request(:NOTIFY, x, *args)
+      end
     end
   end
 
@@ -3745,7 +3752,7 @@ module Sakura
     include GetText
 
     bindtextdomain("ninix-kagari")
-    
+
     def initialize
       @parent = nil # dummy
       @dialog = Gtk::Dialog.new

@@ -34,7 +34,7 @@ module Balloon
   Content = Struct.new(:type, :data, :attr)
   Attribute = Struct.new(:height, :color, :bold, :italic, :strike,
                          :underline, :sup, :sub, :inline, :opaque,
-                         :use_self_alpha, :clipping, :fixed, :foreground, 
+                         :use_self_alpha, :clipping, :fixed, :foreground,
                          :is_sstp_marker)
   Head = Struct.new(:valid, :x, :y)
   Point = Struct.new(:type, :value)
@@ -147,9 +147,9 @@ module Balloon
         'Charset: UTF-8',
         "Command: #{event}",
       ].join("\r\n")
-      request = [request, args.size.times.zip(args).map do |i, a|
-        "Argument#{i}: #{a}"
-      end].join("\r\n")
+      args.each_with_index do |v, i|
+        request = [request, "Argument#{i}: #{v}"].join("\r\n")
+      end
       request = [request, "\r\n\r\n"].join
       request = [[request.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
       @ai_write.write(request)
@@ -172,10 +172,6 @@ module Balloon
         headers[k] = v
       end
       return {proto: protocol, code: code.to_i, status: status, headers: headers}
-    end
-
-    def notify_scope_change(side)
-      send_event('OnScopeChange', side)
     end
 
     def notify_script_begin
@@ -248,11 +244,9 @@ module Balloon
     end
 
     def raise_all
-      send_event('RaiseAll', side)
     end
 
     def raise_(side)
-      send_event('Raise', side)
     end
 
     def lower_all
@@ -425,9 +419,6 @@ module Balloon
       end
     end
 
-    def notify_scope_change(side)
-    end
-
     def notify_script_begin
     end
 
@@ -441,7 +432,7 @@ module Balloon
       @communicate = []
       0.upto(3) do |i|
         key = 'c' + i.to_s
-        @communicate[i] = balloon[key] if balloon.include?(key) 
+        @communicate[i] = balloon[key] if balloon.include?(key)
       end
 
       # create balloon windows
@@ -2077,7 +2068,7 @@ module Balloon
       @communicate = []
       0.upto(3) do |i|
         key = 'c' + i.to_s
-        @communicate[i] = balloon[key] if balloon.include?(key) 
+        @communicate[i] = balloon[key] if balloon.include?(key)
       end
       for key in balloon.keys
         value = balloon[key]
@@ -2997,7 +2988,7 @@ module Balloon
       cr.save()
       # draw sstp marker
       unless @sstp_surface.nil?
-        x, y = @sstp[0]            
+        x, y = @sstp[0]
         cr.set_source(@sstp_surface.surface(write: false), x, y)
         cr.paint()
       end
@@ -4187,9 +4178,9 @@ module Balloon
       text_g = desc.get(['font.color.g', 'fontcolor.g'], :default => 0).to_i
       text_b = desc.get(['font.color.b', 'fontcolor.b'], :default => 0).to_i
       provider = Gtk::CssProvider.new
-      context = @entry.style_context
-      context.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
-      provider.load(data: ["entry {\n",
+      Gtk::StyleContext.add_provider_for_display(
+        Gdk::Display.default, provider, Gtk::StyleProvider::PRIORITY_USER)
+      provider.load_from_string(["entry {\n",
                             'color: #',
                             sprintf('%02x', text_r),
                             sprintf('%02x', text_g),
@@ -4233,14 +4224,17 @@ module Balloon
         #darea.set_size_request(*@window.size) # XXX
       else
         box = Gtk::Box.new(orientation=Gtk::Orientation::HORIZONTAL, spacing=10)
-        box.set_border_width(10)
+        box.set_margin_start(10)
+        box.set_margin_end(10)
+        box.set_margin_top(10)
+        box.set_margin_bottom(10)
         unless ENTRY.empty?
           label = Gtk::Label.new(label=ENTRY)
-          box.pack_start(label, :expand => false, :fill => true, :padding => 0)
+          box.append(label)
           label.show()
         end
-        box.pack_start(@entry, :expand => true, :fill => true, :padding => 0)
-        @window.add(box)
+        box.append(@entry)
+        @window.set_child(box)
         box.show()
       end
     end
@@ -4419,7 +4413,7 @@ module Balloon
     def set_symbol(symbol)
       @symbol = symbol
     end
-        
+
     def set_limittime(limittime)
       begin
         limittime = Integer(limittime)

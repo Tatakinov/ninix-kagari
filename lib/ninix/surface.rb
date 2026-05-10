@@ -456,7 +456,7 @@ module Surface
         gtk_window.set_keep_above(flag)
       end
     end
-         
+
     def window_iconify(flag)
       gtk_window = @window[0].window
       iconified = (gtk_window.window.state & \
@@ -908,16 +908,6 @@ module Surface
         default_id, @maxsize)
       surface_window.set_responsible(self)
       @window[side] = surface_window
-      if @window[side].loading?
-        GLib::Idle.add do
-          next true if @window[side].loading?
-          @window_queue[side].each do |f|
-            f.call
-          end
-          @window_queue.delete(side)
-          next false
-        end
-      end
     end
 
     def get_mayuna_menu
@@ -1361,7 +1351,7 @@ module Surface
   end
 
   class SurfaceWindow < MetaMagic::Holon
-    attr_reader :bind
+    attr_reader :bind, :windows
 
     OPERATOR = {
       'base' =>            Cairo::OPERATOR_SOURCE, # XXX
@@ -1736,7 +1726,7 @@ module Surface
       end
       return mayuna_list
     end
-    
+
     def create_surface_from_file(surface_id, is_asis: false, check_only: false)
       fail "assert" unless @surfaces.include?(surface_id)
       overlay = @surfaces[surface_id][1, @surfaces[surface_id].length - 1]

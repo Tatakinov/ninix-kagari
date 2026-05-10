@@ -18,9 +18,8 @@ require "gtk4"
 require_relative "logging"
 
 module Pix
-  TRANSPARENT_CSS = 'window { background-color: rgba(0, 0, 0, 0); }'
+  TRANSPARENT_CSS = '.ninix-transparent { background-color: rgba(0, 0, 0, 0); }'
   Rect = Struct.new(:x, :y, :width, :height)
-
   def self.surface_to_region(surface)
     region = Cairo::Region.new()
     width = surface.width
@@ -91,11 +90,13 @@ module Pix
     def initialize(monitor = nil)
       @width, @height = 1, 1
       super()
+      add_css_class('ninix-transparent')
       set_decorated(false)
       provider = Gtk::CssProvider.new()
-      provider.load_from_data(TRANSPARENT_CSS)
-      sc = style_context
-      sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
+      provider.load_from_string(TRANSPARENT_CSS)
+      # GTK4: style_context/add_provider gone; register at display level
+      Gtk::StyleContext.add_provider_for_display(
+        Gdk::Display.default, provider, Gtk::StyleProvider::PRIORITY_USER)
       #set_resizable(false)
       if monitor.nil? and not ENV.include?('NINIX_MONITOR_SIZE')
         id = signal_connect('notify') do |obj, spec|
@@ -221,11 +222,13 @@ module Pix
 
     def initialize(application)
       super(application)
+      add_css_class('ninix-transparent')
       set_decorated(false)
       provider = Gtk::CssProvider.new()
-      provider.load_from_data(TRANSPARENT_CSS)
-      sc = style_context
-      sc.add_provider(provider, Gtk::StyleProvider::PRIORITY_USER)
+      provider.load_from_string(TRANSPARENT_CSS)
+      # GTK4: style_context/add_provider gone; register at display level
+      Gtk::StyleContext.add_provider_for_display(
+        Gdk::Display.default, provider, Gtk::StyleProvider::PRIORITY_USER)
       show
       surface.set_input_region(Cairo::Region.new)
       hide

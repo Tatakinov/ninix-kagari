@@ -737,13 +737,16 @@ module NGM
       @url['Public'][0] = url
       label = @url['Public'][1]
       label.set_markup('<span foreground="blue">' + text.to_s + '</span>')
-      target_dir = File.join(
-                             @parent.handle_request(:GET, :get_home_dir),
-                             'ghost',
-                             @parent.handle_request(:GET, :get, 'InstallDir'))
-      @button['install'].set_sensitive(
-                                       (not File.directory?(target_dir) and
-                                       @parent.handle_request(:GET, :get, 'ArchiveUrl') != 'No data'))
+      home_dir = @parent.handle_request(:GET, :get_home_dir)
+install_dir = @parent.handle_request(:GET, :get, 'InstallDir')
+if home_dir && install_dir
+  target_dir = File.join(home_dir, 'ghost', install_dir)
+  @button['install'].set_sensitive(
+                                   (not File.directory?(target_dir) and
+                                   @parent.handle_request(:GET, :get, 'ArchiveUrl') != 'No data'))
+else
+  @button['install'].set_sensitive(false)
+end
       @button['update'].set_sensitive(
                                       (File.directory?(target_dir) and
                                        @parent.handle_request(:GET, :get, 'GhostType') == 'ゴースト' and
