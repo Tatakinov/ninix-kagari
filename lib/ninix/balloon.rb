@@ -146,11 +146,12 @@ module Balloon
         "#{method} SORAKADO/0.1",
         'Charset: UTF-8',
         "Command: #{event}",
-      ].join("\r\n")
+      ]
       args.each_with_index do |v, i|
-        request = [request, "Argument#{i}: #{v}"].join("\r\n")
+        request << "Argument#{i}: #{v}"
       end
-      request = [request, "\r\n\r\n"].join
+      request << "\r\n"
+      request = request.join("\r\n")
       request = [[request.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
       @ai_write.write(request)
       len = nil

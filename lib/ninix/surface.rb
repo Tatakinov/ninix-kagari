@@ -105,11 +105,12 @@ module Surface
         "#{method} SORAKADO/0.1",
         'Charset: UTF-8',
         "Command: #{event}",
-      ].join("\r\n")
-      request = [request, args.size.times.zip(args).map do |i, a|
-        "Argument#{i}: #{a}"
-      end].join("\r\n")
-      request = [request, "\r\n\r\n"].join
+      ]
+      args.each_with_index do |v, i|
+        request << "Argument#{i}: #{v}"
+      end
+      request << "\r\n"
+      request = request.join("\r\n")
       request = [[request.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
       @ao_write.write(request)
       len = nil
