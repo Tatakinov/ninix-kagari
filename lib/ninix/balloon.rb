@@ -174,6 +174,10 @@ module Balloon
       return {proto: protocol, code: code.to_i, status: status, headers: headers}
     end
 
+    def notify_scope_change(side)
+      send_event('OnScopeChange', side)
+    end
+
     def notify_script_begin
       send_event('OnScriptBegin')
     end
@@ -244,9 +248,11 @@ module Balloon
     end
 
     def raise_all
+      send_event('RaiseAll')
     end
 
     def raise_(side)
+      send_event('Raise', side)
     end
 
     def lower_all
