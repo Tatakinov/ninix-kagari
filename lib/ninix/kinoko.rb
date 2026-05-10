@@ -30,57 +30,68 @@ module Kinoko
 
   bindtextdomain("ninix-kagari")
 
-    def initialize(accelgroup)
+    def initialize
       @parent = nil
-      @__menu_list = {}
-      @__popup_menu = Gtk::Menu.new
-      item = Gtk::MenuItem.new(:label => _('Settings...(_O)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
-        @parent.handle_request(:GET, :edit_preferences)
-      end
-      @__popup_menu.add(item)
-      @__menu_list['settings'] = item
-      item = Gtk::MenuItem.new(:label => _('Skin(_K)'), :use_underline => true)
-      @__popup_menu.add(item)
-      @__menu_list['skin'] = item
-      item = Gtk::MenuItem.new(:label => _('Exit(_Q)'), :use_underline => true)
-      item.signal_connect('activate') do |a, b|
-        @parent.handle_request(:GET, :close)
-      end
-      @__popup_menu.add(item)
-      @__menu_list['exit'] = item
-      @__popup_menu.show_all
+      @__popover = nil
+      @__action_group = nil
     end
 
     def set_responsible(parent)
       @parent = parent
     end
 
-    def popup()
-      skin_list = @parent.handle_request(:GET, :get_skin_list)
-      set_skin_menu(skin_list)
-      @__popup_menu.popup_at_pointer(nil)
+    def setup_actions(widget)
+      group = Gio::SimpleActionGroup.new
+
+      settings_action = Gio::SimpleAction.new('settings')
+      settings_action.signal_connect('activate') do
+        @parent.handle_request(:GET, :edit_preferences)
+      end
+      group.add_action(settings_action)
+
+      exit_action = Gio::SimpleAction.new('exit')
+      exit_action.signal_connect('activate') do
+        @parent.handle_request(:GET, :close)
+      end
+      group.add_action(exit_action)
+
+      @__action_group = group
+      widget.insert_action_group('skin', group)
     end
 
-    def set_skin_menu(list)
-      key = 'skin'
-      unless list.empty?
-        menu = Gtk::Menu.new
-        for skin in list
-          item = Gtk::MenuItem.new(:label => skin['title'])
-          item.signal_connect('activate', skin) do |a, k|
-            @parent.handle_request(:GET, :select_skin, k)
-            next true
-          end
-          menu.add(item)
-          item.show()
+    def popup(widget)
+      skin_list = @parent.handle_request(:GET, :get_skin_list)
+
+      # Register dynamic skin actions
+      skin_list.each_with_index do |skin, i|
+        name = "selectskin#{i}"
+        existing = @__action_group.lookup_action(name) rescue nil
+        @__action_group.remove_action(name) if existing
+        action = Gio::SimpleAction.new(name)
+        action.signal_connect('activate') do
+          @parent.handle_request(:GET, :select_skin, skin)
         end
-        @__menu_list[key].set_submenu(menu)
-        menu.show()
-        @__menu_list[key].show()
-      else
-        @__menu_list[key].hide()
+        @__action_group.add_action(action)
       end
+
+      menu = Gio::Menu.new
+      menu.append(_('Settings...(O)'), 'skin.settings')
+
+      unless skin_list.empty?
+        skin_submenu = Gio::Menu.new
+        skin_list.each_with_index do |skin, i|
+          skin_submenu.append(skin['title'], "skin.selectskin#{i}")
+        end
+        menu.append_submenu(_('Skin(K)'), skin_submenu)
+      end
+
+      menu.append(_('Exit(Q)'), 'skin.exit')
+
+      @__popover&.unparent
+      @__popover = Gtk::PopoverMenu.new(menu)
+      @__popover.set_parent(widget)
+      @__popover.set_has_arrow(false)
+      @__popover.popup
     end
   end
 
@@ -141,7 +152,7 @@ module Kinoko
 
     def load_skin()
       scale = @target.get_surface_scale()
-      @skin = Skin.new(@accelgroup)
+      @skin = Skin.new()
       @skin.set_responsible(self)
       @skin.load(@data, scale)
     end
@@ -168,7 +179,6 @@ module Kinoko
       @data = data
       @target = target
       @target.attach_observer(self)
-      @accelgroup = Gtk::AccelGroup.new()
       load_skin()
       return 0 if @skin.nil?
       send_event('OnKinokoObjectCreate')
@@ -218,11 +228,10 @@ module Kinoko
     HANDLERS = {
     }
 
-    def initialize(accelgroup)
+    def initialize()
       @frame_buffer = []
-      @accelgroup = accelgroup
       @parent = nil
-      @__menu = Menu.new(@accelgroup)
+      @__menu = Menu.new()
       @__menu.set_responsible(self)
     end
 
@@ -254,13 +263,10 @@ module Kinoko
       @__shown = false
       @surface_id = 0 # dummy
       @window = Pix::TransparentWindow.new()
-      ##@window.set_title(['surface.', name].join(''))
-      @window.set_skip_taskbar_hint(true)
-      @window.signal_connect('delete_event') do |w, e|
-        delete(w, e)
+      @window.signal_connect('close-request') do |w|
+        delete(w)
         next true
       end
-      @window.add_accel_group(@accelgroup)
       unless @data['animation'].nil?
         path = File.join(@data['dir'], @data['animation'])
         actors = {'' => Seriko.get_actors(NConfig.create_from_file(path))}
@@ -289,30 +295,29 @@ module Kinoko
       @path = path
       @w, @h = w, h
       @darea = @window.darea
-      @darea.set_events(Gdk::EventMask::EXPOSURE_MASK|
-                        Gdk::EventMask::BUTTON_PRESS_MASK|
-                        Gdk::EventMask::BUTTON_RELEASE_MASK|
-                        Gdk::EventMask::POINTER_MOTION_MASK|
-                        Gdk::EventMask::LEAVE_NOTIFY_MASK)
-      @darea.signal_connect('button_press_event') do |w, e|
-        next button_press(w, e)
+
+      # GTK4: use draw func instead of draw signal
+      @darea.set_draw_func do |widget, cr, width, height|
+        redraw(widget, cr)
       end
-      @darea.signal_connect('button_release_event') do |w, e|
-        button_release(w, e)
-        next true
+
+      # GTK4: use gesture controllers instead of event signals
+      gesture = Gtk::GestureClick.new
+      gesture.set_button(0) # all buttons
+      gesture.signal_connect('pressed') do |g, n_press, x, y|
+        button_press(g.current_button, n_press, x, y)
       end
-      @darea.signal_connect('motion_notify_event') do |w, e|
-        motion_notify(w, e)
-        next true
+      @darea.add_controller(gesture)
+
+      motion = Gtk::EventControllerMotion.new
+      motion.signal_connect('leave') do
+        leave_notify()
       end
-      @darea.signal_connect('leave_notify_event') do |w, e|
-        leave_notify(w, e)
-        next true
-      end
-      @darea.signal_connect('draw') do |w, cr|
-        redraw(w, cr)
-        next true
-      end
+      @darea.add_controller(motion)
+
+      # Set up action group for menu
+      @__menu.setup_actions(@darea)
+
       set_position()
       show()
       reset_z_order()
@@ -331,23 +336,17 @@ module Kinoko
     end
 
     def show()
-      @window.show_all() unless @__shown
+      @window.show() unless @__shown
       @__shown = true
     end
 
     def hide()
-      @window.hide_all() if @__shown
+      @window.hide() if @__shown
       @__shown = false
     end
 
     def reset_z_order
-      return unless @__shown
-      target_window = @parent.handle_request(:GET, :get_target_window)
-      if @data['ontop']
-        @window.window.restack(target_window.window, true)
-      else
-        target_window.window.restack(@window.window, true)
-      end
+      # GTK4: window stacking not available via public API
     end
 
     def append_actor(frame, actor)
@@ -418,7 +417,6 @@ module Kinoko
           cr.mask(overlay_surface, x, y)
         end
       end
-      #@darea.queue_draw_area(0, 0, w, h)
       @image_surface = new_surface
       @darea.queue_draw()
     end
@@ -455,7 +453,6 @@ module Kinoko
       if File.exist?(path)
         @path = path
       else
-        #@path = nil
         @path = File.join(@data['dir'], @data['base'])
       end
     end
@@ -464,7 +461,7 @@ module Kinoko
       @seriko.invoke(self, actor_id, :update => update)
     end
 
-    def delete()
+    def delete(widget = nil)
       @parent.handle_request(:GET, :close)
     end
 
@@ -473,28 +470,11 @@ module Kinoko
       @window.destroy()
     end
 
-    def button_press(widget, event)
-      @x_root = event.x_root
-      @y_root = event.y_root
-      if event.event_type == Gdk::EventType::BUTTON_PRESS
-        click = 1
-      else
-        click = 2
+    def button_press(button, n_press, x, y)
+      if button == 3 && n_press == 1
+        @__menu.popup(@darea)
       end
-      button = event.button
-      if button == 3 and click == 1
-        @__menu.popup()
-      end
-      return true
-    end
-
-    def button_release(widget, event) ## FIXME
-    end
-
-    def motion_notify(widget, event) ## FIXME
-    end
-
-    def leave_notify(widget, event) ## FIXME
+      true
     end
   end
 end
