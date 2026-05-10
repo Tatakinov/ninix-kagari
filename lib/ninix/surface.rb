@@ -908,6 +908,20 @@ module Surface
         default_id, @maxsize)
       surface_window.set_responsible(self)
       @window[side] = surface_window
+      # NOTE ウィンドウの準備に時間がかかると
+      # OnBootなどでの最初のSakuraScriptが反映されない場合があるので
+      # それらの処理を準備が完了してから実行する
+      if @window[side].loading?
+        GLib::Idle.add do
+          next false if @window[side].nil?
+          next true if @window[side].loading?
+          @window_queue[side].each do |f|
+            f.call
+          end
+          @window_queue.delete(side)
+          next false
+        end
+      end
     end
 
     def get_mayuna_menu
