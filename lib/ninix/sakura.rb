@@ -2617,6 +2617,8 @@ module Sakura
         __yen_n([])
       end
       @script_mode = SELECT_MODE
+      @defer_show << @script_side if @quick_session and
+        not @defer_show.include?(@script_side)
     end
 
     def __yen_URL(args)
