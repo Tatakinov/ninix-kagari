@@ -12,22 +12,12 @@
 
 require 'gettext'
 
+require_relative 'version_const'
+
 module Version
   include GetText
 
   bindtextdomain("ninix-kagari")
-
-  def self.NUMBER
-    '3.1.3'
-  end
-
-  def self.CODENAME
-    'power cycle'
-  end
-
-  def self.VERSION
-    "#{self.NUMBER} (#{self.CODENAME})"
-  end
 
   def self.VERSION_INFO
     '\h\s[0]\w8ninix-kagari '

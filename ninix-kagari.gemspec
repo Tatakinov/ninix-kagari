@@ -1,4 +1,4 @@
-require_relative 'lib/ninix/version'
+require_relative 'lib/ninix/version_const'
 
 Gem::Specification.new do |spec|
   spec.name        = 'ninix-kagari'
@@ -30,12 +30,12 @@ EOF
   spec.homepage    = 'https://github.com/Tatakinov/ninix-kagari'
   spec.license     = 'GPL-2.0'
   spec.add_runtime_dependency 'narray', '~> 0.6', '>=0.6.1.1'
-  spec.add_runtime_dependency 'gtk3', '~> 3.1', '>=3.1.0'
+  spec.add_runtime_dependency 'gtk4', '~> 4'
   #spec.add_runtime_dependency 'gstreamer', '~> 3.1', '>=3.1.0'
   spec.add_runtime_dependency 'gettext', '~> 3.2', '>=3.2.2'
   spec.add_runtime_dependency 'rubyzip', '~> 1.2', '>=1.2.0'
   #spec.add_runtime_dependency 'charlock_holmes', '~> 0.7', '>=0.7.3'
   #spec.executables << 'ninix-kagari'
-  spec.required_ruby_version = '~> 2.0'
+  spec.required_ruby_version = '>= 3.0'
   #spec.requirements << 'Ghosts and Balloon'
 end
