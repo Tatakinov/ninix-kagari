@@ -1457,10 +1457,9 @@ module Surface
           next motion_notify(window, darea, w, x, y)
         end
         darea.add_controller(motion_controller)
-        dad_controller = Gtk::DropTarget.new(GLib::Type::INVALID, 0)
-        dad_controller.signal_connect('drop') do |widget, context, x, y, data, info, time|
-          drag_data_received(window, darea, context, x, y, data, info, time)
-          next true
+        dad_controller = Gtk::DropTarget.new(Gdk::FileList, Gdk::DragAction::COPY)
+        dad_controller.signal_connect('drop') do |ctrl, data, x, y|
+          next drag_data_received(ctrl, data, x, y)
         end
         darea.add_controller(dad_controller)
         scroll_controller = Gtk::EventControllerScroll.new(Gtk::EventControllerScrollFlags::VERTICAL)
@@ -1575,26 +1574,22 @@ module Surface
       @parent.handle_request(:GET, :reset_balloon_position)
     end
 
-    def drag_data_received(widget, context, x, y, data, info, time)
+    def drag_data_received(ctrl, data, x, y)
       filelist = []
-      dirlist = []
-      for uri in data.uris
-        uri_parsed = URI.parse(uri)
-        pathname = URI.decode_www_form_component(uri_parsed.path)
-        if uri_parsed.scheme == 'file'
-          filelist << pathname if File.exist?(pathname)
-          dirlist << pathname if File.directory?(pathname)
+      data.value.files.each do |file|
+        uri = URI.parse(file.uri)
+        path = URI.decode_www_form_component(uri.path)
+        # Windowsではドライブ名の前の"/"は取り除く
+        path = path[1 ..] if RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+        if uri.scheme == 'file'
+          filelist << path if File.exist?(path)
         end
       end
-      if dirlist.length == 1
+      unless filelist.empty?
         @parent.handle_request(
-          :GET, :enqueue_event,
-          'OnDirectoryDrop', dirlist[0], @side)
-      elsif not filelist.empty?
-        @parent.handle_request(
-          :GET, :enqueue_event,
-          'OnFileDrop2', filelist.join(1.chr), @side)
+          :GET, :analyze_file_magic, @side, *filelist)
       end
+      return true
     end
 
     def append_actor(frame, actor)

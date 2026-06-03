@@ -310,11 +310,14 @@ module SSTP
         return nil
       end
       buf = [event]
-      (0..7).each do |i|
+      @headers.size.times do |i|
         key = "Reference#{i}"
         value = @headers.reverse.assoc(key)&.at(1)
         buf << value
       end
+      buf = buf.reverse.drop_while do |x|
+        x.nil?
+      end.reverse
       return buf
     end
 
@@ -593,6 +596,11 @@ module SSTP
           end)
         end)
         send_response(204)
+      when 'AnalyzeFileMagic'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :analyze_file_magic, args.shift.to_i, *args)
+        end)
       when 'ResetBalloonPosition'
         return send_response(400) unless from_ao or from_ai
         # run in main thread

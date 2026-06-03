@@ -27,6 +27,7 @@ require "pathname"
 require "securerandom"
 require 'json'
 require 'locale'
+require 'magic'
 
 require_relative "surface"
 require_relative "balloon"
@@ -1490,6 +1491,20 @@ module Sakura
         caption: caption.call('closeallbutton.caption', _('Quit(_Q)')),
       }
       @surface.open_menu(JSON.generate(data))
+    end
+
+    def analyze_file_magic(side, *filelist)
+      filelist.delete_if do |x|
+        unless File.directory?(x)
+          next false
+        end
+        enqueue_event('OnDirectoryDrop', x, side)
+        next true
+      end
+      mime = filelist.map do |x|
+        Magic.guess_file_mime_type(x)
+      end
+      enqueue_event('OnFileDrop2', filelist.join((1).chr), side, mime.join((1).chr))
     end
 
     def get_prefix()
