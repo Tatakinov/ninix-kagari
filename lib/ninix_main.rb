@@ -29,6 +29,15 @@ module Kernel
   end
 end
 
+# HACK:
+# Windowsでffiモジュールでmagic.dllを読み込もうとすると挙動が怪しくなるので
+# 事前にFiddle経由でmagic.dllを読み込んでおく
+begin
+  require_relative 'ninix/hack'
+rescue
+  # nop
+end
+
 require 'optparse'
 require 'uri'
 require 'gettext'
