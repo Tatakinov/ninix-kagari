@@ -28,6 +28,8 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 ## Requirements
 
+### apt
+
 - ruby
 
 - ruby-gettext
@@ -35,6 +37,8 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 - ruby-gio2
 
 - ruby-gtk4
+
+- ruby-magic (magic)
 
 - ruby-narray
 
@@ -64,7 +68,7 @@ X11環境では事前にコンポジタを起動して透過を有効にする�
 以下の様にしてください。
 
 ```
-gem install gettext gio2 gtk4 rubyzip rake rake-compiler bundler
+gem install gettext gio2 gtk4 magic rubyzip rake rake-compiler bundler
 gem install narray -- --with-cflags=-std=c99
 git clone https://github.com/Tatakinov/ninix-fmo
 cd ninix-fmo
@@ -124,6 +128,26 @@ rubyinstallerのRuby+Devkitの**x64**をインストールしてください。
 
 ```
 > git clone https://github.com/Tatakinov/ninix-kagari
+```
+
+v3.2以降では環境変数`MAGIC_LIB`を指定する必要があります。
+```
+> set MAGIC_LIB=msys-magic-1.dll
+```
+
+また、環境変数`RUBY_DLL_PATH`を指定する必要がある場合があります。
+その場合、`RUBY_DLL_PATH`は`msys-magic-1.dll`の存在するディレクトリを指定します。
+
+```
+> set RUBY_DLL_PATH=...
+```
+
+[ninix-proxy](https://github.com/Tatakinov/ninix-proxy)を**32-bit**でビルドします。
+
+環境変数`NINIX_PROXY`を設定します。
+
+```
+> set NINIX_PROXY=/path/to/ninix-proxy.exe
 ```
 
 実行します。
