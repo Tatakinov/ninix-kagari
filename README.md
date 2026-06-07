@@ -38,8 +38,6 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - ruby-gtk4
 
-- ruby-magic (magic)
-
 - ruby-narray
 
 - ruby-zip (rubyzip)
@@ -68,7 +66,7 @@ X11環境では事前にコンポジタを起動して透過を有効にする�
 以下の様にしてください。
 
 ```
-gem install gettext gio2 gtk4 magic rubyzip rake rake-compiler bundler
+gem install gettext gio2 gtk4 rubyzip rake rake-compiler bundler
 gem install narray -- --with-cflags=-std=c99
 git clone https://github.com/Tatakinov/ninix-fmo
 cd ninix-fmo
@@ -131,6 +129,7 @@ rubyinstallerのRuby+Devkitの**x64**をインストールしてください。
 ```
 
 v3.2以降では環境変数`MAGIC_LIB`を指定する必要があります。
+
 ```
 > set MAGIC_LIB=msys-magic-1.dll
 ```
