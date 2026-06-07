@@ -27,7 +27,6 @@ require "pathname"
 require "securerandom"
 require 'json'
 require 'locale'
-require 'magic'
 
 require_relative "surface"
 require_relative "balloon"
@@ -43,6 +42,7 @@ require_relative "logging"
 require_relative "case_insensitive_file"
 require_relative "http"
 require_relative 'ninix_server'
+require_relative 'magic'
 
 module Sakura
 
@@ -1502,7 +1502,7 @@ module Sakura
         next true
       end
       mime = filelist.map do |x|
-        Magic.guess_file_mime_type(x)
+        Magic.guess_mime(x)
       end
       enqueue_event('OnFileDrop2', filelist.join((1).chr), side, mime.join((1).chr))
     end
