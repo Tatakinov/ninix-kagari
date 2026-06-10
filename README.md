@@ -122,6 +122,12 @@ rubyinstallerのRuby+Devkitの**x64**をインストールしてください。
 
 [Requirementsをインストールします](#install-requirements-with-gem)。
 
+また、libmagic-1.dllが必要なのでpacmanでインストールします。
+
+```
+> pacman -S mingw-w64-ucrt-x86_64-file
+```
+
 適当な場所にninix-kagariをgit cloneします。
 
 ```
@@ -131,11 +137,11 @@ rubyinstallerのRuby+Devkitの**x64**をインストールしてください。
 v3.2以降では環境変数`MAGIC_LIB`を指定する必要があります。
 
 ```
-> set MAGIC_LIB=msys-magic-1.dll
+> set MAGIC_LIB=libmagic-1.dll
 ```
 
 また、環境変数`RUBY_DLL_PATH`を指定する必要がある場合があります。
-その場合、`RUBY_DLL_PATH`は`msys-magic-1.dll`の存在するディレクトリを指定します。
+その場合、`RUBY_DLL_PATH`は`libmagic-1.dll`の存在するディレクトリを指定します。
 
 ```
 > set RUBY_DLL_PATH=...
