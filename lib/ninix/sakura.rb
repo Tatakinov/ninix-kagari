@@ -196,6 +196,7 @@ module Sakura
       @client.set_responsible(self)
       @defer_show = []
       @defer_update_bind = []
+      @timer = {}
     end
 
     def get_lock_repaint(*args)
@@ -2021,7 +2022,7 @@ module Sakura
       @__running = false
       save_settings()
       save_history()
-      @parent.handle_request(:GET, :rebuild_ghostdb, self, :name => nil)
+      @parent.handle_request(:GET, :rebuild_ghostdb, self, :name => nil, sakura_name: nil)
       hide_all()
       @surface.finalize()
       @balloon.finalize()
@@ -2041,7 +2042,8 @@ module Sakura
         @parent.handle_request(
           :GET, :rebuild_ghostdb,
           self,
-          :name => get_selfname(),
+          :name => @desc['name'],
+          :sakura_name => get_selfname(),
           :s0 => get_surface_id(0),
           :s1 => get_surface_id(1))
         otherghostname = @parent.handle_request(
@@ -2808,6 +2810,24 @@ module Sakura
         notify_event(*args[1..])
       elsif args[0] == 'raiseother' and argc >= 3
         @parent.handle_request(:GET, :raise_other, args[1], @key, *args[2..])
+      elsif args[0] == 'timerraise' and argc >= 4
+        interval = args[1].to_i
+        do_loop = args[2].to_i > 0
+        event = args[3]
+        if interval.zero? and @timer.include?(event) and not @timer[event].nil?
+          GLib::Source.remove(@timer[event])
+          @timer.delete(event)
+        elsif interval < 0
+          return
+        else
+          @timer[event] = GLib::Timeout.add(interval) do
+            notify_event(*args[3 ..])
+            unless do_loop
+              @timer.delete(event)
+            end
+            next do_loop
+          end
+        end
       elsif args[0] == 'embed' and argc >= 2
         notify_event(*args[1..], embed: true)
       elsif args[0, 2] == ['open', 'readme']
@@ -3709,8 +3729,13 @@ module Sakura
     def general_property(key, value = nil)
       case key
       when 'name'
+        return @desc['name']
       when 'sakuraname'
+        # TODO stub shell.sakura.name
+        return @desc['sakura.name']
       when 'keroname'
+        # TODO stub shell.kero.name
+        return @desc['kero.name']
       when 'craftmanw'
       when 'craftmanurl'
       end

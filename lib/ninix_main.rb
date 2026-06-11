@@ -1344,6 +1344,7 @@ module Ninix_Main
         ghost = find_ghost_by_name(k) if ghost.nil?
         ghost = find_ghost_by_sakura_name(k) if ghost.nil?
         # TODO stub
+        return if ghost.nil?
         return @ghosts[ghost].instance.general_property(key, value)
       elsif key.start_with?('activeghostlist')
         key = key[15 ..]
@@ -1354,6 +1355,7 @@ module Ninix_Main
         ghost = find_ghost_by_dir(k)
         ghost = find_ghost_by_name(k) if ghost.nil?
         ghost = find_ghost_by_sakura_name(k) if ghost.nil?
+        return if ghost.nil?
         sakura = @ghosts[ghost].instance
         return unless sakura.is_running
         if key.start_with?('ext')

@@ -23,9 +23,9 @@ module Communicate
       @ghosts = {}
     end
 
-    def rebuild_ghostdb(sakura, name: '', s0: 0, s1: 10)
+    def rebuild_ghostdb(sakura, name: '', sakura_name: '', s0: 0, s1: 10)
       @ghosts.delete(sakura)
-      @ghosts[sakura] = [name, s0, s1] if not name.nil?
+      @ghosts[sakura] = [sakura_name, s0, s1, name] unless name.nil? or name.empty?
     end
 
     def get_otherghostname(name)
@@ -42,10 +42,12 @@ module Communicate
       ghosts_name = []
       if ghost_name.include?(1.chr)
         ghosts_name = ghost_name.split(1.chr, 0)
+      else
+        ghosts_name << ghost_name
       end
       for sakura in @ghosts.keys()
         next if sakura.key == sender
-        if ghosts_name.include?(@ghosts[sakura][0])
+        if ghosts_name.include?(@ghosts[sakura][3])
           sakura.enqueue_event(*args)
         elsif ghosts_name.empty?
           if ghost_name == '__SYSTEM_ALL_GHOST__' or ghost_name == @ghosts[sakura][0]
