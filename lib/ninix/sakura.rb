@@ -2809,7 +2809,10 @@ module Sakura
       if args[0] == 'raise' and argc >= 2
         notify_event(*args[1..])
       elsif args[0] == 'raiseother' and argc >= 3
-        @parent.handle_request(:GET, :raise_other, args[1], @key, *args[2..])
+        reason, ghosts, event, references = @parent.handle_request(:GET, :raise_other, args[1], @key, *args[2..])
+        unless reason.nil? or reason.empty?
+          notify_event('OnRaiseOtherFailure', reason, ghosts, event, *references)
+        end
       elsif args[0] == 'timerraise' and argc >= 4
         interval = args[1].to_i
         do_loop = args[2].to_i > 0

@@ -42,19 +42,32 @@ module Communicate
       ghosts_name = []
       if ghost_name.include?(1.chr)
         ghosts_name = ghost_name.split(1.chr, 0)
-      else
-        ghosts_name << ghost_name
       end
+      reasons = []
+      ghosts = []
       for sakura in @ghosts.keys()
         next if sakura.key == sender
         if ghosts_name.include?(@ghosts[sakura][3])
-          sakura.enqueue_event(*args)
-        elsif ghosts_name.empty?
-          if ghost_name == '__SYSTEM_ALL_GHOST__' or ghost_name == @ghosts[sakura][0]
-            sakura.enqueue_event(*args)
+          unless sakura.notify_event(*args)
+            reasons << '204'
+            ghosts << @ghosts[sakura][3]
           end
+        elsif ghosts_name.empty?
+          if ghost_name == '__SYSTEM_ALL_GHOST__' or ghost_name == @ghosts[sakura][3]
+            unless sakura.notify_event(*args)
+              reasons << '204'
+              ghosts << @ghosts[sakura][3]
+            end
+          else
+            reasons << 'notfound'
+            ghosts << @ghosts[sakura][3]
+          end
+        else
+          reasons << 'notfound'
+          ghosts << @ghosts[sakura][3]
         end
       end
+      return [reasons.join(1.chr), ghosts.join(1.chr), args.shift, args]
     end
 
     ON_OTHER_EVENT = {
@@ -155,7 +168,7 @@ module Communicate
           end
         end
         if sakura.is_listening(on_other_event)
-          sakura.enqueue_event(on_other_event, *args)
+          sakura.notify_event(on_other_event, *args)
         end
       end
     end
