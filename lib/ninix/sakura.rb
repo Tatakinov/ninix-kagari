@@ -2815,7 +2815,7 @@ module Sakura
         end
       elsif args[0] == 'timerraise' and argc >= 4
         interval = args[1].to_i
-        do_loop = args[2].to_i > 0
+        do_loop = args[2].to_i.zero?
         event = args[3]
         if interval.zero? and @timer.include?(event) and not @timer[event].nil?
           GLib::Source.remove(@timer[event])
