@@ -134,7 +134,7 @@ module Balloon
           return
         end
       end
-      send_event('Initialize', File.join(directory, ''))
+      send_event('Initialize', File.join(directory, ''), 'AI')
       send_event('BasewareVersion', 'ninix', Version.NUMBER)
       path, _ao_uuid, ai_uuid = @parent.handle_request(:GET, :endpoint)
       send_event('Endpoint', path, ai_uuid)

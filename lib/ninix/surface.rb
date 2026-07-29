@@ -85,7 +85,7 @@ module Surface
           return
         end
       end
-      send_event('Initialize', File.join(surface_dir, ''))
+      send_event('Initialize', File.join(surface_dir, ''), 'AO')
       send_event('BasewareVersion', 'ninix', Version.NUMBER)
       path, ao_uuid, _ai_uuid = @parent.handle_request(:GET, :endpoint)
       send_event('Endpoint', path, ao_uuid)
