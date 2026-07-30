@@ -1416,6 +1416,11 @@ module Sakura
             caption: caption.call('scriptinputboxbutton.caption', _('Input Script(_L)')),
             valid: true,
           },
+          {
+            type: 'scriptlog',
+            caption: caption.call('scriptlogbutton.caption', _('Script Log(_L)')),
+            valid: true,
+          },
         ],
       }
       data << {
@@ -3755,9 +3760,26 @@ module Sakura
 
     def property(key, value = nil)
       if key.start_with?('currentghost.')
-        key = key[13 .. ]
-        if false
-          # TODO stub
+        key = key[13 ..]
+        if key.start_with?('scope(')
+          key = key[6 ..]
+          n, sep, key = key.partition(')')
+          if sep.nil?
+            return nil
+          end
+          side = n.to_i
+          key = key[1 ..]
+          case key
+          when 'animation.num'
+            if value.nil?
+              @surface.get_active_animation_list(side)
+            end
+          when 'rect'
+            x, y, w, h = @char[side][:surface_rect]
+            return "#{x},#{y},#{x + w},#{y + h}"
+          else
+            return nil
+          end
         else
           return general_property(key, value)
         end
