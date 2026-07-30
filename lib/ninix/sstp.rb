@@ -587,6 +587,13 @@ module SSTP
           @server.handle_request(:NOTIFY, :open_scriptinputbox)
         end)
         send_response(204)
+      when 'OpenScriptLog'
+        return send_response(400) unless from_ao
+        # run in main thread
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :open_script_log)
+        end)
+        send_response(204)
       when 'RaiseBalloon'
         return send_response(400) unless from_ao
         # run in main thread
