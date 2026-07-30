@@ -57,7 +57,6 @@ module ScriptLog
         label.halign = :start
         label.hexpand = true
         list_item.child = label
-        p [:debug, :time]
       end
       factory1.signal_connect('bind') do |f, list_item|
         label = list_item.child
@@ -73,7 +72,6 @@ module ScriptLog
         label.halign = :start
         label.hexpand = true
         list_item.child = label
-        p [:debug, :name]
       end
       factory2.signal_connect('bind') do |f, list_item|
         label = list_item.child
