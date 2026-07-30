@@ -367,6 +367,15 @@ module Surface
       return x != 0
     end
 
+    def get_active_animation_list(side)
+      response = send_event('GetActiveAnimationList', side, method: 'GET')
+      headers = response[:headers]
+      unless headers.include?('Result')
+        return ''
+      end
+      return headers['Result']
+    end
+
     def invoke_yen_e(side, id)
     end
 
@@ -1318,6 +1327,10 @@ module Surface
       @window[side].is_playing_animation(actor_id)
     end
 
+    def get_active_animation_list(side)
+      @window[side].get_active_animation_list
+    end
+
     def change_animation_state(side, actor_id, state, *args)
       @window[side].change_animation_state(actor_id, state, *args)
     end
@@ -1610,6 +1623,10 @@ module Surface
 
     def is_playing_animation(actor_id)
       @seriko.is_playing_animation(actor_id)
+    end
+
+    def get_active_animation_list
+      # TODO stub
     end
 
     def change_animation_state(actor_id, state, *args)
