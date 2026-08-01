@@ -397,6 +397,10 @@ module Surface
 
     def repaint
     end
+
+    def move(side, is_async, x, y, time, base, base_offset, move_offset, *options)
+      send_event('Move', side, is_async, x, y, time, base, base_offset, move_offset, *options)
+    end
   end
 
   class Surface < MetaMagic::Holon
@@ -1375,6 +1379,11 @@ module Surface
 
     def is_internal
       true
+    end
+
+    def move(side, is_async, x, y, time, base, base_offset, move_offset, *options)
+      # TODO stub
+      @parent.handle_request(:NOTIFY, :resume_script) unless is_async
     end
   end
 

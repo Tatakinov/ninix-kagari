@@ -1172,11 +1172,16 @@ module Sakura
       end
     end
 
+    def resume_script
+      if @script_mode == PAUSE_MODE
+        @script_mode = BROWSE_MODE
+      end
+    end
+
     def notify_balloon_click(button, click, side)
       if @script_mode == PAUSE_MODE
         @script_mode = BROWSE_MODE
-        @balloon.clear_text_all()
-        @balloon.hide_all()
+        clear_balloon
         @script_side = 0
       elsif @script_mode == PAUSE_NOCLEAR_MODE
         @script_mode = BROWSE_MODE
@@ -1707,6 +1712,11 @@ module Sakura
         return 0
       end
       return uptime
+    end
+
+    def clear_balloon
+      @balloon.hide_all
+      @balloon.clear_text_all
     end
 
     def hide_all()
@@ -3260,7 +3270,7 @@ module Sakura
           keys.each do |key|
             values << property(key)
           end
-          enqueue_event(event, *values)
+          notify_event(event, *values)
         elsif args[0] == 'set'
           key = args[2]
           # non-nil required
@@ -3282,6 +3292,43 @@ module Sakura
             y = args[4].to_i
             @surface.change_animation_state(@script_side, id, :offset, x, y)
           end
+        end
+      elsif args[0] == 'move' or args[0] == 'moveasync'
+        a = ['fix', 'fix', '0', 'screen', 'left.top', 'left.top']
+        if args.size > 2 and args.none? do |x|
+          x.start_with?('--')
+        end
+          args[1 ..].each_with_index do |x, i|
+            a[i] = x
+          end
+        else
+          h = {
+            '--X=' => 0,
+            '--Y=' => 1,
+            '--time=' => 2,
+            '--base=' => 3,
+            '--base-offset=' => 4,
+            '--move-offset=' => 5,
+          }
+          args[1 ..].each do |x|
+            if x.start_with?('--option=')
+              a << x[9 ..]
+            else
+              h.any? do |k, v|
+                if x.start_with?(k)
+                  a[v] = x[k.size ..]
+                  next true
+                end
+                next false
+              end
+            end
+          end
+        end
+        if args[0] == 'move'
+          @script_mode = PAUSE_MODE unless a[2].to_i.zero?
+          @surface.move(@script_side, false, *a)
+        else
+          @surface.move(@script_side, true, *a)
         end
       else
         #pass ## FIXME
@@ -3772,7 +3819,7 @@ module Sakura
           case key
           when 'animation.num'
             if value.nil?
-              @surface.get_active_animation_list(side)
+              return @surface.get_active_animation_list(side)
             end
           when 'rect'
             x, y, w, h = @char[side][:surface_rect]
