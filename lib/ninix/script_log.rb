@@ -104,6 +104,12 @@ module ScriptLog
     end
 
     def append_data(name, script)
+      if @scroll.vadjustment.value.zero?
+        id = @scroll.vadjustment.signal_connect('value-changed') do |a|
+          a.signal_handler_disconnect(id)
+          a.value = 0.0
+        end
+      end
       @model.insert(0, Item.new(Time.now.to_s, name, script))
     end
   end
