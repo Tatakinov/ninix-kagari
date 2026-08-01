@@ -191,7 +191,7 @@ module SSTP
       sock_domain, remote_port, remote_hostname, remote_ip = @fp.peeraddr
       address = remote_hostname # XXX
       if entry_db.nil? or entry_db.is_empty()
-        show_sstp_marker, use_translator = get_options()
+        show_sstp_marker, use_translator, hide_on_204 = get_options()
         @server.handle_request(
           :GET, :enqueue_request,
           event, script_odict, sender, handle,
@@ -202,13 +202,16 @@ module SSTP
         script = @response_queue.pop
         if script.nil? or script.empty?
           send_response(204, ['Charset: UTF-8']) # No Content
+          @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+            @server.handle_request(:NOTIFY, :clear_balloon)
+          end) if hide_on_204
         else
           send_response(200, ['Charset: UTF-8', "Script: #{script}"]) # OK
         end
       elsif @server.has_request_handler
         send_response(409) # Conflict
       else
-        show_sstp_marker, use_translator = get_options()
+        show_sstp_marker, use_translator, hide_on_204 = get_options()
         @server.handle_request(
           :GET, :enqueue_request,
           event, script_odict, sender, handle,
@@ -367,6 +370,7 @@ module SSTP
 
     def get_options
       show_sstp_marker = use_translator = true
+      hide_on_204 = false
       options = (@headers.reverse.assoc("Option")&.at(1) || "").split(",", 0)
       options.each do |option|
         option = option.strip()
@@ -375,9 +379,11 @@ module SSTP
           show_sstp_marker = false if local_request()
         when 'notranslate'
           use_translator = false
+        when 'hideon204'
+          hide_on_204 = true
         end
       end
-      return show_sstp_marker, use_translator
+      return show_sstp_marker, use_translator, hide_on_204
     end
 
     def local_request
@@ -607,6 +613,11 @@ module SSTP
         return send_response(400) unless from_ao
         @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
           @server.handle_request(:NOTIFY, :analyze_file_magic, args.shift.to_i, *args)
+        end)
+      when 'ResumeScript'
+        return send_response(400) unless from_ao
+        @server.handle_request(:NOTIFY, :enqueue_execute_command, proc do
+          @server.handle_request(:NOTIFY, :resume_script)
         end)
       when 'ResetBalloonPosition'
         return send_response(400) unless from_ao or from_ai
