@@ -763,12 +763,12 @@ module Surface
         surface_window.destroy()
       end
       @window = Hash.new do |hash, key|
-        add_window(key, default_kero, :config_alias => @surface_alias, :mayuna => @__mayuna)
+        hash[key] = add_window(key, default_kero, :config_alias => @surface_alias, :mayuna => @__mayuna)
       end
       @__surface = surface
       @maxsize = [maxwidth, maxheight]
-      add_window(0, default_sakura, :config_alias => @surface_alias, :mayuna => @__mayuna)
-      add_window(1, default_kero, :config_alias => @surface_alias, :mayuna => @__mayuna)
+      @window[0] = add_window(0, default_sakura, :config_alias => @surface_alias, :mayuna => @__mayuna)
+      @window[1] = add_window(1, default_kero, :config_alias => @surface_alias, :mayuna => @__mayuna)
     end
 
     def notify_scope_change(side)
@@ -921,14 +921,12 @@ module Surface
         @__surfaces, seriko, @__region, mayuna, bind,
         default_id, @maxsize)
       surface_window.set_responsible(self)
-      @window[side] = surface_window
       # NOTE ウィンドウの準備に時間がかかると
       # OnBootなどでの最初のSakuraScriptが反映されない場合があるので
       # それらの処理を準備が完了してから実行する
-      if @window[side].loading?
+      if surface_window.loading?
         GLib::Idle.add do
-          next false if @window[side].nil?
-          next true if @window[side].loading?
+          next true if surface_window.loading?
           @window_queue[side].each do |f|
             f.call
           end
@@ -936,6 +934,7 @@ module Surface
           next false
         end
       end
+      return surface_window
     end
 
     def get_mayuna_menu
@@ -1636,6 +1635,7 @@ module Surface
 
     def get_active_animation_list
       # TODO stub
+      []
     end
 
     def change_animation_state(actor_id, state, *args)
