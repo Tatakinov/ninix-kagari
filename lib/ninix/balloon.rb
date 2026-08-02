@@ -64,7 +64,7 @@ module Balloon
     end
 
     def new_(desc, *args)
-      desc["ai"] = "ai_builtin.exe" if ENV.include?('NINIX_ENABLE_SORAKADO')
+      desc["ai"] = "sorakado_builtin.exe" if ENV.include?('NINIX_ENABLE_SORAKADO')
       ai = desc.get('ai')
       if ai.nil? or ai.empty?
         @current = @normal
@@ -124,9 +124,16 @@ module Balloon
       begin
         @ai_write, @ai_read, @ai_err, @ai_thread = Open3.popen3(command)
       rescue
-        Logging::Logging.info('fallback to default Ai') unless ENV.include?('NINIX_ENABLE_SORAKADO')
-        fail if ENV['AI_PATH'].nil?
-        command = File.join(ENV['AI_PATH'], @ai)
+        unless ENV.include?('NINIX_ENABLE_SORAKADO')
+          fail
+        end
+        Logging::Logging.info('fallback to default Ai')
+        command = nil
+        [ENV['AI_PATH'], ENV['SORAKADO_PATH']].all? do |path|
+          command = File.join(path, @ai) unless path.nil?
+          next (command.nil? or not(File.exist?(command)))
+        end
+        fail if command.nil? or not(File.exist?(command))
         begin
           @ai_write, @ai_read, @ai_err, @ai_thread = Open3.popen3(command)
         rescue => e

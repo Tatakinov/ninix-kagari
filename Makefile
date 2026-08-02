@@ -15,6 +15,7 @@ saori_so_dir = $(DESTDIR)$(prefix)/lib/saori
 shiori_so_dir = $(DESTDIR)$(prefix)/lib/kawari8:$(DESTDIR)$(prefix)/lib/yaya:$(DESTDIR)$(prefix)/lib/kagari:$(DESTDIR)$(prefix)/lib/aosora:$(DESTDIR)$(prefix)/lib/satori
 ao_dir = $(DESTDIR)$(prefix)/lib/ao
 ai_dir = $(DESTDIR)$(prefix)/lib/ai
+sorakado_dir = $(DESTDIR)$(prefix)/lib/sorakado
 
 ruby = ruby
 

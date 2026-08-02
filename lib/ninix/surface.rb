@@ -38,7 +38,7 @@ module Surface
     end
 
     def new_(desc, *args)
-      desc["ao"] = "ao_builtin.exe" if ENV.include?('NINIX_ENABLE_SORAKADO')
+      desc["ao"] = "sorakado_builtin.exe" if ENV.include?('NINIX_ENABLE_SORAKADO')
       ao = desc.get('ao')
       if ao.nil? or ao.empty?
         @current = @internal
@@ -75,9 +75,17 @@ module Surface
       begin
         @ao_write, @ao_read, @ao_err, @ao_thread = Open3.popen3(command)
       rescue
-        Logging::Logging.info('fallback to default Ao') unless ENV.include?('NINIX_ENABLE_SORAKADO')
-        fail if ENV['AO_PATH'].nil?
-        command = File.join(ENV['AO_PATH'], @ao)
+        unless ENV.include?('NINIX_ENABLE_SORAKADO')
+          fail
+        end
+        Logging::Logging.info('fallback to default Ao')
+        command = nil
+        [ENV['AO_PATH'], ENV['SORAKADO_PATH']].all? do |path|
+          command = File.join(path, @ao) unless path.nil?
+          p [:debug, command, (command.nil? or not(File.exist?(command)))]
+          next (command.nil? or not(File.exist?(command)))
+        end
+        fail if command.nil? or not(File.exist?(command))
         begin
           @ao_write, @ao_read, @ao_err, @ao_thread = Open3.popen3(command)
         rescue => e
