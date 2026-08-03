@@ -27,9 +27,7 @@ SATORI = shiori/satori/satoriya/satori/libsatori.so
 YAYA   = shiori/yaya/libaya5.so
 SHIORI = $(AOSORA) $(KAWARI) $(SATORI) $(YAYA)
 
-AO = sorakado/ao_builtin/ao_builtin.exe
-AI = sorakado/ai_builtin/ai_builtin.exe
-SORAKADO = $(AO) $(AI)
+SORAKADO = sorakado/sorakado_builtin/build/sorakado_builtin.exe
 
 all: $(SHIORI) $(SORAKADO)
 
@@ -45,11 +43,8 @@ $(SATORI):
 $(YAYA):
 	cd shiori/yaya && $(MAKE) -f makefile.linux
 
-$(AO):
-	cd sorakado/ao_builtin && $(MAKE)
-
-$(AI):
-	cd sorakado/ai_builtin && $(MAKE)
+$(SORAKADO):
+	cd sorakado/sorakado_builtin && cmake -S -B build && cmake --build build
 
 install-all: install $(SHIORI) $(SORAKADO)
 	mkdir -p $(libdir)/aosora
@@ -62,10 +57,8 @@ install-all: install $(SHIORI) $(SORAKADO)
 	cp $(SATORI) $(libdir)/satori/libsatori.so
 	mkdir -p $(libdir)/yaya
 	cp $(YAYA) $(libdir)/yaya/libaya5.so
-	mkdir -p $(libdir)/ao
-	cp $(AO) $(libdir)/ao/ao_builtin.exe
-	mkdir -p $(libdir)/ai
-	cp $(AI) $(libdir)/ai/ai_builtin.exe
+	mkdir -p $(libdir)/sorakado
+	cp $(SORAKADO) $(libdir)/sorakado/sorakado_builtin.exe
 
 install: install-lib install-bin install-doc
 
@@ -75,7 +68,7 @@ install-lib:
 	mkdir -p $(localedir)/ja/LC_MESSAGES
 	(cd po/ja ; msgfmt ninix-kagari.po -o $(localedir)/ja/LC_MESSAGES/ninix-kagari.mo)
 
-sed_dirs = sed -e "s,@ruby,$(ruby),g" -e "s,@libdir,$(libdir),g" -e "s,@so_path,$(shiori_so_dir),g" -e "s,@saori_path,$(saori_so_dir),g" -e "s,@ao_path,$(ao_dir),g" -e "s,@ai_path,$(ai_dir),g"
+sed_dirs = sed -e "s,@ruby,$(ruby),g" -e "s,@libdir,$(libdir),g" -e "s,@so_path,$(shiori_so_dir),g" -e "s,@saori_path,$(saori_so_dir),g" -e "s,@ao_path,$(ao_dir),g" -e "s,@ai_path,$(ai_dir),g" -e "s,@sorakado_path,$(sorakado_dir),g"
 
 install-bin:
 	mkdir -p $(bindir)
@@ -92,5 +85,4 @@ clean:
 	cd shiori/kawari/build/src && $(MAKE) -f gcc.mak clean
 	cd shiori/satori/satoriya/satori && $(MAKE) -f makefile.posix clean
 	cd shiori/yaya && $(MAKE) -f makefile.linux clean
-	cd sorakado/ao_builtin && $(MAKE) clean
-	cd sorakado/ai_builtin && $(MAKE) clean
+	cd sorakado/sorakado_builtin && $(RM) build
