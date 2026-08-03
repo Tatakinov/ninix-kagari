@@ -85,4 +85,4 @@ clean:
 	cd shiori/kawari/build/src && $(MAKE) -f gcc.mak clean
 	cd shiori/satori/satoriya/satori && $(MAKE) -f makefile.posix clean
 	cd shiori/yaya && $(MAKE) -f makefile.linux clean
-	cd sorakado/sorakado_builtin && $(RM) build
+	cd sorakado/sorakado_builtin && $(RM) -r build
