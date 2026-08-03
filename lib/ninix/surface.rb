@@ -82,7 +82,6 @@ module Surface
         command = nil
         [ENV['AO_PATH'], ENV['SORAKADO_PATH']].all? do |path|
           command = File.join(path, @ao) unless path.nil?
-          p [:debug, command, (command.nil? or not(File.exist?(command)))]
           next (command.nil? or not(File.exist?(command)))
         end
         fail if command.nil? or not(File.exist?(command))
