@@ -44,7 +44,7 @@ $(YAYA):
 	cd shiori/yaya && $(MAKE) -f makefile.linux
 
 $(SORAKADO):
-	cd sorakado/sorakado_builtin && cmake -S -B build && cmake --build build
+	cd sorakado/sorakado_builtin && cmake -S . -B build && cmake --build build
 
 install-all: install $(SHIORI) $(SORAKADO)
 	mkdir -p $(libdir)/aosora
