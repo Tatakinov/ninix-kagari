@@ -13,7 +13,7 @@
 module Version
 
   def self.NUMBER
-    '3.4.0'
+    '3.4.1'
   end
 
   def self.CODENAME
