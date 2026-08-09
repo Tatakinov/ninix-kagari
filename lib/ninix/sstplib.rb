@@ -48,11 +48,11 @@ module SSTPLib
     def parse_headers(fp)
       return if fp.nil?
       message = []
-      while line = fp.gets
+      while line = fp.gets(chomp: true)
         break if line.strip.empty?
         line = line.chomp
-        next unless line.include?(":")
-        key, value = line.split(":", 2)
+        key, sep, value = line.partition(":")
+        next if sep.nil?
         message << [key, value.strip]
       end
       charset = message.reverse.assoc("Charset")&.at(1) || "UTF-8" # XXX
@@ -76,8 +76,10 @@ module SSTPLib
         send_error(
           501,
           :message => "Not Implemented (#{@command}/#{@version})")
-        return
+        return false
       end
+      connection = @headers.reverse.assoc("Connection")&.at(1) or ''
+      return connection == 'keep-alive'
     end
 
     def send_error(code, message: nil)
@@ -86,13 +88,21 @@ module SSTPLib
       send_response(code, :message => RESPONSES[code])
     end
 
-    def send_response(code, data = [], message: nil)
+    def send_response(code, data = [], content: nil, message: nil)
       log_request(code, :message => message)
-      @fp.write(response(code))
-      data.each do |v|
-        @fp.write("#{v}\r\n")
+      connection = @headers.reverse.assoc("Connection")&.at(1)
+      unless connection.nil? or connection != 'keep-alive'
+        data << "Connection: #{connection}"
+      else
+        data << 'Connection: close'
       end
-      @fp.write("\r\n")
+      s = response(code)
+      data.each do |v|
+        s += "#{v}\r\n"
+      end
+      s += "\r\n"
+      s += "#{content}\r\n" unless content.nil?
+      @fp.write(s)
     end
 
     def response(code)
@@ -100,7 +110,8 @@ module SSTPLib
     end
 
     def log_error(message)
-      Logging::Logging.error("[#{timestamp}] #{message}\n")
+      #Logging::Logging.error("[#{timestamp}] #{message}\n")
+      Logging::Logging.error("#{message}\n")
     end
 
     def log_request(code, message: nil)
@@ -110,9 +121,11 @@ module SSTPLib
         request = "\"#{@requestline}\""
       end
       if code == 200 or code == 204
-        Logging::Logging.debug("#{client_hostname} [#{timestamp}] #{request} #{code} #{(message or RESPONSES[code])}\n")
+        #Logging::Logging.debug("#{client_hostname} [#{timestamp}] #{request} #{code} #{(message or RESPONSES[code])}\n")
+        Logging::Logging.debug("#{client_hostname} #{request} #{code} #{(message or RESPONSES[code])}\n")
       else
-        Logging::Logging.info("#{client_hostname} [#{timestamp}] #{request} #{code} #{(message or RESPONSES[code])}\n")
+        #Logging::Logging.info("#{client_hostname} [#{timestamp}] #{request} #{code} #{(message or RESPONSES[code])}\n")
+        Logging::Logging.info("#{client_hostname} #{request} #{code} #{(message or RESPONSES[code])}\n")
       end
     end
 
