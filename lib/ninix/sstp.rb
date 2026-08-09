@@ -258,16 +258,12 @@ module SSTP
 
     def from_ao
       return false if @ao_uuid.nil? or @ao_uuid.empty?
-      @headers.lazy.filter_map do |k, v|
-        v if k == 'Ao'
-      end.first == @ao_uuid
+      return @ao_uuid == @headers.reverse.assoc('Ao')&.at(1)
     end
 
     def from_ai
       return false if @ai_uuid.nil? or @ai_uuid.empty?
-      @headers.lazy.filter_map do |k, v|
-        v if k == 'Ai'
-      end.first == @ai_uuid
+      return @ai_uuid == @headers.reverse.assoc('Ai')&.at(1)
     end
 
     def get_script_odict
@@ -305,6 +301,8 @@ module SSTP
       return entry_db
     end
 
+    REFERENCE_REGEX = Regexp.new(/Reference(0|[1-9]\d*)/)
+
     def get_event(key = "Event")
       event = @headers.reverse.assoc(key)&.at(1)
       if event.nil?
@@ -313,14 +311,19 @@ module SSTP
         return nil
       end
       buf = [event]
-      @headers.size.times do |i|
-        key = "Reference#{i}"
-        value = @headers.reverse.assoc(key)&.at(1)
-        buf << value
+      ref = {}
+      @headers.each do |k, v|
+        match = REFERENCE_REGEX.match(k)
+        next if match.nil?
+        ref[match[1].to_i] = v
       end
-      buf = buf.reverse.drop_while do |x|
-        x.nil?
-      end.reverse
+      if ref.size > 0 then
+        0.upto(ref.max do |a, b|
+          next a[0] <=> b[0]
+        end[0]) do |i|
+          buf << ref[i]
+        end
+      end
       return buf
     end
 
@@ -362,10 +365,15 @@ module SSTP
 
     def check_decoder
       charset = get_charset
-      return true if Encoding.name_list.include?(charset)
-      send_response(420, :data => 'Refuse (unsupported charset)')
-      log_error("Unsupported charset #{charset}")
-      return false
+      begin
+        Encoding.find(charset)
+      rescue
+        send_response(420, :data => 'Refuse (unsupported charset)')
+        log_error("Unsupported charset #{charset}")
+        return false
+      end
+      return false if charset == 'locale' or charset == 'external' or charset == 'internal' or charset == 'filesystem'
+      return true
     end
 
     def get_options
@@ -479,10 +487,7 @@ module SSTP
       when 'GetDescript'
         return send_response(400) unless from_ao
         value = @server.handle_request(:GET, :get_descript, *args.take(1))
-        send_response(200)
-        @fp.write(value)
-        @fp.write("\r\n")
-        @fp.write("\r\n")
+        send_response(200, content: value)
       when 'UpdateMonitorRect'
         return send_response(400) unless from_ao
         @server.handle_request(:NOTIFY, :update_monitor_rect, *args.take(5).map do |v|
@@ -665,10 +670,7 @@ module SSTP
         if value.nil? or value.empty?
           send_response(204)
         else
-          send_response(200)
-          @fp.write(value)
-          @fp.write("\r\n")
-          @fp.write("\r\n")
+          send_response(200, content: value)
         end
       else
         send_response(501) # Not Implemented
@@ -778,11 +780,12 @@ module SSTP
   end
 
   class RequestHandler
+    REQUEST_REGEX = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
+
     def self.create_with_http_support(line, server, fp)
       return NilRequestHandler.new(server, fp) if line.nil?
       line = line.encode('UTF-8', :invalid => :replace, :undef => :replace).chomp
-      re_req_http_syntax = Regexp.new('\A([A-Z]+) ([^ ]+) HTTP/([0-9]\\.[0-9])\z')
-      match = re_req_http_syntax.match(line)
+      match = REQUEST_REGEX.match(line)
       unless match.nil?
         method, path, version = match[1, 3]
         return HTTPRequestHandler.new(server, fp, method, path, version)
@@ -793,8 +796,7 @@ module SSTP
     def self.create(line, server, fp, uuid, ao_uuid, ai_uuid)
       return NilRequestHandler.new(server, fp) if line.nil?
       line = line.encode('UTF-8', :invalid => :replace, :undef => :replace).chomp
-      re_req_sstp_syntax = Regexp.new('\A([A-Z]+) SSTP/([0-9]\\.[0-9])\z')
-      match = re_req_sstp_syntax.match(line)
+      match = REQUEST_REGEX.match(line)
       unless match.nil?
         command, version = match[1, 2]
         return SSTPRequestHandler.new(server, fp, command, version, uuid, ao_uuid, ai_uuid)
