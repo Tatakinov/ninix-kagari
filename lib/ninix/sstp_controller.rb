@@ -129,7 +129,7 @@ class BaseSSTPController < MetaMagic::Holon
   def receive_sstp_request(buffer, server, socket)
     begin
       handler = create(buffer, server, socket)
-      handler.handle
+      keep_alive = handler.handle
     rescue SocketError => e
       Logging::Logging.error("socket.error: #{e.message}")
       return false
@@ -141,7 +141,7 @@ class BaseSSTPController < MetaMagic::Holon
       p e.backtrace
       return false
     end
-    return true
+    return keep_alive
   end
 
   def get_sstp_port
@@ -221,15 +221,12 @@ class UnixSSTPController < BaseSSTPController
             v.join
           end
           client = soc.accept
-          buffer = client.gets
-          if buffer.start_with?('EXECUTE ')
-            receive_sstp_request(buffer, soc, client)
-            client.shutdown(Socket::SHUT_WR)
-          else
-            @client_threads << Thread.new(buffer, soc, client) do |b, s, c|
-              receive_sstp_request(b, s, c)
-              c.shutdown(Socket::SHUT_WR)
+          @client_threads << Thread.new(soc, client) do |s, c|
+            loop do
+              buffer = c.gets
+              break unless receive_sstp_request(buffer, s, c)
             end
+            c.shutdown(Socket::SHUT_WR)
           end
         rescue
           # TODO error handling
