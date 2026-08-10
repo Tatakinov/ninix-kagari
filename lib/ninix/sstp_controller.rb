@@ -210,27 +210,49 @@ class UnixSSTPController < BaseSSTPController
     @sstp_servers << server
     Logging::Logging.info("Serving UnixSSTP on name #{@uuid}")
     Thread.new(server) do |soc|
-      until soc.closed?
-        begin
-          threads = []
-          @client_threads.keep_if do |v|
-            threads << v unless v.alive?
-            v.alive?
-          end
-          threads.each do |v|
-            v.join
-          end
-          client = soc.accept
-          @client_threads << Thread.new(soc, client) do |s, c|
-            loop do
-              buffer = c.gets
-              break unless receive_sstp_request(buffer, s, c)
+      queue = Thread::Queue.new
+      pool = []
+      rfds = [soc.socket]
+      pool_n = 10
+      pool_n.times do
+        pool << Thread.new do
+          loop do
+            alive, b, s, c = queue.shift
+            break unless alive
+            if receive_sstp_request(b, s, c) then
+              rfds << c
+            else
+              c.shutdown(Socket::SHUT_WR)
             end
-            c.shutdown(Socket::SHUT_WR)
           end
-        rescue
-          # TODO error handling
         end
+      end
+      begin
+        until soc.socket.closed?
+          readable, = IO.select(rfds)
+          readable.each do |s|
+            if s == soc.socket
+              rfds << soc.socket.accept
+            else
+              rfds.delete_if do |x|
+                next x == s
+              end
+              buffer = s.gets
+              if buffer.nil? or buffer.empty?
+                next
+              end
+              queue << [true, buffer, soc, s]
+            end
+          end
+        end
+      rescue
+        # TODO error handling
+      end
+      pool_n.times do
+        queue << false
+      end
+      pool.each do |th|
+        th.join
       end
     end
   end
