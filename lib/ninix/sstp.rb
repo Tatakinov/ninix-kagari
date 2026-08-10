@@ -487,7 +487,11 @@ module SSTP
       when 'GetDescript'
         return send_response(400) unless from_ao
         value = @server.handle_request(:GET, :get_descript, *args.take(1))
-        send_response(200, content: value)
+        if value.nil? or value.empty?
+          send_response(204)
+        else
+          send_response(200, content: value)
+        end
       when 'UpdateMonitorRect'
         return send_response(400) unless from_ao
         @server.handle_request(:NOTIFY, :update_monitor_rect, *args.take(5).map do |v|
