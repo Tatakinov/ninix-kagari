@@ -73,7 +73,7 @@ module Surface
       fail if @ao.nil?
       command = File.join(surface_dir, @ao)
       begin
-        @ao_write, @ao_read, @ao_err, @ao_thread = Open3.popen3(command)
+        @ao_write, @ao_read, @ao_thread = Open3.popen2(command)
       rescue
         unless ENV.include?('NINIX_ENABLE_SORAKADO')
           fail
@@ -86,7 +86,7 @@ module Surface
         end
         fail if command.nil? or not(File.exist?(command))
         begin
-          @ao_write, @ao_read, @ao_err, @ao_thread = Open3.popen3(command)
+          @ao_write, @ao_read, @ao_thread = Open3.popen2(command)
         rescue => e
           Logging::Logging.error(e.message)
           return

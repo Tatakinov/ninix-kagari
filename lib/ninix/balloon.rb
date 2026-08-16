@@ -122,7 +122,7 @@ module Balloon
       fail if @ai.nil?
       command = File.join(directory, @ai)
       begin
-        @ai_write, @ai_read, @ai_err, @ai_thread = Open3.popen3(command)
+        @ai_write, @ai_read, @ai_thread = Open3.popen2(command)
       rescue
         unless ENV.include?('NINIX_ENABLE_SORAKADO')
           fail
@@ -135,7 +135,7 @@ module Balloon
         end
         fail if command.nil? or not(File.exist?(command))
         begin
-          @ai_write, @ai_read, @ai_err, @ai_thread = Open3.popen3(command)
+          @ai_write, @ai_read, @ai_thread = Open3.popen2(command)
         rescue => e
           Logging::Logging.error(e.message)
           return
