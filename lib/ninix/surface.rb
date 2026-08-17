@@ -38,7 +38,7 @@ module Surface
     end
 
     def new_(desc, *args)
-      desc["ao"] = "sorakado_builtin.exe" if ENV.include?('NINIX_ENABLE_SORAKADO')
+      desc['ao'] = 'sorakado_builtin.exe' if ENV.include?('NINIX_ENABLE_SORAKADO') and not(desc.include?('ao'))
       ao = desc.get('ao')
       if ao.nil? or ao.empty?
         @current = @internal
@@ -72,6 +72,10 @@ module Surface
       @ao = desc.get('ao')
       fail if @ao.nil?
       command = File.join(surface_dir, @ao)
+      unless @ao_thread.nil?
+        @ao_write.close
+        @ao_thread.join
+      end
       begin
         @ao_write, @ao_read, @ao_thread = Open3.popen2(command)
       rescue

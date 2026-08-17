@@ -121,6 +121,10 @@ module Balloon
       @ai = desc.get('ai')
       fail if @ai.nil?
       command = File.join(directory, @ai)
+      unless @ai_thread.nil?
+        @ai_write.close
+        @ai_thread.join
+      end
       begin
         @ai_write, @ai_read, @ai_thread = Open3.popen2(command)
       rescue
