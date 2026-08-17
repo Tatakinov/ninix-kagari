@@ -425,16 +425,22 @@ module Home
     shell_dir = File.join(top_dir, 'shell')
     for name, desc, subdir in find_surface_dir(shell_dir)
       surface_dir = File.join(shell_dir, subdir)
-      surface_info, alias_, tooltips, seriko_descript = read_surface_info(surface_dir)
-      if not surface_info.nil? and \
-        surface_info.include?('surface' + default_sakura.to_s) and \
-        surface_info.include?('surface' + default_kero.to_s)
-        if alias_.nil?
-          alias_ = read_alias_txt(surface_dir)
+      if ENV.include?('NINIX_ENABLE_SORAKADO') and true then
+          desc.set_child(ghost_desc)
+          surface_set[subdir] = [name, surface_dir, desc, {},
+                                  {}, {}, {}]
+      else
+        surface_info, alias_, tooltips, seriko_descript = read_surface_info(surface_dir)
+        if not surface_info.nil? and \
+          surface_info.include?('surface' + default_sakura.to_s) and \
+          surface_info.include?('surface' + default_kero.to_s)
+          if alias_.nil?
+            alias_ = read_alias_txt(surface_dir)
+          end
+          desc.set_child(ghost_desc)
+          surface_set[subdir] = [name, surface_dir, desc, alias_,
+                                 surface_info, tooltips, seriko_descript]
         end
-        desc.set_child(ghost_desc)
-        surface_set[subdir] = [name, surface_dir, desc, alias_,
-                               surface_info, tooltips, seriko_descript]
       end
     end
     return shell_name, surface_set
