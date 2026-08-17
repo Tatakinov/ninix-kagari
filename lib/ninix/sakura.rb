@@ -625,8 +625,8 @@ module Sakura
       end
     end
 
-    def set_balloon_position(side, base_x, base_y)
-      @balloon.set_position(side, base_x, base_y)
+    def set_balloon_position(side, base_x, base_y, monitor_x, monitor_y)
+      @balloon.set_position(side, base_x, base_y, monitor_x, monitor_y)
     end
 
     def set_balloon_direction(side, direction)
@@ -1786,7 +1786,7 @@ module Sakura
       # TODO implement
       #check_mikire_kasanari
       set_balloon_direction(side, direction)
-      set_balloon_position(side, x, y)
+      set_balloon_position(side, x - mx, y - my, mx, my)
     end
 
     def align_top(side)

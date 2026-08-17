@@ -230,8 +230,8 @@ module Balloon
       send_event('SetBalloonID', side, num * 2)
     end
 
-    def set_position(side, base_x, base_y)
-      send_event('SetPosition', side, base_x, base_y)
+    def set_position(side, base_x, base_y, monitor_x, monitor_y)
+      send_event('SetPosition', side, base_x, base_y, monitor_x, monitor_y)
     end
 
     def get_position(side)
@@ -816,7 +816,7 @@ module Balloon
       # nop
     end
 
-    def set_position(side, base_x, base_y)
+    def set_position(side, base_x, base_y, monitor_x, monitor_y)
       # nop
     end
 
@@ -2186,8 +2186,8 @@ module Balloon
       @window[side].set_balloon(num)
     end
 
-    def set_position(side, base_x, base_y)
-      @window[side].set_position(base_x, base_y)
+    def set_position(side, base_x, base_y, monitor_x, monitor_y)
+      @window[side].set_position(base_x, base_y, monitor_x, monitor_y)
     end
 
     def get_position(side)
@@ -2882,7 +2882,7 @@ module Balloon
       end
     end
 
-    def set_position(base_x, base_y)
+    def set_position(base_x, base_y, monitor_x, monitor_y)
       return if @balloon_id.nil?
       px, py = get_balloon_windowposition()
       w, h = get_balloon_size()
