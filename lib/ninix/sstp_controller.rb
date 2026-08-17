@@ -207,6 +207,7 @@ class UnixSSTPController < BaseSSTPController
   def start_servers
     server = NinixServer.new(@uuid)
     server.set_responsible(self)
+    readable_queue = Thread::Queue.new
     @sstp_servers << server
     Logging::Logging.info("Serving UnixSSTP on name #{@uuid}")
     Thread.new(server) do |soc|
@@ -220,7 +221,7 @@ class UnixSSTPController < BaseSSTPController
             alive, b, s, c = queue.shift
             break unless alive
             if receive_sstp_request(b, s, c) then
-              rfds << c
+              readable_queue << c
             else
               c.shutdown(Socket::SHUT_WR)
             end
@@ -229,7 +230,13 @@ class UnixSSTPController < BaseSSTPController
       end
       begin
         until soc.socket.closed?
-          readable, = IO.select(rfds)
+          readable = nil
+          while readable.nil?
+            until readable_queue.empty?
+              rfds << readable_queue.shift
+            end
+            readable, = IO.select(rfds, [], [], 0.001)
+          end
           readable.each do |s|
             if s == soc.socket
               rfds << soc.socket.accept
