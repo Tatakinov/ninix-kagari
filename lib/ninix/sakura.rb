@@ -1383,9 +1383,11 @@ module Sakura
         data = result.split("\x02").map do |x|
           name, url, banner, script = x.split("\x01")
           next {
-            type: 'site',
+            type: 'item',
             caption: name,
-            list: [url, banner, script],
+            valid: true,
+            command: 'VisitSite',
+            args: [url, banner, script],
           }
         end
         next data
@@ -1406,25 +1408,32 @@ module Sakura
         caption: caption.call('alwaysstayontopbutton.caption', _('Stick(_Y)')),
         valid: true,
         state: false,
+        command: 'AlwaysStayOnTop',
       }
       data << {
         type: 'submenu',
         caption: caption.call('configurationbutton.caption', _('Options(_F)')),
         list: [
           {
-            type: 'preferences',
+            type: 'item',
             caption: caption.call('configurationbutton.caption', _('Preferences...(_O)')),
             valid: true,
+            command: 'OpenPreferences',
+            args: [],
           },
           {
-            type: 'scriptinputbox',
+            type: 'item',
             caption: caption.call('scriptinputboxbutton.caption', _('Input Script(_L)')),
             valid: true,
+            command: 'OpenScriptInputbox',
+            args: [],
           },
           {
-            type: 'scriptlog',
+            type: 'item',
             caption: caption.call('scriptlogbutton.caption', _('Script Log(_L)')),
             valid: true,
+            command: 'OpenScriptLog',
+            args: [],
           },
         ],
       }
@@ -1433,10 +1442,11 @@ module Sakura
         caption: caption.call('switchghostbutton.caption', _('Change(_G)')),
         list: @parent.handle_request(:GET, :get_ghost_list).map do |x|
           next {
-            type: 'switch',
+            type: 'item',
             caption: x[0],
             valid: x[1] != @key,
-            list: [x[1]],
+            command: 'ChangeGhost',
+            args: [x[1]],
           }
         end
       }
@@ -1445,10 +1455,11 @@ module Sakura
         caption: caption.call('callghostbutton.caption', _('Summon(_X)')),
         list: @parent.handle_request(:GET, :get_ghost_list).map do |x|
           next {
-            type: 'call',
+            type: 'item',
             caption: x[0],
             valid: x[1] != @key,
-            list: [x[1]],
+            command: 'SummonGhost',
+            args: [x[1]],
           }
         end
       }
@@ -1458,9 +1469,11 @@ module Sakura
         list: @shells.map do |k, v|
           name, path, desc, _ = v.baseinfo
           next {
-            type: 'shell',
+            type: 'item',
             caption: desc.get('name', default: k),
-            list: [k],
+            valid: true, # FIXME false if current selected
+            command: 'ChangeShell',
+            args: [k],
           }
         end
       }
@@ -1473,10 +1486,11 @@ module Sakura
         caption: caption.call('balloonrootbutton.caption', _('Balloon(_B)')),
         list: @parent.handle_request(:GET, :get_balloon_list).map do |x|
           next {
-            type: 'balloon',
+            type: 'item',
             valid: true, # FIXME false if current selected
             caption: x[0],
-            list: [x[1]],
+            command: 'ChangeBalloon',
+            args: [x[1]],
           }
         end,
       }
@@ -1485,21 +1499,27 @@ module Sakura
         caption: caption.call('inforootbutton.caption', _('Information(_I)')),
         list: [
           {
-            type: 'basewareversion',
-            valid: true,
+            type: 'item',
             caption: caption.call('systeminfobutton.caption', _('Version(_V)')),
+            valid: true,
+            command: 'ShowBasewareVersion',
+            args: [],
           },
         ],
       }
       data << {
-        type: 'close',
-        valid: true,
+        type: 'item',
         caption: caption.call('closebutton.caption', _('Close(_W)')),
+        valid: true,
+        command: 'CloseGhost',
+        args: [],
       }
       data << {
-        type: 'close_all',
-        valid: true,
+        type: 'item',
         caption: caption.call('closeallbutton.caption', _('Quit(_Q)')),
+        valid: true,
+        command: 'CloseAllGhost',
+        args: [],
       }
       @surface.open_menu(JSON.generate(data))
     end
