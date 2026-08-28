@@ -1671,7 +1671,7 @@ module Sakura
     end
 
     def get_default_shell()
-      default = @shell_directory or 'master'
+      default = (@shell_directory or 'master')
       unless @shells.include?(default)
         default = @shells.keys()[0] # XXX
       end
@@ -3294,7 +3294,7 @@ module Sakura
         elsif args[0] == 'set'
           key = args[2]
           # non-nil required
-          value = args[3] or ''
+          value = (args[3] or '')
           property(key, value)
         end
       elsif args[0] == 'anim' and not args[2].nil?
