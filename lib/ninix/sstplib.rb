@@ -102,7 +102,6 @@ module SSTPLib
       end
       s += "\r\n"
       s += "#{content}\r\n\r\n" unless content.nil?
-      fail if code == 200 and content.nil?
       @fp.write(s)
     end
 
