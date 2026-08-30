@@ -1357,6 +1357,12 @@ module Satori
         rescue
           #pass
         end
+      when 'OnMouseDoubleClick'
+        if ref5.to_i.zero?
+          key = ref3.to_s
+          key += ref4 unless ref4.nil?
+          event = key + 'つつかれ'
+        end
       when 'OnMouseMove'
         key = [ref3, ref4] # side, part
         count, timestamp = (@mouse_move_count.include?(key) ? @mouse_move_count[key] : [0, 0])
