@@ -24,7 +24,7 @@ Installの節を実行してninix-kagariを起動するだけではゴースト�
 
 - Windows (10 or later)
 
-- BSD
+- FreeBSD
 
 ## Requirements
 
