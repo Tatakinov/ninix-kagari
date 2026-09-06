@@ -27,11 +27,14 @@ EOF
   spec.files       += %w(COPYING ChangeLog.ninix-aya README.md README.ninix-aya README.ninix-aya.en README.ninix SAORI)
   spec.bindir      = "exe"
   spec.executables << 'ninix-kagari'
-  spec.homepage    = 'https://github.com/Tatakinov/ninix-kagari'
+  spec.homepage    = 'https://tatakinov.github.io'
   spec.license     = 'GPL-2.0'
+  spec.metadata['source_code_uri'] = 'https://github.com/Tatakinov/ninix-kagari'
   spec.add_runtime_dependency 'narray', '~> 0.6', '>=0.6.1.1'
+  spec.add_runtime_dependency 'ninix-fmo', '~> 1.0'
+  spec.add_runtime_dependency 'gio2', '~> 4'
   spec.add_runtime_dependency 'gtk4', '~> 4'
-  #spec.add_runtime_dependency 'gstreamer', '~> 3.1', '>=3.1.0'
+  #spec.add_runtime_dependency 'gstreamer', '~> 4'
   spec.add_runtime_dependency 'gettext', '~> 3.2', '>=3.2.2'
   spec.add_runtime_dependency 'rubyzip', '~> 1.2', '>=1.2.0'
   #spec.add_runtime_dependency 'charlock_holmes', '~> 0.7', '>=0.7.3'
