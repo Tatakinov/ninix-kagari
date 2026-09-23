@@ -425,7 +425,7 @@ module Home
     shell_dir = File.join(top_dir, 'shell')
     for name, desc, subdir in find_surface_dir(shell_dir)
       surface_dir = File.join(shell_dir, subdir)
-      if ENV.include?('NINIX_ENABLE_SORAKADO') and true then
+      if ENV.include?('NINIX_ENABLE_SORAKADO') then
           desc.set_child(ghost_desc)
           surface_set[subdir] = [name, surface_dir, desc, {},
                                   {}, {}, {}]
