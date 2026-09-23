@@ -3065,9 +3065,13 @@ module Balloon
       return text
     end
 
-    def get_last_cursor_position
+    def get_last_cursor_position(after_new_line = false)
       x, y, h = 0, 0, 0
-      (@data_buffer.length - 1).downto(0) do |i|
+      offset = 1
+      if after_new_line then
+        offset = 2
+      end
+      (@data_buffer.length - offset).downto(0) do |i|
         data = @data_buffer[i]
         if data[:content][:type] == TYPE_IMAGE and
             not data[:content][:attr][:inline]
@@ -3086,7 +3090,7 @@ module Balloon
         y = data[:pos][:y]
         break
       end
-      (@data_buffer.length - 1).downto(0) do |i|
+      (@data_buffer.length - offset).downto(0) do |i|
         data = @data_buffer[i]
         if data[:content][:type] == TYPE_IMAGE and
             not data[:content][:attr][:inline]
@@ -3876,12 +3880,8 @@ module Balloon
       }
     end
 
-    def set_draw_absolute_y_char(rate, use_default_height: true)
-      rx, ry, rh = get_last_cursor_position
-      # 最初に\n系が呼ばれたときの処理
-      if rh == 0 || use_default_height
-        rh = @line_height
-      end
+    def set_draw_absolute_y_char(rate)
+      rh = @line_height
       set_draw_absolute_y((rh * rate).to_i)
     end
 
@@ -3891,10 +3891,10 @@ module Balloon
       @data_buffer[-1][:head][:y] = { type: TYPE_RELATIVE, value: pos }
     end
 
-    def set_draw_relative_y_char(rate, use_default_height: true)
-      rx, ry, rh = get_last_cursor_position
+    def set_draw_relative_y_char(rate)
+      rx, ry, rh = get_last_cursor_position(true)
       # 最初に\n系が呼ばれたときの処理
-      if rh == 0 || use_default_height
+      if rh == 0
         rh = @line_height
       end
       set_draw_relative_y((rh * rate).to_i)
@@ -3943,7 +3943,7 @@ module Balloon
           if prev_x < x
             new_buffer
             set_draw_absolute_x(0)
-            set_draw_relative_y_char(1.0, use_default_height: false)
+            set_draw_relative_y_char(1.0)
             return append_text(text)
           end
         end
@@ -3992,12 +3992,22 @@ module Balloon
     end
 
     def append_link_in(link_id, args)
-      sl = @data_buffer.length - 1
-      sn = if @data_buffer[-1][:content][:type] == TYPE_TEXT
-             @data_buffer[-1][:content][:data].length
-           else
-             0
-           end
+      sl = 0
+      sn = 0
+      case @data_buffer[-1][:content][:type]
+      when TYPE_TEXT
+        sl = @data_buffer.length - 1
+        sn = @data_buffer[-1][:content][:data].length
+      when TYPE_IMAGE
+        sl = @data_buffer.length
+        sn = 0
+      when TYPE_UNKNOWN
+        sl = @data_buffer.length - 1
+        sn = 0
+      else
+        # unreachable
+        fail
+      end
       @link_buffer << [sl, sn, sl, sn, link_id, args, '', '']
     end
 
