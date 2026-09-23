@@ -2117,7 +2117,7 @@ module Sakura
       elsif @script_mode == SELECT_MODE
         if @passivemode
           #pass
-        elsif idle > SELECT_TIMEOUT
+        elsif idle > @choice_timeout
           @script_mode = BROWSE_MODE
           unless @sstp_request_handler.nil?
             @sstp_request_handler.send_timeout()
@@ -2324,6 +2324,8 @@ module Sakura
         @script_side = 0
         @time_critical_session = false
         @quick_session = false
+        @choice_timeout = SELECT_TIMEOUT
+        @balloon_timeout = BALLOON_LIFE
         set_synchronized_session(:list => [], :reset => true)
         @script_start_time = get_current_time
         @surface.notify_script_begin
@@ -2358,7 +2360,7 @@ module Sakura
       @surface.notify_script_end
       @balloon.notify_script_end
       reset_script()
-      @__balloon_life = BALLOON_LIFE
+      @__balloon_life = @balloon_timeout
     end
 
     def __yen_0(args)
@@ -3093,6 +3095,10 @@ module Sakura
         else
           @surface.set_balloon_offset(@script_side, [x, y])
         end
+      elsif args[0, 2] == ['set', 'balloontimeout'] and argc > 2
+        @balloon_timeout = args[2].to_i / 1_000
+      elsif args[0, 2] == ['set', 'choicetimeout'] and argc > 2
+        @choice_timeout = args[2].to_i / 1_000
       elsif args[0] == 'sound' and argc > 1
         command = args[1]
         return if @audio_player.nil?
@@ -3466,6 +3472,10 @@ module Sakura
       end
     end
 
+    def __yen_C(args)
+      # nop
+    end
+
     def __yen__l(args)
       is_absolute = true
       is_pixel = true
@@ -3564,7 +3574,7 @@ module Sakura
       '\__t' => "__yen___t",
       '\v' => "__yen_v",
       '\f' => "__yen_f",
-      '\C' => nil, # dummy
+      '\C' => "__yen_C", # dummy
       '\_l' => "__yen__l",
       '\__q' => "__yen___q",
     }
