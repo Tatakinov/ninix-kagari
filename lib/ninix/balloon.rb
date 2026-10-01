@@ -322,6 +322,17 @@ module Balloon
     end
 
     def append_image(side, path, **kwargs)
+      x = (kwargs[:x] or 0)
+      y = (kwargs[:y] or 0)
+      inline = (kwargs[:inline] or false)
+      opaque = (kwargs[:opaque] or false)
+      use_self_alpha = (kwargs[:use_self_alpha] or false)
+      clipping = (kwargs[:clipping] and kwargs[:clipping].join(' ') or false)
+      scaling = false # TODO stub
+      fixed = (kwargs[:fixed] or false)
+      foreground = (kwargs[:foreground] or false)
+      source = (kwargs[:source] or false)
+      send_event('AppendImage', side, path, x, y, inline, opaque, use_self_alpha, clipping, scaling, fixed, foreground, source)
     end
 
     def show_sstp_message(message, sender)
