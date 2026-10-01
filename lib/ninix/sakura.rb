@@ -2537,7 +2537,7 @@ module Sakura
           rescue
             next
           end
-          kwargs[:clipping] = [x1, y1, x2 - x1, y2 - y1]
+          kwargs[:clipping] = [x1, y1, x2, y2]
         elsif arg == 'foreground'
           kwargs[:foreground] = true
         elsif arg == 'fixed'
