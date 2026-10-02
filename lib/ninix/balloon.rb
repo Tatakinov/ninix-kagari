@@ -90,6 +90,9 @@ module Balloon
   end
 
   class Ai < MetaMagic::Holon
+    TYPE_QUIT = 0
+    TYPE_REQUEST= 1
+
     def initialize
       super("") # FIXME
     end
@@ -113,6 +116,10 @@ module Balloon
     end
 
     def finalize
+      unless @ai_thread.nil?
+        @queue_send.push({type: TYPE_QUIT})
+        @ai_thread.join
+      end
     end
 
     def new_(desc, balloon)
@@ -145,6 +152,51 @@ module Balloon
           return
         end
       end
+      @queue_send = Thread::Queue.new
+      @queue_info = Thread::Queue.new
+      @queue_recv = Thread::Queue.new
+      @thread_send = Thread.new do
+        loop do
+          data = @queue_send.pop
+          break if data[:type] == TYPE_QUIT
+          request = [
+            "#{data[:method]} SORAKADO/0.1",
+            'Charset: UTF-8',
+            "Command: #{data[:event]}",
+          ]
+          data[:args].each_with_index do |v, i|
+            request << "Argument#{i}: #{v}"
+          end
+          request << "\r\n"
+          request = request.join("\r\n")
+          request = [[request.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
+          @queue_info.push(data[:method] == 'GET')
+          @ai_write.write(request)
+        end
+        @ai_write.write([0].pack('L'))
+        @ai_write.close
+      end
+      @thread_recv = Thread.new do
+        loop do
+          len = nil
+          begin
+            len = @ai_read.read(4)&.unpack('L')&.first
+          end
+          break if len.nil? or len.zero?
+          response = @ai_read.read(len)
+          #p [:debug, request, response]
+          next unless @queue_info.pop
+          iss = StringIO.new(response, 'r')
+          protocol, code, status = iss.readline.split(' ', 3)
+          headers = {}
+          iss.each_line do |line|
+            k, sep, v = line.partition(': ')
+            next if sep != ': '
+            headers[k] = v
+          end
+          @queue_recv.push({proto: protocol, code: code.to_i, status: status, headers: headers})
+        end
+      end
       send_event('Initialize', File.join(directory, ''), 'AI')
       send_event('BasewareVersion', 'ninix', Version.NUMBER)
       path, _ao_uuid, ai_uuid = @parent.handle_request(:GET, :endpoint)
@@ -153,37 +205,13 @@ module Balloon
     end
 
     def send_event(event, *args, method: 'NOTIFY')
-      request = [
-        "#{method} SORAKADO/0.1",
-        'Charset: UTF-8',
-        "Command: #{event}",
-      ]
-      args.each_with_index do |v, i|
-        request << "Argument#{i}: #{v}"
-      end
-      request << "\r\n"
-      request = request.join("\r\n")
-      request = [[request.bytesize].pack('L'), request.force_encoding(Encoding::BINARY)].join
-      @ai_write.write(request)
-      len = nil
-      begin
-        len = @ai_read.read(4)&.unpack('L').first
-      end
-      if len.nil?
-        # TODO error
-        return
-      end
-      response = @ai_read.read(len)
-      #p [:debug, request, response]
-      iss = StringIO.new(response, 'r')
-      protocol, code, status = iss.readline.split(' ', 3)
-      headers = {}
-      iss.each_line do |line|
-        k, sep, v = line.partition(': ')
-        next if sep != ': '
-        headers[k] = v
-      end
-      return {proto: protocol, code: code.to_i, status: status, headers: headers}
+      @queue_send.push({
+        type: TYPE_REQUEST,
+        method: method,
+        event: event,
+        args: args,
+      })
+      return @queue_recv.pop if method == 'GET'
     end
 
     def notify_scope_change(side)
