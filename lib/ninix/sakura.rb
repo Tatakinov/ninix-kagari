@@ -93,19 +93,19 @@ module Sakura
     FROM_GHOST       = 2
     # whether continue script interpretation
     CONTINUING_INTERPRETATION = :continuing_interpretation
-    PAUSE_INTERPRETATION = [
-      '\e',
-      '\y',
-      '\z',
-      '\w',
-      '\_w',
-      '\__w',
-      '\x',
-      '\a',
-      '\-',
-      '\+',
-      '\_+',
-    ]
+    PAUSE_INTERPRETATION = {
+      '\e' => true,
+      '\y' => true,
+      '\z' => true,
+      '\w' => true,
+      '\_w' => true,
+      '\__w' => true,
+      '\x' => true,
+      '\a' => true,
+      '\-' => true,
+      '\+' => true,
+      '\_+' => true,
+    }
 
     def initialize
       super("") # FIXME
@@ -276,6 +276,7 @@ module Sakura
         set_SSP_mode(false)
       end
       @last_script = nil
+      @_b_filename_cache = {}
 =begin TODO stub
       @status_icon = Gtk::StatusIcon.new
       @status_icon.set_title(get_name(:default => ''))
@@ -2503,6 +2504,7 @@ module Sakura
     end
 
     def __yen__b(args)
+      now = Time.now
       filename = args.shift
       kwargs = {}
       index = if args[0] == 'inline'
@@ -2547,14 +2549,20 @@ module Sakura
       if kwargs[:fixed] and kwargs[:inline]
         kwargs.delete(:fixed)
       end
-      filename = Home.get_normalized_path(filename)
-      path = File.join(get_prefix(), 'ghost/master', filename)
-      if File.file?(path)
-        @balloon.append_image(@script_side, path, **kwargs)
+      if @_b_filename_cache.include?(filename)
+        @balloon.append_image(@script_side, @_b_filename_cache[filename], **kwargs)
       else
-        path = [path, '.png'].join('')
+        f = Home.get_normalized_path(filename)
+        path = File.join(get_prefix(), 'ghost/master', f)
         if File.file?(path)
+          @_b_filename_cache[filename] = path
           @balloon.append_image(@script_side, path, **kwargs)
+        else
+          path = [path, '.png'].join('')
+          if File.file?(path)
+            @_b_filename_cache[filename] = path
+            @balloon.append_image(@script_side, path, **kwargs)
+          end
         end
       end
     end
