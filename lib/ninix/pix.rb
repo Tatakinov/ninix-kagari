@@ -20,6 +20,7 @@ require_relative "logging"
 module Pix
   TRANSPARENT_CSS = '.ninix-transparent { background-color: rgba(0, 0, 0, 0); }'
   Rect = Struct.new(:x, :y, :width, :height)
+  FRAME_INTERVAL_60FPS = 1000 / 60 # [msec]
   def self.surface_to_region(surface)
     region = Cairo::Region.new()
     width = surface.width
@@ -89,6 +90,7 @@ module Pix
 
     def initialize(monitor = nil)
       @width, @height = 1, 1
+      @rect_callbacks = []
       super()
       add_css_class('ninix-transparent')
       set_decorated(false)
@@ -102,11 +104,15 @@ module Pix
         id = signal_connect('notify') do |obj, spec|
           next unless maximized? and visible?
           signal_handler_disconnect(id)
-          GLib::Idle.add do
+          GLib::Timeout.add(FRAME_INTERVAL_60FPS, GLib::PRIORITY_DEFAULT_IDLE) do
             unless width > 0 and height > 0
               next true
             end
             @rect = Rect.new(x: 0, y: 0, width: width, height: height)
+            @rect_callbacks.each do |f|
+              f.call
+            end
+            @rect_callbacks = []
             next false
           end
         end
@@ -120,6 +126,14 @@ module Pix
       else
         @rect = monitor.geometry
         fullscreen_on_monitor(monitor)
+      end
+    end
+
+    def when_rect_ready(&block)
+      if @rect.nil?
+        @rect_callbacks << block
+      else
+        block.call
       end
     end
   end
