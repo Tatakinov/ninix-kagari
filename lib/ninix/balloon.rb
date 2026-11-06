@@ -2968,10 +2968,8 @@ module Balloon
         window.show()
         # HACK
         if window.rect.nil?
-          GLib::Idle.add do
-            next true if window.rect.nil?
+          window.when_rect_ready do
             window.darea.queue_draw
-            next false
           end
         end
       end

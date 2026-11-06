@@ -961,13 +961,11 @@ module Surface
       # OnBootなどでの最初のSakuraScriptが反映されない場合があるので
       # それらの処理を準備が完了してから実行する
       if surface_window.loading?
-        GLib::Idle.add do
-          next true if surface_window.loading?
+        surface_window.when_loaded do
           @window_queue[side].each do |f|
             f.call
           end
           @window_queue.delete(side)
-          next false
         end
       end
       return surface_window
@@ -1546,6 +1544,14 @@ module Surface
     def loading?
       @windows.any? do |window|
         window.rect.nil?
+      end
+    end
+
+    def when_loaded(&block)
+      @windows.each do |window|
+        window.when_rect_ready do
+          block.call unless loading?
+        end
       end
     end
 
