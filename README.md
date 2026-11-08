@@ -1,5 +1,9 @@
 # ninix-kagari
 
+> [!NOTE]
+> Main development (the addition of new features) takes place in [ninixw](https://github.com/Tatakinov/ninixw).
+> This project focuses primarily on backports from ninixw and bug fixes.
+
 ## What is this
 
 ninix-kagariはデスクトップマスコットの1つ、伺かの互換アプリケーションです。
